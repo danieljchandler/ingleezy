@@ -540,13 +540,17 @@ const AdminVideoForm = () => {
         // Start the backend pipeline and wait for the acknowledgement before
         // navigating away, otherwise mobile browsers can leave the video stuck in
         // "pending" if the request is interrupted.
+        //
+        // Non-meme uploads are ENGLISH videos and go through the English
+        // pipeline (Deepgram EN + Arabic scaffold generation). The meme path
+        // above still queues the Arabic-era pipeline via visual analysis.
         const { data, error: invokeErr } = await supabase.functions.invoke(
-          "process-approved-video",
+          "process-english-video",
           { body: { videoId: targetVideoId } }
         );
 
         if (invokeErr) {
-          console.error("process-approved-video failed:", invokeErr);
+          console.error("process-english-video failed:", invokeErr);
 
           await (supabase.from("discover_videos" as any) as any)
             .update({

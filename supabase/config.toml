@@ -205,3 +205,8 @@ verify_jwt = true
 # Admin role re-checked inside; verify_jwt keeps anonymous traffic out.
 [functions.sync-hakiya-videos]
 verify_jwt = true
+
+# English video pipeline: Deepgram EN transcription + Arabic scaffold
+# generation for admin-uploaded English videos. Admin re-checked inside.
+[functions.process-english-video]
+verify_jwt = true

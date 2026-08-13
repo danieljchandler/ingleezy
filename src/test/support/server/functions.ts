@@ -339,6 +339,7 @@ export const defaultFunctions: Record<string, FunctionHandler> = {
   "discover-trending-videos": () =>
     ok({ success: true, candidates_found: 0, candidates: [], region_summary: {} }),
   "process-approved-video": () => ok({ processed: true }),
+  "process-english-video": () => ok({ success: true, lines: 0 }),
   "rate-video-cefr": () => ok({ cefr: "A2" }),
   "extract-concepts": () => ok({ concepts: [] }),
   "curriculum-chat": () => ok({ reply: "", proposals: [] }),

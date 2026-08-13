@@ -126,11 +126,16 @@ generation conditioning.
       degrades to stale/skipped rows). Remaining: config.toml entry, admin
       trigger button, learner-surface rendering flip (English primary,
       dialect + Fusha as scaffold), deno happy-path test.
-- [ ] **English uploads** (YouTube/TikTok): KEEP admin upload + processing
-      pipeline; transcription flips to English ASR (Deepgram EN is the easy
-      case — the six-engine Arabic ASR ladder simplifies a lot); line shape
-      becomes `{english, arabic (dialect), fusha, literal}` where `literal` is
-      now an Arabic-order gloss *of the English* (mirror of Hakiya's literal)
+- [~] **English uploads** (YouTube/TikTok): `process-english-video` landed —
+      Deepgram nova-3 EN with utterance segmentation, batched Arabic-target
+      Brain calls for the scaffold (dialect + fusha + literal gloss of the
+      English, with the MSA-leak scan reading ONLY the dialect lines — fusha
+      is deliberate MSA), same audio-acquisition ladder as the Arabic
+      pipeline, admin-only, full status machine. AdminVideoForm routes
+      non-meme uploads to it. Remaining: learner transcript rendering flip
+      (LineByLineTranscript English-primary), Discover/home eligibility
+      rewiring (English videos primary, bridged Arabic secondary), trending
+      discovery flip or prune, Arabic pipeline prune once memes decided.
 - [ ] CEFR video rating: KEEP (re-aim prompt at English)
 - [ ] Stories / reading library / listen episodes / daily story: FLIP
       generation direction (English text, Arabic scaffold)
