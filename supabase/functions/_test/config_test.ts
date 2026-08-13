@@ -79,7 +79,6 @@ Deno.test("functions handling payment or user data require a JWT", async () => {
     "generate-story",
     "record-grammar-outcome",
     "draft-dialect-rules",
-    "mine-dialect-corpus",
     "dialect-violations-digest",
     "extract-concepts",
     "extract-grammar-points",
@@ -108,11 +107,10 @@ Deno.test("the undeclared functions are listed, so the default is a choice", asy
   // Adjust deliberately, in the same commit that adds or declares a function.
   assertEquals(
     undeclared.length,
-    // 36 since `sync-hakiya-videos` was declared explicitly (admin-only
-    // bridge; previously 37 since `convert-to-fusha`, which is capped per
-    // user and answers 401 without a JWT anyway — the inherited default is
-    // the one it wants).
-    36,
+    // 35 since the corpus-mining prune deleted `vet-corpus-sentences`
+    // (was undeclared); before that 36 when `sync-hakiya-videos` was
+    // declared explicitly.
+    35,
     `The number of functions with no config.toml entry changed (now ${undeclared.length}: ` +
       `${undeclared.join(", ")}). They inherit verify_jwt = true. If that is right, ` +
       `update this count; if not, add a block.`,

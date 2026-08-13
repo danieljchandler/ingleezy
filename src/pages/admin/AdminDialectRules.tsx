@@ -145,7 +145,6 @@ const AdminDialectRules = () => {
   const [count, setCount] = useState(6);
   const [guidance, setGuidance] = useState('');
   const [generating, setGenerating] = useState(false);
-  const [mining, setMining] = useState(false);
 
   const { data: rules, isLoading } = useQuery({
     queryKey: ['dialect_rules', activeDialect],
@@ -203,33 +202,6 @@ const AdminDialectRules = () => {
       });
     } finally {
       setGenerating(false);
-    }
-  };
-
-  const mineCorpus = async () => {
-    setMining(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('mine-dialect-corpus', {
-        body: {
-          dialect: activeDialect,
-          category: category.trim() || undefined,
-          count,
-        },
-      });
-      if (error) throw error;
-      toast({
-        title: 'Corpus mined',
-        description: `${data?.inserted ?? 0} draft(s) from ${data?.corpus_size ?? 0} snippets.`,
-      });
-      qc.invalidateQueries({ queryKey: ['dialect_rules', activeDialect] });
-    } catch (err) {
-      toast({
-        variant: 'destructive',
-        title: 'Corpus mining failed',
-        description: (err as Error)?.message ?? 'Unknown error',
-      });
-    } finally {
-      setMining(false);
     }
   };
 
@@ -298,19 +270,6 @@ const AdminDialectRules = () => {
               onChange={(e) => setGuidance(e.target.value)}
               rows={2}
             />
-            <div className="flex items-center justify-between pt-1">
-              <p className="text-xs text-muted-foreground">
-                Or mine real published content for this dialect and let the council generalize patterns:
-              </p>
-              <Button variant="outline" size="sm" onClick={mineCorpus} disabled={mining}>
-                {mining ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                ) : (
-                  <Sparkles className="h-4 w-4 mr-2" />
-                )}
-                Mine corpus
-              </Button>
-            </div>
           </CardContent>
         </Card>
 

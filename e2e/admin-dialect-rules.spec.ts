@@ -471,30 +471,6 @@ test.describe("asking the council for new rules", () => {
     await expect(page.getByText(/failed to draft rules/i)).toBeVisible();
   });
 
-  test("mines the corpus and reports the yield", async ({ page, backend }) => {
-    backend.stubFunction("mine-dialect-corpus", { corpus_size: 120, inserted: 4 });
-    await page.goto("/admin/dialect-rules");
-
-    await page.getByPlaceholder("e.g. negation, pronouns").fill("pronouns");
-    await page.getByRole("button", { name: /mine corpus/i }).click();
-
-    await expect(page.getByText("4 draft(s) from 120 snippets.")).toBeVisible();
-    expect(backend.lastCallTo("mine-dialect-corpus")?.body).toEqual({
-      dialect: "Gulf",
-      category: "pronouns",
-      count: 6,
-    });
-  });
-
-  test("reports a failed mining run", async ({ page, backend, expectConsoleErrors }) => {
-    expectConsoleErrors([/.*/]);
-    backend.stubFunctionFailure("mine-dialect-corpus", 500);
-    await page.goto("/admin/dialect-rules");
-
-    await page.getByRole("button", { name: /mine corpus/i }).click();
-
-    await expect(page.getByText(/corpus mining failed/i)).toBeVisible();
-  });
 });
 
 test.describe("the violations digest", () => {

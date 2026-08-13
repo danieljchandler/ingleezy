@@ -100,8 +100,12 @@ generation conditioning.
 - [x] `learnerProfile.ts` / `learnerProfileCore.ts`: `target: 'english'`
       rendering — English side primary, lexicon named "English"; data path
       untouched (decks are bilingual). CEFR placement re-aim still open.
-- [ ] Prune corpus-mining pipeline (mine-dialect-corpus, derive-yemeni
-      scripts, docs/yemeni) — dialect_rules itself STAYS (scaffold direction)
+- [x] Corpus-mining pipeline pruned: mine-dialect-corpus +
+      vet-corpus-sentences functions, corpusExampleGuard/corpusVettingCore,
+      derive-yemeni + corpus-seed scripts, docs/yemeni, embed-content's
+      corpus branch, admin Mine-corpus button. dialect_rules and the
+      dialect eval harness (eval-dialect-live, golden sets) STAY — they
+      serve the Arabic scaffold direction.
 
 ### SRS / flashcards — FLIP (mostly renames)
 - [ ] Decks: front = English word/phrase (clickable-word save flow KEEP),

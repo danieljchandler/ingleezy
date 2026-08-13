@@ -352,9 +352,6 @@ export const defaultFunctions: Record<string, FunctionHandler> = {
       category: null,
       message: "Council is drafting rules in the background.",
     }),
-  // The admin toast counts `inserted` out of `corpus_size`.
-  "mine-dialect-corpus": () =>
-    ok({ dialect: "Gulf", corpus_size: 0, proposed: 0, inserted: 0, drafts: [] }),
   // A rollup, not a list. The panel reads `totals.all` directly, so the old
   // `{ violations: [] }` threw on the first render rather than showing zero.
   "dialect-violations-digest": () =>
@@ -382,7 +379,6 @@ export const defaultFunctions: Record<string, FunctionHandler> = {
   "ai-resegment-transcript": () => ok({ segments: [] }),
   "classify-tutor-segments": () => ok({ segments: [] }),
   "backfill-literal-translations": () => ok({ updated: 0 }),
-  "vet-corpus-sentences": () => ok({ results: [] }),
   "notify-due-reviews": () => ok({ sent: 0 }),
   "conversation-practice": () => ok({ reply: "" }),
 };

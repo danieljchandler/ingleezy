@@ -8,7 +8,6 @@
 //                    plus translation embedded together so English queries
 //                    land on Arabic content; audio offsets live on the line.
 //   vocabulary_word  curriculum vocabulary (word + gloss).
-//   corpus_sentence  vetted dialect corpus sentences.
 //
 // Degrades cleanly on a database without pgvector: the first insert fails,
 // the run reports the error, nothing else breaks (the migration that creates
@@ -39,7 +38,7 @@ function json(body: unknown, status = 200, corsHeaders: Record<string, string> =
 }
 
 interface Candidate {
-  kind: "video_line" | "vocabulary_word" | "corpus_sentence";
+  kind: "video_line" | "vocabulary_word";
   source_id: string;
   chunk_index: number;
   dialect: string;
@@ -131,29 +130,6 @@ async function vocabularyCandidates(limit: number): Promise<Candidate[]> {
   return out;
 }
 
-async function corpusCandidates(limit: number): Promise<Candidate[]> {
-  const { data, error } = await admin()
-    .from("dialect_corpus_sentences")
-    .select("id, dialect, text")
-    .eq("vetted", true)
-    .order("created_at", { ascending: false })
-    .limit(limit);
-  if (error) throw new Error(`dialect_corpus_sentences fetch failed: ${error.message}`);
-
-  const rows = (data ?? []) as Array<{ id: string; dialect: unknown; text: unknown }>;
-  const seen = await existingKeys("corpus_sentence", rows.map((r) => r.id));
-
-  const out: Candidate[] = [];
-  for (const row of rows) {
-    if (seen.has(`${row.id}:0`)) continue;
-    const dialect = normalizeDialect(row.dialect);
-    const content = typeof row.text === "string" ? row.text.trim() : "";
-    if (!dialect || !content) continue;
-    out.push({ kind: "corpus_sentence", source_id: row.id, chunk_index: 0, dialect, content });
-  }
-  return out;
-}
-
 Deno.serve(async (req) => {
   const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -186,9 +162,6 @@ Deno.serve(async (req) => {
     }
     if (kind === "vocabulary_word" || kind === "all") {
       candidates = candidates.concat(await vocabularyCandidates(limit * 4));
-    }
-    if (kind === "corpus_sentence" || kind === "all") {
-      candidates = candidates.concat(await corpusCandidates(limit * 4));
     }
 
     // One run's vector budget; the caller loops until embedded: 0.

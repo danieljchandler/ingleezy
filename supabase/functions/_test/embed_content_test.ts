@@ -43,7 +43,6 @@ function backend(extra: Record<string, UpstreamHandler> = {}): Record<string, Up
       ]),
     "/rest/v1/vocabulary_words": () =>
       json([{ id: WORD, word_arabic: "كبسه", word_english: "kabsa", dialect_module: "Gulf" }]),
-    "/rest/v1/dialect_corpus_sentences": () => json([]),
     "/rest/v1/content_embeddings": (request) =>
       request.method === "GET" ? json([]) : json({}, 201),
     "api.openai.com": embeddings(),
