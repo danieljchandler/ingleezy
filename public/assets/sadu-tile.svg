@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="56" height="28" viewBox="0 0 56 28">
+  <rect width="56" height="28" fill="#445C3E"/>
+  <polygon points="14,0 28,14 14,28 0,14" fill="#8B4135"/>
+  <polygon points="42,0 56,14 42,28 28,14" fill="#8B4135"/>
+  <line x1="0" y1="0" x2="28" y2="14" stroke="#CFA44E" stroke-width="2.5"/>
+  <line x1="28" y1="14" x2="0" y2="28" stroke="#CFA44E" stroke-width="2.5"/>
+  <line x1="28" y1="0" x2="0" y2="14" stroke="#CFA44E" stroke-width="2.5"/>
+  <line x1="0" y1="14" x2="28" y2="28" stroke="#CFA44E" stroke-width="2.5"/>
+  <line x1="28" y1="0" x2="56" y2="14" stroke="#CFA44E" stroke-width="2.5"/>
+  <line x1="56" y1="14" x2="28" y2="28" stroke="#CFA44E" stroke-width="2.5"/>
+  <line x1="56" y1="0" x2="28" y2="14" stroke="#CFA44E" stroke-width="2.5"/>
+  <line x1="28" y1="14" x2="56" y2="28" stroke="#CFA44E" stroke-width="2.5"/>
+  <polygon points="28,6 34,14 28,22 22,14" fill="none" stroke="#3A423C" stroke-width="1"/>
+  <polygon points="14,9 19,14 14,19 9,14" fill="#CFA44E"/>
+  <polygon points="42,9 47,14 42,19 37,14" fill="#CFA44E"/>
+  <polygon points="14,11.5 16.5,14 14,16.5 11.5,14" fill="#F5ECD8"/>
+  <polygon points="42,11.5 44.5,14 42,16.5 39.5,14" fill="#F5ECD8"/>
+</svg>

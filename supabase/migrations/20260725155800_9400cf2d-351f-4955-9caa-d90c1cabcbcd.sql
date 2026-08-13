@@ -1,0 +1,2 @@
+ALTER TABLE public.user_vocabulary ADD COLUMN IF NOT EXISTS production_difficulty NUMERIC NOT NULL DEFAULT 5.0;
+ALTER TABLE public.user_set_phrases ADD COLUMN IF NOT EXISTS difficulty NUMERIC NOT NULL DEFAULT 5.0;

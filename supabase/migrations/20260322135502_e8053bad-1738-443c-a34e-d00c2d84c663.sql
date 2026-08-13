@@ -1,0 +1,1 @@
+ALTER TABLE public.vocabulary_words ALTER COLUMN topic_id DROP NOT NULL;

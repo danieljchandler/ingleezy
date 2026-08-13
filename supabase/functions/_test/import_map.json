@@ -1,0 +1,27 @@
+{
+  "//": [
+    "TEST ONLY. Redirects the std http server to serveShim.ts so importing an",
+    "edge function hands over its handler instead of binding a port.",
+    "",
+    "Passed explicitly with `deno test --import-map=...`, and deliberately NOT",
+    "placed in a root deno.json: the `edge` CI job runs `deno check` over the",
+    "real sources, and if this map applied there it would typecheck the shim",
+    "instead of the real std module — quietly removing the coverage that job",
+    "exists to provide.",
+    "",
+    "Both std versions in use are listed. `grep -h http/server.ts` across",
+    "supabase/functions/*/index.ts shows 0.168.0 (53 files) and 0.190.0 (3);",
+    "a version that is added without being listed here will bind a real port",
+    "and hang the test, which is a loud enough failure to notice.",
+    "",
+    "web-push is redirected for a different reason: it sends over node:https",
+    "rather than fetch, so the harness's routing fetch cannot see it and a send",
+    "in a test resolves DNS for real. The shim records sends instead, which is",
+    "what makes the retire-on-410 path testable at all."
+  ],
+  "imports": {
+    "https://deno.land/std@0.168.0/http/server.ts": "./serveShim.ts",
+    "https://deno.land/std@0.190.0/http/server.ts": "./serveShim.ts",
+    "https://esm.sh/web-push@3.6.7": "./webPushShim.ts"
+  }
+}

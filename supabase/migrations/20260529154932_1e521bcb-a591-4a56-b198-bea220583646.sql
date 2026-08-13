@@ -1,0 +1,1 @@
+ALTER VIEW public.leaderboard_profiles SET (security_invoker = true);

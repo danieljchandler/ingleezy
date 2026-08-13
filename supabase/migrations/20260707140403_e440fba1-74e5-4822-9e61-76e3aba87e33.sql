@@ -1,0 +1,1 @@
+update authentic_stories set story_video_status = 'failed', story_video_error = 'Timed out (auto-reset)' where story_video_status = 'generating' and updated_at < now() - interval '5 minutes';

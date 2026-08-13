@@ -1,0 +1,13 @@
+-- Root families on the curriculum deck.
+--
+-- `user_vocabulary` has carried a `root` since it was created, and the "words
+-- from the same root" footnote is built on it. `vocabulary_words` — the deck
+-- every lesson, quiz and curriculum review reads — never had one, so the same
+-- word taught in a Gulf lesson could show no root while the learner's own copy
+-- of it did.
+--
+-- Nullable and unconstrained, matching `user_vocabulary.root`: the value is
+-- whatever spelling was written, and `src/lib/arabicRoot.ts` canonicalises it
+-- at read time. As there, '' means "asked, this word has no root" and NULL
+-- means "nobody has looked yet", which is what the admin backfill selects on.
+ALTER TABLE public.vocabulary_words ADD COLUMN IF NOT EXISTS root text;

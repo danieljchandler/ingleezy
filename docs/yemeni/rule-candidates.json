@@ -1,0 +1,273 @@
+{
+ "source": "derived from docs/yemeni/lexicon-full.json",
+ "description": "Candidate MSA->Yemeni substitutions for dialect_rules. Closed-class only; the Yemeni side is never itself MSA; Egyptian code-switches are flagged rather than proposed. Review before approving -- these seed as status=draft.",
+ "min_count": 20,
+ "seedable": [
+  {
+   "yemeni": "ليش",
+   "msa": "لماذا",
+   "count": 775,
+   "pos": "ظرف استفهام",
+   "gloss": "why",
+   "cross_dialect": false
+  },
+  {
+   "yemeni": "مو",
+   "msa": "ليس",
+   "count": 665,
+   "pos": "أداة نفي",
+   "gloss": "is not",
+   "cross_dialect": false
+  },
+  {
+   "yemeni": "كذا",
+   "msa": "هكذا",
+   "count": 433,
+   "pos": "ضمير اشارة",
+   "gloss": "is + this way, thus | this way, this, thus",
+   "cross_dialect": false
+  },
+  {
+   "yemeni": "الحين",
+   "msa": "الان",
+   "count": 418,
+   "pos": "ظرف",
+   "gloss": "the +now/this time/right now",
+   "cross_dialect": false
+  },
+  {
+   "yemeni": "انتو",
+   "msa": "انتم",
+   "count": 361,
+   "pos": "ضمير",
+   "gloss": "you [masc.pl.] | are + you [masc.pl.]",
+   "cross_dialect": false
+  },
+  {
+   "yemeni": "هذي",
+   "msa": "هذا",
+   "count": 335,
+   "pos": "ضمير اشارة",
+   "gloss": "this/these",
+   "cross_dialect": false
+  },
+  {
+   "yemeni": "ايه",
+   "msa": "ماذا",
+   "count": 332,
+   "pos": "أداة استفهام",
+   "gloss": "what",
+   "cross_dialect": false
+  },
+  {
+   "yemeni": "وين",
+   "msa": "اين",
+   "count": 316,
+   "pos": "أداة استفهام",
+   "gloss": "where",
+   "cross_dialect": false
+  },
+  {
+   "yemeni": "واللي",
+   "msa": "الذي",
+   "count": 245,
+   "pos": "اسم موصول",
+   "gloss": "and + which;who;whom",
+   "cross_dialect": false
+  },
+  {
+   "yemeni": "ماهو",
+   "msa": "ما",
+   "count": 221,
+   "pos": "ضمير",
+   "gloss": "not",
+   "cross_dialect": false
+  },
+  {
+   "yemeni": "ذي",
+   "msa": "ذو",
+   "count": 209,
+   "pos": "ضمير اشارة",
+   "gloss": "of/with",
+   "cross_dialect": false
+  },
+  {
+   "yemeni": "وده",
+   "msa": "هذا",
+   "count": 99,
+   "pos": "ضمير اشارة",
+   "gloss": "these two [fem.du.] | this/these | these | this [masc.sg.] | these two [masc.du.]",
+   "cross_dialect": false
+  },
+  {
+   "yemeni": "ومش",
+   "msa": "ليس",
+   "count": 87,
+   "pos": "أداة نفي",
+   "gloss": "not be",
+   "cross_dialect": false
+  },
+  {
+   "yemeni": "انتوا",
+   "msa": "انتم",
+   "count": 63,
+   "pos": "ضمير",
+   "gloss": "you",
+   "cross_dialect": false
+  },
+  {
+   "yemeni": "ليك",
+   "msa": "لك",
+   "count": 62,
+   "pos": "حرف جر",
+   "gloss": "to you",
+   "cross_dialect": false
+  },
+  {
+   "yemeni": "هاي",
+   "msa": "هذا",
+   "count": 59,
+   "pos": "ضمير اشارة",
+   "gloss": "this/these",
+   "cross_dialect": false
+  },
+  {
+   "yemeni": "للي",
+   "msa": "الذي",
+   "count": 56,
+   "pos": "اسم موصول",
+   "gloss": "as/like + which/who/whom [masc.sg.] | as/like + those (people) who/whom [pl.] | who/whom [fem.pl.] | which/who/whom [fem.sg.] | with/by + which/who/whom [fem.sg.] | to/for + those (people) who/whom [pl.] | which/who/whom [fem.du.] | who/whom [pl.] | which/who/whom [du.] | to/for + which/who/whom [masc.sg.] | with/by + which/who/whom [masc.sg.] | which/who/whom [masc.sg.] | as/like + which/who/whom [fem.sg.] | to/for + which/who/whom [fem.sg.] | with/by + those (people) who/whom [pl.]",
+   "cross_dialect": false
+  },
+  {
+   "yemeni": "وهذي",
+   "msa": "هذه",
+   "count": 56,
+   "pos": "ضمير اشارة",
+   "gloss": "and +this",
+   "cross_dialect": false
+  },
+  {
+   "yemeni": "هذول",
+   "msa": "هؤلاء",
+   "count": 50,
+   "pos": "ضمير اشارة",
+   "gloss": "those/these",
+   "cross_dialect": false
+  },
+  {
+   "yemeni": "يلي",
+   "msa": "الذي",
+   "count": 49,
+   "pos": "اسم موصول",
+   "gloss": "who/ that",
+   "cross_dialect": false
+  },
+  {
+   "yemeni": "منو",
+   "msa": "منهو",
+   "count": 45,
+   "pos": "ضمير استفهام",
+   "gloss": "who",
+   "cross_dialect": false
+  },
+  {
+   "yemeni": "ماهي",
+   "msa": "ليس",
+   "count": 38,
+   "pos": "ضمير استفهام",
+   "gloss": "is/are + not | is/are + not be | not | is/are + indeed + not",
+   "cross_dialect": false
+  },
+  {
+   "yemeni": "لهذه",
+   "msa": "هذا",
+   "count": 37,
+   "pos": "ضمير اشارة",
+   "gloss": "for/to + this/these",
+   "cross_dialect": false
+  },
+  {
+   "yemeni": "ليهم",
+   "msa": "لهم",
+   "count": 33,
+   "pos": "حرف جر",
+   "gloss": "to;him_(it;he_has);them;her_(it;she_has;they_have);for",
+   "cross_dialect": false
+  },
+  {
+   "yemeni": "دوناك",
+   "msa": "هؤلاء",
+   "count": 30,
+   "pos": "ضمير اشارة",
+   "gloss": "they/those",
+   "cross_dialect": false
+  },
+  {
+   "yemeni": "هولا",
+   "msa": "هؤلاء",
+   "count": 26,
+   "pos": "ضمير اشارة",
+   "gloss": "these/those",
+   "cross_dialect": false
+  },
+  {
+   "yemeni": "ذولا",
+   "msa": "هؤلاء",
+   "count": 25,
+   "pos": "ضمير اشارة",
+   "gloss": "these",
+   "cross_dialect": false
+  },
+  {
+   "yemeni": "باللي",
+   "msa": "الذي",
+   "count": 25,
+   "pos": "اسم موصول",
+   "gloss": "with/by + which/who/whom [masc.sg.]",
+   "cross_dialect": false
+  },
+  {
+   "yemeni": "وليه",
+   "msa": "لماذا",
+   "count": 23,
+   "pos": "أداة استفهام",
+   "gloss": "why",
+   "cross_dialect": false
+  },
+  {
+   "yemeni": "هاه",
+   "msa": "نعم",
+   "count": 21,
+   "pos": "أداة استفهام",
+   "gloss": "yes",
+   "cross_dialect": false
+  },
+  {
+   "yemeni": "ذول",
+   "msa": "هؤلاء",
+   "count": 21,
+   "pos": "ضمير اشارة",
+   "gloss": "these",
+   "cross_dialect": false
+  }
+ ],
+ "flagged_cross_dialect": [
+  {
+   "yemeni": "فين",
+   "msa": "اين",
+   "count": 428,
+   "pos": "أداة استفهام",
+   "gloss": "where",
+   "cross_dialect": true
+  },
+  {
+   "yemeni": "دي",
+   "msa": "هذا",
+   "count": 208,
+   "pos": "ضمير اشارة",
+   "gloss": "this/these",
+   "cross_dialect": true
+  }
+ ]
+}

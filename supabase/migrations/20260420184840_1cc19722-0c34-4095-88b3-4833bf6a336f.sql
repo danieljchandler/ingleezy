@@ -1,0 +1,1 @@
+ALTER TABLE public.saved_transcriptions ADD COLUMN IF NOT EXISTS dialect text;

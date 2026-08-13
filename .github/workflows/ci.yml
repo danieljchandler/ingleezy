@@ -1,0 +1,244 @@
+name: CI
+
+# The repo had no CI at all, so the Vitest and Playwright suites only ever ran
+# where someone remembered to run them. This is the guard.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  # Lets a red build be re-run from the Actions tab without an empty commit.
+  workflow_dispatch:
+
+# A new push supersedes an in-flight run for the same ref. Cancel the old one
+# rather than paying for a result nobody will look at — except on main, where
+# every commit's status is worth keeping.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+permissions:
+  contents: read
+
+jobs:
+  # Typecheck, lint and unit tests. Fast, no browser needed — this is the job
+  # that should catch most things, so it runs on its own and reports quickly.
+  check:
+    name: Typecheck, lint & unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # tsconfig.app.json is the one that covers src/ (and the shared edge-
+      # function modules the tests import). The Deno functions themselves are
+      # checked by the `edge` job below — tsc cannot resolve their https://
+      # imports, so it would report noise rather than real errors here.
+      #
+      # `npm run typecheck` also covers tsconfig.e2e.json. The e2e tree used to
+      # be typechecked by nothing at all — tsconfig.app.json's `include: ["src"]`
+      # leaves it out — so a spec could reference a helper that no longer existed
+      # and only fail once a browser had spent 15s getting there.
+      - name: Typecheck
+        run: npm run typecheck
+
+      # Ratchet, not a clean-lint gate: the repo carries ~596 pre-existing
+      # errors, so requiring zero would make every build red and train people
+      # to ignore CI. This fails only when the count goes up.
+      - name: Lint (no new errors)
+        run: npm run lint:ratchet
+
+      # With coverage, so vitest.config.ts's per-directory thresholds are
+      # enforced rather than merely recorded. They cover src/hooks, src/lib and
+      # src/contexts — see the comment there for why there is no global figure.
+      # Instrumentation costs roughly a minute on top of the ~2 the suite takes,
+      # which is well inside this job's budget.
+      - name: Unit tests (with coverage thresholds)
+        run: npm run test:coverage
+
+      - name: Production build
+        run: npm run build
+
+  # Edge functions. These are Deno, not covered by tsconfig.app.json, and until
+  # now nothing typechecked them at all — `npx tsc` cannot even resolve their
+  # https:// imports. The first three runs of this check found eight real
+  # defects, including a `corsHeaders` reference from a scope that did not
+  # contain it (every response from dialect-violations-digest threw), a
+  # `fallback()` call missing its CORS argument, and an unguarded
+  # `analyzeData.result` dereference in the transcription pipeline.
+  #
+  # Separate job for the same reason e2e is: a Deno failure should be
+  # distinguishable at a glance from a frontend type error.
+  edge:
+    name: Typecheck edge functions (Deno)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      # Pinned exactly, not to v2.x. `deno check` bundles its own TypeScript, so
+      # a Deno release can turn this red without anything in the repo changing —
+      # which is how a check stops being trusted. Bump this line deliberately.
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.9.5
+
+      # Remote modules are fetched over the network on a cold cache. Keyed on
+      # the sources themselves since there is no lockfile: deno.lock is
+      # gitignored, as the only thing that writes it is a local check run.
+      - name: Cache Deno modules
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/deno
+          key: deno-${{ runner.os }}-${{ hashFiles('supabase/functions/**/*.ts') }}
+          restore-keys: |
+            deno-${{ runner.os }}-
+
+      # One invocation over every function and shared module — they share most
+      # of their dependency graph, so checking them together is far faster than
+      # a loop, and a single command reports every error at once rather than
+      # stopping at the first bad file.
+      # --node-modules-dir=none because two functions import supabase-js as an
+      # `npm:` specifier. Deno 2 sees this repo's package.json, switches to
+      # node_modules resolution and expects `deno install` to have populated it
+      # — which no job here does. This tells Deno to resolve npm packages from
+      # its own cache instead, which is what happens locally where node_modules
+      # exists for entirely unrelated reasons.
+      #
+      # Retried because this step reaches the network. `deno check` resolves
+      # type-only imports straight from esm.sh, and a 408 there means "this
+      # build is not ready yet, ask again" rather than anything about our code —
+      # @supabase/storage-js, reached from supabase-js's own types.d.ts, has
+      # turned this job red on commits that touched no edge function at all
+      # while its parent module answered 200. A transient upstream is not a type
+      # error, and a check that cannot tell the difference stops being trusted.
+      #
+      # The waits are minutes rather than seconds because that is how long an
+      # esm.sh build takes. Worst case is roughly nine minutes against the job's
+      # fifteen. A real type error still fails on the first attempt and on the
+      # last, just later.
+      - name: Typecheck
+        run: |
+          for wait in 30 60 90 120 0; do
+            if deno check --node-modules-dir=none supabase/functions/*/index.ts supabase/functions/_shared/*.ts; then
+              exit 0
+            fi
+            echo "::warning::deno check failed; retrying in ${wait}s"
+            sleep "$wait"
+          done
+          echo "::error::deno check failed five times"
+          exit 1
+
+      # Runtime tests. Until now these functions were only proved to compile —
+      # nothing checked that any of them actually responded. The harness in
+      # supabase/functions/_test/ loads each one's handler without touching the
+      # production sources and puts every outbound fetch under the test's
+      # control, so CORS, auth, validation and error mapping are all assertable.
+      #
+      # --import-map is what redirects the std http server to the capture shim,
+      # and it is passed here rather than living in a deno.json precisely so the
+      # `deno check` above still sees the real module.
+      #
+      # --no-check because the step above already typechecks the sources, and
+      # the tests import remote std modules whose types add nothing here.
+      - name: Runtime tests
+        run: npm run test:edge
+
+  # Can the schema be rebuilt from the migrations in this repo?
+  #
+  # The unit job's schema-contract test compares the app's queries against the
+  # generated types and needs no database. This one is the other half: it
+  # replays all 137 migrations against a stock Postgres to check the history
+  # still produces the schema. A migration set that only works against the one
+  # database it grew on is invisible until someone tries to recreate it.
+  #
+  # A service container rather than the Supabase CLI: the migrations need
+  # `auth` and `storage` objects, which contract/prelude.sql supplies in ~120
+  # lines, and standing up the full Supabase stack to get them would cost
+  # minutes per run for nothing this check uses.
+  contract:
+    name: Migration replay
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # psql comes preinstalled on ubuntu-latest; contract/build.mjs shells out
+      # to it rather than pulling in a Postgres client library for one script.
+      - name: Replay migrations
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres
+        run: npx vitest run src/test/migrationReplay.test.ts
+
+  # Browser tests. Separate job so a Playwright/browser problem is
+  # distinguishable at a glance from a type or unit-test failure.
+  #
+  # Sharded four ways. The suite went from 23 tests to 330 when route coverage
+  # landed, and it keeps growing; four shards keeps each one well inside the
+  # timeout with room for the per-area specs still to come. playwright.config.ts
+  # also raises workers to 4 in CI — every test gets its own browser context and
+  # its own in-memory database, so there is no shared state to serialize on.
+  e2e:
+    name: End-to-end (${{ matrix.shard }}/4)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      # One shard failing should not hide which of the others also failed.
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # Only Chromium — playwright.config.ts defines just the one project.
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      # No secrets needed: playwright.config.ts points the dev server at a fake
+      # Supabase host and the in-memory backend in src/test/support/ answers
+      # every request, so the suite is hermetic. e2e/support/globalSetup.ts
+      # refuses to start if that is ever not true.
+      - name: E2E tests
+        run: npm run test:e2e -- --shard=${{ matrix.shard }}/4
+
+      - name: Upload report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          # Shards run concurrently, so the name has to be unique per shard or
+          # the uploads collide and only one survives.
+          name: playwright-report-shard-${{ matrix.shard }}
+          path: playwright-report/
+          retention-days: 7

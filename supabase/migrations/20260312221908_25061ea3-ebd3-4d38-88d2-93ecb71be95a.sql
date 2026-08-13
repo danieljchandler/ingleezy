@@ -1,0 +1,1 @@
+ALTER TABLE public.trending_video_candidates ADD COLUMN dismissed boolean DEFAULT false;

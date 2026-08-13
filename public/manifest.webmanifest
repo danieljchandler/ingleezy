@@ -1,0 +1,42 @@
+{
+  "name": "Hakiya — Learn Spoken Arabic",
+  "short_name": "Hakiya",
+  "description": "Learn real spoken Arabic — Gulf, Egyptian, and Yemeni dialects — with native audio, smart flashcards, and lessons built from real media.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F9F7F2",
+  "theme_color": "#F9F7F2",
+  "lang": "en",
+  "dir": "ltr",
+  "categories": ["education"],
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "256x256",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon.png",
+      "sizes": "256x256",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Review due cards",
+      "short_name": "Review",
+      "url": "/review",
+      "description": "Start today's spaced-repetition session"
+    },
+    {
+      "name": "Practice",
+      "short_name": "Practice",
+      "url": "/practice",
+      "description": "Speaking, listening and reading practice"
+    }
+  ]
+}

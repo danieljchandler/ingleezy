@@ -1,0 +1,206 @@
+project_id = "ovscskaijvclaxelkdyf"
+
+# ─── Functions that require JWT authentication ────────────────────────────────
+# Payment / subscription functions — MUST verify JWT
+[functions.check-subscription]
+verify_jwt = true
+
+[functions.create-checkout]
+verify_jwt = true
+
+[functions.customer-portal]
+verify_jwt = true
+
+# Admin / pipeline functions — MUST verify JWT.
+# Called from authed admin flows (user JWT) and server-to-server from
+# extract-visual-context (service-role key — a valid JWT), so requiring a
+# valid JWT here does not break the pipeline.
+[functions.process-approved-video]
+verify_jwt = true
+
+[functions.curriculum-chat]
+verify_jwt = true
+
+# User-data functions — require authentication
+[functions.generate-flashcard-image]
+verify_jwt = true
+
+[functions.generate-story]
+verify_jwt = true
+
+# ─── Public learning content functions ────────────────────────────────────────
+# These serve public learning content or lightweight AI helpers.
+# They rely on the Supabase anon key (apikey header) rather than user JWTs.
+[functions.deepgram-transcribe]
+verify_jwt = false
+
+[functions.analyze-gulf-arabic]
+verify_jwt = false
+
+[functions.download-media]
+verify_jwt = false
+
+[functions.munsit-transcribe]
+verify_jwt = false
+
+[functions.elevenlabs-tts]
+verify_jwt = false
+
+[functions.classify-tutor-segments]
+verify_jwt = false
+
+[functions.analyze-meme]
+verify_jwt = false
+
+[functions.scrape-x-post]
+verify_jwt = false
+
+[functions.how-do-i-say]
+verify_jwt = false
+
+[functions.fanar-transcribe]
+verify_jwt = false
+
+[functions.hf-chat]
+verify_jwt = false
+
+[functions.farasa]
+verify_jwt = false
+
+[functions.culture-guide]
+verify_jwt = false
+
+[functions.translate-phrase]
+verify_jwt = false
+
+[functions.discover-trending-videos]
+verify_jwt = false
+
+[functions.conversation-practice]
+verify_jwt = false
+
+[functions.azure-pronunciation]
+verify_jwt = false
+
+[functions.score-shadow-attempt]
+verify_jwt = false
+
+[functions.pronunciation-feedback]
+verify_jwt = false
+
+[functions.listening-quiz]
+verify_jwt = false
+
+[functions.dialect-compare]
+verify_jwt = false
+
+[functions.reading-passage]
+verify_jwt = false
+
+[functions.daily-challenge]
+verify_jwt = false
+
+[functions.grammar-drill]
+verify_jwt = false
+
+[functions.azure-tts]
+verify_jwt = false
+
+[functions.camel-analyze]
+verify_jwt = false
+
+[functions.extract-visual-context]
+verify_jwt = false
+
+[functions.soniox-transcribe]
+verify_jwt = false
+
+[functions.munsit-tts]
+verify_jwt = false
+
+[functions.souq-news]
+verify_jwt = false
+
+[functions.ask-translation]
+verify_jwt = false
+
+[functions.assistant-chat]
+verify_jwt = false
+
+[functions.ai-resegment-transcript]
+verify_jwt = true
+
+[functions.extract-concepts]
+verify_jwt = true
+
+[functions.extract-grammar-points]
+verify_jwt = true
+
+[functions.free-chat]
+verify_jwt = false
+
+[functions.draft-dialect-rules]
+verify_jwt = true
+
+[functions.mine-dialect-corpus]
+verify_jwt = true
+
+[functions.dialect-violations-digest]
+verify_jwt = true
+
+
+
+
+
+[functions.generate-listen-script]
+verify_jwt = true
+
+[functions.generate-listen-line-audio]
+verify_jwt = true
+
+[functions.generate-listen-audio]
+verify_jwt = false
+
+# Writes the caller's own grammar mastery. Stated explicitly rather than relying
+# on the platform default — this one writes learner data, so the requirement
+# should be visible here as well as enforced in the function.
+[functions.record-grammar-outcome]
+verify_jwt = true
+
+# Captures transcript corrections into training_examples before the admin save
+# overwrites them. Role-gated inside (admin / content_reviewer only).
+[functions.record-transcript-corrections]
+verify_jwt = true
+
+# Learner reports (thumbs-down, "this looks wrong") into the native-review
+# queue. Capped per day; reports only become training data after a native
+# speaker corrects them.
+[functions.report-content]
+verify_jwt = true
+
+# Populates the semantic content index (pgvector). Admin-gated inside — each
+# run embeds a bounded slice; loop until it reports embedded: 0.
+[functions.embed-content]
+verify_jwt = true
+
+# Learner referral codes: get-or-create my code, redeem someone else's.
+# Rewards are Stripe-side, conversion-gated (see check-subscription).
+[functions.referral]
+verify_jwt = true
+
+# Paid native feedback: credit ledger, submissions into the reviewers' queue,
+# Stripe one-off credit packs (dark until STRIPE_FEEDBACK_PACK_PRICE is set).
+[functions.native-feedback]
+verify_jwt = true
+
+# Written production (C3): dialect writing prompts and Rulebook-corrected
+# reviews of the learner's typed Arabic. Tier-capped inside.
+[functions.writing-coach]
+verify_jwt = true
+
+# Nightly batch that pre-builds daily stories for recently-active learners.
+# Run on a schedule shortly after 00:00 UTC with the service-role key (a
+# valid JWT, so verify_jwt = true does not block the scheduler); also
+# runnable by an admin. Guarded inside as well.
+[functions.pregenerate-daily]
+verify_jwt = true

@@ -1,0 +1,1 @@
+ALTER TABLE public.user_vocabulary ADD COLUMN dialect text NOT NULL DEFAULT 'Gulf';

@@ -1,0 +1,1 @@
+ALTER TABLE public.user_phrases ADD COLUMN IF NOT EXISTS phrase_audio_url text;

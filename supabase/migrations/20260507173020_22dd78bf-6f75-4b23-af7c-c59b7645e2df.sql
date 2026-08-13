@@ -1,0 +1,1 @@
+ALTER TABLE public.discover_videos ADD COLUMN IF NOT EXISTS is_meme boolean NOT NULL DEFAULT false;

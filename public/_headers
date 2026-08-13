@@ -1,0 +1,33 @@
+/*
+  Permissions-Policy: microphone=*
+
+# The loading emblem, the landing campfire and the placement caravan are
+# unhashed and served straight
+# from public/, so they need an explicit immutable directive. Version them by
+# changing the filename — but not with a hyphenated suffix, which would make it
+# match sw.js's isHashedAsset pattern and route it back through Cache Storage.
+/assets/loading-emblem.mp4
+  Cache-Control: public, max-age=31536000, immutable
+
+/assets/loading-emblem.webm
+  Cache-Control: public, max-age=31536000, immutable
+
+/assets/caravan-hero.mp4
+  Cache-Control: public, max-age=31536000, immutable
+
+/assets/caravan-hero.webm
+  Cache-Control: public, max-age=31536000, immutable
+
+/assets/campfire-hero.mp4
+  Cache-Control: public, max-age=31536000, immutable
+
+/assets/campfire-hero.webm
+  Cache-Control: public, max-age=31536000, immutable
+
+# The posters are the reduced-motion fallback, so they are fetched by exactly
+# the visitors who never download the video — worth caching just as hard.
+/assets/caravan-hero-poster.webp
+  Cache-Control: public, max-age=31536000, immutable
+
+/assets/campfire-hero-poster.webp
+  Cache-Control: public, max-age=31536000, immutable

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://laha-arabic.lovable.app/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://laha-arabic.lovable.app/auth</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://laha-arabic.lovable.app/placement</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://laha-arabic.lovable.app/pricing</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://laha-arabic.lovable.app/learn</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://laha-arabic.lovable.app/discover</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://laha-arabic.lovable.app/alphabet</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://laha-arabic.lovable.app/reading</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://laha-arabic.lovable.app/listening</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://laha-arabic.lovable.app/pronunciation</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://laha-arabic.lovable.app/conversation</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://laha-arabic.lovable.app/grammar</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://laha-arabic.lovable.app/vocab-games</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://laha-arabic.lovable.app/dialect-compare</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://laha-arabic.lovable.app/how-do-i-say</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://laha-arabic.lovable.app/culture-guide</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://laha-arabic.lovable.app/souq-news</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
+  <url><loc>https://laha-arabic.lovable.app/stories</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://laha-arabic.lovable.app/daily-challenge</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
+  <url><loc>https://laha-arabic.lovable.app/leaderboard</loc><changefreq>daily</changefreq><priority>0.5</priority></url>
+  <url><loc>https://laha-arabic.lovable.app/meme</loc><changefreq>weekly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://laha-arabic.lovable.app/bridge</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://laha-arabic.lovable.app/set-phrases</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://laha-arabic.lovable.app/bible</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://laha-arabic.lovable.app/terms</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://laha-arabic.lovable.app/privacy</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+</urlset>

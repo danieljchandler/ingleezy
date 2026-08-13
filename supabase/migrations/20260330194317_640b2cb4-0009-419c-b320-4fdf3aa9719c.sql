@@ -1,0 +1,1 @@
+ALTER TABLE public.user_vocabulary ADD COLUMN jingle_audio_url text;

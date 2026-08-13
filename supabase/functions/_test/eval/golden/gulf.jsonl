@@ -1,0 +1,10 @@
+{"id":"gulf-001","prompt":"Ask the learner what they want to eat tonight.","good":"وش تبون تاكلون الليله؟","bad":"لماذا لا تخبرني ماذا تريد أن تأكل الآن؟","note":"وش/تبي interrogatives; لماذا and الآن are MSA"}
+{"id":"gulf-002","prompt":"Ask where the learner is going right now.","good":"وين رايح الحين؟","bad":"إلى أين أنت ذاهب الآن؟","note":"وين + الحين, never الآن"}
+{"id":"gulf-003","prompt":"Say you don't want anything, you're full.","good":"ما ابي شي، انا شبعان","bad":"ليس لدي رغبة في أي شيء","note":"negation with ما, never ليس"}
+{"id":"gulf-004","prompt":"Greet the learner and ask how they're doing today.","good":"شلونك؟ شخبارك اليوم؟","bad":"إزيك؟ عامل ايه دلوقتي؟","note":"Egyptian greetings are as wrong as MSA in Gulf"}
+{"id":"gulf-005","prompt":"Say you'll call them tomorrow, God willing.","good":"بتصل فيك بكره ان شاء الله","bad":"سوف أتصل بك غدا","note":"b- future prefix, never سوف"}
+{"id":"gulf-006","prompt":"Mention the man you saw yesterday at the souq.","good":"الرجال اللي شفته امس في السوق","bad":"الرجل الذي رأيته بالأمس في السوق","note":"relative اللي, never الذي"}
+{"id":"gulf-007","prompt":"Say you also want a coffee.","good":"وبعد ابي قهوه","bad":"أريد قهوة أيضا","note":"بعد for 'also', never أيضاً"}
+{"id":"gulf-008","prompt":"Ask what this is and where they got it.","good":"وش هذا؟ من وين جبته؟","bad":"ما هذا الذي أحضرته من هناك؟","note":"هذا is acceptable Gulf; الذي is not"}
+{"id":"gulf-009","prompt":"Say the phone rang while you were chatting with him.","good":"وانا اسولف معه دق التلفون","bad":"بينما كنت أتحدث معه رن الهاتف","note":"circumstantial وأنا clause, never بينما"}
+{"id":"gulf-010","prompt":"Offer the learner juice or coffee.","good":"تبي عصير والا قهوه؟","bad":"عايز عصير ولا قهوة كده؟","note":"تبي, not Egyptian عايز/كده"}

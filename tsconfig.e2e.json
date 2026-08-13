@@ -1,0 +1,15 @@
+// The e2e tree was never typechecked: tsconfig.app.json's `"include": ["src"]`
+// leaves e2e/ out entirely, so a spec could reference a helper that no longer
+// exists and only fail once a browser got that far.
+//
+// Same compiler settings as the app, minus vitest globals (Playwright brings its
+// own `test`/`expect` as imports) and plus node types for process/Buffer, which
+// the Supabase test double uses to build fixture JWTs.
+{
+  "extends": "./tsconfig.app.json",
+  "compilerOptions": {
+    "types": ["node"],
+    "noEmit": true
+  },
+  "include": ["e2e", "playwright.config.ts"]
+}

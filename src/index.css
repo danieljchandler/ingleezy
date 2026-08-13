@@ -1,0 +1,451 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700&family=Montserrat:wght@600;700&family=Open+Sans:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* ── Lahja Brand Guide Color Palette ── */
+    /* Deep Desert #44663D | Warm Sand #E2C5A6 | Desert Red #8C4135 | Charcoal #323A36 */
+
+    /* Background: Warm Sand Beige - light, calm, breathable */
+    --background: 32 50% 77%;
+    --foreground: 150 5% 15%;
+
+    /* Cards: Off-white surface - slightly lighter than warm sand */
+    --card: 38 35% 97%;
+    --card-foreground: 150 5% 15%;
+
+    --popover: 38 35% 97%;
+    --popover-foreground: 150 5% 15%;
+
+    /* Desert Red - warm terracotta for primary actions */
+    --primary: 8 45% 38%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Charcoal secondary */
+    --secondary: 150 10% 25%;
+    --secondary-foreground: 0 0% 100%;
+
+    /* Desert Red accent - warm terracotta */
+    --accent: 8 45% 38%;
+    --accent-foreground: 0 0% 100%;
+
+    /* Muted backgrounds - between background and card */
+    --muted: 38 40% 93%;
+    --muted-foreground: 150 5% 40%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 110 25% 32%;
+    --success-foreground: 0 0% 100%;
+
+    /* Subtle warm border for structure */
+    --border: 38 35% 80%;
+    --input: 38 35% 92%;
+    --ring: 8 45% 38%;
+
+    --radius: 1rem;
+
+    /* Desert Red variant for dialect accents */
+    --olive: 8 40% 42%;
+
+    /* Topic gradients - aligned with brand palette */
+    --topic-colors: 8 45% 38%;
+    --topic-animals: 38 47% 70%;
+    --topic-household: 8 40% 42%;
+    --topic-tools: 150 10% 25%;
+    --topic-food: 8 45% 38%;
+    --topic-nature: 8 42% 40%;
+
+    /* Desert Red border color */
+    --desert-red: 8 45% 30%;
+
+    /* Card cream - white/cream for cards */
+    --card-cream: 40 50% 97%;
+
+    /* Shadows - very subtle, borders do the work */
+    --shadow-soft: 0 2px 8px -2px hsl(38 30% 50% / 0.08);
+    --shadow-card: 0 2px 12px -4px hsl(38 30% 40% / 0.1);
+    --shadow-elegant: 0 1px 2px hsl(38 30% 40% / 0.05), 0 8px 24px -10px hsl(8 45% 30% / 0.15);
+    --shadow-button: 0 4px 12px -4px hsl(8 45% 38% / 0.2);
+    /* Topic card shadows - subtle depth */
+    --shadow-topic: 0 2px 8px -2px hsl(8 45% 30% / 0.08), 0 4px 16px -4px hsl(38 30% 40% / 0.06);
+    --shadow-topic-hover: 0 4px 12px -2px hsl(8 45% 30% / 0.12), 0 8px 24px -6px hsl(38 30% 40% / 0.1);
+
+
+    --sidebar-background: 38 35% 96%;
+    --sidebar-foreground: 150 5% 15%;
+    --sidebar-primary: 8 45% 38%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 38 40% 92%;
+    --sidebar-accent-foreground: 150 5% 15%;
+    --sidebar-border: 38 35% 80%;
+    --sidebar-ring: 8 45% 38%;
+  }
+
+  .dark {
+    --background: 0 0% 10%;
+    --foreground: 38 47% 92%;
+
+    --card: 0 0% 14%;
+    --card-foreground: 38 47% 92%;
+
+    --popover: 0 0% 14%;
+    --popover-foreground: 38 47% 92%;
+
+    --primary: 8 40% 48%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 150 10% 32%;
+    --secondary-foreground: 0 0% 100%;
+
+    --accent: 8 40% 48%;
+    --accent-foreground: 0 0% 100%;
+
+    --muted: 0 0% 18%;
+    --muted-foreground: 38 30% 70%;
+
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
+    --ring: 8 40% 48%;
+
+    --success: 110 22% 45%;
+    --success-foreground: 0 0% 100%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Open Sans', 'Noto Sans Arabic', sans-serif;
+    font-size: 1rem;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  html {
+    touch-action: manipulation;
+  }
+
+  /* Locked heading rhythm — Montserrat, tight tracking, no competing weights */
+  h1, h2, h3, h4 {
+    font-family: 'Montserrat', 'Noto Sans Arabic', sans-serif;
+    font-weight: 700;
+    color: hsl(var(--foreground));
+  }
+  h1 { @apply text-headline md:text-display; }
+  h2 { @apply text-title md:text-headline; }
+  h3 { @apply text-subtitle md:text-title; }
+  h4 { @apply text-body md:text-subtitle; font-weight: 600; }
+  p  { @apply text-body; }
+  small { @apply text-caption text-muted-foreground; }
+}
+
+@layer utilities {
+  .font-sans {
+    font-family: 'Open Sans', 'Noto Sans Arabic', sans-serif;
+  }
+
+  .font-heading {
+    font-family: 'Montserrat', 'Noto Sans Arabic', sans-serif;
+  }
+
+  .font-arabic {
+    font-family: 'Noto Sans Arabic', 'Open Sans', sans-serif;
+    line-height: 1.7;
+  }
+
+  /* ── Semantic typography tokens — single source of truth ── */
+  .text-t-display {
+    @apply font-heading text-display font-bold;
+  }
+  .text-t-headline {
+    @apply font-heading text-headline font-bold;
+  }
+  .text-t-title {
+    @apply font-heading text-title font-bold;
+  }
+  .text-t-subtitle {
+    @apply font-heading text-subtitle font-semibold;
+  }
+  .text-t-body {
+    @apply font-sans text-body font-normal;
+  }
+  .text-t-body-strong {
+    @apply font-sans text-body font-medium;
+  }
+  .text-t-caption {
+    @apply font-sans text-caption font-medium text-muted-foreground;
+  }
+  .text-t-overline {
+    @apply font-sans text-overline font-semibold uppercase text-muted-foreground;
+  }
+
+  /* Arabic-first display — used for vocabulary and titles in Arabic */
+  .text-arabic-display {
+    font-family: 'Noto Sans Arabic', 'Open Sans', sans-serif;
+    font-weight: 700;
+    line-height: 1.4;
+    letter-spacing: 0;
+  }
+  .text-arabic-body {
+    font-family: 'Noto Sans Arabic', 'Open Sans', sans-serif;
+    font-weight: 500;
+    line-height: 1.75;
+  }
+
+  /* Legacy aliases — keep existing call sites working */
+  .text-arabic-primary {
+    @apply text-arabic-display;
+  }
+  .text-english-secondary {
+    font-family: 'Open Sans', 'Noto Sans Arabic', sans-serif;
+    font-weight: 500;
+    color: hsl(var(--muted-foreground));
+  }
+
+  .shadow-elegant {
+    box-shadow: var(--shadow-elegant);
+  }
+  .shadow-card-soft {
+    box-shadow: var(--shadow-card);
+  }
+
+  /* Subtle float animation for icons */
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-4px);
+    }
+  }
+
+  /* Pop animation for tap feedback */
+  .animate-pop {
+    animation: pop 0.3s ease-out;
+  }
+
+  @keyframes pop {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(0.95);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  /* Pulse glow for audio playing */
+  .animate-pulse-glow {
+    animation: pulse-glow 1s ease-in-out infinite;
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% {
+      box-shadow: 0 0 0 0 hsl(var(--primary) / 0.4);
+    }
+    50% {
+      box-shadow: 0 0 0 16px hsl(var(--primary) / 0);
+    }
+  }
+
+  /* Unlock bounce - subtle spring when a stop becomes unlocked */
+  .animate-unlock-bounce {
+    animation: unlock-bounce 0.7s ease-out;
+  }
+
+  @keyframes unlock-bounce {
+    0% { transform: scale(1); }
+    25% { transform: scale(1.1); }
+    50% { transform: scale(1.02); }
+    75% { transform: scale(1.06); }
+    100% { transform: scale(1); }
+  }
+
+  /* Master bounce - slightly richer spring when a stop becomes mastered */
+  .animate-master-bounce {
+    animation: master-bounce 0.75s ease-out;
+  }
+
+  @keyframes master-bounce {
+    0% { transform: scale(1); }
+    20% { transform: scale(1.14); }
+    45% { transform: scale(0.96); }
+    70% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
+
+  /* Shine sweep - light glare across a mastered stop */
+  .animate-shine-sweep {
+    animation: shine-sweep 0.9s ease-out forwards;
+  }
+
+  @keyframes shine-sweep {
+    0% { transform: translateX(-120%) skewX(-20deg); opacity: 0; }
+    12% { opacity: 0.45; }
+    88% { opacity: 0.45; }
+    100% { transform: translateX(120%) skewX(-20deg); opacity: 0; }
+  }
+
+  /* Background gradients - for large areas only */
+  .bg-gradient-warm {
+    background: linear-gradient(180deg, hsl(38 45% 90%) 0%, hsl(38 40% 86%) 100%);
+  }
+
+  .bg-gradient-subtle {
+    background: linear-gradient(180deg, hsl(38 45% 92%) 0%, hsl(38 40% 88%) 100%);
+  }
+
+  /* Topic accent colors - for small accent stripes only */
+  .bg-gradient-green {
+    background: hsl(8 45% 38%);
+  }
+
+  .bg-gradient-sand {
+    background: hsl(38 45% 65%);
+  }
+
+  .bg-gradient-olive {
+    background: hsl(8 40% 42%);
+  }
+
+  .bg-gradient-indigo {
+    background: hsl(150 10% 25%);
+  }
+
+  .bg-gradient-charcoal {
+    background: hsl(150 7% 21%);
+  }
+
+  .bg-gradient-red {
+    background: hsl(8 45% 38%);
+  }
+
+  /* Slow drift for parallax backdrop layers */
+  .animate-drift-slow {
+    animation: drift-slow 28s ease-in-out infinite;
+  }
+  .animate-drift-slower {
+    animation: drift-slow 44s ease-in-out infinite reverse;
+  }
+  @keyframes drift-slow {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(-18px); }
+  }
+
+  /* Camel caravan bob */
+  .animate-camel-bob {
+    animation: camel-bob 1.4s ease-in-out infinite;
+  }
+  @keyframes camel-bob {
+    0%, 100% { transform: translateY(0) rotate(-2deg); }
+    50% { transform: translateY(-3px) rotate(2deg); }
+  }
+
+  /* Floating "+N XP" pill */
+  .animate-xp-float {
+    animation: xp-float 900ms ease-out forwards;
+  }
+  @keyframes xp-float {
+    0% { opacity: 0; transform: translateY(8px) scale(0.9); }
+    20% { opacity: 1; transform: translateY(0) scale(1); }
+    100% { opacity: 0; transform: translateY(-40px) scale(1); }
+  }
+
+  /* Milestone banner shine sweep */
+  .animate-banner-shine {
+    animation: banner-shine 2.6s ease-in-out infinite;
+  }
+  @keyframes banner-shine {
+    0% { transform: translateX(0) skewX(-18deg); }
+    60%, 100% { transform: translateX(100%) skewX(-18deg); }
+  }
+
+  /* Gentle horizontal shake (wrong answer) */
+  .animate-shake {
+    animation: shake 0.45s cubic-bezier(.36,.07,.19,.97) both;
+  }
+  @keyframes shake {
+    10%, 90% { transform: translateX(-2px); }
+    20%, 80% { transform: translateX(3px); }
+    30%, 50%, 70% { transform: translateX(-6px); }
+    40%, 60% { transform: translateX(6px); }
+  }
+
+  /* Correct-answer pulse (green ring outward) */
+  .animate-correct-pulse {
+    animation: correct-pulse 0.7s ease-out;
+  }
+  @keyframes correct-pulse {
+    0% { box-shadow: 0 0 0 0 hsl(142 71% 45% / 0.55); }
+    100% { box-shadow: 0 0 0 14px hsl(142 71% 45% / 0); }
+  }
+
+  /* Single sparkle dot fade-out (tracer trail) */
+  .animate-sparkle {
+    animation: sparkle 700ms ease-out forwards;
+  }
+  @keyframes sparkle {
+    0% { opacity: 0.9; transform: scale(0.4); }
+    60% { opacity: 0.7; transform: scale(1); }
+    100% { opacity: 0; transform: scale(1.4); }
+  }
+
+  /* Audio waveform bar (looped) */
+  .animate-wave-bar {
+    animation: wave-bar 900ms ease-in-out infinite;
+    transform-origin: bottom;
+  }
+  @keyframes wave-bar {
+    0%, 100% { transform: scaleY(0.35); }
+    50% { transform: scaleY(1); }
+  }
+
+  /* Subtle drift between four positional forms */
+  .animate-face-morph {
+    animation: face-morph 0.5s ease-out;
+  }
+  @keyframes face-morph {
+    0% { opacity: 0.2; transform: scale(0.85) translateY(6px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
+  }
+}
+
+/* Honor user reduced-motion preference globally */
+@media (prefers-reduced-motion: reduce) {
+  .animate-pop,
+  .animate-pulse-glow,
+  .animate-float,
+  .animate-unlock-bounce,
+  .animate-master-bounce,
+  .animate-shine-sweep,
+  .animate-drift-slow,
+  .animate-drift-slower,
+  .animate-camel-bob,
+  .animate-xp-float,
+  .animate-banner-shine,
+  .animate-shake,
+  .animate-correct-pulse,
+  .animate-sparkle,
+  .animate-wave-bar,
+  .animate-face-morph {
+    animation: none !important;
+  }
+}

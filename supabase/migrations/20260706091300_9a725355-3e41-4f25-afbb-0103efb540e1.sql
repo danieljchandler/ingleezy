@@ -1,0 +1,1 @@
+COMMENT ON FUNCTION public.has_bible_access() IS 'Returns true if the current user is an admin, or a bible_reader who is not a content_reviewer.';

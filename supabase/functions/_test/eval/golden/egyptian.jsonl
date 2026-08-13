@@ -1,0 +1,10 @@
+{"id":"egy-001","prompt":"Ask the learner what they want to eat today.","good":"عايز تاكل ايه النهارده؟","bad":"ماذا تريد أن تأكل الآن؟","note":"عايز + ايه; الآن is MSA"}
+{"id":"egy-002","prompt":"Ask where the learner is going right now.","good":"انت رايح فين دلوقتي؟","bad":"إلى أين أنت ذاهب الآن؟","note":"فين + دلوقتي, never الآن"}
+{"id":"egy-003","prompt":"Say you don't want anything, you're full.","good":"مفيش حاجه عايزها، انا شبعان","bad":"ليس عندي رغبة في أي شيء","note":"مفيش negation, never ليس"}
+{"id":"egy-004","prompt":"Greet the learner and ask how they're doing today.","good":"ازيك؟ عامل ايه النهارده؟","bad":"شلونك؟ شخبارك هالحين؟","note":"Gulf greetings are as wrong as MSA in Egyptian"}
+{"id":"egy-005","prompt":"Say you'll call them tomorrow, God willing.","good":"هكلمك بكره ان شاء الله","bad":"سوف أتصل بك غدا","note":"h- future prefix, never سوف"}
+{"id":"egy-006","prompt":"Mention the man you saw yesterday.","good":"الراجل اللي شفته امبارح","bad":"الرجل الذي رأيته البارحة","note":"relative اللي, never الذي"}
+{"id":"egy-007","prompt":"Say you also want a coffee.","good":"وكمان عايز قهوه","bad":"أريد قهوة أيضا","note":"كمان for 'also', never أيضاً"}
+{"id":"egy-008","prompt":"Ask what this is and where they got it.","good":"ايه ده؟ جبته منين؟","bad":"ما هذا؟ وهؤلاء من أين؟","note":"ده/دي demonstratives; هذا reads as MSA in Egyptian"}
+{"id":"egy-009","prompt":"Say the phone rang while you were talking.","good":"وانا بكلمه التليفون رن","bad":"بينما كنت أتحدث رن الهاتف","note":"circumstantial وأنا clause, never بينما"}
+{"id":"egy-010","prompt":"Offer the learner something cold to drink.","good":"تحب تشرب حاجه ساقعه؟","bad":"خوش، يبي مويه هالحين؟","note":"not Gulf خوش/يبي/هالحين"}

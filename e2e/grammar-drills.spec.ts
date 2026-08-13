@@ -1,0 +1,405 @@
+import { expect, test } from "./support/fixtures";
+import { TEST_USER_ID } from "../src/test/support/factories";
+import type { MemoryDb } from "../src/test/support/postgrest/store";
+import type { Page } from "@playwright/test";
+
+/**
+ * Grammar drills — five multiple-choice questions and a mastery ladder behind
+ * them.
+ *
+ * Two things make this more than a quiz. First, the questions come from one of
+ * two places: a pool of human-approved rows in `grammar_exercises`, or a live
+ * AI generation if fewer than three approved ones exist. The threshold matters
+ * — a drill built from one approved question and nothing else would be a worse
+ * experience than one generated fresh, so partially-seeded categories fall all
+ * the way through rather than part of the way.
+ *
+ * Second, the round is *sent* somewhere. `outcomes` is an ordered list of
+ * hits and misses, submitted once at the end so the next drill can be aimed at
+ * what the learner keeps missing. Order is kept deliberately rather than
+ * derived from the score, so a round is not interchangeable with its total.
+ */
+
+const anExercise = (index: number, over: Record<string, unknown> = {}) => ({
+  id: `aaaaaaaa-1111-4000-8000-00000000000${index}`,
+  question_arabic: `سؤال رقم ${index}`,
+  question_english: `Question number ${index}`,
+  grammar_point: "Present tense",
+  category: "verb-conjugation",
+  difficulty: "beginner",
+  // `text_arabic` / `text_english` — the shape the page renders and the shape
+  // the admin form writes. A `{ text, en }` choice renders as a blank option.
+  choices: [
+    { text_arabic: `صح ${index}`, text_english: `right ${index}` },
+    { text_arabic: `خطأ ${index}`, text_english: `wrong ${index}` },
+  ],
+  correct_index: 0,
+  explanation: `Because of reason ${index}`,
+  status: "published",
+  dialect: "Gulf",
+  session_id: null,
+  created_by: TEST_USER_ID,
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString(),
+  ...over,
+});
+
+function seedApproved(db: MemoryDb, count: number) {
+  db.seed(
+    "grammar_exercises",
+    Array.from({ length: count }, (_, i) => anExercise(i)),
+  );
+  db.seed("user_concept_mastery", []);
+  db.seed("curriculum_concepts", []);
+}
+
+/** Answer the current question correctly and move on. */
+async function answerCorrectly(page: Page) {
+  await page.getByRole("button", { name: /صح/ }).click();
+  await page.getByRole("button", { name: /Next|Finish|See Results/i }).click();
+}
+
+async function answerWrongly(page: Page) {
+  await page.getByRole("button", { name: /خطأ/ }).click();
+  await page.getByRole("button", { name: /Next|Finish|See Results/i }).click();
+}
+
+test.describe("reaching the drills", () => {
+  test("asks a signed-out visitor to sign in, in place", async ({ page, signInAs }) => {
+    await signInAs("anonymous");
+
+    await page.goto("/grammar");
+
+    await expect(page.getByText("Sign in to practice grammar drills")).toBeVisible();
+  });
+
+  test("offers every grammar category to a learner", async ({ page, signInAs, db }) => {
+    await signInAs("free");
+    seedApproved(db, 5);
+
+    await page.goto("/grammar");
+
+    for (const label of [
+      "Verb Conjugation",
+      "Pronouns",
+      "Negation",
+      "Possessives",
+      "Question Forms",
+      "Sentence Structure",
+    ]) {
+      await expect(page.getByRole("button", { name: new RegExp(label) })).toBeVisible();
+    }
+  });
+});
+
+test.describe("where the questions come from", () => {
+  test.beforeEach(async ({ signInAs }) => {
+    await signInAs("free");
+  });
+
+  test("uses approved questions when there are enough of them", async ({ page, db, backend }) => {
+    seedApproved(db, 5);
+
+    await page.goto("/grammar");
+    await page.getByRole("button", { name: new RegExp("Verb Conjugation") }).click();
+
+    await expect(page.getByText("Question 1 of 5")).toBeVisible();
+    // Reviewed content costs nothing per drill and has been checked by a human;
+    // generating over the top of it would be paying to do worse.
+    expect(backend.callsTo("grammar-drill")).toHaveLength(0);
+  });
+
+  test("generates fresh questions when the approved pool is too thin", async ({
+    page,
+    db,
+    backend,
+  }) => {
+    seedApproved(db, 2);
+    backend.stubFunction("grammar-drill", {
+      questions: [
+        {
+          question_arabic: "سؤال مولّد",
+          question_english: "A generated question",
+          grammar_point: "Present tense",
+          choices: [
+            { text_arabic: "صح", text_english: "right" },
+            { text_arabic: "خطأ", text_english: "wrong" },
+          ],
+          correct_index: 0,
+          explanation: "Generated explanation",
+        },
+      ],
+    });
+
+    await page.goto("/grammar");
+    await page.getByRole("button", { name: new RegExp("Verb Conjugation") }).click();
+
+    // Two approved questions is below the floor of three: falling through
+    // entirely beats padding a drill out to length with whatever exists.
+    await expect(page.getByText("سؤال مولّد")).toBeVisible();
+    expect(backend.callsTo("grammar-drill")).toHaveLength(1);
+  });
+
+  test("asks for the learner's dialect and difficulty when generating", async ({
+    page,
+    db,
+    backend,
+  }) => {
+    seedApproved(db, 0);
+    backend.stubFunction("grammar-drill", {
+      questions: [
+        {
+          question_arabic: "سؤال",
+          question_english: "Question",
+          grammar_point: "Present tense",
+          choices: [{ text_arabic: "صح", text_english: "right" }],
+          correct_index: 0,
+          explanation: "",
+        },
+      ],
+    });
+
+    await page.goto("/grammar");
+    await page.getByRole("button", { name: new RegExp("Negation") }).click();
+    await expect(page.getByText("سؤال")).toBeVisible();
+
+    expect(backend.lastCallTo("grammar-drill")?.body).toMatchObject({
+      category: "negation",
+      dialect: "Gulf",
+    });
+  });
+
+  test("returns to the categories when nothing can be generated", async ({
+    page,
+    db,
+    backend,
+    expectConsoleErrors,
+  }) => {
+    expectConsoleErrors([/.*/]);
+    seedApproved(db, 0);
+    backend.stubFunctionFailure("grammar-drill");
+
+    await page.goto("/grammar");
+    await page.getByRole("button", { name: new RegExp("Negation") }).click();
+
+    // Not a dead screen: the category is cleared so the learner is back
+    // somewhere they can act, rather than looking at an empty drill.
+    await expect(page.getByRole("button", { name: new RegExp("Verb Conjugation") })).toBeVisible();
+    await expect(page.getByText(/Question 1 of/)).toHaveCount(0);
+
+    // The toast title is `e.message || "Failed to generate drill"`, and a
+    // failed `functions.invoke` supplies a message — so the learner is shown
+    // supabase-js's wording ("non-2xx status code") rather than the app's.
+    // Pinned as-is: the fallback string is only reachable for an error with no
+    // message at all.
+    await expect(page.getByText(/non-2xx status code/i)).toBeVisible();
+  });
+});
+
+test.describe("answering", () => {
+  test.beforeEach(async ({ signInAs, db }) => {
+    await signInAs("free");
+    seedApproved(db, 5);
+  });
+
+  test("counts a right answer", async ({ page }) => {
+    await page.goto("/grammar");
+    await page.getByRole("button", { name: new RegExp("Verb Conjugation") }).click();
+    await expect(page.getByText("Question 1 of 5")).toBeVisible();
+
+    await page.getByRole("button", { name: /صح/ }).click();
+
+    await expect(page.getByText("1 correct")).toBeVisible();
+  });
+
+  test("leaves the score alone on a wrong answer", async ({ page }) => {
+    await page.goto("/grammar");
+    await page.getByRole("button", { name: new RegExp("Verb Conjugation") }).click();
+    await expect(page.getByText("Question 1 of 5")).toBeVisible();
+
+    await page.getByRole("button", { name: /خطأ/ }).click();
+
+    await expect(page.getByText("0 correct")).toBeVisible();
+  });
+
+  test("shows the explanation once an answer is locked in", async ({ page }) => {
+    await page.goto("/grammar");
+    await page.getByRole("button", { name: new RegExp("Verb Conjugation") }).click();
+    await expect(page.getByText("Question 1 of 5")).toBeVisible();
+
+    await page.getByRole("button", { name: /خطأ/ }).click();
+
+    // A drill that only marks you wrong teaches nothing; the explanation is
+    // the part that does the work.
+    await expect(page.getByText(/Because of reason/)).toBeVisible();
+  });
+
+  test("ignores a second answer to the same question", async ({ page }) => {
+    await page.goto("/grammar");
+    await page.getByRole("button", { name: new RegExp("Verb Conjugation") }).click();
+    await expect(page.getByText("Question 1 of 5")).toBeVisible();
+
+    await page.getByRole("button", { name: /خطأ/ }).click();
+
+    // Every choice is disabled the moment one is taken. Otherwise the
+    // explanation the page has just shown is a free retry, and the score means
+    // nothing.
+    await expect(page.getByRole("button", { name: /صح/ })).toBeDisabled();
+    await expect(page.getByRole("button", { name: /خطأ/ })).toBeDisabled();
+    await expect(page.getByText("0 correct")).toBeVisible();
+  });
+
+  test("keeps the English out of the way until asked for", async ({ page }) => {
+    await page.goto("/grammar");
+    await page.getByRole("button", { name: new RegExp("Verb Conjugation") }).click();
+    await expect(page.getByText("Question 1 of 5")).toBeVisible();
+
+    await expect(page.getByText(/^Question number/)).toHaveCount(0);
+    await page.getByRole("button", { name: "EN" }).click();
+    await expect(page.getByText(/^Question number/)).toBeVisible();
+  });
+});
+
+test.describe("finishing a round", () => {
+  test.beforeEach(async ({ signInAs, db }) => {
+    await signInAs("free");
+    seedApproved(db, 3);
+  });
+
+  test("scores the round as a percentage", async ({ page }) => {
+    await page.goto("/grammar");
+    await page.getByRole("button", { name: new RegExp("Verb Conjugation") }).click();
+    await expect(page.getByText("Question 1 of 3")).toBeVisible();
+
+    await answerCorrectly(page);
+    await answerCorrectly(page);
+    await answerWrongly(page);
+
+    await expect(page.getByText("Drill Complete!")).toBeVisible();
+    await expect(page.getByText("67%")).toBeVisible();
+    await expect(page.getByText("2 / 3 correct")).toBeVisible();
+  });
+
+  test("sends the round's hits and misses in order", async ({ page, backend }) => {
+    await page.goto("/grammar");
+    await page.getByRole("button", { name: new RegExp("Verb Conjugation") }).click();
+    await expect(page.getByText("Question 1 of 3")).toBeVisible();
+
+    await answerWrongly(page);
+    await answerCorrectly(page);
+    await answerCorrectly(page);
+    await expect(page.getByText("Drill Complete!")).toBeVisible();
+
+    // The order is the point: two right after a miss is a different signal
+    // from a miss after two right, and the ladder is meant to tell them apart.
+    await expect
+      .poll(() => backend.lastCallTo("record-grammar-outcome")?.body)
+      .toMatchObject({
+        category: "verb-conjugation",
+        dialect: "Gulf",
+        outcomes: [false, true, true],
+      });
+  });
+
+  test("submits the round exactly once", async ({ page, backend }) => {
+    await page.goto("/grammar");
+    await page.getByRole("button", { name: new RegExp("Verb Conjugation") }).click();
+    await expect(page.getByText("Question 1 of 3")).toBeVisible();
+
+    await answerCorrectly(page);
+    await answerCorrectly(page);
+    await answerCorrectly(page);
+    await expect(page.getByText("Drill Complete!")).toBeVisible();
+
+    // The results screen can re-render for reasons that have nothing to do
+    // with the learner; a second submit would inflate the ladder.
+    await expect.poll(() => backend.callsTo("record-grammar-outcome").length).toBe(1);
+  });
+
+  test("carries on when the ladder cannot be updated", async ({
+    page,
+    backend,
+    expectConsoleErrors,
+  }) => {
+    expectConsoleErrors([/Couldn't record grammar mastery/]);
+    backend.stubFunctionFailure("record-grammar-outcome");
+
+    await page.goto("/grammar");
+    await page.getByRole("button", { name: new RegExp("Verb Conjugation") }).click();
+    await expect(page.getByText("Question 1 of 3")).toBeVisible();
+
+    await answerCorrectly(page);
+    await answerCorrectly(page);
+    await answerCorrectly(page);
+
+    // The learner did the work; losing the bookkeeping should not lose them
+    // the result screen too.
+    await expect(page.getByText("Drill Complete!")).toBeVisible();
+    await expect(page.getByText("100%")).toBeVisible();
+  });
+
+  test("starts a clean round from New Drill", async ({ page }) => {
+    await page.goto("/grammar");
+    await page.getByRole("button", { name: new RegExp("Verb Conjugation") }).click();
+    await expect(page.getByText("Question 1 of 3")).toBeVisible();
+    await answerCorrectly(page);
+    await answerCorrectly(page);
+    await answerCorrectly(page);
+    await expect(page.getByText("Drill Complete!")).toBeVisible();
+
+    await page.getByRole("button", { name: "New Drill" }).click();
+
+    await expect(page.getByRole("button", { name: new RegExp("Verb Conjugation") })).toBeVisible();
+    await expect(page.getByText("Drill Complete!")).toHaveCount(0);
+  });
+});
+
+test.describe("a drill interrupted", () => {
+  test.beforeEach(async ({ signInAs, db }) => {
+    await signInAs("free");
+    seedApproved(db, 3);
+  });
+
+  test("resumes where the learner left off", async ({ page }) => {
+    await page.goto("/grammar");
+    await page.getByRole("button", { name: new RegExp("Verb Conjugation") }).click();
+    await expect(page.getByText("Question 1 of 3")).toBeVisible();
+    await answerCorrectly(page);
+    await expect(page.getByText("Question 2 of 3")).toBeVisible();
+
+    await page.reload();
+
+    // Drills are generated per round, so losing one to a reload means losing
+    // the questions themselves, not just the position.
+    await expect(page.getByText("Question 2 of 3")).toBeVisible();
+    await expect(page.getByText("1 correct")).toBeVisible();
+  });
+
+  test("brings a finished drill back to its last question", async ({ page, backend }) => {
+    await page.goto("/grammar");
+    await page.getByRole("button", { name: new RegExp("Verb Conjugation") }).click();
+    await expect(page.getByText("Question 1 of 3")).toBeVisible();
+    await answerCorrectly(page);
+    await answerCorrectly(page);
+    await answerCorrectly(page);
+    await expect(page.getByText("Drill Complete!")).toBeVisible();
+    await expect.poll(() => backend.callsTo("record-grammar-outcome").length).toBe(1);
+
+    await page.reload();
+
+    // A bug, pinned. The saved session carries the questions, index, score and
+    // outcomes but not `showResult`, and nothing clears the entry when a drill
+    // ends. So reloading after finishing drops the learner back onto the final
+    // question with the score already banked and the answer cleared.
+    await expect(page.getByText("Question 3 of 3")).toBeVisible();
+    await expect(page.getByText("3 correct")).toBeVisible();
+
+    // Answering it again re-finishes the round. `submittedRef` is per-mount, so
+    // the outcomes are submitted a second time — now four entries for a
+    // three-question drill, and the mastery ladder counts the extra one.
+    await answerCorrectly(page);
+    await expect
+      .poll(() => backend.lastCallTo("record-grammar-outcome")?.body)
+      .toMatchObject({ outcomes: [true, true, true, true] });
+  });
+});

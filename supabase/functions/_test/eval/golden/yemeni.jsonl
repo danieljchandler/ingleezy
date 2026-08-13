@@ -1,0 +1,10 @@
+{"id":"yem-001","prompt":"Ask the learner what they want to eat tonight.","good":"ايش تشتي تاكل الليله؟","bad":"ماذا تريد أن تأكل الآن؟","note":"ايش + اشتي; الآن is MSA"}
+{"id":"yem-002","prompt":"Ask where the learner is going right now.","good":"وين رايح ذحين؟","bad":"إلى أين أنت ذاهب الآن؟","note":"وين + ذحين, never الآن"}
+{"id":"yem-003","prompt":"Say you don't want anything, you're full.","good":"ما اشتي شي، انا شبعان","bad":"ليس عندي رغبة في أي شيء","note":"negation with ما/مش, never ليس"}
+{"id":"yem-004","prompt":"Greet the learner and ask how they're doing.","good":"كيفك؟ شلونك اليوم؟","bad":"إزيك؟ عامل ايه النهارده؟","note":"Egyptian greetings are as wrong as MSA in Yemeni"}
+{"id":"yem-005","prompt":"Say you'll call them tomorrow, God willing.","good":"باتصل بك بكره ان شاء الله","bad":"سوف أتصل بك غدا","note":"ba- future prefix, never سوف"}
+{"id":"yem-006","prompt":"Mention the man you saw yesterday at the souq.","good":"الرجال اللي شفته امس في السوق","bad":"الرجل الذي رأيته بالأمس","note":"relative اللي, never الذي"}
+{"id":"yem-007","prompt":"Say you also want a coffee.","good":"وبعد اشتي قهوه","bad":"أريد قهوة أيضا","note":"بعد for 'also', never أيضاً"}
+{"id":"yem-008","prompt":"Ask what this is and where they got it.","good":"ايش هذا؟ من وين جبته؟","bad":"ما هذا؟ كذلك من أين أحضرته؟","note":"هذا is attested Yemeni; كذلك is not"}
+{"id":"yem-009","prompt":"Say the phone rang while you were talking to him.","good":"وانا اكلمه دق التلفون","bad":"بينما كنت أتحدث معه رن الهاتف","note":"circumstantial clause, never بينما"}
+{"id":"yem-010","prompt":"Offer the learner tea or coffee.","good":"تشتي شاهي والا قهوه؟","bad":"عايز شاي ولا قهوة كده؟","note":"اشتي, not Egyptian عايز/كده"}
