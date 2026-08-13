@@ -132,10 +132,11 @@ generation conditioning.
       English, with the MSA-leak scan reading ONLY the dialect lines — fusha
       is deliberate MSA), same audio-acquisition ladder as the Arabic
       pipeline, admin-only, full status machine. AdminVideoForm routes
-      non-meme uploads to it. Remaining: learner transcript rendering flip
-      (LineByLineTranscript English-primary), Discover/home eligibility
-      rewiring (English videos primary, bridged Arabic secondary), trending
-      discovery flip or prune, Arabic pipeline prune once memes decided.
+      non-meme uploads to it. Learner transcript rendering DONE (EnglishLineCard,
+      TappableEnglishText, translate-phrase en_to_ar). Home lead clip
+      prefers native English over bridged; Discover badges bridged rows
+      as immersion. Remaining: trending discovery flip or prune, Arabic
+      pipeline prune once memes decided.
 - [ ] CEFR video rating: KEEP (re-aim prompt at English)
 - [ ] Stories / reading library / listen episodes / daily story: FLIP
       generation direction (English text, Arabic scaffold)

@@ -51,15 +51,22 @@ export function useTodaysVideo(): TodaysVideo {
   const video = useMemo(() => {
     if (pool.length === 0) return null;
 
+    // English-first: the day's lead clip should be the studied language.
+    // Native uploads (English with Arabic scaffold) outrank bridged Hakiya
+    // clips (Arabic immersion) whenever any exist; within each population
+    // the newest-first order below still decides.
+    const natives = pool.filter((v) => (v as { source?: string }).source !== "hakiya");
+    const preferred = natives.length > 0 ? natives : pool;
+
     // Difficulty is written by hand in a few places and arrives in both cases,
     // so it is compared case-insensitively rather than filtered server-side —
     // an `in.()` on "Beginner" silently drops every row stored as "beginner",
     // which reads as an empty library.
     const window = difficultyWindow(placementLevel);
     const atLevel = window
-      ? pool.filter((v) => window.some((d) => sameDifficulty(v.difficulty, d)))
-      : pool;
-    const candidates = atLevel.length > 0 ? atLevel : pool;
+      ? preferred.filter((v) => window.some((d) => sameDifficulty(v.difficulty, d)))
+      : preferred;
+    const candidates = atLevel.length > 0 ? atLevel : preferred;
 
     // The pool is already ordered newest-first by created_at (see
     // useDiscoverVideos), so the first candidate is the most recently

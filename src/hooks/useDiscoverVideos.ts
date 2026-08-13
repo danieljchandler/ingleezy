@@ -39,6 +39,8 @@ export interface DiscoverVideo {
   dialect: string;
   difficulty: string;
   cefr_level?: string | null;
+  /** 'native' = this app's English uploads; 'hakiya' = bridged Arabic immersion content. */
+  source?: string;
   transcript_lines: Json;
   vocabulary: Json;
   grammar_points: Json;

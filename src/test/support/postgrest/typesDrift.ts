@@ -69,6 +69,9 @@ export const COLUMNS_MISSING_FROM_TYPES: DriftedColumn[] = [
     migration: "20260226000000_fanar_usage",
   })),
 
+  // The Hakiya-bridge source tag on discover_videos, created after the fork.
+  { table: "discover_videos", column: "source", migration: "20260813160000_hakiya_bridge_source" },
+
   // The L1-Interference Rulebook, created after the fork and absent from the
   // generated types until a real Supabase project regenerates them. Queried
   // only by englishHelpers.ts under the service role today.

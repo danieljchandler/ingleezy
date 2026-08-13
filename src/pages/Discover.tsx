@@ -126,6 +126,11 @@ function VideoCard({ video, onClick, feed, comprehension }: CardProps) {
           </div>
         )}
         <div className="flex gap-1.5 flex-wrap">
+          {video.source === "hakiya" && (
+            <Badge variant="outline" className="text-xs bg-accent/10 text-accent-foreground border-accent/40">
+              عربي · immersion
+            </Badge>
+          )}
           <Badge variant="outline" className="text-xs">{video.dialect}</Badge>
           <Badge variant="outline" className={cn("text-xs", difficultyColor(video.difficulty))}>
             {video.difficulty}
