@@ -6,12 +6,10 @@ import { AppShell } from "@/components/layout/AppShell";
 import { HomeButton } from "@/components/HomeButton";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { TappableArabicText } from "@/components/shared/TappableArabicText";
+import { Badge } from "@/components/ui/badge";
 import { ArticleQuiz } from "@/components/souq-news/ArticleQuiz";
 import { SentenceReader } from "@/components/shared/SentenceReader";
-import { MarkUnknownsProvider } from "@/contexts/MarkUnknownsContext";
-import { MarkUnknownsToggle } from "@/components/shared/MarkUnknownsToggle";
-import { SaveUnknownsBar } from "@/components/shared/SaveUnknownsBar";
+import { useAddUserVocabulary } from "@/hooks/useUserVocabulary";
 import { markTaskCompletedToday } from "@/lib/todayCompletion";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -26,15 +24,22 @@ import { useQuery } from "@tanstack/react-query";
 import { InfoHint } from "@/components/InfoHint";
 import { PAGE_HINTS } from "@/lib/pageHints";
 
+/**
+ * Souq News, flipped: the day's news from the learner's own region, retold in
+ * easy spoken ENGLISH, one sentence to a card, with a dialect-Arabic scaffold
+ * behind a tap. Familiar events carrying unfamiliar language is the whole
+ * trick — an Egyptian learner reading about Cairo in English already knows
+ * half the story.
+ */
 interface SouqArticle {
-  title_dialect: string;
-  body_dialect: string;
   title_english: string;
-  summary_english: string;
+  body_english: string;
+  title_arabic: string;
+  summary_arabic: string;
   source_url: string | null;
   published_at: string;
-  sentences?: { arabic: string; transliteration?: string; english: string; literal?: string }[];
-  vocabulary?: { word_arabic: string; word_english: string }[];
+  sentences?: { english: string; arabic?: string; literal?: string }[];
+  vocabulary?: { english: string; arabic: string }[];
 }
 
 const DIALECT_COLORS: Record<string, string> = {
@@ -53,6 +58,7 @@ const SouqNews = () => {
   const { activeDialect } = useDialect();
   const { user } = useAuth();
   const [expandedCards, setExpandedCards] = useState<Set<number>>(new Set());
+  const addVocab = useAddUserVocabulary();
 
   const {
     data: articles,
@@ -85,12 +91,34 @@ const SouqNews = () => {
       const opening = !next.has(i);
       if (opening) {
         next.add(i);
+        // Reaching for the Arabic summary is the surest signal the page has
+        // that the learner actually worked through the English above it.
         markTaskCompletedToday("souq");
       } else {
         next.delete(i);
       }
       return next;
     });
+  };
+
+  const saveWord = (word: { english: string; arabic: string; sentenceText?: string; sentenceEnglish?: string }) => {
+    if (!user) {
+      toast.error("Sign in to save words");
+      return;
+    }
+    addVocab.mutate(
+      {
+        word_arabic: word.arabic,
+        word_english: word.english,
+        source: "souq-news",
+        sentence_text: word.sentenceText || undefined,
+        sentence_english: word.sentenceEnglish || undefined,
+      },
+      {
+        onSuccess: () => toast.success("Saved to My Words!"),
+        onError: () => toast.error("Failed to save"),
+      },
+    );
   };
 
   const colorClass = DIALECT_COLORS[activeDialect] || DIALECT_COLORS.Gulf;
@@ -108,11 +136,10 @@ const SouqNews = () => {
             <InfoHint {...PAGE_HINTS["souq-news"]} size="md" />
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Today's news, told like a friend at the souq
+            Today's news from your region, told in easy English
           </p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          <MarkUnknownsToggle />
           <Button
             variant="outline"
             size="icon"
@@ -156,38 +183,60 @@ const SouqNews = () => {
                   colorClass
                 )}
               >
-                {/* Arabic headline */}
-                <h2
-                  className="text-lg font-bold text-foreground leading-relaxed mb-3"
-                  dir="rtl"
-                  style={{ fontFamily: "'Noto Naskh Arabic', 'Noto Sans Arabic', serif" }}
-                >
-                  {article.title_dialect}
+                {/* English headline — the reading task starts here. */}
+                <h2 className="text-lg font-bold text-foreground leading-relaxed mb-3 font-english">
+                  {article.title_english}
                 </h2>
 
-                {/* Arabic body — line by line with reveal */}
+                {/* English body — line by line with the Arabic behind a tap */}
                 <div className="mb-4">
                   <SentenceReader
-                    body={article.body_dialect}
+                    body={article.body_english}
                     sentences={article.sentences}
-                    vocabulary={article.vocabulary}
                     source="souq-news"
+                    onSaveWord={saveWord}
                   />
                 </div>
 
-                {/* English toggle */}
+                {/* Key vocabulary the retelling introduced */}
+                {article.vocabulary && article.vocabulary.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mb-3">
+                    {article.vocabulary.map((v, vi) => (
+                      <Badge key={vi} variant="outline" className="font-english text-xs">
+                        {v.english}
+                        <span dir="rtl" className="font-arabic mr-1 ml-1 text-muted-foreground">
+                          {v.arabic}
+                        </span>
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+
+                {/* Arabic summary toggle — the whole-article scaffold */}
                 <button
                   onClick={() => toggleCard(i)}
                   className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-2"
                 >
                   {expanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
-                  {expanded ? "Hide English" : "Show English"}
+                  {expanded ? "Hide Arabic" : "Show Arabic"}
                 </button>
 
                 {expanded && (
                   <div className="bg-card/60 rounded-xl p-3 mb-3 border border-border/50">
-                    <p className="font-semibold text-sm text-foreground mb-1">{article.title_english}</p>
-                    <p className="text-xs text-muted-foreground">{article.summary_english}</p>
+                    <p
+                      dir="rtl"
+                      className="font-semibold text-sm text-foreground mb-1 font-arabic"
+                      style={{ fontFamily: "'Noto Naskh Arabic', 'Noto Sans Arabic', serif" }}
+                    >
+                      {article.title_arabic}
+                    </p>
+                    <p
+                      dir="rtl"
+                      className="text-xs text-muted-foreground font-arabic"
+                      style={{ fontFamily: "'Noto Naskh Arabic', 'Noto Sans Arabic', serif" }}
+                    >
+                      {article.summary_arabic}
+                    </p>
                   </div>
                 )}
 
@@ -213,15 +262,10 @@ const SouqNews = () => {
           })}
         </div>
       )}
-      <SaveUnknownsBar source="souq-news" />
     </AppShell>
   );
 };
 
-const SouqNewsPage = () => (
-  <MarkUnknownsProvider>
-    <SouqNews />
-  </MarkUnknownsProvider>
-);
+const SouqNewsPage = () => <SouqNews />;
 
 export default SouqNewsPage;

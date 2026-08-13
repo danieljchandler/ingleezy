@@ -59,11 +59,11 @@ export const PAGE_HINTS: Record<string, { title: string; body: string; cta?: str
   },
   conversation: {
     title: "Conversation Simulator",
-    body: "Free-form chat with an AI tutor that only speaks your chosen dialect. No judgment — just speaking reps.",
+    body: "Free-form chat in English with an AI tutor that explains things in your dialect. No judgment — just speaking reps.",
   },
   "souq-news": {
     title: "Souq News",
-    body: "Easy-to-read news summaries in your dialect, with a quick comprehension quiz at the end.",
+    body: "Today's news from your region retold in easy English, with a quick comprehension quiz at the end.",
   },
   stories: {
     title: "Interactive Stories",

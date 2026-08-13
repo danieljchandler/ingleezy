@@ -156,9 +156,19 @@ generation conditioning.
       (ElevenLabs premade English voices, Azure en-US fallback) used by
       both audio functions, synthesizing line.english. ListenEpisode
       reader flipped: English-primary tappable lines, scaffold behind the
-      display preference, english-led vocab. Open: reading library
-      authoring flip (passage_arabic scaffold column + admin form),
-      interactive stories, souq news.
+      display preference, english-led vocab.
+      **Souq News DONE**: same regional Firecrawl search (your region's
+      news, now in English — familiar events carrying unfamiliar
+      language), retelling flipped to easy spoken English with per-line
+      dialect scaffold {english, arabic, literal}, dialect summary +
+      title_arabic behind the Show Arabic toggle, vocabulary
+      {english, arabic}. SentenceReader rebuilt English-primary
+      (TappableEnglishText, reveal shows the Arabic scaffold, `invisible`
+      when collapsed); souq-news-quiz english-target (English questions
+      with dialect glosses, dialect explanation); ArticleQuiz flipped;
+      Mark-Unknowns machinery replaced by tap-word save on this page.
+      Open: reading library authoring flip (passage_arabic scaffold
+      column + admin form), interactive stories.
 
 ### Grammar — FLIP (drills done)
 - [x] Grammar drills flipped: English questions with dialect instruction

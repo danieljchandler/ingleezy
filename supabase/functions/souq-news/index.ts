@@ -1,4 +1,9 @@
-import { getDialectIdentity, getDialectVocabRules, getTashkeelMandate, getDialectTransliterationRules, type Dialect } from "../_shared/dialectHelpers.ts";
+// souq-news — the day's news from the learner's own region, retold in easy
+// spoken ENGLISH with a dialect-Arabic scaffold. The regional search is the
+// part of the Arabic-era feature worth keeping exactly: a Yemeni learner
+// reading about Sanaa in English is reading news they already half-know,
+// which is the cheapest comprehension scaffold there is.
+import { getDialectLabel, type Dialect } from "../_shared/dialectHelpers.ts";
 import { emitMetric } from "../_shared/featureMetrics.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
 import { MODEL_IDS } from "../_shared/modelRegistry.ts";
@@ -130,33 +135,21 @@ Deno.serve(async (req) => {
       );
     }
 
-    const dialectIdentity = getDialectIdentity(dialect as Dialect);
-    const vocabRules = getDialectVocabRules(dialect as Dialect);
+    const dialectLabel = getDialectLabel(dialect as Dialect);
 
-    const systemPrompt = `${dialectIdentity}
-
-${vocabRules}
-
-You are retelling news stories to a friend at the souq (market). Your tone is:
-- Casual, animated, expressive — like real gossip between friends
-- You use filler words and exclamations natural to the dialect
+    const systemPrompt = `You are an English teacher retelling today's news to a native ${dialectLabel} Arabic speaker who is learning English. You are retelling news stories the way a friend tells them over coffee. Your tone in English is:
+- Casual, animated, natural spoken English — contractions welcome; textbook stiffness is a defect
+- Simple everyday vocabulary a learner can follow (roughly B1 level)
 - You stay ACCURATE to the facts — no fabrication
-- You NEVER use Modern Standard Arabic (فصحى) — everything is in dialect
-- Keep it concise: 3-5 sentences per story
-
-${getTashkeelMandate()}
-- title_dialect and body_dialect (and each sentence in "sentences") must be fully vocalized.
-
-${getDialectTransliterationRules(dialect as Dialect)}
-- Provide a Latin-letter transliteration for each sentence in "sentences", following the rules above.
+- Keep it concise: 3-5 short sentences per story
 
 For each article, return a JSON object with:
-- "title_dialect": A catchy dialect headline (Arabic), fully vocalized
-- "body_dialect": The story retold in dialect (Arabic, 3-5 sentences, fully vocalized) — this is the full body as one string
-- "sentences": Array of {"arabic": "...", "transliteration": "...", "english": "...", "literal": "..."} — split body_dialect into its individual sentences, provide a Latin-letter transliteration, a faithful natural English translation, and a "literal" word-for-word English gloss (preserving Arabic word order; may sound stiff — it shows how each sentence is built) for EACH sentence. The arabic values concatenated must equal body_dialect.
-- "title_english": English translation of the headline
-- "summary_english": Brief English summary (1-2 sentences)
-- "vocabulary": Array of 2-3 key dialect words from your retelling, each as {"word_arabic": "...", "word_english": "..."}
+- "title_english": A catchy ENGLISH headline — this is what the learner reads first
+- "body_english": The story retold in easy spoken English (3-5 sentences) — this is the full body as one string
+- "sentences": Array of {"english": "...", "arabic": "...", "literal": "..."} — split body_english into its individual sentences. For EACH sentence provide "arabic": a natural ${dialectLabel} translation (authentic spoken dialect, NEVER Modern Standard Arabic / فصحى), and "literal": a word-for-word Arabic gloss preserving the ENGLISH word order (it may sound stiff — it shows the learner how the English sentence is built). The english values concatenated must equal body_english.
+- "title_arabic": A ${dialectLabel} translation of the headline
+- "summary_arabic": Brief ${dialectLabel} summary (1-2 sentences)
+- "vocabulary": Array of 2-3 key English words from your retelling worth learning, each as {"english": "...", "arabic": "..."} with the ${dialectLabel} meaning
 
 Return ONLY the JSON object, no markdown fencing. CRITICAL: use ONLY ASCII punctuation for JSON structure (commas \`,\`, colons \`:\`, quotes \`"\`). Never use Arabic comma \`،\` or Arabic semicolon \`؛\` as JSON separators — they are valid only inside string values.`;
 
@@ -186,7 +179,7 @@ Return ONLY the JSON object, no markdown fencing. CRITICAL: use ONLY ASCII punct
                 { role: "system", content: systemPrompt },
                 {
                   role: "user",
-                  content: `Rewrite this news article as souq gossip in dialect:\n\nTitle: ${article.title || "No title"}\n\nContent: ${content}`,
+                  content: `Retell this news article in easy spoken English for an Arabic-speaking learner:\n\nTitle: ${article.title || "No title"}\n\nContent: ${content}`,
                 },
               ],
             }),

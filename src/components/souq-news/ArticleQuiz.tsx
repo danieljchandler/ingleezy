@@ -6,24 +6,26 @@ import { cn } from "@/lib/utils";
 import { Loader2, CheckCircle2, XCircle, Brain } from "lucide-react";
 
 interface QuizChoice {
-  arabic: string;
   english: string;
+  /** Dialect-Arabic gloss of the choice — a safety net, not the task. */
+  arabic: string;
   correct: boolean;
 }
 
 interface QuizQuestion {
-  question_arabic: string;
   question_english: string;
+  question_arabic: string;
   choices: QuizChoice[];
+  /** Why the answer is right, in the learner's dialect Arabic. */
   explanation: string;
 }
 
 interface ArticleQuizProps {
   article: {
-    title_dialect: string;
-    body_dialect: string;
     title_english: string;
-    summary_english: string;
+    body_english: string;
+    title_arabic: string;
+    summary_arabic: string;
   };
 }
 
@@ -42,10 +44,10 @@ export const ArticleQuiz = ({ article }: ArticleQuizProps) => {
       const { data, error } = await supabase.functions.invoke("souq-news-quiz", {
         body: {
           dialect: activeDialect,
-          title_dialect: article.title_dialect,
-          body_dialect: article.body_dialect,
           title_english: article.title_english,
-          summary_english: article.summary_english,
+          body_english: article.body_english,
+          title_arabic: article.title_arabic,
+          summary_arabic: article.summary_arabic,
         },
       });
       if (error) throw error;
@@ -143,15 +145,17 @@ export const ArticleQuiz = ({ article }: ArticleQuizProps) => {
         <p className="text-xs font-medium text-primary">{score} correct</p>
       </div>
 
-      {/* Question */}
+      {/* Question — English is the task, the dialect gloss the safety net. */}
+      <p className="text-sm font-semibold text-foreground leading-relaxed font-english">
+        {q.question_english}
+      </p>
       <p
-        className="text-sm font-semibold text-foreground leading-relaxed font-arabic"
+        className="text-xs text-muted-foreground font-arabic"
         dir="rtl"
         style={{ fontFamily: "'Noto Naskh Arabic', 'Noto Sans Arabic', serif" }}
       >
         {q.question_arabic}
       </p>
-      <p className="text-xs text-muted-foreground">{q.question_english}</p>
 
       {/* Choices */}
       <div className="space-y-2">
@@ -184,10 +188,14 @@ export const ArticleQuiz = ({ article }: ArticleQuizProps) => {
                   <XCircle className="h-4 w-4 text-red-500 mt-0.5 shrink-0" />
                 )}
                 <div className="flex-1 min-w-0">
-                  <p className="font-arabic" dir="rtl" style={{ fontFamily: "'Noto Naskh Arabic', 'Noto Sans Arabic', serif" }}>
+                  <p className="font-english">{choice.english}</p>
+                  <p
+                    className="text-xs text-muted-foreground mt-0.5 font-arabic"
+                    dir="rtl"
+                    style={{ fontFamily: "'Noto Naskh Arabic', 'Noto Sans Arabic', serif" }}
+                  >
                     {choice.arabic}
                   </p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{choice.english}</p>
                 </div>
               </div>
             </button>
@@ -198,7 +206,11 @@ export const ArticleQuiz = ({ article }: ArticleQuizProps) => {
       {/* Explanation + Next */}
       {selected !== null && (
         <div className="space-y-2">
-          <p className="text-xs text-muted-foreground bg-muted/50 rounded-lg p-2">
+          <p
+            className="text-xs text-muted-foreground bg-muted/50 rounded-lg p-2 font-arabic"
+            dir="rtl"
+            style={{ fontFamily: "'Noto Naskh Arabic', 'Noto Sans Arabic', serif" }}
+          >
             💡 {q.explanation}
           </p>
           <Button size="sm" onClick={nextQuestion} className="w-full text-xs">

@@ -8,7 +8,7 @@ import type { SupabaseBackend } from "@/test/support/server/handler";
 /**
  * The comprehension check under a Souq News article.
  *
- * Reading a news article in a dialect is the closest thing in the app to real
+ * Reading a news article in English is the closest thing in the app to real
  * input, and it is also the easiest place to fool yourself: a learner who
  * recognises half the words comes away believing they followed it. The quiz is
  * the check on that, and it is generated from the article rather than authored,
@@ -20,20 +20,20 @@ import type { SupabaseBackend } from "@/test/support/server/handler";
  */
 
 const AN_ARTICLE = {
-  title_dialect: "أخبار السوق",
-  body_dialect: "ارتفعت الأسعار في السوق اليوم",
   title_english: "Market news",
-  summary_english: "Prices rose in the market today",
+  body_english: "Prices rose in the market today.",
+  title_arabic: "أخبار السوق",
+  summary_arabic: "ارتفعت الأسعار في السوق اليوم",
 };
 
 const aQuestion = (over: Record<string, unknown> = {}) => ({
-  question_arabic: "شنو صار في السوق؟",
   question_english: "What happened at the market?",
+  question_arabic: "شنو صار في السوق؟",
   choices: [
-    { arabic: "ارتفعت الأسعار", english: "Prices rose", correct: true },
-    { arabic: "انخفضت الأسعار", english: "Prices fell", correct: false },
+    { english: "Prices rose", arabic: "ارتفعت الأسعار", correct: true },
+    { english: "Prices fell", arabic: "انخفضت الأسعار", correct: false },
   ],
-  explanation: "The article says الأسعار ارتفعت — prices rose.",
+  explanation: "المقال يقول إن الأسعار ارتفعت — prices rose.",
   ...over,
 });
 
@@ -87,14 +87,14 @@ describe("offering the quiz", () => {
 
     await startQuiz();
 
-    // Both the dialect body and the English summary: the questions have to be
+    // Both the English body and the Arabic summary: the questions have to be
     // answerable from what was actually written, not from general knowledge
     // about markets.
     expect(backend.lastCallTo("souq-news-quiz")?.body).toMatchObject({
       dialect: "Gulf",
-      title_dialect: AN_ARTICLE.title_dialect,
-      body_dialect: AN_ARTICLE.body_dialect,
-      summary_english: AN_ARTICLE.summary_english,
+      title_english: AN_ARTICLE.title_english,
+      body_english: AN_ARTICLE.body_english,
+      summary_arabic: AN_ARTICLE.summary_arabic,
     });
   });
 
@@ -140,15 +140,15 @@ describe("offering the quiz", () => {
 });
 
 describe("answering a question", () => {
-  it("shows the question in Arabic with the English beneath", async () => {
+  it("shows the question in English with the Arabic beneath", async () => {
     render();
 
     await startQuiz();
 
-    // The Arabic is the exercise; the English is there so a learner who cannot
-    // parse the question still gets to attempt the comprehension.
-    expect(screen.getByText("شنو صار في السوق؟")).toHaveAttribute("dir", "rtl");
+    // The English is the exercise; the dialect gloss is there so a learner who
+    // cannot parse the question still gets to attempt the comprehension.
     expect(screen.getByText("What happened at the market?")).toBeInTheDocument();
+    expect(screen.getByText("شنو صار في السوق؟")).toHaveAttribute("dir", "rtl");
   });
 
   it("counts a right answer", async () => {
@@ -176,9 +176,10 @@ describe("answering a question", () => {
     answer("Prices fell");
 
     // Pointing at the sentence in the article is the whole teaching moment —
-    // being told you were wrong without being shown where is not.
+    // being told you were wrong without being shown where is not. The why
+    // arrives in the learner's own dialect.
     expect(
-      screen.getByText(/The article says الأسعار ارتفعت/),
+      screen.getByText(/المقال يقول إن الأسعار ارتفعت/),
     ).toBeInTheDocument();
   });
 
@@ -240,7 +241,7 @@ describe("working through the quiz", () => {
 
     // An explanation carried over would be an explanation of the wrong
     // question, and the choices would arrive already locked.
-    expect(screen.queryByText(/The article says/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/المقال يقول/)).not.toBeInTheDocument();
     expect(screen.getByText("Today").closest("button")).not.toBeDisabled();
   });
 

@@ -20,9 +20,9 @@ import { execFileSync } from "node:child_process";
 
 /**
  * Maximum tolerated ESLint errors. Only ever goes down.
- * Last lowered: 540 → 535, when the Listen flip retyped the episode reader.
+ * Last lowered: 535 → 532, when the Souq News flip rebuilt its reader.
  */
-const BASELINE = 535;
+const BASELINE = 532;
 
 function runEslint() {
   try {

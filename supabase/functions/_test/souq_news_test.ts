@@ -3,19 +3,23 @@ import { jsonRequest, loadFunction } from "./harness.ts";
 import { chatCompletion, json, type UpstreamHandler } from "./upstreams.ts";
 
 /**
- * Souq News — real headlines retold as market gossip, plus a quiz on them.
+ * Souq News — real regional headlines retold in easy spoken English, plus a
+ * quiz on them.
  *
  * `souq-news` is the app's only function that reaches out to the open web. It
- * searches Firecrawl with a widening time window, then rewrites up to four
- * articles in parallel through the model. Because the articles are independent,
- * *partial* success is the normal outcome: one article failing to parse must
- * not cost the other three, but every article failing for the same reason has
- * to surface as that reason rather than as an empty feed.
+ * searches Firecrawl for the learner's own region — familiar events carrying
+ * unfamiliar language — then rewrites up to four articles in parallel through
+ * the model into simple English with a dialect-Arabic scaffold. Because the
+ * articles are independent, *partial* success is the normal outcome: one
+ * article failing to parse must not cost the other three, but every article
+ * failing for the same reason has to surface as that reason rather than as an
+ * empty feed.
  *
- * The JSON repair pass is the detail worth pinning. The model is writing Arabic
- * and routinely uses an Arabic comma `،` as a JSON separator, which is a parse
- * error — so a failed parse is retried with those characters swapped for their
- * ASCII equivalents before the article is given up on.
+ * The JSON repair pass survives the flip. The English is the story now, but
+ * the model is still writing Arabic scaffold values and still reaches for an
+ * Arabic comma `،` as a JSON separator, which is a parse error — so a failed
+ * parse is retried with those characters swapped for their ASCII equivalents
+ * before the article is given up on.
  */
 
 const USER = "00000000-0000-4000-8000-000000000001";
@@ -47,19 +51,23 @@ const firecrawl = (titles: string[]): UpstreamHandler => () =>
   });
 
 const aRetelling = (over: Record<string, unknown> = {}) => ({
-  title_dialect: "الأسْعار طالْعة مَرّة ثانْية",
-  body_dialect: "شِفْت الأسْعار اليوم؟ طالْعة مَرّة ثانْية.",
+  title_english: "Prices are up again",
+  body_english: "Did you see the prices today? They went up again.",
   sentences: [
     {
-      arabic: "شِفْت الأسْعار اليوم؟",
-      transliteration: "shift il-as'aar il-yoom?",
       english: "Did you see the prices today?",
-      literal: "saw-you the-prices the-day",
+      arabic: "شفت الأسعار اليوم؟",
+      literal: "هل شفت الأسعار اليوم؟",
+    },
+    {
+      english: "They went up again.",
+      arabic: "طلعت مرة ثانية.",
+      literal: "هم طلعوا فوق مرة ثانية.",
     },
   ],
-  title_english: "Prices are up again",
-  summary_english: "Prices rose once more this week.",
-  vocabulary: [{ word_arabic: "أسْعار", word_english: "prices" }],
+  title_arabic: "الأسعار طالعة مرة ثانية",
+  summary_arabic: "الأسعار ارتفعت مرة ثانية هالأسبوع.",
+  vocabulary: [{ english: "prices", arabic: "أسعار" }],
   ...over,
 });
 
@@ -267,7 +275,7 @@ Deno.test("souq-news strips markdown fences from the rewrite", async () => {
   assertEquals((body.articles as unknown[]).length, 1);
 });
 
-Deno.test("souq-news asks for vocalised Arabic and a per-sentence gloss", async () => {
+Deno.test("souq-news asks for spoken English with a dialect scaffold", async () => {
   const { bodies, calls } = await call(
     "souq-news",
     { dialect: "Gulf" },
@@ -279,11 +287,14 @@ Deno.test("souq-news asks for vocalised Arabic and a per-sentence gloss", async 
 
   const i = calls.findIndex((u) => u.includes("chat/completions"));
   const prompt = bodies[i] ?? "";
-  // Every sentence is read aloud by TTS and shown with a literal gloss, so
-  // both are prompt requirements rather than nice-to-haves.
-  assertStringIncludes(prompt, "fully vocalized");
+  // The retelling is the learner's reading task, so its register is a prompt
+  // requirement: natural spoken English, never textbook stiffness, with each
+  // sentence's dialect translation and a word-order gloss riding along — and
+  // the scaffold must be dialect, not the MSA a model defaults to.
+  assertStringIncludes(prompt, "spoken English");
   assertStringIncludes(prompt, "literal");
-  assertStringIncludes(prompt, "transliteration");
+  assertStringIncludes(prompt, "NEVER Modern Standard Arabic");
+  assert(!prompt.includes("fully vocalized"));
 });
 
 Deno.test("souq-news searches the region matching the dialect", async () => {
@@ -413,23 +424,23 @@ Deno.test("souq-news names each missing key", async () => {
 // ── souq-news-quiz ──────────────────────────────────────────────────────────
 
 const aQuestion = (over: Record<string, unknown> = {}) => ({
-  question_arabic: "وش صار للأسعار؟",
   question_english: "What happened to the prices?",
+  question_arabic: "وش صار للأسعار؟",
   choices: [
-    { arabic: "طالعة", english: "they rose", correct: true },
-    { arabic: "نازلة", english: "they fell", correct: false },
-    { arabic: "ثابتة", english: "unchanged", correct: false },
-    { arabic: "ما أدري", english: "unknown", correct: false },
+    { english: "they rose", arabic: "طالعة", correct: true },
+    { english: "they fell", arabic: "نازلة", correct: false },
+    { english: "unchanged", arabic: "ثابتة", correct: false },
+    { english: "unknown", arabic: "ما أدري", correct: false },
   ],
-  explanation: "The article says prices rose again.",
+  explanation: "المقال يقول إن الأسعار طلعت مرة ثانية.",
   ...over,
 });
 
 const anArticle = {
-  title_dialect: "الأسعار طالعة",
-  body_dialect: "شفت الأسعار اليوم؟ طالعة مرة ثانية.",
   title_english: "Prices are up",
-  summary_english: "Prices rose again.",
+  body_english: "Did you see the prices today? They went up again.",
+  title_arabic: "الأسعار طالعة",
+  summary_arabic: "الأسعار ارتفعت مرة ثانية.",
   dialect: "Gulf",
 };
 
@@ -445,16 +456,16 @@ Deno.test("souq-news-quiz builds questions from the article", async () => {
   assertEquals(status, 200);
   assertEquals((body.questions as unknown[]).length, 1);
   const i = calls.findIndex((u) => u.includes("chat/completions"));
-  // Both the dialect body and the English summary go in: the questions are in
-  // dialect but the model needs the English to get the facts right.
-  assertStringIncludes(bodies[i] ?? "", "شفت الأسعار اليوم");
-  assertStringIncludes(bodies[i] ?? "", "Prices rose again");
+  // Both the English body and the Arabic summary go in: the questions are in
+  // English but the dialect glosses need the Arabic the learner already saw.
+  assertStringIncludes(bodies[i] ?? "", "Did you see the prices today");
+  assertStringIncludes(bodies[i] ?? "", "الأسعار ارتفعت مرة ثانية");
 });
 
 Deno.test("souq-news-quiz refuses a request with no article body", async () => {
   const { status, body, calls } = await call(
     "souq-news-quiz",
-    { ...anArticle, body_dialect: undefined },
+    { ...anArticle, body_english: undefined },
     caller({
       "ai.gateway.lovable.dev": () => chatCompletion("", { questions: [aQuestion()] }),
     }),
@@ -463,11 +474,11 @@ Deno.test("souq-news-quiz refuses a request with no article body", async () => {
   // There is nothing to comprehend. A quiz generated from a headline alone
   // tests guessing.
   assertEquals(status, 400);
-  assertStringIncludes(String(body.error), "body_dialect is required");
+  assertStringIncludes(String(body.error), "body_english is required");
   assert(!calls.some((u) => u.includes("chat/completions")));
 });
 
-Deno.test("souq-news-quiz asks for dialect questions rather than MSA", async () => {
+Deno.test("souq-news-quiz asks for English questions with dialect glosses", async () => {
   const { bodies, calls } = await call(
     "souq-news-quiz",
     anArticle,
@@ -477,9 +488,12 @@ Deno.test("souq-news-quiz asks for dialect questions rather than MSA", async () 
   );
 
   const i = calls.findIndex((u) => u.includes("chat/completions"));
-  // The article is in dialect, so a question in MSA is a different reading
-  // task from the one the learner just did.
-  assertStringIncludes(bodies[i] ?? "", "never MSA");
+  const prompt = bodies[i] ?? "";
+  // The learner just read the article in English, so the questions are the
+  // same reading task — and the Arabic riding along must be their dialect,
+  // not the MSA a model defaults to.
+  assertStringIncludes(prompt, "ENGLISH");
+  assertStringIncludes(prompt, "never MSA");
 });
 
 Deno.test("souq-news-quiz preserves a rate limit", async () => {
