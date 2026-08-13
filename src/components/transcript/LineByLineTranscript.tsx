@@ -14,6 +14,7 @@ import { useDialect } from "@/contexts/DialectContext";
 import { AskAISentence } from "@/components/shared/AskAISentence";
 import { TranslationPair } from "@/components/shared/TranslationPair";
 import { FushaLine } from "@/components/shared/FushaLine";
+import { TappableEnglishText } from "@/components/shared/TappableEnglishText";
 import { useDisplayPrefs } from "@/hooks/useDisplayPrefs";
 import { useFushaLines } from "@/hooks/useFushaLines";
 
@@ -733,6 +734,90 @@ interface TranscriptLineCardProps {
    );
  };
  
+/**
+ * Card for a native ENGLISH video line — the direction-flipped rendering.
+ * English is the studied content (primary, tappable words → flashcards);
+ * the Arabic rows are scaffold: dialect translation, optional Fusha, and a
+ * literal gloss in English word order showing how the sentence is built.
+ */
+const EnglishLineCard = ({
+  line,
+  isActive,
+  isPlaying,
+  showTranslation,
+  fusha,
+  onToggle,
+  onPlay,
+  hasAudio,
+  onSaveToMyWords,
+  savedWords,
+}: TranscriptLineCardProps) => {
+  return (
+    <div
+      className={cn(
+        "rounded-xl border p-4 transition-colors",
+        isActive ? "border-primary/60 bg-primary/5" : "border-border bg-card",
+      )}
+    >
+      <div className="flex items-start gap-3">
+        {hasAudio && (
+          <button
+            type="button"
+            onClick={onPlay}
+            className={cn(
+              "mt-1 shrink-0 rounded-full p-2 transition-colors",
+              isPlaying ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-primary/15",
+            )}
+            aria-label={isPlaying ? "Pause line" : "Play line"}
+          >
+            {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+          </button>
+        )}
+        <div className="flex-1 min-w-0">
+          <p className="text-lg leading-relaxed">
+            <TappableEnglishText
+              text={line.english ?? ""}
+              sentenceArabic={line.arabic}
+              source="english-video-line"
+              onSaveWord={onSaveToMyWords}
+              savedWords={savedWords}
+            />
+          </p>
+        </div>
+      </div>
+
+      {/* Scaffold (collapsible): the learner's own language explaining the line. */}
+      <div
+        className={cn(
+          "overflow-hidden transition-all duration-200",
+          showTranslation ? "max-h-64 opacity-100 mt-3" : "max-h-0 opacity-0",
+        )}
+      >
+        <div className="pt-3 border-t border-border/50 space-y-2">
+          {line.arabic && (
+            <p dir="rtl" className="font-arabic text-base leading-relaxed">{line.arabic}</p>
+          )}
+          {fusha && <FushaLine dialect={line.arabic} fusha={fusha} />}
+          {line.literal && (
+            <p dir="rtl" className="font-arabic text-sm text-muted-foreground">
+              <span className="text-[10px] uppercase tracking-wide ml-1" dir="ltr">word by word</span>{" "}
+              {line.literal}
+            </p>
+          )}
+        </div>
+      </div>
+
+      <div className="flex justify-center mt-2 cursor-pointer" onClick={onToggle}>
+        {showTranslation ? (
+          <ChevronUp className="h-4 w-4 text-muted-foreground/50" />
+        ) : (
+          <ChevronDown className="h-4 w-4 text-muted-foreground/50" />
+        )}
+      </div>
+    </div>
+  );
+};
+
 export const LineByLineTranscript = ({
    lines,
    audioUrl,
@@ -887,6 +972,21 @@ export const LineByLineTranscript = ({
 
        <div className="space-y-3">
          {lines.map((line) => (
+           line.english ? (
+           <EnglishLineCard
+             key={line.id}
+             line={line}
+             isActive={activeLineId === line.id}
+             isPlaying={isPlaying && activeLineId === line.id}
+             showTranslation={isLineExpanded(line.id)}
+             fusha={showFusha ? (line.fusha || undefined) : undefined}
+             onToggle={() => toggleLine(line.id)}
+             onPlay={() => handlePlayLine(line)}
+             hasAudio={!!audioUrl}
+             onSaveToMyWords={onSaveToMyWords}
+             savedWords={savedWords}
+           />
+           ) : (
            <TranscriptLineCard
              key={line.id}
              line={line}
@@ -903,6 +1003,7 @@ export const LineByLineTranscript = ({
              savedWords={savedWords}
              vocabSectionWords={vocabSectionWords}
            />
+           )
          ))}
        </div>
  

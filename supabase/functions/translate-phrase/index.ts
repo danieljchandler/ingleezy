@@ -26,6 +26,10 @@ serve(async (req) => {
     const rawPhrase = body.phrase;
     const dialect = body.dialect || 'Gulf';
     const mode = body.mode || 'auto'; // 'word' | 'phrase' | 'auto'
+    // 'ar_to_en' (default, the Arabic-video direction) or 'en_to_ar' — an
+    // English word/phrase from an English video, translated into the
+    // learner's dialect (translation) and Fusha (msa slot).
+    const direction = body.direction === 'en_to_ar' ? 'en_to_ar' : 'ar_to_en';
     const sentenceArabic: string | undefined = typeof body.sentenceArabic === 'string' ? body.sentenceArabic.trim() : undefined;
     const sentenceEnglish: string | undefined = typeof body.sentenceEnglish === 'string' ? body.sentenceEnglish.trim() : undefined;
     
@@ -49,15 +53,21 @@ serve(async (req) => {
     
     const isWord = mode === 'word' || (mode === 'auto' && !phrase.includes(' '));
 
-    const contextBlock = sentenceArabic
-      ? `\n\nCONTEXT — the word/phrase appears inside this sentence:\nArabic sentence: "${sentenceArabic}"${sentenceEnglish ? `\nAccepted English translation: "${sentenceEnglish}"` : ''}\n\nIMPORTANT: Choose the meaning that fits THIS sentence's context. Many Arabic words have multiple senses — pick the one consistent with the accepted translation above, not the most common dictionary meaning.`
+    const contextBlock = sentenceArabic || sentenceEnglish
+      ? `\n\nCONTEXT — the word/phrase appears inside this sentence:${sentenceArabic ? `\nArabic sentence: "${sentenceArabic}"` : ''}${sentenceEnglish ? `\nEnglish sentence: "${sentenceEnglish}"` : ''}\n\nIMPORTANT: Choose the meaning that fits THIS sentence's context — not the most common dictionary meaning.`
       : '';
 
-    const translationPrompt = isWord
-      ? `You are a ${dialectLabel} translator. Translate the given Arabic word to English. Return ONLY the English translation — no explanation, no punctuation around it, just 1-4 words.${contextBlock}`
-      : `You are a ${dialectLabel} translator. Translate the given Arabic phrase to natural English. Return ONLY the English translation — no explanation, no punctuation around it, just a brief translation.${contextBlock}`;
+    const translationPrompt = direction === 'en_to_ar'
+      ? (isWord
+          ? `You are a native ${dialectLabel} speaker. Translate the given English word into ${dialectLabel} — the word people actually say, never Modern Standard Arabic. Return ONLY the Arabic script, 1-4 words, no explanation.${contextBlock}`
+          : `You are a native ${dialectLabel} speaker. Translate the given English phrase into natural ${dialectLabel} — how people actually say it, never Modern Standard Arabic. Return ONLY the Arabic script, no explanation.${contextBlock}`)
+      : (isWord
+          ? `You are a ${dialectLabel} translator. Translate the given Arabic word to English. Return ONLY the English translation — no explanation, no punctuation around it, just 1-4 words.${contextBlock}`
+          : `You are a ${dialectLabel} translator. Translate the given Arabic phrase to natural English. Return ONLY the English translation — no explanation, no punctuation around it, just a brief translation.${contextBlock}`);
 
-    const msaPrompt = `Convert this ${dialectLabel} word/phrase to Modern Standard Arabic (فصحى). Return ONLY the MSA Arabic script, no explanation.${contextBlock}`;
+    const msaPrompt = direction === 'en_to_ar'
+      ? `Translate this English word/phrase into Modern Standard Arabic (فصحى). Return ONLY the MSA Arabic script, no explanation.${contextBlock}`
+      : `Convert this ${dialectLabel} word/phrase to Modern Standard Arabic (فصحى). Return ONLY the MSA Arabic script, no explanation.${contextBlock}`;
 
     // For multi-word phrases, also produce a word-for-word literal gloss so
     // learners see how the phrase is built. Single words don't need one.
@@ -116,8 +126,9 @@ serve(async (req) => {
       callModel(MODEL_LINEUPS.TRANSLATION.drafters[0], translationPrompt, phrase, 80),
       callModel(MODEL_LINEUPS.TRANSLATION.drafters[1], translationPrompt, phrase, 80),
       callModel(MODEL_LINEUPS.TRANSLATION.drafters[1], msaPrompt, phrase, 50),
-      // Literal gloss only for multi-word phrases.
-      isWord
+      // Literal gloss only for multi-word Arabic phrases — the en_to_ar
+      // direction has no gloss leg (its prompt is Arabic-order → English).
+      isWord || direction === 'en_to_ar'
         ? Promise.resolve(null)
         : callModel(MODEL_LINEUPS.TRANSLATION.drafters[1], literalPrompt, phrase, 80),
     ]);

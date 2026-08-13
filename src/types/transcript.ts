@@ -8,6 +8,14 @@
  
  export type TranscriptLine = {
    id: string;
+  /**
+   * Present on native ENGLISH videos (the process-english-video pipeline):
+   * the sentence as spoken, in English. When set, `arabic` holds the dialect
+   * scaffold translation, `fusha` its MSA rendering, and `literal` an
+   * Arabic gloss in English word order. Absent on Arabic (Hakiya-bridged)
+   * videos, where `arabic` is the spoken line.
+   */
+  english?: string;
    arabic: string;          // full sentence as spoken
    translation: string;     // English sentence translation
    literal?: string;        // word-for-word English gloss of the whole line

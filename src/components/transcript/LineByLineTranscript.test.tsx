@@ -771,3 +771,72 @@ describe("looking up a phrase", () => {
     ).not.toContain("bg-secondary/20");
   });
 });
+
+// ── English-video lines (the direction flip) ─────────────────────────────────
+
+const AN_ENGLISH_LINE: TranscriptLine = {
+  id: "en-line-1",
+  english: "I went to the market yesterday.",
+  arabic: "رحت السوق أمس",
+  fusha: "ذهبت إلى السوق أمس",
+  literal: "أنا ذهبت إلى الـ سوق أمس",
+  translation: "",
+  tokens: [],
+  startMs: 500,
+  endMs: 2100,
+};
+
+describe("english-video lines", () => {
+  it("renders the English as the primary, tappable text", () => {
+    render({ lines: [AN_ENGLISH_LINE] });
+
+    // Each word is its own tap target — the clickable-word → flashcard loop.
+    expect(screen.getByRole("button", { name: "market" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "yesterday." })).toBeInTheDocument();
+  });
+
+  it("keeps the Arabic scaffold behind the expand, like translations always were", () => {
+    render({ lines: [AN_ENGLISH_LINE] });
+
+    // Scaffold present in the DOM but collapsed until the learner asks.
+    const scaffold = screen.getByText("رحت السوق أمس");
+    expect(scaffold.closest(".max-h-0")).not.toBeNull();
+
+    fireEvent.click(screen.getAllByText("رحت السوق أمس")[0].closest("div.rounded-xl")!.querySelector("svg.lucide-chevron-down")!.closest("div")!);
+    expect(screen.getByText("رحت السوق أمس").closest(".max-h-0")).toBeNull();
+  });
+
+  it("shows the literal word-order gloss with the scaffold", () => {
+    render({ lines: [AN_ENGLISH_LINE] });
+    expect(screen.getByText(/أنا ذهبت إلى الـ سوق أمس/)).toBeInTheDocument();
+  });
+
+  it("looks a tapped word up in the learner's dialect and saves it flipped", async () => {
+    const { backend, onSaveToMyWords } = render({
+      lines: [AN_ENGLISH_LINE],
+      seed: (b) => b.stubFunction("translate-phrase", { translation: "سوق", msa: "سوق" }),
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "market" }));
+
+    await waitFor(() => expect(screen.getByText("سوق")).toBeInTheDocument());
+    expect(backend.lastCallTo("translate-phrase")?.body).toMatchObject({
+      phrase: "market",
+      direction: "en_to_ar",
+      mode: "word",
+      dialect: "Gulf",
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: /save to my words/i }));
+    expect(onSaveToMyWords).toHaveBeenCalledWith(
+      expect.objectContaining({ english: "market", arabic: "سوق" }),
+    );
+  });
+
+  it("arabic-video lines still render the Arabic card", () => {
+    render({ lines: [A_LINE, AN_ENGLISH_LINE] });
+    // The Arabic line keeps its tokens; the English line keeps its words.
+    expect(screen.getByText("رحت")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "market" })).toBeInTheDocument();
+  });
+});
