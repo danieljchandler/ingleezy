@@ -28,30 +28,30 @@ serve(async (req) => {
       includeInterests: false,
     });
 
-    const systemExtra = `You are a ${dialectLabel} grammar teacher. Generate exactly 5 multiple-choice grammar drill questions.
+    const systemExtra = `You are an English grammar teacher for native ${dialectLabel} speakers. Generate exactly 5 multiple-choice grammar drill questions.
 Category: ${category || "mixed"}
 Difficulty: ${difficulty || "beginner"}
-Each question tests a specific ${dialectLabel} grammar concept (verb conjugation, pronouns, sentence structure, negation, possessives, etc.).
-All Arabic text MUST be authentic ${dialectLabel}, never MSA.
+Each question tests a specific ENGLISH grammar concept, built to catch the errors Arabic speakers actually make in that category (see the interference patterns above — a drill whose wrong options are the Arabic-shaped forms teaches twice).
+The question sentence and all choices are English; the instruction line and the explanation are in ${dialectLabel} Arabic — grammar explained in the learner's own language.
 Return the questions via the provided tool only.
 
 ${learnerBlock}`;
 
-    const userPrompt = `Generate 5 ${difficulty || "beginner"} level ${dialectLabel} grammar questions about "${category || "mixed grammar"}". Each question should have the Arabic text, an English explanation of what's being tested, 4 answer choices (with Arabic text + English gloss), and indicate the correct answer index (0-3). Include a brief explanation for why the correct answer is right.`;
+    const userPrompt = `Generate 5 ${difficulty || "beginner"} level English grammar questions about "${category || "mixed grammar"}". Each question has: the English sentence/question being tested (often with a blank), a short ${dialectLabel} instruction line, 4 answer choices in English (each with a ${dialectLabel} gloss), the correct answer index (0-3), and a brief explanation in ${dialectLabel} of why the correct answer is right — naming the Arabic-transfer trap when there is one.`;
 
     try {
       const brain = await askBrain<{ questions: any[] }>({
         purpose: "grammar_drill",
         dialect: dialect as Dialect,
+        target: "english",
         strategy: "ensemble",
         systemPromptExtra: systemExtra,
         userPrompt,
         maxTokens: 2048,
         temperature: 0.5,
-        arabicTextPath: (p: any) => (Array.isArray(p?.questions) ? p.questions.map((q: any) => [q?.question_arabic, ...(Array.isArray(q?.choices) ? q.choices.map((c: any) => c?.text_arabic) : [])].filter(Boolean).join(" ")).join("\n") : ""),
         tool: {
           name: "suggest_questions",
-          description: "Return 5 grammar drill questions in the target dialect.",
+          description: "Return 5 English grammar drill questions with dialect-Arabic support.",
           parameters: {
             type: "object",
             properties: {
@@ -60,21 +60,21 @@ ${learnerBlock}`;
                 items: {
                   type: "object",
                   properties: {
-                    question_arabic: { type: "string" },
-                    question_english: { type: "string" },
+                    question: { type: "string", description: "The English sentence/question being tested, often with a blank" },
+                    question_ar: { type: "string", description: "Short instruction line in the learner's dialect" },
                     grammar_point: { type: "string" },
                     choices: {
                       type: "array",
                       items: {
                         type: "object",
-                        properties: { text_arabic: { type: "string" }, text_english: { type: "string" } },
-                        required: ["text_arabic", "text_english"],
+                        properties: { text: { type: "string" }, text_ar: { type: "string" } },
+                        required: ["text", "text_ar"],
                       },
                     },
                     correct_index: { type: "number" },
-                    explanation: { type: "string" },
+                    explanation_ar: { type: "string", description: "Why the correct answer is right, in the learner's dialect, naming the Arabic-transfer trap when there is one" },
                   },
-                  required: ["question_arabic", "question_english", "grammar_point", "choices", "correct_index", "explanation"],
+                  required: ["question", "question_ar", "grammar_point", "choices", "correct_index", "explanation_ar"],
                 },
               },
             },
@@ -82,10 +82,6 @@ ${learnerBlock}`;
           },
         },
       });
-
-      if (brain.msaLeaks.leaks.length > 0) {
-        console.warn("grammar-drill MSA leaks after repair:", brain.msaLeaks.leaks, "repairs:", brain.msaRepairs);
-      }
 
       return new Response(JSON.stringify(brain.output), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },

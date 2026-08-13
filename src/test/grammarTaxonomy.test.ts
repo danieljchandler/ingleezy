@@ -121,17 +121,18 @@ describe("Arabic definite article", () => {
 });
 
 describe("the migration's keyword table stays in step with this module", () => {
-  // 20260801150000 re-keys existing curriculum_concepts rows onto the same
-  // taxonomy, which means it carries a copy of CATEGORY_KEYWORDS in SQL. A copy
-  // that silently drifts would re-key old rows one way and new writes another —
-  // recreating exactly the split the migration exists to fix. So the copy is
-  // pinned here rather than trusted.
+  // 20260813180000 (superseding 20260801150000's copy for parity purposes)
+  // re-keys curriculum_concepts rows onto the taxonomy, which means it carries
+  // a copy of CATEGORY_KEYWORDS in SQL. A copy that silently drifts would
+  // re-key old rows one way and new writes another — recreating exactly the
+  // split the original migration exists to fix. So the copy is pinned here
+  // rather than trusted.
   it("lists the same (priority, category, keyword) triples", async () => {
     const { readFile } = await import("node:fs/promises");
     const { resolve } = await import("node:path");
     // Vitest runs from the repo root; import.meta.url is not a file URL here.
     const sql = await readFile(
-      resolve("supabase/migrations/20260801150000_unify_grammar_concept_keys.sql"),
+      resolve("supabase/migrations/20260813180000_english_grammar_keywords.sql"),
       "utf8",
     );
 

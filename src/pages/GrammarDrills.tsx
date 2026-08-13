@@ -29,17 +29,22 @@ import {
 } from "lucide-react";
 
 interface Choice {
-  text_arabic: string;
-  text_english: string;
+  /** The English answer option. */
+  text: string;
+  /** Its gloss in the learner's dialect. */
+  text_ar: string;
 }
 
 interface DrillQuestion {
-  question_arabic: string;
-  question_english: string;
+  /** The English sentence/question being tested. */
+  question: string;
+  /** Instruction line in the learner's dialect. */
+  question_ar: string;
   grammar_point: string;
   choices: Choice[];
   correct_index: number;
-  explanation: string;
+  /** Why the correct answer is right — in the learner's dialect. */
+  explanation_ar: string;
 }
 
 const DIFFICULTIES = [
@@ -108,8 +113,8 @@ const GrammarDrills = () => {
       summary: `Working through a ${difficulty} grammar drill, question ${currentIndex + 1} of ${questions.length}.`,
       content: [
         `Grammar point: ${currentQuestion.grammar_point}`,
-        `Question: ${currentQuestion.question_arabic} — ${currentQuestion.question_english}`,
-        answered && `Explanation: ${currentQuestion.explanation}`,
+        `Question: ${currentQuestion.question} — ${currentQuestion.question_ar}`,
+        answered && `Explanation: ${currentQuestion.explanation_ar}`,
       ]
         .filter(Boolean)
         .join("\n"),
@@ -154,12 +159,15 @@ const GrammarDrills = () => {
       if (approved && approved.length >= 3) {
         const shuffled = (approved as any[]).sort(() => Math.random() - 0.5).slice(0, 5);
         setQuestions(shuffled.map((q: any) => ({
-          question_arabic: q.question_arabic,
-          question_english: q.question_english,
+          question: q.question ?? q.question_english ?? "",
+          question_ar: q.question_ar ?? q.question_arabic ?? "",
           grammar_point: q.grammar_point,
-          choices: q.choices as Choice[],
+          choices: (q.choices as any[]).map((c) => ({
+            text: c.text ?? c.text_english ?? "",
+            text_ar: c.text_ar ?? c.text_arabic ?? "",
+          })),
           correct_index: q.correct_index,
-          explanation: q.explanation,
+          explanation_ar: q.explanation_ar ?? q.explanation ?? "",
         })));
         return;
       }
@@ -328,10 +336,10 @@ const GrammarDrills = () => {
 
           {/* Question */}
           <div className="bg-card border border-border rounded-2xl p-5 space-y-2">
-            <p className="text-xl font-bold text-foreground text-right leading-relaxed" dir="rtl">
-              {q.question_arabic}
+            <p className="font-english text-xl font-bold text-foreground leading-relaxed">
+              {q.question}
             </p>
-            {showEnglish && <p className="text-sm text-muted-foreground">{q.question_english}</p>}
+            {showEnglish && <p dir="rtl" className="font-arabic text-sm text-muted-foreground">{q.question_ar}</p>}
           </div>
 
           {/* Choices */}
@@ -347,7 +355,7 @@ const GrammarDrills = () => {
                   onClick={() => handleAnswer(i)}
                   disabled={answered}
                   className={cn(
-                    "w-full p-4 rounded-xl border text-right",
+                    "w-full p-4 rounded-xl border text-left",
                     "flex items-center gap-3 transition-all duration-200",
                     !answered && "hover:border-primary/40 active:scale-[0.99] cursor-pointer",
                     !answered && "bg-card border-border",
@@ -361,9 +369,9 @@ const GrammarDrills = () => {
                     {answered && isSelected && !isCorrect && <X className="h-4 w-4 text-red-600 dark:text-red-400" />}
                     {!answered && <span className="text-xs text-muted-foreground">{String.fromCharCode(65 + i)}</span>}
                   </div>
-                  <div className="flex-1 text-right" dir="rtl">
-                    <p className="font-semibold text-foreground">{choice.text_arabic}</p>
-                    {showEnglish && <p className="text-xs text-muted-foreground">{choice.text_english}</p>}
+                  <div className="flex-1 text-left">
+                    <p className="font-english font-semibold text-foreground">{choice.text}</p>
+                    {showEnglish && <p dir="rtl" className="font-arabic text-xs text-muted-foreground">{choice.text_ar}</p>}
                   </div>
                 </button>
               );
@@ -374,7 +382,7 @@ const GrammarDrills = () => {
           {selectedAnswer !== null && (
             <div className="space-y-3">
               <div className="bg-primary/5 border border-primary/20 rounded-xl p-4">
-                <p className="text-sm text-foreground">{q.explanation}</p>
+                <p dir="rtl" className="font-arabic text-sm text-foreground">{q.explanation_ar}</p>
               </div>
               <Button onClick={nextQuestion} className="w-full">
                 {currentIndex < questions.length - 1 ? (

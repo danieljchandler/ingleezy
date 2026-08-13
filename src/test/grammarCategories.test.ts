@@ -100,7 +100,9 @@ describe("buildCategoryProgress", () => {
     // renaming one starts a fresh concept and orphans the old mastery, and the
     // record-grammar-outcome allowlist would reject it.
     expect(GRAMMAR_CATEGORIES.map((c) => c.id)).toEqual([
+      "articles",
       "verb-conjugation",
+      "prepositions",
       "pronouns",
       "negation",
       "possessives",

@@ -34,7 +34,12 @@ export interface GrammarCategory {
  * than a category that silently records mastery nothing else can find.
  */
 export const GRAMMAR_CATEGORIES: GrammarCategory[] = [
-  { id: "verb-conjugation", label: "Verb Conjugation", labelAr: "تصريف الأفعال", icon: "🔄" },
+  // English grammar rungs; ids are the mastery-ladder contract and carry over
+  // from the Arabic era unchanged. articles + prepositions were added with
+  // the retarget — the two highest-frequency Arabic-speaker error areas.
+  { id: "articles", label: "Articles (a/an/the)", labelAr: "أدوات التعريف والتنكير", icon: "🅰️" },
+  { id: "verb-conjugation", label: "Verb Tenses", labelAr: "تصريف الأفعال", icon: "🔄" },
+  { id: "prepositions", label: "Prepositions", labelAr: "حروف الجر", icon: "📍" },
   { id: "pronouns", label: "Pronouns", labelAr: "الضمائر", icon: "👤" },
   { id: "negation", label: "Negation", labelAr: "النفي", icon: "🚫" },
   { id: "possessives", label: "Possessives", labelAr: "الملكية", icon: "🏠" },

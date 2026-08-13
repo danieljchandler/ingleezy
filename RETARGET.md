@@ -151,6 +151,17 @@ generation conditioning.
       authoring flip (passage_arabic scaffold column + admin form),
       interactive stories, listen episodes, souq news.
 
+### Grammar — FLIP (drills done)
+- [x] Grammar drills flipped: English questions with dialect instruction
+      lines, English choices with dialect glosses, explanations in the
+      learner's dialect naming the Arabic-transfer trap. Taxonomy extended
+      with `articles` + `prepositions` rungs (adding keys is safe; renaming
+      orphans mastery) — keyword parity migration 20260813180000. The
+      mastery ladder (ids, record-grammar-outcome, user_concept_mastery)
+      carries over unchanged. Open: admin grammar-exercise authoring form
+      relabel; extract-concepts/extract-grammar-points prompts still
+      Arabic-era.
+
 ### Speaking / audio — FLIP
 - [ ] Pronunciation practice: English phoneme scoring, seeded with the
       Arabic-speaker confusion set (/p/-/b/, /v/-/f/, vowel pairs,

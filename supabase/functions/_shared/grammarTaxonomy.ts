@@ -32,6 +32,11 @@ export const GRAMMAR_CATEGORY_IDS = [
   "possessives",
   "questions",
   "sentence-structure",
+  // Added with the English retarget: the two highest-frequency Arabic-speaker
+  // error areas that had no rung in the Arabic-era taxonomy. Adding a key is
+  // safe (a fresh rung); renaming one is what orphans recorded mastery.
+  "articles",
+  "prepositions",
 ] as const;
 
 export type GrammarCategoryId = (typeof GRAMMAR_CATEGORY_IDS)[number];
@@ -52,6 +57,14 @@ export const GRAMMAR_CATEGORY_SET: ReadonlySet<string> = new Set(GRAMMAR_CATEGOR
  * They are matched after diacritic stripping, same as the rest.
  */
 export const CATEGORY_KEYWORDS: { id: GrammarCategoryId; keywords: string[] }[] = [
+  {
+    id: "articles",
+    keywords: ["article", "articles", "a/an", "definite article", "indefinite article", "أداة التعريف", "أداة تنكير", "ادوات التعريف"],
+  },
+  {
+    id: "prepositions",
+    keywords: ["preposition", "prepositions", "حرف جر", "حروف الجر", "حروف جر"],
+  },
   {
     id: "negation",
     keywords: ["negation", "negative", "negate", "negating", "نفي", "منفي"],

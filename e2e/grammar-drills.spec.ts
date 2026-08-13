@@ -20,21 +20,23 @@ import type { Page } from "@playwright/test";
  * derived from the score, so a round is not interchangeable with its total.
  */
 
+// The table keeps its Arabic-era column names; the CONTENT is flipped —
+// question_english carries the English drill sentence (primary),
+// question_arabic the dialect instruction line, explanation the dialect
+// explanation. The page normalizes both old and new key spellings.
 const anExercise = (index: number, over: Record<string, unknown> = {}) => ({
   id: `aaaaaaaa-1111-4000-8000-00000000000${index}`,
-  question_arabic: `سؤال رقم ${index}`,
-  question_english: `Question number ${index}`,
+  question_english: `He ___ to work number ${index}.`,
+  question_arabic: `اختر الشكل الصحيح ${index}`,
   grammar_point: "Present tense",
   category: "verb-conjugation",
   difficulty: "beginner",
-  // `text_arabic` / `text_english` — the shape the page renders and the shape
-  // the admin form writes. A `{ text, en }` choice renders as a blank option.
   choices: [
-    { text_arabic: `صح ${index}`, text_english: `right ${index}` },
-    { text_arabic: `خطأ ${index}`, text_english: `wrong ${index}` },
+    { text: `goes ${index}`, text_ar: `صح ${index}` },
+    { text: `go ${index}`, text_ar: `خطأ ${index}` },
   ],
   correct_index: 0,
-  explanation: `Because of reason ${index}`,
+  explanation: `لأن السبب ${index}`,
   status: "published",
   dialect: "Gulf",
   session_id: null,
@@ -55,12 +57,12 @@ function seedApproved(db: MemoryDb, count: number) {
 
 /** Answer the current question correctly and move on. */
 async function answerCorrectly(page: Page) {
-  await page.getByRole("button", { name: /صح/ }).click();
+  await page.getByRole("button", { name: /goes/ }).click();
   await page.getByRole("button", { name: /Next|Finish|See Results/i }).click();
 }
 
 async function answerWrongly(page: Page) {
-  await page.getByRole("button", { name: /خطأ/ }).click();
+  await page.getByRole("button", { name: /go \d/ }).click();
   await page.getByRole("button", { name: /Next|Finish|See Results/i }).click();
 }
 
@@ -80,7 +82,9 @@ test.describe("reaching the drills", () => {
     await page.goto("/grammar");
 
     for (const label of [
-      "Verb Conjugation",
+      "Articles",
+      "Verb Tenses",
+      "Prepositions",
       "Pronouns",
       "Negation",
       "Possessives",
@@ -101,7 +105,7 @@ test.describe("where the questions come from", () => {
     seedApproved(db, 5);
 
     await page.goto("/grammar");
-    await page.getByRole("button", { name: new RegExp("Verb Conjugation") }).click();
+    await page.getByRole("button", { name: new RegExp("Verb Tenses") }).click();
 
     await expect(page.getByText("Question 1 of 5")).toBeVisible();
     // Reviewed content costs nothing per drill and has been checked by a human;
@@ -118,25 +122,25 @@ test.describe("where the questions come from", () => {
     backend.stubFunction("grammar-drill", {
       questions: [
         {
-          question_arabic: "سؤال مولّد",
-          question_english: "A generated question",
+          question: "A generated question ___.",
+          question_ar: "سؤال مولّد",
           grammar_point: "Present tense",
           choices: [
-            { text_arabic: "صح", text_english: "right" },
-            { text_arabic: "خطأ", text_english: "wrong" },
+            { text: "goes", text_ar: "صح" },
+            { text: "go", text_ar: "خطأ" },
           ],
           correct_index: 0,
-          explanation: "Generated explanation",
+          explanation_ar: "شرح مولّد",
         },
       ],
     });
 
     await page.goto("/grammar");
-    await page.getByRole("button", { name: new RegExp("Verb Conjugation") }).click();
+    await page.getByRole("button", { name: new RegExp("Verb Tenses") }).click();
 
     // Two approved questions is below the floor of three: falling through
     // entirely beats padding a drill out to length with whatever exists.
-    await expect(page.getByText("سؤال مولّد")).toBeVisible();
+    await expect(page.getByText("A generated question ___.")).toBeVisible();
     expect(backend.callsTo("grammar-drill")).toHaveLength(1);
   });
 
@@ -149,19 +153,19 @@ test.describe("where the questions come from", () => {
     backend.stubFunction("grammar-drill", {
       questions: [
         {
-          question_arabic: "سؤال",
-          question_english: "Question",
+          question: "Thin question ___.",
+          question_ar: "سؤال",
           grammar_point: "Present tense",
-          choices: [{ text_arabic: "صح", text_english: "right" }],
+          choices: [{ text: "goes", text_ar: "صح" }],
           correct_index: 0,
-          explanation: "",
+          explanation_ar: "",
         },
       ],
     });
 
     await page.goto("/grammar");
     await page.getByRole("button", { name: new RegExp("Negation") }).click();
-    await expect(page.getByText("سؤال")).toBeVisible();
+    await expect(page.getByText("Thin question ___.")).toBeVisible();
 
     expect(backend.lastCallTo("grammar-drill")?.body).toMatchObject({
       category: "negation",
@@ -184,7 +188,7 @@ test.describe("where the questions come from", () => {
 
     // Not a dead screen: the category is cleared so the learner is back
     // somewhere they can act, rather than looking at an empty drill.
-    await expect(page.getByRole("button", { name: new RegExp("Verb Conjugation") })).toBeVisible();
+    await expect(page.getByRole("button", { name: new RegExp("Verb Tenses") })).toBeVisible();
     await expect(page.getByText(/Question 1 of/)).toHaveCount(0);
 
     // The toast title is `e.message || "Failed to generate drill"`, and a
@@ -204,59 +208,59 @@ test.describe("answering", () => {
 
   test("counts a right answer", async ({ page }) => {
     await page.goto("/grammar");
-    await page.getByRole("button", { name: new RegExp("Verb Conjugation") }).click();
+    await page.getByRole("button", { name: new RegExp("Verb Tenses") }).click();
     await expect(page.getByText("Question 1 of 5")).toBeVisible();
 
-    await page.getByRole("button", { name: /صح/ }).click();
+    await page.getByRole("button", { name: /goes/ }).click();
 
     await expect(page.getByText("1 correct")).toBeVisible();
   });
 
   test("leaves the score alone on a wrong answer", async ({ page }) => {
     await page.goto("/grammar");
-    await page.getByRole("button", { name: new RegExp("Verb Conjugation") }).click();
+    await page.getByRole("button", { name: new RegExp("Verb Tenses") }).click();
     await expect(page.getByText("Question 1 of 5")).toBeVisible();
 
-    await page.getByRole("button", { name: /خطأ/ }).click();
+    await page.getByRole("button", { name: /go \d/ }).click();
 
     await expect(page.getByText("0 correct")).toBeVisible();
   });
 
   test("shows the explanation once an answer is locked in", async ({ page }) => {
     await page.goto("/grammar");
-    await page.getByRole("button", { name: new RegExp("Verb Conjugation") }).click();
+    await page.getByRole("button", { name: new RegExp("Verb Tenses") }).click();
     await expect(page.getByText("Question 1 of 5")).toBeVisible();
 
-    await page.getByRole("button", { name: /خطأ/ }).click();
+    await page.getByRole("button", { name: /go \d/ }).click();
 
     // A drill that only marks you wrong teaches nothing; the explanation is
     // the part that does the work.
-    await expect(page.getByText(/Because of reason/)).toBeVisible();
+    await expect(page.getByText(/لأن السبب/)).toBeVisible();
   });
 
   test("ignores a second answer to the same question", async ({ page }) => {
     await page.goto("/grammar");
-    await page.getByRole("button", { name: new RegExp("Verb Conjugation") }).click();
+    await page.getByRole("button", { name: new RegExp("Verb Tenses") }).click();
     await expect(page.getByText("Question 1 of 5")).toBeVisible();
 
-    await page.getByRole("button", { name: /خطأ/ }).click();
+    await page.getByRole("button", { name: /go \d/ }).click();
 
     // Every choice is disabled the moment one is taken. Otherwise the
     // explanation the page has just shown is a free retry, and the score means
     // nothing.
-    await expect(page.getByRole("button", { name: /صح/ })).toBeDisabled();
-    await expect(page.getByRole("button", { name: /خطأ/ })).toBeDisabled();
+    await expect(page.getByRole("button", { name: /goes/ })).toBeDisabled();
+    await expect(page.getByRole("button", { name: /go \d/ })).toBeDisabled();
     await expect(page.getByText("0 correct")).toBeVisible();
   });
 
-  test("keeps the English out of the way until asked for", async ({ page }) => {
+  test("keeps the Arabic support out of the way until asked for", async ({ page }) => {
     await page.goto("/grammar");
-    await page.getByRole("button", { name: new RegExp("Verb Conjugation") }).click();
+    await page.getByRole("button", { name: new RegExp("Verb Tenses") }).click();
     await expect(page.getByText("Question 1 of 5")).toBeVisible();
 
-    await expect(page.getByText(/^Question number/)).toHaveCount(0);
+    await expect(page.getByText(/^اختر الشكل الصحيح/)).toHaveCount(0);
     await page.getByRole("button", { name: "EN" }).click();
-    await expect(page.getByText(/^Question number/)).toBeVisible();
+    await expect(page.getByText(/^اختر الشكل الصحيح/)).toBeVisible();
   });
 });
 
@@ -268,7 +272,7 @@ test.describe("finishing a round", () => {
 
   test("scores the round as a percentage", async ({ page }) => {
     await page.goto("/grammar");
-    await page.getByRole("button", { name: new RegExp("Verb Conjugation") }).click();
+    await page.getByRole("button", { name: new RegExp("Verb Tenses") }).click();
     await expect(page.getByText("Question 1 of 3")).toBeVisible();
 
     await answerCorrectly(page);
@@ -282,7 +286,7 @@ test.describe("finishing a round", () => {
 
   test("sends the round's hits and misses in order", async ({ page, backend }) => {
     await page.goto("/grammar");
-    await page.getByRole("button", { name: new RegExp("Verb Conjugation") }).click();
+    await page.getByRole("button", { name: new RegExp("Verb Tenses") }).click();
     await expect(page.getByText("Question 1 of 3")).toBeVisible();
 
     await answerWrongly(page);
@@ -303,7 +307,7 @@ test.describe("finishing a round", () => {
 
   test("submits the round exactly once", async ({ page, backend }) => {
     await page.goto("/grammar");
-    await page.getByRole("button", { name: new RegExp("Verb Conjugation") }).click();
+    await page.getByRole("button", { name: new RegExp("Verb Tenses") }).click();
     await expect(page.getByText("Question 1 of 3")).toBeVisible();
 
     await answerCorrectly(page);
@@ -325,7 +329,7 @@ test.describe("finishing a round", () => {
     backend.stubFunctionFailure("record-grammar-outcome");
 
     await page.goto("/grammar");
-    await page.getByRole("button", { name: new RegExp("Verb Conjugation") }).click();
+    await page.getByRole("button", { name: new RegExp("Verb Tenses") }).click();
     await expect(page.getByText("Question 1 of 3")).toBeVisible();
 
     await answerCorrectly(page);
@@ -340,7 +344,7 @@ test.describe("finishing a round", () => {
 
   test("starts a clean round from New Drill", async ({ page }) => {
     await page.goto("/grammar");
-    await page.getByRole("button", { name: new RegExp("Verb Conjugation") }).click();
+    await page.getByRole("button", { name: new RegExp("Verb Tenses") }).click();
     await expect(page.getByText("Question 1 of 3")).toBeVisible();
     await answerCorrectly(page);
     await answerCorrectly(page);
@@ -349,7 +353,7 @@ test.describe("finishing a round", () => {
 
     await page.getByRole("button", { name: "New Drill" }).click();
 
-    await expect(page.getByRole("button", { name: new RegExp("Verb Conjugation") })).toBeVisible();
+    await expect(page.getByRole("button", { name: new RegExp("Verb Tenses") })).toBeVisible();
     await expect(page.getByText("Drill Complete!")).toHaveCount(0);
   });
 });
@@ -362,7 +366,7 @@ test.describe("a drill interrupted", () => {
 
   test("resumes where the learner left off", async ({ page }) => {
     await page.goto("/grammar");
-    await page.getByRole("button", { name: new RegExp("Verb Conjugation") }).click();
+    await page.getByRole("button", { name: new RegExp("Verb Tenses") }).click();
     await expect(page.getByText("Question 1 of 3")).toBeVisible();
     await answerCorrectly(page);
     await expect(page.getByText("Question 2 of 3")).toBeVisible();
@@ -377,7 +381,7 @@ test.describe("a drill interrupted", () => {
 
   test("brings a finished drill back to its last question", async ({ page, backend }) => {
     await page.goto("/grammar");
-    await page.getByRole("button", { name: new RegExp("Verb Conjugation") }).click();
+    await page.getByRole("button", { name: new RegExp("Verb Tenses") }).click();
     await expect(page.getByText("Question 1 of 3")).toBeVisible();
     await answerCorrectly(page);
     await answerCorrectly(page);
