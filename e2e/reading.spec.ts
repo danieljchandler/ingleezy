@@ -60,17 +60,22 @@ const PASSAGE = {
 /**
  * A published passage row, as the editorial library holds one.
  *
- * Deliberately has no per-line breakdown: `reading_passages` stores the passage
- * as one block of text and has no `lines` column at all, so the page splits it
- * on sentence boundaries itself. The tap-to-translate reading view is built out
- * of those lines, which makes the split load-bearing for every editorial
- * passage — see "breaks a library passage into lines" below.
+ * Deliberately has no per-line breakdown here: an editorial row may store the
+ * passage as one block of English, so the page splits it on sentence
+ * boundaries itself and pairs the `passage_arabic` scaffold (when the row
+ * carries one) by position. The tap-to-translate reading view is built out of
+ * those lines, which makes the split load-bearing for every editorial passage
+ * — see "breaks a library passage into lines" below. A row whose `lines` were
+ * authored skips the split entirely.
  */
 const aPublishedPassage = (over: Record<string, unknown> = {}) => ({
   id: "dddddddd-0000-4000-8000-000000000001",
   title: "From the library",
-  title_english: "From the library",
+  title_arabic: null,
   passage: "I read a book yesterday. It was enjoyable.",
+  passage_arabic: null,
+  lines: null,
+  title_english: "From the library",
   passage_english: "I read a book yesterday. It was enjoyable.",
   vocabulary: [{ english: "book", arabic: "كتاب" }],
   questions: [
@@ -194,6 +199,52 @@ test.describe("preferring the editorial library", () => {
     // every word its own tappable span.
     await expect(page.getByRole("button", { name: "read" })).toBeVisible();
     await expect(page.getByRole("button", { name: "enjoyable." })).toBeVisible();
+  });
+
+  test("pairs a library passage's Arabic scaffold by sentence position", async ({ page, db }) => {
+    db.seed("reading_passages", [
+      aPublishedPassage({
+        passage_arabic: "قريت كتاب أمس. كان ممتع.",
+      }),
+    ]);
+
+    await page.goto("/reading");
+    await readAt(page);
+    await expect(page.getByRole("heading", { name: "From the library" })).toBeVisible();
+
+    // The scaffold sits behind each line's eye toggle, exactly as it does for
+    // a generated passage.
+    await expect(page.getByText("قريت كتاب أمس.")).toHaveCount(0);
+    await page.locator("button:has(svg.lucide-eye)").first().click();
+    await expect(page.getByText("قريت كتاب أمس.")).toBeVisible();
+
+    await page.locator("button:has(svg.lucide-eye)").first().click();
+    await expect(page.getByText("كان ممتع.")).toBeVisible();
+  });
+
+  test("uses a library passage's authored lines over the splitter", async ({ page, db }) => {
+    db.seed("reading_passages", [
+      aPublishedPassage({
+        lines: [
+          {
+            english: "I read a whole book in one evening.",
+            arabic: "قريت كتاب كامل في ليلة وحدة.",
+            literal: "أنا قريت كتاب كامل في وحدة ليلة.",
+          },
+        ],
+      }),
+    ]);
+
+    await page.goto("/reading");
+    await readAt(page);
+    await expect(page.getByRole("heading", { name: "From the library" })).toBeVisible();
+
+    // The authored split wins over the sentence splitter — including its
+    // literal gloss, which the splitter can never produce.
+    await expect(page.getByRole("button", { name: "evening." })).toBeVisible();
+    await page.locator("button:has(svg.lucide-eye)").first().click();
+    await expect(page.getByText("قريت كتاب كامل في ليلة وحدة.")).toBeVisible();
+    await expect(page.getByText("أنا قريت كتاب كامل في وحدة ليلة.")).toBeVisible();
   });
 
   test("ignores a draft passage", async ({ page, db, backend }) => {

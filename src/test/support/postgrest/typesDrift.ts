@@ -75,6 +75,15 @@ export const COLUMNS_MISSING_FROM_TYPES: DriftedColumn[] = [
   // Listen episodes gained a dialect-Arabic title with the English retarget.
   { table: "listen_episodes", column: "title_arabic", migration: "20260813190000_listen_title_arabic" },
 
+  // Editorial reading passages gained their Arabic scaffold with the English
+  // retarget: dialect title, position-paired dialect translation, and an
+  // optional authored per-line breakdown.
+  ...["title_arabic", "passage_arabic", "lines"].map((column) => ({
+    table: "reading_passages",
+    column,
+    migration: "20260813200000_reading_passages_scaffold",
+  })),
+
   // The L1-Interference Rulebook, created after the fork and absent from the
   // generated types until a real Supabase project regenerates them. Queried
   // only by englishHelpers.ts under the service role today.

@@ -579,11 +579,15 @@ test.describe("previewing what the model wrote", () => {
     await page.goto(`/admin/curriculum-builder/${SESSION}`);
     await page.getByRole("button", { name: /Publish/ }).click();
 
+    // The builder still emits the Arabic-era payload; the approval crosswires
+    // it into the flipped columns, where `title`/`passage` are the ENGLISH the
+    // reader treats as the passage and the Arabic becomes its scaffold.
     const row = (await writtenTo(db, "reading_passages"))[0];
     expect(row).toMatchObject({
-      title: "في السوق",
-      title_english: "At the market",
-      passage_english: "Ahmed went to the market.",
+      title: "At the market",
+      title_arabic: "في السوق",
+      passage: "Ahmed went to the market.",
+      passage_arabic: "ذهب أحمد إلى السوق.",
       cultural_note: "Souqs open after dawn prayer.",
       difficulty: "beginner",
     });

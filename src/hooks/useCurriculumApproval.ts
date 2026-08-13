@@ -311,13 +311,21 @@ export function useCurriculumApproval() {
 
       const passage = data.passage as Record<string, unknown>;
 
+      // Direction flip: `title`/`passage` carry the ENGLISH the learner reads,
+      // `title_arabic`/`passage_arabic` its dialect scaffold. The curriculum
+      // builder still emits the Arabic-era payload (title/passage Arabic, with
+      // *_english translations), detected here by the *_english fields only
+      // that payload carries — a flipped builder passes title/title_arabic and
+      // passage/passage_arabic directly and skips the crosswire.
+      const legacy = passage.title_english != null || passage.passage_english != null;
       const { data: inserted, error } = await supabase
         .from('reading_passages' as never)
         .insert({
-          title: passage.title as string,
-          title_english: passage.title_english as string,
-          passage: passage.passage as string,
-          passage_english: passage.passage_english as string,
+          title: (legacy ? passage.title_english : passage.title) as string ?? '',
+          title_arabic: ((legacy ? passage.title : passage.title_arabic) as string) ?? null,
+          passage: (legacy ? passage.passage_english : passage.passage) as string ?? '',
+          passage_arabic: ((legacy ? passage.passage : passage.passage_arabic) as string) ?? null,
+          lines: passage.lines || null,
           difficulty: (data.difficulty as string) || 'beginner',
           vocabulary: passage.vocabulary || [],
           questions: passage.questions || [],
@@ -337,7 +345,7 @@ export function useCurriculumApproval() {
         dialect: (data.dialect as string) || 'Gulf',
       });
 
-      return passage.title_english as string;
+      return (legacy ? passage.title_english : passage.title) as string;
     },
     onSuccess: (title) => {
       toast.success('Reading passage published!', { description: title });

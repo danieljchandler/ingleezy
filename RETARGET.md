@@ -178,8 +178,18 @@ generation conditioning.
       Yemeni, English-scenario placeholders). Story audio/video media
       functions still narrate the Arabic-era authentic-stories pipeline —
       flip or prune with that decision.
-      Open: reading library authoring flip (passage_arabic scaffold
-      column + admin form).
+      **Reading library scaffold DONE**: reading_passages gained
+      title_arabic / passage_arabic / lines (20260813200000) — `title`
+      and `passage` carry English (as the flipped reader already
+      assumed), the scaffold pairs by sentence position or by authored
+      lines. Curriculum-approval publish crosswires the Arabic-era
+      builder payload into the flipped columns (detected by its
+      *_english fields); a flipped builder can emit english/arabic
+      fields directly. Remaining in this area: the curriculum builder's
+      own prompts (still Arabic-era), and the authentic-stories media
+      pipeline (import → dialect translate → audio/slideshow), which
+      still serves Arabic content — flip or prune with the memes
+      decision.
 
 ### Grammar — FLIP (drills done)
 - [x] Grammar drills flipped: English questions with dialect instruction

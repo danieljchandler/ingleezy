@@ -500,9 +500,15 @@ describe("publishing the other content types", () => {
       },
     });
 
+    // The Arabic-era builder payload is crosswired into the flipped columns:
+    // `title`/`passage` carry the English the reader treats as the passage,
+    // the Arabic becomes its scaffold.
     const [passage] = harness.backend.db.rows("reading_passages");
     expect(passage).toMatchObject({
-      title_english: "At the market",
+      title: "At the market",
+      title_arabic: "في السوق",
+      passage: "I went to the market yesterday",
+      passage_arabic: "رحت السوق أمس",
       difficulty: "intermediate",
       cultural_note: "Souqs open after asr.",
       status: "published",
@@ -513,6 +519,37 @@ describe("publishing the other content types", () => {
         dialect: "Yemeni",
       }),
     );
+  });
+
+  it("passes an already-flipped passage payload straight through", async () => {
+    const harness = render();
+
+    // A payload with no *_english fields is the flipped shape: English in
+    // title/passage, the scaffold in the _arabic fields. It must not be
+    // crosswired a second time.
+    await harness.result.current.approveReadingPassage.mutateAsync({
+      ...approvalArgs,
+      data: {
+        difficulty: "beginner",
+        passage: {
+          title: "At the market",
+          title_arabic: "في السوق",
+          passage: "I went to the market yesterday",
+          passage_arabic: "رحت السوق أمس",
+          lines: [{ english: "I went to the market yesterday", arabic: "رحت السوق أمس" }],
+          vocabulary: [],
+          questions: [],
+        },
+      },
+    });
+
+    expect(harness.backend.db.rows("reading_passages")[0]).toMatchObject({
+      title: "At the market",
+      title_arabic: "في السوق",
+      passage: "I went to the market yesterday",
+      passage_arabic: "رحت السوق أمس",
+      lines: [{ english: "I went to the market yesterday", arabic: "رحت السوق أمس" }],
+    });
   });
 
   it("publishes a daily challenge", async () => {
