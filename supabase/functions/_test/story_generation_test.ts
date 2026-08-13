@@ -99,13 +99,12 @@ const drafted = {
   scenes: [
     {
       scene_order: 0,
-      narrative_arabic: "كَانَ يَا مَا كَان",
-      narrative_transliteration: "kaan yaa maa kaan",
       narrative_english: "Once upon a time",
-      narrative_literal: "was o what was",
-      vocabulary: [{ word_arabic: "جمل", word_english: "camel" }],
+      narrative_arabic: "كان يا ما كان",
+      narrative_literal: "مرة في زمان",
+      vocabulary: [{ word_english: "camel", word_arabic: "جمل" }],
       is_ending: false,
-      choices: [{ text_arabic: "امشِ", text_english: "walk on", next_scene_order: 1 }],
+      choices: [{ text_english: "walk on", text_arabic: "امشِ", next_scene_order: 1 }],
       ending_message: null,
       ending_message_arabic: null,
     },
@@ -206,6 +205,25 @@ Deno.test("generate-story requires the story to be finishable", async () => {
   assertStringIncludes(prompt, "MUST be an ending scene");
   assertStringIncludes(prompt, "Choices must reference valid scene numbers");
   assertStringIncludes(prompt, "Avoid circular references that trap the player");
+});
+
+Deno.test("generate-story writes English scenes over a dialect scaffold", async () => {
+  const result = await call(
+    "generate-story",
+    { prompt: "a lost camel" },
+    caller(emitting(drafted)),
+  );
+
+  const prompt = gatewayPrompt(result);
+  // The narrative is the learner's reading task, so its language is a prompt
+  // requirement: stories in English, with each scene's Arabic scaffold in the
+  // learner's dialect rather than the MSA a model defaults to — and no
+  // vocalisation machinery, which belonged to the Arabic-era generator.
+  assertStringIncludes(prompt, "stories in ENGLISH");
+  assertStringIncludes(prompt, "NEVER Modern Standard Arabic");
+  assertStringIncludes(prompt, "ENGLISH word order");
+  assertEquals(prompt.includes("fully vocalized"), false);
+  assertEquals(prompt.includes("transliteration"), false);
 });
 
 Deno.test("generate-story passes the author's own guidance through", async () => {

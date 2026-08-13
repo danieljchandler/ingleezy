@@ -167,8 +167,19 @@ generation conditioning.
       when collapsed); souq-news-quiz english-target (English questions
       with dialect glosses, dialect explanation); ArticleQuiz flipped;
       Mark-Unknowns machinery replaced by tap-word save on this page.
+      **Interactive stories DONE**: generate-story english-target
+      (English scenes over a dialect scaffold — narrative_arabic natural
+      dialect, narrative_literal Arabic-in-English-order, transliteration
+      retired from the schema; structure rules kept). StoryPlayer flipped:
+      TappableEnglishText narrative (paragraph + line-by-line), Arabic
+      behind Show translation, English-led choices and vocab pills,
+      word saves keyed on the English sentence. AdminStoryForm flipped
+      (English-first fields, scaffold labels, dialect list Gulf/Egyptian/
+      Yemeni, English-scenario placeholders). Story audio/video media
+      functions still narrate the Arabic-era authentic-stories pipeline —
+      flip or prune with that decision.
       Open: reading library authoring flip (passage_arabic scaffold
-      column + admin form), interactive stories.
+      column + admin form).
 
 ### Grammar — FLIP (drills done)
 - [x] Grammar drills flipped: English questions with dialect instruction

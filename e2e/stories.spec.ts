@@ -3,7 +3,7 @@ import { TEST_USER_ID } from "../src/test/support/factories";
 import type { MemoryDb } from "../src/test/support/postgrest/store";
 
 /**
- * Interactive stories — branching narratives with a saved position.
+ * Interactive stories — branching ENGLISH narratives with a saved position.
  *
  * The scene graph is data, not code: each scene carries `choices`, and each
  * choice names the `scene_order` it leads to. Nothing validates that the target
@@ -21,7 +21,7 @@ const STORY = "bbbbbbbb-0000-4000-8000-000000000000";
 
 const aStory = (over: Record<string, unknown> = {}) => ({
   id: STORY,
-  title: "Lost in the souq",
+  title: "Lost in the market",
   title_arabic: "ضايع في السوق",
   description: "Find your way back to the hotel",
   description_arabic: "",
@@ -42,8 +42,8 @@ const aScene = (order: number, over: Record<string, unknown> = {}) => ({
   id: `cccccccc-0000-4000-8000-00000000000${order}`,
   story_id: STORY,
   scene_order: order,
-  narrative_arabic: `المشهد رقم ${order}`,
   narrative_english: `Scene number ${order}`,
+  narrative_arabic: `المشهد رقم ${order}`,
   narrative_literal: null,
   vocabulary: [],
   choices: [],
@@ -60,23 +60,23 @@ function seedForkedStory(db: MemoryDb) {
   db.seed("interactive_stories", [aStory()]);
   db.seed("story_scenes", [
     aScene(0, {
+      narrative_english: "You are in the market",
       narrative_arabic: "أنت في السوق",
-      narrative_english: "You are in the souq",
       choices: [
-        { text_arabic: "اسأل البائع", text_english: "Ask the shopkeeper", next_scene_order: 1 },
-        { text_arabic: "امش لوحدك", text_english: "Walk on alone", next_scene_order: 2 },
+        { text_english: "Ask the shopkeeper", text_arabic: "اسأل البائع", next_scene_order: 1 },
+        { text_english: "Walk on alone", text_arabic: "امش لوحدك", next_scene_order: 2 },
       ],
     }),
     aScene(1, {
-      narrative_arabic: "البائع يدلك على الطريق",
       narrative_english: "The shopkeeper points the way",
+      narrative_arabic: "البائع يدلك على الطريق",
       is_ending: true,
       ending_message: "You found the hotel",
       ending_message_arabic: "وصلت الفندق",
     }),
     aScene(2, {
-      narrative_arabic: "ضعت أكثر",
       narrative_english: "You are more lost than before",
+      narrative_arabic: "ضعت أكثر",
       is_ending: true,
       ending_message: "Try asking next time",
     }),
@@ -94,7 +94,7 @@ test.describe("the story list", () => {
 
     await page.goto("/stories");
 
-    await expect(page.getByRole("heading", { name: "Lost in the souq" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Lost in the market" })).toBeVisible();
     await expect(page.getByText("Gulf")).toBeVisible();
     await expect(page.getByText("Beginner")).toBeVisible();
   });
@@ -132,8 +132,8 @@ test.describe("the story list", () => {
 
     // Deliberate, and different from how the curriculum behaves:
     // the query has no dialect filter, and the card badges the dialect instead.
-    // Worth pinning, because "why does my Gulf learner see Egyptian content" has
-    // a different answer here than everywhere else in the app.
+    // The dialect only changes the scaffold language here — the English is the
+    // same task for everyone — so cross-dialect browsing costs nothing.
     await expect(page.getByRole("heading", { name: "Gulf story" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Egyptian story" })).toBeVisible();
   });
@@ -150,7 +150,7 @@ test.describe("the story list", () => {
     seedForkedStory(db);
 
     await page.goto("/stories");
-    await page.getByRole("heading", { name: "Lost in the souq" }).click();
+    await page.getByRole("heading", { name: "Lost in the market" }).click();
 
     await expect(page).toHaveURL(new RegExp(`/stories/${STORY}$`));
   });
@@ -159,11 +159,11 @@ test.describe("the story list", () => {
     await signInAs("anonymous");
     db.seed("interactive_stories", [aStory()]);
 
-    await page.goto("/stories");
-
     // No ProtectedRoute on either story route — this is a sample-the-product
     // surface, and a redirect to /auth would defeat that.
-    await expect(page.getByRole("heading", { name: "Lost in the souq" })).toBeVisible();
+    await page.goto("/stories");
+
+    await expect(page.getByRole("heading", { name: "Lost in the market" })).toBeVisible();
   });
 });
 
@@ -176,7 +176,7 @@ test.describe("playing through a story", () => {
   test("opens on the first scene with its choices", async ({ page }) => {
     await page.goto(`/stories/${STORY}`);
 
-    await expect(page.getByText("أنت في السوق")).toBeVisible();
+    await expect(page.getByText("You are in the market")).toBeVisible();
     await expect(page.getByText("Ask the shopkeeper")).toBeVisible();
     await expect(page.getByText("Walk on alone")).toBeVisible();
   });
@@ -192,12 +192,10 @@ test.describe("playing through a story", () => {
     await page.getByText("Walk on alone").click();
 
     // Both choices lead to an ending, so picking the wrong one has to land
-    // somewhere different rather than somewhere generic. Asserted on the Arabic
-    // and the ending message, since the English narrative stays hidden until
-    // the reader asks for it.
-    await expect(page.getByText("ضعت أكثر")).toBeVisible();
+    // somewhere different rather than somewhere generic.
+    await expect(page.getByText("You are more lost than before")).toBeVisible();
     await expect(page.getByText("Try asking next time")).toBeVisible();
-    await expect(page.getByText("البائع يدلك على الطريق")).toHaveCount(0);
+    await expect(page.getByText("The shopkeeper points the way")).toHaveCount(0);
   });
 
   test("records the whole path taken, not just where the reader stopped", async ({ page, db }) => {
@@ -231,7 +229,7 @@ test.describe("playing through a story", () => {
 
     await page.getByRole("button", { name: "Play Again" }).click();
 
-    await expect(page.getByText("أنت في السوق")).toBeVisible();
+    await expect(page.getByText("You are in the market")).toBeVisible();
     // The reset has to reach the server too, or the next visit resumes at the
     // ending the reader just chose to leave.
     await expect
@@ -255,7 +253,7 @@ test.describe("playing through a story", () => {
 
     await page.goto(`/stories/${STORY}`);
 
-    await expect(page.getByText("ضعت أكثر")).toBeVisible();
+    await expect(page.getByText("You are more lost than before")).toBeVisible();
     await expect(page.getByText("Scene 2 · 3 total scenes")).toBeVisible();
   });
 
@@ -277,7 +275,7 @@ test.describe("playing through a story", () => {
 
     // Resuming onto the trophy screen would leave a reader with nothing to do
     // but restart, so a completed run is not restored.
-    await expect(page.getByText("أنت في السوق")).toBeVisible();
+    await expect(page.getByText("You are in the market")).toBeVisible();
   });
 
   test("offers a way out when a choice points at a scene that is not there", async ({
@@ -286,7 +284,7 @@ test.describe("playing through a story", () => {
   }) => {
     db.seed("story_scenes", [
       aScene(0, {
-        choices: [{ text_arabic: "روح", text_english: "Go on", next_scene_order: 99 }],
+        choices: [{ text_english: "Go on", text_arabic: "روح", next_scene_order: 99 }],
       }),
     ]);
 
@@ -298,7 +296,7 @@ test.describe("playing through a story", () => {
     // whose only other control is the browser back button.
     await expect(page.getByText(/Scene not found/i)).toBeVisible();
     await page.getByRole("button", { name: "Restart Story" }).click();
-    await expect(page.getByText("المشهد رقم 0")).toBeVisible();
+    await expect(page.getByText("Scene number 0")).toBeVisible();
   });
 
   test("says so when a story has no scenes at all", async ({ page, db }) => {
@@ -319,52 +317,52 @@ test.describe("reading aids", () => {
     db.seed("story_progress", []);
     db.seed("story_scenes", [
       aScene(0, {
+        narrative_english: "You are in the market. The shopkeeper calls out to you.",
         narrative_arabic: "أنت في السوق. البائع ينادي عليك.",
-        narrative_english: "You are in the souq. The shopkeeper calls out to you.",
-        narrative_literal: "you in the-souq. the-seller calls on-you.",
-        choices: [{ text_arabic: "روح", text_english: "Go on", next_scene_order: 1 }],
+        narrative_literal: "أنت في الـ سوق. الـ بائع ينادي عليك.",
+        choices: [{ text_english: "Go on", text_arabic: "روح", next_scene_order: 1 }],
       }),
       aScene(1, { is_ending: true, ending_message: "Done" }),
     ]);
   });
 
-  test("keeps the English hidden until asked for", async ({ page }) => {
+  test("keeps the Arabic hidden until asked for", async ({ page }) => {
     await page.goto(`/stories/${STORY}`);
-    await expect(page.getByText("أنت في السوق. البائع ينادي عليك.")).toBeVisible();
+    await expect(page.getByText("You are in the market. The shopkeeper calls out to you.")).toBeVisible();
 
-    await expect(page.getByText("You are in the souq. The shopkeeper calls out to you.")).toHaveCount(0);
+    await expect(page.getByText("أنت في السوق. البائع ينادي عليك.")).toHaveCount(0);
 
     await page.getByRole("button", { name: "Show translation" }).click();
-    await expect(page.getByText("You are in the souq. The shopkeeper calls out to you.")).toBeVisible();
+    await expect(page.getByText("أنت في السوق. البائع ينادي عليك.")).toBeVisible();
   });
 
   test("hides it again", async ({ page }) => {
     await page.goto(`/stories/${STORY}`);
     await page.getByRole("button", { name: "Show translation" }).click();
-    await expect(page.getByText("You are in the souq. The shopkeeper calls out to you.")).toBeVisible();
+    await expect(page.getByText("أنت في السوق. البائع ينادي عليك.")).toBeVisible();
 
     await page.getByRole("button", { name: "Hide translation" }).click();
-    await expect(page.getByText("You are in the souq. The shopkeeper calls out to you.")).toHaveCount(0);
+    await expect(page.getByText("أنت في السوق. البائع ينادي عليك.")).toHaveCount(0);
   });
 
-  test("pairs each Arabic sentence with its English in line-by-line view", async ({ page }) => {
+  test("pairs each English sentence with its Arabic in line-by-line view", async ({ page }) => {
     await page.goto(`/stories/${STORY}`);
     await page.getByRole("button", { name: "Line-by-line" }).click();
 
     // The split is on sentence terminators and the two languages are aligned by
     // index, so a paragraph that splits into a different number of sentences in
     // each language silently mispairs them.
+    await expect(page.getByText("You are in the market.")).toBeVisible();
     await expect(page.getByText("أنت في السوق.")).toBeVisible();
-    await expect(page.getByText("You are in the souq.")).toBeVisible();
-    await expect(page.getByText("البائع ينادي عليك.")).toBeVisible();
     await expect(page.getByText("The shopkeeper calls out to you.")).toBeVisible();
+    await expect(page.getByText("البائع ينادي عليك.")).toBeVisible();
   });
 
   test("drops the translation toggle in line-by-line view", async ({ page }) => {
     await page.goto(`/stories/${STORY}`);
     await page.getByRole("button", { name: "Line-by-line" }).click();
 
-    // Line-by-line already shows the English, so the toggle would do nothing.
+    // Line-by-line already shows the Arabic, so the toggle would do nothing.
     await expect(page.getByRole("button", { name: /translation/ })).toHaveCount(0);
     await expect(page.getByRole("button", { name: "Paragraph view" })).toBeVisible();
   });
@@ -375,11 +373,11 @@ test.describe("reading aids", () => {
   }) => {
     db.seed("story_scenes", [
       aScene(0, {
-        // Two Arabic sentences, one English one — what a translator writing
+        // Two English sentences, one Arabic one — what a translator writing
         // naturally produces.
-        narrative_arabic: "أنت في السوق. البائع ينادي.",
-        narrative_english: "You are in the souq and the shopkeeper calls out",
-        choices: [{ text_arabic: "روح", text_english: "Go on", next_scene_order: 1 }],
+        narrative_english: "You are in the market. The shopkeeper calls out.",
+        narrative_arabic: "أنت في السوق والبائع ينادي عليك",
+        choices: [{ text_english: "Go on", text_arabic: "روح", next_scene_order: 1 }],
       }),
       aScene(1, { is_ending: true }),
     ]);
@@ -387,11 +385,11 @@ test.describe("reading aids", () => {
     await page.goto(`/stories/${STORY}`);
     await page.getByRole("button", { name: "Line-by-line" }).click();
 
-    // Pinning the consequence: the second Arabic sentence gets no English at
+    // Pinning the consequence: the second English sentence gets no Arabic at
     // all, rather than sharing the one that covers both. Nothing warns the
     // editor, and it reads as a missing translation.
-    await expect(page.getByText("You are in the souq and the shopkeeper calls out")).toBeVisible();
-    await expect(page.getByText("البائع ينادي.")).toBeVisible();
+    await expect(page.getByText("أنت في السوق والبائع ينادي عليك")).toBeVisible();
+    await expect(page.getByText("The shopkeeper calls out.")).toBeVisible();
   });
 });
 
@@ -402,10 +400,10 @@ test.describe("saving a word from a scene", () => {
     db.seed("user_vocabulary", []);
     db.seed("story_scenes", [
       aScene(0, {
+        narrative_english: "You are in the market. The shopkeeper sells dates.",
         narrative_arabic: "أنت في السوق. البائع يبيع تمر.",
-        narrative_english: "You are in the souq. The shopkeeper sells dates.",
-        vocabulary: [{ word_arabic: "تمر", word_english: "dates" }],
-        choices: [{ text_arabic: "روح", text_english: "Go on", next_scene_order: 1 }],
+        vocabulary: [{ word_english: "dates", word_arabic: "تمر" }],
+        choices: [{ text_english: "Go on", text_arabic: "روح", next_scene_order: 1 }],
       }),
       aScene(1, { is_ending: true }),
     ]);
@@ -416,15 +414,17 @@ test.describe("saving a word from a scene", () => {
     withVocabulary(db);
 
     await page.goto(`/stories/${STORY}`);
-    await page.getByRole("button", { name: /تمر/ }).click();
+    // Exact name: the narrative's own tappable "dates." (with the full stop)
+    // is a different control from the vocabulary pill.
+    await page.getByRole("button", { name: "dates", exact: true }).click();
 
     await expect(page.getByText("Saved to My Words")).toBeVisible();
     await expect.poll(() => db.rows("user_vocabulary").length).toBe(1);
     // The sentence containing the word, not the whole scene: a flashcard whose
     // example is three sentences long is not a usable example.
     expect(db.rows("user_vocabulary")[0]).toMatchObject({
-      word_arabic: "تمر",
       word_english: "dates",
+      word_arabic: "تمر",
       source: "story",
       sentence_text: "البائع يبيع تمر.",
       sentence_english: "The shopkeeper sells dates.",
@@ -436,10 +436,10 @@ test.describe("saving a word from a scene", () => {
     withVocabulary(db);
 
     await page.goto(`/stories/${STORY}`);
-    await page.getByRole("button", { name: /تمر/ }).click();
+    await page.getByRole("button", { name: "dates", exact: true }).click();
     await expect(page.getByText("Saved to My Words")).toBeVisible();
 
-    await expect(page.getByRole("button", { name: /تمر/ })).toBeDisabled();
+    await expect(page.getByRole("button", { name: "dates", exact: true })).toBeDisabled();
   });
 
   test("reports a failed save", async ({ page, signInAs, db, expectConsoleErrors }) => {
@@ -449,10 +449,10 @@ test.describe("saving a word from a scene", () => {
     db.failWrites("user_vocabulary", 500);
 
     await page.goto(`/stories/${STORY}`);
-    await page.getByRole("button", { name: /تمر/ }).click();
+    await page.getByRole("button", { name: "dates", exact: true }).click();
 
     await expect(page.getByText("Failed to save")).toBeVisible();
-    await expect(page.getByRole("button", { name: /تمر/ })).toBeEnabled();
+    await expect(page.getByRole("button", { name: "dates", exact: true })).toBeEnabled();
   });
 
   test("gives a signed-out reader a dead button rather than a prompt", async ({
@@ -469,7 +469,7 @@ test.describe("saving a word from a scene", () => {
     // but the same button is `disabled={isSaved || !user}` — so the click never
     // lands and that message is unreachable. A signed-out reader sees a word
     // pill with a plus on it that does nothing, and is told nothing.
-    await expect(page.getByRole("button", { name: /تمر/ })).toBeDisabled();
+    await expect(page.getByRole("button", { name: "dates", exact: true })).toBeDisabled();
     await expect(page.getByText("Sign in to save words")).toHaveCount(0);
   });
 });

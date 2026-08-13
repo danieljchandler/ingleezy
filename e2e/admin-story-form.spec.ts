@@ -161,18 +161,18 @@ test.describe("a new story", () => {
   test("saves the scene alongside the story", async ({ page, db }) => {
     await page.goto("/admin/stories/new");
     await titleField(page).fill("At the Coffee Shop");
-    await page.getByPlaceholder("دخلت المقهى وشفت...").fill("دخلت المقهى");
     await page.getByPlaceholder("You entered the café and saw...").fill("You entered the café");
-    await page.getByPlaceholder("entered-I the-café and-saw-I...").fill("entered-I the-café");
+    await page.getByPlaceholder("دخلت المقهى وشفت...").fill("دخلت المقهى");
+    await page.getByPlaceholder("أنا دخلت الـ مقهى و شفت...").fill("أنا دخلت الـ مقهى");
     await saveButton(page).click();
 
     const scenes = await writtenTo(db, "story_scenes");
     expect(scenes).toHaveLength(1);
     expect(scenes[0]).toMatchObject({
       scene_order: 0,
-      narrative_arabic: "دخلت المقهى",
       narrative_english: "You entered the café",
-      narrative_literal: "entered-I the-café",
+      narrative_arabic: "دخلت المقهى",
+      narrative_literal: "أنا دخلت الـ مقهى",
       is_ending: false,
     });
   });

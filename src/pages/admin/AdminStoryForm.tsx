@@ -320,7 +320,9 @@ const AdminStoryForm = () => {
                 <Select value={dialect} onValueChange={setDialect}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {['Gulf', 'Egyptian', 'Levantine', 'MSA'].map((d) => (
+                    {/* The dialect names the learner's Arabic — the scaffold
+                        language — so the list matches the app's dialects. */}
+                    {['Gulf', 'Egyptian', 'Yemeni'].map((d) => (
                       <SelectItem key={d} value={d}>{d}</SelectItem>
                     ))}
                   </SelectContent>
@@ -365,18 +367,8 @@ const AdminStoryForm = () => {
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
-                {/* Narrative */}
+                {/* Narrative — the English is the story; the Arabic its scaffold */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label>Narrative (Arabic)</Label>
-                    <Textarea
-                      value={scene.narrative_arabic}
-                      onChange={(e) => updateScene(sIdx, { narrative_arabic: e.target.value })}
-                      placeholder="دخلت المقهى وشفت..."
-                      dir="rtl"
-                      rows={3}
-                    />
-                  </div>
                   <div>
                     <Label>Narrative (English)</Label>
                     <Textarea
@@ -386,13 +378,24 @@ const AdminStoryForm = () => {
                       rows={3}
                     />
                   </div>
+                  <div>
+                    <Label>Narrative (Arabic scaffold)</Label>
+                    <Textarea
+                      value={scene.narrative_arabic}
+                      onChange={(e) => updateScene(sIdx, { narrative_arabic: e.target.value })}
+                      placeholder="دخلت المقهى وشفت..."
+                      dir="rtl"
+                      rows={3}
+                    />
+                  </div>
                 </div>
                 <div>
-                  <Label>Narrative (Literal — word-for-word)</Label>
+                  <Label>Narrative (Literal — Arabic in English word order)</Label>
                   <Textarea
                     value={scene.narrative_literal ?? ''}
                     onChange={(e) => updateScene(sIdx, { narrative_literal: e.target.value })}
-                    placeholder="entered-I the-café and-saw-I..."
+                    placeholder="أنا دخلت الـ مقهى و شفت..."
+                    dir="rtl"
                     rows={2}
                   />
                 </div>
@@ -444,16 +447,16 @@ const AdminStoryForm = () => {
                           <div key={cIdx} className="flex items-start gap-2 bg-muted/50 rounded-lg p-3">
                             <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-2">
                               <Input
+                                placeholder="English text"
+                                value={choice.text_english}
+                                onChange={(e) => updateChoice(sIdx, cIdx, { text_english: e.target.value })}
+                                className="text-sm"
+                              />
+                              <Input
                                 placeholder="Arabic text"
                                 value={choice.text_arabic}
                                 onChange={(e) => updateChoice(sIdx, cIdx, { text_arabic: e.target.value })}
                                 dir="rtl"
-                                className="text-sm"
-                              />
-                              <Input
-                                placeholder="English text"
-                                value={choice.text_english}
-                                onChange={(e) => updateChoice(sIdx, cIdx, { text_english: e.target.value })}
                                 className="text-sm"
                               />
                               <div className="flex items-center gap-2">
@@ -489,18 +492,18 @@ const AdminStoryForm = () => {
                     {scene.vocabulary.map((v, vIdx) => (
                       <div key={vIdx} className="flex items-center gap-1 bg-primary/10 rounded-full pl-3 pr-1 py-1">
                         <Input
+                          value={v.word_english}
+                          onChange={(e) => updateVocab(sIdx, vIdx, { word_english: e.target.value })}
+                          className="h-6 w-24 border-0 bg-transparent text-sm p-0"
+                          placeholder="English"
+                        />
+                        <span className="text-muted-foreground text-xs">/</span>
+                        <Input
                           value={v.word_arabic}
                           onChange={(e) => updateVocab(sIdx, vIdx, { word_arabic: e.target.value })}
                           className="h-6 w-24 border-0 bg-transparent text-sm p-0"
                           dir="rtl"
                           placeholder="عربي"
-                        />
-                        <span className="text-muted-foreground text-xs">/</span>
-                        <Input
-                          value={v.word_english}
-                          onChange={(e) => updateVocab(sIdx, vIdx, { word_english: e.target.value })}
-                          className="h-6 w-24 border-0 bg-transparent text-sm p-0"
-                          placeholder="English"
                         />
                         <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => removeVocab(sIdx, vIdx)}>
                           <Trash2 className="h-3 w-3 text-destructive" />
@@ -535,7 +538,7 @@ const AdminStoryForm = () => {
                 id="ai-prompt"
                 value={aiPrompt}
                 onChange={(e) => setAiPrompt(e.target.value)}
-                placeholder="e.g. Ordering food at a traditional Gulf restaurant, negotiating a taxi fare in Cairo, visiting a souk and bargaining for spices..."
+                placeholder="e.g. Ordering food at a restaurant abroad, a job interview in English, checking in at the airport, asking for directions in a new city..."
                 rows={3}
                 className="mt-1"
               />
@@ -547,7 +550,7 @@ const AdminStoryForm = () => {
                 id="ai-guidance"
                 value={aiGuidance}
                 onChange={(e) => setAiGuidance(e.target.value)}
-                placeholder="e.g. Include vocabulary about numbers and prices. Make one path lead to a cultural faux pas. Focus on polite greetings..."
+                placeholder="e.g. Include vocabulary about numbers and prices. Make one path lead to a misunderstanding. Focus on polite requests..."
                 rows={2}
                 className="mt-1"
               />

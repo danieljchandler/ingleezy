@@ -20,7 +20,7 @@ import { toast } from 'sonner';
 import { recordContinue, clearContinue } from '@/lib/continueProgress';
 import { useDialect } from '@/contexts/DialectContext';
 import { AskAISentence } from '@/components/shared/AskAISentence';
-import { TranslationPair } from '@/components/shared/TranslationPair';
+import { TappableEnglishText } from '@/components/shared/TappableEnglishText';
 
 /**
  * Split a paragraph into sentences by sentence terminators (. ! ? ؟ and newlines),
@@ -36,23 +36,23 @@ function splitSentences(text: string): string[] {
 }
 
 /**
- * Find the sentence in `arabic` containing `word`, and return the aligned
- * English sentence by index. Falls back to the full text when not found.
+ * Find the sentence in `english` containing `word`, and return the aligned
+ * Arabic sentence by index. Falls back to the full text when not found.
  */
 function extractSentenceForWord(
-  arabic: string,
   english: string,
+  arabic: string,
   word: string,
 ): { sentence_text: string; sentence_english: string } {
-  const arSentences = splitSentences(arabic);
   const enSentences = splitSentences(english);
-  const idx = arSentences.findIndex(s => s.includes(word));
+  const arSentences = splitSentences(arabic);
+  const idx = enSentences.findIndex(s => s.toLowerCase().includes(word.toLowerCase()));
   if (idx === -1) {
     return { sentence_text: arabic, sentence_english: english };
   }
   return {
-    sentence_text: arSentences[idx],
-    sentence_english: enSentences[idx] ?? english,
+    sentence_text: arSentences[idx] ?? arabic,
+    sentence_english: enSentences[idx],
   };
 }
 
@@ -111,7 +111,7 @@ const StoryPlayer = () => {
               kind: "story" as const,
               title: storyTitle,
               summary: "Reading an interactive branching story.",
-              content: `Current scene: ${currentScene.narrative_arabic}${currentScene.narrative_english ? ` — ${currentScene.narrative_english}` : ""}`,
+              content: `Current scene: ${currentScene.narrative_english}${currentScene.narrative_arabic ? ` — ${currentScene.narrative_arabic}` : ""}`,
             }
           : null,
       [storyTitle, currentScene],
@@ -218,27 +218,33 @@ const StoryPlayer = () => {
               {/* Decorative corner */}
               <div className="absolute top-0 right-0 w-16 h-16 bg-primary/5 rounded-bl-full" />
 
-              {/* Arabic narrative */}
+              {/* English narrative — the reading task; every word tappable */}
               {lineByLine ? (
-                <div className="mb-4 space-y-3" dir="rtl">
-                  {splitSentences(currentScene.narrative_arabic).map((ar, i) => {
-                    const en = splitSentences(currentScene.narrative_english)[i];
+                <div className="mb-4 space-y-3">
+                  {splitSentences(currentScene.narrative_english).map((en, i) => {
+                    const ar = splitSentences(currentScene.narrative_arabic)[i];
                     return (
                       <div key={i} className="pb-3 border-b border-border/40 last:border-0">
-                        <p className="text-2xl leading-relaxed font-medium">{ar}</p>
-                        <div className="flex items-center justify-between gap-2 mt-1.5" dir="ltr">
-                          {en ? (
-                            <p className="text-sm text-muted-foreground flex-1">{en}</p>
+                        <p className="text-xl leading-relaxed font-medium font-english">
+                          <TappableEnglishText text={en} sentenceArabic={ar} source="story" />
+                        </p>
+                        <div className="flex items-center justify-between gap-2 mt-1.5">
+                          {ar ? (
+                            <p className="text-sm text-muted-foreground flex-1 font-arabic" dir="rtl">{ar}</p>
                           ) : <span />}
-                          <AskAISentence arabic={ar} english={en} variant="chip" />
+                          <AskAISentence arabic={ar ?? ""} english={en} variant="chip" />
                         </div>
                       </div>
                     );
                   })}
                 </div>
               ) : (
-                <p className="text-2xl leading-relaxed mb-4 font-medium" dir="rtl">
-                  {currentScene.narrative_arabic}
+                <p className="text-xl leading-relaxed mb-4 font-medium font-english">
+                  <TappableEnglishText
+                    text={currentScene.narrative_english}
+                    sentenceArabic={currentScene.narrative_arabic}
+                    source="story"
+                  />
                 </p>
               )}
 
@@ -261,12 +267,15 @@ const StoryPlayer = () => {
               </div>
 
               {!lineByLine && showTranslation && (
-                <div className="animate-in fade-in duration-200">
-                  <TranslationPair
-                    variant="compact"
-                    literal={currentScene.narrative_literal}
-                    natural={currentScene.narrative_english}
-                  />
+                <div className="animate-in fade-in duration-200 space-y-1">
+                  <p dir="rtl" className="font-arabic text-base text-foreground">
+                    {currentScene.narrative_arabic}
+                  </p>
+                  {currentScene.narrative_literal && (
+                    <p dir="rtl" className="font-arabic text-sm text-muted-foreground/80">
+                      {currentScene.narrative_literal}
+                    </p>
+                  )}
                 </div>
               )}
 
@@ -276,7 +285,7 @@ const StoryPlayer = () => {
                   <p className="text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider flex items-center gap-1">
                     <Sparkles className="h-3 w-3" /> Key Words · tap to save
                   </p>
-                  <div className="flex flex-wrap gap-2" dir="rtl">
+                  <div className="flex flex-wrap gap-2">
                     {currentScene.vocabulary.map((v, i) => {
                       const key = `${v.word_arabic}::${v.word_english}`;
                       const isSaved = savedWords.has(key);
@@ -290,9 +299,9 @@ const StoryPlayer = () => {
                               return;
                             }
                             const { sentence_text, sentence_english } = extractSentenceForWord(
-                              currentScene.narrative_arabic,
                               currentScene.narrative_english,
-                              v.word_arabic,
+                              currentScene.narrative_arabic,
+                              v.word_english,
                             );
                             addVocab.mutate(
                               {
@@ -325,8 +334,8 @@ const StoryPlayer = () => {
                               : 'bg-primary/10 hover:bg-primary/20 active:scale-95'
                           )}
                         >
-                          <span className="font-medium">{v.word_arabic}</span>
-                          {showTranslation && <span className="text-muted-foreground text-xs">({v.word_english})</span>}
+                          <span className="font-medium font-english">{v.word_english}</span>
+                          {showTranslation && <span className="text-muted-foreground text-xs font-arabic" dir="rtl">({v.word_arabic})</span>}
                           {isSaved ? (
                             <Check className="h-3 w-3 text-primary" />
                           ) : (
@@ -379,10 +388,10 @@ const StoryPlayer = () => {
                       'active:scale-[0.98] group'
                     )}
                   >
-                    <p className="text-lg font-medium group-hover:text-primary transition-colors" dir="rtl">
-                      {choice.text_arabic}
+                    <p className="text-lg font-medium group-hover:text-primary transition-colors font-english">
+                      {choice.text_english}
                     </p>
-                    <p className="text-sm text-muted-foreground mt-1">{choice.text_english}</p>
+                    <p className="text-sm text-muted-foreground mt-1 font-arabic" dir="rtl">{choice.text_arabic}</p>
                   </button>
                 ))}
               </div>

@@ -1,8 +1,11 @@
+// generate-story — authors a complete interactive branching story in easy
+// ENGLISH for the admin story builder. The scenes carry a dialect-Arabic
+// scaffold (natural translation + a word-for-word gloss in English word
+// order) so the learner reads English with their own Arabic a tap away.
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { askBrain, BrainHttpError } from "../_shared/aiBrain.ts";
-import { getTashkeelMandate, getDialectTransliterationRules, type Dialect } from "../_shared/dialectHelpers.ts";
+import { getDialectLabel, type Dialect } from "../_shared/dialectHelpers.ts";
 import { enforceDailyCap } from "../_shared/usageCap.ts";
-import { LITERAL_GLOSS_RULE } from "../_shared/literalGloss.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
 
 
@@ -29,8 +32,9 @@ serve(async (req) => {
     const numScenes = Math.max(3, Math.min(10, sceneCount || 5));
     const targetDialect: Dialect = (dialect || "Gulf") as Dialect;
     const targetDifficulty = difficulty || "Beginner";
+    const dialectLabel = getDialectLabel(targetDialect);
 
-    const systemExtra = `You are an expert Arabic language teacher creating interactive branching stories at a ${targetDifficulty} level.
+    const systemExtra = `You are an expert English teacher creating interactive branching stories in ENGLISH at a ${targetDifficulty} level for native ${dialectLabel} Arabic speakers.
 
 Generate a complete interactive story with exactly ${numScenes} scenes (numbered 0 to ${numScenes - 1}).
 
@@ -44,36 +48,32 @@ Story structure rules:
 - The story should naturally lead toward the ending(s)
 
 Difficulty rules at ${targetDifficulty} level:
-- Beginner: simple sentences, common everyday vocabulary, short narratives
-- Intermediate: more complex sentences, colloquial expressions, cultural references
+- Beginner: simple short sentences, common everyday vocabulary
+- Intermediate: more complex sentences, phrasal verbs, natural idiom
 - Advanced: idiomatic expressions, complex grammar, rich cultural context
-- Always provide accurate English translations
-- Each scene should teach 2-4 vocabulary words
+- The English is contemporary and natural — contractions welcome; textbook stiffness is a defect
+- Each scene should teach 2-4 English vocabulary words
 
 ${guidance ? `Additional guidance from the author:\n${guidance}\n` : ""}
 
-${getTashkeelMandate()}
-- narrative_arabic, choices' text_arabic, and ending_message_arabic must all be fully vocalized.
-
-${getDialectTransliterationRules(targetDialect)}
-- Provide a transliteration for narrative_arabic on every scene.
-
-${LITERAL_GLOSS_RULE}
-- Provide "narrative_literal" for every scene.
+The Arabic scaffold on every scene:
+- narrative_arabic: a natural ${dialectLabel} translation of the scene (authentic spoken dialect, NEVER Modern Standard Arabic / فصحى)
+- narrative_literal: a word-for-word ${dialectLabel} gloss preserving the ENGLISH word order — it may sound stiff; its purpose is to show the learner how each English sentence is built
+- choices' text_arabic and ending_message_arabic are ${dialectLabel} too
 
 You MUST call the generate_story function. No text outside the function call.`;
 
-    const userPrompt = `Create an interactive ${targetDialect} Arabic story about: ${prompt}
+    const userPrompt = `Create an interactive English story about: ${prompt}
 
-The story should have ${numScenes} scenes. Make the narrative engaging and educational. Each scene should immerse the learner in a realistic ${targetDialect} cultural context. The choices should feel natural and meaningful, not arbitrary.`;
+The story should have ${numScenes} scenes. Make the narrative engaging and educational for a ${dialectLabel} Arabic speaker learning English. The choices should feel natural and meaningful, not arbitrary.`;
 
     const parameters = {
       type: "object",
       properties: {
         title: { type: "string", description: "Story title in English (catchy, descriptive)" },
-        title_arabic: { type: "string", description: `Story title in ${targetDialect} Arabic` },
+        title_arabic: { type: "string", description: `Story title in ${dialectLabel} Arabic` },
         description: { type: "string", description: "1-2 sentence description of the story in English" },
-        description_arabic: { type: "string", description: `1-2 sentence description in ${targetDialect} Arabic` },
+        description_arabic: { type: "string", description: `1-2 sentence description in ${dialectLabel} Arabic` },
         scenes: {
           type: "array",
           description: `Array of exactly ${numScenes} scenes`,
@@ -81,20 +81,19 @@ The story should have ${numScenes} scenes. Make the narrative engaging and educa
             type: "object",
             properties: {
               scene_order: { type: "number", description: "Scene index starting from 0" },
-              narrative_arabic: { type: "string", description: `Scene narrative in ${targetDialect} Arabic (2-4 sentences), FULLY VOCALIZED with tashkeel` },
-              narrative_transliteration: { type: "string", description: "Latin-letter transliteration of narrative_arabic" },
-              narrative_english: { type: "string", description: "Natural English translation (2-4 sentences)" },
-              narrative_literal: { type: "string", description: "Word-for-word English gloss of the narrative preserving Arabic word order (may sound stiff; shows how sentences are built)" },
+              narrative_english: { type: "string", description: "Scene narrative in natural English (2-4 sentences) — the learner's reading task" },
+              narrative_arabic: { type: "string", description: `Natural ${dialectLabel} Arabic translation of the narrative (spoken dialect, never MSA)` },
+              narrative_literal: { type: "string", description: "Word-for-word Arabic gloss of the narrative preserving the ENGLISH word order (may sound stiff; shows how the English is built)" },
               vocabulary: {
                 type: "array",
-                description: "2-4 key vocabulary words from this scene",
+                description: "2-4 key English words from this scene",
                 items: {
                   type: "object",
                   properties: {
-                    word_arabic: { type: "string" },
-                    word_english: { type: "string" },
+                    word_english: { type: "string", description: "The English word" },
+                    word_arabic: { type: "string", description: `Its ${dialectLabel} meaning` },
                   },
-                  required: ["word_arabic", "word_english"],
+                  required: ["word_english", "word_arabic"],
                   additionalProperties: false,
                 },
               },
@@ -105,22 +104,21 @@ The story should have ${numScenes} scenes. Make the narrative engaging and educa
                 items: {
                   type: "object",
                   properties: {
-                    text_arabic: { type: "string", description: "Choice text in dialect Arabic" },
                     text_english: { type: "string", description: "Choice text in English" },
+                    text_arabic: { type: "string", description: `Choice text in ${dialectLabel} Arabic` },
                     next_scene_order: { type: "number", description: `Scene number to go to (1 to ${numScenes - 1})` },
                   },
-                  required: ["text_arabic", "text_english", "next_scene_order"],
+                  required: ["text_english", "text_arabic", "next_scene_order"],
                   additionalProperties: false,
                 },
               },
               ending_message: { type: "string", description: "Congratulatory message in English (null for non-endings)" },
-              ending_message_arabic: { type: "string", description: "Congratulatory message in Arabic (null for non-endings)" },
+              ending_message_arabic: { type: "string", description: `Congratulatory message in ${dialectLabel} Arabic (null for non-endings)` },
             },
             required: [
               "scene_order",
-              "narrative_arabic",
-              "narrative_transliteration",
               "narrative_english",
+              "narrative_arabic",
               "narrative_literal",
               "vocabulary",
               "is_ending",
@@ -137,30 +135,25 @@ The story should have ${numScenes} scenes. Make the narrative engaging and educa
     };
 
     try {
-      const result = await askBrain<{ scenes?: Array<{ narrative_arabic?: string }> }>({
+      const result = await askBrain<{ scenes?: Array<{ narrative_english?: string }> }>({
         purpose: "story",
         dialect: targetDialect,
+        target: "english",
         userPrompt,
         systemPromptExtra: systemExtra,
         strategy: "draft_critic",
         models: ["google/gemini-3-flash-preview", "openai/gpt-5-mini"],
         tool: {
           name: "generate_story",
-          description: "Generate a complete interactive Arabic story with scenes and choices",
+          description: "Generate a complete interactive English story with scenes and choices",
           parameters,
         },
         maxTokens: 6000,
         temperature: 0.8,
-        arabicTextPath: (p) => {
-          const story = p as { scenes?: Array<{ narrative_arabic?: string }> };
-          return (story?.scenes ?? []).map((s) => s?.narrative_arabic ?? "").join(" ");
-        },
       });
 
       console.log("generate-story brain result", {
         models: result.models,
-        leaks: result.msaLeaks.leaks.length,
-        repairs: result.msaRepairs,
         latencyMs: result.totalLatencyMs,
       });
 

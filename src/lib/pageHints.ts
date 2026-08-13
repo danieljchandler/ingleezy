@@ -67,7 +67,7 @@ export const PAGE_HINTS: Record<string, { title: string; body: string; cta?: str
   },
   stories: {
     title: "Interactive Stories",
-    body: "Choose-your-own-adventure stories in Arabic. Decisions branch the narrative and reinforce vocab in context.",
+    body: "Choose-your-own-adventure stories in English. Decisions branch the narrative and reinforce vocab in context.",
   },
   "placement-quiz": {
     title: "Placement Quiz",

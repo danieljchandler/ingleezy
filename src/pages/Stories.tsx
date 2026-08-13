@@ -28,7 +28,7 @@ const Stories = () => {
             <BookOpen className="h-8 w-8 text-primary" />
           </div>
           <h1 className="text-2xl font-bold font-heading mb-1 inline-flex items-center gap-2 justify-center">Interactive Stories <InfoHint {...PAGE_HINTS["stories"]} size="md" /></h1>
-          <p className="text-muted-foreground">Choose your adventure and learn Arabic through immersive scenarios</p>
+          <p className="text-muted-foreground">Choose your adventure and learn English through immersive scenarios</p>
         </div>
 
         {isLoading ? (
