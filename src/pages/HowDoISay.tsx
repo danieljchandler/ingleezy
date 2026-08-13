@@ -35,9 +35,9 @@ import {
 import { cn } from "@/lib/utils";
 
 interface PhraseTranslation {
-  arabic: string;
-  transliteration: string;
   english: string;
+  arabic: string;
+  phonetic_ar: string;
   context: string;
   naturalness: number;
   isPreferred: boolean;
@@ -52,8 +52,7 @@ interface HowDoISayResult {
   situationSummary?: string;
   translations: PhraseTranslation[];
   vocabulary: VocabItem[];
-  culturalNotes?: string;
-  genderVariants?: string;
+  usageNotes_ar?: string;
 }
 
 /** Extracts the real error message from a supabase.functions.invoke error. */
@@ -142,7 +141,7 @@ const HowDoISay = () => {
         toast.error("Sign in to save words");
         return;
       }
-      if (savedWords.has(word.arabic)) return;
+      if (savedWords.has(word.english)) return;
 
       try {
         await addUserVocabulary.mutateAsync({
@@ -151,8 +150,8 @@ const HowDoISay = () => {
           root: word.root,
           source: "how-do-i-say",
         });
-        setSavedWords((prev) => new Set(prev).add(word.arabic));
-        toast.success("Saved to My Words!", { description: word.arabic });
+        setSavedWords((prev) => new Set(prev).add(word.english));
+        toast.success("Saved to My Words!", { description: word.english });
       } catch {
         toast.error("Failed to save word");
       }
@@ -166,23 +165,26 @@ const HowDoISay = () => {
         toast.error("Sign in to save phrases");
         return;
       }
-      if (savedPhrases.has(translation.arabic)) return;
+      if (savedPhrases.has(translation.english)) return;
 
       try {
         await addUserPhrase.mutateAsync({
+          // Flipped semantics: the ENGLISH phrase is what is being learned;
+          // the Arabic gloss rides in phrase_arabic. transliteration carries
+          // the Arabic-script phonetic rendering of the English.
           phrase_arabic: translation.arabic,
-          phrase_english: result?.phrase ?? translation.english,
-          transliteration: translation.transliteration,
+          phrase_english: translation.english,
+          transliteration: translation.phonetic_ar,
           notes: translation.context || undefined,
           source: "how-do-i-say",
         });
-        setSavedPhrases((prev) => new Set(prev).add(translation.arabic));
-        toast.success("Phrase saved!", { description: translation.arabic });
+        setSavedPhrases((prev) => new Set(prev).add(translation.english));
+        toast.success("Phrase saved!", { description: translation.english });
       } catch {
         toast.error("Failed to save phrase");
       }
     },
-    [isAuthenticated, addUserPhrase, result, savedPhrases],
+    [isAuthenticated, addUserPhrase, savedPhrases],
   );
 
   return (
@@ -361,18 +363,16 @@ const HowDoISay = () => {
                             Best option
                           </Badge>
                         )}
-                        {/* Arabic phrase */}
-                        <p
-                          className="text-2xl font-semibold text-foreground leading-snug"
-                          dir="rtl"
-                          style={{ fontFamily: "'Amiri', serif" }}
-                        >
-                          {t.arabic}
+                        {/* The English — the thing being learned */}
+                        <p className="font-english text-2xl font-semibold text-foreground leading-snug">
+                          {t.english}
                         </p>
-                        {/* Transliteration */}
-                        <p className="text-sm text-primary/80 mt-1 italic">{t.transliteration}</p>
-                        {/* Back-translation */}
-                        <p className="text-sm text-muted-foreground mt-0.5">{t.english}</p>
+                        {/* How to pronounce it, in Arabic letters */}
+                        {t.phonetic_ar && (
+                          <p dir="rtl" className="font-arabic text-sm text-primary/80 mt-1">{t.phonetic_ar}</p>
+                        )}
+                        {/* What it means, in the learner's dialect */}
+                        <p dir="rtl" className="font-arabic text-sm text-muted-foreground mt-0.5">{t.arabic}</p>
                         {/* Context */}
                         {t.context && (
                           <p className="text-xs text-muted-foreground/70 mt-1.5 italic">
@@ -389,16 +389,16 @@ const HowDoISay = () => {
                       {isAuthenticated && (
                         <button
                           onClick={() => handleSavePhrase(t)}
-                          disabled={savedPhrases.has(t.arabic)}
+                          disabled={savedPhrases.has(t.english)}
                           className={cn(
                             "shrink-0 p-2 rounded-lg transition-all",
-                            savedPhrases.has(t.arabic)
+                            savedPhrases.has(t.english)
                               ? "text-primary bg-primary/10"
                               : "text-muted-foreground hover:text-primary hover:bg-primary/10",
                           )}
-                          title={savedPhrases.has(t.arabic) ? "Saved" : "Save phrase"}
+                          title={savedPhrases.has(t.english) ? "Saved" : "Save phrase"}
                         >
-                          {savedPhrases.has(t.arabic) ? (
+                          {savedPhrases.has(t.english) ? (
                             <BookmarkCheck className="h-5 w-5" />
                           ) : (
                             <Bookmark className="h-5 w-5" />
@@ -412,35 +412,18 @@ const HowDoISay = () => {
             </div>
           </div>
 
-          {/* Cultural notes */}
-          {result.culturalNotes && (
+          {/* Usage notes, in the learner's dialect */}
+          {result.usageNotes_ar && (
             <Card className="border-border bg-card">
               <CardHeader className="pb-2">
                 <CardTitle className="text-base flex items-center gap-2">
                   <Info className="h-4 w-4 text-primary" />
-                  Cultural Notes
+                  Usage Notes
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {result.culturalNotes}
-                </p>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Gender variants */}
-          {result.genderVariants && (
-            <Card className="border-border bg-card">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base flex items-center gap-2">
-                  <Users className="h-4 w-4 text-primary" />
-                  Gender Variants
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {result.genderVariants}
+                <p dir="rtl" className="font-arabic text-sm text-muted-foreground leading-relaxed">
+                  {result.usageNotes_ar}
                 </p>
               </CardContent>
             </Card>
@@ -463,35 +446,26 @@ const HowDoISay = () => {
                       className="flex items-center justify-between p-3 rounded-lg bg-muted/50 border border-border/50"
                     >
                       <div className="flex items-center gap-3 min-w-0">
-                        <span
-                          className="text-lg font-semibold text-foreground shrink-0"
-                          dir="rtl"
-                          style={{ fontFamily: "'Amiri', serif" }}
-                        >
-                          {word.arabic}
-                        </span>
-                        <span className="text-sm text-muted-foreground truncate">
+                        <span className="font-english text-lg font-semibold text-foreground shrink-0">
                           {word.english}
                         </span>
-                        {word.root && (
-                          <Badge variant="outline" className="text-xs shrink-0">
-                            Root: {word.root}
-                          </Badge>
-                        )}
+                        <span dir="rtl" className="font-arabic text-sm text-muted-foreground truncate">
+                          {word.arabic}
+                        </span>
                       </div>
                       {isAuthenticated && (
                         <button
                           onClick={() => handleSaveWord(word)}
-                          disabled={savedWords.has(word.arabic)}
+                          disabled={savedWords.has(word.english)}
                           className={cn(
                             "shrink-0 p-1.5 rounded-lg transition-all ml-2",
-                            savedWords.has(word.arabic)
+                            savedWords.has(word.english)
                               ? "text-primary"
                               : "text-muted-foreground hover:text-primary hover:bg-primary/10",
                           )}
-                          title={savedWords.has(word.arabic) ? "Saved" : "Save word"}
+                          title={savedWords.has(word.english) ? "Saved" : "Save word"}
                         >
-                          {savedWords.has(word.arabic) ? (
+                          {savedWords.has(word.english) ? (
                             <Check className="h-4 w-4" />
                           ) : (
                             <Plus className="h-4 w-4" />

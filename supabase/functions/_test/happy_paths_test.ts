@@ -417,21 +417,21 @@ Deno.test("placement-quiz scores without calling a model", async () => {
 Deno.test("how-do-i-say returns translations wrapped in a success envelope", async () => {
   const { status, body } = await call(
     "how-do-i-say",
-    { phrase: "How much is this?", dialect: "Gulf" },
+    { phrase: "بكم هذا؟", dialect: "Gulf" },
     {
       ...allowed(),
       ...modelReturns({
         translations: [
           {
+            english: "How much is this?",
             arabic: "بكم هذا؟",
-            transliteration: "bikam hatha",
-            literal: "with-how-much this",
-            register: "neutral",
+            phonetic_ar: "هاو متش إز ذس",
+            naturalness: 5,
             isPreferred: true,
           },
         ],
         vocabulary: [],
-        culturalNotes: "Common in shops.",
+        usageNotes_ar: "شائعة في المحلات.",
       }),
     },
   );
@@ -441,7 +441,7 @@ Deno.test("how-do-i-say returns translations wrapped in a success envelope", asy
   // the sort of inconsistency a test has to hold still.
   assertEquals(body.success, true);
   const result = body.result as Record<string, unknown>;
-  assertEquals(result.phrase, "How much is this?");
+  assertEquals(result.phrase, "بكم هذا؟");
   assert(Array.isArray(result.translations));
 });
 

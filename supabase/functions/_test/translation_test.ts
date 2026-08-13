@@ -5,7 +5,7 @@ import { chatCompletion, json, type UpstreamHandler } from "./upstreams.ts";
 /**
  * The three translation functions, which look alike and are not.
  *
- * `how-do-i-say` goes English→Arabic through the Brain's *council* strategy —
+ * `how-do-i-say` goes Arabic→English through the Brain's *council* strategy —
  * several drafters plus a judge — and post-processes the result heavily: it
  * filters incomplete translations, clamps naturalness, and forces exactly one
  * preferred entry. That normalisation is the part the page depends on and the
@@ -73,9 +73,9 @@ async function call(
 // ── how-do-i-say ────────────────────────────────────────────────────────────
 
 const aTranslation = (over: Record<string, unknown> = {}) => ({
+  english: "How's it going?",
   arabic: "شلونك",
-  transliteration: "shlonak",
-  english: "how are you",
+  phonetic_ar: "هاوز إت قوينق",
   context: "casual greeting",
   naturalness: 4,
   isPreferred: false,
@@ -104,24 +104,24 @@ Deno.test("how-do-i-say wraps its result in a success envelope", async () => {
   assertEquals(result.inputMode, "translation");
 });
 
-Deno.test("how-do-i-say drops translations missing their transliteration", async () => {
+Deno.test("how-do-i-say drops translations missing either language", async () => {
   const { body } = await call(
     "how-do-i-say",
-    { phrase: "how are you" },
+    { phrase: "شلون أقول شلونك" },
     caller({
       "ai.gateway.lovable.dev": emitting({
         translations: [
           aTranslation({ isPreferred: true }),
-          { arabic: "كيفك", english: "how are you" },
-          { transliteration: "keefak", english: "how are you" },
+          { english: "How are you?" },
+          { arabic: "كيفك", phonetic_ar: "هاو آر يو" },
         ],
       }),
     }),
   );
 
   const result = body.result as { translations: unknown[] };
-  // Both halves are required: the page renders the Arabic and the
-  // transliteration together, and a row with one missing renders as a blank.
+  // Both halves are required: the page renders the English with its dialect
+  // gloss together, and a row with one missing renders as a blank.
   assertEquals(result.translations.length, 1);
 });
 

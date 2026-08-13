@@ -18,20 +18,20 @@ import type { MemoryDb } from "../src/test/support/postgrest/store";
  */
 
 const aTranslation = (over: Record<string, unknown> = {}) => ({
+  english: "How's it going?",
   arabic: "شلونك",
-  transliteration: "shlonak",
-  english: "How are you",
-  context: "Casual, to a man",
+  phonetic_ar: "هاوز إت قوينق",
+  context: "Casual",
   naturalness: 5,
   isPreferred: true,
   ...over,
 });
 
 const aResult = (over: Record<string, unknown> = {}) => ({
-  phrase: "how are you",
+  phrase: "شلون أقول شلونك بالإنجليزي",
   inputMode: "translation",
   translations: [aTranslation()],
-  vocabulary: [{ arabic: "شلون", english: "how", root: "ش ل ن" }],
+  vocabulary: [{ english: "going", arabic: "ماشي" }],
   ...over,
 });
 
@@ -180,28 +180,15 @@ test.describe("the answer", () => {
     await expect(page.getByText("شلون", { exact: true })).toBeVisible();
   });
 
-  test("adds a cultural note when there is one", async ({ page, backend }) => {
+  test("adds a usage note when there is one", async ({ page, backend }) => {
     backend.stubFunction("how-do-i-say", {
       success: true,
-      result: aResult({ culturalNotes: "Answer with الحمد لله regardless of how you feel." }),
+      result: aResult({ usageNotes_ar: "هالعبارة غير رسمية — مع مديرك قل How are you." }),
     });
 
     await ask(page);
 
-    await expect(page.getByText(/regardless of how you feel/)).toBeVisible();
-  });
-
-  test("spells out the gendered forms when they differ", async ({ page, backend }) => {
-    backend.stubFunction("how-do-i-say", {
-      success: true,
-      result: aResult({ genderVariants: "شلونك to a man, شلونچ to a woman." }),
-    });
-
-    await ask(page);
-
-    // Arabic marks the *addressee's* gender, so a single translation is wrong
-    // for half the people a learner might say it to.
-    await expect(page.getByText(/to a woman/)).toBeVisible();
+    await expect(page.getByText(/مع مديرك/)).toBeVisible();
   });
 });
 
@@ -274,8 +261,8 @@ test.describe("saving what came back", () => {
     await expect.poll(() => db.rows("user_vocabulary").length).toBe(1);
     expect(db.rows("user_vocabulary")[0]).toMatchObject({
       user_id: TEST_USER_ID,
-      word_arabic: "شلون",
-      root: "ش ل ن",
+      word_english: "going",
+      word_arabic: "ماشي",
       source: "how-do-i-say",
     });
   });
@@ -285,11 +272,12 @@ test.describe("saving what came back", () => {
     await page.locator("button[title='Save phrase']").first().click();
 
     await expect.poll(() => db.rows("user_phrases").length).toBe(1);
-    // The English stored is the learner's own question, not the model's gloss
-    // of its own answer — that is what makes the card searchable later.
+    // The ENGLISH phrase is the thing being learned; the dialect gloss and
+    // the Arabic-letter phonetic rendering ride along with it.
     expect(db.rows("user_phrases")[0]).toMatchObject({
+      phrase_english: "How's it going?",
       phrase_arabic: "شلونك",
-      phrase_english: "how are you",
+      transliteration: "هاوز إت قوينق",
       source: "how-do-i-say",
     });
   });

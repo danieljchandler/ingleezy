@@ -1,26 +1,32 @@
-// how-do-i-say — dialect translation / scenario / conversation helper.
-// Powered by the AI Brain council strategy: 3 drafters + judge + MSA repair pass.
+// how-do-i-say — "how do I say this in English?" for Arabic speakers.
+// The learner types a phrase (dialect, Fusha, or rough English), a scenario,
+// or a pasted conversation, and gets 2-4 natural ENGLISH ways to say it —
+// each with a dialect-Arabic gloss and an Arabic-script phonetic rendering
+// (the mirror of the Latin transliteration the Arabic app gave English
+// speakers). Council strategy in english-target mode: the interference
+// rulebook steers phrasing and the usage notes toward what Arabic speakers
+// actually need told.
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { askBrain, BrainHttpError } from "../_shared/aiBrain.ts";
-import { getDialectLabel, getDialectTransliterationRules, type Dialect } from "../_shared/dialectHelpers.ts";
+import { getDialectLabel, type Dialect } from "../_shared/dialectHelpers.ts";
 import { enforceDailyCap } from "../_shared/usageCap.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
 
 
 interface Translation {
-  arabic: string;
-  transliteration: string;
   english: string;
+  arabic: string;
+  /** The English pronounced in Arabic letters ("ثانك يو"), readable aloud immediately. */
+  phonetic_ar: string;
   context: string;
   naturalness: number;
   isPreferred: boolean;
 }
 
 interface VocabItem {
-  arabic: string;
   english: string;
-  root?: string;
+  arabic: string;
 }
 
 interface BrainOutput {
@@ -29,37 +35,34 @@ interface BrainOutput {
   situationSummary?: string;
   translations: Translation[];
   vocabulary?: VocabItem[];
-  culturalNotes?: string;
-  genderVariants?: string;
+  usageNotes_ar?: string;
 }
 
 function buildExtras(dialect: Dialect): string {
   const dialectLabel = getDialectLabel(dialect);
-  return `You are an expert ${dialectLabel} language teacher.
+  return `You are an expert English teacher for native ${dialectLabel} speakers.
 
-The user may provide one of three input types. Detect which it is:
-1. TRANSLATION — a word or phrase to translate (e.g. "I'm tired", "thank you very much").
-2. SCENARIO — a situation description (e.g. "I'm at a restaurant and want the bill").
-3. CONVERSATION — a pasted chat where they want a reply.
+The user may provide one of three input types (their input may be Arabic, English, or a mix). Detect which it is:
+1. TRANSLATION — a word or phrase they want to say in English (e.g. "أنا تعبان", "شكراً بس بطريقة ثانية").
+2. SCENARIO — a situation description (e.g. "أنا في مطعم وأبي الفاتورة").
+3. CONVERSATION — a pasted chat where they want an English reply.
 
 Based on the detected type:
-- TRANSLATION → 2-4 natural ${dialectLabel} ways to say it.
+- TRANSLATION → 2-4 natural spoken-English ways to say it.
 - SCENARIO → 2-4 things to say in that situation, ordered most→least appropriate.
-- CONVERSATION → analyse tone/relationship, then 2-4 natural ${dialectLabel} replies.
+- CONVERSATION → analyse tone/relationship, then 2-4 natural English replies.
 
 Rules for the emit_translation tool call:
 - inputMode is exactly one of: translation | scenario | conversation.
-- detectedContext is one friendly sentence confirming what you understood.
-- situationSummary is required for SCENARIO and CONVERSATION; omit for TRANSLATION.
+- detectedContext is one friendly sentence in ${dialectLabel} confirming what you understood.
+- situationSummary is required for SCENARIO and CONVERSATION (in ${dialectLabel}); omit for TRANSLATION.
 - Provide 2-4 translations ordered most→least natural. Exactly one must have isPreferred=true.
-- naturalness is 1-5 (5 = most native).
-- Use ${dialectLabel} vocabulary and spelling, NEVER Modern Standard Arabic (فصحى).
-- Transliteration: simple Latin letters easy for English speakers.
-- vocabulary: 3-8 most useful individual words with optional Arabic root.
-- culturalNotes: 2-4 practical sentences (politeness, gender, usage tips).
-- genderVariants: only when phrasing changes by speaker/listener gender.
-
-${getDialectTransliterationRules(dialect)}`;
+- naturalness is 1-5 (5 = what a native speaker would actually say).
+- english: contemporary SPOKEN English — contractions welcome; textbook stiffness is a defect.
+- arabic: a ${dialectLabel} gloss of that English line (never Fusha).
+- phonetic_ar: the English pronounced in Arabic letters (e.g. "ثانك يو" for "thank you").
+- vocabulary: 3-8 most useful individual English words from the answers, each with its ${dialectLabel} meaning.
+- usageNotes_ar: 2-4 practical sentences in ${dialectLabel} — register, politeness, when each phrasing fits, and any Arabic-transfer trap to avoid.`;
 }
 
 const TOOL_PARAMETERS = {
@@ -75,14 +78,14 @@ const TOOL_PARAMETERS = {
       items: {
         type: "object",
         properties: {
-          arabic: { type: "string" },
-          transliteration: { type: "string" },
           english: { type: "string" },
+          arabic: { type: "string" },
+          phonetic_ar: { type: "string" },
           context: { type: "string" },
           naturalness: { type: "number", minimum: 1, maximum: 5 },
           isPreferred: { type: "boolean" },
         },
-        required: ["arabic", "transliteration", "english", "naturalness", "isPreferred"],
+        required: ["english", "arabic", "phonetic_ar", "naturalness", "isPreferred"],
       },
     },
     vocabulary: {
@@ -90,15 +93,13 @@ const TOOL_PARAMETERS = {
       items: {
         type: "object",
         properties: {
-          arabic: { type: "string" },
           english: { type: "string" },
-          root: { type: "string" },
+          arabic: { type: "string" },
         },
-        required: ["arabic", "english"],
+        required: ["english", "arabic"],
       },
     },
-    culturalNotes: { type: "string" },
-    genderVariants: { type: "string" },
+    usageNotes_ar: { type: "string" },
   },
   required: ["inputMode", "detectedContext", "translations"],
 } as const;
@@ -147,6 +148,7 @@ serve(async (req) => {
     const brain = await askBrain<BrainOutput>({
       purpose: "how_do_i_say",
       dialect,
+      target: "english",
       // Strategy resolved by pickStrategy(purpose) → council (drafters + judge),
       // matching this function's documented multi-model consensus.
       userPrompt: trimmedPhrase,
@@ -155,25 +157,19 @@ serve(async (req) => {
       temperature: 0.4,
       tool: {
         name: "emit_translation",
-        description: `Emit ${getDialectLabel(dialect)} translations/replies for the user's input.`,
+        description: "Emit natural English phrasings (with Arabic glosses) for the user's input.",
         parameters: TOOL_PARAMETERS as unknown as Record<string, unknown>,
-      },
-      arabicTextPath: (p) => {
-        const out = p as BrainOutput;
-        const ts = (out?.translations ?? []).map((t) => t?.arabic ?? "").join("\n");
-        const vocab = (out?.vocabulary ?? []).map((v) => v?.arabic ?? "").join(" ");
-        return `${ts}\n${vocab}`;
       },
     });
 
     const parsed = brain.output;
     const translations: Translation[] = Array.isArray(parsed.translations)
       ? parsed.translations
-          .filter((t) => t?.arabic && t?.transliteration)
+          .filter((t) => t?.english && t?.arabic)
           .map((t) => ({
+            english: String(t.english),
             arabic: String(t.arabic),
-            transliteration: String(t.transliteration),
-            english: String(t.english ?? ""),
+            phonetic_ar: String(t.phonetic_ar ?? ""),
             context: String(t.context ?? ""),
             naturalness: typeof t.naturalness === "number"
               ? Math.min(5, Math.max(1, t.naturalness))
@@ -209,11 +205,10 @@ serve(async (req) => {
 
     const vocabulary: VocabItem[] = Array.isArray(parsed.vocabulary)
       ? parsed.vocabulary
-          .filter((v) => v?.arabic)
+          .filter((v) => v?.english)
           .map((v) => ({
-            arabic: String(v.arabic),
-            english: String(v.english ?? ""),
-            root: v.root ? String(v.root) : undefined,
+            english: String(v.english),
+            arabic: String(v.arabic ?? ""),
           }))
       : [];
 
@@ -250,16 +245,14 @@ serve(async (req) => {
       situationSummary: parsed.situationSummary ? String(parsed.situationSummary) : undefined,
       translations,
       vocabulary,
-      culturalNotes: parsed.culturalNotes ? String(parsed.culturalNotes) : undefined,
-      genderVariants: parsed.genderVariants ? String(parsed.genderVariants) : undefined,
+      usageNotes_ar: parsed.usageNotes_ar ? String(parsed.usageNotes_ar) : undefined,
       llmUsed,
     };
 
     const preferred = translations.find((t) => t.isPreferred);
     console.log(
       `how-do-i-say: ${translations.length} translation(s) via ${llmUsed}, ` +
-      `preferred="${preferred?.transliteration ?? "none"}", ` +
-      `msaLeaks=${brain.msaLeaks.leaks.length}, repairs=${brain.msaRepairs}`,
+      `preferred="${preferred?.english ?? "none"}"`,
     );
 
     return new Response(
