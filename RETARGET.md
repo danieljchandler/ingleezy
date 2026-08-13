@@ -95,7 +95,8 @@ generation conditioning.
       deliberately NOT string-matched ("he go" is innocent in "where did he
       go") — those need AI grading. Pure core in `englishPromptCore.ts`;
       Vitest + Deno tested.
-- [ ] Admin CRUD for interference_rules (mirror AdminDialectRules)
+- [x] Admin CRUD for interference_rules (AdminInterferenceRules page,
+      route + dashboard tile)
 - [x] First English-target caller end-to-end: practice-sentence-coach —
       Deepgram EN ASR, Brain target:'english', deterministic transfer scan
       feeding the prompt, bilingual feedback (English rewrites + dialect
@@ -137,7 +138,11 @@ generation conditioning.
       prefers native English over bridged; Discover badges bridged rows
       as immersion. Remaining: trending discovery flip or prune, Arabic
       pipeline prune once memes decided.
-- [ ] CEFR video rating: KEEP (re-aim prompt at English)
+- [x] CEFR video rating: FLIPPED — English transcripts (lines carrying
+      `english`) rate against an English A1/A2 baseline with English
+      descriptors (phrasal verbs, connected speech); transcripts without
+      English lines are Hakiya-bridged clips and keep the Arabic-era
+      dialect-aware path.
 - [~] Stories / reading library / listen episodes / daily story: FLIP
       generation direction (English text, Arabic scaffold).
       **Daily story DONE**: english-target Brain call, English-primary
@@ -215,10 +220,11 @@ generation conditioning.
 ### Arabic-only surfaces — PRUNE or REPURPOSE
 - [ ] Alphabet Journey → **English Sounds** journey (phonics for Arabic
       speakers) — repurpose structure, all-new content
-- [ ] MSA Bridge (`MsaBridge.tsx`, `msa_transformation_rules`) → PRUNE
-- [ ] Dialect Compare → PRUNE (or later: "how do Brits vs Americans say it")
-- [ ] Yemeni corpus tooling (`docs/yemeni`, mine-dialect-corpus,
-      derive-yemeni-* scripts) → PRUNE
+- [x] MSA Bridge → PRUNED (only stale generated-types references remain
+      until types regeneration)
+- [x] Dialect Compare → PRUNED (revisit later as "how do Brits vs
+      Americans say it")
+- [x] Yemeni corpus tooling → PRUNED
 - [x] Bible reading (Arabic scripture) → PRUNED
 - [ ] Meme analyzer / Souq news / Learn-from-X: FLIP if cheap, else defer
 

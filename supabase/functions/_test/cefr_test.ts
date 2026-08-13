@@ -15,6 +15,12 @@ import { chatCompletion, json, type UpstreamHandler } from "./upstreams.ts";
  * That matters downstream. `discover-feed` ranks on `cefr_level`, so a rating
  * that collapses to one value collapses the recommender with it — and nothing
  * would report the failure, because every video would still have a level.
+ *
+ * Since the retarget there are two modes: transcripts whose lines carry
+ * `english` are the app's primary content, rated against an English A1/A2
+ * baseline; lines without it are the Hakiya-bridged Arabic immersion clips,
+ * rated exactly as before. The Arabic fixtures below therefore double as the
+ * bridge-mode regression suite.
  */
 
 const VIDEO_ID = "33333333-0000-4000-8000-000000000000";
@@ -285,6 +291,92 @@ Deno.test("rate-video-cefr caps the rationale it stores", async () => {
   // Shown to an admin in a table cell; an unbounded essay from the model would
   // make the row unreadable.
   assertEquals(String(body.rationale).length, 600);
+});
+
+// ── English mode ────────────────────────────────────────────────────────────
+
+/** English transcript lines; the arabic on each is scaffold, not content. */
+const englishLines = (...texts: string[]) =>
+  texts.map((english, i) => ({ english, arabic: `سطر ${i}`, id: `l${i}` }));
+
+/** N distinct long, rare English words. */
+const hardEnglishLine = (n: number) =>
+  Array.from({ length: n }, (_, i) => `bureaucratisation${i}`).join(" ");
+
+const easyEnglishLine = (n: number) => Array.from({ length: n }, () => "the").join(" ");
+
+Deno.test("rate-video-cefr rates an English transcript as an English video", async () => {
+  const { bodies, calls } = await call(
+    { transcript_lines: englishLines("I went to the market today", "It was very busy") },
+    upstreams({ "ai.gateway.lovable.dev": rating("A2") }),
+  );
+
+  const prompt = bodies[calls.findIndex((u) => u.includes("chat/completions"))] ?? "";
+  // The prompt has to say what is being rated, for whom, and against which
+  // descriptors — phrasal verbs and connected speech are English difficulty,
+  // not Arabic's dialect markers.
+  assertStringIncludes(prompt, "ENGLISH video for Arabic-speaking English learners");
+  assertStringIncludes(prompt, "phrasal verbs");
+  assert(!prompt.includes("DIALECT NOTE"));
+});
+
+Deno.test("rate-video-cefr measures the English, not its Arabic scaffold", async () => {
+  const { body } = await call(
+    { transcript_lines: englishLines("I went to the market", "It was busy") },
+    upstreams({ "ai.gateway.lovable.dev": rating("A1") }),
+  );
+
+  const metrics = body.metrics as Record<string, unknown>;
+  // Each line carries its scaffold translation; counting those tokens would
+  // rate every English video partly on the Arabic bolted to it.
+  assertEquals(metrics.total_lines, 2);
+  assertEquals(metrics.total_tokens, 8);
+});
+
+Deno.test("rate-video-cefr floors simple English at the bottom", async () => {
+  const { body } = await call(
+    { transcript_lines: englishLines(easyEnglishLine(10)) },
+    upstreams({ "ai.gateway.lovable.dev": rating("A1") }),
+  );
+
+  assertEquals(body.metric_floor, "A1");
+});
+
+Deno.test("rate-video-cefr separates easy from hard English", async () => {
+  const easy = await call(
+    { transcript_lines: englishLines(easyEnglishLine(15), easyEnglishLine(15)) },
+    upstreams({ "ai.gateway.lovable.dev": rating("A1") }),
+  );
+  const hard = await call(
+    {
+      transcript_lines: englishLines(hardEnglishLine(14), hardEnglishLine(14), hardEnglishLine(14)),
+      duration_seconds: 12,
+    },
+    upstreams({ "ai.gateway.lovable.dev": rating("C1") }),
+  );
+
+  const order = ["A1", "A2", "B1", "B2", "C1", "C2"];
+  // Same property the Arabic mode pins: two genuinely different clips must
+  // not come out the same — the English baseline has to do real work.
+  assert(
+    order.indexOf(String(hard.body.metric_floor)) >
+      order.indexOf(String(easy.body.metric_floor)),
+    `${easy.body.metric_floor} vs ${hard.body.metric_floor}`,
+  );
+});
+
+Deno.test("rate-video-cefr keeps the Arabic path for a bridged clip", async () => {
+  const { bodies, calls } = await call(
+    { transcript_lines: lines("الجو حلو اليوم"), dialect: "Gulf" },
+    upstreams({ "ai.gateway.lovable.dev": rating("A2") }),
+  );
+
+  const prompt = bodies[calls.findIndex((u) => u.includes("chat/completions"))] ?? "";
+  // A transcript with no English lines is Hakiya-bridged immersion content;
+  // it keeps the dialect-aware Arabic rating rather than being measured
+  // against an English baseline it would fail entirely.
+  assertStringIncludes(prompt, "Gulf Arabic video");
+  assertStringIncludes(prompt, "DIALECT NOTE");
 });
 
 Deno.test("rate-video-cefr rates a stored video and writes the result back", async () => {
