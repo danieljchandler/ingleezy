@@ -224,6 +224,12 @@ generation conditioning.
       pages and RequestSituationCard flipped English-primary. Shadowing
       still Arabic — it echoes native clips (immersion), revisit with the
       Hakiya-bridge listening decisions.
+      **Phrase of the day + jingle DONE**: an English expression a native
+      would say today (category wheel re-aimed at English life; one shared
+      list — the dialect only names the gloss), recall direction mirrored
+      (dialect gloss shown, English behind the reveal with phonetic_ar),
+      notes in the learner's dialect; english-target Brain call. The jingle
+      sings the English in an English pop style.
       (sentence coach DONE — the model for the rest)
 - [ ] TTS: English voices for targets; Arabic TTS kept for scaffold audio
 - [ ] Realtime conversation simulator: KEEP, English persona

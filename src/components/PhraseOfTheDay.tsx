@@ -13,9 +13,13 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 interface PhraseData {
-  phrase_arabic: string;
+  /** The English phrase — the thing being learned. */
   phrase_english: string;
+  /** Its dialect-Arabic gloss. */
+  phrase_arabic: string;
+  /** phonetic_ar — the English pronounced in Arabic letters. */
   transliteration: string;
+  /** Usage note in the learner's dialect. */
   notes: string;
   dialect: string;
   date: string;
@@ -32,7 +36,9 @@ export const PhraseOfTheDay = () => {
   const [phrase, setPhrase] = useState<PhraseData | null>(null);
   const [loading, setLoading] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [showArabic, setShowArabic] = useState(false);
+  // The English is the recall exercise: the learner reads the Arabic meaning,
+  // tries to produce the English, then reveals to check.
+  const [showEnglish, setShowEnglish] = useState(false);
 
   const today = new Date().toISOString().slice(0, 10);
 
@@ -43,26 +49,26 @@ export const PhraseOfTheDay = () => {
     return {
       kind: "phrase",
       title: "Phrase of the Day",
-      summary: `The learner's home screen is showing today's Phrase of the Day in ${phrase.dialect} Arabic.`,
+      summary: `The learner's home screen is showing today's English Phrase of the Day, glossed in ${phrase.dialect} Arabic.`,
       content: [
-        `Today's Phrase of the Day (${phrase.dialect} Arabic, ${phrase.date}):`,
-        `Arabic: ${phrase.phrase_arabic}`,
-        `Transliteration: ${phrase.transliteration}`,
+        `Today's English Phrase of the Day (${phrase.date}):`,
         `English: ${phrase.phrase_english}`,
+        `Arabic gloss (${phrase.dialect}): ${phrase.phrase_arabic}`,
+        `Phonetic (Arabic letters): ${phrase.transliteration}`,
         phrase.notes && `Notes: ${phrase.notes}`,
-        !showArabic &&
-          "(The Arabic script is still hidden on screen — the learner hasn't tapped to reveal it yet.)",
+        !showEnglish &&
+          "(The English is still hidden on screen — the learner hasn't tapped to reveal it yet.)",
       ]
         .filter(Boolean)
         .join("\n"),
     };
-  }, [phrase, showArabic]);
+  }, [phrase, showEnglish]);
   usePageAiContext(aiContext);
 
   const fetchPhrase = async (force = false) => {
     setLoading(true);
     setSaved(false);
-    setShowArabic(false);
+    setShowEnglish(false);
     try {
       if (!force) {
         const cached = localStorage.getItem(cacheKey(activeDialect, today));
@@ -175,7 +181,7 @@ export const PhraseOfTheDay = () => {
           </div>
           <div>
             <p className="font-bold text-foreground text-sm">Phrase of the Day</p>
-            <p className="text-xs text-muted-foreground">{activeDialect} Arabic</p>
+            <p className="text-xs text-muted-foreground">English · glossed in {activeDialect}</p>
           </div>
         </div>
         <Button
@@ -197,37 +203,37 @@ export const PhraseOfTheDay = () => {
         </div>
       ) : phrase ? (
         <div className="space-y-3 relative z-10">
-          {showArabic ? (
-            <p
-              dir="rtl"
-              className="text-2xl font-semibold text-foreground leading-relaxed"
-              style={{ fontFamily: "'Noto Sans Arabic', sans-serif" }}
-            >
-              {phrase.phrase_arabic}
+          {showEnglish ? (
+            <p className="text-2xl font-semibold text-foreground leading-relaxed font-english">
+              {phrase.phrase_english}
             </p>
           ) : (
             <button
-              onClick={() => setShowArabic(true)}
-              aria-label="Reveal Arabic phrase"
+              onClick={() => setShowEnglish(true)}
+              aria-label="Reveal English phrase"
               className="w-full py-3 rounded-lg border-2 border-dashed border-accent/40 bg-card/40 text-sm text-muted-foreground hover:bg-card/60 transition flex items-center justify-center gap-2"
             >
               <Eye className="h-4 w-4" />
-              Tap to reveal Arabic
+              Tap to reveal English
             </button>
           )}
 
-          <p className="text-base text-foreground font-medium">
-            {phrase.phrase_english}
+          <p
+            dir="rtl"
+            className="text-base text-foreground font-medium font-arabic"
+            style={{ fontFamily: "'Noto Sans Arabic', sans-serif" }}
+          >
+            {phrase.phrase_arabic}
           </p>
 
-          {showArabic && (
-            <p className="text-sm text-muted-foreground italic">
+          {showEnglish && (
+            <p dir="rtl" className="text-sm text-muted-foreground font-arabic">
               {phrase.transliteration}
             </p>
           )}
 
           {phrase.notes && (
-            <p className="text-xs text-muted-foreground leading-relaxed border-l-2 border-accent/40 pl-3">
+            <p dir="rtl" className="text-xs text-muted-foreground leading-relaxed border-r-2 border-accent/40 pr-3 font-arabic">
               {phrase.notes}
             </p>
           )}
@@ -257,13 +263,13 @@ export const PhraseOfTheDay = () => {
               variant="chip"
               className="h-9"
             />
-            {showArabic && (
+            {showEnglish && (
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => setShowArabic(false)}
-                title="Hide Arabic"
-                aria-label="Hide Arabic"
+                onClick={() => setShowEnglish(false)}
+                title="Hide English"
+                aria-label="Hide English"
               >
                 <EyeOff className="h-4 w-4" />
               </Button>

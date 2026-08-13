@@ -153,34 +153,26 @@ Deno.test("generate-phrase-jingle refuses to start with a key missing", async ()
 
 // ── Writing the jingle ───────────────────────────────────────────────────────
 
-Deno.test("generate-phrase-jingle asks for the learner's own dialect", async () => {
+Deno.test("generate-phrase-jingle sings the English, whatever the dialect", async () => {
   const result = await call({ ...PHRASE, dialect: "Egyptian" }, backend());
   const { system, user } = writerPrompt(result);
 
-  // A Gulf tune for an Egyptian learner teaches the phrase in a voice they will
-  // not hear again.
-  assertStringIncludes(system, "Egyptian Arabic pop/shaabi style");
-  assertStringIncludes(user, "Egyptian");
+  // The jingle sings the thing being memorised — the English phrase. The
+  // learner's dialect only describes the gloss in the request, so it must not
+  // steer the music style any more.
+  assertStringIncludes(system, "memorizing ENGLISH phrases");
+  assertStringIncludes(system, "English pop style");
+  assertStringIncludes(user, "English phrase");
 });
 
-Deno.test("generate-phrase-jingle styles a Yemeni jingle as Yemeni folk-pop", async () => {
-  const result = await call({ ...PHRASE, dialect: "Yemeni" }, backend());
-  assertStringIncludes(writerPrompt(result).system, "Yemeni folk-pop style");
-});
-
-Deno.test("generate-phrase-jingle defaults an unspecified dialect to Gulf", async () => {
+Deno.test("generate-phrase-jingle sends the English as the phrase to sing", async () => {
   const result = await call(PHRASE, backend());
-  assertStringIncludes(writerPrompt(result).system, "Khaliji/Gulf Arabic pop style");
-});
+  const { user } = writerPrompt(result);
 
-Deno.test("generate-phrase-jingle asks for tashkeel on the lyrics", async () => {
-  const result = await call(PHRASE, backend());
-  const { system, user } = writerPrompt(result);
-
-  // The point of the jingle is hearing the vowels; unvocalised lyrics leave the
-  // singer to guess them.
-  assertStringIncludes(system, "full tashkeel");
-  assertStringIncludes(user, "tashkeel");
+  // The English is the lyric; the Arabic rides along only as the meaning so
+  // the writer knows what the phrase is about.
+  assertStringIncludes(user, PHRASE.phrase_english);
+  assertStringIncludes(user, PHRASE.phrase_arabic);
 });
 
 Deno.test("generate-phrase-jingle asks for the phrase to repeat", async () => {

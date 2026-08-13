@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { getDialectLabel, getDialectVocabRules } from "../_shared/dialectHelpers.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
 import { MODEL_IDS } from "../_shared/modelRegistry.ts";
 import { enforceDailyCap } from "../_shared/usageCap.ts";
@@ -31,7 +30,7 @@ serve(async (req) => {
   if (cap.limited) return cap.response;
 
   try {
-    const { phrase_arabic, phrase_english, dialect = "Gulf" } = await req.json();
+    const { phrase_arabic, phrase_english, dialect: _dialect = "Gulf" } = await req.json();
 
     if (!phrase_arabic || !phrase_english) {
       return new Response(
@@ -40,13 +39,9 @@ serve(async (req) => {
       );
     }
 
-    const dialectLabel = getDialectLabel(dialect);
-    const dialectRules = getDialectVocabRules(dialect);
-    const dialectStyle = dialect === "Egyptian"
-      ? "Egyptian Arabic pop/shaabi style with Egyptian dialect vocals"
-      : dialect === "Yemeni"
-      ? "Yemeni folk-pop style with Yemeni dialect vocals"
-      : "Khaliji/Gulf Arabic pop style with Gulf dialect vocals";
+    // The jingle sings the ENGLISH — the thing being memorised. The Arabic
+    // gloss rides along in the request only so the writer knows the meaning.
+    const jingleStyle = "upbeat English pop style with clear, friendly English vocals";
 
     const promptGen = await fetch(
       "https://ai.gateway.lovable.dev/v1/chat/completions",
@@ -61,21 +56,19 @@ serve(async (req) => {
           messages: [
             {
               role: "system",
-              content: `You write short, catchy jingles for memorizing Arabic phrases.
-
-${dialectRules}
+              content: `You write short, catchy jingles for memorizing ENGLISH phrases.
 
 Return STRICT JSON only (no markdown, no commentary):
 {
-  "lyrics": "<sung lyrics in ${dialectLabel} Arabic with full tashkeel. 2-4 short lines. Repeat the target phrase at least 3 times. Tiny bit of simple English is OK if it helps the hook.>",
-  "prompt": "<English music-generation prompt: 12-second ${dialectStyle} jingle. Describe mood, tempo, voices, instrumentation. State that the lyrics above must be sung clearly.>"
+  "lyrics": "<sung lyrics in simple, clear English. 2-4 short lines. Repeat the target phrase at least 3 times, exactly as given.>",
+  "prompt": "<English music-generation prompt: 12-second ${jingleStyle} jingle. Describe mood, tempo, voices, instrumentation. State that the lyrics above must be sung clearly.>"
 }
 
 SAFETY: no violence, weapons, politics, religion, romance, alcohol, drugs, body parts, or anything explicit. Keep it cheerful and family-friendly.`,
             },
             {
               role: "user",
-              content: `Jingle for the ${dialectLabel} phrase "${phrase_arabic}" (meaning "${phrase_english}"). Arabic must include tashkeel. Return JSON only.`,
+              content: `Jingle for the English phrase "${phrase_english}" (meaning "${phrase_arabic}" in Arabic). Return JSON only.`,
             },
           ],
           response_format: { type: "json_object" },
@@ -115,7 +108,7 @@ SAFETY: no violence, weapons, politics, religion, romance, alcohol, drugs, body 
     }
 
     const musicPrompt = lyrics
-      ? `${stylePrompt}\n\nLyrics to sing clearly (${dialectLabel} Arabic with tashkeel):\n${lyrics}`
+      ? `${stylePrompt}\n\nLyrics to sing clearly (English):\n${lyrics}`
       : stylePrompt;
 
     if (!musicPrompt) {

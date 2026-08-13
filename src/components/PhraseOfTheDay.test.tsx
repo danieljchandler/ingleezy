@@ -8,14 +8,14 @@ import type { SupabaseBackend } from "@/test/support/server/handler";
 import type { Persona } from "@/test/support/personas";
 
 /**
- * The card at the top of the home screen: one phrase a day, in the learner's
- * dialect.
+ * The card at the top of the home screen: one English phrase a day, glossed in
+ * the learner's dialect.
  *
- * It is a recall exercise disguised as a widget. The English shows first and
- * the Arabic is hidden behind a tap, because reading a phrase you can already
- * see teaches nothing — trying to produce it and then checking is the whole
- * exercise, and it is the same thing the review deck does, offered to somebody
- * who opened the app with no intention of studying.
+ * It is a recall exercise disguised as a widget. The Arabic meaning shows
+ * first and the English is hidden behind a tap, because reading a phrase you
+ * can already see teaches nothing — trying to produce it and then checking is
+ * the whole exercise, and it is the same thing the review deck does, offered
+ * to somebody who opened the app with no intention of studying.
  *
  * The caching is per dialect per day for a reason beyond cost: the point of a
  * phrase of the *day* is that it is the same phrase every time you come back
@@ -26,10 +26,10 @@ import type { Persona } from "@/test/support/personas";
 const TODAY = new Date().toISOString().slice(0, 10);
 
 const aPhrase = (over: Record<string, unknown> = {}) => ({
+  phrase_english: "How's it going?",
   phrase_arabic: "شخبارك؟",
-  phrase_english: "How are you?",
-  transliteration: "shakhbarak?",
-  notes: "Gulf greeting; شلونك works too.",
+  transliteration: "هاوز إت قوينق؟",
+  notes: "تحية ودية بين الأصحاب، مو رسمية.",
   dialect: "Gulf",
   date: TODAY,
   category: "greetings",
@@ -93,52 +93,54 @@ function render({ persona = "free", dialect = "Gulf", seed }: Options = {}) {
 const cacheKey = (dialect = "Gulf") => `phraseOfDay:${dialect}:${TODAY}`;
 
 describe("showing today's phrase", () => {
-  it("leads with the English and hides the Arabic", async () => {
+  it("leads with the Arabic meaning and hides the English", async () => {
     render();
 
-    await waitFor(() => expect(screen.getByText("How are you?")).toBeInTheDocument());
-    // Reading a phrase you can already see teaches nothing. Reaching for it and
-    // then checking is the exercise.
-    expect(screen.queryByText("شخبارك؟")).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /reveal arabic/i })).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText("شخبارك؟")).toBeInTheDocument());
+    // Reading a phrase you can already see teaches nothing. Reaching for the
+    // English and then checking is the exercise.
+    expect(screen.queryByText("How's it going?")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /reveal english/i })).toBeInTheDocument();
   });
 
-  it("reveals the Arabic and its reading together", async () => {
+  it("reveals the English and its phonetic reading together", async () => {
     render();
-    await waitFor(() => expect(screen.getByText("How are you?")).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText("شخبارك؟")).toBeInTheDocument());
 
-    fireEvent.click(screen.getByRole("button", { name: /reveal arabic/i }));
+    fireEvent.click(screen.getByRole("button", { name: /reveal english/i }));
 
-    // The transliteration is the answer key to the pronunciation, so it belongs
+    // The phonetic_ar is the answer key to the pronunciation, so it belongs
     // with the reveal rather than beside the prompt.
-    expect(screen.getByText("شخبارك؟")).toBeInTheDocument();
-    expect(screen.getByText("shakhbarak?")).toBeInTheDocument();
+    expect(screen.getByText("How's it going?")).toBeInTheDocument();
+    expect(screen.getByText("هاوز إت قوينق؟")).toBeInTheDocument();
   });
 
   it("can be hidden again for another go", async () => {
     render();
-    await waitFor(() => expect(screen.getByText("How are you?")).toBeInTheDocument());
-    fireEvent.click(screen.getByRole("button", { name: /reveal arabic/i }));
+    await waitFor(() => expect(screen.getByText("شخبارك؟")).toBeInTheDocument());
+    fireEvent.click(screen.getByRole("button", { name: /reveal english/i }));
 
-    fireEvent.click(screen.getByRole("button", { name: /hide arabic/i }));
+    fireEvent.click(screen.getByRole("button", { name: /hide english/i }));
 
-    expect(screen.queryByText("شخبارك؟")).not.toBeInTheDocument();
+    expect(screen.queryByText("How's it going?")).not.toBeInTheDocument();
   });
 
   it("shows the usage note when there is one", async () => {
     render();
 
-    // The note is where the dialect actually lives — "شلونك works too" is the
+    // The note arrives in the learner's own dialect — it is what makes the
     // difference between a phrase and a phrasebook entry.
     await waitFor(() =>
-      expect(screen.getByText("Gulf greeting; شلونك works too.")).toBeInTheDocument(),
+      expect(screen.getByText("تحية ودية بين الأصحاب، مو رسمية.")).toBeInTheDocument(),
     );
   });
 
-  it("names the dialect it is teaching", async () => {
+  it("names the gloss dialect", async () => {
     render({ dialect: "Egyptian", seed: (b) => b.stubFunction("phrase-of-the-day", aPhrase()) });
 
-    await waitFor(() => expect(screen.getByText("Egyptian Arabic")).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByText("English · glossed in Egyptian")).toBeInTheDocument(),
+    );
   });
 
   it("asks for the learner's dialect", async () => {
@@ -159,14 +161,14 @@ describe("keeping it the phrase of the day", () => {
     render();
 
     await waitFor(() => expect(localStorage.getItem(cacheKey())).toBeTruthy());
-    expect(JSON.parse(localStorage.getItem(cacheKey())!).phrase_english).toBe("How are you?");
+    expect(JSON.parse(localStorage.getItem(cacheKey())!).phrase_english).toBe("How's it going?");
   });
 
   it("reads the stored phrase rather than generating another", async () => {
-    localStorage.setItem(cacheKey(), JSON.stringify(aPhrase({ phrase_english: "Good morning" })));
+    localStorage.setItem(cacheKey(), JSON.stringify(aPhrase({ phrase_arabic: "صباح الخير" })));
     const { backend } = render();
 
-    await waitFor(() => expect(screen.getByText("Good morning")).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText("صباح الخير")).toBeInTheDocument());
     // The point of a phrase of the *day* is that it is the same phrase each
     // time you come back to it; regenerating would make it unlearnable.
     expect(backend.callsTo("phrase-of-the-day")).toEqual([]);
@@ -186,7 +188,7 @@ describe("keeping it the phrase of the day", () => {
       seed: (b) => b.stubFunction("phrase-of-the-day", aPhrase({ _meta: { msaRepairs: 2 } })),
     });
 
-    await waitFor(() => expect(screen.getByText("How are you?")).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText("شخبارك؟")).toBeInTheDocument());
     // A phrase the MSA filter had to rewrite is borderline by definition;
     // pinning it for the day would give the learner a whole day of it.
     expect(localStorage.getItem(cacheKey())).toBeNull();
@@ -195,9 +197,9 @@ describe("keeping it the phrase of the day", () => {
 
 describe("asking for another", () => {
   it("generates a fresh one rather than reusing the stored phrase", async () => {
-    localStorage.setItem(cacheKey(), JSON.stringify(aPhrase({ phrase_english: "Good morning" })));
+    localStorage.setItem(cacheKey(), JSON.stringify(aPhrase({ phrase_arabic: "صباح الخير" })));
     const { backend } = render();
-    await waitFor(() => expect(screen.getByText("Good morning")).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText("صباح الخير")).toBeInTheDocument());
 
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: /refresh phrase/i }));
@@ -212,7 +214,7 @@ describe("asking for another", () => {
 
   it("steers away from the category already seen today", async () => {
     const { backend } = render();
-    await waitFor(() => expect(screen.getByText("How are you?")).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText("شخبارك؟")).toBeInTheDocument());
 
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: /refresh phrase/i }));
@@ -227,10 +229,10 @@ describe("asking for another", () => {
     );
   });
 
-  it("hides the Arabic again for the new phrase", async () => {
+  it("hides the English again for the new phrase", async () => {
     render();
-    await waitFor(() => expect(screen.getByText("How are you?")).toBeInTheDocument());
-    fireEvent.click(screen.getByRole("button", { name: /reveal arabic/i }));
+    await waitFor(() => expect(screen.getByText("شخبارك؟")).toBeInTheDocument());
+    fireEvent.click(screen.getByRole("button", { name: /reveal english/i }));
 
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: /refresh phrase/i }));
@@ -238,7 +240,7 @@ describe("asking for another", () => {
 
     // A new phrase arriving already revealed would skip the exercise.
     await waitFor(() =>
-      expect(screen.getByRole("button", { name: /reveal arabic/i })).toBeInTheDocument(),
+      expect(screen.getByRole("button", { name: /reveal english/i })).toBeInTheDocument(),
     );
   });
 });
@@ -246,7 +248,7 @@ describe("asking for another", () => {
 describe("saving it", () => {
   it("keeps the phrase with its reading and note", async () => {
     const { backend } = render();
-    await waitFor(() => expect(screen.getByText("How are you?")).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText("شخبارك؟")).toBeInTheDocument());
 
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: /save as flashcard/i }));
@@ -254,9 +256,9 @@ describe("saving it", () => {
 
     await waitFor(() =>
       expect(backend.db.lastWriteTo("user_phrases")?.payload[0]).toMatchObject({
+        phrase_english: "How's it going?",
         phrase_arabic: "شخبارك؟",
-        phrase_english: "How are you?",
-        transliteration: "shakhbarak?",
+        transliteration: "هاوز إت قوينق؟",
         source: "phrase-of-the-day",
       }),
     );
@@ -264,7 +266,7 @@ describe("saving it", () => {
 
   it("says so once it is saved", async () => {
     render();
-    await waitFor(() => expect(screen.getByText("How are you?")).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText("شخبارك؟")).toBeInTheDocument());
 
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: /save as flashcard/i }));
@@ -277,7 +279,7 @@ describe("saving it", () => {
 
   it("refuses for a signed-out visitor", async () => {
     const { backend } = render({ persona: "anonymous" });
-    await waitFor(() => expect(screen.getByText("How are you?")).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText("شخبارك؟")).toBeInTheDocument());
 
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: /save as flashcard/i }));
@@ -292,7 +294,7 @@ describe("saving it", () => {
 describe("telling the assistant what's on screen", () => {
   it("publishes today's phrase as the page context", async () => {
     render();
-    await waitFor(() => expect(screen.getByText("How are you?")).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText("شخبارك؟")).toBeInTheDocument());
 
     // "Tell me about the phrase of the day" must be answered about THIS
     // phrase; without the published context the assistant invents one.
@@ -300,17 +302,17 @@ describe("telling the assistant what's on screen", () => {
       expect(screen.getByTestId("ai-page-context").textContent).toContain("شخبارك؟"),
     );
     const ctx = screen.getByTestId("ai-page-context").textContent!;
-    expect(ctx).toContain("shakhbarak?");
-    expect(ctx).toContain("How are you?");
+    expect(ctx).toContain("هاوز إت قوينق؟");
+    expect(ctx).toContain("How's it going?");
   });
 
-  it("tells the assistant the Arabic is still hidden until it is revealed", async () => {
+  it("tells the assistant the English is still hidden until it is revealed", async () => {
     render();
     await waitFor(() =>
       expect(screen.getByTestId("ai-page-context").textContent).toContain("hidden"),
     );
 
-    fireEvent.click(screen.getByRole("button", { name: /reveal arabic/i }));
+    fireEvent.click(screen.getByRole("button", { name: /reveal english/i }));
 
     // Once revealed, the "hidden" caveat would just be wrong.
     await waitFor(() =>
@@ -330,7 +332,7 @@ describe("telling the assistant what's on screen", () => {
 
   it("opens the assistant seeded with the phrase from the Ask AI chip", async () => {
     render();
-    await waitFor(() => expect(screen.getByText("How are you?")).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText("شخبارك؟")).toBeInTheDocument());
 
     fireEvent.click(screen.getByRole("button", { name: /ask ai/i }));
 
