@@ -1,10 +1,12 @@
-// free-chat — streaming dialect-aware Arabic tutor chat via the AI Brain.
-// The Brain owns the dialect identity + vocab rules system block; this file
+// free-chat — streaming ENGLISH tutor chat for Arabic speakers via the AI
+// Brain's english-target mode. The Brain owns the English identity +
+// interference rulebook system block; this file
 // just appends the tutor-specific conversation/correction rules.
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { streamBrain, BrainHttpError } from "../_shared/aiBrain.ts";
 import { getDialectLabel, type Dialect } from "../_shared/dialectHelpers.ts";
-import { detectMsaLeaks } from "../_shared/msaLeakDetector.ts";
+import { getTransferPatterns } from "../_shared/englishHelpers.ts";
+import { detectTransferErrors } from "../_shared/transferErrorDetector.ts";
 import { enforceDailyCap } from "../_shared/usageCap.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
 
@@ -31,15 +33,14 @@ function buildTutorExtras(dialect: Dialect, cefr: string, topicHint?: string) {
 ${levelRule}
 
 CONVERSATION RULES:
-1. Reply ONLY in Arabic (${getDialectLabel(dialect)}). Do NOT include English translations or transliteration in your reply text — the UI handles those.
+1. Reply ONLY in English. Do NOT include Arabic translations or transliteration in your reply text — the UI handles those.
 2. Keep replies SHORT and natural — 1 to 3 sentences. This is a chat, not a monologue.
 3. ALWAYS end with a question or conversational hook so the learner keeps talking.
-4. Stay in dialect — never switch to MSA (فصحى).
-5. Sound like a real friend chatting, not a textbook.
+4. Sound like a real friend chatting, not a textbook.
 
 CORRECTION RULES (very important):
-- If the learner's last message has a clear grammar/vocabulary mistake or used the wrong dialect/MSA, prepend a single line in this EXACT format on its own first line, then a blank line, then your normal Arabic reply:
-  [[CORRECTION]] short friendly fix in English (one sentence, ≤ 20 words)
+- If the learner's last message has a clear grammar/vocabulary mistake — especially a known Arabic-transfer pattern — prepend a single line in this EXACT format on its own first line, then a blank line, then your normal English reply:
+  [[CORRECTION]] short friendly fix in ${getDialectLabel(dialect)} Arabic (one sentence, ≤ 20 words)
 - Only correct genuinely wrong things. Do NOT correct stylistic choices or correct every message.
 - If nothing to correct, do NOT include any [[CORRECTION]] line.
 
@@ -71,23 +72,28 @@ serve(async (req) => {
 
     const effectiveDialect = (dialect ?? "Gulf") as Dialect;
 
-    // Multi-turn drift tracking: scan the last 3 assistant turns for MSA leaks.
-    // If found, append a self-correction nudge so the model stops repeating the pattern.
-    const recentAssistantTurns = messages
-      .filter((m) => m.role === "assistant")
+    // Transfer-error tracking: scan the learner's recent turns for known
+    // Arabic-shaped English so a [[CORRECTION]] can name the natural form —
+    // the deterministic detector means a known calque never slides by.
+    const recentLearnerTurns = messages
+      .filter((m) => m.role === "user")
       .slice(-3)
       .map((m) => m.content)
       .join("\n");
-    const historyLeaks = recentAssistantTurns
-      ? detectMsaLeaks(recentAssistantTurns, effectiveDialect).leaks
+    const transferHits = recentLearnerTurns
+      ? detectTransferErrors(recentLearnerTurns, getTransferPatterns(effectiveDialect)).errors
       : [];
-    const driftNudge = historyLeaks.length > 0
-      ? `\n\nSELF-CORRECTION (your earlier replies used MSA tokens: ${historyLeaks.slice(0, 8).join(", ")}). Do NOT repeat that pattern — use only ${getDialectLabel(effectiveDialect)} forms from here on.`
+    const driftNudge = transferHits.length > 0
+      ? `\n\nKNOWN TRANSFER ERRORS in the learner's recent messages: ${
+          transferHits.slice(0, 5).map((e) => `"${e.match}"${e.suggestion ? ` → "${e.suggestion}"` : ""}`).join(", ")
+        }. Address the most recent one with a [[CORRECTION]] line.`
       : "";
 
     return await streamBrain({
       purpose: "free_chat_turn",
       dialect: effectiveDialect,
+      target: "english",
+      cefr: (cefrLevel ?? "A2").toUpperCase(),
       systemPromptExtra: buildTutorExtras(effectiveDialect, cefrLevel ?? "A2", topicHint) + driftNudge,
       messages,
       model: "google/gemini-2.5-pro",

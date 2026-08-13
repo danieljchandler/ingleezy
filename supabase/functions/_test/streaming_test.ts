@@ -133,8 +133,9 @@ Deno.test("free-chat defaults to Gulf when no dialect is sent", async () => {
     subscriber({ "ai.gateway.lovable.dev": () => sseCompletion("أهلاً") }),
   );
 
-  // The dialect reaches the model only through the system prompt, so a missing
-  // default would produce MSA for every learner who arrived without one.
+  // The dialect is the learner's L1 — it selects the interference rules and
+  // the language of [[CORRECTION]] lines, so a missing default would leave
+  // corrections without a dialect to be written in.
   const sent = bodies.find((b) => b?.includes("system")) ?? "";
   assertStringIncludes(sent, "Gulf");
 });
@@ -186,42 +187,42 @@ Deno.test("free-chat asks for a warm opener when there is no topic", async () =>
   assertStringIncludes(sent, "Start with a warm friendly greeting");
 });
 
-Deno.test("free-chat nudges itself when its own recent turns leaked MSA", async () => {
+Deno.test("free-chat names the learner's transfer errors for correction", async () => {
   const { bodies } = await call(
     "free-chat",
     {
       dialect: "Gulf",
       messages: [
-        // `ماذا` and `الآن` are MSA forms a Gulf speaker would not use.
-        { role: "assistant", content: "ماذا تفعل الآن؟" },
-        { role: "user", content: "ولا شي" },
+        { role: "assistant", content: "How was your evening?" },
+        // A known calque — the deterministic detector must catch it so the
+        // correction never depends on the model noticing.
+        { role: "user", content: "Nice! I open the light and read." },
       ],
     },
-    subscriber({ "ai.gateway.lovable.dev": () => sseCompletion("زين") }),
+    subscriber({ "ai.gateway.lovable.dev": () => sseCompletion("Lovely") }),
   );
 
   const sent = bodies.find((b) => b?.includes("system")) ?? "";
-  // Drift is cumulative: once the model has answered in MSA once it tends to
-  // keep going, so the nudge is appended from the *history* rather than waiting
-  // for the next reply to be scanned.
-  assertStringIncludes(sent, "SELF-CORRECTION");
+  assertStringIncludes(sent, "KNOWN TRANSFER ERRORS");
+  assertStringIncludes(sent, "open the light");
+  assertStringIncludes(sent, "turn on the light");
 });
 
-Deno.test("free-chat adds no nudge to a clean conversation", async () => {
+Deno.test("free-chat adds no transfer nudge to clean English", async () => {
   const { bodies } = await call(
     "free-chat",
     {
       dialect: "Gulf",
       messages: [
-        { role: "assistant", content: "شلونك؟" },
-        { role: "user", content: "زين" },
+        { role: "assistant", content: "How are you?" },
+        { role: "user", content: "I am doing well, thanks!" },
       ],
     },
-    subscriber({ "ai.gateway.lovable.dev": () => sseCompletion("تمام") }),
+    subscriber({ "ai.gateway.lovable.dev": () => sseCompletion("Great") }),
   );
 
   const sent = bodies.find((b) => b?.includes("system")) ?? "";
-  assert(!sent.includes("SELF-CORRECTION"));
+  assert(!sent.includes("KNOWN TRANSFER ERRORS"));
 });
 
 Deno.test("free-chat reports a rate-limited gateway as 429", async () => {

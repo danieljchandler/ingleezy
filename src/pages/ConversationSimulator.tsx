@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { TappableArabicText } from "@/components/shared/TappableArabicText";
+import { TappableEnglishText } from "@/components/shared/TappableEnglishText";
 import { AskAISentence } from "@/components/shared/AskAISentence";
 import { InfoHint } from "@/components/InfoHint";
 import { PAGE_HINTS } from "@/lib/pageHints";
@@ -271,17 +271,10 @@ export default function ConversationSimulator() {
         const cacheKey = `${activeDialect}:${trimmed}`;
         let url = ttsCache.current.get(cacheKey);
         if (!url) {
-          // Route by dialect: Gulf → Munsit Gulf voices, Egyptian → ElevenLabs
-          // native ar-EG voices, Yemeni → Azure's real ar-YE neural voices
-          // (previously Yemeni went to ElevenLabs, which has no Yemeni voice).
-          const fnName =
-            activeDialect === "Gulf" ? "munsit-tts" :
-            activeDialect === "Yemeni" ? "azure-tts" :
-            "elevenlabs-tts";
-          const body =
-            fnName === "azure-tts"
-              ? { text: trimmed, voice: "ar-YE-SalehNeural" }
-              : { text: trimmed };
+          // Replies are English now — ElevenLabs multilingual handles both
+          // the English and any short Arabic aside inside a correction.
+          const fnName = "elevenlabs-tts";
+          const body = { text: trimmed };
           const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
           const ANON = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
           const { data: { session } } = await supabase.auth.getSession();
@@ -430,8 +423,8 @@ export default function ConversationSimulator() {
             ))}
           </div>
           <p className="text-xs text-muted-foreground mt-3">
-            The tutor will reply in {activeDialect} Arabic at your level ({cefr}). Tap any word to
-            save it, or save the whole reply as a phrase.
+            Your partner replies in English at your level ({cefr}); corrections come in {activeDialect}.
+            Tap any word to save it, or save the whole reply as a phrase.
           </p>
         </div>
       )}
@@ -446,7 +439,7 @@ export default function ConversationSimulator() {
             return (
               <div key={i} className="flex justify-end">
                 <div className="max-w-[85%] rounded-2xl rounded-tr-sm px-3 py-2 bg-primary text-primary-foreground">
-                  <p dir="rtl" className="font-arabic text-base leading-relaxed" style={{ fontFamily: "'Noto Naskh Arabic', 'Noto Sans Arabic', serif" }}>
+                  <p dir="auto" className="font-english text-base leading-relaxed">
                     {m.content}
                   </p>
                 </div>
@@ -466,11 +459,9 @@ export default function ConversationSimulator() {
               )}
               <div className="max-w-[90%] rounded-2xl rounded-tl-sm px-3 py-2 bg-muted">
                 {m.content ? (
-                  <TappableArabicText
-                    text={m.content}
-                    source="free-chat"
-                    sentenceContext={{ arabic: m.content }}
-                  />
+                  <p className="text-base leading-relaxed">
+                    <TappableEnglishText text={m.content} source="free-chat" />
+                  </p>
                 ) : (
                   <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                 )}
@@ -519,10 +510,10 @@ export default function ConversationSimulator() {
                 handleSend();
               }
             }}
-            placeholder="Type in Arabic or English…"
+            placeholder="Type in English…"
             dir="auto"
             disabled={sending || recording || transcribing}
-            className="font-arabic"
+            className="font-english"
           />
           <Button
             type="button"

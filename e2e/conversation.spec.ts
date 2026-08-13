@@ -90,8 +90,8 @@ async function startTopic(page: Page, label = "Free Talk") {
 }
 
 async function send(page: Page, text: string) {
-  await page.getByPlaceholder("Type in Arabic or English…").fill(text);
-  await page.getByPlaceholder("Type in Arabic or English…").press("Enter");
+  await page.getByPlaceholder("Type in English…").fill(text);
+  await page.getByPlaceholder("Type in English…").press("Enter");
 }
 
 test.describe("starting a conversation", () => {
@@ -120,11 +120,11 @@ test.describe("starting a conversation", () => {
     // Pinned as-is: the input is mounted only once `messages` is non-empty, so
     // a learner who wants to open with their own sentence has to pick a topic
     // first and talk over the tutor's greeting.
-    await expect(page.getByPlaceholder("Type in Arabic or English…")).toHaveCount(0);
+    await expect(page.getByPlaceholder("Type in English…")).toHaveCount(0);
 
     await startTopic(page);
     await expectSaid(page, OPENER);
-    await expect(page.getByPlaceholder("Type in Arabic or English…")).toBeVisible();
+    await expect(page.getByPlaceholder("Type in English…")).toBeVisible();
   });
 
   test("opens with an empty history so the tutor speaks first", async ({ page, backend }) => {
@@ -244,7 +244,7 @@ test.describe("the streamed reply", () => {
     await send(page, "أنا بخير");
 
     await expect(page.getByText("أنا بخير")).toBeVisible();
-    await expect(page.getByPlaceholder("Type in Arabic or English…")).toHaveValue("");
+    await expect(page.getByPlaceholder("Type in English…")).toHaveValue("");
   });
 
   test("lifts a correction out of the front of the reply", async ({ page, backend }) => {
@@ -304,7 +304,7 @@ test.describe("the streamed reply", () => {
 
     // `[DONE]` is what breaks the read loop. Without it the box stays disabled
     // and the conversation is one turn long forever.
-    await expect(page.getByPlaceholder("Type in Arabic or English…")).toBeEnabled();
+    await expect(page.getByPlaceholder("Type in English…")).toBeEnabled();
   });
 
   test("sends nothing for an empty box", async ({ page, backend }) => {
@@ -316,7 +316,7 @@ test.describe("the streamed reply", () => {
     await expectSaid(page, OPENER);
     const before = backend.callsTo("free-chat").length;
 
-    await page.getByPlaceholder("Type in Arabic or English…").press("Enter");
+    await page.getByPlaceholder("Type in English…").press("Enter");
 
     expect(backend.callsTo("free-chat")).toHaveLength(before);
   });
@@ -324,7 +324,10 @@ test.describe("the streamed reply", () => {
 
 test.describe("when the chat fails", () => {
   test.beforeEach(async ({ signInAs, db, expectConsoleErrors, allowExternalHosts }) => {
-    tolerateLiveDial(expectConsoleErrors, allowExternalHosts);
+    // Every test here stubs free-chat to fail, and the page logs the stream
+    // error it recovers from — that log is the expected evidence, not noise.
+    expectConsoleErrors([/\[realtime\] start error/, /Failed to fetch/, /free-chat stream error/]);
+    allowExternalHosts(["api.openai.com"]);
     await signInAs("free");
     seedChat(db);
   });
@@ -440,7 +443,7 @@ test.describe("what a learner can keep", () => {
     await expect(page.getByRole("button", { name: /Save phrase/ })).toBeVisible();
   });
 
-  test("routes Gulf speech to the Gulf voice", async ({ page, backend }) => {
+  test("plays replies through the multilingual English voice", async ({ page, backend }) => {
     await page.goto("/conversation");
     await exitLive(page);
     await startTopic(page);
@@ -448,13 +451,14 @@ test.describe("what a learner can keep", () => {
 
     await page.getByRole("button", { name: /Play/ }).click();
 
-    // Each dialect has a different provider behind it because no single one
-    // covers all three: Gulf → Munsit, Egyptian → ElevenLabs, Yemeni → Azure's
-    // real ar-YE neural voice.
-    await expect.poll(() => backend.callsTo("munsit-tts").length).toBe(1);
+    // Replies are English now, so the dialect-routed Arabic voices are gone:
+    // one multilingual provider covers the reply and any Arabic aside in a
+    // correction line.
+    await expect.poll(() => backend.callsTo("elevenlabs-tts").length).toBe(1);
+    expect(backend.callsTo("munsit-tts")).toHaveLength(0);
   });
 
-  test("routes Yemeni speech to a real Yemeni voice", async ({
+  test("keeps the same English voice regardless of the learner's dialect", async ({
     page,
     signInAs,
     db,
@@ -471,12 +475,8 @@ test.describe("what a learner can keep", () => {
 
     await page.getByRole("button", { name: /Play/ }).click();
 
-    await expect.poll(() => backend.callsTo("azure-tts").length).toBe(1);
-    // The voice is named explicitly. Yemeni previously went to ElevenLabs,
-    // which has no Yemeni voice at all, so it was read in something else.
-    expect(backend.lastCallTo("azure-tts")?.body).toMatchObject({
-      voice: "ar-YE-SalehNeural",
-    });
+    await expect.poll(() => backend.callsTo("elevenlabs-tts").length).toBe(1);
+    expect(backend.callsTo("azure-tts")).toHaveLength(0);
   });
 
   test("routes Egyptian speech to an Egyptian voice", async ({

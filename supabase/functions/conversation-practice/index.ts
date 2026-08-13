@@ -1,10 +1,14 @@
-// conversation-practice — dialect-aware practice turn through the AI Brain.
-// The brain owns dialect identity + vocab rules; this file appends difficulty
-// guidance and buffers the stream server-side because the client expects { reply }.
+// conversation-practice — an ENGLISH conversation partner for Arabic
+// speakers, through the Brain's english-target mode. The Brain owns the
+// English identity + interference rulebook; this file appends difficulty
+// guidance, scans the learner's recent turns for known Arabic-transfer
+// phrases so the partner corrects them by name, and buffers the stream
+// server-side because the client expects { reply }.
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { streamBrain, BrainHttpError } from "../_shared/aiBrain.ts";
 import { getDialectLabel, type Dialect } from "../_shared/dialectHelpers.ts";
-import { detectMsaLeaks } from "../_shared/msaLeakDetector.ts";
+import { getTransferPatterns } from "../_shared/englishHelpers.ts";
+import { detectTransferErrors } from "../_shared/transferErrorDetector.ts";
 import { enforceDailyCap } from "../_shared/usageCap.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
 import { learnerPromptBlock } from "../_shared/learnerProfile.ts";
@@ -13,12 +17,12 @@ import { MODEL_IDS } from "../_shared/modelRegistry.ts";
 
 function difficultyExtras(difficulty: string): string {
   if (difficulty === "advanced") {
-    return "Student Arabic level: advanced. Speak naturally at full speed. Use complex grammar, idioms, and cultural expressions. Challenge the student.";
+    return "Student English level: advanced. Speak naturally at full speed. Use complex grammar, idioms, and cultural expressions. Challenge the student.";
   }
   if (difficulty === "intermediate") {
-    return "Student Arabic level: intermediate. Use moderately complex sentences. Mix common and less common vocabulary. Correct mistakes gently.";
+    return "Student English level: intermediate. Use moderately complex sentences. Mix common and less common vocabulary. Correct mistakes gently.";
   }
-  return "Student Arabic level: beginner. Use very simple, short sentences. Speak slowly. Use only basic vocabulary. Be encouraging and patient.";
+  return "Student English level: beginner. Use very simple, short sentences. Use only basic vocabulary. Be encouraging and patient.";
 }
 
 async function readSseToText(stream: ReadableStream<Uint8Array>): Promise<string> {
@@ -73,18 +77,23 @@ serve(async (req) => {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 30_000);
 
-    // Multi-turn drift tracking: scan the last 3 assistant turns.
+    // Transfer-error tracking: scan the learner's recent turns for known
+    // Arabic-shaped English (the mirror of the old assistant-side MSA drift
+    // nudge — here the drift worth catching is the learner's, and the
+    // partner is told to correct it by name rather than let it slide).
     const effectiveDialect = dialect as Dialect;
-    const recentAssistantTurns = (messages as Array<{ role: string; content: string }>)
-      .filter((m) => m.role === "assistant")
+    const recentLearnerTurns = (messages as Array<{ role: string; content: string }>)
+      .filter((m) => m.role === "user")
       .slice(-3)
       .map((m) => m.content)
       .join("\n");
-    const historyLeaks = recentAssistantTurns
-      ? detectMsaLeaks(recentAssistantTurns, effectiveDialect).leaks
+    const transferHits = recentLearnerTurns
+      ? detectTransferErrors(recentLearnerTurns, getTransferPatterns(effectiveDialect)).errors
       : [];
-    const driftNudge = historyLeaks.length > 0
-      ? `\n\nSELF-CORRECTION (your earlier replies used MSA tokens: ${historyLeaks.slice(0, 8).join(", ")}). Do NOT repeat that pattern — use only ${getDialectLabel(effectiveDialect)} forms.`
+    const driftNudge = transferHits.length > 0
+      ? `\n\nThe student's recent messages contain known Arabic-transfer phrases: ${
+          transferHits.slice(0, 5).map((e) => `"${e.match}"${e.suggestion ? ` (say: "${e.suggestion}")` : ""}`).join(", ")
+        }. Weave a gentle correction into your reply — name the natural form; a short ${getDialectLabel(effectiveDialect)} aside explaining why is welcome.`
       : "";
 
     // A conversation partner who knows your vocabulary can stay inside it and
@@ -92,7 +101,7 @@ serve(async (req) => {
     // Only the first turn pays the query: on later turns the same profile is
     // already reflected in the history the model can see.
     const learnerBlock = messages.length <= 2
-      ? await learnerPromptBlock({ userId: cap.userId, dialect: effectiveDialect })
+      ? await learnerPromptBlock({ userId: cap.userId, dialect: effectiveDialect, target: "english" })
       : "";
     const learnerNudge = learnerBlock ? `\n\n${learnerBlock}` : "";
 
@@ -100,7 +109,10 @@ serve(async (req) => {
       const streamed = await streamBrain({
         purpose: "conversation_practice_turn",
         dialect: effectiveDialect,
-        systemPromptExtra: difficultyExtras(difficulty) + driftNudge + learnerNudge,
+        target: "english",
+        systemPromptExtra:
+          `You are a friendly English conversation partner. Keep the conversation going naturally — ask follow-ups, react, share. ` +
+          difficultyExtras(difficulty) + driftNudge + learnerNudge,
         messages,
         model: MODEL_IDS.GEMINI_FAST,
         temperature: 0.8,

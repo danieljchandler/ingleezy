@@ -171,7 +171,7 @@ Deno.test("conversation-practice reports a stream that carried nothing", async (
 Deno.test("conversation-practice tunes the prompt to the stated level", async () => {
   const advanced = await call(
     "conversation-practice",
-    { messages: [turn("مرحبا")], difficulty: "advanced" },
+    { messages: [turn("Hi")], difficulty: "advanced" },
     caller(streaming("رد")),
   );
   assertStringIncludes(gatewayPrompt(advanced.bodies, advanced.calls), "advanced");
@@ -194,35 +194,40 @@ Deno.test("conversation-practice treats an unknown level as beginner", async () 
   assertStringIncludes(gatewayPrompt(result.bodies, result.calls), "Be encouraging and patient");
 });
 
-Deno.test("conversation-practice nudges itself back after its own MSA leaks", async () => {
+Deno.test("conversation-practice tells the partner to correct known transfer phrases", async () => {
   const result = await call(
     "conversation-practice",
     {
       dialect: "Gulf",
       messages: [
-        turn("مرحبا"),
-        // An earlier assistant turn that drifted into MSA/Egyptian forms.
-        turn("دلوقتي أنا ماذا أفعل", "assistant"),
-        turn("طيب"),
+        turn("Hi!"),
+        turn("Hello! How was your day?", "assistant"),
+        // A learner turn carrying a known calque.
+        turn("Good! But please open the light."),
       ],
     },
-    caller(streaming("رد")),
+    caller(streaming("Sure")),
   );
 
   assertEquals(result.status, 200);
   const prompt = gatewayPrompt(result.bodies, result.calls);
-  assertStringIncludes(prompt, "SELF-CORRECTION");
+  assertStringIncludes(prompt, "open the light");
+  assertStringIncludes(prompt, "turn on the light");
+  assertStringIncludes(prompt, "gentle correction");
 });
 
-Deno.test("conversation-practice adds no nudge to a clean history", async () => {
+Deno.test("conversation-practice adds no correction nudge to clean English", async () => {
   const result = await call(
     "conversation-practice",
-    { dialect: "Gulf", messages: [turn("مرحبا"), turn("شلونك", "assistant"), turn("زين")] },
-    caller(streaming("رد")),
+    {
+      dialect: "Gulf",
+      messages: [turn("Hi!"), turn("Hello!", "assistant"), turn("I went to the market.")],
+    },
+    caller(streaming("Nice")),
   );
 
   const prompt = gatewayPrompt(result.bodies, result.calls);
-  assertEquals(prompt.includes("SELF-CORRECTION"), false);
+  assertEquals(prompt.includes("gentle correction"), false);
 });
 
 Deno.test("conversation-practice only pays for the learner profile on the opening turns", async () => {
