@@ -174,6 +174,7 @@ export const ROUTES: RouteSpec[] = [
   { path: "/admin/videos/:videoId/edit", params: { videoId: VIDEO_ID }, gate: "admin-or-reviewer" },
   { path: "/admin/set-phrases", gate: "admin-or-reviewer" },
   { path: "/admin/dialect-rules", gate: "admin-or-reviewer" },
+  { path: "/admin/interference-rules", gate: "admin-or-reviewer" },
 
   { path: "/admin/curriculum", gate: "admin" },
   { path: "/admin/lessons/import", gate: "admin" },

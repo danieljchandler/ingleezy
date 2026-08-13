@@ -72,7 +72,11 @@ export const COLUMNS_MISSING_FROM_TYPES: DriftedColumn[] = [
   // The L1-Interference Rulebook, created after the fork and absent from the
   // generated types until a real Supabase project regenerates them. Queried
   // only by englishHelpers.ts under the service role today.
-  ...["id", "dialect", "category", "rule", "explanation_ar", "examples", "priority", "status"].map(
+  ...[
+    "id", "dialect", "category", "rule", "explanation_ar", "examples", "priority",
+    "status", "source", "notes", "version", "created_by", "approved_by",
+    "approved_at", "created_at", "updated_at",
+  ].map(
     (column) => ({
       table: "interference_rules",
       column,

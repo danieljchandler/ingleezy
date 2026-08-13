@@ -426,6 +426,31 @@ export const aDialectRule = (over: Row = {}): Row => ({
 });
 
 /**
+ * One L1-interference rule, as /admin/interference-rules shows it — the
+ * English-target mirror of aDialectRule. `dialect: null` means the rule
+ * applies to speakers of every Arabic dialect.
+ */
+export const anInterferenceRule = (over: Row = {}): Row => ({
+  id: ruleId(0),
+  dialect: null,
+  category: "calque",
+  rule: "Arabic idioms translated word-for-word produce unnatural English.",
+  explanation_ar: "التعابير لا تُترجم حرفياً.",
+  examples: { good: ["turn on the light"], bad: ["open the light"] },
+  priority: 4,
+  status: "draft",
+  source: "manual",
+  notes: null,
+  version: 1,
+  approved_by: null,
+  approved_at: null,
+  created_by: TEST_USER_ID,
+  created_at: daysAgo(3),
+  updated_at: daysAgo(3),
+  ...over,
+});
+
+/**
  * One MSA-to-dialect transformation rule, as the Bridge screen shows it.
  *
  * These are the "if you know fusha, here is the swap" cards — ماذا becomes شنو,

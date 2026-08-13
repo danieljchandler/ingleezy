@@ -103,6 +103,7 @@ const AdminMemeForm = lazyPage(() => import("./pages/admin/AdminMemeForm"));
 const AdminCoverage = lazyPage(() => import("./pages/admin/AdminCoverage"));
 const AdminSetPhrases = lazyPage(() => import("./pages/admin/AdminSetPhrases"));
 const AdminDialectRules = lazyPage(() => import("./pages/admin/AdminDialectRules"));
+const AdminInterferenceRules = lazyPage(() => import("./pages/admin/AdminInterferenceRules"));
 const AdminInviteCodes = lazyPage(() => import("./pages/admin/AdminInviteCodes"));
 const AdminFeedback = lazyPage(() => import("./pages/admin/AdminFeedback"));
 const AdminReadingLibrary = lazyPage(() => import("./pages/admin/AdminReadingLibrary"));
@@ -446,6 +447,7 @@ const App = () => {
               <Route path="memes/:memeId" element={<AdminMemeForm />} />
               <Route path="set-phrases" element={<AdminSetPhrases />} />
               <Route path="dialect-rules" element={<AdminDialectRules />} />
+              <Route path="interference-rules" element={<AdminInterferenceRules />} />
               <Route path="invite-codes" element={<AdminInviteCodes />} />
               <Route path="errors" element={<AdminErrors />} />
               <Route path="metrics" element={<AdminFeatureMetrics />} />

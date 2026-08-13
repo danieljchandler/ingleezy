@@ -274,6 +274,20 @@ const Dashboard = () => {
                 </CardContent>
               </Card>
 
+              <Card className="cursor-pointer hover:shadow-lg transition-shadow border-primary/30" onClick={() => navigate('/admin/interference-rules')}>
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-4">
+                    <div className="bg-primary/10 rounded-full p-4">
+                      <Languages className="h-8 w-8 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-lg">Interference Rulebook</h3>
+                      <p className="text-muted-foreground">How Arabic shapes learners' English — steers every English generation</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
               <Card className="cursor-pointer hover:shadow-lg transition-shadow border-accent/30" onClick={() => navigate('/admin/stories')}>
                 <CardContent className="pt-6">
                   <div className="flex items-center gap-4">
