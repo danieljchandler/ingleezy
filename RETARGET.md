@@ -96,7 +96,11 @@ generation conditioning.
       go") — those need AI grading. Pure core in `englishPromptCore.ts`;
       Vitest + Deno tested.
 - [ ] Admin CRUD for interference_rules (mirror AdminDialectRules)
-- [ ] First English-target caller end-to-end, then flip generators one by one
+- [x] First English-target caller end-to-end: practice-sentence-coach —
+      Deepgram EN ASR, Brain target:'english', deterministic transfer scan
+      feeding the prompt, bilingual feedback (English rewrites + dialect
+      verdict/tips/interference notes), learner_errors tagged with
+      interference categories. Remaining generators flip one by one.
 - [x] `learnerProfile.ts` / `learnerProfileCore.ts`: `target: 'english'`
       rendering — English side primary, lexicon named "English"; data path
       untouched (decks are bilingual). CEFR placement re-aim still open.
@@ -135,7 +139,8 @@ generation conditioning.
 - [ ] Pronunciation practice: English phoneme scoring, seeded with the
       Arabic-speaker confusion set (/p/-/b/, /v/-/f/, vowel pairs,
       clusters) — this *replaces* Alphabet Journey's role
-- [ ] Shadowing, sentence coach, set phrases: KEEP loops, English targets
+- [~] Shadowing, sentence coach, set phrases: KEEP loops, English targets
+      (sentence coach DONE — the model for the rest)
 - [ ] TTS: English voices for targets; Arabic TTS kept for scaffold audio
 - [ ] Realtime conversation simulator: KEEP, English persona
       (⚠ port Hakiya's usage-cap findings: meter minutes, not sessions)

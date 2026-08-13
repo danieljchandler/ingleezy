@@ -7,23 +7,26 @@ import {
   SheetDescription,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Loader2, Mic, Square, RefreshCw, Sparkles, CheckCircle2, XCircle } from "lucide-react";
+import { Loader2, Mic, Square, RefreshCw, Sparkles, CheckCircle2, XCircle, Lightbulb } from "lucide-react";
 import { LevelMeter } from "@/components/pronunciation/LevelMeter";
 import { useShadowRecorder } from "@/hooks/useShadowRecorder";
-import { TappableArabicText } from "@/components/shared/TappableArabicText";
-import { AskAISentence } from "@/components/shared/AskAISentence";
 import { useDialect } from "@/contexts/DialectContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
+// The learner speaks ENGLISH here; feedback comes back bilingual — natural
+// English rewrites with dialect-Arabic glosses, and verdict/tips written in
+// the learner's own dialect. interference_notes name the Arabic-transfer
+// patterns the coach heard (the L1-aware part of the coaching).
 interface Feedback {
   used_target_word?: boolean;
   understandable?: boolean;
-  verdict?: string;
+  verdict_ar?: string;
   natural_rewrite?: string;
-  natural_rewrite_english?: string;
-  alternatives?: Array<{ arabic: string; english: string }>;
-  tips?: string[];
+  natural_rewrite_arabic?: string;
+  alternatives?: Array<{ english: string; arabic: string }>;
+  tips_ar?: string[];
+  interference_notes?: Array<{ category: string; note_ar: string }>;
   transcript?: string;
   empty?: boolean;
   message?: string;
@@ -32,8 +35,10 @@ interface Feedback {
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  targetArabic: string;
-  targetEnglish?: string;
+  /** The English word/phrase being practised. */
+  targetEnglish: string;
+  /** Its gloss in the learner's dialect (scaffold). */
+  targetArabic?: string;
 }
 
 async function blobToBase64(blob: Blob): Promise<string> {
@@ -46,7 +51,7 @@ async function blobToBase64(blob: Blob): Promise<string> {
   return btoa(bin);
 }
 
-export function SentencePracticeSheet({ open, onOpenChange, targetArabic, targetEnglish }: Props) {
+export function SentencePracticeSheet({ open, onOpenChange, targetEnglish, targetArabic }: Props) {
   const { activeDialect } = useDialect();
   const { start, stop, isRecording, level, permissionDenied } = useShadowRecorder();
   const [loading, setLoading] = useState(false);
@@ -72,8 +77,8 @@ export function SentencePracticeSheet({ open, onOpenChange, targetArabic, target
           body: {
             audioBase64,
             mimeType: blob.type,
-            targetArabic,
             targetEnglish,
+            targetArabic,
             dialect: activeDialect,
           },
         });
@@ -91,7 +96,7 @@ export function SentencePracticeSheet({ open, onOpenChange, targetArabic, target
         setLoading(false);
       }
     },
-    [targetArabic, targetEnglish, activeDialect],
+    [targetEnglish, targetArabic, activeDialect],
   );
 
   const beginRecord = useCallback(() => {
@@ -120,20 +125,16 @@ export function SentencePracticeSheet({ open, onOpenChange, targetArabic, target
             Practice a sentence
           </SheetTitle>
           <SheetDescription>
-            Say a sentence using{" "}
-            <span
-              dir="rtl"
-              className="font-semibold text-foreground"
-              style={{ fontFamily: "'Amiri', 'Traditional Arabic', serif" }}
-            >
-              {targetArabic}
-            </span>
-            {targetEnglish ? <> ({targetEnglish})</> : null}. Speak naturally — pronunciation doesn't
-            need to be perfect.
+            Say an English sentence using{" "}
+            <span className="font-english font-semibold text-foreground">{targetEnglish}</span>
+            {targetArabic ? (
+              <>
+                {" "}
+                (<span dir="rtl" className="font-arabic">{targetArabic}</span>)
+              </>
+            ) : null}
+            . Speak naturally — pronunciation doesn't need to be perfect.
           </SheetDescription>
-          <div className="flex justify-start pt-1">
-            <AskAISentence arabic={targetArabic} english={targetEnglish} variant="chip" />
-          </div>
         </SheetHeader>
 
         <div className="mt-6 space-y-6">
@@ -191,13 +192,7 @@ export function SentencePracticeSheet({ open, onOpenChange, targetArabic, target
                       <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground mb-1">
                         You said
                       </p>
-                      <div
-                        dir="rtl"
-                        className="text-lg leading-relaxed"
-                        style={{ fontFamily: "'Amiri', 'Traditional Arabic', serif" }}
-                      >
-                        <TappableArabicText text={feedback.transcript} source="sentence-practice" />
-                      </div>
+                      <p className="font-english text-lg leading-relaxed">{feedback.transcript}</p>
                     </div>
                   )}
 
@@ -220,30 +215,46 @@ export function SentencePracticeSheet({ open, onOpenChange, targetArabic, target
                     </span>
                   </div>
 
-                  {feedback.verdict && (
-                    <p className="text-sm text-foreground">{feedback.verdict}</p>
+                  {feedback.verdict_ar && (
+                    <p dir="rtl" className="font-arabic text-sm text-foreground">
+                      {feedback.verdict_ar}
+                    </p>
                   )}
 
                   {feedback.natural_rewrite && (
                     <div className="rounded-lg bg-muted/40 border border-border p-3">
                       <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground mb-1">
-                        More natural in {activeDialect}
+                        More natural
                       </p>
-                      <div
-                        dir="rtl"
-                        className="text-lg leading-relaxed"
-                        style={{ fontFamily: "'Amiri', 'Traditional Arabic', serif" }}
-                      >
-                        <TappableArabicText
-                          text={feedback.natural_rewrite}
-                          source="sentence-practice-rewrite"
-                        />
-                      </div>
-                      {feedback.natural_rewrite_english && (
-                        <p className="mt-1.5 text-xs text-muted-foreground italic">
-                          {feedback.natural_rewrite_english}
+                      <p className="font-english text-lg leading-relaxed">
+                        {feedback.natural_rewrite}
+                      </p>
+                      {feedback.natural_rewrite_arabic && (
+                        <p dir="rtl" className="mt-1.5 font-arabic text-sm text-muted-foreground">
+                          {feedback.natural_rewrite_arabic}
                         </p>
                       )}
+                    </div>
+                  )}
+
+                  {feedback.interference_notes && feedback.interference_notes.length > 0 && (
+                    <div className="rounded-lg border border-accent/40 bg-accent/5 p-3">
+                      <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground mb-1.5 flex items-center gap-1">
+                        <Lightbulb className="h-3.5 w-3.5 text-accent" />
+                        From Arabic to English
+                      </p>
+                      <ul className="space-y-1.5 text-sm">
+                        {feedback.interference_notes.map((note, i) => (
+                          <li key={i} className="flex gap-2 items-baseline">
+                            <span className="text-[10px] uppercase tracking-wide text-muted-foreground shrink-0">
+                              {note.category}
+                            </span>
+                            <span dir="rtl" className="font-arabic flex-1 text-right">
+                              {note.note_ar}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
                     </div>
                   )}
 
@@ -258,19 +269,10 @@ export function SentencePracticeSheet({ open, onOpenChange, targetArabic, target
                             key={i}
                             className="rounded-lg border border-border bg-background/50 p-2.5"
                           >
-                            <div
-                              dir="rtl"
-                              className="text-base leading-relaxed"
-                              style={{ fontFamily: "'Amiri', 'Traditional Arabic', serif" }}
-                            >
-                              <TappableArabicText
-                                text={alt.arabic}
-                                source="sentence-practice-alt"
-                              />
-                            </div>
-                            {alt.english && (
-                              <p className="mt-1 text-xs text-muted-foreground italic">
-                                {alt.english}
+                            <p className="font-english text-base leading-relaxed">{alt.english}</p>
+                            {alt.arabic && (
+                              <p dir="rtl" className="mt-1 font-arabic text-xs text-muted-foreground">
+                                {alt.arabic}
                               </p>
                             )}
                           </div>
@@ -279,16 +281,16 @@ export function SentencePracticeSheet({ open, onOpenChange, targetArabic, target
                     </div>
                   )}
 
-                  {feedback.tips && feedback.tips.length > 0 && (
+                  {feedback.tips_ar && feedback.tips_ar.length > 0 && (
                     <div>
                       <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground mb-1.5">
                         Tips
                       </p>
                       <ul className="space-y-1 text-sm text-foreground">
-                        {feedback.tips.map((tip, i) => (
-                          <li key={i} className="flex gap-2">
+                        {feedback.tips_ar.map((tip, i) => (
+                          <li key={i} className="flex gap-2 flex-row-reverse">
                             <span className="text-primary">•</span>
-                            <span>{tip}</span>
+                            <span dir="rtl" className="font-arabic flex-1 text-right">{tip}</span>
                           </li>
                         ))}
                       </ul>

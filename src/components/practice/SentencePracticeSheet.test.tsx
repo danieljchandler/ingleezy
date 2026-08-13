@@ -6,8 +6,8 @@ import { SentencePracticeSheet } from "./SentencePracticeSheet";
 import type { SupabaseBackend } from "@/test/support/server/handler";
 
 /**
- * Free production practice: say any sentence using this word, and get told
- * whether it worked.
+ * Free production practice: say any ENGLISH sentence using this word, and get
+ * told whether it worked.
  *
  * Every other speaking exercise in the app scores a learner against a fixed
  * target — repeat this, read that. This one has no target. The learner makes
@@ -15,13 +15,15 @@ import type { SupabaseBackend } from "@/test/support/server/handler";
  * conversation, and the only honest questions to ask about it are "did you use
  * the word" and "would a native have understood you".
  *
- * The coaching that follows is deliberately not a score. A rewrite in natural
- * dialect, some alternatives, a couple of tips — all optional, because a model
- * that always finds three things to correct teaches a learner their Arabic is
+ * The coaching is bilingual by design: the rewrites are English (the thing
+ * being learned), the verdict/tips/interference notes come back in the
+ * learner's own dialect. And it is deliberately not a score — a model that
+ * always finds three things to correct teaches a learner their English is
  * always wrong.
  */
 
-const TARGET = "سوق";
+const TARGET = "market";
+const GLOSS = "سوق";
 
 // The recorder is driven by useShadowRecorder, which owns getUserMedia, an
 // AudioContext analyser for the level meter and the silence detector. Mocked
@@ -54,12 +56,13 @@ const aTake = () => new Blob([new Uint8Array(32)], { type: "audio/webm" });
 const aCoaching = (over: Record<string, unknown> = {}) => ({
   used_target_word: true,
   understandable: true,
-  verdict: "Clear and natural.",
-  transcript: "رحت السوق أمس",
-  natural_rewrite: "رحت السوق البارحة",
-  natural_rewrite_english: "I went to the market yesterday",
-  alternatives: [{ arabic: "سرت السوق", english: "I headed to the market" }],
-  tips: ["البارحة is more common than أمس in Gulf speech"],
+  verdict_ar: "واضح ومفهوم، عاش!",
+  transcript: "I go to market yesterday",
+  natural_rewrite: "I went to the market yesterday",
+  natural_rewrite_arabic: "رحت السوق أمس",
+  alternatives: [{ english: "I headed to the market", arabic: "سرت السوق" }],
+  tips_ar: ["قل went مو go لما تتكلم عن أمس"],
+  interference_notes: [{ category: "article", note_ar: "لا تنسَ the قبل market" }],
   ...over,
 });
 
@@ -91,8 +94,8 @@ function render(seed: (backend: SupabaseBackend) => void = () => {}, open = true
     <SentencePracticeSheet
       open={open}
       onOpenChange={() => {}}
-      targetArabic={TARGET}
-      targetEnglish="market"
+      targetEnglish={TARGET}
+      targetArabic={GLOSS}
     />,
     {
       persona: "free",
@@ -101,7 +104,6 @@ function render(seed: (backend: SupabaseBackend) => void = () => {}, open = true
           aProfile({ user_id: TEST_USER_ID, preferred_dialect: "Gulf" }),
         ]);
         backend.stubFunction("practice-sentence-coach", aCoaching());
-        backend.stubFunction("word-enrichment", { definition: "market" });
         seed(backend);
       },
     },
@@ -117,9 +119,9 @@ describe("setting the exercise", () => {
     render();
 
     // Without the word on screen the exercise is "say something", which is not
-    // an exercise.
+    // an exercise. The Arabic gloss rides along as scaffold.
     expect(screen.getByText(TARGET)).toBeInTheDocument();
-    expect(screen.getByText(/market/)).toBeInTheDocument();
+    expect(screen.getByText(GLOSS)).toBeInTheDocument();
   });
 
   it("tells the learner not to worry about their accent", () => {
@@ -192,8 +194,8 @@ describe("the coaching", () => {
 
     await waitFor(() =>
       expect(backend.lastCallTo("practice-sentence-coach")?.body).toMatchObject({
-        targetArabic: TARGET,
-        targetEnglish: "market",
+        targetEnglish: TARGET,
+        targetArabic: GLOSS,
         dialect: "Gulf",
         mimeType: "audio/webm",
       }),
@@ -223,16 +225,28 @@ describe("the coaching", () => {
     expect(screen.getByText("Understandable")).toBeInTheDocument();
   });
 
-  it("offers a more natural phrasing in the learner's dialect", async () => {
+  it("offers a more natural English phrasing with its Arabic gloss", async () => {
     render();
     record();
 
     await finishRecording({ blob: aTake() });
 
-    // The heading names the dialect, because "more natural" means nothing
-    // without saying more natural to whom.
-    await waitFor(() => expect(screen.getByText("More natural in Gulf")).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText("More natural")).toBeInTheDocument());
     expect(screen.getByText("I went to the market yesterday")).toBeInTheDocument();
+    expect(screen.getByText("رحت السوق أمس")).toBeInTheDocument();
+  });
+
+  it("names the interference patterns in the learner's own dialect", async () => {
+    render();
+    record();
+
+    await finishRecording({ blob: aTake() });
+
+    // The L1-aware part of the coaching: the pattern is named, and the
+    // explanation is in the learner's language, not the one they are learning.
+    await waitFor(() => expect(screen.getByText("From Arabic to English")).toBeInTheDocument());
+    expect(screen.getByText("article")).toBeInTheDocument();
+    expect(screen.getByText("لا تنسَ the قبل market")).toBeInTheDocument();
   });
 
   it("offers other ways to say it", async () => {
@@ -253,9 +267,7 @@ describe("the coaching", () => {
     await finishRecording({ blob: aTake() });
 
     await waitFor(() =>
-      expect(
-        screen.getByText("البارحة is more common than أمس in Gulf speech"),
-      ).toBeInTheDocument(),
+      expect(screen.getByText("قل went مو go لما تتكلم عن أمس")).toBeInTheDocument(),
     );
   });
 
@@ -263,7 +275,7 @@ describe("the coaching", () => {
     render((backend) =>
       backend.stubFunction(
         "practice-sentence-coach",
-        aCoaching({ natural_rewrite: null, alternatives: [], tips: [] }),
+        aCoaching({ natural_rewrite: null, alternatives: [], tips_ar: [], interference_notes: [] }),
       ),
     );
     record();
@@ -274,9 +286,10 @@ describe("the coaching", () => {
     // their Arabic is always wrong. An empty section is the honest answer when
     // the sentence was simply fine.
     await waitFor(() => expect(screen.getByText("Used target word")).toBeInTheDocument());
-    expect(screen.queryByText(/More natural in/)).not.toBeInTheDocument();
+    expect(screen.queryByText("More natural")).not.toBeInTheDocument();
     expect(screen.queryByText("Other ways to say it")).not.toBeInTheDocument();
     expect(screen.queryByText("Tips")).not.toBeInTheDocument();
+    expect(screen.queryByText("From Arabic to English")).not.toBeInTheDocument();
   });
 
   it("passes on the coach's own explanation when it had nothing to say", async () => {
@@ -359,8 +372,8 @@ describe("when the coach fails", () => {
       <SentencePracticeSheet
         open={false}
         onOpenChange={() => {}}
-        targetArabic={TARGET}
-        targetEnglish="market"
+        targetEnglish={TARGET}
+        targetArabic={GLOSS}
       />,
     );
 

@@ -1,40 +1,55 @@
 /**
- * practice-sentence-coach
+ * practice-sentence-coach — the first English-target caller of the Brain.
  *
- * Given a short voice recording of a learner trying to use a target Arabic
- * vocabulary word in a sentence, transcribes the utterance via Munsit ASR and
- * returns dialect-aware coaching feedback: a naturalness rewrite, 2-3
- * alternative phrasings, encouraging pronunciation tips, and a lenient
- * correctness verdict. Intentionally forgiving of non-native pronunciation —
- * focuses on intelligibility and dialect authenticity, not accent perfection.
+ * Given a short voice recording of a learner trying to use a target ENGLISH
+ * word in a sentence, transcribes the utterance via Deepgram (nova-3, en) and
+ * returns L1-aware coaching: a natural English rewrite with a dialect-Arabic
+ * gloss, alternative phrasings, and encouraging tips written in the learner's
+ * own dialect. Intentionally forgiving of non-native pronunciation — focuses
+ * on intelligibility and natural phrasing, not accent perfection.
+ *
+ * What makes it L1-aware rather than generic ESL coaching:
+ *  - the Brain runs with target: 'english', so the system prompt carries the
+ *    interference rulebook (article drops, copula omission, calques …);
+ *  - the transfer-error detector runs on the transcript first, and its hits
+ *    are handed to the model so known Arabic-shaped phrases are always
+ *    addressed by name;
+ *  - misses are persisted to learner_errors with the interference categories
+ *    in `detail`, feeding the mistake flywheel and /mistakes.
  *
  * Body: {
  *   audioBase64: string,
  *   mimeType?: string,
- *   targetArabic: string,   // the vocabulary word / phrase the learner is practising
- *   targetEnglish?: string,
- *   dialect?: string,        // "Gulf" | "Egyptian" | "Yemeni"
+ *   targetEnglish: string,  // the vocabulary word / phrase being practised
+ *   targetArabic?: string,  // its gloss in the learner's dialect (scaffold)
+ *   dialect?: string,       // the learner's L1: "Gulf" | "Egyptian" | "Yemeni"
+ *   cefr?: string,          // conditions feedback complexity (A1–C1)
  * }
  */
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
-import { munsitModel, munsitFallbackModel } from "../_shared/asrConfig.ts";
 import { enforceDailyCap } from "../_shared/usageCap.ts";
 import { recordLearnerErrors, resolveLearnerErrors } from "../_shared/learnerErrors.ts";
 import { askBrain, BrainHttpError } from "../_shared/aiBrain.ts";
-import { getDialectLabel, getDialectTransliterationRules, type Dialect } from "../_shared/dialectHelpers.ts";
+import { getDialectLabel, type Dialect } from "../_shared/dialectHelpers.ts";
+import { getTransferPatterns } from "../_shared/englishHelpers.ts";
+import { detectTransferErrors } from "../_shared/transferErrorDetector.ts";
 import { MODEL_IDS } from "../_shared/modelRegistry.ts";
 
-const MUNSIT_BASE = "https://api.munsit.com/api/v1";
+const DEEPGRAM_URL = "https://api.deepgram.com/v1/listen";
 
 interface CoachFeedback {
   used_target_word: boolean;
   understandable: boolean;
-  verdict: string;
+  /** One short encouraging sentence, in the learner's dialect Arabic. */
+  verdict_ar: string;
   natural_rewrite: string;
-  natural_rewrite_english: string;
-  alternatives: { arabic: string; english: string }[];
-  tips: string[];
+  natural_rewrite_arabic: string;
+  alternatives: { english: string; arabic: string }[];
+  /** 1-2 short tips in the learner's dialect Arabic. */
+  tips_ar: string[];
+  /** Interference patterns the coach observed, named for the learner. */
+  interference_notes: { category: string; note_ar: string }[];
 }
 
 const FEEDBACK_TOOL_PARAMETERS = {
@@ -46,46 +61,62 @@ const FEEDBACK_TOOL_PARAMETERS = {
     },
     understandable: {
       type: "boolean",
-      description: "True if a native speaker would understand the intent, even with mistakes.",
+      description: "True if a native English speaker would understand the intent, even with mistakes.",
     },
-    verdict: {
+    verdict_ar: {
       type: "string",
-      description: "One short encouraging sentence summarising how it went.",
+      description: "One short encouraging sentence in the learner's dialect Arabic.",
     },
     natural_rewrite: {
       type: "string",
-      description: "The learner's sentence rewritten naturally in the target dialect. Arabic script.",
+      description: "The learner's sentence rewritten as natural spoken English, close to their intent.",
     },
-    natural_rewrite_english: {
+    natural_rewrite_arabic: {
       type: "string",
-      description: "English gloss of the natural rewrite.",
+      description: "Gloss of the natural rewrite in the learner's dialect Arabic.",
     },
     alternatives: {
       type: "array",
       items: {
         type: "object",
         properties: {
-          arabic: { type: "string" },
           english: { type: "string" },
+          arabic: { type: "string" },
         },
-        required: ["arabic", "english"],
+        required: ["english", "arabic"],
       },
-      description: "2 alternative native phrasings.",
+      description: "2 alternative natural English phrasings, each with a dialect-Arabic gloss.",
     },
-    tips: {
+    tips_ar: {
       type: "array",
       items: { type: "string" },
-      description: "1-2 short encouraging usage/pronunciation tips.",
+      description: "1-2 short encouraging tips, written in the learner's dialect Arabic.",
+    },
+    interference_notes: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          category: {
+            type: "string",
+            description: "article | copula | phonology | preposition | calque | word_order | morphology | spelling | register",
+          },
+          note_ar: { type: "string", description: "The pattern explained briefly in the learner's dialect Arabic." },
+        },
+        required: ["category", "note_ar"],
+      },
+      description: "Arabic-interference patterns present in the attempt. Empty when clean.",
     },
   },
   required: [
     "used_target_word",
     "understandable",
-    "verdict",
+    "verdict_ar",
     "natural_rewrite",
-    "natural_rewrite_english",
+    "natural_rewrite_arabic",
     "alternatives",
-    "tips",
+    "tips_ar",
+    "interference_notes",
   ],
 } as const;
 
@@ -95,44 +126,43 @@ function toDialect(d?: string): Dialect {
   return "Gulf";
 }
 
-async function munsitCall(audioBase64: string, mimeType: string, apiKey: string, model: string): Promise<string> {
+/** Transcribe a short English utterance. Nova-3 handles accented English well;
+ *  keyterm boosting nudges it toward the word being practised. */
+async function deepgramTranscribe(
+  audioBase64: string,
+  mimeType: string,
+  apiKey: string,
+  keyterm?: string,
+): Promise<string> {
   const bin = atob(audioBase64);
   const bytes = new Uint8Array(bin.length);
   for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-  const blob = new Blob([bytes], { type: mimeType || "audio/webm" });
-  const ext = mimeType.includes("wav") ? "wav" : mimeType.includes("mp4") ? "m4a" : "webm";
-  const fd = new FormData();
-  fd.append("file", new File([blob], `utterance.${ext}`, { type: blob.type }));
-  fd.append("model", model);
 
-  const resp = await fetch(`${MUNSIT_BASE}/audio/transcribe`, {
+  const params = new URLSearchParams({
+    model: "nova-3",
+    language: "en",
+    punctuate: "true",
+    smart_format: "true",
+  });
+  if (keyterm?.trim()) params.append("keyterm", `${keyterm.trim()}:2`);
+
+  const resp = await fetch(`${DEEPGRAM_URL}?${params}`, {
     method: "POST",
-    headers: { "x-api-key": apiKey },
-    body: fd,
+    headers: {
+      Authorization: `Token ${apiKey}`,
+      "Content-Type": mimeType || "audio/webm",
+    },
+    body: bytes,
     signal: AbortSignal.timeout(30_000),
   });
   if (!resp.ok) {
     const t = await resp.text();
-    throw new Error(`Munsit ${resp.status}: ${t.slice(0, 200)}`);
+    throw new Error(`Deepgram ${resp.status}: ${t.slice(0, 200)}`);
   }
   const data = await resp.json();
-  // Munsit nests transcript under data.data.transcription (see model registry notes)
-  return (data?.data?.transcription ?? data?.transcription ?? "").toString().trim();
-}
-
-/**
- * Transcribe with the primary Munsit model, retrying once on the other model
- * when the first answer is empty. The bare `munsit` model went degraded
- * upstream (a few characters back for any payload), so the default is now
- * `munsit-en-ar` — the retry covers the reverse happening later.
- */
-async function munsitTranscribe(audioBase64: string, mimeType: string, apiKey: string): Promise<string> {
-  const primary = munsitModel();
-  const first = await munsitCall(audioBase64, mimeType, apiKey, primary);
-  if (first.trim()) return first;
-  const fallback = munsitFallbackModel(primary);
-  console.warn(`munsit: empty transcription from ${primary} — retrying with ${fallback}`);
-  return await munsitCall(audioBase64, mimeType, apiKey, fallback);
+  const transcript: string =
+    data?.results?.channels?.[0]?.alternatives?.[0]?.transcript ?? "";
+  return transcript.toString().trim();
 }
 
 serve(async (req) => {
@@ -144,19 +174,24 @@ serve(async (req) => {
   if (cap.limited) return cap.response;
 
   try {
-    const { audioBase64, mimeType, targetArabic, targetEnglish, dialect } = await req.json();
-    if (!audioBase64 || !targetArabic) {
+    const { audioBase64, mimeType, targetEnglish, targetArabic, dialect, cefr } = await req.json();
+    if (!audioBase64 || !targetEnglish) {
       return new Response(
-        JSON.stringify({ error: "audioBase64 and targetArabic are required" }),
+        JSON.stringify({ error: "audioBase64 and targetEnglish are required" }),
         { status: 400, headers: { ...cors, "Content-Type": "application/json" } },
       );
     }
 
-    const munsitKey = Deno.env.get("MUNSIT_API_KEY");
-    if (!munsitKey) throw new Error("MUNSIT_API_KEY not configured");
+    const deepgramKey = Deno.env.get("DEEPGRAM_API_KEY");
+    if (!deepgramKey) throw new Error("DEEPGRAM_API_KEY not configured");
 
-    // Step 1: Transcribe
-    const transcript = await munsitTranscribe(audioBase64, mimeType || "audio/webm", munsitKey);
+    // Step 1: Transcribe the English attempt.
+    const transcript = await deepgramTranscribe(
+      audioBase64,
+      mimeType || "audio/webm",
+      deepgramKey,
+      targetEnglish,
+    );
     if (!transcript) {
       return new Response(
         JSON.stringify({
@@ -168,30 +203,43 @@ serve(async (req) => {
       );
     }
 
-    // Step 2: Coach through the shared Brain so the dialect rewrite/alternatives
-    // inherit dialect identity + MSA-leak scan/repair.
     const resolvedDialect = toDialect(dialect);
     const dLabel = getDialectLabel(resolvedDialect);
 
+    // Step 2: Deterministic transfer scan — known Arabic-shaped phrases in
+    // the transcript. Handed to the model so they are addressed by name, and
+    // persisted with any miss for the flywheel.
+    const detected = detectTransferErrors(transcript, getTransferPatterns(resolvedDialect));
+    const detectedBlock = detected.errors.length
+      ? `\n\nKnown Arabic-transfer phrases detected in the attempt (address each one, kindly):\n` +
+        detected.errors
+          .map((e) => `- "${e.match}" (${e.category}${e.suggestion ? ` → "${e.suggestion}"` : ""})`)
+          .join("\n")
+      : "";
+
+    // Step 3: Coach through the Brain's English-target mode. The system
+    // prompt carries the English identity + interference rulebook; this
+    // extra block sets the coaching persona and the language of feedback.
     const systemPromptExtra =
-      `You are a warm, encouraging Arabic tutor specializing in ${dLabel}. ` +
-      `You coach non-native learners who are just starting to speak. Be GENEROUS with pronunciation — ` +
-      `if the transcript is close to what the learner likely meant, treat it as understood. Focus on ` +
-      `natural dialect phrasing, grammar, and word usage, NOT on accent perfection. ` +
-      `Never demand Modern Standard Arabic — stay in ${dLabel} throughout.\n\n` +
-      `${getDialectTransliterationRules(resolvedDialect)}`;
+      `You are a warm, encouraging English coach for a native ${dLabel} speaker. ` +
+      `Be GENEROUS with pronunciation — ASR of accented English is imperfect; if the transcript is ` +
+      `close to what the learner likely meant, treat it as understood. Focus on natural spoken English ` +
+      `phrasing and the Arabic-interference patterns above, NOT accent perfection. ` +
+      `All feedback fields ending in _ar MUST be written in ${dLabel} (never Fusha, never English).`;
 
     const userPrompt =
-      `The learner is practising the word "${targetArabic}"` +
-      (targetEnglish ? ` (meaning: "${targetEnglish}")` : "") +
+      `The learner is practising the English word "${targetEnglish}"` +
+      (targetArabic ? ` (${dLabel}: "${targetArabic}")` : "") +
       ` by trying to say a sentence with it.\n\n` +
-      `ASR transcript of what they said (may contain small ASR errors — be lenient): "${transcript}"\n\n` +
-      `Assess:\n` +
+      `ASR transcript of what they said (may contain small ASR errors — be lenient): "${transcript}"` +
+      detectedBlock +
+      `\n\nAssess:\n` +
       `1. Did they use the target word (or a close variant)?\n` +
-      `2. Is the sentence understandable and natural in ${dLabel}?\n` +
-      `3. Provide a corrected/more natural rewrite in ${dLabel} — keep it close to their intent.\n` +
-      `4. Give 2 alternative ways a native ${dLabel} speaker might say the same idea.\n` +
-      `5. Give 1-2 short, encouraging pronunciation/usage tips (not accent nitpicks).\n` +
+      `2. Would a native English speaker understand the sentence?\n` +
+      `3. Rewrite it as natural spoken English, close to their intent, with a ${dLabel} gloss.\n` +
+      `4. Give 2 alternative natural phrasings of the same idea, each with a ${dLabel} gloss.\n` +
+      `5. Name any Arabic-interference patterns present (include the detected ones above; add others you see).\n` +
+      `6. Give 1-2 short encouraging tips in ${dLabel}.\n` +
       `Reply via the return_feedback tool ONLY.`;
 
     let brain;
@@ -199,6 +247,8 @@ serve(async (req) => {
       brain = await askBrain<CoachFeedback>({
         purpose: "practice_sentence_coach",
         dialect: resolvedDialect,
+        target: "english",
+        cefr: typeof cefr === "string" ? cefr : undefined,
         strategy: "solo",
         models: [MODEL_IDS.GEMINI_FLASH],
         userPrompt,
@@ -209,11 +259,6 @@ serve(async (req) => {
           name: "return_feedback",
           description: "Return sentence-practice coaching feedback",
           parameters: FEEDBACK_TOOL_PARAMETERS as unknown as Record<string, unknown>,
-        },
-        arabicTextPath: (p) => {
-          const out = p as CoachFeedback;
-          const alts = (out?.alternatives ?? []).map((a) => a?.arabic ?? "").join("\n");
-          return `${out?.natural_rewrite ?? ""}\n${alts}`;
         },
       });
     } catch (e) {
@@ -234,25 +279,34 @@ serve(async (req) => {
       throw e;
     }
 
-    // The coach's verdict is the app's clearest signal about production: it
-    // knows whether the learner actually used the target word and whether a
-    // native speaker would have understood them. Persist the misses so the
-    // target comes back around in generated content; clear them on a clean run.
+    // The coach's verdict is the app's clearest signal about production.
+    // Persist misses so the target comes back around in generated content —
+    // tagged with the interference categories, which is what makes the
+    // flywheel L1-aware. (learner_errors columns keep their Arabic-era names
+    // until the data-model rename; target_arabic carries the English target.)
     const feedback = brain.output as CoachFeedback;
+    const interference = [
+      ...new Set([
+        ...detected.errors.map((e) => e.category),
+        ...(feedback?.interference_notes ?? []).map((n) => n?.category).filter(Boolean),
+      ]),
+    ];
     if (feedback?.used_target_word === false || feedback?.understandable === false) {
       void recordLearnerErrors(cap.userId, [{
         source: "sentence_coach",
         dialect: resolvedDialect,
-        targetArabic,
+        targetArabic: targetEnglish,
         producedArabic: transcript ?? null,
         errorKind: feedback?.used_target_word === false ? "wrong_word" : "other",
         detail: {
           natural_rewrite: feedback?.natural_rewrite ?? null,
-          tips: feedback?.tips ?? [],
+          tips: feedback?.tips_ar ?? [],
+          interference,
+          detector_rule_ids: detected.errors.map((e) => e.rule_id).filter(Boolean),
         },
       }]);
     } else {
-      void resolveLearnerErrors(cap.userId, targetArabic, resolvedDialect);
+      void resolveLearnerErrors(cap.userId, targetEnglish, resolvedDialect);
     }
 
     return new Response(

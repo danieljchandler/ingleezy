@@ -12,7 +12,7 @@ import { chatCompletion, json, sseCompletion, type UpstreamHandler } from "./ups
  * multi-turn drift check, scanning its own last three replies for MSA leaks and
  * nudging itself back into dialect.
  *
- * `practice-sentence-coach` is a two-stage pipeline — Munsit ASR, then the
+ * `practice-sentence-coach` is a two-stage pipeline — Deepgram ASR (en), then the
  * brain — with a retry between Munsit models and a learner-error write that
  * depends on the model's verdict rather than on any status code.
  */
@@ -307,21 +307,22 @@ Deno.test("conversation-practice counts against the free-tier daily cap", async 
 const feedback = {
   used_target_word: true,
   understandable: true,
-  verdict: "Nicely done.",
-  natural_rewrite: "أبي أروح السوق",
-  natural_rewrite_english: "I want to go to the market",
-  alternatives: [{ arabic: "ودي أروح السوق", english: "I'd like to go to the market" }],
-  tips: ["Stress the first syllable."],
+  verdict_ar: "واضح ومفهوم، عاش!",
+  natural_rewrite: "I want to go to the market",
+  natural_rewrite_arabic: "أبي أروح السوق",
+  alternatives: [{ english: "I'd like to go to the market", arabic: "ودي أروح السوق" }],
+  tips_ar: ["قل the market مو market بس"],
+  interference_notes: [{ category: "article", note_ar: "لا تنسَ the قبل الاسم" }],
 };
 
 const AUDIO = btoa("fixture-audio-bytes");
 
-const munsit = (transcription: string): UpstreamHandler => () =>
-  json({ data: { transcription } });
+const deepgram = (transcript: string): UpstreamHandler => () =>
+  json({ results: { channels: [{ alternatives: [{ transcript }] }] } });
 
 function coachUpstreams(extra: Record<string, UpstreamHandler> = {}) {
   return caller({
-    "api.munsit.com": munsit("أبغى أروح السوق"),
+    "api.deepgram.com": deepgram("I want go to market"),
     ...emitting(feedback),
     ...extra,
   });
@@ -340,7 +341,7 @@ Deno.test("practice-sentence-coach answers the preflight", async () => {
 Deno.test("practice-sentence-coach asks an anonymous caller to sign in", async () => {
   const result = await call(
     "practice-sentence-coach",
-    { audioBase64: AUDIO, targetArabic: "سوق" },
+    { audioBase64: AUDIO, targetEnglish: "market" },
     coachUpstreams(),
     { jwt: null },
   );
@@ -352,7 +353,7 @@ Deno.test("practice-sentence-coach asks an anonymous caller to sign in", async (
 Deno.test("practice-sentence-coach needs both the clip and the target", async () => {
   const noAudio = await call(
     "practice-sentence-coach",
-    { targetArabic: "سوق" },
+    { targetEnglish: "market" },
     coachUpstreams(),
   );
   assertEquals(noAudio.status, 400);
@@ -368,22 +369,22 @@ Deno.test("practice-sentence-coach needs both the clip and the target", async ()
 Deno.test("practice-sentence-coach returns the transcript alongside the coaching", async () => {
   const result = await call(
     "practice-sentence-coach",
-    { audioBase64: AUDIO, targetArabic: "سوق", targetEnglish: "market", dialect: "Gulf" },
+    { audioBase64: AUDIO, targetEnglish: "market", targetArabic: "سوق", dialect: "Gulf" },
     coachUpstreams(),
   );
 
   assertEquals(result.status, 200);
-  assertEquals(result.body.transcript, "أبغى أروح السوق");
+  assertEquals(result.body.transcript, "I want go to market");
   assertEquals(result.body.used_target_word, true);
-  assertEquals(result.body.natural_rewrite, "أبي أروح السوق");
+  assertEquals(result.body.natural_rewrite, "I want to go to the market");
   assertEquals((result.body.alternatives as unknown[]).length, 1);
 });
 
 Deno.test("practice-sentence-coach says so gently when it heard nothing", async () => {
   const result = await call(
     "practice-sentence-coach",
-    { audioBase64: AUDIO, targetArabic: "سوق" },
-    coachUpstreams({ "api.munsit.com": munsit("") }),
+    { audioBase64: AUDIO, targetEnglish: "market" },
+    coachUpstreams({ "api.deepgram.com": deepgram("") }),
   );
 
   // A silent clip is a 200 with `empty: true`, not an error — the learner is
@@ -396,49 +397,46 @@ Deno.test("practice-sentence-coach says so gently when it heard nothing", async 
 Deno.test("practice-sentence-coach never reaches the model on a silent clip", async () => {
   const result = await call(
     "practice-sentence-coach",
-    { audioBase64: AUDIO, targetArabic: "سوق" },
-    coachUpstreams({ "api.munsit.com": munsit("") }),
+    { audioBase64: AUDIO, targetEnglish: "market" },
+    coachUpstreams({ "api.deepgram.com": deepgram("") }),
   );
 
   assertEquals(result.calls.filter((url) => url.includes("gateway")).length, 0);
 });
 
-Deno.test("practice-sentence-coach retries the other ASR model on an empty answer", async () => {
-  let attempt = 0;
+Deno.test("practice-sentence-coach hands detected transfer phrases to the model", async () => {
   const result = await call(
     "practice-sentence-coach",
-    { audioBase64: AUDIO, targetArabic: "سوق" },
-    coachUpstreams({
-      "api.munsit.com": () => {
-        attempt += 1;
-        return json({ data: { transcription: attempt === 1 ? "" : "أبغى أروح السوق" } });
-      },
-    }),
+    { audioBase64: AUDIO, targetEnglish: "light" },
+    coachUpstreams({ "api.deepgram.com": deepgram("Please open the light") }),
   );
 
-  assertEquals(result.status, 200);
-  assertEquals(attempt, 2);
-  assertEquals(result.body.transcript, "أبغى أروح السوق");
+  // The deterministic detector runs before the model, and its hits are named
+  // in the prompt so a known calque can never slip past a lenient coach.
+  const prompt = gatewayPrompt(result.bodies, result.calls);
+  assertStringIncludes(prompt, "open the light");
+  assertStringIncludes(prompt, "calque");
+  assertStringIncludes(prompt, "turn on the light");
 });
 
 Deno.test("practice-sentence-coach tells the model what was being practised", async () => {
   const result = await call(
     "practice-sentence-coach",
-    { audioBase64: AUDIO, targetArabic: "سوق", targetEnglish: "market", dialect: "Egyptian" },
+    { audioBase64: AUDIO, targetEnglish: "market", targetArabic: "سوق", dialect: "Egyptian" },
     coachUpstreams(),
   );
 
   const prompt = gatewayPrompt(result.bodies, result.calls);
-  assertStringIncludes(prompt, "سوق");
   assertStringIncludes(prompt, "market");
-  assertStringIncludes(prompt, "أبغى أروح السوق");
+  assertStringIncludes(prompt, "سوق");
+  assertStringIncludes(prompt, "I want go to market");
   assertStringIncludes(prompt, "Egyptian");
 });
 
 Deno.test("practice-sentence-coach records a miss as a learner error", async () => {
   const result = await call(
     "practice-sentence-coach",
-    { audioBase64: AUDIO, targetArabic: "سوق" },
+    { audioBase64: AUDIO, targetEnglish: "market" },
     coachUpstreams({
       ...emitting({ ...feedback, used_target_word: false }),
       "/rest/v1/learner_errors": () => json({}, 201),
@@ -454,12 +452,16 @@ Deno.test("practice-sentence-coach records a miss as a learner error", async () 
   const rows = JSON.parse(write?.body ?? "[]") as Array<Record<string, unknown>>;
   assertEquals(rows[0].source, "sentence_coach");
   assertEquals(rows[0].error_kind, "wrong_word");
+  // The flywheel tag: which interference patterns this miss exhibited.
+  const detail = rows[0].detail as Record<string, unknown>;
+  assert(Array.isArray(detail.interference));
+  assert((detail.interference as string[]).includes("article"));
 });
 
 Deno.test("practice-sentence-coach records an unintelligible attempt differently", async () => {
   const result = await call(
     "practice-sentence-coach",
-    { audioBase64: AUDIO, targetArabic: "سوق" },
+    { audioBase64: AUDIO, targetEnglish: "market" },
     coachUpstreams({
       ...emitting({ ...feedback, understandable: false }),
       "/rest/v1/learner_errors": () => json({}, 201),
@@ -477,7 +479,7 @@ Deno.test("practice-sentence-coach records an unintelligible attempt differently
 Deno.test("practice-sentence-coach clears the target after a clean attempt", async () => {
   const result = await call(
     "practice-sentence-coach",
-    { audioBase64: AUDIO, targetArabic: "سوق" },
+    { audioBase64: AUDIO, targetEnglish: "market" },
     coachUpstreams({ "/rest/v1/learner_errors": () => json({}, 204) }),
     { settleFor: { match: "/rest/v1/learner_errors", method: "PATCH" } },
   );
@@ -492,7 +494,7 @@ Deno.test("practice-sentence-coach clears the target after a clean attempt", asy
 Deno.test("practice-sentence-coach passes a rate limit through", async () => {
   const result = await call(
     "practice-sentence-coach",
-    { audioBase64: AUDIO, targetArabic: "سوق" },
+    { audioBase64: AUDIO, targetEnglish: "market" },
     coachUpstreams({
       "ai.gateway.lovable.dev": () => json({ error: "slow down" }, 429),
       "openrouter.ai": () => json({ error: "slow down" }, 429),
@@ -506,7 +508,7 @@ Deno.test("practice-sentence-coach passes a rate limit through", async () => {
 Deno.test("practice-sentence-coach passes a credit failure through", async () => {
   const result = await call(
     "practice-sentence-coach",
-    { audioBase64: AUDIO, targetArabic: "سوق" },
+    { audioBase64: AUDIO, targetEnglish: "market" },
     coachUpstreams({
       "ai.gateway.lovable.dev": () => json({ error: "no credits" }, 402),
       "openrouter.ai": () => json({ error: "no credits" }, 402),
@@ -518,35 +520,35 @@ Deno.test("practice-sentence-coach passes a credit failure through", async () =>
 });
 
 Deno.test("practice-sentence-coach reports an ASR outage as its own message", async () => {
-  // Pinned, not fixed. A Munsit failure is rethrown into the outer catch and
-  // returned verbatim, so the learner sees "Munsit 503: ..." — an upstream
-  // vendor's name and status in the middle of a practice session.
+  // Pinned, not fixed. A Deepgram failure is rethrown into the outer catch
+  // and returned verbatim, so the learner sees "Deepgram 503: ..." — an
+  // upstream vendor's name and status in the middle of a practice session.
   const result = await call(
     "practice-sentence-coach",
-    { audioBase64: AUDIO, targetArabic: "سوق" },
-    coachUpstreams({ "api.munsit.com": () => json({ error: "down" }, 503) }),
+    { audioBase64: AUDIO, targetEnglish: "market" },
+    coachUpstreams({ "api.deepgram.com": () => json({ error: "down" }, 503) }),
   );
 
   assertEquals(result.status, 500);
-  assertStringIncludes(String(result.body.error), "Munsit 503");
+  assertStringIncludes(String(result.body.error), "Deepgram 503");
 });
 
 Deno.test("practice-sentence-coach reports a missing ASR key as a server error", async () => {
   const result = await call(
     "practice-sentence-coach",
-    { audioBase64: AUDIO, targetArabic: "سوق" },
+    { audioBase64: AUDIO, targetEnglish: "market" },
     coachUpstreams(),
-    { env: { MUNSIT_API_KEY: undefined } },
+    { env: { DEEPGRAM_API_KEY: undefined } },
   );
 
   assertEquals(result.status, 500);
-  assertStringIncludes(String(result.body.error), "MUNSIT_API_KEY");
+  assertStringIncludes(String(result.body.error), "DEEPGRAM_API_KEY");
 });
 
 Deno.test("practice-sentence-coach counts against the free-tier daily cap", async () => {
   const result = await call(
     "practice-sentence-coach",
-    { audioBase64: AUDIO, targetArabic: "سوق" },
+    { audioBase64: AUDIO, targetEnglish: "market" },
     coachUpstreams({
       "/rest/v1/subscribers": () => json({ subscribed: false, subscription_end: null }),
       "/rest/v1/rpc/increment_usage_counter": () => json(41),
