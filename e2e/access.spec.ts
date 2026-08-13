@@ -65,32 +65,6 @@ test.describe("admin console access", () => {
   });
 });
 
-test.describe("bible access", () => {
-  // The rule in src/lib/rbac.ts is deliberately non-obvious: bible_reader
-  // grants access, but content_reviewer revokes it.
-  test("a bible reader gets in", async ({ page, signInAs }) => {
-    await signInAs("bible_reader");
-    await page.goto("/bible");
-
-    await expect(page.getByText(/no access|not available/i)).toHaveCount(0);
-  });
-
-  test("a learner without the role does not", async ({ page, signInAs }) => {
-    await signInAs("free");
-    await page.goto("/bible");
-
-    await expect(page.getByText(/access/i).first()).toBeVisible();
-  });
-
-  test("content_reviewer revokes a bible reader's access", async ({ page, signInAs, db }) => {
-    await signInAs("bible_reader");
-    db.add("user_roles", { user_id: db.rows("profiles")[0].user_id, role: "content_reviewer" });
-
-    await page.goto("/bible");
-    await expect(page.getByText(/access/i).first()).toBeVisible();
-  });
-});
-
 test.describe("subscription tiers", () => {
   /**
    * These record what the app does today, and today it does not gate on tier.

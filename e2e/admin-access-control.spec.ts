@@ -1,15 +1,12 @@
 import { expect, test } from "./support/fixtures";
-import { aProfile, anInviteCode, aRole } from "../src/test/support/factories";
+import { anInviteCode } from "../src/test/support/factories";
 
 /**
- * The two admin screens that control who gets into the product at all.
+ * The admin screen that controls who gets into the product at all.
  *
  * Invite codes gate sign-up — the app is closed beta, and `Auth.tsx` refuses to
- * create an account without a valid one. Role management grants the privileged
- * roles, including `admin` itself. Neither had any coverage.
+ * create an account without a valid one.
  */
-
-const OTHER_USER = "00000000-0000-4000-8000-000000000009";
 
 test.describe("invite codes", () => {
   test.beforeEach(async ({ signInAs }) => {
@@ -120,69 +117,3 @@ test.describe("invite codes", () => {
   });
 });
 
-test.describe("role management", () => {
-  test.beforeEach(async ({ signInAs, db, backend }) => {
-    await signInAs("admin");
-    // Emails live in auth.users, which is why admin_find_user is an RPC — the
-    // client cannot resolve one itself.
-    backend.addUser(OTHER_USER, "learner@example.com");
-    db.seed("profiles", [aProfile(), aProfile({ user_id: OTHER_USER, display_name: "Learner" })]);
-  });
-
-  test("lists who currently holds a managed role", async ({ page, db }) => {
-    db.add("user_roles", aRole("bible_reader", { id: "r1", user_id: OTHER_USER }));
-
-    await page.goto("/admin/bible-access");
-
-    await expect(page.getByText("learner@example.com")).toBeVisible();
-  });
-
-  test("grants a role by email", async ({ page, db }) => {
-    await page.goto("/admin/bible-access");
-
-    await page.getByPlaceholder(/user email or uuid/i).fill("learner@example.com");
-    await page.getByRole("button", { name: /add|grant/i }).first().click();
-
-    await expect
-      .poll(() => db.writesTo("user_roles").filter((w) => w.method === "POST").length)
-      .toBeGreaterThanOrEqual(1);
-
-    const write = db.writesTo("user_roles").find((w) => w.method === "POST");
-    expect(write?.payload[0]).toMatchObject({ user_id: OTHER_USER });
-  });
-
-  test("refuses an email that matches no account", async ({ page, db }) => {
-    await page.goto("/admin/bible-access");
-
-    await page.getByPlaceholder(/user email or uuid/i).fill("nobody@example.com");
-    await page.getByRole("button", { name: /add|grant/i }).first().click();
-
-    await expect(page.getByText(/user not found/i)).toBeVisible();
-    expect(db.writesTo("user_roles")).toHaveLength(0);
-  });
-
-  test("does not grant the same role twice", async ({ page, db }) => {
-    // A duplicate row would leave two rows to revoke, so revoking once would
-    // appear to do nothing.
-    db.add("user_roles", aRole("bible_reader", { id: "r1", user_id: OTHER_USER }));
-
-    await page.goto("/admin/bible-access");
-    await page.getByPlaceholder(/user email or uuid/i).fill("learner@example.com");
-    await page.getByRole("button", { name: /add|grant/i }).first().click();
-
-    await expect(page.getByText(/already assigned/i)).toBeVisible();
-    expect(db.writesTo("user_roles").filter((w) => w.method === "POST")).toHaveLength(0);
-  });
-
-  test("cannot be submitted with a blank identifier", async ({ page }) => {
-    // Disabled rather than clickable-and-ignored, which is the better of the
-    // two: nothing to misread as having worked.
-    await page.goto("/admin/bible-access");
-
-    const submit = page.getByRole("button", { name: /add|grant/i }).first();
-    await expect(submit).toBeDisabled();
-
-    await page.getByPlaceholder(/user email or uuid/i).fill("learner@example.com");
-    await expect(submit).toBeEnabled();
-  });
-});

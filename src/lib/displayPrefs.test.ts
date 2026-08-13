@@ -11,16 +11,12 @@ import {
 /**
  * What Arabic content the learner sees by default.
  *
- * Two things here are easy to break. The preferences were originally
- * Bible-only and were promoted to a global setting, so there is a migration
- * from the old key that has to keep working for anyone who set them before the
- * change. And `stripTashkil` removes diacritics by Unicode range — a range
- * that is slightly wrong deletes letters rather than marks, which corrupts the
- * word silently rather than failing.
+ * The easy thing to break here is `stripTashkil`: it removes diacritics by
+ * Unicode range, and a range that is slightly wrong deletes letters rather
+ * than marks, which corrupts the word silently rather than failing.
  */
 
 const STORAGE_KEY = "ingleezy:display-prefs";
-const LEGACY_KEY = "ingleezy:bible-display-prefs";
 
 beforeEach(() => localStorage.clear());
 afterEach(() => vi.restoreAllMocks());
@@ -66,39 +62,6 @@ describe("persistence", () => {
     });
 
     expect(() => saveDisplayPrefs(DEFAULT_DISPLAY_PREFS)).not.toThrow();
-  });
-});
-
-describe("migrating from the Bible-only key", () => {
-  it("adopts settings saved before the preference went global", () => {
-    localStorage.setItem(LEGACY_KEY, JSON.stringify({ showEnglish: true, showTashkil: false }));
-
-    expect(loadDisplayPrefs()).toMatchObject({ showEnglish: true, showTashkil: false });
-  });
-
-  it("copies them to the new key, so the migration happens once", () => {
-    localStorage.setItem(LEGACY_KEY, JSON.stringify({ showEnglish: true }));
-
-    loadDisplayPrefs();
-
-    expect(JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "{}")).toMatchObject({
-      showEnglish: true,
-    });
-  });
-
-  it("prefers the new key when both exist", () => {
-    localStorage.setItem(LEGACY_KEY, JSON.stringify({ showEnglish: true }));
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ showEnglish: false }));
-
-    expect(loadDisplayPrefs().showEnglish).toBe(false);
-  });
-
-  it("keeps writing the legacy key, for readers that have not migrated", () => {
-    saveDisplayPrefs({ ...DEFAULT_DISPLAY_PREFS, showFormal: true });
-
-    expect(JSON.parse(localStorage.getItem(LEGACY_KEY) ?? "{}")).toMatchObject({
-      showFormal: true,
-    });
   });
 });
 

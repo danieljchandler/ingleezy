@@ -327,7 +327,6 @@ export const defaultFunctions: Record<string, FunctionHandler> = {
       voice: "ballad",
       session_id: "sess_fixture",
     }),
-  "bible-passage": () => ok({ verses: [] }),
   // `summary` is an array of `{ occasion, inserted }`, one entry per occasion.
   // The fixture used to answer `{ inserted: 0 }`, which the admin page joined
   // into the toast "Seeded: undefined" — a success message describing nothing.

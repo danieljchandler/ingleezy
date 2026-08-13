@@ -9,9 +9,6 @@
  *
  * Persisted in localStorage; synced across components in the same tab via a
  * custom event, and across tabs via the native `storage` event.
- *
- * Originally introduced for Bible Lessons (key: ingleezy:bible-display-prefs);
- * promoted to a global setting. We migrate the old key on first read.
  */
 
 export type DisplayPrefs = {
@@ -22,7 +19,6 @@ export type DisplayPrefs = {
 };
 
 const STORAGE_KEY = "ingleezy:display-prefs";
-const LEGACY_KEY = "ingleezy:bible-display-prefs";
 const EVENT = "ingleezy:display-prefs-changed";
 
 export const DEFAULT_DISPLAY_PREFS: DisplayPrefs = {
@@ -34,19 +30,7 @@ export const DEFAULT_DISPLAY_PREFS: DisplayPrefs = {
 
 export function loadDisplayPrefs(): DisplayPrefs {
   try {
-    let raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) {
-      // Migrate from the old Bible-only key, if present.
-      const legacy = localStorage.getItem(LEGACY_KEY);
-      if (legacy) {
-        raw = legacy;
-        try {
-          localStorage.setItem(STORAGE_KEY, legacy);
-        } catch {
-          /* no-op */
-        }
-      }
-    }
+    const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return DEFAULT_DISPLAY_PREFS;
     const parsed = JSON.parse(raw);
     return { ...DEFAULT_DISPLAY_PREFS, ...parsed };
@@ -58,8 +42,6 @@ export function loadDisplayPrefs(): DisplayPrefs {
 export function saveDisplayPrefs(prefs: DisplayPrefs) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
-    // Keep legacy key in sync so any not-yet-migrated reader stays consistent.
-    localStorage.setItem(LEGACY_KEY, JSON.stringify(prefs));
     window.dispatchEvent(new CustomEvent(EVENT));
   } catch {
     /* no-op */

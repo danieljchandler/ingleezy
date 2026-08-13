@@ -744,8 +744,8 @@ export const LineByLineTranscript = ({
  }: LineByLineTranscriptProps) => {
    const { activeDialect } = useDialect();
    // The Fusha row rides on the global "Formal Arabic (MSA)" display
-   // preference, the same switch Settings and the Bible reader use — a learner
-   // who asked for MSA everywhere should not have to ask again per transcript.
+   // preference, the same switch Settings uses — a learner who asked for MSA
+   // everywhere should not have to ask again per transcript.
    const { prefs, update: updatePrefs } = useDisplayPrefs();
    const showFusha = prefs.showFormal;
    const { fushaFor, status: fushaStatus, retry: retryFusha } = useFushaLines(

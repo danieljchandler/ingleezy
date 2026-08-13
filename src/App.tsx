@@ -69,8 +69,6 @@ const VocabBattles = lazyPage(() => import("./pages/VocabBattles"));
 const BattlePlay = lazyPage(() => import("./pages/BattlePlay"));
 const PlacementQuiz = lazyPage(() => import("./pages/PlacementQuiz"));
 const SouqNews = lazyPage(() => import("./pages/SouqNews"));
-const BibleReading = lazyPage(() => import("./pages/BibleReading"));
-const BibleLessons = lazyPage(() => import("./pages/BibleLessons"));
 const MyTranscriptions = lazyPage(() => import("./pages/MyTranscriptions"));
 const AlphabetJourney = lazyPage(() => import("./pages/AlphabetJourney"));
 const AlphabetLetter = lazyPage(() => import("./pages/AlphabetLetter"));
@@ -102,8 +100,6 @@ const AdminStoryForm = lazyPage(() => import("./pages/admin/AdminStoryForm"));
 const TrendingVideos = lazyPage(() => import("./pages/admin/TrendingVideos"));
 const AdminMemes = lazyPage(() => import("./pages/admin/AdminMemes"));
 const AdminMemeForm = lazyPage(() => import("./pages/admin/AdminMemeForm"));
-const BibleAccess = lazyPage(() => import("./pages/admin/BibleAccess"));
-const AdminBibleLessons = lazyPage(() => import("./pages/admin/AdminBibleLessons"));
 const AdminCoverage = lazyPage(() => import("./pages/admin/AdminCoverage"));
 const AdminSetPhrases = lazyPage(() => import("./pages/admin/AdminSetPhrases"));
 const AdminDialectRules = lazyPage(() => import("./pages/admin/AdminDialectRules"));
@@ -394,15 +390,6 @@ const App = () => {
             <Route path="/placement" element={
               <ErrorBoundary name="PlacementQuizRoute"><PlacementQuiz /></ErrorBoundary>
             } />
-            <Route path="/bible" element={
-              <ErrorBoundary name="BibleReadingRoute"><BibleReading /></ErrorBoundary>
-            } />
-            <Route path="/bible/lessons" element={
-              <ErrorBoundary name="BibleLessonsRoute"><BibleLessons /></ErrorBoundary>
-            } />
-            <Route path="/bible/lessons/:lessonId" element={
-              <ErrorBoundary name="BibleLessonRoute"><BibleLessons /></ErrorBoundary>
-            } />
             <Route path="/my-transcriptions" element={
               <ErrorBoundary name="MyTranscriptionsRoute"><ProtectedRoute><MyTranscriptions /></ProtectedRoute></ErrorBoundary>
             } />
@@ -453,8 +440,6 @@ const App = () => {
               <Route path="stories/new" element={<AdminStoryForm />} />
               <Route path="stories/:storyId/edit" element={<AdminStoryForm />} />
               <Route path="trending" element={<TrendingVideos />} />
-              <Route path="bible-access" element={<BibleAccess />} />
-              <Route path="bible-lessons" element={<AdminBibleLessons />} />
               <Route path="coverage" element={<AdminCoverage />} />
               <Route path="memes" element={<AdminMemes />} />
               <Route path="memes/new" element={<AdminMemeForm />} />

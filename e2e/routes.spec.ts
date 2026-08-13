@@ -82,8 +82,6 @@ function authorisedPersona(route: RouteSpec): Persona {
     case "admin":
     case "admin-or-reviewer":
       return "admin";
-    case "in-page":
-      return "bible_reader";
     case "auth":
       return "free";
     case "public":

@@ -163,8 +163,6 @@ test.describe("what an admin can launch", () => {
       "Interactive Stories",
       "Reading Library",
       "Trending Videos",
-      "Bible Access",
-      "Bible Lessons",
       "Curriculum Coverage",
       "Feature Metrics",
       "Error Log",

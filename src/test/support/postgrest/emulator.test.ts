@@ -558,18 +558,6 @@ describe("rpc", () => {
     expect(notRecorder).toBe(false);
   });
 
-  it("mirrors the app's bible-access rule, including the revocation", async () => {
-    backend.db.seed("user_roles", [
-      { user_id: "u1", role: "bible_reader" },
-      { user_id: "u1", role: "content_reviewer" },
-    ]);
-    backend.setUser("u1");
-
-    // bible_reader alone grants access; content_reviewer takes it away.
-    const { data } = await db.rpc("has_bible_access");
-    expect(data).toBe(false);
-  });
-
   it("award_xp accumulates", async () => {
     backend.setUser("u1");
     await db.rpc("award_xp", { _amount: 15, _reason: "review" });

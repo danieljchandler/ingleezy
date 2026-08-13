@@ -130,7 +130,7 @@ test.describe("the story list", () => {
 
     await page.goto("/stories");
 
-    // Deliberate, and different from how Bible lessons and curriculum behave:
+    // Deliberate, and different from how the curriculum behaves:
     // the query has no dialect filter, and the card badges the dialect instead.
     // Worth pinning, because "why does my Gulf learner see Egyptian content" has
     // a different answer here than everywhere else in the app.

@@ -71,8 +71,6 @@ const ROUTE_HINTS: Array<[prefix: string, hintKey: string]> = [
   ["/stories", "stories"],
   ["/souq-news", "souq-news"],
   ["/placement", "placement-quiz"],
-  ["/bible/lessons", "bible-lessons"],
-  ["/bible", "bible-reading"],
   ["/set-phrases", "set-phrases"],
   ["/onboarding", "onboarding"],
   ["/", "today"],

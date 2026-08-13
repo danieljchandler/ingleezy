@@ -29,8 +29,7 @@ const SoundRow = ({ entry }: { entry: SoundSpotlightEntry }) => {
    *
    * The panel opens by default and every row asked for its clip immediately, so
    * loading a lesson fired a TTS request per sound whether or not the learner
-   * ever tapped a speaker — the same eager pattern the alphabet button had, and
-   * the opposite of the Bible reader's.
+   * ever tapped a speaker — the same eager pattern the alphabet button had.
    */
   const [armed, setArmed] = useState(false);
   const { ttsUrl } = useAzureTTS({

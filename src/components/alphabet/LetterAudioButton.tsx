@@ -41,8 +41,7 @@ export const LetterAudioButton = ({
    * one screen and the letter detail view adds a Fusha button beside each
    * dialect one, so opening a page fired a TTS request per button whether or
    * not the learner ever tapped one — and held every response as a blob for the
-   * life of the page. `bible/VerseAudioButton` had already solved this by
-   * arming on the first tap.
+   * life of the page. Arming on the first tap avoids all of that.
    *
    * Keyed on the letter rather than a bare flag so a button reused for the next
    * letter goes back to waiting instead of speaking unasked.

@@ -97,14 +97,6 @@ export const PAGE_HINTS: Record<string, { title: string; body: string; cta?: str
     title: "Settings",
     body: "Tune dialects, display preferences, audio, hints, and more. Everything that shapes your learning experience.",
   },
-  "bible-reading": {
-    title: "Bible Reading",
-    body: "Read scripture in Arabic with verse-by-verse translations and tappable vocabulary.",
-  },
-  "bible-lessons": {
-    title: "Bible Lessons",
-    body: "Guided lessons built from biblical passages — great for vocabulary tied to spiritual or classical themes.",
-  },
   "grammar-drills": {
     title: "Grammar Drills",
     body: "Targeted exercises on verb forms, agreement, and tricky constructions. Build the scaffolding under your vocab.",

@@ -1,14 +1,12 @@
-import { BookOpen, MessageCircle, Languages, FileText, Heart, BarChart3, Trophy, Users, User, Settings, CreditCard, GraduationCap, BookMarked, Newspaper, Globe2, Compass, MessageCircleQuestion, Laugh, Twitter, Mic, BookOpen as Stories } from "lucide-react";
+import { BookOpen, MessageCircle, Languages, FileText, Heart, BarChart3, Trophy, Users, User, Settings, CreditCard, GraduationCap, Newspaper, Globe2, Compass, MessageCircleQuestion, Laugh, Twitter, Mic, BookOpen as Stories } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { HubHeader, HubSection } from "@/components/layout/HubGrid";
 import { useAuth } from "@/hooks/useAuth";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
-import { useBibleAccess } from "@/hooks/useBibleAccess";
 
 const MeHub = () => {
   const { isAuthenticated } = useAuth();
   const { isAdmin } = useAdminAuth();
-  const { hasAccess: hasBible } = useBibleAccess();
 
   return (
     <AppShell>
@@ -40,7 +38,6 @@ const MeHub = () => {
         tiles={[
           { id: "stories", label: "Interactive Stories", description: "Choose-your-adventure in Arabic", icon: Stories, to: "/stories", accent: "bg-amber-500/10 text-amber-600" },
           { id: "souq", label: "Souq News", description: "Headlines retold in dialect", icon: Newspaper, to: "/souq-news", accent: "bg-emerald-500/10 text-emerald-600" },
-          { id: "bible", label: "Bible Reading", description: "Scripture in Arabic with tools", icon: BookMarked, to: "/bible", accent: "bg-amber-500/10 text-amber-600", show: hasBible },
           { id: "meme", label: "Meme Analyzer", description: "Break down Arabic memes", icon: Laugh, to: "/meme" },
           { id: "learn-from-x", label: "Learn from X Post", description: "Analyze Arabic X posts", icon: Twitter, to: "/learn-from-x" },
         ]}

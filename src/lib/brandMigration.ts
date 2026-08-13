@@ -11,7 +11,6 @@ const MIGRATED_FLAG = "ingleezy:migrated:v1";
 const EXACT_KEYS: Array<[string, string]> = [
   ["lahja_dialect_module", "ingleezy_dialect_module"],
   ["lahja_bridge_view_enabled", "ingleezy_bridge_view_enabled"],
-  ["lahja_bible_session", "ingleezy_bible_session"],
   ["lahja_freechat_v1", "ingleezy_freechat_v1"],
 ];
 

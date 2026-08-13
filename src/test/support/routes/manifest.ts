@@ -9,8 +9,8 @@
  */
 
 /**
- * How a route turns an unauthorised visitor away. Four mechanisms exist in this
- * app and they behave differently enough that a test has to know which is which.
+ * How a route turns an unauthorised visitor away. The mechanisms in this app
+ * behave differently enough that a test has to know which is which.
  */
 export type Gate =
   /** No guard at all. */
@@ -20,9 +20,7 @@ export type Gate =
   /** AdminLayout — admin or recorder only; others are redirected with a toast. */
   | "admin"
   /** AdminLayout — also reachable by a content_reviewer (the rbac.ts allow-list). */
-  | "admin-or-reviewer"
-  /** No route guard; the page itself checks the role and renders a notice. */
-  | "in-page";
+  | "admin-or-reviewer";
 
 export interface RouteSpec {
   path: string;
@@ -162,11 +160,6 @@ export const ROUTES: RouteSpec[] = [
   { path: "/my-transcriptions", gate: "auth", boundary: "MyTranscriptionsRoute" },
   { path: "/tutor-upload", gate: "auth", boundary: "TutorUploadRoute" },
 
-  // ── Bible — gated inside the page, not at the route ─────────────────────────
-  { path: "/bible", gate: "in-page", boundary: "BibleReadingRoute" },
-  { path: "/bible/lessons", gate: "in-page", boundary: "BibleLessonsRoute" },
-  { path: "/bible/lessons/:lessonId", params: { lessonId: LESSON_ID }, gate: "in-page", boundary: "BibleLessonRoute" },
-
   // ── Account ────────────────────────────────────────────────────────────────
   { path: "/me", gate: "auth", boundary: "MeHubRoute" },
   { path: "/profile", gate: "auth", boundary: "ProfileRoute" },
@@ -202,8 +195,6 @@ export const ROUTES: RouteSpec[] = [
   { path: "/admin/stories/new", gate: "admin" },
   { path: "/admin/stories/:storyId/edit", params: { storyId: STORY_ID }, gate: "admin" },
   { path: "/admin/trending", gate: "admin" },
-  { path: "/admin/bible-access", gate: "admin" },
-  { path: "/admin/bible-lessons", gate: "admin" },
   { path: "/admin/coverage", gate: "admin" },
   { path: "/admin/memes", gate: "admin" },
   { path: "/admin/memes/new", gate: "admin" },

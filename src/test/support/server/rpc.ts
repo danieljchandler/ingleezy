@@ -1,5 +1,4 @@
 import {
-  hasBibleAccessFromRoles,
   MANAGED_ROLES,
   type AppRole,
   type ManagedRole,
@@ -70,14 +69,6 @@ export const defaultRpcs: Record<string, RpcHandler> = {
     return roles.includes("admin") || roles.includes("recorder") || roles.includes("content_reviewer");
   },
 
-  // Delegates to the app's own rule rather than restating it, so the two cannot
-  // disagree. The rule is subtle — bible_reader is revoked by content_reviewer —
-  // and a second copy here would be a second thing to get wrong.
-  has_bible_access: ({ db, userId }) => hasBibleAccessFromRoles(rolesFor(db, userId)),
-
-  user_has_bible_access: ({ db, args }) =>
-    hasBibleAccessFromRoles(rolesFor(db, arg(args, "user_id") as string)),
-
   // Both of these join auth.users in the real database, which is the whole
   // reason they exist as security-definer RPCs — the client cannot read that
   // table, so it cannot resolve an email itself. `findUser`/`listUsers` on the
@@ -90,8 +81,8 @@ export const defaultRpcs: Record<string, RpcHandler> = {
       .rows("user_roles")
       .filter((row) => MANAGED_ROLES.includes(row.role as ManagedRole))
       .map((row) => ({
-        // The row id, not just the user id: BibleAccess keys its table on it and
-        // revokes by it, so omitting it renders unkeyed rows and breaks revoke.
+        // The row id, not just the user id: the roles admin UI keys its table
+        // on it and revokes by it, so omitting it breaks revoke.
         id: row.id,
         user_id: row.user_id,
         role: row.role,

@@ -71,7 +71,6 @@ const MyWords = () => {
     "listen": "🎙 Podcast",
     "podcast": "🎙 Podcast",
     "souq-news": "📰 Souq News",
-    "bible": "📖 Bible",
     "reading-practice": "📚 Reading",
     "daily-story": "📔 Stories",
     "discover": "🔍 Discover",

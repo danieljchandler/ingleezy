@@ -22,7 +22,6 @@ describe("hintKeyForPath", () => {
   it("matches param routes by prefix", () => {
     expect(hintKeyForPath("/discover/abc-123")).toBe("discover");
     expect(hintKeyForPath("/stories/story-9")).toBe("stories");
-    expect(hintKeyForPath("/bible/lessons/l1")).toBe("bible-lessons");
   });
 
   it("returns null for unmapped routes rather than guessing", () => {

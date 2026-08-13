@@ -64,7 +64,7 @@ export { TEST_USER_ID };
 // ── Identity ─────────────────────────────────────────────────────────────────
 
 // `profiles` has no email column — the address lives in auth.users, which is
-// why BibleAccess resolves a user through the admin_find_user RPC rather than
+// why admin pages resolve a user through the admin_find_user RPC rather than
 // querying profiles directly.
 export const aProfile = (over: Row = {}): Row => ({
   user_id: TEST_USER_ID,
@@ -449,35 +449,6 @@ export const anMsaRule = (over: Row = {}): Row => ({
   created_by: TEST_USER_ID,
   created_at: daysAgo(30),
   updated_at: daysAgo(30),
-  ...over,
-});
-
-/**
- * A hand-curated Bible passage.
- *
- * The three verse columns are JSONB arrays, one entry per verse, and the admin
- * form round-trips them through a newline-joined textarea — so the array is the
- * shape that matters, not the text.
- */
-export const aBibleLesson = (over: Row = {}): Row => ({
-  id: makeId("f7f7f7f7")(0),
-  title: "The Beatitudes",
-  description: null,
-  book_usfm: "MAT",
-  book_name: "Matthew",
-  chapter: 5,
-  verse_start: 3,
-  verse_end: 5,
-  dialect: "Gulf",
-  dialect_verses: ["طوبى للمساكين", "طوبى للحزانى"],
-  formal_verses: [],
-  english_verses: [],
-  cultural_note: null,
-  display_order: 0,
-  published: false,
-  created_by: TEST_USER_ID,
-  created_at: daysAgo(5),
-  updated_at: daysAgo(5),
   ...over,
 });
 

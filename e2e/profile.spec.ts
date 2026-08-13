@@ -393,19 +393,4 @@ test.describe("the Me hub", () => {
 
     await expect(page.getByRole("button", { name: /Admin/ })).toBeVisible();
   });
-
-  test("shows Bible Reading only to a reader", async ({ page, signInAs, db }) => {
-    await signInAs("free");
-    seedProfile(db);
-    await page.goto("/me");
-    await expect(page.getByRole("button", { name: /Bible Reading/ })).toHaveCount(0);
-
-    await signInAs("bible_reader");
-    seedProfile(db);
-    await page.goto("/me");
-
-    // Gated in-page by `useBibleAccess`, not at the route — so the hub tile and
-    // the route guard are two separate decisions that have to agree.
-    await expect(page.getByRole("button", { name: /Bible Reading/ })).toBeVisible();
-  });
 });

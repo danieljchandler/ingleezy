@@ -316,35 +316,6 @@ const Dashboard = () => {
                 </CardContent>
               </Card>
 
-              <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate('/admin/bible-access')}>
-                <CardContent className="pt-6">
-                  <div className="flex items-center gap-4">
-                    <div className="bg-primary/10 rounded-full p-4">
-                      <BookMarked className="h-8 w-8 text-primary" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-lg">Bible Access</h3>
-                      <p className="text-muted-foreground">Manage Bible reading access for users</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate('/admin/bible-lessons')}>
-                <CardContent className="pt-6">
-                  <div className="flex items-center gap-4">
-                    <div className="bg-primary/10 rounded-full p-4">
-                      <BookMarked className="h-8 w-8 text-primary" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-lg">Bible Lessons</h3>
-                      <p className="text-muted-foreground">Curate hand-picked Bible passages by dialect</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-
               <Card className="cursor-pointer hover:shadow-lg transition-shadow border-emerald-500/30" onClick={() => navigate('/admin/coverage')}>
                 <CardContent className="pt-6">
                   <div className="flex items-center gap-4">

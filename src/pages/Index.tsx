@@ -1,7 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useMemo } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { useBibleAccess } from "@/hooks/useBibleAccess";
 import { supabase } from "@/integrations/supabase/client";
 import { useReviewStats } from "@/hooks/useReview";
 import { useUserVocabularyDueCount } from "@/hooks/useUserVocabulary";
@@ -9,7 +8,7 @@ import { useSRSStats } from "@/hooks/useSRSStats";
 import { useUserXP } from "@/hooks/useGamification";
 import { useTodayQueue } from "@/hooks/useTodayQueue";
 import { Button } from "@/components/design-system";
-import { Settings, Brain, LogIn, LogOut, Mic, BookOpen, Sparkles, GraduationCap, Laugh, Play, ChevronRight, Twitter, MessageCircleQuestion, MessageSquare, MessageCircle, Globe2, Headphones, Trophy, FileText, Flame, BarChart3, PenTool, Gamepad2, Users, Swords, Newspaper, BookMarked, Image as ImageIcon, Languages, Settings2 } from "lucide-react";
+import { Settings, Brain, LogIn, LogOut, Mic, BookOpen, Sparkles, GraduationCap, Laugh, Play, ChevronRight, Twitter, MessageCircleQuestion, MessageSquare, MessageCircle, Globe2, Headphones, Trophy, FileText, Flame, BarChart3, PenTool, Gamepad2, Users, Swords, Newspaper, Image as ImageIcon, Languages, Settings2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AppShell } from "@/components/layout/AppShell";
 import { Badge } from "@/components/ui/badge";
@@ -92,7 +91,6 @@ const Index = () => {
   // Dialect-aware placement level (see the profile fetch below) — decides
   // whether the placement banner is still worth showing.
   const [placementLevel, setPlacementLevel] = useState<string | null>(null);
-  const { hasAccess: hasBibleAccess } = useBibleAccess();
 
   const { state: homeLayout } = useHomeLayout();
   const { progress: alphabetProgress, masteredCount: alphabetMastered, isUnlocked: alphabetUnlocked } = useAlphabetProgress();

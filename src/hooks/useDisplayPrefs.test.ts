@@ -1,7 +1,6 @@
 import { act, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useDisplayPrefs } from "./useDisplayPrefs";
-import { useBibleDisplayPrefs } from "./useBibleDisplayPrefs";
 
 /**
  * Which rows of an Arabic passage are shown: dialect text, tashkil, the MSA
@@ -10,17 +9,16 @@ import { useBibleDisplayPrefs } from "./useBibleDisplayPrefs";
  * This is the app's most load-bearing preference. Turning English on makes
  * every reading exercise a translation exercise; leaving tashkil on past the
  * point a learner needs it is the single biggest reason people stall at reading
- * unvocalised text. And it is global — the same four booleans drive Bible
- * lessons, the reading library, transcripts and set phrases — so the setting is
- * changed in one place and has to be believed in a dozen others, several of
- * which are mounted at the same time.
+ * unvocalised text. And it is global — the same four booleans drive the
+ * reading library, transcripts and set phrases — so the setting is changed in
+ * one place and has to be believed in a dozen others, several of which are
+ * mounted at the same time.
  *
  * Hence the two channels: a custom event for the tab that made the change
  * (`storage` never fires there) and `storage` for the others.
  */
 
 const KEY = "ingleezy:display-prefs";
-const LEGACY_KEY = "ingleezy:bible-display-prefs";
 
 const DEFAULTS = {
   showArabic: true,
@@ -80,25 +78,6 @@ describe("the starting point", () => {
     expect(result.current.prefs).toEqual({ ...DEFAULTS, showEnglish: true });
   });
 
-  it("inherits the settings from when this was a Bible-only feature", () => {
-    localStorage.setItem(LEGACY_KEY, JSON.stringify({ ...DEFAULTS, showFormal: true }));
-
-    const { result } = renderHook(() => useDisplayPrefs());
-
-    // Promoting the setting from Bible lessons to the whole app must not reset
-    // the people who had already configured it there.
-    expect(result.current.prefs.showFormal).toBe(true);
-  });
-
-  it("prefers the current key when both exist", () => {
-    localStorage.setItem(LEGACY_KEY, JSON.stringify({ ...DEFAULTS, showFormal: true }));
-    localStorage.setItem(KEY, JSON.stringify({ ...DEFAULTS, showFormal: false }));
-
-    const { result } = renderHook(() => useDisplayPrefs());
-
-    expect(result.current.prefs.showFormal).toBe(false);
-  });
-
   it("falls back when the stored value is not readable", () => {
     localStorage.setItem(KEY, "{not json");
 
@@ -139,18 +118,6 @@ describe("changing a setting", () => {
     });
 
     expect(JSON.parse(localStorage.getItem(KEY)!).showTashkil).toBe(false);
-  });
-
-  it("keeps the legacy key in step", () => {
-    const { result } = renderHook(() => useDisplayPrefs());
-
-    act(() => {
-      result.current.update({ showFormal: true });
-    });
-
-    // Anything still reading the Bible-only key sees the same answer, so the
-    // two cannot drift into showing different things on different screens.
-    expect(JSON.parse(localStorage.getItem(LEGACY_KEY)!).showFormal).toBe(true);
   });
 
   it("accumulates across several changes", () => {
@@ -219,13 +186,5 @@ describe("staying in step", () => {
         window.dispatchEvent(new CustomEvent("ingleezy:display-prefs-changed"));
       }),
     ).not.toThrow();
-  });
-});
-
-describe("the Bible-lessons alias", () => {
-  it("is the same hook under its old name", () => {
-    // Kept so the Bible screens' imports still resolve. Pointing it at a
-    // separate implementation is how the two keys would drift back apart.
-    expect(useBibleDisplayPrefs).toBe(useDisplayPrefs);
   });
 });

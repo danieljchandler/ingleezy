@@ -187,8 +187,6 @@ describe("the no-hardcoding rule", () => {
     "free-chat/index.ts → google/gemini-2.5-pro",
     "curriculum-chat/index.ts → google/gemini-2.5-pro",
     "curriculum-chat/index.ts → google/gemini-3-flash-preview",
-    "bible-passage/index.ts → google/gemini-2.5-pro",
-    "bible-passage/index.ts → google/gemini-3-flash-preview",
     "analyze-gulf-arabic/index.ts → anthropic/claude-sonnet-4.5",
     "analyze-gulf-arabic/index.ts → google/gemini-3.5-flash",
     "analyze-gulf-arabic/index.ts → qwen/qwen3-max",
@@ -221,7 +219,7 @@ describe("the no-hardcoding rule", () => {
 
   it("never routes general work through Fanar-Sadiq", async () => {
     const offenders = (await functionSources())
-      .filter(({ path }) => !path.includes("bible") && !path.includes("quran"))
+      .filter(({ path }) => !path.includes("quran"))
       .filter(({ text }) => text.includes("Fanar-Sadiq"))
       .map(({ path }) => path);
 

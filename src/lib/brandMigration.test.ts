@@ -27,14 +27,12 @@ describe("exact key renames", () => {
   it("moves each old key to its new name", () => {
     localStorage.setItem("lahja_dialect_module", "Egyptian");
     localStorage.setItem("lahja_bridge_view_enabled", "true");
-    localStorage.setItem("lahja_bible_session", "{}");
     localStorage.setItem("lahja_freechat_v1", "[]");
 
     runBrandMigration();
 
     expect(localStorage.getItem("ingleezy_dialect_module")).toBe("Egyptian");
     expect(localStorage.getItem("ingleezy_bridge_view_enabled")).toBe("true");
-    expect(localStorage.getItem("ingleezy_bible_session")).toBe("{}");
     expect(localStorage.getItem("ingleezy_freechat_v1")).toBe("[]");
   });
 
@@ -168,7 +166,7 @@ describe("when storage misbehaves", () => {
 
   it("still migrates the rest when one key fails", () => {
     localStorage.setItem("lahja_dialect_module", "Egyptian");
-    localStorage.setItem("lahja_bible_session", "{}");
+    localStorage.setItem("lahja_freechat_v1", "[]");
 
     const realSet = Storage.prototype.setItem;
     vi.spyOn(Storage.prototype, "setItem").mockImplementation(function (
@@ -184,7 +182,7 @@ describe("when storage misbehaves", () => {
 
     // Each key is moved inside its own try, so one quota failure does not
     // abandon the ones after it.
-    expect(localStorage.getItem("ingleezy_bible_session")).toBe("{}");
+    expect(localStorage.getItem("ingleezy_freechat_v1")).toBe("[]");
   });
 
   it("marks itself done even when a key could not be moved", () => {

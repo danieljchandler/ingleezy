@@ -15,8 +15,8 @@ const ROWS: Array<{
 
 /**
  * Global display preferences editor. Applies across all learning modules
- * (Bible Lessons, Reading Practice, Stories, Transcripts, etc.) wherever
- * the renderer reads from `useDisplayPrefs`.
+ * (Reading Practice, Stories, Transcripts, etc.) wherever the renderer reads
+ * from `useDisplayPrefs`.
  */
 export function DisplayPrefsEditor() {
   const { prefs, update } = useDisplayPrefs();

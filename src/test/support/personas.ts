@@ -29,7 +29,6 @@ export type Persona =
   | "admin"
   | "recorder"
   | "content_reviewer"
-  | "bible_reader"
   | "beta_tester";
 
 export interface PersonaOptions {
@@ -54,7 +53,6 @@ const SPECS: Record<Persona, PersonaSpec> = {
   admin: { roles: ["admin"], tier: "allin", signedIn: true },
   recorder: { roles: ["recorder"], tier: "free", signedIn: true },
   content_reviewer: { roles: ["content_reviewer"], tier: "free", signedIn: true },
-  bible_reader: { roles: ["bible_reader"], tier: "free", signedIn: true },
   beta_tester: { roles: ["beta_tester"], tier: "free", signedIn: true },
 };
 

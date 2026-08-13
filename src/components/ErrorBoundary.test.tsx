@@ -7,8 +7,8 @@ import { ErrorBoundary } from "./ErrorBoundary";
 /**
  * The last line of defence between a render-time throw and a white screen.
  *
- * App.tsx wraps the whole router in one of these, and four pages that call out
- * to slow or flaky things (Transcribe, MemeAnalyzer, LearnFromX, BibleReading)
+ * App.tsx wraps the whole router in one of these, and pages that call out
+ * to slow or flaky things (Transcribe, MemeAnalyzer, LearnFromX)
  * wrap themselves in another. So this component decides what a learner sees on
  * the worst day the app has, which is exactly why it classifies the error
  * rather than showing one generic panel: "check your connection" and "sign in

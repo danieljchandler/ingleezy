@@ -1,22 +1,16 @@
 import { expect, test } from "./support/fixtures";
-import { anInviteCode, aRole, TEST_USER_ID } from "../src/test/support/factories";
+import { anInviteCode, TEST_USER_ID } from "../src/test/support/factories";
 
 /** Invite codes have no exported id helper; these only need to be distinct. */
 const inviteCodeId = (index: number) => `eeeeeeee-0000-4000-8000-00000000000${index}`;
 
 /**
- * The two admin screens that hand out access: invite codes and role grants.
+ * The admin screen that hands out access: invite codes.
  *
- * Both control who can get in and what they can see, and neither had any
- * coverage. An invite code is the only way to create an account during the
- * closed beta, so a code that is generated wrong, deleted by accident, or shown
- * as live when it is spent all cost real signups. Role grants decide Bible
- * access, content review and beta features, and the grant path goes through two
- * security-definer RPCs — `admin_find_user` to resolve an email the client
- * cannot read, then a plain insert — with a duplicate check between them.
+ * An invite code is the only way to create an account during the closed beta,
+ * so a code that is generated wrong, deleted by accident, or shown as live
+ * when it is spent all cost real signups.
  */
-
-const OTHER_USER = "00000000-0000-4000-8000-000000000009";
 
 test.describe("invite codes", () => {
   test.beforeEach(async ({ signInAs, db }) => {
@@ -259,180 +253,3 @@ test.describe("invite codes", () => {
   });
 });
 
-test.describe("granting roles", () => {
-  test.beforeEach(async ({ signInAs, backend }) => {
-    await signInAs("admin");
-    backend.addUser(OTHER_USER, "learner@example.com");
-  });
-
-  test("grants a role by email", async ({ page, db }) => {
-    await page.goto("/admin/bible-access");
-
-    await page.getByPlaceholder(/email or uuid/i).fill("learner@example.com");
-    await page.getByRole("button", { name: /^add$/i }).click();
-
-    await expect(page.getByText(/bible reader granted/i)).toBeVisible();
-
-    // The email is resolved server-side: profiles has no email column, so
-    // admin_find_user is the only way the client can turn one into a user id.
-    const granted = db.rows("user_roles").find((row) => row.user_id === OTHER_USER);
-    expect(granted?.role).toBe("bible_reader");
-  });
-
-  test("grants a role by user id", async ({ page, db }) => {
-    await page.goto("/admin/bible-access");
-
-    await page.getByPlaceholder(/email or uuid/i).fill(OTHER_USER);
-    await page.getByRole("button", { name: /^add$/i }).click();
-
-    await expect(page.getByText(/bible reader granted/i)).toBeVisible();
-    expect(db.rows("user_roles").some((row) => row.user_id === OTHER_USER)).toBe(true);
-  });
-
-  test("grants the role that was selected", async ({ page, db }) => {
-    await page.goto("/admin/bible-access");
-
-    await page.getByPlaceholder(/email or uuid/i).fill("learner@example.com");
-    await page.getByRole("combobox").first().click();
-    await page.getByRole("option", { name: "Beta tester" }).click();
-    await page.getByRole("button", { name: /^add$/i }).click();
-
-    await expect(page.getByText(/beta tester granted/i)).toBeVisible();
-    expect(
-      db.rows("user_roles").find((row) => row.user_id === OTHER_USER)?.role,
-    ).toBe("beta_tester");
-  });
-
-  test("refuses an identifier that matches no account", async ({ page, db }) => {
-    await page.goto("/admin/bible-access");
-
-    await page.getByPlaceholder(/email or uuid/i).fill("nobody@example.com");
-    await page.getByRole("button", { name: /^add$/i }).click();
-
-    await expect(page.getByText(/user not found/i)).toBeVisible();
-    // Granting to a resolved-to-nothing id would create an orphan row that no
-    // account could ever use and no admin could ever find.
-    expect(db.rows("user_roles").some((row) => row.user_id === OTHER_USER)).toBe(false);
-  });
-
-  test("does not grant the same role twice", async ({ page, db }) => {
-    db.add("user_roles", aRole("bible_reader", { id: "role-existing", user_id: OTHER_USER }));
-
-    await page.goto("/admin/bible-access");
-    await page.getByPlaceholder(/email or uuid/i).fill("learner@example.com");
-    await page.getByRole("button", { name: /^add$/i }).click();
-
-    await expect(page.getByText(/already assigned/i)).toBeVisible();
-    expect(db.rows("user_roles").filter((row) => row.user_id === OTHER_USER)).toHaveLength(1);
-  });
-
-  test("clears the field after a grant, so the next one starts clean", async ({ page }) => {
-    await page.goto("/admin/bible-access");
-
-    await page.getByPlaceholder(/email or uuid/i).fill("learner@example.com");
-    await page.getByRole("button", { name: /^add$/i }).click();
-    await expect(page.getByText(/bible reader granted/i)).toBeVisible();
-
-    await expect(page.getByPlaceholder(/email or uuid/i)).toHaveValue("");
-  });
-
-  test("will not submit an empty identifier", async ({ page }) => {
-    await page.goto("/admin/bible-access");
-
-    await expect(page.getByRole("button", { name: /^add$/i })).toBeDisabled();
-  });
-
-  test("lists the grants with the email each belongs to", async ({ page, db }) => {
-    db.add("user_roles", aRole("bible_reader", { id: "role-existing", user_id: OTHER_USER }));
-
-    await page.goto("/admin/bible-access");
-
-    // The email is the only human-readable identifier here; a table of bare
-    // UUIDs is unauditable.
-    await expect(page.getByText("learner@example.com")).toBeVisible();
-    await expect(page.getByRole("table").getByText("Bible reader")).toBeVisible();
-  });
-
-  test("filters the list to one role", async ({ page, db, backend }) => {
-    const third = "00000000-0000-4000-8000-000000000008";
-    backend.addUser(third, "tester@example.com");
-    db.add(
-      "user_roles",
-      aRole("bible_reader", { id: "role-a", user_id: OTHER_USER }),
-      aRole("beta_tester", { id: "role-b", user_id: third }),
-    );
-
-    await page.goto("/admin/bible-access");
-    await expect(page.getByText("tester@example.com")).toBeVisible();
-
-    await page.getByRole("combobox").nth(1).click();
-    await page.getByRole("option", { name: "Bible reader" }).click();
-
-    await expect(page.getByText("learner@example.com")).toBeVisible();
-    await expect(page.getByText("tester@example.com")).toHaveCount(0);
-  });
-
-  test("says so when nothing matches the filter", async ({ page, db }) => {
-    db.add("user_roles", aRole("bible_reader", { id: "role-a", user_id: OTHER_USER }));
-
-    await page.goto("/admin/bible-access");
-    await page.getByRole("combobox").nth(1).click();
-    await page.getByRole("option", { name: "Content reviewer" }).click();
-
-    await expect(page.getByText(/no matching role assignments/i)).toBeVisible();
-  });
-
-  test("revokes exactly the grant asked for", async ({ page, db, backend }) => {
-    const third = "00000000-0000-4000-8000-000000000008";
-    backend.addUser(third, "tester@example.com");
-    db.add(
-      "user_roles",
-      aRole("bible_reader", { id: "role-a", user_id: OTHER_USER }),
-      aRole("beta_tester", { id: "role-b", user_id: third }),
-    );
-
-    await page.goto("/admin/bible-access");
-    await expect(page.getByText("learner@example.com")).toBeVisible();
-
-    await page
-      .getByRole("row")
-      .filter({ hasText: "learner@example.com" })
-      .getByRole("button")
-      .click();
-
-    await expect(page.getByText(/role revoked/i)).toBeVisible();
-    // Revoking by row id, so the other grant survives — a delete keyed on
-    // user_id or role alone would take out more than was asked.
-    const remaining = db.rows("user_roles").filter((row) => row.id === "role-b");
-    expect(remaining).toHaveLength(1);
-  });
-
-  test("reports a failed revoke rather than removing the row from the screen", async ({
-    page,
-    db,
-    expectConsoleErrors,
-  }) => {
-    expectConsoleErrors([/.*/]);
-    db.add("user_roles", aRole("bible_reader", { id: "role-a", user_id: OTHER_USER }));
-
-    await page.goto("/admin/bible-access");
-    await expect(page.getByText("learner@example.com")).toBeVisible();
-
-    db.failWrites("user_roles", 403);
-    await page.getByRole("row").filter({ hasText: "learner@example.com" }).getByRole("button").click();
-
-    await expect(page.getByText(/failed to revoke/i)).toBeVisible();
-    // The row is dropped from local state on success only; dropping it on
-    // failure would show an admin a revocation that never happened.
-    await expect(page.getByText("learner@example.com")).toBeVisible();
-    expect(db.rows("user_roles").some((row) => row.id === "role-a")).toBe(true);
-  });
-
-  test("turns a non-admin away", async ({ page, signInAs }) => {
-    await signInAs("recorder");
-    await page.goto("/admin/bible-access");
-
-    // Recorders reach /admin, but handing out roles is not theirs to do.
-    await expect(page.getByText(/only admins can manage role access/i)).toBeVisible();
-  });
-});
