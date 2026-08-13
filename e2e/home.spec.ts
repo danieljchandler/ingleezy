@@ -161,10 +161,17 @@ test.describe("the daily queue", () => {
 
     // Watching native video is the app's core loop and it used to sit at the
     // bottom of the page, under the whole queue — reachable only by scrolling
-    // past everything else.
+    // past everything else. It now deliberately follows the daily-goals
+    // header ("learners see their target first" — see Index.tsx), so the
+    // guard is: video below the goals, but above every queue row.
     const video = await page.getByRole("heading", { name: /Watch today's video/ }).boundingBox();
-    const queue = await page.getByRole("heading", { name: "Today", exact: true }).boundingBox();
-    expect(video!.y).toBeLessThan(queue!.y);
+    const goals = await page.getByRole("heading", { name: "Today", exact: true }).boundingBox();
+    const firstQueueRow = await page
+      .getByRole("button", { name: /estimated \d+ minutes/ })
+      .first()
+      .boundingBox();
+    expect(video!.y).toBeGreaterThan(goals!.y);
+    expect(video!.y).toBeLessThan(firstQueueRow!.y);
   });
 
   test("still counts the video in the day's total", async ({ page, db }) => {

@@ -50,7 +50,6 @@ const PronunciationPractice = lazyPage(() => import("./pages/PronunciationPracti
 const NativeFeedback = lazyPage(() => import("./pages/NativeFeedback"));
 const WritingPractice = lazyPage(() => import("./pages/WritingPractice"));
 const ConversationSimulator = lazyPage(() => import("./pages/ConversationSimulator"));
-const DialectCompare = lazyPage(() => import("./pages/DialectCompare"));
 const ListeningPractice = lazyPage(() => import("./pages/ListeningPractice"));
 const Leaderboard = lazyPage(() => import("./pages/Leaderboard"));
 const ReadingPractice = lazyPage(() => import("./pages/ReadingPractice"));
@@ -76,7 +75,6 @@ const MyTranscriptions = lazyPage(() => import("./pages/MyTranscriptions"));
 const AlphabetJourney = lazyPage(() => import("./pages/AlphabetJourney"));
 const AlphabetLetter = lazyPage(() => import("./pages/AlphabetLetter"));
 const AlphabetCheckpoint = lazyPage(() => import("./pages/AlphabetCheckpoint"));
-const MsaBridge = lazyPage(() => import("./pages/MsaBridge"));
 const Listen = lazyPage(() => import("./pages/Listen"));
 const ListenEpisode = lazyPage(() => import("./pages/ListenEpisode"));
 const Terms = lazyPage(() => import("./pages/Terms"));
@@ -304,11 +302,6 @@ const App = () => {
                 <ConversationSimulator />
               </ErrorBoundary>
             } />
-            <Route path="/dialect-compare" element={
-              <ErrorBoundary name="DialectCompareRoute">
-                <DialectCompare />
-              </ErrorBoundary>
-            } />
             <Route path="/listening" element={
               <ErrorBoundary name="ListeningRoute">
                 <ListeningPractice />
@@ -415,9 +408,6 @@ const App = () => {
             } />
             <Route path="/alphabet" element={
               <ErrorBoundary name="AlphabetJourneyRoute"><AlphabetJourney /></ErrorBoundary>
-            } />
-            <Route path="/bridge" element={
-              <ErrorBoundary name="MsaBridgeRoute"><MsaBridge /></ErrorBoundary>
             } />
             <Route path="/terms" element={
               <ErrorBoundary name="TermsRoute"><Terms /></ErrorBoundary>

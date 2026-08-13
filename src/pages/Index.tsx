@@ -431,27 +431,6 @@ const Index = () => {
           than competing with it for the first screen. */}
       <div className="mt-6 space-y-4">
         {isAuthenticated && <ContinueCard />}
-
-        <button
-          onClick={() => navigate("/bridge")}
-          className={cn(
-            "w-full px-4 py-3 rounded-2xl text-left",
-            "bg-gradient-to-r from-[#5C3A46]/8 via-[#F9F7F2] to-[#5C3A46]/8",
-            "border border-[#5C3A46]/25 hover:border-[#5C3A46]/50",
-            "flex items-center gap-3 transition-all active:scale-[0.99]"
-          )}
-        >
-          <div className="h-9 w-9 rounded-xl bg-[#5C3A46]/10 flex items-center justify-center shrink-0">
-            <Globe2 className="h-4 w-4 text-[#5C3A46]" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-[#5C3A46]">Coming from MSA?</p>
-            <p className="text-[11px] text-[#5C3A46]/70 truncate">
-              Bridge <span className="font-arabic" dir="rtl">الفصحى</span> into {activeDialect} dialect
-            </p>
-          </div>
-          <ChevronRight className="h-4 w-4 text-[#5C3A46]/60 shrink-0" />
-        </button>
       </div>
 
     </AppShell>

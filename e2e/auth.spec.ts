@@ -140,7 +140,7 @@ test.describe("signing up with an invite code", () => {
   });
 
   test("a valid code creates the account and redeems the code", async ({ page, backend }) => {
-    backend.db.seed("invite_codes", [anInviteCode({ code: "HAKIYA-GOOD", uses: 0, max_uses: 5 })]);
+    backend.db.seed("invite_codes", [anInviteCode({ code: "INGLEEZY-GOOD", uses: 0, max_uses: 5 })]);
 
     await fillCredentials(page, { email: "new@example.com", invite: "ingleezy-good" });
     await page.getByRole("button", { name: /^sign up$/i }).click();
@@ -154,10 +154,10 @@ test.describe("signing up with an invite code", () => {
   });
 
   test("uppercases the code, so a lowercase paste still works", async ({ page, backend }) => {
-    backend.db.seed("invite_codes", [anInviteCode({ code: "HAKIYA-GOOD" })]);
+    backend.db.seed("invite_codes", [anInviteCode({ code: "INGLEEZY-GOOD" })]);
 
     await page.getByLabel(/invite code/i).fill("ingleezy-good");
-    await expect(page.getByLabel(/invite code/i)).toHaveValue("HAKIYA-GOOD");
+    await expect(page.getByLabel(/invite code/i)).toHaveValue("INGLEEZY-GOOD");
   });
 
   test("a code that does not exist is refused before the account is created", async ({
@@ -176,18 +176,18 @@ test.describe("signing up with an invite code", () => {
   });
 
   test("a fully used code is refused", async ({ page, backend }) => {
-    backend.db.seed("invite_codes", [anInviteCode({ code: "HAKIYA-FULL", uses: 5, max_uses: 5 })]);
+    backend.db.seed("invite_codes", [anInviteCode({ code: "INGLEEZY-FULL", uses: 5, max_uses: 5 })]);
 
-    await fillCredentials(page, { email: "new@example.com", invite: "HAKIYA-FULL" });
+    await fillCredentials(page, { email: "new@example.com", invite: "INGLEEZY-FULL" });
     await page.getByRole("button", { name: /^sign up$/i }).click();
 
     await expect(page.getByText(/invalid, expired, or fully used code/i)).toBeVisible();
   });
 
   test("an expired code is refused", async ({ page, backend }) => {
-    backend.db.seed("invite_codes", [anInviteCode({ code: "HAKIYA-OFF", expires_at: daysAgo(1) })]);
+    backend.db.seed("invite_codes", [anInviteCode({ code: "INGLEEZY-OFF", expires_at: daysAgo(1) })]);
 
-    await fillCredentials(page, { email: "new@example.com", invite: "HAKIYA-OFF" });
+    await fillCredentials(page, { email: "new@example.com", invite: "INGLEEZY-OFF" });
     await page.getByRole("button", { name: /^sign up$/i }).click();
 
     await expect(page.getByText(/invalid, expired, or fully used code/i)).toBeVisible();
@@ -195,11 +195,11 @@ test.describe("signing up with an invite code", () => {
 
   test("an email that already has an account says so", async ({ page, backend }) => {
     backend.db
-      .seed("invite_codes", [anInviteCode({ code: "HAKIYA-GOOD" })])
+      .seed("invite_codes", [anInviteCode({ code: "INGLEEZY-GOOD" })])
       .seed("profiles", [aProfile()]);
     backend.addUser("00000000-0000-4000-8000-000000000077", "taken@example.com");
 
-    await fillCredentials(page, { email: "taken@example.com", invite: "HAKIYA-GOOD" });
+    await fillCredentials(page, { email: "taken@example.com", invite: "INGLEEZY-GOOD" });
     await page.getByRole("button", { name: /^sign up$/i }).click();
 
     await expect(page.getByText(/already registered/i)).toBeVisible();
@@ -212,12 +212,12 @@ test.describe("signing up with an invite code", () => {
     // The comment in Auth.tsx describes this: someone takes the last seat
     // between verify and redeem. Without the compensating sign-out the learner
     // ends up with an account that bypassed the invite gate entirely.
-    backend.db.seed("invite_codes", [anInviteCode({ code: "HAKIYA-RACE" })]);
+    backend.db.seed("invite_codes", [anInviteCode({ code: "INGLEEZY-RACE" })]);
     backend.stubRpc("redeem_invite_code", () => {
       throw new Error("no seats left");
     });
 
-    await fillCredentials(page, { email: "new@example.com", invite: "HAKIYA-RACE" });
+    await fillCredentials(page, { email: "new@example.com", invite: "INGLEEZY-RACE" });
     await page.getByRole("button", { name: /^sign up$/i }).click();
 
     await expect(page.getByText(/couldn't be redeemed/i)).toBeVisible();
@@ -242,12 +242,12 @@ test.describe("signing up with an invite code", () => {
     // out on the landing page rather than on the form with the error visible.
     // Harmless — the toast still explains it, and the session is cleared — but
     // it is why the assertion above checks the session rather than the URL.
-    backend.db.seed("invite_codes", [anInviteCode({ code: "HAKIYA-RACE2" })]);
+    backend.db.seed("invite_codes", [anInviteCode({ code: "INGLEEZY-RACE2" })]);
     backend.stubRpc("redeem_invite_code", () => {
       throw new Error("no seats left");
     });
 
-    await fillCredentials(page, { email: "new2@example.com", invite: "HAKIYA-RACE2" });
+    await fillCredentials(page, { email: "new2@example.com", invite: "INGLEEZY-RACE2" });
     await page.getByRole("button", { name: /^sign up$/i }).click();
 
     await expect(page).toHaveURL(/127\.0\.0\.1:\d+\/$/);

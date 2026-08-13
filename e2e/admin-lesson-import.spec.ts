@@ -31,7 +31,7 @@ function workbook(sheets: Record<string, Cell[][]>): Buffer {
 }
 
 const OVERVIEW: Cell[][] = [
-  ["HAKIYA  |  Stage 1 · Lesson 4 · Around the House", null],
+  ["INGLEEZY  |  Stage 1 · Lesson 4 · Around the House", null],
   ["Stage", "Stage 1 — Foundations (Pre-A1 → A1)"],
   ["Lesson", "Lesson 4 of 20  |  Week 2, Day 1"],
   ["Duration", "~15 minutes"],

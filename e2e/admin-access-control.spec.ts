@@ -18,13 +18,13 @@ test.describe("invite codes", () => {
 
   test("lists the codes that exist", async ({ page, db }) => {
     db.seed("invite_codes", [
-      anInviteCode({ id: "c1", code: "HAKIYA-AAAA", note: "Twitter batch" }),
-      anInviteCode({ id: "c2", code: "HAKIYA-BBBB", note: null }),
+      anInviteCode({ id: "c1", code: "INGLEEZY-AAAA", note: "Twitter batch" }),
+      anInviteCode({ id: "c2", code: "INGLEEZY-BBBB", note: null }),
     ]);
 
     await page.goto("/admin/invite-codes");
 
-    await expect(page.getByText("HAKIYA-AAAA")).toBeVisible();
+    await expect(page.getByText("INGLEEZY-AAAA")).toBeVisible();
     await expect(page.getByText("Twitter batch")).toBeVisible();
   });
 

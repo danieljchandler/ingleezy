@@ -87,7 +87,6 @@ export const ROUTES: RouteSpec[] = [
   { path: "/learn/:lessonId", params: { lessonId: LESSON_ID }, gate: "public", boundary: "LearnLessonRoute" },
   { path: "/quiz/:lessonId", params: { lessonId: LESSON_ID }, gate: "public", boundary: "QuizRoute" },
   { path: "/placement", gate: "public", boundary: "PlacementQuizRoute" },
-  { path: "/bridge", gate: "public", boundary: "MsaBridgeRoute" },
   { path: "/grammar", gate: "public", boundary: "GrammarRoute" },
 
   // ── Alphabet ───────────────────────────────────────────────────────────────
@@ -144,7 +143,6 @@ export const ROUTES: RouteSpec[] = [
     expectedConsoleErrors: [/\[realtime\] start error/],
   },
   { path: "/listening", gate: "public", boundary: "ListeningRoute" },
-  { path: "/dialect-compare", gate: "public", boundary: "DialectCompareRoute" },
   { path: "/daily-challenge", gate: "public", boundary: "DailyChallengeRoute" },
   { path: "/vocab-games", gate: "public", boundary: "VocabGamesRoute" },
   { path: "/battles", gate: "auth", boundary: "VocabBattlesRoute" },

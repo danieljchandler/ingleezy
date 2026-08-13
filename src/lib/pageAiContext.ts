@@ -54,7 +54,6 @@ const ROUTE_HINTS: Array<[prefix: string, hintKey: string]> = [
   ["/pricing", "pricing"],
   ["/pronunciation", "pronunciation"],
   ["/conversation", "conversation"],
-  ["/dialect-compare", "dialect-compare"],
   ["/listening", "listening-practice"],
   ["/listen", "listening-practice"],
   ["/leaderboard", "leaderboard"],

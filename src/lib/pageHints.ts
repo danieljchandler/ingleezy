@@ -121,10 +121,6 @@ export const PAGE_HINTS: Record<string, { title: string; body: string; cta?: str
     title: "Vocab Battles",
     body: "Head-to-head vocab duels against other learners or the AI. Fast-paced, points-based, addictive.",
   },
-  "dialect-compare": {
-    title: "Dialect Compare",
-    body: "See how the same word or phrase shifts across Gulf, Egyptian, Yemeni and more. Build dialect intuition.",
-  },
   "culture-guide": {
     title: "Culture Guide",
     body: "Customs, etiquette, and context that turn language into real communication. Avoid the awkward moments.",

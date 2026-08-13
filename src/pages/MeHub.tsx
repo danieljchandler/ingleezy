@@ -32,7 +32,6 @@ const MeHub = () => {
           { id: "tutor", label: "Tutor Upload", description: "Auto-extract flashcards from tutor audio", icon: GraduationCap, to: "/tutor-upload", show: isAuthenticated },
           { id: "how-do-i-say", label: "How do I say…?", description: "Translate phrases into dialect", icon: MessageCircleQuestion, to: "/how-do-i-say" },
           { id: "culture", label: "What should I do?", description: "Culture & etiquette guide", icon: Compass, to: "/culture-guide" },
-          { id: "dialect-compare", label: "Dialect Compare", description: "Same word across dialects", icon: Globe2, to: "/dialect-compare", accent: "bg-emerald-500/10 text-emerald-600" },
         ]}
       />
 

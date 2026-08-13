@@ -80,7 +80,7 @@ function parseOverview(sheet: XLSX.WorkSheet): ParsedLessonOverview {
     const b = String(row[1] || '').trim();
 
     // The first non-empty row with content in A is usually the title
-    if ((a.includes('HAKIYA') || a.includes('LAHJA')) && a.includes('Lesson')) {
+    if ((a.includes('INGLEEZY') || a.includes('HAKIYA') || a.includes('LAHJA')) && a.includes('Lesson')) {
       // Parse title from header like "HAKIYA  |  Stage 1 · Lesson 1 · Objects — The World Around You"
       const parts = a.split('·');
       title = parts.length >= 3 ? parts.slice(2).join('·').trim() : a;

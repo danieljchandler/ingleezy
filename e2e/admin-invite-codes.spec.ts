@@ -59,12 +59,12 @@ test.describe("listing codes", () => {
 
   test("shows a code with how much of it is left", async ({ page, db }) => {
     db.seed("invite_codes", [
-      anInviteCode({ id: CODE_ID, code: "HAKIYA01", uses: 2, max_uses: 5, note: "Twitter batch" }),
+      anInviteCode({ id: CODE_ID, code: "INGLEEZY01", uses: 2, max_uses: 5, note: "Twitter batch" }),
     ]);
 
     await page.goto("/admin/invite-codes");
 
-    await expect(page.getByText("HAKIYA01")).toBeVisible();
+    await expect(page.getByText("INGLEEZY01")).toBeVisible();
     await expect(page.getByText("2/5 used")).toBeVisible();
     await expect(page.getByText("Twitter batch")).toBeVisible();
   });

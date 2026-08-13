@@ -286,7 +286,7 @@ const Auth = () => {
                   type="text"
                   value={inviteCode}
                   onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
-                  placeholder="e.g. HAKIYA-XXXX"
+                  placeholder="e.g. INGLEEZY-XXXX"
                   className="h-11 rounded-lg font-mono tracking-wider"
                   autoComplete="off"
                   autoCapitalize="characters"

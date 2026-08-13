@@ -51,14 +51,6 @@ const LearnHub = () => {
             accent: "bg-sky-500/10 text-sky-600",
           },
           {
-            id: "bridge",
-            label: "MSA → Dialect Bridge",
-            description: "Translate your formal Arabic into dialect",
-            icon: Globe2,
-            to: "/bridge",
-            accent: "bg-[#5C3A46]/10 text-[#5C3A46]",
-          },
-          {
             id: "grammar",
             label: "Grammar Drills",
             description: "AI conjugation, pronouns & structure practice",
