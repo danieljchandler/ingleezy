@@ -2,7 +2,7 @@
 // Uses Munsit for Gulf episodes, Azure for Egyptian/Yemeni. Caches per-line.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-import { planProvider, synthesizeLine } from "../_shared/listenTts.ts";
+import { planEnglishProvider, synthesizeLine } from "../_shared/listenTts.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
 
 
@@ -64,14 +64,15 @@ Deno.serve(async (req) => {
     }
     const script = (episode.script as any[]) ?? [];
     const line = script[lineIndex];
-    if (!line?.arabic) {
+    if (!line?.english && !line?.arabic) {
       return new Response(JSON.stringify({ error: "line_not_found" }), {
         status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const plan = await planProvider(episode.dialect);
-    const bytes = await synthesizeLine(line.arabic, line.speaker_role ?? "", lineIndex, plan);
+    // Episodes are English now; the voice plan no longer depends on the dialect.
+    const plan = planEnglishProvider();
+    const bytes = await synthesizeLine(line.english ?? line.arabic, line.speaker_role ?? "", lineIndex, plan);
 
     const path = `episodes/${episodeId}/line-${lineIndex}.${plan.ext}`;
     const { error: upErr } = await admin.storage

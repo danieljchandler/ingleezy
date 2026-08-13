@@ -147,9 +147,18 @@ generation conditioning.
       **Reading practice DONE**: reading-passage (english-target,
       englishPassageGate, {english, arabic, literal} lines, bilingual
       quiz), reading-qa (English answers, dialect glosses), ReadingPractice
-      page flipped to tappable-English lines. Open: reading library
+      page flipped to tappable-English lines.
+      **Listen episodes DONE**: generate-listen-script emits English
+      scripts (ScriptLine {speaker, speaker_role, english, arabic,
+      literal}), English title + dialect-Arabic title_arabic
+      (20260813190000) and Arabic summary teaser; tashkeel pass and
+      dialect-flavor blocks removed. listenTts gained planEnglishProvider
+      (ElevenLabs premade English voices, Azure en-US fallback) used by
+      both audio functions, synthesizing line.english. ListenEpisode
+      reader flipped: English-primary tappable lines, scaffold behind the
+      display preference, english-led vocab. Open: reading library
       authoring flip (passage_arabic scaffold column + admin form),
-      interactive stories, listen episodes, souq news.
+      interactive stories, souq news.
 
 ### Grammar — FLIP (drills done)
 - [x] Grammar drills flipped: English questions with dialect instruction

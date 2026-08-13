@@ -25,6 +25,22 @@ export interface ProviderPlan {
   elevenLabsModelId?: string;
 }
 
+// English voices for the flipped (english-target) episodes: ElevenLabs
+// premade voices — global, stable IDs available to every workspace. Two
+// contrasting voices cover host_a/host_b alternation; Azure en-US neural
+// voices are the no-ElevenLabs fallback.
+const ELEVENLABS_ENGLISH_VOICES = [
+  "21m00Tcm4TlvDq8ikWAM", // Rachel — calm, conversational (female, en-US)
+  "TxGEqnHWrfWFTfGW9XjX", // Josh — warm, natural (male, en-US)
+  "EXAVITQu4vr4xnSDxMaL", // Bella — bright (female, en-US)
+];
+
+const AZURE_ENGLISH_VOICES = [
+  "en-US-JennyNeural",
+  "en-US-GuyNeural",
+  "en-US-AriaNeural",
+];
+
 // Native Egyptian Arabic voices from the workspace library.
 const ELEVENLABS_EGYPTIAN_VOICES = [
   "6aXW46RTUz6Y2lkBGQ1a", // Farida — Lively and Radiant (female, ar-EG)
@@ -93,6 +109,29 @@ async function loadMunsitGulfVoices(apiKey: string): Promise<{ voices: string[];
   cachedMunsit = { voices, modelId };
   console.log(`listenTts: cached ${voices.length} Munsit Gulf voices (model=${modelId})`);
   return cachedMunsit;
+}
+
+/**
+ * The plan for ENGLISH episode audio — the default for everything the
+ * flipped generate-listen-script produces. `planProvider(dialect)` below
+ * remains for Arabic content (e.g. scaffold-line audio, legacy episodes).
+ */
+export function planEnglishProvider(): ProviderPlan {
+  if (Deno.env.get("ELEVENLABS_API_KEY")) {
+    return {
+      provider: "elevenlabs",
+      ext: "mp3",
+      contentType: "audio/mpeg",
+      elevenLabsVoices: ELEVENLABS_ENGLISH_VOICES,
+      elevenLabsModelId: elevenLabsModel(),
+    };
+  }
+  return {
+    provider: "azure",
+    ext: "mp3",
+    contentType: "audio/mpeg",
+    azureVoices: AZURE_ENGLISH_VOICES,
+  };
 }
 
 export async function planProvider(dialect: string): Promise<ProviderPlan> {

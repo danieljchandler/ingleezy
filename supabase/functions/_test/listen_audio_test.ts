@@ -196,21 +196,13 @@ Deno.test("generate-listen-line-audio synthesises an uncached line", async () =>
   assert(String(result.body.audio_url).includes("listen-audio"));
 });
 
-Deno.test("generate-listen-line-audio falls back to Azure when Munsit has no voices", async () => {
-  const result = await call(
-    { episodeId: EPISODE, lineIndex: 0 },
-    backend({ extra: { "api.munsit.com": () => json({ error: "down" }, 503) } }),
-  );
-
-  assertEquals(result.status, 200);
-  assertEquals(result.body.provider, "azure");
-});
-
-Deno.test("generate-listen-line-audio uses Azure when Munsit is not configured", async () => {
+Deno.test("generate-listen-line-audio uses Azure when ElevenLabs is not configured", async () => {
+  // English episodes: ElevenLabs first, Azure en-US neural voices as the
+  // no-key fallback. Munsit (Arabic-only) is out of this path entirely.
   const result = await call(
     { episodeId: EPISODE, lineIndex: 0 },
     backend(),
-    { env: { MUNSIT_API_KEY: undefined } },
+    { env: { ELEVENLABS_API_KEY: undefined } },
   );
 
   assertEquals(result.status, 200);
@@ -227,14 +219,16 @@ Deno.test("generate-listen-line-audio uses ElevenLabs for an Egyptian episode", 
   assertEquals(result.body.provider, "elevenlabs");
 });
 
-Deno.test("generate-listen-line-audio uses Azure for a Yemeni episode", async () => {
+Deno.test("generate-listen-line-audio uses the same English voice plan for every dialect", async () => {
+  // The dialect is the learner's L1, not the episode's language — the spoken
+  // lines are English, so a Yemeni learner's episode uses the same voices.
   const result = await call(
     { episodeId: EPISODE, lineIndex: 0 },
     backend({ episode: { dialect: "Yemeni", script } }),
   );
 
   assertEquals(result.status, 200);
-  assertEquals(result.body.provider, "azure");
+  assertEquals(result.body.provider, "elevenlabs");
 });
 
 Deno.test("generate-listen-line-audio stores the clip under a per-line key", async () => {
@@ -302,33 +296,12 @@ Deno.test("generate-listen-line-audio reports a failed upload", async () => {
 // two tests that need Munsit to work therefore come last, after every fallback
 // assertion has already run.
 
-/** Munsit's voice list, with a male Gulf voice so the Gulf filter keeps one. */
-const munsitVoices: UpstreamHandler = (request) =>
-  request.url.includes("/voices")
-    ? json([{ voice_id: "gulf-male-1", name: "Faisal", gender: "male", dialect: ["gulf"] }])
-    : json({ data: { transcription: "" } });
-
-Deno.test("generate-listen-line-audio prefers Munsit for a Gulf episode", async () => {
-  const result = await call(
-    { episodeId: EPISODE, lineIndex: 0 },
-    backend({ extra: { "api.munsit.com": munsitVoices } }),
-  );
-
-  assertEquals(result.status, 200);
-  assertEquals(result.body.provider, "munsit");
-  // And Munsit returns WAV, so the stored file is named for it.
-  assert(
-    result.calls.find((url) => url.includes("/storage/v1/object"))?.endsWith(".wav"),
-    "Munsit returns WAV",
-  );
-});
-
 Deno.test("generate-listen-line-audio reports a TTS outage", async () => {
   const result = await call(
     { episodeId: EPISODE, lineIndex: 0 },
     backend({
       extra: {
-        "api.munsit.com": () => json({ error: "down" }, 503),
+        "api.elevenlabs.io": () => json({ error: "down" }, 503),
         "tts.speech.microsoft.com": () => json({ error: "down" }, 503),
       },
     }),

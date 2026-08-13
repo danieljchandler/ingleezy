@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { TappableArabicText } from "@/components/shared/TappableArabicText";
+import { TappableEnglishText } from "@/components/shared/TappableEnglishText";
 import { AskAISentence } from "@/components/shared/AskAISentence";
 import { TranslationPair } from "@/components/shared/TranslationPair";
 import { useDisplayPrefs } from "@/hooks/useDisplayPrefs";
@@ -138,7 +138,7 @@ const ListenEpisode = () => {
             <Badge variant="outline">{episode.dialect}</Badge>
             <Badge variant="outline" className="capitalize">{episode.length_bucket}</Badge>
           </div>
-          <h1 className="text-2xl font-bold leading-tight" dir="rtl">{episode.title}</h1>
+          <h1 className="font-english text-2xl font-bold leading-tight">{episode.title}</h1>
           {episode.summary && <p className="text-sm text-muted-foreground">{episode.summary}</p>}
 
           {episode.audio_mode === "full" && (
@@ -166,7 +166,7 @@ const ListenEpisode = () => {
                   {line.speaker}
                 </span>
                 <div className="flex items-center gap-1 shrink-0">
-                  <AskAISentence arabic={line.arabic} english={line.english} variant="chip" />
+
                   <Button
                     size="icon"
                     variant="ghost"
@@ -179,17 +179,20 @@ const ListenEpisode = () => {
                   </Button>
                 </div>
               </div>
-              <TappableArabicText
-                text={line.arabic}
-                source="listen"
-                sentenceContext={{ arabic: line.arabic, english: line.english }}
-              />
-              {showEnglish && line.english && (
-                <TranslationPair
-                  variant="compact"
-                  literal={line.literal}
-                  natural={line.english}
+              <p className="font-english text-base leading-relaxed">
+                <TappableEnglishText
+                  text={line.english ?? ""}
+                  sentenceArabic={line.arabic}
+                  source="listen"
                 />
+              </p>
+              {showEnglish && line.arabic && (
+                <div className="space-y-1">
+                  <p dir="rtl" className="font-arabic text-sm text-muted-foreground">{line.arabic}</p>
+                  {line.literal && (
+                    <p dir="rtl" className="font-arabic text-xs text-muted-foreground/80">{line.literal}</p>
+                  )}
+                </div>
               )}
             </Card>
           ))}
@@ -207,8 +210,8 @@ const ListenEpisode = () => {
                 return (
                   <Card key={v.arabic} className="p-2.5 flex items-center justify-between gap-2">
                     <div className="min-w-0">
-                      <p className="font-semibold" dir="rtl">{v.arabic}</p>
-                      <p className="text-xs text-muted-foreground">{v.english}{v.note ? ` — ${v.note}` : ""}</p>
+                      <p className="font-english font-semibold">{v.english}</p>
+                      <p dir="rtl" className="font-arabic text-xs text-muted-foreground">{v.arabic}{v.note ? ` — ${v.note}` : ""}</p>
                     </div>
                     <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => addOneVocab(v)} disabled={added}>
                       {added ? <Check className="h-4 w-4 text-primary" /> : <Plus className="h-4 w-4" />}

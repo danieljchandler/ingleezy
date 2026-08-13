@@ -72,6 +72,9 @@ export const COLUMNS_MISSING_FROM_TYPES: DriftedColumn[] = [
   // The Hakiya-bridge source tag on discover_videos, created after the fork.
   { table: "discover_videos", column: "source", migration: "20260813160000_hakiya_bridge_source" },
 
+  // Listen episodes gained a dialect-Arabic title with the English retarget.
+  { table: "listen_episodes", column: "title_arabic", migration: "20260813190000_listen_title_arabic" },
+
   // The L1-Interference Rulebook, created after the fork and absent from the
   // generated types until a real Supabase project regenerates them. Queried
   // only by englishHelpers.ts under the service role today.

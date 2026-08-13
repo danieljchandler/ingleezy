@@ -21,8 +21,9 @@ const EPISODE = "bbbbbbbb-1111-4000-8000-000000000000";
 
 const anEpisode = (over: Record<string, unknown> = {}) => ({
   id: EPISODE,
-  title: "قهوة الصباح",
-  summary: "Two friends talk about morning coffee",
+  title: "Morning Coffee",
+  title_arabic: "قهوة الصباح",
+  summary: "صديقان يسولفان عن قهوة الصباح",
   topic: "coffee",
   topic_category: "daily-life",
   dialect: "Gulf",
@@ -36,10 +37,10 @@ const anEpisode = (over: Record<string, unknown> = {}) => ({
   play_count: 0,
   creator_id: TEST_USER_ID,
   script: [
-    { speaker: "A", arabic: "صباح الخير", english: "Good morning" },
-    { speaker: "B", arabic: "صباح النور", english: "Morning light" },
+    { speaker: "A", english: "Good morning, everyone.", arabic: "صباح الخير", literal: "صباح الـ خير للجميع" },
+    { speaker: "B", english: "Coffee first, always.", arabic: "القهوة أول شي", literal: "قهوة أولاً دايماً" },
   ],
-  key_vocabulary: [{ arabic: "صباح", english: "morning" }],
+  key_vocabulary: [{ english: "morning", arabic: "صباح" }],
   created_at: new Date().toISOString(),
   updated_at: new Date().toISOString(),
   ...over,
@@ -86,8 +87,8 @@ test.describe("the library", () => {
     // Scoped to the card: the Create tab's format and length pickers are in
     // the DOM behind the inactive tab and carry the same words.
     const card = page.locator("a[href$='/listen/" + EPISODE + "']");
-    await expect(card.getByRole("heading", { name: "قهوة الصباح" })).toBeVisible();
-    await expect(card.getByText("Two friends talk about morning coffee")).toBeVisible();
+    await expect(card.getByRole("heading", { name: "Morning Coffee" })).toBeVisible();
+    await expect(card.getByText("صديقان يسولفان عن قهوة الصباح")).toBeVisible();
     await expect(card.getByText("Podcast")).toBeVisible();
     await expect(card.getByText("Short")).toBeVisible();
   });
@@ -124,7 +125,7 @@ test.describe("the library", () => {
     seedListen(db, [anEpisode({ play_count: 0 })]);
 
     await page.goto("/listen");
-    await expect(page.getByRole("heading", { name: "قهوة الصباح" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Morning Coffee" })).toBeVisible();
 
     await expect(page.getByText("▶ 0")).toHaveCount(0);
   });
@@ -160,7 +161,7 @@ test.describe("the library", () => {
     seedListen(db);
 
     await page.goto("/listen");
-    await page.getByRole("heading", { name: "قهوة الصباح" }).click();
+    await page.getByRole("heading", { name: "Morning Coffee" }).click();
 
     await expect(page).toHaveURL(new RegExp(`/listen/${EPISODE}$`));
   });
@@ -286,12 +287,11 @@ test.describe("an episode", () => {
 
     await page.goto(`/listen/${EPISODE}`);
 
-    // Rendered through TappableArabicText, so each word is its own lookup
-    // target rather than one run of text — a sentence-level locator matches
-    // nothing.
-    await expect(page.getByRole("heading", { name: "قهوة الصباح" })).toBeVisible();
-    await expect(page.getByRole("button", { name: /Look up “الخير”/ })).toBeVisible();
-    await expect(page.getByRole("button", { name: /Look up “النور”/ })).toBeVisible();
+    // Rendered through TappableEnglishText, so each word is its own lookup
+    // target rather than one run of text.
+    await expect(page.getByRole("heading", { name: "Morning Coffee" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "morning," })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Coffee" })).toBeVisible();
   });
 
   test("offers the key vocabulary", async ({ page, db }) => {
@@ -349,7 +349,7 @@ test.describe("an episode", () => {
     await expect(
       page.getByText("Audio failed — you can still play each line on tap."),
     ).toBeVisible();
-    await expect(page.getByRole("button", { name: /Look up “الخير”/ })).toBeVisible();
+    await expect(page.getByRole("button", { name: "morning," })).toBeVisible();
   });
 
   test("re-kicks a stale recording job", async ({ page, db, backend }) => {
@@ -381,7 +381,7 @@ test.describe("an episode", () => {
     ]);
 
     await page.goto(`/listen/${EPISODE}`);
-    await expect(page.getByRole("heading", { name: "قهوة الصباح" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Morning Coffee" })).toBeVisible();
 
     // Still plausibly working. Re-kicking it would double the synthesis spend
     // on every episode anyone opened while it was rendering.

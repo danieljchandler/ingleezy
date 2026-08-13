@@ -13,7 +13,7 @@ import { getCorsHeaders } from "../_shared/cors.ts";
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import {
-  planProvider,
+  planEnglishProvider,
   synthesizeLine,
   concatForPlan,
   estimateSeconds,
@@ -41,7 +41,8 @@ async function runJob(episodeId: string) {
       .update({ audio_status: "pending", updated_at: new Date().toISOString() })
       .eq("id", episodeId);
 
-    const plan = await planProvider(episode.dialect);
+    // Episodes are English now; the voice plan no longer depends on the dialect.
+    const plan = planEnglishProvider();
     console.log(`generate-listen-audio: episode=${episodeId} provider=${plan.provider}`);
 
     // Resume support: which lines do we already have?
@@ -58,7 +59,7 @@ async function runJob(episodeId: string) {
 
     for (let i = 0; i < script.length; i++) {
       const line = script[i];
-      if (!line?.arabic) {
+      if (!line?.english && !line?.arabic) {
         lineDurations.push(0);
         continue;
       }
@@ -73,7 +74,7 @@ async function runJob(episodeId: string) {
       }
 
       if (!bytes) {
-        bytes = await synthesizeLine(line.arabic, line.speaker_role ?? "", i, plan);
+        bytes = await synthesizeLine(line.english ?? line.arabic, line.speaker_role ?? "", i, plan);
         await admin.storage.from("listen-audio").upload(linePath, bytes, {
           contentType: plan.contentType, upsert: true,
         });

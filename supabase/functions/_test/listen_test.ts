@@ -234,26 +234,27 @@ Deno.test("refuses a script too short to be an episode", async () => {
   assertEquals(body.error, "empty_script");
 });
 
-Deno.test("ignores lines the model returned with no Arabic in them", async () => {
+Deno.test("ignores lines the model returned with no English in them", async () => {
   const { status } = await call(
     { topic: "coffee", format: "podcast", length: "short" },
     {
       ...allowed(),
       ...modelReturns({
-        title: "قهوة",
+        title: "Coffee",
+        titleArabic: "قهوة",
         summary: "s",
         script: [
-          { speaker: "A", speaker_role: "host", arabic: "صباح الخير", english: "Good morning" },
-          { speaker: "B", speaker_role: "guest", arabic: "", english: "(silence)" },
-          { speaker: "A", speaker_role: "host", arabic: "تحب قهوة؟", english: "Coffee?" },
-          { speaker: "B", speaker_role: "guest", arabic: "أكيد", english: "Of course" },
+          { speaker: "A", speaker_role: "host", english: "Good morning", arabic: "صباح الخير" },
+          { speaker: "B", speaker_role: "guest", english: "", arabic: "(صمت)" },
+          { speaker: "A", speaker_role: "host", english: "Coffee?", arabic: "تحب قهوة؟" },
+          { speaker: "B", speaker_role: "guest", english: "Of course", arabic: "أكيد" },
         ],
         key_vocabulary: [],
       }),
     },
   );
 
-  // The filter runs before the count, so an Arabic-less line does not pad a
+  // The filter runs before the count, so an English-less line does not pad a
   // script up to the floor. Four lines, one empty, is a three-line episode.
   assertEquals(status, 502);
 });
