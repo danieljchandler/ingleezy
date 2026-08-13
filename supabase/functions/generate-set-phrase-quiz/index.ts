@@ -5,6 +5,10 @@
  * phrase, randomly assigns a `reply` or `scenario` question type. If a scenario
  * question lacks cached distractors, calls Lovable AI to generate them.
  *
+ * Flipped: the phrases are ENGLISH — what the learner practises saying — and
+ * the scenario prompt arrives in the learner's dialect Arabic, so the setup is
+ * fully understood and the production is entirely in the target language.
+ *
  * Body: { dialect: string, occasionId?: string, length?: number }
  * Auth: requires user JWT (uses anon key + auth header).
  */
@@ -14,45 +18,52 @@ import { getCorsHeaders } from "../_shared/cors.ts";
 import { MODEL_IDS } from "../_shared/modelRegistry.ts";
 
 
+// The rules guard the SCAFFOLD language now: the scenario the learner reads
+// and the glosses on every choice must be their own dialect, never MSA.
 const DIALECT_RULES: Record<string, string> = {
-  Gulf: "Use authentic Gulf (Khaliji) Arabic only. Forbid MSA (فصحى) and Egyptian/Levantine/Yemeni. Use forms like شلونك، وين، هالحين، يبي.",
-  Egyptian: "Use authentic Egyptian Arabic only. Forbid MSA and Gulf/Levantine/Yemeni. Use forms like إزيك، فين، دلوقتي، عايز.",
-  Yemeni: "Use authentic Yemeni Arabic only. Forbid MSA and Gulf/Egyptian/Levantine. Use forms like كيفك، وين، ذحين، بغيت.",
+  Gulf: "All Arabic you write must be authentic Gulf (Khaliji) Arabic only. Forbid MSA (فصحى) and Egyptian/Levantine/Yemeni. Use forms like شلونك، وين، هالحين، يبي.",
+  Egyptian: "All Arabic you write must be authentic Egyptian Arabic only. Forbid MSA and Gulf/Levantine/Yemeni. Use forms like إزيك، فين، دلوقتي، عايز.",
+  Yemeni: "All Arabic you write must be authentic Yemeni Arabic only. Forbid MSA and Gulf/Egyptian/Levantine. Use forms like كيفك، وين، ذحين، بغيت.",
 };
 
 interface QuizItem {
   phrase_id: string;
   question_type: "reply" | "scenario";
+  /** reply mode: `english` is the opener the learner answers. scenario mode:
+   *  `arabic` is the situation in the learner's dialect. */
   prompt: { arabic?: string; english?: string; audio_url?: string | null };
-  expected_arabic: string;
-  expected_english?: string | null;
+  /** The English the learner should produce. */
+  expected_english: string;
+  /** Its dialect-Arabic gloss. */
+  expected_arabic?: string | null;
+  /** phonetic_ar — the English pronounced in Arabic letters. */
   expected_transliteration?: string | null;
   expected_audio_url?: string | null;
   cultural_note?: string | null;
   formality?: string | null;
   occasion?: { name: string; icon_name: string } | null;
-  choices: { arabic: string; english?: string; correct: boolean }[];
+  choices: { english: string; arabic?: string; correct: boolean }[];
   is_due_review: boolean;
 }
 
 async function generateScenarioAndDistractors(
   dialect: string,
-  phraseArabic: string,
-  phraseEnglish: string | null,
+  phraseEnglish: string,
+  phraseArabic: string | null,
   occasion: string | null,
-): Promise<{ scenario_english: string; distractors: { arabic: string; english: string }[] } | null> {
+): Promise<{ scenario_arabic: string; distractors: { english: string; arabic: string }[] } | null> {
   const apiKey = Deno.env.get("LOVABLE_API_KEY");
   if (!apiKey) return null;
 
-  const sys = `You design culturally authentic Arabic situational-phrase quizzes.
+  const sys = `You design situational ENGLISH-phrase quizzes for Arabic-speaking English learners.
 ${DIALECT_RULES[dialect] ?? DIALECT_RULES.Gulf}
 Rules:
-- The "correct" phrase is fixed and shown to you. NEVER invent or rewrite it.
-- Generate ONE short English scenario (1-2 sentences) where a native speaker would naturally say the correct phrase.
-- Generate exactly 3 distractor phrases that are REAL Arabic phrases used in OTHER situations (not nonsense, not synonyms of the correct one). They should sound plausible to a learner who only recognises individual words.
-- For funerals, religious or sensitive occasions, keep tone respectful — no humor.`;
+- The "correct" English phrase is fixed and shown to you. NEVER invent or rewrite it.
+- Generate ONE short scenario (1-2 sentences) in the learner's dialect Arabic where an English speaker would naturally say the correct phrase. The learner reads the situation in their own language and must produce the English.
+- Generate exactly 3 distractor phrases that are REAL English phrases used in OTHER situations (not nonsense, not synonyms of the correct one). They should sound plausible to a learner who only recognises individual words. Give each its dialect-Arabic gloss.
+- For condolences, religious or sensitive occasions, keep tone respectful — no humor.`;
 
-  const user = `Correct phrase: ${phraseArabic}${phraseEnglish ? ` (means: ${phraseEnglish})` : ""}
+  const user = `Correct English phrase: ${phraseEnglish}${phraseArabic ? ` (Arabic gloss: ${phraseArabic})` : ""}
 Occasion: ${occasion ?? "general"}
 Generate the scenario + 3 distractor phrases.`;
 
@@ -75,21 +86,21 @@ Generate the scenario + 3 distractor phrases.`;
               parameters: {
                 type: "object",
                 properties: {
-                  scenario_english: { type: "string" },
+                  scenario_arabic: { type: "string", description: "The situation in the learner's dialect Arabic (1-2 sentences)." },
                   distractors: {
                     type: "array",
                     items: {
                       type: "object",
                       properties: {
-                        arabic: { type: "string" },
-                        english: { type: "string" },
+                        english: { type: "string", description: "A real English phrase used in a different situation." },
+                        arabic: { type: "string", description: "Its dialect-Arabic gloss." },
                       },
-                      required: ["arabic", "english"],
+                      required: ["english", "arabic"],
                       additionalProperties: false,
                     },
                   },
                 },
-                required: ["scenario_english", "distractors"],
+                required: ["scenario_arabic", "distractors"],
                 additionalProperties: false,
               },
             },
@@ -109,7 +120,7 @@ Generate the scenario + 3 distractor phrases.`;
     const parsed = JSON.parse(args);
     const distractors = (parsed.distractors || []).slice(0, 3);
     if (distractors.length < 3) return null;
-    return { scenario_english: parsed.scenario_english, distractors };
+    return { scenario_arabic: parsed.scenario_arabic, distractors };
   } catch (err) {
     console.error("scenario gen failed:", err);
     return null;
@@ -186,25 +197,29 @@ serve(async (req) => {
 
     const items: QuizItem[] = [];
     for (const { row: p, due } of all) {
-      const hasReply = !!p.reply_arabic;
+      // A phrase with no English on it cannot be practised in the flipped app.
+      if (!p.phrase_english) continue;
+      const hasReply = !!p.reply_english;
       const canScenario = true; // we can synthesize a scenario via AI
       const type: "reply" | "scenario" =
         hasReply && Math.random() < 0.5 ? "reply" : (canScenario ? "scenario" : "reply");
 
+      // The scenario_english column carries the dialect-Arabic scenario since
+      // the retarget (rename deferred with the rest of the semantic flips).
       let scenarioText: string | null = p.scenario_english || null;
-      let distractors: { arabic: string; english?: string }[] = Array.isArray(p.cached_distractors)
+      let distractors: { english: string; arabic?: string }[] = Array.isArray(p.cached_distractors)
         ? p.cached_distractors
         : [];
 
       if (type === "scenario" && (!scenarioText || distractors.length < 3)) {
         const gen = await generateScenarioAndDistractors(
           dialect,
-          p.phrase_arabic,
           p.phrase_english,
+          p.phrase_arabic,
           p.set_phrase_occasions?.name ?? null,
         );
         if (gen) {
-          scenarioText = scenarioText || gen.scenario_english;
+          scenarioText = scenarioText || gen.scenario_arabic;
           if (distractors.length < 3) distractors = gen.distractors;
           // cache
           await admin
@@ -217,35 +232,37 @@ serve(async (req) => {
         }
       }
 
-      const expected = type === "reply" ? p.reply_arabic : p.phrase_arabic;
-      const expectedEng = type === "reply" ? p.reply_english : p.phrase_english;
+      const expected = type === "reply" ? p.reply_english : p.phrase_english;
+      const expectedAr = type === "reply" ? p.reply_arabic : p.phrase_arabic;
       const expectedAudio = type === "reply" ? p.reply_audio_url : p.phrase_audio_url;
       const expectedTrans = type === "reply" ? p.reply_transliteration : p.phrase_transliteration;
 
       // Build choices: correct + up to 3 distractors. Fallback: pick from other phrases.
       let choiceDistractors = distractors.slice(0, 3);
       if (choiceDistractors.length < 3) {
-        const fallback = shuffle(filtered.filter((f: any) => f.id !== p.id))
+        const fallback = shuffle(filtered.filter((f: any) => f.id !== p.id && f.phrase_english))
           .slice(0, 3 - choiceDistractors.length)
-          .map((f: any) => ({ arabic: f.phrase_arabic, english: f.phrase_english ?? "" }));
+          .map((f: any) => ({ english: f.phrase_english, arabic: f.phrase_arabic ?? "" }));
         choiceDistractors = [...choiceDistractors, ...fallback];
       }
 
       const choices = shuffle([
-        { arabic: expected, english: expectedEng ?? "", correct: true },
-        ...choiceDistractors.map((d) => ({ arabic: d.arabic, english: d.english ?? "", correct: false })),
+        { english: expected, arabic: expectedAr ?? "", correct: true },
+        ...choiceDistractors.map((d) => ({ english: d.english, arabic: d.arabic ?? "", correct: false })),
       ]);
 
       items.push({
         phrase_id: p.id,
         question_type: type,
         prompt: {
-          arabic: type === "reply" ? p.phrase_arabic : undefined,
-          english: type === "scenario" ? scenarioText ?? "Choose the right phrase to say." : undefined,
+          english: type === "reply" ? p.phrase_english : undefined,
+          // The fallback keeps the card usable when generation failed — the
+          // learner still picks from real choices, just without a story.
+          arabic: type === "scenario" ? scenarioText ?? "اختر العبارة المناسبة." : undefined,
           audio_url: type === "reply" ? p.phrase_audio_url : null,
         },
-        expected_arabic: expected,
-        expected_english: expectedEng,
+        expected_english: expected,
+        expected_arabic: expectedAr,
         expected_transliteration: expectedTrans,
         expected_audio_url: expectedAudio,
         cultural_note: p.cultural_note,

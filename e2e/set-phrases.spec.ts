@@ -3,7 +3,9 @@ import { TEST_USER_ID } from "../src/test/support/factories";
 import type { MemoryDb } from "../src/test/support/postgrest/store";
 
 /**
- * Set phrases — the fixed things people say at weddings, funerals and Eid.
+ * Set phrases — the fixed things English speakers say: greetings, small talk,
+ * congratulations, apologies. The scenario arrives in the learner's dialect;
+ * the phrase they produce is English.
  *
  * Two things distinguish this from the vocabulary decks. The material is
  * grouped by *occasion* rather than by topic, and it is answered by voice as
@@ -48,16 +50,17 @@ const aQuizItem = (over: Record<string, unknown> = {}) => ({
   formality: "formal",
   is_due_review: false,
   occasion: { name: "Weddings", icon_name: "heart" },
-  prompt: { english: "You arrive at a friend's wedding", arabic: null, audio_url: null },
+  // The situation is in the learner's dialect; the production is English.
+  prompt: { arabic: "وصلت عرس صديقك", english: null, audio_url: null },
   // Flat, not a nested `expected` object — the fields the answered panel reads.
+  expected_english: "Congratulations!",
   expected_arabic: "مبروك",
-  expected_english: "Congratulations",
-  expected_transliteration: "mabrouk",
+  expected_transliteration: "كونقراتشوليشنز",
   expected_audio_url: null,
   cultural_note: null,
   choices: [
-    { arabic: "مبروك", correct: true },
-    { arabic: "البقاء لله", correct: false },
+    { english: "Congratulations!", arabic: "مبروك", correct: true },
+    { english: "My condolences.", arabic: "البقاء لله", correct: false },
   ],
   ...over,
 });
@@ -198,14 +201,15 @@ test.describe("a practice session", () => {
   test("asks for a batch and shows the first question", async ({ page, backend }) => {
     await page.goto("/set-phrases/practice");
 
-    await expect(page.getByText("You arrive at a friend's wedding")).toBeVisible();
+    await expect(page.getByText("وصلت عرس صديقك")).toBeVisible();
+    await expect(page.getByText("What do you say in English?")).toBeVisible();
     await expect(page.getByText("1 / 1")).toBeVisible();
     expect(backend.lastCallTo("generate-set-phrase-quiz")?.body).toMatchObject({ length: 8 });
   });
 
   test("narrows the batch to the occasion it was opened with", async ({ page, backend }) => {
     await page.goto(`/set-phrases/practice?occasion=${OCCASION}`);
-    await expect(page.getByText("You arrive at a friend's wedding")).toBeVisible();
+    await expect(page.getByText("وصلت عرس صديقك")).toBeVisible();
 
     expect(backend.lastCallTo("generate-set-phrase-quiz")?.body).toMatchObject({
       occasionId: OCCASION,
@@ -236,28 +240,32 @@ test.describe("a practice session", () => {
 
   test("keeps the choices hidden until the learner asks for them", async ({ page }) => {
     await page.goto("/set-phrases/practice");
-    await expect(page.getByText("You arrive at a friend's wedding")).toBeVisible();
+    await expect(page.getByText("وصلت عرس صديقك")).toBeVisible();
 
     // The point of the exercise is producing the phrase, not recognising it;
     // showing four options up front turns it into a different, easier task.
-    await expect(page.getByRole("button", { name: "مبروك" })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Congratulations!" })).toHaveCount(0);
 
     await page.getByRole("button", { name: /choices/i }).click();
-    await expect(page.getByRole("button", { name: "مبروك" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Congratulations!" })).toBeVisible();
   });
 
   test("marks a right answer and shows what was expected", async ({ page }) => {
     await page.goto("/set-phrases/practice");
     await page.getByRole("button", { name: /choices/i }).click();
-    await page.getByRole("button", { name: "مبروك" }).click();
+    await page.getByRole("button", { name: "Congratulations!" }).click();
 
-    await expect(page.getByText("Congratulations")).toBeVisible();
+    // The answer card leads with the English and carries its phonetic_ar and
+    // dialect gloss beneath.
+    await expect(page.getByText("Correct answer:")).toBeVisible();
+    await expect(page.getByText("كونقراتشوليشنز")).toBeVisible();
+    await expect(page.getByText("مبروك", { exact: true })).toBeVisible();
   });
 
   test("schedules the phrase further out for a right answer", async ({ page, db }) => {
     await page.goto("/set-phrases/practice");
     await page.getByRole("button", { name: /choices/i }).click();
-    await page.getByRole("button", { name: "مبروك" }).click();
+    await page.getByRole("button", { name: "Congratulations!" }).click();
 
     await expect.poll(() => db.rows("user_set_phrases").length).toBe(1);
     const row = db.rows("user_set_phrases")[0];
@@ -271,7 +279,7 @@ test.describe("a practice session", () => {
   test("brings the phrase back sooner after a wrong answer", async ({ page, db }) => {
     await page.goto("/set-phrases/practice");
     await page.getByRole("button", { name: /choices/i }).click();
-    await page.getByRole("button", { name: "البقاء لله" }).click();
+    await page.getByRole("button", { name: "My condolences." }).click();
 
     await expect.poll(() => db.rows("user_set_phrases").length).toBe(1);
     // Quality 1 is "again" — the whole reason a wrong answer is worth logging.
@@ -281,7 +289,7 @@ test.describe("a practice session", () => {
   test("logs the attempt separately from the schedule", async ({ page, db }) => {
     await page.goto("/set-phrases/practice");
     await page.getByRole("button", { name: /choices/i }).click();
-    await page.getByRole("button", { name: "مبروك" }).click();
+    await page.getByRole("button", { name: "Congratulations!" }).click();
 
     // Two different records with two different jobs: the schedule decides when
     // the learner sees this again, the attempt log is what tells an editor a
@@ -298,7 +306,7 @@ test.describe("a practice session", () => {
   test("records a wrong answer as an attempt too", async ({ page, db }) => {
     await page.goto("/set-phrases/practice");
     await page.getByRole("button", { name: /choices/i }).click();
-    await page.getByRole("button", { name: "البقاء لله" }).click();
+    await page.getByRole("button", { name: "My condolences." }).click();
 
     await expect.poll(() => db.rows("set_phrase_quiz_attempts").length).toBe(1);
     expect(db.rows("set_phrase_quiz_attempts")[0]).toMatchObject({
@@ -310,7 +318,7 @@ test.describe("a practice session", () => {
   test("saves a phrase from the session", async ({ page, db }) => {
     await page.goto("/set-phrases/practice");
     await page.getByRole("button", { name: /choices/i }).click();
-    await page.getByRole("button", { name: "مبروك" }).click();
+    await page.getByRole("button", { name: "Congratulations!" }).click();
 
     await page.getByRole("button", { name: /Save/i }).click();
 
@@ -322,7 +330,7 @@ test.describe("a practice session", () => {
   test("ends the session after the last question", async ({ page }) => {
     await page.goto("/set-phrases/practice");
     await page.getByRole("button", { name: /choices/i }).click();
-    await page.getByRole("button", { name: "مبروك" }).click();
+    await page.getByRole("button", { name: "Congratulations!" }).click();
     await page.getByRole("button", { name: /Next|Finish|Done/i }).click();
 
     await expect(page.getByText("Session complete!")).toBeVisible();
@@ -332,10 +340,10 @@ test.describe("a practice session", () => {
   test("moves through a longer batch one question at a time", async ({ page, backend }) => {
     backend.stubFunction("generate-set-phrase-quiz", {
       items: [
-        aQuizItem({ prompt: { english: "First scenario", arabic: null, audio_url: null } }),
+        aQuizItem({ prompt: { arabic: "الموقف الأول", english: null, audio_url: null } }),
         aQuizItem({
           phrase_id: "bbbbbbbb-2222-4000-8000-000000000001",
-          prompt: { english: "Second scenario", arabic: null, audio_url: null },
+          prompt: { arabic: "الموقف الثاني", english: null, audio_url: null },
         }),
       ],
     });
@@ -343,40 +351,40 @@ test.describe("a practice session", () => {
     await page.goto("/set-phrases/practice");
     await expect(page.getByText("1 / 2")).toBeVisible();
     await page.getByRole("button", { name: /choices/i }).click();
-    await page.getByRole("button", { name: "مبروك" }).first().click();
+    await page.getByRole("button", { name: "Congratulations!" }).first().click();
     await page.getByRole("button", { name: /Next|Finish|Done/i }).click();
 
     await expect(page.getByText("2 / 2")).toBeVisible();
-    await expect(page.getByText("Second scenario")).toBeVisible();
+    await expect(page.getByText("الموقف الثاني")).toBeVisible();
   });
 
   test("hides the choices again on the next question", async ({ page, backend }) => {
     backend.stubFunction("generate-set-phrase-quiz", {
       items: [
-        aQuizItem({ prompt: { english: "First scenario", arabic: null, audio_url: null } }),
+        aQuizItem({ prompt: { arabic: "الموقف الأول", english: null, audio_url: null } }),
         aQuizItem({
           phrase_id: "bbbbbbbb-2222-4000-8000-000000000001",
-          prompt: { english: "Second scenario", arabic: null, audio_url: null },
+          prompt: { arabic: "الموقف الثاني", english: null, audio_url: null },
         }),
       ],
     });
 
     await page.goto("/set-phrases/practice");
     await page.getByRole("button", { name: /choices/i }).click();
-    await page.getByRole("button", { name: "مبروك" }).first().click();
+    await page.getByRole("button", { name: "Congratulations!" }).first().click();
     await page.getByRole("button", { name: /Next|Finish|Done/i }).click();
-    await expect(page.getByText("Second scenario")).toBeVisible();
+    await expect(page.getByText("الموقف الثاني")).toBeVisible();
 
     // Carried over, the next question would open already answered-for.
-    await expect(page.getByRole("button", { name: "مبروك" })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Congratulations!" })).toHaveCount(0);
   });
 
-  test("shows a reply prompt in Arabic rather than as a scenario", async ({ page, backend }) => {
+  test("shows a reply prompt in English rather than as a scenario", async ({ page, backend }) => {
     backend.stubFunction("generate-set-phrase-quiz", {
       items: [
         aQuizItem({
           question_type: "reply",
-          prompt: { english: null, arabic: "الله يبارك فيك", audio_url: null },
+          prompt: { english: "Thank you so much for your help", arabic: null, audio_url: null },
         }),
       ],
     });
@@ -384,8 +392,8 @@ test.describe("a practice session", () => {
     await page.goto("/set-phrases/practice");
 
     // Two question types share one screen: "here is a situation, what do you
-    // say" and "someone said this to you, what do you say back".
+    // say" and "someone said this to you in English, what do you say back".
     await expect(page.getByText("Reply to this:")).toBeVisible();
-    await expect(page.getByText("الله يبارك فيك")).toBeVisible();
+    await expect(page.getByText("Thank you so much for your help")).toBeVisible();
   });
 });

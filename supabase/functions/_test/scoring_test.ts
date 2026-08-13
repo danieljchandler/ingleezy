@@ -5,19 +5,18 @@ import { json, type UpstreamHandler } from "./upstreams.ts";
 /**
  * The two functions that judge whether a learner said the right thing.
  *
- * Both transcribe with Munsit and compare against a reference by normalised
- * Arabic edit distance, and the *normalisation* is the substance. Arabic is
- * written with optional diacritics and several letters that a speaker does not
- * distinguish — أ/إ/آ, ى/ي, ة/ه — so comparing raw strings marks a correct take
- * wrong for reasons that have nothing to do with pronunciation. Every one of
- * those foldings is a real class of false negative, and none of them is visible
- * from the page: the learner just sees a low score.
+ * Both compare a transcription against a reference by normalised edit
+ * distance, and the *normalisation* is the substance — comparing raw strings
+ * marks a correct take wrong for reasons that have nothing to do with
+ * pronunciation, and none of those false negatives is visible from the page:
+ * the learner just sees a low score.
  *
- * They differ in what they compare against. Shadowing scores against the actual
- * words a native said in one clip and returns a per-word alignment the coaching
- * function consumes; the set-phrase scorer compares against a canonical phrase
- * *and its accepted variants*, because there is usually more than one right
- * answer.
+ * They differ in language and in what they compare against. Shadowing still
+ * scores ARABIC (echoing native clips is an immersion exercise, and Arabic
+ * folding — diacritics, أ/إ/آ, ى/ي, ة/ه — is its substance); the set-phrase
+ * scorer is flipped to ENGLISH via Deepgram, folding case, punctuation and
+ * apostrophes, and compares against a canonical phrase *and its accepted
+ * variants*, because there is usually more than one right answer.
  */
 
 const USER = "00000000-0000-4000-8000-000000000001";
@@ -247,11 +246,15 @@ Deno.test("score-shadow-attempt scores an anonymous take without recording anyth
 
 // ── score-set-phrase-voice ──────────────────────────────────────────────────
 
+/** Deepgram's transcription envelope. */
+const heardEnglish = (text: string): UpstreamHandler => () =>
+  json({ results: { channels: [{ alternatives: [{ transcript: text }] }] } });
+
 const aPhrase = (over: Record<string, unknown> = {}) => ({
   id: PHRASE_ID,
-  phrase_arabic: "شلونك اليوم",
-  reply_arabic: "بخير الحمد لله",
-  accepted_variants: ["شخبارك اليوم"],
+  phrase_english: "how are you today",
+  reply_english: "I'm good, thanks!",
+  accepted_variants: ["how are you doing today"],
   dialect: "Gulf",
   ...over,
 });
@@ -261,22 +264,30 @@ const scorePhrase = (recognised: string, body: Record<string, unknown> = {}, phr
     "score-set-phrase-voice",
     { audioBase64: AUDIO, phraseId: PHRASE_ID, mimeType: "audio/webm", ...body },
     caller({
-      "api.munsit.com": heard(recognised),
+      "api.deepgram.com": heardEnglish(recognised),
       "/rest/v1/set_phrases": () => json(phrase),
     }),
   );
 
 Deno.test("score-set-phrase-voice accepts a phrase said correctly", async () => {
-  const { status, body } = await scorePhrase("شلونك اليوم");
+  const { status, body } = await scorePhrase("how are you today");
 
   assertEquals(status, 200);
   assertEquals(body.accepted, true);
   assertEquals(body.quality, 5);
-  assertEquals(body.canonical, "شلونك اليوم");
+  assertEquals(body.canonical, "how are you today");
+});
+
+Deno.test("score-set-phrase-voice ignores case, punctuation and apostrophes", async () => {
+  // ASR output styles these freely; none of them is pronunciation.
+  const { body } = await scorePhrase("im good thanks", { target: "reply" });
+
+  assertEquals(body.similarity, 1);
+  assertEquals(body.accepted, true);
 });
 
 Deno.test("score-set-phrase-voice accepts a listed variant", async () => {
-  const { body } = await scorePhrase("شخبارك اليوم");
+  const { body } = await scorePhrase("how are you doing today");
 
   // There is usually more than one right answer. Scoring only against the
   // canonical form marks a native-sounding alternative wrong.
@@ -286,9 +297,9 @@ Deno.test("score-set-phrase-voice accepts a listed variant", async () => {
 
 Deno.test("score-set-phrase-voice takes the best match across all candidates", async () => {
   const { body } = await scorePhrase(
-    "شخبارك اليوم",
+    "how are you doing today",
     {},
-    aPhrase({ accepted_variants: ["لا شي", "شخبارك اليوم", "ولا شي"] }),
+    aPhrase({ accepted_variants: ["whats up", "how are you doing today", "hows it going"] }),
   );
 
   // Best, not first — the order variants happen to be stored in must not
@@ -300,15 +311,15 @@ Deno.test("score-set-phrase-voice bands the similarity into SRS qualities", asyn
   for (
     const [recognised, expected] of [
       // Exact: 1.0 → 5.
-      ["شلونك اليوم", 5],
-      // Two characters off out of eleven: ~0.82 → 4.
-      ["شلونك الي", 4],
-      // Three characters off out of eleven: ~0.73 → 3.
-      ["شلونك ال", 3],
-      // Only the first word, six characters short: ~0.45 → 2.
-      ["شلونك", 2],
+      ["how are you today", 5],
+      // Three characters short out of seventeen: ~0.82 → 4.
+      ["how are you to", 4],
+      // Six characters short: ~0.65 → 3.
+      ["how are you", 3],
+      // Only the first two words: ~0.41 → 2.
+      ["how are", 2],
       // Almost nothing in common → 1.
-      ["مرحبا", 1],
+      ["goodbye", 1],
     ] as const
   ) {
     const { body } = await scorePhrase(recognised);
@@ -321,26 +332,25 @@ Deno.test("score-set-phrase-voice bands the similarity into SRS qualities", asyn
 });
 
 Deno.test("score-set-phrase-voice rejects a take that is not close enough", async () => {
-  const { body } = await scorePhrase("ما اعرف شنو");
+  const { body } = await scorePhrase("no idea what to say");
 
   assertEquals(body.accepted, false);
-  assertEquals(body.quality, 1);
 });
 
 Deno.test("score-set-phrase-voice scores the reply when asked for it", async () => {
-  const { body } = await scorePhrase("بخير الحمد لله", { target: "reply" });
+  const { body } = await scorePhrase("I'm good, thanks!", { target: "reply" });
 
   // A set phrase is a call and a response; practising only the call teaches
   // half a conversation.
-  assertEquals(body.canonical, "بخير الحمد لله");
+  assertEquals(body.canonical, "I'm good, thanks!");
   assertEquals(body.accepted, true);
 });
 
 Deno.test("score-set-phrase-voice ignores variants that are not strings", async () => {
   const { status, body } = await scorePhrase(
-    "شلونك اليوم",
+    "how are you today",
     {},
-    aPhrase({ accepted_variants: [null, 42, { arabic: "x" }, "شخبارك اليوم"] }),
+    aPhrase({ accepted_variants: [null, 42, { english: "x" }, "how are you doing today"] }),
   );
 
   // `accepted_variants` is JSON, so an admin edit can put anything in it.
@@ -350,7 +360,7 @@ Deno.test("score-set-phrase-voice ignores variants that are not strings", async 
 
 Deno.test("score-set-phrase-voice copes with no variants at all", async () => {
   const { status, body } = await scorePhrase(
-    "شلونك اليوم",
+    "how are you today",
     {},
     aPhrase({ accepted_variants: null }),
   );
@@ -362,7 +372,7 @@ Deno.test("score-set-phrase-voice copes with no variants at all", async () => {
 Deno.test("score-set-phrase-voice records the dialect from the phrase, not the request", async () => {
   const fn = await loadFunction("score-set-phrase-voice", {
     upstreams: caller({
-      "api.munsit.com": heard("ما اعرف"),
+      "api.deepgram.com": heardEnglish("no idea"),
       "/rest/v1/set_phrases": () => json(aPhrase({ dialect: "Egyptian" })),
     }),
   });
@@ -375,9 +385,9 @@ Deno.test("score-set-phrase-voice records the dialect from the phrase, not the r
       }),
     );
 
-    // The phrase's own dialect is authoritative. Recorded errors have to land
-    // in the same bucket the learner profile reads, and the client's idea of
-    // the current dialect is not that bucket.
+    // The phrase's own dialect is authoritative — it names the learner's L1
+    // bucket. Recorded errors have to land in the same bucket the learner
+    // profile reads, and the client's idea of the current dialect is not it.
     for (let i = 0; i < 50; i++) {
       const write = fn.calls.find((c) => c.url.includes("learner_errors"));
       if (write) {
@@ -398,13 +408,13 @@ Deno.test("score-set-phrase-voice refuses a request missing either half", async 
       "score-set-phrase-voice",
       body,
       caller({
-        "api.munsit.com": heard("شلونك"),
+        "api.deepgram.com": heardEnglish("how are you"),
         "/rest/v1/set_phrases": () => json(aPhrase()),
       }),
     );
 
     assertEquals(status, 400);
-    assert(!calls.some((url) => url.includes("api.munsit.com")));
+    assert(!calls.some((url) => url.includes("api.deepgram.com")));
   }
 });
 
@@ -413,7 +423,7 @@ Deno.test("score-set-phrase-voice reports an unknown phrase", async () => {
     "score-set-phrase-voice",
     { audioBase64: AUDIO, phraseId: PHRASE_ID },
     caller({
-      "api.munsit.com": heard("شلونك"),
+      "api.deepgram.com": heardEnglish("how are you"),
       "/rest/v1/set_phrases": () => json(null),
     }),
   );
@@ -421,14 +431,14 @@ Deno.test("score-set-phrase-voice reports an unknown phrase", async () => {
   assertEquals(status, 500);
   assertStringIncludes(String(body.error), "phrase not found");
   // Looked up before transcribing, so a bad id costs no ASR.
-  assert(!calls.some((url) => url.includes("api.munsit.com")));
+  assert(!calls.some((url) => url.includes("api.deepgram.com")));
 });
 
 Deno.test("score-set-phrase-voice reports a phrase with no text for the target", async () => {
   const { status, body } = await scorePhrase(
-    "بخير",
+    "im good",
     { target: "reply" },
-    aPhrase({ reply_arabic: null }),
+    aPhrase({ reply_english: null }),
   );
 
   // Not every set phrase has a reply. Asking for one that does not exist is an

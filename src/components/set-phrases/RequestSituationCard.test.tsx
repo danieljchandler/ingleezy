@@ -10,10 +10,10 @@ import type { Persona } from "@/test/support/personas";
  * set-phrase library.
  *
  * The library covers the situations somebody thought of in advance. A learner
- * about to visit a friend's grandfather in hospital, or meet their fiancée's
- * parents, needs the six things people actually say in that room, in their
- * dialect — and no curated list will ever have all of those. So this generates
- * them on demand and offers to keep them.
+ * about to sit an interview, call a landlord, or comfort an English-speaking
+ * colleague needs the six things people actually say in that room — and no
+ * curated list will ever have all of those. So this generates them on demand,
+ * in English with dialect glosses, and offers to keep them.
  *
  * Saving is the point rather than reading: a phrase read once and closed is
  * gone, and the source is stamped with the situation so that the deck later
@@ -29,23 +29,23 @@ vi.mock("sonner", () => ({
 }));
 
 const aPhrase = (over: Record<string, unknown> = {}) => ({
-  phrase_arabic: "الله يرحمه",
-  phrase_english: "May God have mercy on him",
-  literal: "God have-mercy-on-him",
-  transliteration: "allah yirhamah",
-  notes: "The standard thing to say on hearing of a death.",
+  phrase_english: "I'm so sorry for your loss",
+  phrase_arabic: "الله يرحمه ويصبركم",
+  literal: "أنا آسف جداً على فقدانك",
+  transliteration: "أيم سو سوري فور يور لوس",
+  notes: "هذي أكثر عبارة يقولونها لما يسمعون خبر وفاة.",
   ...over,
 });
 
 const ANOTHER_PHRASE = aPhrase({
-  phrase_arabic: "البقية في حياتك",
-  phrase_english: "May the rest of his life be added to yours",
-  literal: "the-remainder in your-life",
-  transliteration: "al-baqiya fi hayatak",
+  phrase_english: "He'll be in my thoughts",
+  phrase_arabic: "رح يظل في بالي",
+  literal: "هو رح يكون في أفكاري",
+  transliteration: "هيل بي إن ماي ثوتس",
   notes: undefined,
 });
 
-const A_SITUATION = "Comforting a friend whose grandfather just passed away";
+const A_SITUATION = "Comforting an English-speaking friend whose grandfather just passed away";
 
 let cleanup: (() => void) | undefined;
 
@@ -92,7 +92,7 @@ async function render({ persona = "free", dialect = "Gulf", seed }: Options = {}
 }
 
 const describeSituation = (text: string) =>
-  fireEvent.change(screen.getByPlaceholderText(/Comforting a friend/), {
+  fireEvent.change(screen.getByPlaceholderText(/Asking your manager/), {
     target: { value: text },
   });
 
@@ -108,22 +108,23 @@ const phrasesWrittenTo = (backend: SupabaseBackend) =>
   backend.db.writesTo("user_phrases").flatMap((write) => write.payload);
 
 describe("asking for phrases", () => {
-  it("says what it will produce, in the learner's dialect", async () => {
+  it("says what it will produce, glossed in the learner's dialect", async () => {
     await render({ dialect: "Egyptian" });
 
-    // "Authentic phrases" means nothing without saying authentic to whom.
-    expect(screen.getByText(/authentic Egyptian phrases/)).toBeInTheDocument();
+    // "Natural English phrases" means nothing without saying whose Arabic
+    // explains them.
+    expect(screen.getByText(/glossed in Egyptian Arabic/)).toBeInTheDocument();
   });
 
   it("offers situations to start from", async () => {
     await render();
 
-    fireEvent.click(screen.getByRole("button", { name: "Bargaining at the souq" }));
+    fireEvent.click(screen.getByRole("button", { name: "A job interview in English" }));
 
     // A blank box is the hardest thing to answer; the suggestions are there to
     // show the shape of a useful answer rather than to be used as-is.
-    expect(screen.getByPlaceholderText(/Comforting a friend/)).toHaveValue(
-      "Bargaining at the souq",
+    expect(screen.getByPlaceholderText(/Asking your manager/)).toHaveValue(
+      "A job interview in English",
     );
   });
 
@@ -158,13 +159,14 @@ describe("asking for phrases", () => {
 
     await generate();
 
-    expect(screen.getByText("الله يرحمه")).toHaveAttribute("dir", "rtl");
-    expect(screen.getByText("allah yirhamah")).toBeInTheDocument();
-    expect(screen.getByText("May God have mercy on him")).toBeInTheDocument();
-    // The literal is what explains the Arabic; the note is what stops a learner
-    // using a condolence as a greeting.
-    expect(screen.getByText(/God have-mercy-on-him/)).toBeInTheDocument();
-    expect(screen.getByText(/standard thing to say on hearing of a death/)).toBeInTheDocument();
+    expect(screen.getByText("I'm so sorry for your loss")).toBeInTheDocument();
+    // The phonetic_ar and the gloss both read right-to-left.
+    expect(screen.getByText("أيم سو سوري فور يور لوس")).toHaveAttribute("dir", "rtl");
+    expect(screen.getByText("الله يرحمه ويصبركم")).toHaveAttribute("dir", "rtl");
+    // The literal is what explains the English; the note is what stops a
+    // learner using a condolence as a greeting.
+    expect(screen.getByText(/أنا آسف جداً على فقدانك/)).toBeInTheDocument();
+    expect(screen.getByText(/أكثر عبارة يقولونها/)).toBeInTheDocument();
   });
 
   it("counts what came back", async () => {
@@ -224,7 +226,7 @@ describe("asking for phrases", () => {
 
     // Phrases for the last situation sitting under a new one would be saved to
     // the deck with the wrong source.
-    expect(screen.getAllByText("الله يرحمه")).toHaveLength(1);
+    expect(screen.getAllByText("I'm so sorry for your loss")).toHaveLength(1);
   });
 });
 
@@ -247,9 +249,9 @@ describe("keeping a phrase", () => {
     // it — otherwise every generated phrase is indistinguishable.
     await waitFor(() => expect(phrasesWrittenTo(backend)).toHaveLength(1));
     expect(phrasesWrittenTo(backend)[0]).toMatchObject({
-      phrase_arabic: "الله يرحمه",
-      phrase_english: "May God have mercy on him",
-      transliteration: "allah yirhamah",
+      phrase_english: "I'm so sorry for your loss",
+      phrase_arabic: "الله يرحمه ويصبركم",
+      transliteration: "أيم سو سوري فور يور لوس",
       source: `situation:${A_SITUATION}`,
       dialect: "Gulf",
     });
@@ -292,9 +294,9 @@ describe("keeping a phrase", () => {
     // Six phrases for one situation are a set; saving them one at a time is six
     // decisions where there is really only one.
     await waitFor(() => expect(phrasesWrittenTo(backend)).toHaveLength(2));
-    expect(phrasesWrittenTo(backend).map((p) => p.phrase_arabic)).toEqual([
-      "الله يرحمه",
-      "البقية في حياتك",
+    expect(phrasesWrittenTo(backend).map((p) => p.phrase_english)).toEqual([
+      "I'm so sorry for your loss",
+      "He'll be in my thoughts",
     ]);
   });
 

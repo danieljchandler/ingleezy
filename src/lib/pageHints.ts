@@ -75,7 +75,7 @@ export const PAGE_HINTS: Record<string, { title: string; body: string; cta?: str
   },
   "set-phrases": {
     title: "Set Phrases",
-    body: "High-frequency expressions for real-life situations — greetings, ordering, bargaining, and more.",
+    body: "High-frequency English expressions for real-life situations — greetings, small talk, phone calls, and more.",
   },
   "daily-challenge": {
     title: "Daily Challenge",

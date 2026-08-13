@@ -1,8 +1,10 @@
 /**
  * request-situation-phrases
  *
- * User-facing. Given a free-form situation/context the learner needs phrases for,
- * generate 5-8 authentic dialect phrases via Lovable AI. Returns the phrases for
+ * User-facing. Given a free-form situation/context the learner needs phrases
+ * for (described in Arabic or English), generate 5-8 natural ENGLISH phrases
+ * via Lovable AI — each with a dialect-Arabic gloss, a phonetic_ar rendering,
+ * and a word-for-word Arabic gloss in English order. Returns the phrases for
  * the client to display + selectively save into user_phrases.
  *
  * Body: { situation: string, dialect: string, count?: number }
@@ -13,10 +15,11 @@ import { getCorsHeaders } from "../_shared/cors.ts";
 import { MODEL_IDS } from "../_shared/modelRegistry.ts";
 
 
+// Guards the SCAFFOLD: every Arabic gloss must be the learner's own dialect.
 const DIALECT_RULES: Record<string, string> = {
-  Gulf: "Authentic Gulf (Khaliji) Arabic only. Forbid MSA / Egyptian / Levantine / Yemeni. Use شلونك، وين، هالحين، يبي.",
-  Egyptian: "Authentic Egyptian Arabic only. Forbid MSA / Gulf / Levantine / Yemeni. Use إزيك، فين، دلوقتي، عايز.",
-  Yemeni: "Authentic Yemeni Arabic only. Forbid MSA / Gulf / Egyptian / Levantine. Use كيفك، وين، ذحين، بغيت.",
+  Gulf: "All Arabic glosses must be authentic Gulf (Khaliji) Arabic only. Forbid MSA / Egyptian / Levantine / Yemeni. Use شلونك، وين، هالحين، يبي.",
+  Egyptian: "All Arabic glosses must be authentic Egyptian Arabic only. Forbid MSA / Gulf / Levantine / Yemeni. Use إزيك، فين، دلوقتي، عايز.",
+  Yemeni: "All Arabic glosses must be authentic Yemeni Arabic only. Forbid MSA / Gulf / Egyptian / Levantine. Use كيفك، وين، ذحين، بغيت.",
 };
 
 serve(async (req) => {
@@ -55,15 +58,16 @@ serve(async (req) => {
     }
 
     const n = Math.max(3, Math.min(10, Number(count) || 6));
-    const sys = `You generate authentic situational Arabic phrases for language learners.
+    const sys = `You generate natural situational ENGLISH phrases for Arabic-speaking English learners. The learner may describe the situation in Arabic or English.
 ${DIALECT_RULES[dialect] ?? DIALECT_RULES.Gulf}
 Rules:
-- Generate ${n} REAL phrases a native speaker would actually say in the described situation.
+- Generate ${n} REAL English phrases a native speaker would actually say in the described situation. Contemporary spoken English — contractions welcome; textbook stiffness is a defect.
 - Mix difficulty A1-B2; mix formality where appropriate.
-- Include accurate English meaning and a Latin-script transliteration.
-- Also include a "literal" word-for-word English gloss preserving the Arabic word order (may sound stiff; shows how the phrase is built).
-- Add a short note ONLY if cultural/usage context matters; otherwise leave empty.
-- NEVER invent unnatural phrases. NEVER use MSA when a dialect form exists.`;
+- phrase_arabic: an accurate dialect-Arabic gloss of the English phrase.
+- transliteration: the ENGLISH pronounced in Arabic letters (e.g. "ثانك يو" for "thank you"), readable aloud immediately.
+- Also include a "literal" word-for-word ARABIC gloss preserving the ENGLISH word order (may sound stiff; shows how the English is built).
+- notes: a short usage note in the learner's dialect Arabic ONLY if register/context matters; otherwise leave empty.
+- NEVER invent unnatural phrases.`;
 
     const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -87,13 +91,13 @@ Rules:
                   items: {
                     type: "object",
                     properties: {
-                      phrase_arabic: { type: "string" },
-                      phrase_english: { type: "string" },
-                      literal: { type: "string", description: "Word-for-word English gloss preserving Arabic word order." },
-                      transliteration: { type: "string" },
-                      notes: { type: "string" },
+                      phrase_english: { type: "string", description: "The English phrase." },
+                      phrase_arabic: { type: "string", description: "Its dialect-Arabic gloss." },
+                      literal: { type: "string", description: "Word-for-word Arabic gloss preserving ENGLISH word order." },
+                      transliteration: { type: "string", description: "The English pronounced in Arabic letters (phonetic_ar)." },
+                      notes: { type: "string", description: "Usage note in the learner's dialect Arabic." },
                     },
-                    required: ["phrase_arabic", "phrase_english", "transliteration"],
+                    required: ["phrase_english", "phrase_arabic", "transliteration"],
                   },
                 },
               },

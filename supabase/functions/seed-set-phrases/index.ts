@@ -1,8 +1,10 @@
 /**
  * seed-set-phrases
  *
- * Admin tool. Generates 10 draft phrases per occasion for the given dialect via
- * Lovable AI. Phrases are inserted as status='draft' for admin review.
+ * Admin tool. Generates 10 draft ENGLISH phrases per occasion for learners of
+ * the given dialect via Lovable AI — each with a dialect-Arabic gloss, a
+ * word-for-word Arabic gloss in English order, and a phonetic_ar rendering.
+ * Phrases are inserted as status='draft' for admin review.
  *
  * Body: { dialect: string, occasionIds?: string[] }
  * Requires admin user JWT.
@@ -13,24 +15,26 @@ import { getCorsHeaders } from "../_shared/cors.ts";
 import { MODEL_IDS } from "../_shared/modelRegistry.ts";
 
 
+// Guards the SCAFFOLD: every Arabic gloss must be the learner's own dialect.
 const DIALECT_RULES: Record<string, string> = {
-  Gulf: "Authentic Gulf (Khaliji) Arabic only. Forbid MSA / Egyptian / Levantine / Yemeni. Use شلونك، وين، هالحين، يبي.",
-  Egyptian: "Authentic Egyptian Arabic only. Forbid MSA / Gulf / Levantine / Yemeni. Use إزيك، فين، دلوقتي، عايز.",
-  Yemeni: "Authentic Yemeni Arabic only. Forbid MSA / Gulf / Egyptian / Levantine. Use كيفك، وين، ذحين، بغيت.",
+  Gulf: "All Arabic glosses must be authentic Gulf (Khaliji) Arabic only. Forbid MSA / Egyptian / Levantine / Yemeni. Use شلونك، وين، هالحين، يبي.",
+  Egyptian: "All Arabic glosses must be authentic Egyptian Arabic only. Forbid MSA / Gulf / Levantine / Yemeni. Use إزيك، فين، دلوقتي، عايز.",
+  Yemeni: "All Arabic glosses must be authentic Yemeni Arabic only. Forbid MSA / Gulf / Egyptian / Levantine. Use كيفك، وين، ذحين، بغيت.",
 };
 
 async function generatePhrases(dialect: string, occasionName: string): Promise<any[]> {
   const apiKey = Deno.env.get("LOVABLE_API_KEY")!;
-  const sys = `You curate authentic Arabic situational-phrase libraries for language learners.
+  const sys = `You curate ENGLISH situational-phrase libraries for Arabic-speaking English learners.
 ${DIALECT_RULES[dialect] ?? DIALECT_RULES.Gulf}
 Rules:
-- Generate 10 distinct REAL phrases native speakers actually say for the occasion. NO invented phrases.
-- Mix difficulties A1-B2; mix formality (casual/neutral/formal/religious).
-- CRITICAL: Every phrase MUST include the most common native reply (reply_arabic, reply_english, reply_transliteration). Set phrases are conversational — there is ALWAYS an expected response (greeting → return greeting, condolence → standard reply, congratulations → standard reply, thanks → standard reply, etc.). Never omit the reply. If multiple replies are common, pick the single most frequent one.
-- The reply must be authentic to the same dialect as the phrase, NOT MSA.
-- Provide a 1-sentence English scenario where someone would say the phrase.
-- For BOTH the phrase and its reply, also provide a "literal" word-for-word English gloss (phrase_literal, reply_literal) that preserves the Arabic word order (e.g. "what news-your?" for "شخبارك؟"). It may sound stiff — it shows learners how the phrase is built.
-- Cultural sensitivity: respectful tone for funerals/religious.`;
+- Generate 10 distinct REAL English phrases native speakers actually say for the occasion. Contemporary spoken English — contractions welcome; NO invented or textbook-stiff phrases.
+- Mix difficulties A1-B2; mix formality (casual/neutral/formal).
+- CRITICAL: Every phrase MUST include the most common native reply (reply_english, reply_arabic, reply_transliteration). Set phrases are conversational — there is ALWAYS an expected response (greeting → return greeting, apology → standard acceptance, thanks → standard reply, etc.). Never omit the reply.
+- phrase_arabic / reply_arabic: the phrase's natural dialect-Arabic gloss.
+- phrase_transliteration / reply_transliteration: the ENGLISH pronounced in Arabic letters (e.g. "ثانك يو" for "thank you"), readable aloud immediately.
+- scenario_english: a 1-sentence scenario in the learner's dialect Arabic describing when someone says the phrase (the column name is historical).
+- For BOTH the phrase and its reply, also provide a "literal" word-for-word ARABIC gloss (phrase_literal, reply_literal) that preserves the ENGLISH word order. It may sound stiff — it shows learners how the English is built.
+- cultural_note: a short usage note in the learner's dialect Arabic, only when register or culture matters.`;
 
   const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
@@ -54,20 +58,20 @@ Rules:
                 items: {
                   type: "object",
                   properties: {
-                    phrase_arabic: { type: "string" },
-                    phrase_english: { type: "string" },
-                    phrase_literal: { type: "string", description: "Word-for-word English gloss of the phrase, preserving Arabic word order." },
-                    phrase_transliteration: { type: "string" },
-                    reply_arabic: { type: "string" },
+                    phrase_english: { type: "string", description: "The English phrase the learner practises." },
+                    phrase_arabic: { type: "string", description: "Its dialect-Arabic gloss." },
+                    phrase_literal: { type: "string", description: "Word-for-word Arabic gloss of the phrase, preserving ENGLISH word order." },
+                    phrase_transliteration: { type: "string", description: "The English pronounced in Arabic letters (phonetic_ar)." },
                     reply_english: { type: "string" },
-                    reply_literal: { type: "string", description: "Word-for-word English gloss of the reply, preserving Arabic word order." },
-                    reply_transliteration: { type: "string" },
-                    scenario_english: { type: "string" },
-                    cultural_note: { type: "string" },
+                    reply_arabic: { type: "string" },
+                    reply_literal: { type: "string", description: "Word-for-word Arabic gloss of the reply, preserving ENGLISH word order." },
+                    reply_transliteration: { type: "string", description: "The reply pronounced in Arabic letters (phonetic_ar)." },
+                    scenario_english: { type: "string", description: "The scenario in the learner's dialect Arabic (column name historical)." },
+                    cultural_note: { type: "string", description: "Usage note in the learner's dialect Arabic." },
                     formality: { type: "string", enum: ["casual", "neutral", "formal", "religious"] },
                     difficulty: { type: "string", enum: ["A1", "A2", "B1", "B2", "C1"] },
                   },
-                  required: ["phrase_arabic", "phrase_english", "reply_arabic", "reply_english", "reply_transliteration", "scenario_english", "formality", "difficulty"],
+                  required: ["phrase_english", "phrase_arabic", "reply_english", "reply_arabic", "reply_transliteration", "scenario_english", "formality", "difficulty"],
                 },
               },
             },

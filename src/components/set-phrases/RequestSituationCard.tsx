@@ -18,10 +18,10 @@ interface GeneratedPhrase {
 
 const SUGGESTIONS = [
   "Ordering coffee at a café",
-  "Bargaining at the souq",
-  "Visiting someone at the hospital",
-  "Talking to a taxi driver",
-  "Meeting your future in-laws",
+  "A job interview in English",
+  "Checking in at the airport",
+  "Calling customer service",
+  "Meeting new colleagues",
 ];
 
 export const RequestSituationCard = () => {
@@ -103,7 +103,8 @@ export const RequestSituationCard = () => {
         <div className="flex-1">
           <h2 className="font-semibold">Need phrases for a specific situation?</h2>
           <p className="text-xs text-muted-foreground mt-1">
-            Describe the situation and AI will generate authentic {activeDialect} phrases you can save.
+            Describe the situation — in Arabic or English — and AI will generate
+            natural English phrases, glossed in {activeDialect} Arabic, you can save.
           </p>
         </div>
       </div>
@@ -111,7 +112,7 @@ export const RequestSituationCard = () => {
       <Textarea
         value={situation}
         onChange={(e) => setSituation(e.target.value)}
-        placeholder="e.g. Comforting a friend whose grandfather just passed away"
+        placeholder="e.g. Asking your manager for a day off"
         className="mt-3 min-h-[64px]"
         disabled={loading}
       />
@@ -150,22 +151,24 @@ export const RequestSituationCard = () => {
               key={i}
               className="p-3 rounded-lg bg-card border border-border"
             >
-              <p className="text-lg font-semibold" dir="rtl" style={{ fontFamily: "'Noto Sans Arabic', sans-serif" }}>
-                {p.phrase_arabic}
+              <p className="text-lg font-semibold font-english">
+                {p.phrase_english}
               </p>
               {p.transliteration && (
-                <p className="text-xs italic text-muted-foreground mt-0.5">{p.transliteration}</p>
+                <p className="text-xs text-muted-foreground mt-0.5 font-arabic" dir="rtl">{p.transliteration}</p>
               )}
-              <p className="text-sm mt-1">{p.phrase_english}</p>
+              <p className="text-sm mt-1 font-arabic" dir="rtl" style={{ fontFamily: "'Noto Sans Arabic', sans-serif" }}>
+                {p.phrase_arabic}
+              </p>
               {p.literal && (
-                <p className="text-xs italic text-muted-foreground/80 mt-0.5">
-                  <span className="not-italic uppercase tracking-wide text-[9px] mr-1 text-muted-foreground/60">
+                <p className="text-xs text-muted-foreground/80 mt-0.5 font-arabic" dir="rtl">
+                  <span className="uppercase tracking-wide text-[9px] ml-1 text-muted-foreground/60">
                     Literal
                   </span>
                   {p.literal}
                 </p>
               )}
-              {p.notes && <p className="text-[11px] text-muted-foreground mt-1">{p.notes}</p>}
+              {p.notes && <p className="text-[11px] text-muted-foreground mt-1 font-arabic" dir="rtl">{p.notes}</p>}
               <div className="flex justify-end mt-2">
                 {saved.has(i) ? (
                   <Button size="sm" variant="ghost" disabled className="text-emerald-600">

@@ -27,9 +27,10 @@ const SetPhrases = () => {
               <MessageCircle className="h-5 w-5 text-emerald-700 dark:text-emerald-300" />
             </div>
             <div className="flex-1">
-              <h2 className="font-semibold">Practice {activeDialect} situational phrases</h2>
+              <h2 className="font-semibold">Practice English situational phrases</h2>
               <p className="text-xs text-muted-foreground mt-1">
-                Greetings, weddings, Eid, condolences and more — voice or choice quizzes with spaced repetition.
+                Greetings, small talk, phone calls, apologies and more — voice or
+                choice quizzes with spaced repetition, glossed in {activeDialect} Arabic.
               </p>
             </div>
           </div>

@@ -236,15 +236,20 @@ export const useLogQuizAttempt = () => {
 export interface QuizItem {
   phrase_id: string;
   question_type: "reply" | "scenario";
+  /** reply mode: `english` is the opener the learner answers. scenario mode:
+   *  `arabic` is the situation in the learner's dialect. */
   prompt: { arabic?: string; english?: string; audio_url?: string | null };
-  expected_arabic: string;
-  expected_english?: string | null;
+  /** The English the learner should produce. */
+  expected_english: string;
+  /** Its dialect-Arabic gloss. */
+  expected_arabic?: string | null;
+  /** phonetic_ar — the English pronounced in Arabic letters. */
   expected_transliteration?: string | null;
   expected_audio_url?: string | null;
   cultural_note?: string | null;
   formality?: string | null;
   occasion?: { name: string; icon_name: string } | null;
-  choices: { arabic: string; english?: string; correct: boolean }[];
+  choices: { english: string; arabic?: string; correct: boolean }[];
   is_due_review: boolean;
 }
 

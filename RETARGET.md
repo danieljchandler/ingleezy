@@ -211,7 +211,19 @@ generation conditioning.
 - [ ] Pronunciation practice: English phoneme scoring, seeded with the
       Arabic-speaker confusion set (/p/-/b/, /v/-/f/, vowel pairs,
       clusters) — this *replaces* Alphabet Journey's role
-- [~] Shadowing, sentence coach, set phrases: KEEP loops, English targets
+- [~] Shadowing, sentence coach, set phrases: KEEP loops, English targets.
+      **Set phrases DONE**: English phrases with dialect glosses, phonetic_ar
+      in the transliteration columns, Arabic-in-English-order literals, and
+      the scenario in the learner's dialect (scenario_english column name
+      historical). seed-set-phrases + request-situation-phrases generate
+      English with dialect-guarded glosses; generate-set-phrase-quiz emits
+      dialect scenarios + English choices with glosses (Arabic fallback
+      prompt when generation fails); score-set-phrase-voice moved from
+      Munsit to Deepgram EN with English normalisation (case/punctuation/
+      apostrophes), learner_errors carrying English targets. Practice/hub
+      pages and RequestSituationCard flipped English-primary. Shadowing
+      still Arabic — it echoes native clips (immersion), revisit with the
+      Hakiya-bridge listening decisions.
       (sentence coach DONE — the model for the rest)
 - [ ] TTS: English voices for targets; Arabic TTS kept for scaffold audio
 - [ ] Realtime conversation simulator: KEEP, English persona

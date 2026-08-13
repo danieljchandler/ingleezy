@@ -104,7 +104,7 @@ const SetPhrasesPractice = ({ reviewMode = false }: Props) => {
     setRecording(false);
   };
 
-  const pickChoice = (choice: { arabic: string; correct: boolean }) => {
+  const pickChoice = (choice: { english: string; correct: boolean }) => {
     setAnswered({ correct: choice.correct, mode: "choice" });
     logAttempt.mutate({
       phrase_id: current.phrase_id,
@@ -159,7 +159,7 @@ const SetPhrasesPractice = ({ reviewMode = false }: Props) => {
             <div>
               <p className="text-xs uppercase text-muted-foreground mb-2">Reply to this:</p>
               <div className="flex items-center justify-between gap-2">
-                <p className="text-2xl font-semibold leading-relaxed" dir="rtl">{current.prompt.arabic}</p>
+                <p className="text-2xl font-semibold leading-relaxed font-english">{current.prompt.english}</p>
                 {current.prompt.audio_url && (
                   <Button size="icon" variant="ghost" onClick={() => playAudio(current.prompt.audio_url)}>
                     <Volume2 className="h-5 w-5" />
@@ -169,9 +169,11 @@ const SetPhrasesPractice = ({ reviewMode = false }: Props) => {
             </div>
           ) : (
             <div>
+              {/* The situation arrives in the learner's dialect so the setup is
+                  fully understood; the production is entirely in English. */}
               <p className="text-xs uppercase text-muted-foreground mb-2">Scenario:</p>
-              <p className="text-base leading-relaxed">{current.prompt.english}</p>
-              <p className="text-xs text-muted-foreground mt-2">What do you say?</p>
+              <p className="text-base leading-relaxed font-arabic" dir="rtl">{current.prompt.arabic}</p>
+              <p className="text-xs text-muted-foreground mt-2">What do you say in English?</p>
             </div>
           )}
         </Card>
@@ -204,10 +206,9 @@ const SetPhrasesPractice = ({ reviewMode = false }: Props) => {
                   <button
                     key={i}
                     onClick={() => pickChoice(c)}
-                    className="w-full p-3 rounded-lg border border-border bg-card text-right hover:border-primary/40 active:scale-[0.99] transition"
-                    dir="rtl"
+                    className="w-full p-3 rounded-lg border border-border bg-card text-left hover:border-primary/40 active:scale-[0.99] transition"
                   >
-                    <p className="text-lg">{c.arabic}</p>
+                    <p className="text-lg font-english">{c.english}</p>
                   </button>
                 ))}
               </div>
@@ -224,7 +225,7 @@ const SetPhrasesPractice = ({ reviewMode = false }: Props) => {
             <div>
               <p className="text-xs text-muted-foreground">Correct answer:</p>
               <div className="flex items-center justify-between gap-2 mt-1">
-                <p className="text-xl font-semibold" dir="rtl">{current.expected_arabic}</p>
+                <p className="text-xl font-semibold font-english">{current.expected_english}</p>
                 {current.expected_audio_url && (
                   <Button size="icon" variant="ghost" onClick={() => playAudio(current.expected_audio_url)}>
                     <Volume2 className="h-5 w-5" />
@@ -232,20 +233,20 @@ const SetPhrasesPractice = ({ reviewMode = false }: Props) => {
                 )}
               </div>
               {current.expected_transliteration && (
-                <p className="text-sm text-muted-foreground italic mt-1">{current.expected_transliteration}</p>
+                <p className="text-sm text-muted-foreground mt-1 font-arabic" dir="rtl">{current.expected_transliteration}</p>
               )}
-              {current.expected_english && (
-                <p className="text-sm text-muted-foreground mt-1">{current.expected_english}</p>
+              {current.expected_arabic && (
+                <p className="text-sm text-muted-foreground mt-1 font-arabic" dir="rtl">{current.expected_arabic}</p>
               )}
             </div>
             {answered.mode === "voice" && answered.transcript !== undefined && (
               <div className="text-xs text-muted-foreground border-t pt-2">
-                <p>You said: <span dir="rtl">{answered.transcript || "(nothing detected)"}</span></p>
+                <p>You said: <span className="font-english">{answered.transcript || "(nothing detected)"}</span></p>
                 <p>Match: {Math.round((answered.similarity ?? 0) * 100)}%</p>
               </div>
             )}
             {current.cultural_note && (
-              <p className="text-xs text-muted-foreground border-t pt-2">💡 {current.cultural_note}</p>
+              <p className="text-xs text-muted-foreground border-t pt-2 font-arabic" dir="rtl">💡 {current.cultural_note}</p>
             )}
             <div className="flex gap-2">
               <Button variant="outline" onClick={() => save.mutate({ phraseId: current.phrase_id, source: answered.correct ? "reviewed" : "quiz_miss" })}>

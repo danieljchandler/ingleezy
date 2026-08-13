@@ -4,7 +4,8 @@ import { chatCompletion, json, type UpstreamHandler } from "./upstreams.ts";
 
 /**
  * `seed-set-phrases` and `generate-set-phrase-quiz` — the two halves of the
- * set-phrase deck.
+ * set-phrase deck, flipped: the phrases are ENGLISH, the scenario the learner
+ * reads is their own dialect Arabic, and every choice carries a dialect gloss.
  *
  * Seeding is admin-only and generates ten drafts per occasion, one model call
  * at a time, and keeps going when one occasion fails. Quiz building is the
@@ -75,13 +76,13 @@ async function call(
 const generated = {
   phrases: [
     {
+      phrase_english: "Good morning!",
       phrase_arabic: "صباح الخير",
-      phrase_english: "good morning",
-      phrase_transliteration: "sabah al-khayr",
-      reply_arabic: "صباح النور",
-      reply_english: "morning of light",
-      reply_transliteration: "sabah an-nur",
-      scenario_english: "Greeting a colleague.",
+      phrase_transliteration: "قود مورنينق",
+      reply_english: "Morning! How are you?",
+      reply_arabic: "صباح النور! شلونك؟",
+      reply_transliteration: "مورنينق! هاو ار يو؟",
+      scenario_english: "تسلم على زميلك أول ما توصل الدوام.",
       formality: "neutral",
       difficulty: "A1",
     },
@@ -157,7 +158,11 @@ Deno.test("seed-set-phrases writes the generated phrases as drafts", async () =>
   assertEquals(rows[0].dialect, "Egyptian");
   assertEquals(rows[0].occasion_id, OCCASION);
   assertEquals(rows[0].created_by, USER);
+  // English is the phrase, the Arabic its gloss, the transliteration the
+  // English pronounced in Arabic letters.
+  assertEquals(rows[0].phrase_english, "Good morning!");
   assertEquals(rows[0].phrase_arabic, "صباح الخير");
+  assertEquals(rows[0].phrase_transliteration, "قود مورنينق");
   // The gloss columns are optional in the tool schema, so a phrase without
   // them lands as null rather than as undefined.
   assertEquals(rows[0].phrase_literal, null);
@@ -172,7 +177,7 @@ Deno.test("seed-set-phrases fills in the defaults the model omitted", async () =
       "/rest/v1/set_phrase_occasions": () => json([{ id: OCCASION, name: "Greetings" }]),
       "/rest/v1/set_phrases": () => json([], 201),
       "ai.gateway.lovable.dev": emitting({
-        phrases: [{ phrase_arabic: "هلا", phrase_english: "hi" }],
+        phrases: [{ phrase_english: "hi", phrase_arabic: "هلا" }],
       }),
     }),
   );
@@ -214,7 +219,10 @@ Deno.test("seed-set-phrases carries the dialect rules into the prompt", async ()
   );
 
   const prompt = result.bodies[result.calls.findIndex((url) => url.includes("gateway"))] ?? "";
-  assertStringIncludes(prompt, "Authentic Yemeni Arabic only");
+  // The rules guard the scaffold now: English phrases, glossed only in the
+  // learner's own dialect.
+  assertStringIncludes(prompt, "ENGLISH situational-phrase libraries");
+  assertStringIncludes(prompt, "authentic Yemeni Arabic only");
   assertStringIncludes(prompt, "Occasion: Greetings");
 });
 
@@ -256,24 +264,25 @@ Deno.test("seed-set-phrases records a model outage per occasion", async () => {
 /** A published phrase with no reply, so the question type is always scenario. */
 const scenarioPhrase = (over: Record<string, unknown> = {}) => ({
   id: PHRASE,
+  phrase_english: "You're doing a great job",
   phrase_arabic: "الله يعطيك العافية",
-  phrase_english: "may God give you strength",
   phrase_transliteration: null,
   phrase_audio_url: null,
-  reply_arabic: null,
   reply_english: null,
+  reply_arabic: null,
   reply_transliteration: null,
   reply_audio_url: null,
-  scenario_english: "Thanking someone who has been working hard.",
+  // scenario_english carries the dialect-Arabic scenario since the retarget.
+  scenario_english: "واحد خلص شغل طويل وتبي تشجعه.",
   cultural_note: null,
   formality: "neutral",
   difficulty: "A2",
   cached_distractors: [
-    { arabic: "مبروك", english: "congratulations" },
-    { arabic: "البقاء لله", english: "condolences" },
-    { arabic: "بالعافية", english: "enjoy" },
+    { english: "Congratulations!", arabic: "مبروك" },
+    { english: "My condolences.", arabic: "البقاء لله" },
+    { english: "Enjoy your meal.", arabic: "بالعافية" },
   ],
-  set_phrase_occasions: { name: "Hospitality", icon_name: "Coffee" },
+  set_phrase_occasions: { name: "Encouragement", icon_name: "Coffee" },
   ...over,
 });
 
@@ -290,8 +299,8 @@ interface QuizItem {
   phrase_id: string;
   question_type: string;
   prompt: { arabic?: string; english?: string; audio_url?: string | null };
-  expected_arabic: string;
-  choices: Array<{ arabic: string; correct: boolean }>;
+  expected_english: string;
+  choices: Array<{ english: string; correct: boolean }>;
   is_due_review: boolean;
   occasion: { name: string } | null;
 }
@@ -326,13 +335,35 @@ Deno.test("generate-set-phrase-quiz builds a scenario question from a cached phr
   const items = result.body.items as QuizItem[];
   assertEquals(items.length, 1);
   assertEquals(items[0].question_type, "scenario");
-  assertEquals(items[0].prompt.english, "Thanking someone who has been working hard.");
-  assertEquals(items[0].expected_arabic, "الله يعطيك العافية");
+  // The situation arrives in the learner's dialect; the production is English.
+  assertEquals(items[0].prompt.arabic, "واحد خلص شغل طويل وتبي تشجعه.");
+  assertEquals(items[0].expected_english, "You're doing a great job");
   assertEquals(items[0].is_due_review, false);
-  assertEquals(items[0].occasion?.name, "Hospitality");
+  assertEquals(items[0].occasion?.name, "Encouragement");
   // Exactly one right answer, and four choices in total.
   assertEquals(items[0].choices.length, 4);
   assertEquals(items[0].choices.filter((c) => c.correct).length, 1);
+});
+
+Deno.test("generate-set-phrase-quiz skips a phrase with no English on it", async () => {
+  const result = await withRandom(0.9, () =>
+    call(
+      "generate-set-phrase-quiz",
+      { dialect: "Gulf" },
+      quizUpstreams({
+        "/rest/v1/set_phrases": () =>
+          json([
+            scenarioPhrase({ id: "88888888-0000-4000-8000-000000000002", phrase_english: null }),
+            scenarioPhrase(),
+          ]),
+      }),
+    ));
+
+  // A pre-flip row whose English was never filled in cannot be practised —
+  // serving it would put an unanswerable card in the session.
+  const items = result.body.items as QuizItem[];
+  assertEquals(items.length, 1);
+  assertEquals(items[0].expected_english, "You're doing a great job");
 });
 
 Deno.test("generate-set-phrase-quiz does not call the model when distractors are cached", async () => {
@@ -354,11 +385,11 @@ Deno.test("generate-set-phrase-quiz generates and caches missing distractors", a
             ? json([], 204)
             : json([scenarioPhrase({ scenario_english: null, cached_distractors: [] })]),
         "ai.gateway.lovable.dev": emitting({
-          scenario_english: "Someone just finished a long shift.",
+          scenario_arabic: "زميلك تعب على مشروع كامل الأسبوع.",
           distractors: [
-            { arabic: "مبروك", english: "congratulations" },
-            { arabic: "البقاء لله", english: "condolences" },
-            { arabic: "بالعافية", english: "enjoy" },
+            { english: "Congratulations!", arabic: "مبروك" },
+            { english: "My condolences.", arabic: "البقاء لله" },
+            { english: "Enjoy your meal.", arabic: "بالعافية" },
           ],
         }),
       }),
@@ -366,7 +397,7 @@ Deno.test("generate-set-phrase-quiz generates and caches missing distractors", a
 
   assertEquals(result.status, 200);
   const items = result.body.items as QuizItem[];
-  assertEquals(items[0].prompt.english, "Someone just finished a long shift.");
+  assertEquals(items[0].prompt.arabic, "زميلك تعب على مشروع كامل الأسبوع.");
 
   // The generated set is written back, so the next learner reuses it.
   const patch = result.calls
@@ -375,6 +406,35 @@ Deno.test("generate-set-phrase-quiz generates and caches missing distractors", a
   assert(patch, "expected the generated distractors to be cached");
   const cached = JSON.parse(patch?.body ?? "{}") as Record<string, unknown>;
   assertEquals((cached.cached_distractors as unknown[]).length, 3);
+});
+
+Deno.test("generate-set-phrase-quiz asks for an Arabic scenario and English distractors", async () => {
+  const result = await withRandom(0.9, () =>
+    call(
+      "generate-set-phrase-quiz",
+      { dialect: "Yemeni" },
+      quizUpstreams({
+        "/rest/v1/set_phrases": (request) =>
+          request.method === "PATCH"
+            ? json([], 204)
+            : json([scenarioPhrase({ scenario_english: null, cached_distractors: [] })]),
+        "ai.gateway.lovable.dev": emitting({
+          scenario_arabic: "موقف.",
+          distractors: [
+            { english: "a", arabic: "أ" },
+            { english: "b", arabic: "ب" },
+            { english: "c", arabic: "ج" },
+          ],
+        }),
+      }),
+    ));
+
+  const prompt = result.bodies[result.calls.findIndex((url) => url.includes("gateway"))] ?? "";
+  // The learner reads the situation in their own language and produces the
+  // English; the model must be told both halves of that.
+  assertStringIncludes(prompt, "ENGLISH-phrase quizzes");
+  assertStringIncludes(prompt, "authentic Yemeni Arabic only");
+  assertStringIncludes(prompt, "REAL English phrases");
 });
 
 Deno.test("generate-set-phrase-quiz falls back to other phrases when generation fails", async () => {
@@ -388,7 +448,7 @@ Deno.test("generate-set-phrase-quiz falls back to other phrases when generation 
             scenarioPhrase({ scenario_english: null, cached_distractors: [] }),
             scenarioPhrase({
               id: "88888888-0000-4000-8000-000000000001",
-              phrase_arabic: "مبروك",
+              phrase_english: "Congratulations!",
               cached_distractors: [],
               scenario_english: null,
             }),
@@ -401,10 +461,11 @@ Deno.test("generate-set-phrase-quiz falls back to other phrases when generation 
   assertEquals(result.status, 200);
   const items = result.body.items as QuizItem[];
   // Distractors come from the other real phrases rather than from nothing, so
-  // the question still has four choices even with the model unavailable.
+  // the question still has choices even with the model unavailable — and the
+  // prompt degrades to a generic Arabic instruction rather than to nothing.
   assert(items[0].choices.length >= 2);
   assertEquals(items[0].choices.filter((c) => c.correct).length, 1);
-  assertEquals(items[0].prompt.english, "Choose the right phrase to say.");
+  assertEquals(items[0].prompt.arabic, "اختر العبارة المناسبة.");
 });
 
 Deno.test("generate-set-phrase-quiz asks a reply question when the phrase has one", async () => {
@@ -416,8 +477,8 @@ Deno.test("generate-set-phrase-quiz asks a reply question when the phrase has on
         "/rest/v1/set_phrases": () =>
           json([
             scenarioPhrase({
-              reply_arabic: "الله يعافيك",
-              reply_english: "and God grant you health",
+              reply_english: "Thanks, that means a lot",
+              reply_arabic: "تسلم، هالكلام يفرح",
             }),
           ]),
       }),
@@ -425,9 +486,9 @@ Deno.test("generate-set-phrase-quiz asks a reply question when the phrase has on
 
   const items = result.body.items as QuizItem[];
   assertEquals(items[0].question_type, "reply");
-  // The learner is shown the phrase and must produce the reply.
-  assertEquals(items[0].prompt.arabic, "الله يعطيك العافية");
-  assertEquals(items[0].expected_arabic, "الله يعافيك");
+  // The learner is shown the English opener and must produce the English reply.
+  assertEquals(items[0].prompt.english, "You're doing a great job");
+  assertEquals(items[0].expected_english, "Thanks, that means a lot");
 });
 
 Deno.test("generate-set-phrase-quiz marks a due card as a review", async () => {

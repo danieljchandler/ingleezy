@@ -1,45 +1,37 @@
 /**
  * score-set-phrase-voice
  *
- * Transcribes a short user utterance via Munsit ASR and compares against the
- * canonical phrase + accepted variants for a set_phrase. Returns similarity,
- * SM-2-style quality (0..5) and an `accepted` flag.
+ * Transcribes a short ENGLISH utterance via Deepgram and compares against the
+ * canonical English phrase + accepted variants for a set_phrase. Returns
+ * similarity, SM-2-style quality (0..5) and an `accepted` flag.
  *
  * Body: { audioBase64: string, mimeType?: string, phraseId: string, target: 'phrase'|'reply' }
  */
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getCorsHeaders } from "../_shared/cors.ts";
-import { munsitModel, munsitFallbackModel } from "../_shared/asrConfig.ts";
 import {
   recordLearnerErrorsForRequest,
   resolveLearnerErrorsForRequest,
 } from "../_shared/learnerErrors.ts";
 
 
-const MUNSIT_BASE = "https://api.munsit.com/api/v1";
+const DEEPGRAM_URL = "https://api.deepgram.com/v1/listen";
 
-function normalizeArabic(s: string): string {
+/**
+ * Fold an English utterance down to what a fair comparison needs: case,
+ * punctuation and apostrophes gone, whitespace collapsed. Kept deliberately
+ * dumber than a phonetic match — "I'm good thanks" vs "im good thanks" must
+ * be identical, but "I'm well" staying distinct from "I'm good" is the test.
+ */
+function normalizeEnglish(s: string): string {
   if (!s) return "";
   return s
-    // strip tashkeel (diacritics)
-    .replace(/[\u064B-\u065F\u0670\u0610-\u061A\u06D6-\u06ED]/g, "")
-    // tatweel
-    .replace(/\u0640/g, "")
-    // alef variants → bare alef
-    .replace(/[\u0622\u0623\u0625]/g, "\u0627")
-    // alef maqsura → ya
-    .replace(/\u0649/g, "\u064A")
-    // ta marbuta → ha
-    .replace(/\u0629/g, "\u0647")
-    // hamza variations on waw/ya
-    .replace(/\u0624/g, "\u0648")
-    .replace(/\u0626/g, "\u064A")
-    // strip standalone hamza, punctuation
-    .replace(/[\u0621\u060C\u061B\u061F.,!?؟،؛"'()\[\]{}«»]/g, "")
+    .toLowerCase()
+    .replace(/[’']/g, "")
+    .replace(/[^a-z0-9\s]/g, " ")
     .replace(/\s+/g, " ")
-    .trim()
-    .toLowerCase();
+    .trim();
 }
 
 function levenshtein(a: string, b: string): number {
@@ -61,8 +53,8 @@ function levenshtein(a: string, b: string): number {
 }
 
 function similarity(a: string, b: string): number {
-  const na = normalizeArabic(a);
-  const nb = normalizeArabic(b);
+  const na = normalizeEnglish(a);
+  const nb = normalizeEnglish(b);
   if (!na && !nb) return 1;
   if (!na || !nb) return 0;
   const dist = levenshtein(na, nb);
@@ -70,45 +62,41 @@ function similarity(a: string, b: string): number {
   return 1 - dist / maxLen;
 }
 
-async function munsitCall(audioBase64: string, mimeType: string, apiKey: string, model: string): Promise<string> {
+/** Transcribe a short English utterance. Nova-3 handles accented English well;
+ *  keyterm boosting nudges it toward the phrase being practised. */
+async function deepgramTranscribe(
+  audioBase64: string,
+  mimeType: string,
+  apiKey: string,
+  keyterm?: string,
+): Promise<string> {
   const bin = atob(audioBase64);
   const bytes = new Uint8Array(bin.length);
   for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-  const blob = new Blob([bytes], { type: mimeType || "audio/webm" });
-  const fd = new FormData();
-  fd.append("file", new File([blob], "utterance." + (mimeType.includes("wav") ? "wav" : "webm"), { type: blob.type }));
-  fd.append("model", model);
 
-  const resp = await fetch(`${MUNSIT_BASE}/audio/transcribe`, {
+  const params = new URLSearchParams({
+    model: "nova-3",
+    language: "en",
+    punctuate: "true",
+    smart_format: "true",
+  });
+  if (keyterm?.trim()) params.append("keyterm", `${keyterm.trim()}:2`);
+
+  const resp = await fetch(`${DEEPGRAM_URL}?${params}`, {
     method: "POST",
-    headers: { "x-api-key": apiKey },
-    body: fd,
+    headers: {
+      Authorization: `Token ${apiKey}`,
+      "Content-Type": mimeType || "audio/webm",
+    },
+    body: bytes,
     signal: AbortSignal.timeout(25_000),
   });
   if (!resp.ok) {
     const t = await resp.text();
-    throw new Error(`Munsit ${resp.status}: ${t.slice(0, 200)}`);
+    throw new Error(`Deepgram ${resp.status}: ${t.slice(0, 200)}`);
   }
-  const raw = await resp.json();
-  // Munsit returns { statusCode, data: { transcription, ... } }; older/alt
-  // shapes may put transcription at the root — fall back to that.
-  const payload = raw?.data ?? raw ?? {};
-  return ((payload.transcription ?? raw.transcription ?? "") as string).toString();
-}
-
-/**
- * Transcribe with the primary Munsit model, retrying once on the other model
- * when the first answer is empty. The bare `munsit` model went degraded
- * upstream (a few characters back for any payload), so the default is now
- * `munsit-en-ar` — the retry covers the reverse happening later.
- */
-async function munsitTranscribe(audioBase64: string, mimeType: string, apiKey: string): Promise<string> {
-  const primary = munsitModel();
-  const first = await munsitCall(audioBase64, mimeType, apiKey, primary);
-  if (first.trim()) return first;
-  const fallback = munsitFallbackModel(primary);
-  console.warn(`munsit: empty transcription from ${primary} — retrying with ${fallback}`);
-  return await munsitCall(audioBase64, mimeType, apiKey, fallback);
+  const data = await resp.json();
+  return (data?.results?.channels?.[0]?.alternatives?.[0]?.transcript ?? "").toString();
 }
 
 serve(async (req) => {
@@ -131,17 +119,17 @@ serve(async (req) => {
 
     const { data: phrase, error } = await supabase
       .from("set_phrases")
-      .select("phrase_arabic, reply_arabic, accepted_variants, dialect")
+      .select("phrase_english, reply_english, accepted_variants, dialect")
       .eq("id", phraseId)
       .maybeSingle();
     if (error || !phrase) throw new Error("phrase not found");
 
-    const canonical = (target === "reply" ? phrase.reply_arabic : phrase.phrase_arabic) || "";
+    const canonical = (target === "reply" ? phrase.reply_english : phrase.phrase_english) || "";
     if (!canonical) throw new Error("no canonical text for target");
 
     // Take the dialect from the phrase itself rather than the request body —
-    // it's authoritative, and recorded errors must land in the same bucket the
-    // learner profile reads.
+    // it names the learner's L1 bucket, and recorded errors must land in the
+    // same bucket the learner profile reads.
     const dialect = phrase.dialect || "Gulf";
 
     const variants: string[] = Array.isArray(phrase.accepted_variants)
@@ -149,10 +137,15 @@ serve(async (req) => {
       : [];
     const candidates = [canonical, ...variants];
 
-    const apiKey = Deno.env.get("MUNSIT_API_KEY");
-    if (!apiKey) throw new Error("MUNSIT_API_KEY not configured");
+    const apiKey = Deno.env.get("DEEPGRAM_API_KEY");
+    if (!apiKey) throw new Error("DEEPGRAM_API_KEY not configured");
 
-    const transcript = await munsitTranscribe(audioBase64, mimeType || "audio/webm", apiKey);
+    const transcript = await deepgramTranscribe(
+      audioBase64,
+      mimeType || "audio/webm",
+      apiKey,
+      canonical,
+    );
 
     let best = 0;
     for (const c of candidates) {
@@ -168,7 +161,8 @@ serve(async (req) => {
     const accepted = best >= 0.75;
 
     // Record rejected attempts so the phrase resurfaces in generated practice;
-    // clear the flag once it's said acceptably. Fire-and-forget.
+    // clear the flag once it's said acceptably. Fire-and-forget. The
+    // target_arabic column carries English targets since the retarget.
     if (!accepted) {
       void recordLearnerErrorsForRequest(req, [{
         source: "set_phrase_voice",

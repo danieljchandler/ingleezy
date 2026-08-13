@@ -348,8 +348,9 @@ Deno.test("request-situation-phrases asks for a note only when it matters", asyn
     caller({ "ai.gateway.lovable.dev": emitting({ phrases: [aPhrase()] }) }),
   );
 
-  // A cultural note on every phrase trains the learner to skip all of them.
-  assertStringIncludes(promptOf(bodies, calls), "ONLY if cultural/usage context matters");
+  // A usage note on every phrase trains the learner to skip all of them —
+  // and the notes that do appear arrive in the learner's dialect.
+  assertStringIncludes(promptOf(bodies, calls), "ONLY if register/context matters");
 });
 
 Deno.test("request-situation-phrases asks for real phrases in dialect", async () => {
@@ -364,7 +365,9 @@ Deno.test("request-situation-phrases asks for real phrases in dialect", async ()
   // actually say; an invented-but-grammatical phrase is worse than nothing
   // because the learner will use it.
   assertStringIncludes(prompt, "NEVER invent unnatural phrases");
-  assertStringIncludes(prompt, "Yemeni");
+  // Flipped: the phrases are English; the Yemeni is the gloss language.
+  assertStringIncludes(prompt, "ENGLISH phrases");
+  assertStringIncludes(prompt, "authentic Yemeni Arabic only");
 });
 
 Deno.test("request-situation-phrases refuses a request with no situation", async () => {
