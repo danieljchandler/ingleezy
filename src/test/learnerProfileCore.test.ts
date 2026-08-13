@@ -202,6 +202,26 @@ describe("renderProfileForPrompt", () => {
     expect(renderProfileForPrompt(profile())).toContain("Never list these words");
   });
 
+  // English-target rendering: same profile, flipped presentation. The decks
+  // are bilingual, so this must be a pure re-render — English side primary
+  // (it is the word being learned), and the lexicon named "English" because
+  // the dialect is the learner's L1 there, not the subject.
+  it("english target renders the English side first", () => {
+    const out = renderProfileForPrompt(profile(), { target: "english" });
+    expect(out).toContain("house (بيت)");
+    expect(out).not.toContain("بيت (house)");
+  });
+
+  it("english target names the lexicon English, not the dialect", () => {
+    const out = renderProfileForPrompt(profile(), { target: "english" });
+    expect(out).toContain("Active English vocabulary");
+    expect(out).not.toContain("Gulf Arabic vocabulary");
+  });
+
+  it("arabic remains the default direction", () => {
+    expect(renderProfileForPrompt(profile())).toContain("بيت (house)");
+  });
+
   const shaky = {
     conceptKey: "negation",
     label: "Negation",

@@ -171,19 +171,27 @@ export function classifyRows(rows: ScheduleRow[], errorTargets: Set<string> = ne
  */
 export function renderProfileForPrompt(
   profile: LearnerProfile,
-  opts: { includeWeak?: boolean; includeInterests?: boolean } = {},
+  opts: { includeWeak?: boolean; includeInterests?: boolean; target?: "arabic" | "english" } = {},
 ): string {
-  const { includeWeak = true, includeInterests = true } = opts;
+  const { includeWeak = true, includeInterests = true, target = "arabic" } = opts;
   const lines: string[] = [];
 
+  // The decks store every card bilingually, so one profile serves both
+  // generation directions — only the presentation flips. English-target
+  // renders the English side first (that is the word being learned; the
+  // Arabic is its scaffold) and names the lexicon "English" rather than the
+  // dialect, since there the dialect is the learner's L1, not the subject.
   const list = (words: LearnerWord[]) =>
-    words.map((w) => `${w.arabic} (${w.english})`).join(", ");
+    words
+      .map((w) => (target === "english" ? `${w.english} (${w.arabic})` : `${w.arabic} (${w.english})`))
+      .join(", ");
 
   if (profile.level) {
     lines.push(`- CEFR level: ${profile.level}. Pitch the language at this level.`);
   }
   if (profile.knownTotal > 0) {
-    lines.push(`- Active ${profile.dialectLabel} vocabulary: roughly ${profile.knownTotal} words.`);
+    const lexicon = target === "english" ? "English" : profile.dialectLabel;
+    lines.push(`- Active ${lexicon} vocabulary: roughly ${profile.knownTotal} words.`);
   }
   if (includeInterests && profile.reason) {
     lines.push(`- Why they are learning: ${profile.reason}. Prefer situations relevant to this.`);

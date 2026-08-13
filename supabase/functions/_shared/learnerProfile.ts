@@ -320,6 +320,8 @@ export async function learnerPromptBlock(
   opts: {
     userId: string | null | undefined;
     dialect: Dialect;
+    /** Match the BrainTask target: flips which side of each card is primary. */
+    target?: "arabic" | "english";
     budget?: Partial<ProfileBudget>;
     includeWeak?: boolean;
     includeInterests?: boolean;
@@ -337,6 +339,7 @@ export async function learnerPromptBlock(
     return renderProfileForPrompt(profile, {
       includeWeak: opts.includeWeak,
       includeInterests: opts.includeInterests,
+      target: opts.target,
     });
   } catch (e) {
     console.warn("[learnerProfile] falling back to unpersonalised prompt:", e);
