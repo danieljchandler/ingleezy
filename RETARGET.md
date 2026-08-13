@@ -138,8 +138,13 @@ generation conditioning.
       as immersion. Remaining: trending discovery flip or prune, Arabic
       pipeline prune once memes decided.
 - [ ] CEFR video rating: KEEP (re-aim prompt at English)
-- [ ] Stories / reading library / listen episodes / daily story: FLIP
-      generation direction (English text, Arabic scaffold)
+- [~] Stories / reading library / listen episodes / daily story: FLIP
+      generation direction (English text, Arabic scaffold).
+      **Daily story DONE**: english-target Brain call, English-primary
+      sentences {english, arabic, literal}, transliteration retired,
+      body_arabic nullable (20260813170000), reader flipped to tappable
+      English cards with the scaffold behind the display preference.
+      Interactive stories / reading library / listen / souq still open.
 
 ### Speaking / audio — FLIP
 - [ ] Pronunciation practice: English phoneme scoring, seeded with the

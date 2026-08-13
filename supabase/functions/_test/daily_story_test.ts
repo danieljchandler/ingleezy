@@ -32,27 +32,24 @@ function caller(extra: Record<string, UpstreamHandler> = {}): Record<string, Ups
 }
 
 const story = {
-  title: "يوم في السوق",
-  body_arabic: "كَانَ البَيْت هَادِئًا. رَاحَ عَلِي لِلشُّغُل",
-  body_transliteration: "kaan al-bayt haadi'an. raah 'ali lish-shughul",
+  title: "A day at the market",
   body_english: "The house was quiet. Ali went to work",
-  body_english_literal: "was the-house quiet. went Ali to-the-work",
+  body_arabic: "كان البيت هادي. راح علي للشغل",
+  body_english_literal: "الـ بيت كان هادي. علي راح إلى الـ شغل",
   sentences: [
     {
-      arabic: "كَانَ البَيْت هَادِئًا.",
-      transliteration: "kaan al-bayt haadi'an.",
       english: "The house was quiet.",
-      literal: "was the-house quiet.",
+      arabic: "كان البيت هادي.",
+      literal: "الـ بيت كان هادي.",
     },
     {
-      arabic: "رَاحَ عَلِي لِلشُّغُل",
-      transliteration: "raah 'ali lish-shughul",
       english: "Ali went to work",
-      literal: "went Ali to-the-work",
+      arabic: "راح علي للشغل",
+      literal: "علي راح إلى الـ شغل",
     },
   ],
-  used_mature: ["بيت"],
-  used_new: ["شغل"],
+  used_mature: ["house"],
+  used_new: ["work"],
 };
 
 const emitting = (payload: unknown): Record<string, UpstreamHandler> => ({
@@ -222,7 +219,7 @@ Deno.test("generate-daily-story anchors the story on mature words", async () => 
 
   assertEquals(result.status, 200);
   const prompt = gatewayPrompt(result);
-  assertStringIncludes(prompt, "بيت (house)");
+  assertStringIncludes(prompt, "house (بيت)");
   assertStringIncludes(prompt, "MATURE words");
 });
 
@@ -250,8 +247,8 @@ Deno.test("generate-daily-story pads a nearly empty deck from the starter set", 
 
   assertEquals(result.status, 200);
   const prompt = gatewayPrompt(result);
-  assertStringIncludes(prompt, "بيت (house)");
-  assertStringIncludes(prompt, "زين (good)");
+  assertStringIncludes(prompt, "house (بيت)");
+  assertStringIncludes(prompt, "good (زين)");
 });
 
 Deno.test("generate-daily-story pads with the right dialect's starters", async () => {
@@ -259,8 +256,8 @@ Deno.test("generate-daily-story pads with the right dialect's starters", async (
 
   const prompt = gatewayPrompt(result);
   // Egyptian says كويس where Gulf says زين.
-  assertStringIncludes(prompt, "كويس (good)");
-  assertEquals(prompt.includes("زين (good)"), false);
+  assertStringIncludes(prompt, "good (كويس)");
+  assertEquals(prompt.includes("good (زين)"), false);
 });
 
 Deno.test("generate-daily-story does not pad a deck that already has enough", async () => {
@@ -272,7 +269,7 @@ Deno.test("generate-daily-story does not pad a deck that already has enough", as
   );
 
   const prompt = gatewayPrompt(result);
-  assertEquals(prompt.includes("زين (good)"), false);
+  assertEquals(prompt.includes("good (زين)"), false);
 });
 
 Deno.test("generate-daily-story does not repeat a starter the learner already has", async () => {
@@ -284,8 +281,8 @@ Deno.test("generate-daily-story does not repeat a starter the learner already ha
   );
 
   const prompt = gatewayPrompt(result);
-  // "بيت" is both saved and a starter; it must appear once, not twice.
-  assertEquals(prompt.split("بيت (house)").length - 1, 1);
+  // "house" is both saved and a starter; it must appear once, not twice.
+  assertEquals(prompt.split("house (بيت)").length - 1, 1);
 });
 
 Deno.test("generate-daily-story saves the story it generated", async () => {
@@ -297,18 +294,20 @@ Deno.test("generate-daily-story saves the story it generated", async () => {
   const saved = savedRow(result);
   assertEquals(saved.user_id, USER);
   assertEquals(saved.dialect, "Yemeni");
-  assertEquals(saved.title, "يوم في السوق");
+  assertEquals(saved.title, "A day at the market");
+  assertEquals(saved.body_english, story.body_english);
   assertEquals(saved.body_arabic, story.body_arabic);
-  assertEquals(saved.body_transliteration, story.body_transliteration);
+  // Retired: an Arabic speaker needs no romanization of Arabic.
+  assertEquals(saved.body_transliteration, null);
   assertEquals(saved.body_english_literal, story.body_english_literal);
-  assertEquals(saved.vocab_used, ["بيت"]);
-  assertEquals(saved.new_words, ["شغل"]);
+  assertEquals(saved.vocab_used, ["house"]);
+  assertEquals(saved.new_words, ["work"]);
 });
 
 Deno.test("generate-daily-story saves the story's sentence split", async () => {
-  // The story is read one sentence to a card. The page can split the Arabic on
-  // punctuation by itself, but only the model can say which English belongs to
-  // which line, so the split is stored rather than re-derived.
+  // The story is read one sentence to a card. The page can split the English
+  // on punctuation by itself, but only the model can say which Arabic scaffold
+  // belongs to which line, so the split is stored rather than re-derived.
   const result = await call({}, backend());
 
   assertEquals(savedRow(result).sentences, story.sentences);
@@ -317,7 +316,7 @@ Deno.test("generate-daily-story saves the story's sentence split", async () => {
 Deno.test("generate-daily-story asks the model to split the story up", async () => {
   const result = await call({}, backend());
 
-  assertStringIncludes(gatewayPrompt(result), "split the story into its sentences");
+  assertStringIncludes(gatewayPrompt(result), "the story split one entry per sentence");
 });
 
 Deno.test("generate-daily-story stores no split when the model left one out", async () => {
@@ -332,13 +331,14 @@ Deno.test("generate-daily-story stores no split when the model left one out", as
   assertEquals(savedRow(result).sentences, null);
 });
 
-Deno.test("generate-daily-story drops a sentence that has no Arabic", async () => {
+Deno.test("generate-daily-story drops a sentence that has no English", async () => {
+  // English is the story now - an entry without it is nothing to read.
   const result = await call(
     {},
     backend({
       extra: emitting({
         ...story,
-        sentences: [...story.sentences, { arabic: "  ", english: "Nothing to read." }],
+        sentences: [...story.sentences, { english: "  ", arabic: "لا شيء" }],
       }),
     }),
   );
@@ -368,36 +368,34 @@ Deno.test("generate-daily-story stores an absent optional field as null", async 
     backend({
       extra: emitting({
         ...story,
-        body_transliteration: "",
-        body_english: "",
+        body_arabic: "",
         body_english_literal: "",
       }),
     }),
   );
 
   const saved = savedRow(result);
-  assertEquals(saved.body_transliteration, null);
-  assertEquals(saved.body_english, null);
+  assertEquals(saved.body_arabic, null);
   assertEquals(saved.body_english_literal, null);
 });
 
 Deno.test("generate-daily-story titles an untitled story", async () => {
   const result = await call({}, backend({ extra: emitting({ ...story, title: "" }) }));
 
-  assertEquals(savedRow(result).title, "قصة اليوم");
+  assertEquals(savedRow(result).title, "Today's story");
 });
 
 Deno.test("generate-daily-story truncates a runaway title", async () => {
   const result = await call(
     {},
-    backend({ extra: emitting({ ...story, title: "ط".repeat(400) }) }),
+    backend({ extra: emitting({ ...story, title: "a".repeat(400) }) }),
   );
 
   assertEquals(String(savedRow(result).title).length, 160);
 });
 
-Deno.test("generate-daily-story refuses to save a story with no Arabic", async () => {
-  const result = await call({}, backend({ extra: emitting({ ...story, body_arabic: "   " }) }));
+Deno.test("generate-daily-story refuses to save a story with no English", async () => {
+  const result = await call({}, backend({ extra: emitting({ ...story, body_english: "   " }) }));
 
   assertEquals(result.status, 502);
   assertEquals(result.body.error, "empty_story");
@@ -436,12 +434,11 @@ Deno.test("generate-daily-story reports a rejected save", async () => {
   assertEquals(result.body.error, "save_failed");
 });
 
-Deno.test("generate-daily-story demands the story be fully vocalised", async () => {
-  // It is read aloud by TTS, so tashkeel is not cosmetic — an unvocalised body
-  // is mispronounced rather than merely plain.
-  const result = await call({}, backend());
+Deno.test("generate-daily-story asks for English with a dialect scaffold", async () => {
+  const result = await call({ dialect: "Gulf" }, backend());
 
   const prompt = gatewayPrompt(result);
-  assertStringIncludes(prompt, "read aloud by text-to-speech");
-  assertStringIncludes(prompt, "180-220 Arabic words");
+  assertStringIncludes(prompt, "180-220 English words");
+  assertStringIncludes(prompt, "Gulf dialect Arabic translation");
+  assertStringIncludes(prompt, "NOT Modern Standard Arabic");
 });

@@ -10,12 +10,7 @@
 // Everything here runs under the service role and is parameterized by
 // (userId, dialect); the callers own authentication and caching policy.
 import { askBrain } from "./aiBrain.ts";
-import {
-  getTashkeelMandate,
-  getDialectTransliterationRules,
-  type Dialect,
-} from "./dialectHelpers.ts";
-import { LITERAL_GLOSS_RULE } from "./literalGloss.ts";
+import type { Dialect } from "./dialectHelpers.ts";
 
 // ── Minimal structural type for the PostgREST client ─────────────────────────
 // Same pattern as learnerProfile.ts: typed structurally rather than as
@@ -76,11 +71,13 @@ export const STARTER_WORDS: Record<string, VocabRow[]> = {
   ],
 };
 
-/** One card in the reader: a sentence of the story with its own translations. */
+/** One card in the reader: an ENGLISH sentence with its Arabic scaffold. */
 export interface StorySentence {
-  arabic: string;
-  transliteration?: string;
-  english?: string;
+  /** The sentence as the learner reads it — English is the story now. */
+  english: string;
+  /** Dialect-Arabic translation (the scaffold). */
+  arabic?: string;
+  /** Word-for-word Arabic gloss preserving the English word order. */
   literal?: string;
 }
 
@@ -90,17 +87,18 @@ const dense = (text: string) => text.replace(/\s+/g, "");
 /**
  * The model's sentence split, reduced to what is safe to store.
  *
- * Entries without Arabic are dropped — a card with no Arabic on it is nothing
- * to read — and blank translations become absent rather than empty strings, so
- * the reader can tell "no translation" from "a translation that is empty".
+ * Entries without English are dropped — the ENGLISH is the story now; a card
+ * with none is nothing to read — and blank scaffolds become absent rather
+ * than empty strings, so the reader can tell "no translation" from "a
+ * translation that is empty".
  *
- * The whole split is discarded unless it accounts for nearly all of the story:
- * a model that quietly skipped a sentence would otherwise produce a story the
- * learner reads a shortened version of, with no sign that anything is missing.
- * Dropping it costs only the per-sentence translations, since the page falls
- * back to splitting body_arabic on punctuation.
+ * The whole split is discarded unless it accounts for nearly all of the
+ * story: a model that quietly skipped a sentence would otherwise produce a
+ * story the learner reads a shortened version of, with no sign that anything
+ * is missing. Dropping it costs only the per-sentence scaffolds, since the
+ * page falls back to splitting the body on punctuation.
  */
-export function cleanStorySentences(raw: unknown, bodyArabic: string): StorySentence[] {
+export function cleanStorySentences(raw: unknown, bodyEnglish: string): StorySentence[] {
   if (!Array.isArray(raw)) return [];
 
   const text = (value: unknown) =>
@@ -110,19 +108,18 @@ export function cleanStorySentences(raw: unknown, bodyArabic: string): StorySent
   for (const entry of raw) {
     if (!entry || typeof entry !== "object") continue;
     const row = entry as Record<string, unknown>;
-    const arabic = text(row.arabic);
-    if (!arabic) continue;
+    const english = text(row.english);
+    if (!english) continue;
     sentences.push({
-      arabic,
-      transliteration: text(row.transliteration),
-      english: text(row.english),
+      english,
+      arabic: text(row.arabic),
       literal: text(row.literal),
     });
   }
 
   if (sentences.length === 0) return [];
-  const covered = dense(sentences.map((s) => s.arabic).join(""));
-  if (covered.length < dense(bodyArabic).length * 0.95) return [];
+  const covered = dense(sentences.map((s) => s.english).join(""));
+  if (covered.length < dense(bodyEnglish).length * 0.95) return [];
   return sentences;
 }
 
@@ -198,25 +195,25 @@ export async function generateDailyStoryFor(
     fresh = [...fresh, ...starters.filter((w) => !known.has(w.word_arabic))];
   }
 
-  const matureList = mature.map((w) => `${w.word_arabic} (${w.word_english})`).join(", ");
-  const newList = fresh.map((w) => `${w.word_arabic} (${w.word_english})`).join(", ");
+  // English-first rendering: the studied word leads, its Arabic rides along.
+  const matureList = mature.map((w) => `${w.word_english} (${w.word_arabic})`).join(", ");
+  const newList = fresh.map((w) => `${w.word_english} (${w.word_arabic})`).join(", ");
 
-  // 2. Ask the brain for a ~200-word story (draft_critic strategy, dialect-guarded)
-  const systemExtra = `You are a creative Arabic short-story writer.
-Write a vivid, self-contained micro-story of about 180-220 Arabic words.
+  // 2. Ask the brain for a ~200-word ENGLISH story (english-target: the
+  // interference rulebook steers it toward the patterns worth modeling).
+  // The Arabic scaffold (dialect translation + literal gloss) is produced in
+  // the same call — one generation, so the scaffold is not separately
+  // dialect-guarded; acceptable for support text a learner reads alongside
+  // the English rather than studies as Arabic.
+  const systemExtra = `You are a creative English short-story writer for Arabic-speaking learners.
+Write a vivid, self-contained micro-story of about 180-220 English words as body_english.
 Weave in as many of the learner's MATURE words as feels natural, and gently introduce each of the NEW words at least once (use them in context so meaning is inferable).
-Reading level: late beginner to intermediate. Short sentences, concrete imagery, one clear arc.
+Reading level: matched to the learner. Short sentences, concrete imagery, one clear arc, natural SPOKEN English.
 
-${getTashkeelMandate()}
-- body_arabic must be fully vocalized — it is read aloud by text-to-speech.
-
-${getDialectTransliterationRules(dialect as Dialect)}
-- Provide a transliteration for body_arabic as body_transliteration.
-
-${LITERAL_GLOSS_RULE}
-- Provide the whole-story literal gloss as body_english_literal.
-
-Also split the story into its sentences as "sentences", one entry per sentence, in order — the learner reads the story a sentence at a time. The arabic values joined back together must be body_arabic, unchanged and fully vocalized.
+Also provide:
+- body_arabic: a natural ${dialect} dialect Arabic translation of the whole story (the learner's own dialect — NOT Modern Standard Arabic).
+- body_english_literal: a word-for-word ARABIC gloss of the story preserving the ENGLISH word order, so the learner sees how the English is built. Stiffness is expected.
+- sentences: the story split one entry per sentence, in order — the learner reads a sentence at a time. The english values joined back together must be body_english, unchanged. Each entry carries its ${dialect} Arabic translation as arabic and its word-order Arabic gloss as literal.
 
 Return ONLY the structured fields via the provided tool.`;
 
@@ -226,9 +223,8 @@ Return ONLY the structured fields via the provided tool.`;
   try {
     brain = await askBrain<{
       title: string;
-      body_arabic: string;
-      body_transliteration: string;
       body_english: string;
+      body_arabic: string;
       body_english_literal: string;
       sentences: StorySentence[];
       used_mature: string[];
@@ -236,6 +232,7 @@ Return ONLY the structured fields via the provided tool.`;
     }>({
       purpose: "story",
       dialect: dialect as Dialect,
+      target: "english",
       strategy: "draft_critic",
       // Uses MODEL_LINEUPS.CONTENT (Gemini 3.5 Flash drafts, Claude Sonnet 4.5 critiques)
       // from _shared/modelRegistry.ts. Do not hardcode model IDs here.
@@ -243,36 +240,33 @@ Return ONLY the structured fields via the provided tool.`;
       userPrompt,
       maxTokens: 3072,
       temperature: 0.7,
-      arabicTextPath: (p) => (p as { body_arabic?: string } | null)?.body_arabic ?? "",
       tool: {
         name: "emit_story",
-        description: "Return the daily vocabulary story in the target dialect.",
+        description: "Return the daily vocabulary story in English with Arabic scaffolding.",
         parameters: {
           type: "object",
           properties: {
-            title: { type: "string", description: "Short evocative Arabic title" },
-            body_arabic: { type: "string", description: "Story in target dialect, ~200 Arabic words" },
-            body_transliteration: { type: "string", description: "Latin-letter transliteration of body_arabic, following the dialect's transliteration rules" },
-            body_english: { type: "string", description: "Faithful natural English translation" },
-            body_english_literal: { type: "string", description: "Word-for-word English gloss of the story preserving Arabic word order (may sound stiff; shows how sentences are built)" },
+            title: { type: "string", description: "Short evocative English title" },
+            body_english: { type: "string", description: "The story in natural spoken English, ~200 words" },
+            body_arabic: { type: "string", description: "Natural dialect-Arabic translation of the whole story (the learner's dialect, never MSA)" },
+            body_english_literal: { type: "string", description: "Word-for-word Arabic gloss of the story preserving the English word order (may sound stiff; shows how sentences are built)" },
             sentences: {
               type: "array",
-              description: "body_arabic split into its individual sentences, in order, each with its own transliteration, natural English and literal gloss",
+              description: "body_english split into its individual sentences, in order, each with its dialect-Arabic translation and word-order Arabic gloss",
               items: {
                 type: "object",
                 properties: {
-                  arabic: { type: "string", description: "One sentence of body_arabic, fully vocalized" },
-                  transliteration: { type: "string", description: "Latin-letter transliteration of this sentence, following the dialect's rules" },
-                  english: { type: "string", description: "Faithful natural English translation of this sentence" },
-                  literal: { type: "string", description: "Word-for-word English gloss of this sentence, preserving Arabic word order" },
+                  english: { type: "string", description: "One sentence of body_english, unchanged" },
+                  arabic: { type: "string", description: "Dialect-Arabic translation of this sentence" },
+                  literal: { type: "string", description: "Word-for-word Arabic gloss of this sentence, preserving the English word order" },
                 },
-                required: ["arabic", "english"],
+                required: ["english", "arabic"],
               },
             },
             used_mature: { type: "array", items: { type: "string" } },
             used_new: { type: "array", items: { type: "string" } },
           },
-          required: ["title", "body_arabic", "body_transliteration", "body_english", "used_mature", "used_new"],
+          required: ["title", "body_english", "body_arabic", "used_mature", "used_new"],
         },
       },
     });
@@ -282,21 +276,16 @@ Return ONLY the structured fields via the provided tool.`;
     throw new DailyStoryError("ai_failed", String(err?.message ?? e).slice(0, 400));
   }
 
-  if (brain.msaLeaks.leaks.length > 0) {
-    console.warn("daily-story MSA leaks after repair", brain.msaLeaks.leaks, "repairs:", brain.msaRepairs);
-  }
-
   const parsed = brain.output;
-  const title = String(parsed.title ?? "").slice(0, 160) || "قصة اليوم";
-  const bodyArabic = String(parsed.body_arabic ?? "").trim();
-  const bodyTransliteration = String(parsed.body_transliteration ?? "").trim();
+  const title = String(parsed.title ?? "").slice(0, 160) || "Today's story";
   const bodyEnglish = String(parsed.body_english ?? "").trim();
+  const bodyArabic = String(parsed.body_arabic ?? "").trim();
   const bodyEnglishLiteral = String(parsed.body_english_literal ?? "").trim();
-  if (!bodyArabic) {
+  if (!bodyEnglish) {
     throw new DailyStoryError("empty_story", brain.raw.slice(0, 400));
   }
 
-  const sentences = cleanStorySentences(parsed.sentences, bodyArabic);
+  const sentences = cleanStorySentences(parsed.sentences, bodyEnglish);
   const vocabUsed = Array.isArray(parsed.used_mature) ? parsed.used_mature : [];
   const newUsed = Array.isArray(parsed.used_new) ? parsed.used_new : [];
 
@@ -309,9 +298,12 @@ Return ONLY the structured fields via the provided tool.`;
         story_date: date,
         dialect,
         title,
-        body_arabic: bodyArabic,
-        body_transliteration: bodyTransliteration || null,
-        body_english: bodyEnglish || null,
+        // Column roles after the direction flip: body_english is the story
+        // (primary), body_arabic its dialect scaffold. body_transliteration
+        // is retired — an Arabic speaker needs no romanization of Arabic.
+        body_english: bodyEnglish,
+        body_arabic: bodyArabic || null, // nullable since 20260813170000
+        body_transliteration: null,
         body_english_literal: bodyEnglishLiteral || null,
         sentences: sentences.length > 0 ? sentences : null,
         vocab_used: vocabUsed,

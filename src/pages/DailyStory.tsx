@@ -4,10 +4,7 @@ import { Loader2, Sparkles, RefreshCw, ArrowLeft, Check } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { SentenceReader } from "@/components/shared/SentenceReader";
-import { AskAISentence } from "@/components/shared/AskAISentence";
-import { TranslationPair } from "@/components/shared/TranslationPair";
-import { pairSentences, type ReaderSentence } from "@/lib/sentences";
+import { TappableEnglishText } from "@/components/shared/TappableEnglishText";
 import { useAuth } from "@/hooks/useAuth";
 import { useDailyStory, useGenerateDailyStory } from "@/hooks/useDailyStory";
 import { useDisplayPrefs } from "@/hooks/useDisplayPrefs";
@@ -38,27 +35,32 @@ const DailyStoryPage = () => {
   }, [story]);
 
   /**
-   * The story, one sentence to a card.
-   *
-   * Newer stories carry an authored `sentences` array; the ones already in the
-   * table are four whole-paragraph columns, so they are split here and their
-   * translations lined up by position — which only happens when the counts
-   * agree (see `pairSentences`). Whatever that leaves unmatched still has the
-   * whole-story blocks below to fall back on.
+   * The story, one ENGLISH sentence to a card, its Arabic scaffold behind a
+   * reveal. Newer stories carry an authored `sentences` array; a story whose
+   * split was discarded falls back to splitting body_english on sentence
+   * punctuation, with the whole-story Arabic block below covering the
+   * scaffold.
    */
-  const lines = useMemo<ReaderSentence[]>(() => {
+  const lines = useMemo<Array<{ english: string; arabic?: string; literal?: string }>>(() => {
     if (!story) return [];
-    if (story.sentences && story.sentences.length > 0) return story.sentences;
-    return pairSentences({
-      arabic: story.body_arabic,
-      transliteration: story.body_transliteration,
-      english: story.body_english,
-      literal: story.body_english_literal,
-    });
+    if (story.sentences && story.sentences.length > 0) {
+      return (story.sentences as Array<{ english?: string; arabic?: string; literal?: string }>)
+        .filter((sentence) => typeof sentence.english === "string" && sentence.english.trim())
+        .map((sentence) => ({
+          english: sentence.english as string,
+          arabic: sentence.arabic,
+          literal: sentence.literal,
+        }));
+    }
+    const body = story.body_english ?? "";
+    return body
+      .split(/(?<=[.!?])\s+/)
+      .map((english) => english.trim())
+      .filter(Boolean)
+      .map((english) => ({ english }));
   }, [story]);
 
-  const perSentenceEnglish = lines.some((l) => l.english || l.literal);
-  const perSentenceTransliteration = lines.some((l) => l.transliteration);
+  const perSentenceArabic = lines.some((l) => l.arabic || l.literal);
 
   if (authLoading) {
     return (
@@ -153,48 +155,48 @@ const DailyStoryPage = () => {
               </div>
             </header>
 
-            <SentenceReader
-              body={story.body_arabic}
-              sentences={lines}
-              source="daily-story"
-              revealByDefault={showEnglish}
-              arabicClassName="text-lg"
-            />
+            {/* One English sentence per card; the Arabic scaffold sits under
+                each sentence, shown when the global reveal preference is on. */}
+            <div className="space-y-3">
+              {lines.map((line, i) => (
+                <div key={i} className="rounded-xl border border-border bg-card p-4 space-y-2">
+                  <p className="font-english text-lg leading-relaxed">
+                    <TappableEnglishText
+                      text={line.english}
+                      sentenceArabic={line.arabic}
+                      source="daily-story"
+                    />
+                  </p>
+                  {showEnglish && line.arabic && (
+                    <p dir="rtl" className="font-arabic text-base text-muted-foreground">
+                      {line.arabic}
+                    </p>
+                  )}
+                  {showEnglish && line.literal && (
+                    <p dir="rtl" className="font-arabic text-sm text-muted-foreground/80">
+                      {line.literal}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
 
-            {/* Whole-story fallbacks: only for a story whose paragraphs could
-                not be lined up sentence by sentence, so nothing is lost. */}
-            {!perSentenceTransliteration && story.body_transliteration && (
-              <p className="text-sm text-muted-foreground italic">
-                {story.body_transliteration}
-              </p>
-            )}
-
-            {!perSentenceEnglish && (
-              <div className="flex justify-start">
-                <AskAISentence
-                  arabic={story.body_arabic}
-                  english={story.body_english ?? undefined}
-                  variant="chip"
-                />
-              </div>
-            )}
-
-            {!perSentenceEnglish && showEnglish && story.body_english && (
+            {/* Whole-story scaffold fallback: a story whose sentence split was
+                discarded still shows its Arabic below, so nothing is lost. */}
+            {!perSentenceArabic && showEnglish && story.body_arabic && (
               <div className="border-t border-border pt-3">
-                <TranslationPair
-                  variant="compact"
-                  literal={story.body_english_literal}
-                  natural={story.body_english}
-                />
+                <p dir="rtl" className="font-arabic text-base text-muted-foreground">
+                  {story.body_arabic}
+                </p>
               </div>
             )}
 
             {story.new_words?.length > 0 && (
               <div className="border-t border-border pt-3">
                 <p className="text-xs font-semibold uppercase text-muted-foreground mb-2">New words introduced</p>
-                <div className="flex flex-wrap gap-2" dir="rtl">
+                <div className="flex flex-wrap gap-2">
                   {story.new_words.map((w, i) => (
-                    <Badge key={i} variant="outline" className="text-base">{w}</Badge>
+                    <Badge key={i} variant="outline" className="text-base font-english">{w}</Badge>
                   ))}
                 </div>
               </div>
