@@ -123,3 +123,52 @@ describe("readingPassageGate", () => {
     }
   });
 });
+
+// ── englishPassageGate: the direction-flipped gate ───────────────────────────
+
+import { englishPassageGate } from "../../supabase/functions/_shared/passageQualityCore";
+
+describe("englishPassageGate", () => {
+  const anEnglishDraft = (over: Record<string, unknown> = {}) => ({
+    title: "At the cafe",
+    lines: [
+      { english: "I went to the cafe.", arabic: "رحت المقهى.", literal: "أنا رحت إلى الـ مقهى." },
+      { english: "I ordered a coffee.", arabic: "طلبت قهوة.", literal: "أنا طلبت قهوة." },
+      { english: "It was busy.", arabic: "كان زحمة.", literal: "كان هو زحمة." },
+    ],
+    vocabulary: [{ english: "cafe", arabic: "مقهى" }],
+    questions: [
+      { question: "Where?", options: [{ text: "Cafe", correct: true }, { text: "Home", correct: false }] },
+    ],
+    ...over,
+  });
+
+  it("passes a complete English draft", () => {
+    expect(englishPassageGate(anEnglishDraft(), { minLines: 3 })).toBeNull();
+  });
+
+  it("rejects a line without its English", () => {
+    const draft = anEnglishDraft();
+    (draft.lines as Array<Record<string, unknown>>)[1].english = " ";
+    expect(englishPassageGate(draft, { minLines: 3 })).toBe("line missing english");
+  });
+
+  it("rejects a line without its Arabic gloss or literal", () => {
+    const draft = anEnglishDraft();
+    (draft.lines as Array<Record<string, unknown>>)[0].arabic = "";
+    expect(englishPassageGate(draft, { minLines: 3 })).toBe("line missing arabic gloss");
+    const draft2 = anEnglishDraft();
+    delete (draft2.lines as Array<Record<string, unknown>>)[2].literal;
+    expect(englishPassageGate(draft2, { minLines: 3 })).toBe("line missing literal gloss");
+  });
+
+  it("still enforces the length floor", () => {
+    expect(englishPassageGate(anEnglishDraft(), { minLines: 5 })).toContain("too short");
+  });
+
+  it("has no tashkeel floor — the scaffold Arabic is read, never voiced", () => {
+    // The Arabic in the fixture above carries no tashkeel at all; the Arabic
+    // gate would refuse it, this one must not.
+    expect(englishPassageGate(anEnglishDraft(), { minLines: 3 })).toBeNull();
+  });
+});

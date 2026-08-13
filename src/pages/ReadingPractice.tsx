@@ -27,6 +27,7 @@ import { MarkUnknownsProvider, useMarkUnknowns } from "@/contexts/MarkUnknownsCo
 import { MarkUnknownsToggle } from "@/components/shared/MarkUnknownsToggle";
 import { SaveUnknownsBar } from "@/components/shared/SaveUnknownsBar";
 import { AskAISentence } from "@/components/shared/AskAISentence";
+import { TappableEnglishText } from "@/components/shared/TappableEnglishText";
 import { LoadingPanel } from "@/components/loading/LoadingPanel";
 import { TranslationPair } from "@/components/shared/TranslationPair";
 import {
@@ -56,21 +57,24 @@ interface VocabItem {
 }
 
 interface PassageLine {
-  arabic: string;
+  /** The sentence as read — English is the studied language. */
   english: string;
+  /** Dialect-Arabic translation (scaffold). */
+  arabic: string;
+  /** Word-for-word Arabic gloss preserving the English word order. */
   literal?: string;
-  transliteration?: string;
 }
 
 interface Question {
+  /** The question, in English. */
   question: string;
-  questionEnglish: string;
-  options: { text: string; textEnglish: string; correct: boolean }[];
+  questionArabic: string;
+  options: { text: string; textArabic: string; correct: boolean }[];
 }
 
 interface Passage {
   title: string;
-  titleEnglish: string;
+  titleArabic: string;
   lines: PassageLine[];
   passage?: string;
   passageEnglish?: string;
@@ -120,153 +124,31 @@ const DIFFICULTY_CONFIG = {
   advanced: { label: "Advanced", color: "bg-red-500/20 text-red-700 dark:text-red-400", xp: 20 },
 };
 
-interface WordEnrichment {
-  definition?: string;
-  root?: string;
-  transliteration?: string;
-  otherUses?: { arabic: string; english: string }[];
-}
-
-/** Fetch definition + root + transliteration + other uses for a word via AI */
-const enrichWord = async (word: string, dialect: string): Promise<WordEnrichment> => {
-  try {
-    const { data, error } = await supabase.functions.invoke("word-enrichment", {
-      body: { word, dialect },
-    });
-    if (error) throw error;
-    return {
-      definition: data?.definition || undefined,
-      root: data?.root || undefined,
-      transliteration: data?.transliteration || undefined,
-      otherUses: Array.isArray(data?.uses) ? data.uses : [],
-    };
-  } catch {
-    return {};
-  }
-};
-
-// ─── Tappable Arabic Line Component ───
-const TappableArabicLine = ({
+// ─── English line with tappable words + Arabic scaffold ───
+const TappableEnglishLine = ({
   line,
   lineIdx,
-  wordTranslations,
-  onWordTap,
-  isAuthenticated,
   onSaveFlashcard,
   revealedLines,
   onToggleLine,
 }: {
   line: PassageLine;
   lineIdx: number;
-  wordTranslations: Record<string, { translation: string; lineEnglish: string; enrichment?: WordEnrichment; enriching?: boolean }>;
-  onWordTap: (word: string, lineIdx: number) => void;
-  isAuthenticated: boolean;
   onSaveFlashcard: (arabic: string, english: string, root?: string, sentence?: { arabic: string; english: string }, transliteration?: string) => void;
   revealedLines: Set<number>;
   onToggleLine: (idx: number) => void;
 }) => {
-  const markUnknowns = useMarkUnknowns();
-
   return (
   <div className="space-y-1">
-    <p className="text-lg leading-relaxed font-arabic text-foreground flex flex-wrap justify-end gap-1" dir="rtl">
-      {line.arabic.split(/\s+/).map((word, wIdx) => {
-        const cleanWord = word.replace(/[،.؟!,]/g, "").trim();
-        const wordData = wordTranslations[cleanWord];
-        const marking = markUnknowns.enabled;
-        const marked = marking && markUnknowns.isMarked(cleanWord);
-
-        if (marking) {
-          return (
-            <span
-              key={wIdx}
-              onClick={() =>
-                cleanWord &&
-                markUnknowns.toggle({
-                  arabic: cleanWord,
-                  sentence_text: line.arabic,
-                  sentence_english: line.english,
-                })
-              }
-              className={cn(
-                "cursor-pointer rounded px-0.5 transition-colors",
-                marked
-                  ? "bg-yellow-300/70 text-foreground dark:bg-yellow-500/40"
-                  : "hover:bg-yellow-200/40"
-              )}
-            >
-              {word}
-            </span>
-          );
+    <p className="font-english text-lg leading-relaxed text-foreground">
+      <TappableEnglishText
+        text={line.english}
+        sentenceArabic={line.arabic}
+        source="reading-practice"
+        onSaveWord={(w) =>
+          onSaveFlashcard(w.arabic ?? "", w.english, undefined, { arabic: line.arabic, english: line.english })
         }
-
-        return (
-          <Popover key={wIdx}>
-            <PopoverTrigger asChild>
-              <span
-                onClick={() => onWordTap(word, lineIdx)}
-                className={cn(
-                  "cursor-pointer rounded px-0.5 transition-colors",
-                  wordData
-                    ? "text-primary underline underline-offset-4 decoration-primary/30"
-                    : "hover:bg-primary/10"
-                )}
-              >
-                {word}
-              </span>
-            </PopoverTrigger>
-            {wordData && (
-              <PopoverContent className="w-64 p-3" side="top">
-                <div className="space-y-2">
-                  <p className="font-bold text-foreground font-arabic text-lg" dir="rtl">{cleanWord}</p>
-                  <p className="text-sm text-muted-foreground">{wordData.translation}</p>
-
-                  {wordData.enriching ? (
-                    <div className="flex items-center gap-2 pt-1">
-                      <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
-                      <span className="text-xs text-muted-foreground">Loading root & uses…</span>
-                    </div>
-                  ) : wordData.enrichment?.root ? (
-                    <div className="pt-1 border-t border-border">
-                      <p className="text-xs font-medium text-muted-foreground">Root</p>
-                      <p className="font-arabic text-sm text-foreground" dir="rtl">{wordData.enrichment.root}</p>
-                    </div>
-                  ) : null}
-
-                  {wordData.enrichment?.otherUses && wordData.enrichment.otherUses.length > 0 && (
-                    <div className="pt-1 border-t border-border">
-                      <p className="text-xs font-medium text-muted-foreground mb-1">Other forms</p>
-                      <div className="space-y-0.5">
-                        {wordData.enrichment.otherUses.map((u, i) => (
-                          <p key={i} className="text-xs">
-                            <span className="font-arabic" dir="rtl">{u.arabic}</span>
-                            <span className="text-muted-foreground"> — {u.english}</span>
-                          </p>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {isAuthenticated && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="w-full text-xs mt-1"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onSaveFlashcard(cleanWord, wordData.translation, wordData.enrichment?.root, { arabic: line.arabic, english: line.english }, wordData.enrichment?.transliteration);
-                      }}
-                    >
-                      <BookmarkPlus className="h-3 w-3 mr-1" />
-                      Save to My Words
-                    </Button>
-                  )}
-                </div>
-              </PopoverContent>
-            )}
-          </Popover>
-        );
-      })}
+      />
     </p>
 
     <div className="flex items-center gap-1">
@@ -282,19 +164,12 @@ const TappableArabicLine = ({
       </button>
       {revealedLines.has(lineIdx) && (
         <div className="flex-1 space-y-1">
-          {line.transliteration && (
-            <p className="text-xs text-muted-foreground/80 tracking-wide" dir="ltr">
-              {line.transliteration}
-            </p>
+          <p dir="rtl" className="font-arabic text-sm text-foreground">{line.arabic}</p>
+          {line.literal && (
+            <p dir="rtl" className="font-arabic text-xs text-muted-foreground/80">{line.literal}</p>
           )}
-          <TranslationPair
-            variant="compact"
-            literal={line.literal}
-            natural={line.english}
-          />
         </div>
       )}
-      <AskAISentence arabic={line.arabic} english={line.english} variant="chip" />
     </div>
   </div>
   );
@@ -341,7 +216,7 @@ const ReadingPractice = () => {
               kind: "passage" as const,
               title: passage.title,
               summary: `Reading a ${passage.difficulty} practice passage.`,
-              content: passage.lines.map((l) => l.arabic).join(" "),
+              content: passage.lines.map((l) => l.english).join(" "),
             }
           : null,
       [passage],
@@ -356,8 +231,6 @@ const ReadingPractice = () => {
   const [quizStarted, setQuizStarted] = useState(savedSession?.quizStarted ?? false);
   const [showEnglish, setShowEnglish] = useState(false);
 
-  // Word-level translation state
-  const [wordTranslations, setWordTranslations] = useState<Record<string, { translation: string; lineEnglish: string; enrichment?: WordEnrichment; enriching?: boolean }>>({});
 
   // Q&A state
   const [qaMessages, setQaMessages] = useState<QAMessage[]>([]);
@@ -397,21 +270,22 @@ const ReadingPractice = () => {
   const normalizePassage = (raw: any): Passage => {
     let lines: PassageLine[] = raw.lines || [];
     if (lines.length === 0 && raw.passage) {
-      const arabicSentences = raw.passage.split(/(?<=[.!؟،])\s+/).filter(Boolean);
-      const englishSentences = (raw.passageEnglish || "").split(/(?<=[.!?])\s+/).filter(Boolean);
-      lines = arabicSentences.map((s: string, i: number) => ({
-        arabic: s.trim(),
-        english: (englishSentences[i] || "").trim(),
+      // Editorial rows store the passage as one ENGLISH block; the Arabic
+      // scaffold (when the library carries one) is paired by position.
+      const englishSentences = raw.passage.split(/(?<=[.!?])\s+/).filter(Boolean);
+      const arabicSentences = (raw.passageArabic || "").split(/(?<=[.!؟،])\s+/).filter(Boolean);
+      lines = englishSentences.map((sentence: string, i: number) => ({
+        english: sentence.trim(),
+        arabic: (arabicSentences[i] || "").trim(),
       }));
     }
     return {
       title: raw.title,
-      titleEnglish: raw.titleEnglish || raw.title_english || "",
+      titleArabic: raw.titleArabic || raw.title_arabic || "",
       lines: lines.map((l) => ({
-        arabic: l.arabic,
         english: l.english,
+        arabic: l.arabic,
         literal: l.literal || undefined,
-        transliteration: l.transliteration || undefined,
       })),
       difficulty: raw.difficulty,
       vocabulary: raw.vocabulary || [],
@@ -432,7 +306,6 @@ const ReadingPractice = () => {
     setAnswers([]);
     setShowResults(false);
     setRevealedLines(new Set());
-    setWordTranslations({});
 
     try {
       // Bounded too: this runs before the edge function, so a stalled query here
@@ -462,9 +335,9 @@ const ReadingPractice = () => {
         const picked = (approved as any[])[Math.floor(Math.random() * approved.length)];
         const p = normalizePassage({
           title: picked.title,
-          titleEnglish: picked.title_english,
+          titleArabic: picked.title_arabic ?? picked.titleArabic ?? "",
           passage: picked.passage,
-          passageEnglish: picked.passage_english,
+          passageArabic: picked.passage_arabic ?? "",
           lines: picked.lines,
           difficulty: selectedDifficulty,
           vocabulary: picked.vocabulary,
@@ -546,35 +419,6 @@ const ReadingPractice = () => {
     });
   };
 
-  const handleWordTap = async (word: string, lineIdx: number, contextLines?: PassageLine[], contextVocab?: VocabItem[]) => {
-    const cleanWord = word.replace(/[،.؟!,]/g, "").trim();
-    if (!cleanWord) return;
-    if (wordTranslations[cleanWord]) return;
-
-    const lines = contextLines || passage?.lines || [];
-    const vocab = contextVocab || passage?.vocabulary || [];
-
-    const line = lines[lineIdx];
-    const lineEnglish = line?.english || "";
-
-    const vocabMatch = vocab.find(
-      (v) => cleanWord.includes(v.arabic) || v.arabic.includes(cleanWord)
-    );
-    const translation = vocabMatch?.english || "";
-
-    setWordTranslations((prev) => ({
-      ...prev,
-      [cleanWord]: { translation, lineEnglish, enriching: true },
-    }));
-
-    const enrichment = await enrichWord(cleanWord, activeDialect);
-    const definition = enrichment?.definition || translation || `In context: "${lineEnglish}"`;
-    setWordTranslations((prev) => ({
-      ...prev,
-      [cleanWord]: { ...prev[cleanWord], translation: definition, enrichment, enriching: false },
-    }));
-  };
-
   const saveAsFlashcard = (
     arabic: string,
     english: string,
@@ -638,7 +482,6 @@ const ReadingPractice = () => {
     setAnswers([]);
     setShowResults(false);
     setRevealedLines(new Set());
-    setWordTranslations({});
     localStorage.removeItem('session_reading_practice');
   };
 
@@ -657,7 +500,7 @@ const ReadingPractice = () => {
       // Build history for context (last 6 messages)
       const recentHistory = qaMessages.slice(-6).map((m) => ({
         role: m.role,
-        content: m.role === "user" ? m.content : m.lines?.map((l) => l.arabic).join(" ") || m.content,
+        content: m.role === "user" ? m.content : m.lines?.map((l) => l.english).join(" ") || m.content,
       }));
 
       const { data, error } = await supabase.functions.invoke("reading-qa", {
@@ -675,7 +518,7 @@ const ReadingPractice = () => {
       if (answer) {
         const assistantMsg: QAMessage = {
           role: "assistant",
-          content: answer.lines?.map((l: PassageLine) => l.arabic).join(" ") || "",
+          content: answer.lines?.map((l: PassageLine) => l.english).join(" ") || "",
           lines: answer.lines || [],
           vocabulary: answer.vocabulary || [],
           followUp: answer.followUp || undefined,
@@ -702,7 +545,6 @@ const ReadingPractice = () => {
   const resetQA = () => {
     setQaMessages([]);
     setQaInput("");
-    setWordTranslations({});
     setQaRevealedLines(new Set());
   };
 
@@ -843,17 +685,14 @@ const ReadingPractice = () => {
                   <div className="max-w-[95%] space-y-3">
                     {/* Arabic response lines */}
                     <div className="bg-card border border-border rounded-2xl rounded-bl-md p-3 space-y-2">
-                      <p className="text-xs text-muted-foreground mb-1">Tap words for translation • Eye icon for English</p>
+                      <p className="text-xs text-muted-foreground mb-1">Tap words for meaning • Eye icon for Arabic</p>
                       {msg.lines?.map((line, lineIdx) => {
                         const lineKey = `${msgIdx}-${lineIdx}`;
                         return (
-                          <TappableArabicLine
+                          <TappableEnglishLine
                             key={lineKey}
                             line={line}
                             lineIdx={lineIdx}
-                            wordTranslations={wordTranslations}
-                            onWordTap={(w, idx) => handleWordTap(w, idx, msg.lines, msg.vocabulary)}
-                            isAuthenticated={isAuthenticated}
                             onSaveFlashcard={saveAsFlashcard}
                             revealedLines={qaRevealedLines.has(lineKey) ? new Set([lineIdx]) : new Set()}
                             onToggleLine={() => toggleQaLineTranslation(lineKey)}
@@ -872,7 +711,7 @@ const ReadingPractice = () => {
                             className="text-xs cursor-pointer hover:bg-secondary/80"
                             onClick={() => saveAsFlashcard(v.arabic, v.english)}
                           >
-                            {v.arabic}{showEnglish ? ` — ${v.english}` : ""}
+                            {v.english}{showEnglish ? ` — ${v.arabic}` : ""}
                             {isAuthenticated && <BookmarkPlus className="h-2.5 w-2.5 ml-1 inline" />}
                           </Badge>
                         ))}
@@ -1067,8 +906,8 @@ const ReadingPractice = () => {
       {!quizStarted && (
         <div className="space-y-4">
           <div className="text-center">
-            <h2 className="text-xl font-bold text-foreground font-arabic" dir="rtl">{passage.title}</h2>
-            {showEnglish && <p className="text-sm text-muted-foreground animate-in fade-in duration-200">{passage.titleEnglish}</p>}
+            <h2 className="font-english text-xl font-bold text-foreground">{passage.title}</h2>
+            {showEnglish && <p dir="rtl" className="font-arabic text-sm text-muted-foreground animate-in fade-in duration-200">{passage.titleArabic}</p>}
           </div>
 
           <div className="bg-card border border-border rounded-2xl p-4 space-y-3">
@@ -1077,13 +916,10 @@ const ReadingPractice = () => {
             </p>
 
             {passage.lines.map((line, lineIdx) => (
-              <TappableArabicLine
+              <TappableEnglishLine
                 key={lineIdx}
                 line={line}
                 lineIdx={lineIdx}
-                wordTranslations={wordTranslations}
-                onWordTap={(w, idx) => handleWordTap(w, idx)}
-                isAuthenticated={isAuthenticated}
                 onSaveFlashcard={saveAsFlashcard}
                 revealedLines={revealedLines}
                 onToggleLine={toggleLineTranslation}
@@ -1104,7 +940,7 @@ const ReadingPractice = () => {
                   className="text-sm cursor-pointer hover:bg-secondary/80"
                   onClick={() => saveAsFlashcard(v.arabic, v.english)}
                 >
-                  {v.arabic}{showEnglish ? ` — ${v.english}` : ""}
+                  {v.english}{showEnglish ? ` — ${v.arabic}` : ""}
                   {isAuthenticated && <BookmarkPlus className="h-3 w-3 ml-1.5 inline" />}
                 </Badge>
               ))}
@@ -1131,8 +967,8 @@ const ReadingPractice = () => {
 
           <div className="bg-card border border-border rounded-2xl p-5 space-y-4">
             <div className="text-center">
-              <p className="text-lg font-arabic text-foreground" dir="rtl">{passage.questions[currentQuestion].question}</p>
-              {showEnglish && <p className="text-sm text-muted-foreground mt-1 animate-in fade-in duration-200">{passage.questions[currentQuestion].questionEnglish}</p>}
+              <p className="font-english text-lg text-foreground">{passage.questions[currentQuestion].question}</p>
+              {showEnglish && <p dir="rtl" className="font-arabic text-sm text-muted-foreground mt-1 animate-in fade-in duration-200">{passage.questions[currentQuestion].questionArabic}</p>}
             </div>
             <div className="space-y-2">
               {passage.questions[currentQuestion].options.map((option, i) => {
@@ -1145,7 +981,7 @@ const ReadingPractice = () => {
                     onClick={() => handleAnswer(i)}
                     disabled={isAnswered}
                     className={cn(
-                      "w-full p-4 rounded-xl text-right transition-all border-2",
+                      "w-full p-4 rounded-xl text-left transition-all border-2",
                       isAnswered
                         ? isCorrect
                           ? "border-green-500 bg-green-500/10"
@@ -1155,8 +991,8 @@ const ReadingPractice = () => {
                         : "border-border hover:border-primary/50 bg-card"
                     )}
                   >
-                    <p className="font-arabic text-foreground" dir="rtl">{option.text}</p>
-                    {showEnglish && <p className="text-xs text-muted-foreground mt-1 animate-in fade-in duration-200">{option.textEnglish}</p>}
+                    <p className="font-english text-foreground">{option.text}</p>
+                    {showEnglish && <p dir="rtl" className="font-arabic text-xs text-muted-foreground mt-1 animate-in fade-in duration-200">{option.textArabic}</p>}
                   </button>
                 );
               })}

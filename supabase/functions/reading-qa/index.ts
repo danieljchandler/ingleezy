@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { getDialectVocabRules, getDialectLabel, getDialectIdentity } from "../_shared/dialectHelpers.ts";
+import { getDialectLabel } from "../_shared/dialectHelpers.ts";
+import { getEnglishIdentity, getInterferenceGuidance } from "../_shared/englishHelpers.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
 import { MODEL_IDS } from "../_shared/modelRegistry.ts";
 
@@ -24,38 +25,37 @@ serve(async (req) => {
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
     const dialectLabel = getDialectLabel(dialect);
-    const dialectRules = getDialectVocabRules(dialect);
-    const dialectIdentity = getDialectIdentity(dialect);
+    const englishIdentity = getEnglishIdentity();
+    const interference = getInterferenceGuidance(dialect);
 
     const difficultyGuide: Record<string, string> = {
-      beginner: `Use simple, everyday ${dialectLabel} vocabulary. Short sentences (3-6 words). Common greetings and phrases.`,
-      intermediate: `Use varied ${dialectLabel} vocabulary with colloquial expressions. Medium-length sentences with some cultural references.`,
-      advanced: `Use complex structures, idiomatic ${dialectLabel} expressions, and nuanced vocabulary. Longer, natural sentences.`,
+      beginner: `Use simple, everyday English. Short sentences (3-6 words). Common phrases.`,
+      intermediate: `Use varied English vocabulary with common idioms. Medium-length sentences.`,
+      advanced: `Use complex structures, idiomatic English, and nuanced vocabulary. Longer, natural sentences.`,
     };
 
-    const systemPrompt = `${dialectIdentity}
+    const systemPrompt = `${englishIdentity}
 
-You are a friendly and knowledgeable language partner helping someone learn ${dialectLabel}.
-The student asks you questions about any topic. You answer naturally in ${dialectLabel} dialect at the "${difficulty}" level.
+You are a friendly and knowledgeable language partner helping a native ${dialectLabel} speaker learn English.
+The student asks you questions about any topic (in Arabic or English). You answer naturally in ENGLISH at the "${difficulty}" level.
 
-${dialectRules}
+${interference}
 
 ${difficultyGuide[difficulty] || difficultyGuide.beginner}
 
 IMPORTANT RULES:
-- Answer the student's question directly and naturally in ${dialectLabel} dialect.
+- Answer the student's question directly and naturally in English.
 - Keep your answer 3-6 sentences long depending on difficulty.
 - Be conversational and warm, as if chatting with a friend.
-- Include culturally relevant details when appropriate.
 - Return valid JSON only, no markdown code blocks.
 
 Return JSON in this exact format:
 {
   "lines": [
-    {"arabic": "One sentence in ${dialectLabel}", "english": "English translation of that sentence"}
+    {"english": "One sentence of your English answer", "arabic": "${dialectLabel} gloss of that sentence"}
   ],
-  "vocabulary": [{"arabic": "word", "english": "meaning", "inContext": "how it's used in the answer"}],
-  "followUp": "A suggested follow-up question in English the student could ask next"
+  "vocabulary": [{"english": "word", "arabic": "its ${dialectLabel} meaning", "inContext": "how it's used in the answer"}],
+  "followUp": "A suggested follow-up question in simple English the student could ask next"
 }`;
 
     // Build conversation messages
@@ -119,7 +119,7 @@ Return JSON in this exact format:
       console.error("Failed to parse QA response:", e, content);
       parsed = {
         lines: [
-          { arabic: "عذراً، ما قدرت أجاوب. جرب تسأل سؤال ثاني.", english: "Sorry, I couldn't answer. Try asking another question." },
+          { english: "Sorry, I couldn't answer that. Try asking another question.", arabic: "عذراً، ما قدرت أجاوب. جرب سؤال ثاني." },
         ],
         vocabulary: [],
         followUp: "Try asking a simpler question",

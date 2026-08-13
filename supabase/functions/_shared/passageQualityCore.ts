@@ -120,3 +120,39 @@ export function readingPassageGate(
 
   return null;
 }
+
+/**
+ * The english-target mirror of readingPassageGate: an ENGLISH passage with a
+ * dialect-Arabic gloss and a word-order Arabic literal on every line. No
+ * transliteration and no tashkeel floor — both were Arabic-target concerns
+ * (the scaffold Arabic here is read silently, never voiced by TTS).
+ */
+export function englishPassageGate(
+  parsed: unknown,
+  opts: { minLines?: number } = {},
+): string | null {
+  const minLines = Math.max(1, opts.minLines ?? 1);
+  const p = (parsed ?? {}) as DraftPassage;
+  if (!nonEmpty(p.title)) return "missing title";
+
+  const lines = Array.isArray(p.lines) ? (p.lines as DraftLine[]) : [];
+  if (lines.length === 0) return "no lines";
+  if (lines.length < minLines) return `too short: ${lines.length} lines, need ${minLines}`;
+  for (const l of lines) {
+    if (!nonEmpty(l?.english)) return "line missing english";
+    if (!nonEmpty(l?.arabic)) return "line missing arabic gloss";
+    if (!nonEmpty(l?.literal)) return "line missing literal gloss";
+  }
+
+  if (!Array.isArray(p.vocabulary) || p.vocabulary.length === 0) return "no vocabulary";
+
+  const questions = Array.isArray(p.questions) ? (p.questions as DraftQuestion[]) : [];
+  if (questions.length === 0) return "no questions";
+  for (const q of questions) {
+    const options = Array.isArray(q?.options) ? (q.options as DraftOption[]) : [];
+    if (options.length < 2) return "question missing options";
+    if (!options.some((o) => o?.correct === true)) return "question has no correct answer";
+  }
+
+  return null;
+}

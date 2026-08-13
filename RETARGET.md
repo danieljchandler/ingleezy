@@ -144,7 +144,12 @@ generation conditioning.
       sentences {english, arabic, literal}, transliteration retired,
       body_arabic nullable (20260813170000), reader flipped to tappable
       English cards with the scaffold behind the display preference.
-      Interactive stories / reading library / listen / souq still open.
+      **Reading practice DONE**: reading-passage (english-target,
+      englishPassageGate, {english, arabic, literal} lines, bilingual
+      quiz), reading-qa (English answers, dialect glosses), ReadingPractice
+      page flipped to tappable-English lines. Open: reading library
+      authoring flip (passage_arabic scaffold column + admin form),
+      interactive stories, listen episodes, souq news.
 
 ### Speaking / audio — FLIP
 - [ ] Pronunciation practice: English phoneme scoring, seeded with the

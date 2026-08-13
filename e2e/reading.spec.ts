@@ -30,28 +30,28 @@ const completedToday = async (page: Page) =>
   ) as string[];
 
 const PASSAGE = {
-  title: "في المقهى",
-  titleEnglish: "At the cafe",
-  passage: "رحت المقهى الصبح. طلبت قهوة.",
-  passageEnglish: "I went to the cafe in the morning. I ordered a coffee.",
+  title: "At the cafe",
+  titleArabic: "في المقهى",
   lines: [
-    { arabic: "رحت المقهى الصبح.", english: "I went to the cafe in the morning." },
-    { arabic: "طلبت قهوة.", english: "I ordered a coffee." },
+    { english: "I went to the cafe in the morning.", arabic: "رحت المقهى الصبح.", literal: "أنا رحت إلى الـ مقهى في الـ صبح." },
+    { english: "I ordered a coffee.", arabic: "طلبت قهوة.", literal: "أنا طلبت قهوة." },
   ],
-  vocabulary: [{ arabic: "مقهى", english: "cafe" }],
+  vocabulary: [{ english: "cafe", arabic: "مقهى" }],
   questions: [
     {
       question: "Where did the writer go?",
+      questionArabic: "وين راح الكاتب؟",
       options: [
-        { text: "To the cafe", correct: true },
-        { text: "To the market", correct: false },
+        { text: "To the cafe", textArabic: "للمقهى", correct: true },
+        { text: "To the market", textArabic: "للسوق", correct: false },
       ],
     },
     {
       question: "What did they order?",
+      questionArabic: "شنو طلبوا؟",
       options: [
-        { text: "Coffee", correct: true },
-        { text: "Tea", correct: false },
+        { text: "Coffee", textArabic: "قهوة", correct: true },
+        { text: "Tea", textArabic: "شاي", correct: false },
       ],
     },
   ],
@@ -68,17 +68,18 @@ const PASSAGE = {
  */
 const aPublishedPassage = (over: Record<string, unknown> = {}) => ({
   id: "dddddddd-0000-4000-8000-000000000001",
-  title: "من المكتبة",
+  title: "From the library",
   title_english: "From the library",
-  passage: "قرأت كتاب أمس. كان ممتعاً.",
+  passage: "I read a book yesterday. It was enjoyable.",
   passage_english: "I read a book yesterday. It was enjoyable.",
-  vocabulary: [{ arabic: "كتاب", english: "book" }],
+  vocabulary: [{ english: "book", arabic: "كتاب" }],
   questions: [
     {
       question: "What did they read?",
+      questionArabic: "شنو قرأوا؟",
       options: [
-        { text: "A book", correct: true },
-        { text: "A letter", correct: false },
+        { text: "A book", textArabic: "كتاب", correct: true },
+        { text: "A letter", textArabic: "رسالة", correct: false },
       ],
     },
   ],
@@ -129,7 +130,7 @@ test.describe("choosing what to read", () => {
     await page.goto("/reading");
     await readAt(page, /advanced/i);
 
-    await expect(page.getByRole("heading", { name: "في المقهى" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "At the cafe" })).toBeVisible();
     expect(backend.lastCallTo("reading-passage")?.body).toMatchObject({
       difficulty: "advanced",
       dialect: "Gulf",
@@ -142,7 +143,7 @@ test.describe("choosing what to read", () => {
     await page.getByLabel(/describe a scenario/i).fill("ordering coffee at a café");
     await page.getByRole("button", { name: /beginner/i }).click();
 
-    await expect(page.getByRole("heading", { name: "في المقهى" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "At the cafe" })).toBeVisible();
     // The scenario is the one lever a learner has over what they read.
     expect(backend.lastCallTo("reading-passage")?.body).toMatchObject({
       topic: "ordering coffee at a café",
@@ -155,7 +156,7 @@ test.describe("choosing what to read", () => {
     await page.getByLabel(/describe a scenario/i).fill("   ");
     await page.getByRole("button", { name: /beginner/i }).click();
 
-    await expect(page.getByRole("heading", { name: "في المقهى" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "At the cafe" })).toBeVisible();
     // An empty topic string reaches the prompt as an instruction to write about
     // nothing in particular, which is not the same as no instruction.
     expect(backend.lastCallTo("reading-passage")?.body).not.toHaveProperty("topic");
@@ -178,7 +179,7 @@ test.describe("preferring the editorial library", () => {
 
     // Editorial passages are hand-checked; generating over them wastes the
     // review effort and costs a model call for a worse result.
-    await expect(page.getByRole("heading", { name: "من المكتبة" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "From the library" })).toBeVisible();
     expect(backend.callsTo("reading-passage")).toHaveLength(0);
   });
 
@@ -187,15 +188,12 @@ test.describe("preferring the editorial library", () => {
 
     await page.goto("/reading");
     await readAt(page);
-    await expect(page.getByRole("heading", { name: "من المكتبة" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "From the library" })).toBeVisible();
 
-    // The stored row is one block of text; the reading view is per-line, with a
-    // reveal and a tap-to-translate on each. Asserted on words from each
-    // sentence, because every word is its own tappable span — a split that
-    // produced one giant line would still show both words, but the reveal would
-    // uncover the whole passage at once rather than a sentence.
-    await expect(page.getByText("قرأت", { exact: true })).toBeVisible();
-    await expect(page.getByText("كان", { exact: true })).toBeVisible();
+    // The stored row is one block of text; the reading view is per-line, with
+    // every word its own tappable span.
+    await expect(page.getByRole("button", { name: "read" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "enjoyable." })).toBeVisible();
   });
 
   test("ignores a draft passage", async ({ page, db, backend }) => {
@@ -206,7 +204,7 @@ test.describe("preferring the editorial library", () => {
 
     // A draft is unreviewed. Serving it would put unchecked Arabic in front of
     // a learner with no way for an editor to tell.
-    await expect(page.getByRole("heading", { name: "في المقهى" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "At the cafe" })).toBeVisible();
     expect(backend.callsTo("reading-passage")).toHaveLength(1);
   });
 
@@ -216,7 +214,7 @@ test.describe("preferring the editorial library", () => {
     await page.goto("/reading");
     await readAt(page, /beginner/i);
 
-    await expect(page.getByRole("heading", { name: "في المقهى" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "At the cafe" })).toBeVisible();
     expect(backend.callsTo("reading-passage")).toHaveLength(1);
   });
 
@@ -228,7 +226,7 @@ test.describe("preferring the editorial library", () => {
 
     // A Gulf learner reading Egyptian text is being taught the wrong dialect,
     // which is the one thing this app exists to avoid.
-    await expect(page.getByRole("heading", { name: "في المقهى" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "At the cafe" })).toBeVisible();
     expect(backend.callsTo("reading-passage")).toHaveLength(1);
   });
 
@@ -247,7 +245,7 @@ test.describe("preferring the editorial library", () => {
 
     // The library is a shortcut, not a dependency — a failure there must not
     // cost the learner their passage.
-    await expect(page.getByRole("heading", { name: "في المقهى" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "At the cafe" })).toBeVisible();
     expect(backend.callsTo("reading-passage")).toHaveLength(1);
   });
 });
@@ -268,32 +266,34 @@ test.describe("reading the passage", () => {
     });
   });
 
-  test("shows the Arabic and keeps the English behind a switch", async ({ page }) => {
+  test("shows the English and keeps the Arabic scaffold behind a switch", async ({ page }) => {
     await page.goto("/reading");
     await readAt(page);
 
-    await expect(page.getByRole("heading", { name: "في المقهى" })).toBeVisible();
-    await expect(page.getByText("At the cafe")).toHaveCount(0);
+    await expect(page.getByRole("heading", { name: "At the cafe" })).toBeVisible();
+    await expect(page.getByText("في المقهى")).toHaveCount(0);
 
     await page.getByRole("switch").first().click();
-    await expect(page.getByText("At the cafe")).toBeVisible();
+    await expect(page.getByText("في المقهى")).toBeVisible();
   });
 
   test("lists the key vocabulary", async ({ page }) => {
     await page.goto("/reading");
     await readAt(page);
 
-    // Scoped to the badge: the word also appears inside the passage itself,
-    // where it is a lookup target rather than a save control.
-    await expect(page.getByText("مقهى", { exact: true })).toBeVisible();
+    // Scoped to the badge element: the word also appears inside the passage
+    // itself as a tappable <button>, where it is a lookup target rather than
+    // a save control — an unscoped exact-text match would hit both.
+    await expect(page.locator('div[class*="cursor-pointer"]', { hasText: "cafe" })).toBeVisible();
   });
 
   test("saves a key word straight to My Words", async ({ page, db }) => {
     await page.goto("/reading");
     await readAt(page);
-    await expect(page.getByText("مقهى", { exact: true })).toBeVisible();
+    const badge = page.locator('div[class*="cursor-pointer"]', { hasText: "cafe" });
+    await expect(badge).toBeVisible();
 
-    await page.getByText("مقهى", { exact: true }).click();
+    await badge.click();
 
     await expect.poll(() => db.rows("user_vocabulary").length, { timeout: 10_000 }).toBe(1);
     expect(db.rows("user_vocabulary")[0].word_english).toBe("cafe");
@@ -312,7 +312,7 @@ test.describe("the comprehension quiz", () => {
   const startQuiz = async (page: Page) => {
     await page.goto("/reading");
     await readAt(page);
-    await expect(page.getByRole("heading", { name: "في المقهى" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "At the cafe" })).toBeVisible();
     await page.getByRole("button", { name: /start comprehension quiz/i }).click();
   };
 
@@ -391,7 +391,7 @@ test.describe("when the passage cannot be generated", () => {
     // spent, and the retry path skips the slow drafting model — so a second
     // try usually lands. Surfacing the first failure would send the learner
     // away from a passage they were about to get.
-    await expect(page.getByRole("heading", { name: "في المقهى" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "At the cafe" })).toBeVisible();
     expect(attempts).toBe(2);
   });
 

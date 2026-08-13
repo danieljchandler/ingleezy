@@ -1,17 +1,11 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import {
-  getDialectLabel,
-  getTashkeelMandate,
-  getDialectTransliterationRules,
-  primeDialectPrompt,
-  type Dialect,
-} from "../_shared/dialectHelpers.ts";
+import { getDialectLabel, type Dialect } from "../_shared/dialectHelpers.ts";
+import { primeEnglishPrompt } from "../_shared/englishHelpers.ts";
 import { askBrain } from "../_shared/aiBrain.ts";
 import { enforceDailyCap } from "../_shared/usageCap.ts";
-import { LITERAL_GLOSS_RULE, literalSchema } from "../_shared/literalGloss.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
 import { learnerPromptBlock } from "../_shared/learnerProfile.ts";
-import { readingPassageGate } from "../_shared/passageQualityCore.ts";
+import { englishPassageGate } from "../_shared/passageQualityCore.ts";
 
 /**
  * Wall-clock ceiling for the generation, kept under the client's own timeout so
@@ -52,17 +46,17 @@ const PASSAGE_SHAPE: Record<
   beginner: {
     minLines: 3,
     maxLines: 4,
-    style: (label) => `short sentences, simple ${label} vocabulary, common everyday phrases`,
+    style: () => `short sentences, simple everyday English, common phrases`,
   },
   intermediate: {
     minLines: 5,
     maxLines: 6,
-    style: (label) => `varied ${label} vocabulary, colloquial expressions and cultural references`,
+    style: () => `varied English vocabulary, common idioms and phrasal verbs`,
   },
   advanced: {
     minLines: 7,
     maxLines: 9,
-    style: (label) => `complex structures, idiomatic ${label} expressions`,
+    style: () => `complex structures, idiomatic natural English`,
   },
 };
 
@@ -81,10 +75,10 @@ serve(async (req) => {
   try {
     const { difficulty = "beginner", topic, dialect = "Gulf" } = await req.json();
 
-    // Warm the dialect rulebook cache now. It depends on nothing else in the
-    // request, so it has no business sitting behind the auth and learner-profile
-    // round trips the way it did when askBrain was the first to touch it.
-    const priming = primeDialectPrompt(dialect as Dialect);
+    // Warm the interference rulebook cache now. It depends on nothing else in
+    // the request, so it has no business sitting behind the auth and
+    // learner-profile round trips.
+    const priming = primeEnglishPrompt(dialect as Dialect);
 
     // Free-tier daily cap
     const capStart = Date.now();
@@ -102,61 +96,37 @@ serve(async (req) => {
     // it is deliberately ignored.
     const profileStart = Date.now();
     const [learnerBlock] = await Promise.all([
-      learnerPromptBlock({ userId: cap.userId, dialect }),
+      learnerPromptBlock({ userId: cap.userId, dialect, target: "english" }),
       priming,
     ]);
     mark("profile+rules", profileStart);
 
-    const culturalContext = dialect === "Egyptian"
-      ? "daily life, culture, or social situations in Egypt (Cairo, Alexandria, etc.)"
-      : dialect === "Yemeni"
-      ? "daily life, culture, or social situations in Yemen (Sana'a, Aden, Hadramaut, qat sessions, traditional architecture)"
-      : "daily life, culture, or social situations in the Gulf";
+    // Situations an Arabic-speaking learner actually needs English for.
+    const culturalContext =
+      "everyday situations an Arabic speaker meets English in — travel, work, shops, online, studies";
 
     const topicContext = topic ? `Topic: ${topic}` : `Topic: ${culturalContext}`;
 
     const shape = PASSAGE_SHAPE[difficulty] ?? PASSAGE_SHAPE.beginner;
     const difficultyGuide = `${shape.minLines}-${shape.maxLines} sentences, ${shape.style(dialectLabel)}`;
 
-    const systemExtra = `You are a ${dialectLabel} language instructor creating reading comprehension exercises.
-- Set passages in culturally authentic contexts.
-- Generate engaging, culturally relevant passages appropriate for the difficulty level.
-- The primary passage text MUST be in ${dialectLabel} dialect, not MSA.
-
-${getTashkeelMandate()}
-- title and every line's "arabic" field must be fully vocalized.
-- Vocalize for how the sentence is SPOKEN in ${dialectLabel}, never for MSA case.
-  No إعراب: no damma/fatha/kasra as a case ending on a noun, and NEVER tanween
-  (قَاتًا is wrong; قَات is right). Final consonants take sukuun.
-
-NO FUSHA (this is the single most common failure — read it back and check):
-- The passage must sound like someone TALKING, not like a news bulletin or a
-  storybook in Classical Arabic. Dialect vocabulary alone is not enough: fusha
-  grammar with a few dialect words sprinkled in is still fusha.
-- Use the dialect's own verbs and function words rather than their MSA
-  equivalents — e.g. prefer قعد over جَلَسَ, راح over ذَهَبَ, شاف over رَأَى,
-  ربعه/أصحابه over رِفَاقِهِ, بس over لَكِنْ, عشان/علشان over لِأَنَّ.
-- Use the dialect's present-tense verb prefixes and negation, not MSA's.
-- Word order and phrasing should be conversational.
-
-${getDialectTransliterationRules(dialect as Dialect)}
-- Provide a transliteration for every line.
-
-${LITERAL_GLOSS_RULE}
-- Provide a "literal" gloss for every line.
-
+    const systemExtra = `You are an English instructor creating reading comprehension exercises for native ${dialectLabel} speakers.
+- Set passages in engaging, realistic contexts.
+- The passage text MUST be natural spoken-register English at the difficulty level — textbook stiffness is a defect.
+- Every line carries its ${dialectLabel} Arabic translation as "arabic" (the learner's own dialect, never Fusha) and a "literal" gloss: the ${dialectLabel} words in ENGLISH word order, so the learner sees how the English sentence is built (stiffness expected there).
+- Comprehension questions are in English with a ${dialectLabel} rendering as questionArabic; options are English with textArabic glosses.
 - Return the structured fields via the provided tool only.
 
 ${learnerBlock}`;
 
-    const userPrompt = `Write a short STORY for a ${difficulty} learner to read.
+    const userPrompt = `Write a short STORY in English for a ${difficulty} learner to read.
 
 LENGTH (hard requirement): the "lines" array MUST contain at least ${shape.minLines} sentences, ideally ${shape.minLines}-${shape.maxLines}. A response with fewer than ${shape.minLines} will be rejected.
 
 It must read as a story, not a couple of stray facts: something happens, in order — a setting, then events, then how it ends. ${difficultyGuide}.
 ${topicContext}
 
-Put one sentence per entry in the "lines" array, each with its Arabic text, transliteration, natural English translation, and literal word-for-word gloss. Also generate 3-4 vocabulary items and 2-3 comprehension questions about the story.`;
+Put one sentence per entry in the "lines" array, each with its English text, its ${dialectLabel} translation, and the literal word-order gloss. Also generate 3-4 vocabulary items (English word + ${dialectLabel} meaning) and 2-3 comprehension questions about the story.`;
 
     let passage: any;
     let brainPasses: unknown[] = [];
@@ -165,6 +135,7 @@ Put one sentence per entry in the "lines" array, each with its Arabic text, tran
       const brain = await askBrain<any>({
         purpose: "reading_passage",
         dialect: dialect as Dialect,
+        target: "english",
         strategy: "draft_critic",
         // No models[] override: this takes MODEL_LINEUPS.CONTENT, the same
         // Gemini 3.5 Flash + Claude tandem generate-daily-story uses.
@@ -185,35 +156,20 @@ Put one sentence per entry in the "lines" array, each with its Arabic text, tran
         maxTokens: 3072,
         temperature: 0.8,
         budgetMs: GENERATION_BUDGET_MS,
-        // Have a native-speaker reviewer read the draft and send it back if it
-        // comes out as fusha. The MSA token detector cannot catch this: text can
-        // be MSA in grammar, register and case-marking while containing none of
-        // the blacklisted words, which is exactly what a learner notices. Costs
-        // one short classification call; only a failed verdict costs a rewrite.
-        enforceDialect: true,
-        // What the critic pass is actually there to guarantee, stated as a
-        // check we can run locally in microseconds. A draft that already has
-        // full tashkeel, a transliteration, a natural translation and a literal
-        // gloss on every line — plus vocabulary and an answerable quiz — is
-        // finished, and re-generating it through the critic only costs the
-        // learner another 30-60s of spinner. Anything missing still triggers
-        // the full rewrite. See _shared/passageQualityCore.ts.
-        qualityGate: (parsed: unknown) => readingPassageGate(parsed, { minLines: shape.minLines }),
-        arabicTextPath: (p: any) => {
-          const parts: string[] = [];
-          if (typeof p?.title === "string") parts.push(p.title);
-          if (Array.isArray(p?.lines)) for (const l of p.lines) if (typeof l?.arabic === "string") parts.push(l.arabic);
-          if (Array.isArray(p?.questions)) for (const q of p.questions) if (typeof q?.question === "string") parts.push(q.question);
-          return parts.join("\n");
-        },
+        // What the critic pass is there to guarantee, stated as a check we can
+        // run locally in microseconds: English + gloss + literal on every
+        // line, vocabulary, an answerable quiz, enough lines. A draft that
+        // already has all of it ships without paying the critic; anything
+        // missing triggers the full rewrite. See _shared/passageQualityCore.ts.
+        qualityGate: (parsed: unknown) => englishPassageGate(parsed, { minLines: shape.minLines }),
         tool: {
           name: "emit_reading_passage",
           description: `Reading passage in ${dialectLabel}.`,
           parameters: {
             type: "object",
             properties: {
-              title: { type: "string" },
-              titleEnglish: { type: "string" },
+              title: { type: "string", description: "English title" },
+              titleArabic: { type: "string", description: "Dialect-Arabic rendering of the title" },
               lines: {
                 type: "array",
                 // Stated in the schema as well as the prompt: a bare prose
@@ -223,15 +179,14 @@ Put one sentence per entry in the "lines" array, each with its Arabic text, tran
                 items: {
                   type: "object",
                   properties: {
-                    arabic: { type: "string" },
-                    transliteration: { type: "string" },
-                    english: { type: "string" },
-                    literal: literalSchema("sentence"),
+                    english: { type: "string", description: "One sentence of the story" },
+                    arabic: { type: "string", description: "Dialect-Arabic translation of this sentence" },
+                    literal: { type: "string", description: "Word-for-word Arabic gloss preserving the English word order" },
                   },
                   // `literal` is required here, not merely described: the quality
                   // gate below refuses a draft without it, and a schema that asks
                   // for it up front is much cheaper than a rewrite pass that adds it.
-                  required: ["arabic", "transliteration", "english", "literal"],
+                  required: ["english", "arabic", "literal"],
                 },
               },
               difficulty: { type: "string" },
@@ -239,8 +194,8 @@ Put one sentence per entry in the "lines" array, each with its Arabic text, tran
                 type: "array",
                 items: {
                   type: "object",
-                  properties: { arabic: { type: "string" }, english: { type: "string" }, inContext: { type: "string" } },
-                  required: ["arabic", "english"],
+                  properties: { english: { type: "string" }, arabic: { type: "string" }, inContext: { type: "string" } },
+                  required: ["english", "arabic"],
                 },
               },
               questions: {
@@ -248,31 +203,28 @@ Put one sentence per entry in the "lines" array, each with its Arabic text, tran
                 items: {
                   type: "object",
                   properties: {
-                    question: { type: "string" },
-                    questionEnglish: { type: "string" },
+                    question: { type: "string", description: "The question, in English" },
+                    questionArabic: { type: "string", description: "Dialect-Arabic rendering of the question" },
                     options: {
                       type: "array",
                       items: {
                         type: "object",
-                        properties: { text: { type: "string" }, textEnglish: { type: "string" }, correct: { type: "boolean" } },
-                        required: ["text", "textEnglish", "correct"],
+                        properties: { text: { type: "string", description: "Option in English" }, textArabic: { type: "string" }, correct: { type: "boolean" } },
+                        required: ["text", "textArabic", "correct"],
                       },
                     },
                   },
-                  required: ["question", "questionEnglish", "options"],
+                  required: ["question", "questionArabic", "options"],
                 },
               },
             },
-            required: ["title", "titleEnglish", "lines", "vocabulary", "questions"],
+            required: ["title", "titleArabic", "lines", "vocabulary", "questions"],
           },
         },
       });
       passage = brain.output;
       brainPasses = brain.passes ?? [];
       mark("generate", brainStart);
-      if (brain.msaLeaks.leaks.length > 0) {
-        console.warn("reading-passage MSA leaks after repair:", brain.msaLeaks.leaks, "repairs:", brain.msaRepairs);
-      }
     } catch (e: any) {
       mark("generate", brainStart);
       console.error("reading-passage brain error:", e?.status, e?.message);
