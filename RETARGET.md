@@ -97,8 +97,9 @@ generation conditioning.
       Vitest + Deno tested.
 - [ ] Admin CRUD for interference_rules (mirror AdminDialectRules)
 - [ ] First English-target caller end-to-end, then flip generators one by one
-- [ ] `learnerProfile.ts`: semantics flip only; CEFR placement quiz re-aimed
-      at English
+- [x] `learnerProfile.ts` / `learnerProfileCore.ts`: `target: 'english'`
+      rendering — English side primary, lexicon named "English"; data path
+      untouched (decks are bilingual). CEFR placement re-aim still open.
 - [ ] Prune corpus-mining pipeline (mine-dialect-corpus, derive-yemeni
       scripts, docs/yemeni) — dialect_rules itself STAYS (scaffold direction)
 
@@ -111,10 +112,12 @@ generation conditioning.
       (act/action/active/actor) — same linking pattern, different linguistics
 
 ### Media pipeline — FLIP + BRIDGE
-- [ ] **Hakiya bridge** (new `sync-hakiya-videos` function): snapshot published
-      `discover_videos` → local table, source-tagged `hakiya`. Renders with
-      English translation primary, dialect + Fusha lines as scaffold.
-      Read-only; Hakiya schema drift degrades gracefully.
+- [~] **Hakiya bridge**: `sync-hakiya-videos` function + `source` column
+      landed (same discover_videos table, so existing surfaces serve bridged
+      rows with zero UI changes; idempotent upsert on Hakiya UUIDs; drift
+      degrades to stale/skipped rows). Remaining: config.toml entry, admin
+      trigger button, learner-surface rendering flip (English primary,
+      dialect + Fusha as scaffold), deno happy-path test.
 - [ ] **English uploads** (YouTube/TikTok): KEEP admin upload + processing
       pipeline; transcription flips to English ASR (Deepgram EN is the easy
       case — the six-engine Arabic ASR ladder simplifies a lot); line shape
