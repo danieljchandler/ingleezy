@@ -34,7 +34,7 @@ function storageAvailable(storageKey: SafeStorageKey) {
 
   try {
     const storage = window[storageKey];
-    const probe = `__hakiya_storage_probe__${storageKey}`;
+    const probe = `__ingleezy_storage_probe__${storageKey}`;
     storage.setItem(probe, "1");
     storage.removeItem(probe);
     return true;

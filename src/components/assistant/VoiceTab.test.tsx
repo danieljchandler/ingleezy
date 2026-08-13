@@ -77,7 +77,7 @@ afterEach(() => {
 });
 
 function render({ signedIn = true, route = "/reading" }: { signedIn?: boolean; route?: string } = {}) {
-  localStorage.setItem("hakiya_dialect_module", "Gulf");
+  localStorage.setItem("ingleezy_dialect_module", "Gulf");
   const harness = renderWithProviders(<VoiceTab />, {
     persona: signedIn ? "free" : undefined,
     route,

@@ -1,15 +1,15 @@
 import { useNavigate } from "react-router-dom";
 import { ArrowRight, Headphones, Brain, PlayCircle, Globe2 } from "lucide-react";
 import { Button, CampfireMedallion } from "@/components/design-system";
-import hakiyaLogoAsset from "@/assets/hakiya-logo.png.asset.json";
+import ingleezyLogoAsset from "@/assets/ingleezy-logo.png.asset.json";
 
-const hakiyaLogo = hakiyaLogoAsset.url;
+const ingleezyLogo = ingleezyLogoAsset.url;
 
 /**
  * Logged-out landing hero shown on `/` when the visitor isn't authenticated.
- * Goal: explain Hakiya in one screen and push to /auth or /placement.
+ * Goal: explain Ingleezy in one screen and push to /auth or /placement.
  *
- * The framing is the name. Hakiya is حكاية — a story — so the page opens on
+ * The framing is the name. Ingleezy is حكاية — a story — so the page opens on
  * people telling one round a fire, and the three value cards run as a story
  * arc: who tells it, how it stays with you, what you get to hear next.
  *
@@ -24,7 +24,7 @@ export function LandingHero() {
     <section className="py-6">
       {/* Logo */}
       <div className="flex justify-center mb-5">
-        <img src={hakiyaLogo} alt="Hakiya" className="h-16 sm:h-20" />
+        <img src={ingleezyLogo} alt="Ingleezy" className="h-16 sm:h-20" />
       </div>
 
       {/* The fire: campfire clip + its one-line beat */}
@@ -55,7 +55,7 @@ export function LandingHero() {
           </span>
         </h1>
         <p className="text-base text-muted-foreground leading-relaxed">
-          Hakiya means{" "}
+          Ingleezy means{" "}
           <span className="font-arabic" dir="rtl">
             حكاية
           </span>{" "}

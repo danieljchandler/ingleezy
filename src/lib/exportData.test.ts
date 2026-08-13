@@ -137,7 +137,7 @@ describe("exporting vocabulary as JSON", () => {
 
     // Learners export more than once; identical filenames overwrite each other
     // in the downloads folder.
-    expect((lastDownload()).filename).toBe("hakiya-vocabulary-2026-03-11.json");
+    expect((lastDownload()).filename).toBe("ingleezy-vocabulary-2026-03-11.json");
   });
 
   it("writes an empty file rather than failing when nothing is saved", async () => {
@@ -252,7 +252,7 @@ describe("exporting review history", () => {
     await exportReviewHistoryAsJSON(USER);
 
     // Both land in the same folder on the same day.
-    expect((lastDownload()).filename).toBe("hakiya-reviews-2026-03-11.json");
+    expect((lastDownload()).filename).toBe("ingleezy-reviews-2026-03-11.json");
   });
 
   it("exports nobody else's history", async () => {

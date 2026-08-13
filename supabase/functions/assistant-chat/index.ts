@@ -113,7 +113,7 @@ ${pageLines.join("\n")}
       ]);
     }
 
-    const systemPromptExtra = `You are Hakiya's in-app AI tutor, a friendly expert in spoken ${dialectLabel}. The learner can ask about anything they see in the app — a video, a story, a grammar point, a word — or about Arabic in general.
+    const systemPromptExtra = `You are Ingleezy's in-app AI tutor, a friendly expert in spoken ${dialectLabel}. The learner can ask about anything they see in the app — a video, a story, a grammar point, a word — or about Arabic in general.
 ${seedBlock}${pageBlock}${learnerBlock ? `\n${learnerBlock}\n` : ""}${historyBlock ? `\n${historyBlock}\n` : ""}
 ${getDialectTransliterationRules(resolvedDialect)}
 

@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { runBrandMigration } from "./brandMigration";
 
 /**
- * The one-time rename of every localStorage key from `lahja*` to `hakiya*`.
+ * The one-time rename of every localStorage key from `lahja*` to `ingleezy*`.
  *
  * This runs in `main.tsx` before React mounts, on every existing user's next
  * visit, exactly once. Getting it wrong is not recoverable from inside the app:
@@ -16,7 +16,7 @@ import { runBrandMigration } from "./brandMigration";
  * the flag set.
  */
 
-const FLAG = "hakiya:migrated:v1";
+const FLAG = "ingleezy:migrated:v1";
 
 beforeEach(() => {
   localStorage.clear();
@@ -32,10 +32,10 @@ describe("exact key renames", () => {
 
     runBrandMigration();
 
-    expect(localStorage.getItem("hakiya_dialect_module")).toBe("Egyptian");
-    expect(localStorage.getItem("hakiya_bridge_view_enabled")).toBe("true");
-    expect(localStorage.getItem("hakiya_bible_session")).toBe("{}");
-    expect(localStorage.getItem("hakiya_freechat_v1")).toBe("[]");
+    expect(localStorage.getItem("ingleezy_dialect_module")).toBe("Egyptian");
+    expect(localStorage.getItem("ingleezy_bridge_view_enabled")).toBe("true");
+    expect(localStorage.getItem("ingleezy_bible_session")).toBe("{}");
+    expect(localStorage.getItem("ingleezy_freechat_v1")).toBe("[]");
   });
 
   it("removes the old key once it has been copied", () => {
@@ -51,18 +51,18 @@ describe("exact key renames", () => {
   it("keeps a value already written under the new name", () => {
     // The app has already been used post-rename; the old key is a leftover.
     localStorage.setItem("lahja_dialect_module", "Gulf");
-    localStorage.setItem("hakiya_dialect_module", "Yemeni");
+    localStorage.setItem("ingleezy_dialect_module", "Yemeni");
 
     runBrandMigration();
 
-    expect(localStorage.getItem("hakiya_dialect_module")).toBe("Yemeni");
+    expect(localStorage.getItem("ingleezy_dialect_module")).toBe("Yemeni");
     expect(localStorage.getItem("lahja_dialect_module")).toBeNull();
   });
 
   it("does nothing for a key that was never set", () => {
     runBrandMigration();
 
-    expect(localStorage.getItem("hakiya_dialect_module")).toBeNull();
+    expect(localStorage.getItem("ingleezy_dialect_module")).toBeNull();
   });
 
   it("preserves an empty string rather than treating it as absent", () => {
@@ -72,21 +72,21 @@ describe("exact key renames", () => {
 
     // `""` is falsy but is a real stored value; a truthiness check here would
     // silently drop it.
-    expect(localStorage.getItem("hakiya_bridge_view_enabled")).toBe("");
+    expect(localStorage.getItem("ingleezy_bridge_view_enabled")).toBe("");
   });
 });
 
 describe("prefix renames", () => {
-  it("renames every lahja: key to hakiya:", () => {
+  it("renames every lahja: key to ingleezy:", () => {
     localStorage.setItem("lahja:review-queue:user-1", "[1,2,3]");
     localStorage.setItem("lahja:display-prefs", '{"tashkil":true}');
     localStorage.setItem("lahja:home-layout", "compact");
 
     runBrandMigration();
 
-    expect(localStorage.getItem("hakiya:review-queue:user-1")).toBe("[1,2,3]");
-    expect(localStorage.getItem("hakiya:display-prefs")).toBe('{"tashkil":true}');
-    expect(localStorage.getItem("hakiya:home-layout")).toBe("compact");
+    expect(localStorage.getItem("ingleezy:review-queue:user-1")).toBe("[1,2,3]");
+    expect(localStorage.getItem("ingleezy:display-prefs")).toBe('{"tashkil":true}');
+    expect(localStorage.getItem("ingleezy:home-layout")).toBe("compact");
     expect(localStorage.getItem("lahja:review-queue:user-1")).toBeNull();
   });
 
@@ -101,18 +101,18 @@ describe("prefix renames", () => {
     runBrandMigration();
 
     for (let i = 0; i < 20; i++) {
-      expect(localStorage.getItem(`hakiya:review-queue:user-${i}`)).toBe(String(i));
+      expect(localStorage.getItem(`ingleezy:review-queue:user-${i}`)).toBe(String(i));
       expect(localStorage.getItem(`lahja:review-queue:user-${i}`)).toBeNull();
     }
   });
 
   it("keeps a value already under the new prefix", () => {
     localStorage.setItem("lahja:display-prefs", "old");
-    localStorage.setItem("hakiya:display-prefs", "new");
+    localStorage.setItem("ingleezy:display-prefs", "new");
 
     runBrandMigration();
 
-    expect(localStorage.getItem("hakiya:display-prefs")).toBe("new");
+    expect(localStorage.getItem("ingleezy:display-prefs")).toBe("new");
     expect(localStorage.getItem("lahja:display-prefs")).toBeNull();
   });
 
@@ -143,14 +143,14 @@ describe("running more than once", () => {
     runBrandMigration();
 
     // The learner switches dialect after the migration.
-    localStorage.setItem("hakiya_dialect_module", "Yemeni");
+    localStorage.setItem("ingleezy_dialect_module", "Yemeni");
     // And an old key reappears somehow — a restored backup, a second tab.
     localStorage.setItem("lahja_dialect_module", "Gulf");
     runBrandMigration();
 
     // The flag short-circuits, so the stale value cannot overwrite the live
     // one. It also means the stale key is left behind, which is the price.
-    expect(localStorage.getItem("hakiya_dialect_module")).toBe("Yemeni");
+    expect(localStorage.getItem("ingleezy_dialect_module")).toBe("Yemeni");
     expect(localStorage.getItem("lahja_dialect_module")).toBe("Gulf");
   });
 });
@@ -176,7 +176,7 @@ describe("when storage misbehaves", () => {
       key: string,
       value: string,
     ) {
-      if (key === "hakiya_dialect_module") throw new Error("QuotaExceededError");
+      if (key === "ingleezy_dialect_module") throw new Error("QuotaExceededError");
       return realSet.call(this, key, value);
     });
 
@@ -184,7 +184,7 @@ describe("when storage misbehaves", () => {
 
     // Each key is moved inside its own try, so one quota failure does not
     // abandon the ones after it.
-    expect(localStorage.getItem("hakiya_bible_session")).toBe("{}");
+    expect(localStorage.getItem("ingleezy_bible_session")).toBe("{}");
   });
 
   it("marks itself done even when a key could not be moved", () => {
@@ -196,7 +196,7 @@ describe("when storage misbehaves", () => {
       key: string,
       value: string,
     ) {
-      if (key === "hakiya_dialect_module") throw new Error("QuotaExceededError");
+      if (key === "ingleezy_dialect_module") throw new Error("QuotaExceededError");
       return realSet.call(this, key, value);
     });
 
@@ -213,6 +213,6 @@ describe("when storage misbehaves", () => {
     // the new key, finds nothing, and falls back to its default — a silent
     // reset to Gulf with the real choice stranded one key away.
     expect(localStorage.getItem(FLAG)).toBe("1");
-    expect(localStorage.getItem("hakiya_dialect_module")).toBeNull();
+    expect(localStorage.getItem("ingleezy_dialect_module")).toBeNull();
   });
 });

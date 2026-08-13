@@ -16,7 +16,7 @@ export interface ContinueEntry {
   updatedAt: number;
 }
 
-const STORAGE_KEY = "hakiya:continue:v1";
+const STORAGE_KEY = "ingleezy:continue:v1";
 const MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 const MIN_WRITE_INTERVAL_MS = 5000; // throttle noisy writers (e.g. video timer)
 
@@ -34,7 +34,7 @@ export function recordContinue(entry: Omit<ContinueEntry, "updatedAt">): void {
     const full: ContinueEntry = { ...entry, updatedAt: now };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(full));
     // Notify same-tab listeners (the storage event only fires cross-tab).
-    window.dispatchEvent(new CustomEvent("hakiya:continue-changed"));
+    window.dispatchEvent(new CustomEvent("ingleezy:continue-changed"));
   } catch {
     // quota / private mode — ignore
   }
@@ -61,7 +61,7 @@ export function clearContinue(): void {
   if (typeof window === "undefined") return;
   try {
     localStorage.removeItem(STORAGE_KEY);
-    window.dispatchEvent(new CustomEvent("hakiya:continue-changed"));
+    window.dispatchEvent(new CustomEvent("ingleezy:continue-changed"));
   } catch {}
 }
 

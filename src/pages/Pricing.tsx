@@ -71,10 +71,10 @@ const Pricing = () => {
             Choose Your Plan <InfoHint {...PAGE_HINTS["pricing"]} size="md" />
           </h1>
           <p className="text-muted-foreground text-lg">
-            Unlock the full power of Hakiya to accelerate your Arabic learning
+            Unlock the full power of Ingleezy to accelerate your Arabic learning
           </p>
           <Badge variant="outline" className="mt-3">
-            Hakiya is in closed beta — pricing below reflects our upcoming public launch
+            Ingleezy is in closed beta — pricing below reflects our upcoming public launch
           </Badge>
         </div>
 
@@ -293,7 +293,7 @@ const Pricing = () => {
                   },
                   {
                     q: 'Do you offer student or annual pricing?',
-                    a: 'Annual plans (2 months free) and student discounts are coming shortly after launch. Email hello@hakiya.app to be notified.',
+                    a: 'Annual plans (2 months free) and student discounts are coming shortly after launch. Email hello@ingleezy.app to be notified.',
                   },
                 ].map(({ q, a }) => (
                   <div key={q} className="border-b border-border pb-4">

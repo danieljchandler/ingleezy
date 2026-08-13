@@ -380,7 +380,7 @@ Deno.test("refuses malformed JSON", async () => {
         method: "POST",
         headers: {
           "content-type": "application/json",
-          origin: "https://hakiya.app",
+          origin: "https://ingleezy.app",
           authorization: "Bearer fixture",
         },
         body: "{not json",

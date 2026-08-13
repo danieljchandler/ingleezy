@@ -56,7 +56,7 @@ export const FIXTURE_ENV: Record<string, string> = {
   VAPID_PRIVATE_KEY: "tUQVlrPzzw18X2N_kpvu-T6hIHm0emz9ZzGxkDJQ9aE",
   VAPID_SUBJECT: "mailto:test@example.com",
 
-  ALLOWED_ORIGINS: "https://hakiya.app,https://lahja-arabic.lovable.app",
+  ALLOWED_ORIGINS: "https://ingleezy.app,https://lahja-arabic.lovable.app",
 };
 
 /** A recorded outbound call, so a test can assert what was sent upstream. */
@@ -399,7 +399,7 @@ export interface RequestOptions {
 export function jsonRequest(
   name: string,
   body: unknown,
-  { origin = "https://hakiya.app", jwt, headers = {}, method = "POST" }: RequestOptions = {},
+  { origin = "https://ingleezy.app", jwt, headers = {}, method = "POST" }: RequestOptions = {},
 ): Request {
   return new Request(`${FUNCTION_ORIGIN}/${name}`, {
     method,
@@ -425,7 +425,7 @@ export function jsonRequest(
 export function formRequest(
   name: string,
   parts: Record<string, string | File>,
-  { origin = "https://hakiya.app", jwt, headers = {} }: RequestOptions = {},
+  { origin = "https://ingleezy.app", jwt, headers = {} }: RequestOptions = {},
 ): Request {
   const form = new FormData();
   for (const [key, value] of Object.entries(parts)) form.append(key, value);
@@ -447,7 +447,7 @@ export function audioFile(name = "clip.mp3", type = "audio/mpeg"): File {
 }
 
 /** The CORS preflight browsers send before the real call. */
-export function optionsRequest(name: string, origin = "https://hakiya.app"): Request {
+export function optionsRequest(name: string, origin = "https://ingleezy.app"): Request {
   return new Request(`${FUNCTION_ORIGIN}/${name}`, {
     method: "OPTIONS",
     headers: { origin, "access-control-request-method": "POST" },

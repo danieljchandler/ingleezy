@@ -84,7 +84,7 @@ const Privacy = () => {
           <li>Ask what data we hold about you.</li>
         </ul>
         <p>
-          Email <a href="mailto:hello@hakiya.app">hello@hakiya.app</a> for
+          Email <a href="mailto:hello@ingleezy.app">hello@ingleezy.app</a> for
           any of the above. We'll respond within 30 days.
         </p>
 
@@ -97,7 +97,7 @@ const Privacy = () => {
 
         <h2>Children</h2>
         <p>
-          Hakiya is not directed at children under 13. If you believe a child has
+          Ingleezy is not directed at children under 13. If you believe a child has
           created an account, email us and we'll remove it.
         </p>
 
@@ -109,7 +109,7 @@ const Privacy = () => {
 
         <h2>Contact</h2>
         <p>
-          Privacy questions: <a href="mailto:hello@hakiya.app">hello@hakiya.app</a>.
+          Privacy questions: <a href="mailto:hello@ingleezy.app">hello@ingleezy.app</a>.
         </p>
       </article>
       <Footer />

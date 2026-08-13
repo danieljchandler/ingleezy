@@ -15,7 +15,7 @@ const DialectContext = createContext<DialectContextType>({
   setDialect: () => {},
 });
 
-const STORAGE_KEY = 'hakiya_dialect_module';
+const STORAGE_KEY = 'ingleezy_dialect_module';
 
 /** Query-key prefixes that depend on the active dialect and should be
  *  invalidated when the user switches dialect. */

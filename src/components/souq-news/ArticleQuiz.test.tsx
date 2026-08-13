@@ -50,7 +50,7 @@ afterEach(() => {
 });
 
 function render(questions: Array<Record<string, unknown>> = [aQuestion()], dialect = "Gulf") {
-  localStorage.setItem("hakiya_dialect_module", dialect);
+  localStorage.setItem("ingleezy_dialect_module", dialect);
   const harness = renderWithProviders(<ArticleQuiz article={AN_ARTICLE} />, {
     persona: "free",
     seed: (backend: SupabaseBackend) => {

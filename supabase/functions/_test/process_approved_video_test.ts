@@ -286,7 +286,7 @@ Deno.test("process-approved-video rejects a body that is not JSON", async () => 
         method: "POST",
         headers: {
           "content-type": "application/json",
-          origin: "https://hakiya.app",
+          origin: "https://ingleezy.app",
           authorization: `Bearer ${SERVICE_ROLE}`,
         },
         body: "{ not json",

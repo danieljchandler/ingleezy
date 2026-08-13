@@ -142,7 +142,7 @@ test.describe("signing up with an invite code", () => {
   test("a valid code creates the account and redeems the code", async ({ page, backend }) => {
     backend.db.seed("invite_codes", [anInviteCode({ code: "HAKIYA-GOOD", uses: 0, max_uses: 5 })]);
 
-    await fillCredentials(page, { email: "new@example.com", invite: "hakiya-good" });
+    await fillCredentials(page, { email: "new@example.com", invite: "ingleezy-good" });
     await page.getByRole("button", { name: /^sign up$/i }).click();
 
     await expect(page.getByText(/account created/i)).toBeVisible();
@@ -156,7 +156,7 @@ test.describe("signing up with an invite code", () => {
   test("uppercases the code, so a lowercase paste still works", async ({ page, backend }) => {
     backend.db.seed("invite_codes", [anInviteCode({ code: "HAKIYA-GOOD" })]);
 
-    await page.getByLabel(/invite code/i).fill("hakiya-good");
+    await page.getByLabel(/invite code/i).fill("ingleezy-good");
     await expect(page.getByLabel(/invite code/i)).toHaveValue("HAKIYA-GOOD");
   });
 
@@ -284,6 +284,6 @@ test.describe("switching between modes", () => {
 
     await page.getByRole("button", { name: /create an account/i }).click();
     await expect(page.getByLabel(/invite code/i)).toBeVisible();
-    await expect(page.getByRole("heading", { name: /join hakiya/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /join ingleezy/i })).toBeVisible();
   });
 });

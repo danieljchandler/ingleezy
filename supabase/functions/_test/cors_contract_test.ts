@@ -15,7 +15,7 @@ import { loadFunction, optionsRequest } from "./harness.ts";
  * surface, and a new function is included the moment its directory appears.
  */
 
-const ALLOWED_ORIGIN = "https://hakiya.app";
+const ALLOWED_ORIGIN = "https://ingleezy.app";
 const DENIED_ORIGIN = "https://evil.example";
 
 /** Every deployed function directory. */

@@ -19,8 +19,8 @@ import { useBibleDisplayPrefs } from "./useBibleDisplayPrefs";
  * (`storage` never fires there) and `storage` for the others.
  */
 
-const KEY = "hakiya:display-prefs";
-const LEGACY_KEY = "hakiya:bible-display-prefs";
+const KEY = "ingleezy:display-prefs";
+const LEGACY_KEY = "ingleezy:bible-display-prefs";
 
 const DEFAULTS = {
   showArabic: true,
@@ -216,7 +216,7 @@ describe("staying in step", () => {
     // moves, for the life of the tab.
     expect(() =>
       act(() => {
-        window.dispatchEvent(new CustomEvent("hakiya:display-prefs-changed"));
+        window.dispatchEvent(new CustomEvent("ingleezy:display-prefs-changed"));
       }),
     ).not.toThrow();
   });

@@ -85,7 +85,7 @@ const ResetPassword = () => {
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold font-heading mb-2">Set a new password</h1>
           <p className="text-muted-foreground text-sm">
-            Choose a new password for your Hakiya account.
+            Choose a new password for your Ingleezy account.
           </p>
         </div>
         <div className="bg-card rounded-xl p-6 border border-border">

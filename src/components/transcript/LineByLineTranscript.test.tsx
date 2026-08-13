@@ -147,7 +147,7 @@ function render({
 }: Options = {}) {
   const onAddToVocabSection = readOnly ? undefined : vi.fn();
   const onSaveToMyWords = readOnly ? undefined : vi.fn();
-  localStorage.setItem("hakiya_dialect_module", dialect);
+  localStorage.setItem("ingleezy_dialect_module", dialect);
   const harness = renderWithProviders(
     <LineByLineTranscript
       lines={lines}

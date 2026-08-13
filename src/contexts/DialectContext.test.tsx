@@ -19,7 +19,7 @@ import { useUserVocabulary } from "@/hooks/useUserVocabulary";
 let cleanup: (() => void) | undefined;
 afterEach(() => cleanup?.());
 
-const STORAGE_KEY = "hakiya_dialect_module";
+const STORAGE_KEY = "ingleezy_dialect_module";
 
 describe("the starting dialect", () => {
   it("defaults to Gulf", async () => {

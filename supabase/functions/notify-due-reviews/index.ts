@@ -31,7 +31,7 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const VAPID_PUBLIC_KEY = Deno.env.get("VAPID_PUBLIC_KEY") ?? "";
 const VAPID_PRIVATE_KEY = Deno.env.get("VAPID_PRIVATE_KEY") ?? "";
-const VAPID_SUBJECT = Deno.env.get("VAPID_SUBJECT") ?? "https://hakiya.app";
+const VAPID_SUBJECT = Deno.env.get("VAPID_SUBJECT") ?? "https://ingleezy.app";
 
 /**
  * Only notify inside this local-hour window. A reminder that arrives at 3am is
@@ -190,7 +190,7 @@ serve(async (req) => {
         title: "Your cards are waiting",
         body: `${total} card${total === 1 ? "" : "s"} due — a few minutes keeps the streak.`,
         url: "/review",
-        tag: "hakiya-due",
+        tag: "ingleezy-due",
       });
 
       try {

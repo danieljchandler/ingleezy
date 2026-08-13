@@ -16,7 +16,7 @@ import { useLeechPrefs } from "./useLeechPrefs";
  * to reach the review screen while it is mounted — the switch is in Settings.
  */
 
-const KEY = "hakiya:leech-tracking-enabled";
+const KEY = "ingleezy:leech-tracking-enabled";
 
 beforeEach(() => {
   localStorage.clear();
@@ -151,7 +151,7 @@ describe("staying in step", () => {
 
     expect(() =>
       act(() => {
-        window.dispatchEvent(new CustomEvent("hakiya:leech-prefs-changed"));
+        window.dispatchEvent(new CustomEvent("ingleezy:leech-prefs-changed"));
       }),
     ).not.toThrow();
   });

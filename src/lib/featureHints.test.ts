@@ -16,7 +16,7 @@ import {
  * components across the same tab, where `storage` never fires.
  */
 
-const KEY = "hakiya:feature-hints-enabled";
+const KEY = "ingleezy:feature-hints-enabled";
 
 beforeEach(() => {
   localStorage.clear();

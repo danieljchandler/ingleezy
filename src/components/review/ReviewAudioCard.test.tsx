@@ -72,7 +72,7 @@ type Props = Partial<Parameters<typeof ReviewAudioCard>[0]>;
  * rather than consumed.
  */
 function render(over: Props = {}) {
-  localStorage.setItem("hakiya_dialect_module", "Gulf");
+  localStorage.setItem("ingleezy_dialect_module", "Gulf");
   const onReveal = vi.fn();
   const harness = renderWithProviders(
     <ReviewAudioCard

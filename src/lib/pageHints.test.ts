@@ -85,7 +85,7 @@ describe("the copy itself", () => {
   });
 
   it("uses the app's current name throughout", () => {
-    // The rename from Lahja to Hakiya touched copy as well as storage keys;
+    // The rename from Lahja to Ingleezy touched copy as well as storage keys;
     // user-visible strings are the half nobody gets a migration for.
     const stale = Object.entries(PAGE_HINTS)
       .filter(([, hint]) => /lahja/i.test(`${hint.title} ${hint.body} ${hint.cta ?? ""}`))

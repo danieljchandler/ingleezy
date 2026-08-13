@@ -480,7 +480,7 @@ Deno.test("phrase-of-the-day works with no body at all", async () => {
     const response = await fn.handler(
       new Request("http://localhost/phrase-of-the-day", {
         method: "POST",
-        headers: { origin: "https://hakiya.app", authorization: "Bearer fixture" },
+        headers: { origin: "https://ingleezy.app", authorization: "Bearer fixture" },
       }),
     );
 

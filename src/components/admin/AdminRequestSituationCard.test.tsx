@@ -67,7 +67,7 @@ interface Options {
 }
 
 function render({ dialect = "Gulf", occasions = OCCASIONS, seed }: Options = {}) {
-  localStorage.setItem("hakiya_dialect_module", dialect);
+  localStorage.setItem("ingleezy_dialect_module", dialect);
   const onSaved = vi.fn();
   const harness = renderWithProviders(
     <AdminRequestSituationCard occasions={occasions} onSaved={onSaved} />,

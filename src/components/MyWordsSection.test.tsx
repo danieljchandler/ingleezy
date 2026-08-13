@@ -50,7 +50,7 @@ interface Options {
 }
 
 function render({ seed, activeDialect = "Gulf" }: Options = {}) {
-  localStorage.setItem("hakiya_dialect_module", activeDialect);
+  localStorage.setItem("ingleezy_dialect_module", activeDialect);
   const harness = renderWithProviders(<MyWordsSection />, {
     persona: "standard",
     personaOptions: { profile: { preferred_dialect: activeDialect } },

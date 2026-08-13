@@ -312,12 +312,12 @@ ${Object.entries(MODE_INSTRUCTIONS).filter(([k]) => !k.startsWith('suggest_')).m
 
 REMEMBER: Always include the \`\`\`json code block when generating content. The "type" field inside the JSON determines which preview card appears. Without this JSON block, the admin cannot approve and save the content.`;
   
-  return `You are an expert ${isEgyptian ? "Egyptian" : isYemeni ? "Yemeni" : "Gulf"} Arabic curriculum designer and language teacher. You are helping an admin build lessons and vocabulary for "Hakiya" (حكية), ${appDesc}.
+  return `You are an expert ${isEgyptian ? "Egyptian" : isYemeni ? "Yemeni" : "Gulf"} Arabic curriculum designer and language teacher. You are helping an admin build lessons and vocabulary for "Ingleezy" (حكية), ${appDesc}.
 
 Target dialect: ${dialectDesc}
 ${stageInfo}
 
-The Hakiya curriculum has 6 stages:
+The Ingleezy curriculum has 6 stages:
 1. Foundations (Pre-A1 → A1): 50+ survival phrases, Arabic script, Gulf sounds. 4–6 weeks.
 2. Building Blocks (A1 → A2): Basic sentences, slow Gulf speech, 500+ words. 8–12 weeks.
 3. The Bridge (A2 → B1): Authentic content with scaffolding, familiar topics, 1,500+ words. 8–16 weeks.

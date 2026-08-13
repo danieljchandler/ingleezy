@@ -238,7 +238,7 @@ export const useUpdateUserVocabularyReview = () => {
         : currentProductionLapses;
       const leechTrackingEnabled = (() => {
         try {
-          const raw = localStorage.getItem("hakiya:leech-tracking-enabled");
+          const raw = localStorage.getItem("ingleezy:leech-tracking-enabled");
           return raw === null ? true : raw === "true";
         } catch {
           return true;

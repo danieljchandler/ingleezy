@@ -5,10 +5,10 @@
  * which origins may call your functions.  When the variable is not set the
  * default is to allow only the known production domain.
  */
-// hakiya.app is the current production domain (see index.html's canonical
+// ingleezy.app is the current production domain (see index.html's canonical
 // link/OG tags); lahja-arabic.lovable.app is kept for the pre-rebrand Lovable
 // preview URL in case it's still linked anywhere.
-const DEFAULT_ORIGINS = 'https://hakiya.app,https://lahja-arabic.lovable.app';
+const DEFAULT_ORIGINS = 'https://ingleezy.app,https://lahja-arabic.lovable.app';
 
 function getAllowedOrigins(): string[] {
   const raw = Deno.env.get('ALLOWED_ORIGINS') ?? DEFAULT_ORIGINS;

@@ -12,7 +12,7 @@ import { useDocumentTitle } from "./useDocumentTitle";
  * the previous title on unmount rather than assuming a base.
  */
 
-const BASE = "Hakiya — Learn Spoken Arabic";
+const BASE = "Ingleezy — English for Arabic speakers";
 
 beforeEach(() => {
   document.title = BASE;
@@ -24,7 +24,7 @@ describe("setting a title", () => {
 
     // Bookmarks and history entries are read out of context, so the app's name
     // has to travel with the page's.
-    expect(document.title).toBe("My Words — Hakiya");
+    expect(document.title).toBe("My Words — Ingleezy");
   });
 
   it("falls back to the full base title for a page with no name", () => {
@@ -38,14 +38,14 @@ describe("setting a title", () => {
     expect(document.title).toBe(BASE);
 
     renderHook(() => useDocumentTitle("   "));
-    // " — Hakiya" would be a tab with a leading dash and no name.
+    // " — Ingleezy" would be a tab with a leading dash and no name.
     expect(document.title).toBe(BASE);
   });
 
   it("keeps a title that is only meaningful in Arabic", () => {
     renderHook(() => useDocumentTitle("مفرداتي"));
 
-    expect(document.title).toBe("مفرداتي — Hakiya");
+    expect(document.title).toBe("مفرداتي — Ingleezy");
   });
 
   it("follows the title as it changes", () => {
@@ -57,7 +57,7 @@ describe("setting a title", () => {
 
     // A page that renames itself — a story opening, a lesson loading — has to
     // take the tab with it.
-    expect(document.title).toBe("Review — Hakiya");
+    expect(document.title).toBe("Review — Ingleezy");
   });
 });
 
@@ -66,7 +66,7 @@ describe("giving the title back", () => {
     document.title = "Something else";
 
     const { unmount } = renderHook(() => useDocumentTitle("My Words"));
-    expect(document.title).toBe("My Words — Hakiya");
+    expect(document.title).toBe("My Words — Ingleezy");
 
     unmount();
 
@@ -80,10 +80,10 @@ describe("giving the title back", () => {
     const outer = renderHook(() => useDocumentTitle("Curriculum"));
     const inner = renderHook(() => useDocumentTitle("Lesson 4"));
 
-    expect(document.title).toBe("Lesson 4 — Hakiya");
+    expect(document.title).toBe("Lesson 4 — Ingleezy");
 
     inner.unmount();
-    expect(document.title).toBe("Curriculum — Hakiya");
+    expect(document.title).toBe("Curriculum — Ingleezy");
 
     outer.unmount();
     expect(document.title).toBe(BASE);
@@ -96,7 +96,7 @@ describe("giving the title back", () => {
     });
 
     rerender({ title: "Second" });
-    expect(document.title).toBe("Second — Hakiya");
+    expect(document.title).toBe("Second — Ingleezy");
 
     unmount();
 

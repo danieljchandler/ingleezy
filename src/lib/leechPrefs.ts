@@ -2,8 +2,8 @@
  * User preference: whether to flag cards as "leeches" after repeated failures.
  * Disabling stops new leech flagging AND hides the helper panel on already-flagged cards.
  */
-const KEY = "hakiya:leech-tracking-enabled";
-const EVENT = "hakiya:leech-prefs-changed";
+const KEY = "ingleezy:leech-tracking-enabled";
+const EVENT = "ingleezy:leech-prefs-changed";
 
 export function loadLeechTrackingEnabled(): boolean {
   try {

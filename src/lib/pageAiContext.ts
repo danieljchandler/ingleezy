@@ -114,7 +114,7 @@ export function buildPagePayload(
   const hint = key ? PAGE_HINTS[key] : undefined;
   return {
     route: pathname,
-    title: hint?.title ?? "Hakiya",
+    title: hint?.title ?? "Ingleezy",
     summary: cap(hint?.body, 400),
   };
 }

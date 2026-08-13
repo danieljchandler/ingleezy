@@ -13,7 +13,7 @@ import { MilestoneBanner } from "./MilestoneBanner";
  * happened is not.
  */
 
-const STORAGE_KEY = "hakiya:alphabet:milestone-seen";
+const STORAGE_KEY = "ingleezy:alphabet:milestone-seen";
 
 const reduced = vi.hoisted(() => ({ value: false }));
 vi.mock("@/lib/uiPrefs", async (importOriginal) => ({

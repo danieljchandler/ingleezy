@@ -21,7 +21,7 @@ import {
  * reproduce an aesthetic far more reliably when given a stable one.
  */
 
-const KEY = "hakiya:imageStyleLock:v1";
+const KEY = "ingleezy:imageStyleLock:v1";
 
 beforeEach(() => {
   localStorage.clear();

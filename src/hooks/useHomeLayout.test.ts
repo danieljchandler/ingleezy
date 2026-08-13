@@ -17,7 +17,7 @@ import { HOME_SECTIONS, isSectionVisible, loadHomeLayout, saveHomeLayout } from 
  * is the normal state of an existing user's storage, not an edge case.
  */
 
-const STORAGE_KEY = "hakiya:home-layout:v1";
+const STORAGE_KEY = "ingleezy:home-layout:v1";
 const ALL_IDS = HOME_SECTIONS.map((s) => s.id);
 /** The one section the home page lets a learner hide. */
 const HIDEABLE = HOME_SECTIONS.find((s) => !s.alwaysOn)!.id;

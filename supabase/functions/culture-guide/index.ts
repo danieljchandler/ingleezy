@@ -43,7 +43,7 @@ function buildSystemPrompt(dialect: string): string {
 
   return `${identity}
 
-You are a ${dialectLabel} cultural advisor for "Hakiya" — ${regionDesc}
+You are a ${dialectLabel} cultural advisor for "Ingleezy" — ${regionDesc}
 
 Your role: Help users navigate real-life social situations with culturally appropriate responses, phrases, and etiquette.
 

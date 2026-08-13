@@ -20,7 +20,7 @@ import {
  * matters most: a storage read that throws must not silently mute the app.
  */
 
-const SOUND_KEY = "hakiya:ui:sound";
+const SOUND_KEY = "ingleezy:ui:sound";
 
 beforeEach(() => {
   window.localStorage.clear();
@@ -85,7 +85,7 @@ describe("writing the sound preference", () => {
 
   it("announces the change", () => {
     const listener = vi.fn();
-    window.addEventListener("hakiya:ui-sound-changed", listener);
+    window.addEventListener("ingleezy:ui-sound-changed", listener);
 
     setSoundEnabled(false);
 
@@ -93,7 +93,7 @@ describe("writing the sound preference", () => {
     // sound-playing component in another without either knowing about the
     // other.
     expect(listener).toHaveBeenCalledTimes(1);
-    window.removeEventListener("hakiya:ui-sound-changed", listener);
+    window.removeEventListener("ingleezy:ui-sound-changed", listener);
   });
 
   it("does not throw when storage refuses the write", () => {

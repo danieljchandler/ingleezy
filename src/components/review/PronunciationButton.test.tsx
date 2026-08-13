@@ -132,7 +132,7 @@ interface Options {
 }
 
 function render({ word = A_WORD, wordEnglish, dialect = "Gulf", seed }: Options = {}) {
-  localStorage.setItem("hakiya_dialect_module", dialect);
+  localStorage.setItem("ingleezy_dialect_module", dialect);
   const harness = renderWithProviders(
     <PronunciationButton word={word} wordEnglish={wordEnglish} />,
     {

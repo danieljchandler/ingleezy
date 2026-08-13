@@ -15,7 +15,7 @@ import { useFeatureHints } from "./useFeatureHints";
  * flipping the switch in Settings take effect on the screen behind it.
  */
 
-const KEY = "hakiya:feature-hints-enabled";
+const KEY = "ingleezy:feature-hints-enabled";
 
 beforeEach(() => {
   localStorage.clear();
@@ -149,7 +149,7 @@ describe("staying in step", () => {
 
     expect(() =>
       act(() => {
-        window.dispatchEvent(new CustomEvent("hakiya:feature-hints-changed"));
+        window.dispatchEvent(new CustomEvent("ingleezy:feature-hints-changed"));
       }),
     ).not.toThrow();
   });

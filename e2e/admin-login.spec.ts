@@ -74,7 +74,7 @@ test.describe("the form", () => {
   });
 
   test("offers a way back to the learner app", async ({ page }) => {
-    await page.getByRole("button", { name: /back to hakiya/i }).click();
+    await page.getByRole("button", { name: /back to ingleezy/i }).click();
 
     await expect(page).toHaveURL(/127\.0\.0\.1:\d+\/$/);
   });

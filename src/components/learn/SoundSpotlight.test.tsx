@@ -51,7 +51,7 @@ const entries: SoundSpotlightEntry[] = [
 let cleanup: (() => void) | undefined;
 
 function renderSpotlight(list: SoundSpotlightEntry[] = entries, dialect = "Gulf") {
-  localStorage.setItem("hakiya_dialect_module", dialect);
+  localStorage.setItem("ingleezy_dialect_module", dialect);
   const harness = renderWithProviders(<SoundSpotlight entries={list} />);
   cleanup = harness.cleanup;
   return harness;

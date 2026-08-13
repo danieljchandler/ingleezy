@@ -186,12 +186,12 @@ describe("bumpAttempts", () => {
 
 describe("corrupt or unavailable storage", () => {
   it("treats unparseable storage as an empty queue rather than throwing", () => {
-    localStorage.setItem(`hakiya:review-queue:${USER}`, "{not json");
+    localStorage.setItem(`ingleezy:review-queue:${USER}`, "{not json");
     expect(all(USER)).toEqual([]);
   });
 
   it("treats a non-array value as empty", () => {
-    localStorage.setItem(`hakiya:review-queue:${USER}`, JSON.stringify({ nope: true }));
+    localStorage.setItem(`ingleezy:review-queue:${USER}`, JSON.stringify({ nope: true }));
     expect(all(USER)).toEqual([]);
   });
 

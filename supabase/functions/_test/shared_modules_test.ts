@@ -41,51 +41,51 @@ const originFor = (origin: string, allowed?: string): string | undefined =>
     ]);
 
 Deno.test("cors mirrors an allow-listed origin", () => {
-  assertEquals(originFor("https://hakiya.app", "https://hakiya.app"), "https://hakiya.app");
+  assertEquals(originFor("https://ingleezy.app", "https://ingleezy.app"), "https://ingleezy.app");
 });
 
 Deno.test("cors omits the header entirely for an unknown origin", () => {
   // Omitted rather than set to something wrong: the browser then blocks the
   // response, which is the behaviour the header exists to produce. A wildcard
   // here would let any page on the internet read a learner's data.
-  assertEquals(originFor("https://evil.example", "https://hakiya.app"), undefined);
+  assertEquals(originFor("https://evil.example", "https://ingleezy.app"), undefined);
 });
 
 Deno.test("cors falls back to the production domains when nothing is configured", () => {
   // A missing secret must not open the functions up, and must not lock the real
   // site out either.
-  assertEquals(originFor("https://hakiya.app", undefined), "https://hakiya.app");
+  assertEquals(originFor("https://ingleezy.app", undefined), "https://ingleezy.app");
   assertEquals(originFor("https://evil.example", undefined), undefined);
 });
 
 Deno.test("cors reads a comma-separated list, ignoring the spacing", () => {
-  const allowed = " https://hakiya.app , https://other.test ";
+  const allowed = " https://ingleezy.app , https://other.test ";
   assertEquals(originFor("https://other.test", allowed), "https://other.test");
-  assertEquals(originFor("https://hakiya.app", allowed), "https://hakiya.app");
+  assertEquals(originFor("https://ingleezy.app", allowed), "https://ingleezy.app");
 });
 
 Deno.test("cors allows local development on either loopback name", () => {
-  assertEquals(originFor("http://localhost:5173", "https://hakiya.app"), "http://localhost:5173");
-  assertEquals(originFor("http://127.0.0.1:5173", "https://hakiya.app"), "http://127.0.0.1:5173");
+  assertEquals(originFor("http://localhost:5173", "https://ingleezy.app"), "http://localhost:5173");
+  assertEquals(originFor("http://127.0.0.1:5173", "https://ingleezy.app"), "http://127.0.0.1:5173");
 });
 
 Deno.test("cors allows Lovable preview subdomains", () => {
   // Preview deploys get a generated subdomain per branch, so they cannot be
   // enumerated in the allow-list.
   assertEquals(
-    originFor("https://id-preview--abc123.lovable.app", "https://hakiya.app"),
+    originFor("https://id-preview--abc123.lovable.app", "https://ingleezy.app"),
     "https://id-preview--abc123.lovable.app",
   );
-  assertEquals(originFor("https://foo.lovable.dev", "https://hakiya.app"), "https://foo.lovable.dev");
+  assertEquals(originFor("https://foo.lovable.dev", "https://ingleezy.app"), "https://foo.lovable.dev");
 });
 
 Deno.test("cors does not allow a domain that merely ends in a Lovable name", () => {
   // The pattern is anchored at both ends. Without the anchors,
   // `lovable.app.evil.com` and `evil-lovable.app` would both match, which is
   // the whole risk of matching a domain with a regex.
-  assertEquals(originFor("https://lovable.app.evil.com", "https://hakiya.app"), undefined);
-  assertEquals(originFor("https://notlovable.app", "https://hakiya.app"), undefined);
-  assertEquals(originFor("http://foo.lovable.app", "https://hakiya.app"), undefined);
+  assertEquals(originFor("https://lovable.app.evil.com", "https://ingleezy.app"), undefined);
+  assertEquals(originFor("https://notlovable.app", "https://ingleezy.app"), undefined);
+  assertEquals(originFor("http://foo.lovable.app", "https://ingleezy.app"), undefined);
 });
 
 Deno.test("cors omits the header when there is no origin at all", () => {
@@ -100,7 +100,7 @@ Deno.test("cors always varies on origin", () => {
   // its Allow-Origin header — to another.
   assertEquals(getCorsHeaders(new Request("https://fn.test/x")).Vary, "Origin");
   assertEquals(
-    getCorsHeaders(new Request("https://fn.test/x", { headers: { origin: "https://hakiya.app" } }))
+    getCorsHeaders(new Request("https://fn.test/x", { headers: { origin: "https://ingleezy.app" } }))
       .Vary,
     "Origin",
   );
@@ -118,14 +118,14 @@ Deno.test("cors allows the headers supabase-js actually sends", () => {
 
 Deno.test("an error response carries the status, the message and the CORS headers", async () => {
   const cors = getCorsHeaders(
-    new Request("https://fn.test/x", { headers: { origin: "https://hakiya.app" } }),
+    new Request("https://fn.test/x", { headers: { origin: "https://ingleezy.app" } }),
   );
   const response = createErrorResponse(400, "Invalid input", cors);
 
   assertEquals(response.status, 400);
   // Without the CORS headers the browser reports a network error instead of the
   // message, so the caller cannot tell a validation failure from being offline.
-  assertEquals(response.headers.get("Access-Control-Allow-Origin"), "https://hakiya.app");
+  assertEquals(response.headers.get("Access-Control-Allow-Origin"), "https://ingleezy.app");
   assertEquals(response.headers.get("Content-Type"), "application/json");
   assertEquals(await response.json(), { error: "Invalid input" });
 });

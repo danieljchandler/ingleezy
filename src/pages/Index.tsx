@@ -16,8 +16,8 @@ import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { XPDisplay, StreakDisplay, WeeklyGoalCard, AchievementsGrid } from "@/components/gamification";
-import hakiyaLogoAsset from "@/assets/hakiya-logo.png.asset.json";
-const lahjaLogo = hakiyaLogoAsset.url;
+import ingleezyLogoAsset from "@/assets/ingleezy-logo.png.asset.json";
+const lahjaLogo = ingleezyLogoAsset.url;
 import { useState } from "react";
 import { NotificationBell } from "@/components/NotificationBell";
 import { useDialect, DialectModule } from "@/contexts/DialectContext";
@@ -173,7 +173,7 @@ const Index = () => {
 
       {/* Top bar with logo and auth */}
       <div className="flex items-center justify-between mb-4">
-        <img src={lahjaLogo} alt="Hakiya" className="h-24" />
+        <img src={lahjaLogo} alt="Ingleezy" className="h-24" />
         
         <div className="flex items-center gap-3">
           {!authLoading && (isAuthenticated ? (
@@ -276,7 +276,7 @@ const Index = () => {
                     <InfoHint
                       size="md"
                       title="Your daily queue"
-                      body="Everything Hakiya recommends for you today — reviews, a challenge, listening, reading and more. Knock them out to hit your goal and grow your streak."
+                      body="Everything Ingleezy recommends for you today — reviews, a challenge, listening, reading and more. Knock them out to hit your goal and grow your streak."
                     />
                   </div>
                   <p className="text-sm text-muted-foreground mt-0.5">

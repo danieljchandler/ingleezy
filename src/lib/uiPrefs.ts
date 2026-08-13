@@ -5,7 +5,7 @@
  */
 import { useEffect, useState } from "react";
 
-const SOUND_KEY = "hakiya:ui:sound";
+const SOUND_KEY = "ingleezy:ui:sound";
 
 export function isSoundEnabled(): boolean {
   if (typeof window === "undefined") return true;
@@ -21,7 +21,7 @@ export function setSoundEnabled(v: boolean) {
   if (typeof window === "undefined") return;
   try {
     window.localStorage.setItem(SOUND_KEY, v ? "1" : "0");
-    window.dispatchEvent(new CustomEvent("hakiya:ui-sound-changed"));
+    window.dispatchEvent(new CustomEvent("ingleezy:ui-sound-changed"));
   } catch {
     /* ignore */
   }
@@ -41,8 +41,8 @@ export function useSoundPref(): [boolean, (v: boolean) => void] {
   const [enabled, setEnabled] = useState<boolean>(() => isSoundEnabled());
   useEffect(() => {
     const handler = () => setEnabled(isSoundEnabled());
-    window.addEventListener("hakiya:ui-sound-changed", handler);
-    return () => window.removeEventListener("hakiya:ui-sound-changed", handler);
+    window.addEventListener("ingleezy:ui-sound-changed", handler);
+    return () => window.removeEventListener("ingleezy:ui-sound-changed", handler);
   }, []);
   return [
     enabled,

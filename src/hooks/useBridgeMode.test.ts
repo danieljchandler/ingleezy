@@ -21,7 +21,7 @@ import type { SupabaseBackend } from "@/test/support/server/handler";
  * `storage`, which never fires in the tab that wrote it.
  */
 
-const STORAGE_KEY = "hakiya_bridge_view_enabled";
+const STORAGE_KEY = "ingleezy_bridge_view_enabled";
 
 let cleanup: (() => void) | undefined;
 
@@ -219,7 +219,7 @@ describe("staying in sync", () => {
 
     act(() => {
       localStorage.setItem(STORAGE_KEY, "1");
-      window.dispatchEvent(new CustomEvent("hakiya:bridge-mode-changed"));
+      window.dispatchEvent(new CustomEvent("ingleezy:bridge-mode-changed"));
     });
 
     // Settings and the content that reacts to the setting are different trees;
@@ -262,7 +262,7 @@ describe("staying in sync", () => {
     expect(() =>
       act(() => {
         localStorage.setItem(STORAGE_KEY, "1");
-        window.dispatchEvent(new CustomEvent("hakiya:bridge-mode-changed"));
+        window.dispatchEvent(new CustomEvent("ingleezy:bridge-mode-changed"));
       }),
     ).not.toThrow();
   });

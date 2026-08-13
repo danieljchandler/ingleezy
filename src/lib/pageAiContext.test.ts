@@ -65,7 +65,7 @@ describe("buildPagePayload", () => {
   it("degrades to a bare route when nothing is known", () => {
     const payload = buildPagePayload("/no-such-page", null);
     expect(payload.route).toBe("/no-such-page");
-    expect(payload.title).toBe("Hakiya");
+    expect(payload.title).toBe("Ingleezy");
     expect(payload.summary).toBeUndefined();
   });
 });

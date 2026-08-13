@@ -10,8 +10,8 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
-const STORAGE_KEY = "hakiya_bridge_view_enabled";
-const EVENT = "hakiya:bridge-mode-changed";
+const STORAGE_KEY = "ingleezy_bridge_view_enabled";
+const EVENT = "ingleezy:bridge-mode-changed";
 
 function readLocal(): boolean {
   try {

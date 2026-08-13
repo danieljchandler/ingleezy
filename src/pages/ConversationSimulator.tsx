@@ -43,7 +43,7 @@ interface ChatMsg {
   streaming?: boolean;
 }
 
-const STORAGE_KEY = "hakiya_freechat_v1";
+const STORAGE_KEY = "ingleezy_freechat_v1";
 const STORAGE_TTL_MS = 4 * 60 * 60 * 1000;
 
 const TOPIC_SEEDS = [

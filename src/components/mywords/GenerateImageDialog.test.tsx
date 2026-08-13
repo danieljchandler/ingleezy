@@ -277,7 +277,7 @@ describe("the style lock", () => {
     // Persisted rather than held in the dialog: a signature look retyped for
     // every card is not a signature look. (Asserted at the store rather than by
     // reopening, because the test harness clears storage between mounts.)
-    const stored = JSON.parse(localStorage.getItem("hakiya:imageStyleLock:v1")!);
+    const stored = JSON.parse(localStorage.getItem("ingleezy:imageStyleLock:v1")!);
     expect(stored).toMatchObject({ enabled: true, description: "flat pastel illustration" });
     expect(stored.seed).toBeTruthy();
   });

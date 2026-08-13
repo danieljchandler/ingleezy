@@ -527,7 +527,7 @@ Deno.test("discover-feed works with no body at all", async () => {
       new Request("http://localhost/discover-feed", {
         method: "POST",
         headers: {
-          origin: "https://hakiya.app",
+          origin: "https://ingleezy.app",
           authorization: `Bearer ${fixtureJwt()}`,
         },
       }),

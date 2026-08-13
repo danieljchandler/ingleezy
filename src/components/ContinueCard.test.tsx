@@ -35,7 +35,7 @@ vi.mock("@/hooks/useLessonProgress", () => ({
   useResumableLesson: () => ({ data: lesson.data }),
 }));
 
-const STORAGE_KEY = "hakiya:continue:v1";
+const STORAGE_KEY = "ingleezy:continue:v1";
 const NOW = new Date("2026-03-10T12:00:00Z");
 
 let cleanup: (() => void) | undefined;
@@ -85,7 +85,7 @@ interface Options {
 function render({ entry, raw, resumable = null, activeDialect = "Gulf" }: Options = {}) {
   if (raw !== undefined) localStorage.setItem(STORAGE_KEY, raw);
   else if (entry) localStorage.setItem(STORAGE_KEY, JSON.stringify(entry));
-  localStorage.setItem("hakiya_dialect_module", activeDialect);
+  localStorage.setItem("ingleezy_dialect_module", activeDialect);
   lesson.data = resumable;
 
   const harness = renderWithProviders(<ContinueCard />);
@@ -307,7 +307,7 @@ describe("ContinueCard — keeping up with changes", () => {
     expect(card()).not.toBeInTheDocument();
 
     localStorage.setItem(STORAGE_KEY, JSON.stringify(anEntry()));
-    await emit("hakiya:continue-changed");
+    await emit("ingleezy:continue-changed");
 
     expect(screen.getByText("The Merchant of Muscat")).toBeInTheDocument();
   });
@@ -337,7 +337,7 @@ describe("ContinueCard — keeping up with changes", () => {
     act(() => unmount());
 
     localStorage.setItem(STORAGE_KEY, JSON.stringify(anEntry()));
-    await emit("hakiya:continue-changed");
+    await emit("ingleezy:continue-changed");
 
     expect(card()).not.toBeInTheDocument();
   });

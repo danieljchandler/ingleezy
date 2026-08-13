@@ -58,7 +58,7 @@ const authoredSentences = ARABIC.map((arabic, i) => ({
 async function readWithEnglishOn(page: Page) {
   await page.addInitScript(() =>
     window.localStorage.setItem(
-      "hakiya:display-prefs",
+      "ingleezy:display-prefs",
       JSON.stringify({
         showArabic: true,
         showTashkil: true,

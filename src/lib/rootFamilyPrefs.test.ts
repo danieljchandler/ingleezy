@@ -19,7 +19,7 @@ import {
  * running in another one.
  */
 
-const KEY = "hakiya:root-families-enabled";
+const KEY = "ingleezy:root-families-enabled";
 
 beforeEach(() => {
   window.localStorage.clear();
@@ -126,7 +126,7 @@ describe("subscribing", () => {
     const listener = vi.fn();
     const unsubscribe = subscribeRootFamilyPrefs(listener);
 
-    window.dispatchEvent(new CustomEvent("hakiya:leech-prefs-changed"));
+    window.dispatchEvent(new CustomEvent("ingleezy:leech-prefs-changed"));
 
     expect(listener).not.toHaveBeenCalled();
     unsubscribe();

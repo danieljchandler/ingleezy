@@ -148,7 +148,7 @@ Deno.serve(async (req) => {
         );
       }
       const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
-      const origin = req.headers.get("origin") || "https://hakiya.app";
+      const origin = req.headers.get("origin") || "https://ingleezy.app";
       const session = await stripe.checkout.sessions.create({
         customer_email: user.email ?? undefined,
         line_items: [{ price: priceId, quantity: 1 }],

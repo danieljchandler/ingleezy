@@ -19,8 +19,8 @@ import {
 } from 'lucide-react';
 import { getTopicCategories } from '@/data/listenTopics';
 import { LEARNING_REASONS, reasonLabel } from '@/data/learningReasons';
-import hakiyaIconAsset from '@/assets/hakiya-icon.png.asset.json';
-const lahjaIcon = hakiyaIconAsset.url;
+import ingleezyIconAsset from '@/assets/ingleezy-icon.png.asset.json';
+const lahjaIcon = ingleezyIconAsset.url;
 
 type Step = 'welcome' | 'dialect' | 'level' | 'purpose' | 'goal';
 
@@ -133,7 +133,7 @@ const Onboarding = () => {
       }
 
       markTourPending();
-      toast.success('Welcome to Hakiya! 🎉');
+      toast.success('Welcome to Ingleezy! 🎉');
       navigate('/');
     } catch (e) {
       console.error(e);
@@ -172,13 +172,13 @@ const Onboarding = () => {
         {/* ─── WELCOME ─────────────────────────── */}
         {step === 'welcome' && (
           <div className="text-center space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-            <img src={lahjaIcon} alt="Hakiya" className="h-20 w-20 mx-auto" />
+            <img src={lahjaIcon} alt="Ingleezy" className="h-20 w-20 mx-auto" />
             <div>
               <h1 className="text-3xl font-bold font-heading text-foreground mb-3" dir="rtl">
                 !أهلاً وسهلاً
               </h1>
               <h2 className="text-xl font-semibold text-foreground mb-2">
-                Welcome to Hakiya
+                Welcome to Ingleezy
               </h2>
               <p className="text-muted-foreground leading-relaxed">
                 Learn Arabic dialects through real conversations, videos, and interactive lessons.

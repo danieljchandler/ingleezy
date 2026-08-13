@@ -85,7 +85,7 @@ afterEach(() => {
 });
 
 function render(seed: (backend: SupabaseBackend) => void = () => {}) {
-  localStorage.setItem("hakiya_dialect_module", "Gulf");
+  localStorage.setItem("ingleezy_dialect_module", "Gulf");
   const harness = renderWithProviders(
     <ImportFromAnkiDialog open onOpenChange={() => {}} />,
     {

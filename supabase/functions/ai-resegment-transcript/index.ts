@@ -53,7 +53,7 @@ const DIALECT_MARKERS: Record<string, string> = {
 function buildSystemPrompt(dialect: string | undefined): string {
   const key = dialect && DIALECT_MARKERS[dialect] ? dialect : "Gulf";
   const markers = DIALECT_MARKERS[key];
-  return `You are an expert Arabic transcript editor for the Hakiya dialect-learning platform.
+  return `You are an expert Arabic transcript editor for the Ingleezy dialect-learning platform.
 
 You receive a flattened list of timestamped Arabic words from ASR output and must
 group them into clean, learner-friendly subtitle lines.

@@ -19,7 +19,7 @@ import { useRootFamilyPrefs } from "./useRootFamilyPrefs";
  * for every learner who had turned the feature off.
  */
 
-const KEY = "hakiya:root-families-enabled";
+const KEY = "ingleezy:root-families-enabled";
 
 beforeEach(() => {
   localStorage.clear();

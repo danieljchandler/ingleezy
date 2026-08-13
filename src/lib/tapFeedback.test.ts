@@ -111,7 +111,7 @@ describe("the tap chime", () => {
   it("plays for a user who has never touched the setting", () => {
     // An unset preference means on — a silent app by default would read as
     // broken audio.
-    expect(localStorage.getItem("hakiya:ui-sound")).toBeNull();
+    expect(localStorage.getItem("ingleezy:ui-sound")).toBeNull();
     playTapChime();
 
     expect(started).toBeGreaterThan(0);

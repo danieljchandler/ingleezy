@@ -1,6 +1,6 @@
 /* eslint-env serviceworker */
 /**
- * Hakiya service worker.
+ * Ingleezy service worker.
  *
  * Hand-rolled rather than generated, because what this app actually needs is
  * narrow and the rules matter more than the coverage:
@@ -22,9 +22,9 @@
  */
 
 const VERSION = 'v1';
-const SHELL_CACHE = `hakiya-shell-${VERSION}`;
-const ASSET_CACHE = `hakiya-assets-${VERSION}`;
-const AUDIO_CACHE = `hakiya-audio-${VERSION}`;
+const SHELL_CACHE = `ingleezy-shell-${VERSION}`;
+const ASSET_CACHE = `ingleezy-assets-${VERSION}`;
+const AUDIO_CACHE = `ingleezy-audio-${VERSION}`;
 
 const CURRENT_CACHES = [SHELL_CACHE, ASSET_CACHE, AUDIO_CACHE];
 
@@ -172,12 +172,12 @@ self.addEventListener('push', (event) => {
     payload = { body: event.data ? event.data.text() : '' };
   }
 
-  const title = payload.title || 'Hakiya';
+  const title = payload.title || 'Ingleezy';
   const options = {
     body: payload.body || 'You have cards waiting.',
     icon: '/favicon.png',
     badge: '/favicon.png',
-    tag: payload.tag || 'hakiya-reminder',
+    tag: payload.tag || 'ingleezy-reminder',
     // Replace rather than stack: three reminders in a tray is how an app gets
     // its notifications switched off.
     renotify: false,

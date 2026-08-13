@@ -33,7 +33,7 @@ afterEach(() => {
 function render(rows: Record<string, unknown>[], dialect = "Gulf") {
   // DialectContext seeds from localStorage and then re-syncs from the profile
   // row, so both have to name the same dialect or the provider snaps back.
-  localStorage.setItem("hakiya_dialect_module", dialect);
+  localStorage.setItem("ingleezy_dialect_module", dialect);
   const seed = (backend: SupabaseBackend) => {
     backend.db.seed("profiles", [aProfile({ user_id: TEST_USER_ID, preferred_dialect: dialect })]);
     backend.db.seed("topics", rows);
@@ -114,7 +114,7 @@ describe("listing the topics", () => {
 
 describe("when the read fails", () => {
   it("surfaces the error rather than an empty topic list", async () => {
-    localStorage.setItem("hakiya_dialect_module", "Gulf");
+    localStorage.setItem("ingleezy_dialect_module", "Gulf");
     const harness = renderHookWithProviders(() => useTopics(), {
       persona: "free",
       seed: (backend) => backend.db.failAlways("topics", 500, { message: "boom" }),

@@ -69,7 +69,7 @@ interface Options {
 }
 
 function render({ persona = "free", dialect = "Gulf", seed }: Options = {}) {
-  localStorage.setItem("hakiya_dialect_module", dialect);
+  localStorage.setItem("ingleezy_dialect_module", dialect);
   const harness = renderWithProviders(
     <>
       <PhraseOfTheDay />

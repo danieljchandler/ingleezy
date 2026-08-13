@@ -22,7 +22,7 @@ import {
  * simply never appear for anyone with a saved layout.
  */
 
-const STORAGE_KEY = "hakiya:home-layout:v1";
+const STORAGE_KEY = "ingleezy:home-layout:v1";
 const ALL_IDS = HOME_SECTIONS.map((section) => section.id);
 
 beforeEach(() => localStorage.clear());
@@ -59,12 +59,12 @@ describe("round-tripping", () => {
 
   it("announces a change so the home page re-reads it", () => {
     const listener = vi.fn();
-    window.addEventListener("hakiya:home-layout-changed", listener);
+    window.addEventListener("ingleezy:home-layout-changed", listener);
 
     saveHomeLayout({ order: ALL_IDS, hidden: [] });
 
     expect(listener).toHaveBeenCalledTimes(1);
-    window.removeEventListener("hakiya:home-layout-changed", listener);
+    window.removeEventListener("ingleezy:home-layout-changed", listener);
   });
 });
 

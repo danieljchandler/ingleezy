@@ -19,8 +19,8 @@ import {
  * word silently rather than failing.
  */
 
-const STORAGE_KEY = "hakiya:display-prefs";
-const LEGACY_KEY = "hakiya:bible-display-prefs";
+const STORAGE_KEY = "ingleezy:display-prefs";
+const LEGACY_KEY = "ingleezy:bible-display-prefs";
 
 beforeEach(() => localStorage.clear());
 afterEach(() => vi.restoreAllMocks());

@@ -18,8 +18,8 @@ import { markTourPending, OnboardingTour } from "./OnboardingTour";
  * ordinary case on a page without the nav.
  */
 
-const TOUR_KEY = "hakiya:tourCompleted";
-const TRIGGER_KEY = "hakiya:showTour";
+const TOUR_KEY = "ingleezy:tourCompleted";
+const TRIGGER_KEY = "ingleezy:showTour";
 
 const STEP_TITLES = ["Today", "Learn", "Discover", "Practice", "Me"];
 

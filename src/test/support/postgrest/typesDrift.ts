@@ -30,12 +30,8 @@ export interface DriftedColumn {
 const CURRICULUM_RESTRUCTURE = "20260224000000_curriculum_restructure";
 
 export const COLUMNS_MISSING_FROM_TYPES: DriftedColumn[] = [
-  // FSRS-4.5 added difficulty to all three SRS tables; the types picked it up
-  // for user_vocabulary and user_phrases but not for word_reviews.
-  { table: "word_reviews", column: "difficulty", migration: "20260304000000_fsrs_difficulty" },
-
-
-
+  // (word_reviews.difficulty was tracked here until the types regeneration
+  //  that came with the Fusha layer picked it up — drift fixed upstream.)
 
   // The lesson-content columns the curriculum builder writes.
   ...[

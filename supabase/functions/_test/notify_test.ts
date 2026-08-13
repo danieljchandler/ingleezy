@@ -411,7 +411,7 @@ Deno.test("notify-due-reviews works with no body at all", async () => {
       new Request("http://localhost/notify-due-reviews", {
         method: "POST",
         headers: {
-          origin: "https://hakiya.app",
+          origin: "https://ingleezy.app",
           authorization: `Bearer ${SERVICE_ROLE}`,
         },
       }),

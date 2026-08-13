@@ -63,7 +63,7 @@ interface Options {
 }
 
 async function render({ dialect = "Gulf", owned = [], seed }: Options = {}) {
-  localStorage.setItem("hakiya_dialect_module", dialect);
+  localStorage.setItem("ingleezy_dialect_module", dialect);
   const onOpenChange = vi.fn();
   const harness = renderWithProviders(
     <SuggestFlashcardsDialog open onOpenChange={onOpenChange} />,

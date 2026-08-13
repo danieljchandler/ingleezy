@@ -16,7 +16,7 @@ export async function exportVocabularyAsJSON(userId: string): Promise<void> {
   if (error) throw new Error(`Failed to export vocabulary: ${error.message}`);
 
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-  downloadBlob(blob, `hakiya-vocabulary-${formatDate()}.json`);
+  downloadBlob(blob, `ingleezy-vocabulary-${formatDate()}.json`);
 }
 
 /**
@@ -49,7 +49,7 @@ export async function exportVocabularyAsCSV(userId: string): Promise<void> {
   ];
 
   const blob = new Blob([csvRows.join("\n")], { type: "text/csv;charset=utf-8" });
-  downloadBlob(blob, `hakiya-vocabulary-${formatDate()}.csv`);
+  downloadBlob(blob, `ingleezy-vocabulary-${formatDate()}.csv`);
 }
 
 /**
@@ -67,7 +67,7 @@ export async function exportReviewHistoryAsJSON(userId: string): Promise<void> {
   if (error) throw new Error(`Failed to export review history: ${error.message}`);
 
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-  downloadBlob(blob, `hakiya-reviews-${formatDate()}.json`);
+  downloadBlob(blob, `ingleezy-reviews-${formatDate()}.json`);
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────

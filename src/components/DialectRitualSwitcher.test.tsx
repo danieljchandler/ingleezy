@@ -17,7 +17,7 @@ import { DialectRitualSwitcher } from "./DialectRitualSwitcher";
  * learner needs most often and asks for least.
  */
 
-const STORAGE_KEY = "hakiya_dialect_module";
+const STORAGE_KEY = "ingleezy_dialect_module";
 
 let cleanup: (() => void) | undefined;
 

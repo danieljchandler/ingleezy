@@ -49,11 +49,11 @@ export const ContinueCard = () => {
 
   useEffect(() => {
     const refresh = () => setEntry(getContinue());
-    window.addEventListener("hakiya:continue-changed", refresh);
+    window.addEventListener("ingleezy:continue-changed", refresh);
     window.addEventListener("storage", refresh);
     window.addEventListener("focus", refresh);
     return () => {
-      window.removeEventListener("hakiya:continue-changed", refresh);
+      window.removeEventListener("ingleezy:continue-changed", refresh);
       window.removeEventListener("storage", refresh);
       window.removeEventListener("focus", refresh);
     };

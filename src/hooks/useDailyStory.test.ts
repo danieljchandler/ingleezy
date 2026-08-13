@@ -57,7 +57,7 @@ function render(
   rows: Record<string, unknown>[],
   { dialect = "Gulf", fn }: { dialect?: string; fn?: (backend: SupabaseBackend) => void } = {},
 ) {
-  localStorage.setItem("hakiya_dialect_module", dialect);
+  localStorage.setItem("ingleezy_dialect_module", dialect);
   const seed = (backend: SupabaseBackend) => {
     backend.db.seed("profiles", [aProfile({ user_id: TEST_USER_ID, preferred_dialect: dialect })]);
     backend.db.seed(STORY_TABLE, rows);

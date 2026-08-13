@@ -95,7 +95,7 @@ ${context.slice(0, MAX_CONTEXT_CHARS)}
 
 ${vocab}
 
-You are Hakiya's AI tutor on a live voice call. The learner may ask about anything they see in the app — a video, a story, a grammar point, a word — or about Arabic in general.
+You are Ingleezy's AI tutor on a live voice call. The learner may ask about anything they see in the app — a video, a story, a grammar point, a word — or about Arabic in general.
 ${contextBlock}${learnerBlock ? `\n${learnerBlock}\n` : ""}
 Strict rules:
 - This is spoken dialogue — keep every turn short (1-2 sentences) and wait for the learner.

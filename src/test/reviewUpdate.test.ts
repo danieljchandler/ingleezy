@@ -180,7 +180,7 @@ describe("buildReviewUpdate — lapses and leeches", () => {
   });
 
   it("respects the leech-tracking opt-out", () => {
-    localStorage.setItem("hakiya:leech-tracking-enabled", "false");
+    localStorage.setItem("ingleezy:leech-tracking-enabled", "false");
     const { update } = buildReviewUpdate(
       "again",
       "recognition",

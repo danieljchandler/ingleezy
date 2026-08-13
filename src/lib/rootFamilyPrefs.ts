@@ -5,8 +5,8 @@
  * chips on My Words. It also stops the root-index query from running at all —
  * the feature costs nothing when it's off, rather than fetching and hiding.
  */
-const KEY = "hakiya:root-families-enabled";
-const EVENT = "hakiya:root-family-prefs-changed";
+const KEY = "ingleezy:root-families-enabled";
+const EVENT = "ingleezy:root-family-prefs-changed";
 
 export function loadRootFamiliesEnabled(): boolean {
   try {

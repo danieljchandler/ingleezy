@@ -74,12 +74,12 @@ describe("recording", () => {
 
   it("announces the change, since the storage event does not fire in the same tab", () => {
     const listener = vi.fn();
-    window.addEventListener("hakiya:continue-changed", listener);
+    window.addEventListener("ingleezy:continue-changed", listener);
 
     recordContinue(anEntry());
 
     expect(listener).toHaveBeenCalledTimes(1);
-    window.removeEventListener("hakiya:continue-changed", listener);
+    window.removeEventListener("ingleezy:continue-changed", listener);
   });
 
   it("survives a blocked write", () => {
@@ -164,20 +164,20 @@ describe("expiry", () => {
 
     getContinue();
 
-    expect(localStorage.getItem("hakiya:continue:v1")).toBeNull();
+    expect(localStorage.getItem("ingleezy:continue:v1")).toBeNull();
   });
 });
 
 describe("reading a damaged entry", () => {
   it("returns null for unparseable storage", () => {
-    localStorage.setItem("hakiya:continue:v1", "{not json");
+    localStorage.setItem("ingleezy:continue:v1", "{not json");
     expect(getContinue()).toBeNull();
   });
 
   it("returns null when the timestamp is missing", () => {
     // Without updatedAt the expiry check cannot run, so the entry is not
     // trustworthy at any age.
-    localStorage.setItem("hakiya:continue:v1", JSON.stringify({ kind: "story", route: "/x" }));
+    localStorage.setItem("ingleezy:continue:v1", JSON.stringify({ kind: "story", route: "/x" }));
     expect(getContinue()).toBeNull();
   });
 
@@ -194,13 +194,13 @@ describe("clearing", () => {
   it("removes the entry and announces it", () => {
     recordContinue(anEntry());
     const listener = vi.fn();
-    window.addEventListener("hakiya:continue-changed", listener);
+    window.addEventListener("ingleezy:continue-changed", listener);
 
     clearContinue();
 
     expect(getContinue()).toBeNull();
     expect(listener).toHaveBeenCalledTimes(1);
-    window.removeEventListener("hakiya:continue-changed", listener);
+    window.removeEventListener("ingleezy:continue-changed", listener);
   });
 });
 

@@ -181,7 +181,7 @@ describe("the dialect chip", () => {
   });
 
   it("follows the stored dialect", async () => {
-    localStorage.setItem("hakiya_dialect_module", "Egyptian");
+    localStorage.setItem("ingleezy_dialect_module", "Egyptian");
     render();
 
     expect(screen.getByText("Egyptian")).toBeInTheDocument();

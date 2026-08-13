@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700&family=Montserrat:wght@600;700&family=Open+Sans:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700&family=Montserrat:wght@600;700&family=Open+Sans:wght@400;500&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,113 +6,114 @@
 
 @layer base {
   :root {
-    /* ── Lahja Brand Guide Color Palette ── */
-    /* Deep Desert #44663D | Warm Sand #E2C5A6 | Desert Red #8C4135 | Charcoal #323A36 */
+    /* ── Ingleezy placeholder palette (final branding pending) ──
+       Cobalt primary (the teal→indigo bridge), warm amber accent for CTAs,
+       near-white neutral base. Swap these tokens when the brand guide lands. */
 
-    /* Background: Warm Sand Beige - light, calm, breathable */
-    --background: 32 50% 77%;
-    --foreground: 150 5% 15%;
+    /* Background: near-white, cool and clean */
+    --background: 228 25% 98%;
+    --foreground: 228 15% 15%;
 
-    /* Cards: Off-white surface - slightly lighter than warm sand */
-    --card: 38 35% 97%;
-    --card-foreground: 150 5% 15%;
+    /* Cards: pure white surface */
+    --card: 0 0% 100%;
+    --card-foreground: 228 15% 15%;
 
-    --popover: 38 35% 97%;
-    --popover-foreground: 150 5% 15%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 228 15% 15%;
 
-    /* Desert Red - warm terracotta for primary actions */
-    --primary: 8 45% 38%;
+    /* Cobalt - primary actions */
+    --primary: 224 70% 45%;
     --primary-foreground: 0 0% 100%;
 
-    /* Charcoal secondary */
-    --secondary: 150 10% 25%;
+    /* Deep slate secondary */
+    --secondary: 228 15% 25%;
     --secondary-foreground: 0 0% 100%;
 
-    /* Desert Red accent - warm terracotta */
-    --accent: 8 45% 38%;
-    --accent-foreground: 0 0% 100%;
+    /* Warm amber accent - CTAs, streaks, success moments */
+    --accent: 36 90% 50%;
+    --accent-foreground: 228 15% 15%;
 
     /* Muted backgrounds - between background and card */
-    --muted: 38 40% 93%;
-    --muted-foreground: 150 5% 40%;
+    --muted: 228 20% 94%;
+    --muted-foreground: 228 10% 42%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 110 25% 32%;
+    --success: 152 55% 34%;
     --success-foreground: 0 0% 100%;
 
-    /* Subtle warm border for structure */
-    --border: 38 35% 80%;
-    --input: 38 35% 92%;
-    --ring: 8 45% 38%;
+    /* Subtle cool border for structure */
+    --border: 228 20% 87%;
+    --input: 228 20% 93%;
+    --ring: 224 70% 45%;
 
     --radius: 1rem;
 
-    /* Desert Red variant for dialect accents */
-    --olive: 8 40% 42%;
+    /* Cobalt variant for scaffold accents (legacy token name kept: heavy usage) */
+    --olive: 224 60% 50%;
 
-    /* Topic gradients - aligned with brand palette */
-    --topic-colors: 8 45% 38%;
-    --topic-animals: 38 47% 70%;
-    --topic-household: 8 40% 42%;
-    --topic-tools: 150 10% 25%;
-    --topic-food: 8 45% 38%;
-    --topic-nature: 8 42% 40%;
+    /* Topic gradients - aligned with placeholder palette */
+    --topic-colors: 224 70% 45%;
+    --topic-animals: 199 65% 55%;
+    --topic-household: 224 60% 50%;
+    --topic-tools: 228 15% 25%;
+    --topic-food: 36 90% 50%;
+    --topic-nature: 175 55% 40%;
 
-    /* Desert Red border color */
-    --desert-red: 8 45% 30%;
+    /* Deep cobalt border color (legacy token name kept: heavy usage) */
+    --desert-red: 224 70% 35%;
 
-    /* Card cream - white/cream for cards */
-    --card-cream: 40 50% 97%;
+    /* Card white (legacy token name kept: heavy usage) */
+    --card-cream: 228 25% 99%;
 
     /* Shadows - very subtle, borders do the work */
-    --shadow-soft: 0 2px 8px -2px hsl(38 30% 50% / 0.08);
-    --shadow-card: 0 2px 12px -4px hsl(38 30% 40% / 0.1);
-    --shadow-elegant: 0 1px 2px hsl(38 30% 40% / 0.05), 0 8px 24px -10px hsl(8 45% 30% / 0.15);
-    --shadow-button: 0 4px 12px -4px hsl(8 45% 38% / 0.2);
+    --shadow-soft: 0 2px 8px -2px hsl(228 20% 50% / 0.08);
+    --shadow-card: 0 2px 12px -4px hsl(228 20% 40% / 0.1);
+    --shadow-elegant: 0 1px 2px hsl(228 20% 40% / 0.05), 0 8px 24px -10px hsl(224 70% 35% / 0.15);
+    --shadow-button: 0 4px 12px -4px hsl(224 70% 45% / 0.2);
     /* Topic card shadows - subtle depth */
-    --shadow-topic: 0 2px 8px -2px hsl(8 45% 30% / 0.08), 0 4px 16px -4px hsl(38 30% 40% / 0.06);
-    --shadow-topic-hover: 0 4px 12px -2px hsl(8 45% 30% / 0.12), 0 8px 24px -6px hsl(38 30% 40% / 0.1);
+    --shadow-topic: 0 2px 8px -2px hsl(224 70% 35% / 0.08), 0 4px 16px -4px hsl(228 20% 40% / 0.06);
+    --shadow-topic-hover: 0 4px 12px -2px hsl(224 70% 35% / 0.12), 0 8px 24px -6px hsl(228 20% 40% / 0.1);
 
 
-    --sidebar-background: 38 35% 96%;
-    --sidebar-foreground: 150 5% 15%;
-    --sidebar-primary: 8 45% 38%;
+    --sidebar-background: 228 25% 97%;
+    --sidebar-foreground: 228 15% 15%;
+    --sidebar-primary: 224 70% 45%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 38 40% 92%;
-    --sidebar-accent-foreground: 150 5% 15%;
-    --sidebar-border: 38 35% 80%;
-    --sidebar-ring: 8 45% 38%;
+    --sidebar-accent: 228 20% 92%;
+    --sidebar-accent-foreground: 228 15% 15%;
+    --sidebar-border: 228 20% 87%;
+    --sidebar-ring: 224 70% 45%;
   }
 
   .dark {
-    --background: 0 0% 10%;
-    --foreground: 38 47% 92%;
+    --background: 228 15% 10%;
+    --foreground: 228 20% 92%;
 
-    --card: 0 0% 14%;
-    --card-foreground: 38 47% 92%;
+    --card: 228 14% 14%;
+    --card-foreground: 228 20% 92%;
 
-    --popover: 0 0% 14%;
-    --popover-foreground: 38 47% 92%;
+    --popover: 228 14% 14%;
+    --popover-foreground: 228 20% 92%;
 
-    --primary: 8 40% 48%;
+    --primary: 224 70% 58%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 150 10% 32%;
+    --secondary: 228 12% 32%;
     --secondary-foreground: 0 0% 100%;
 
-    --accent: 8 40% 48%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 36 85% 55%;
+    --accent-foreground: 228 15% 10%;
 
-    --muted: 0 0% 18%;
-    --muted-foreground: 38 30% 70%;
+    --muted: 228 12% 18%;
+    --muted-foreground: 228 15% 70%;
 
-    --border: 0 0% 20%;
-    --input: 0 0% 20%;
-    --ring: 8 40% 48%;
+    --border: 228 12% 20%;
+    --input: 228 12% 20%;
+    --ring: 224 70% 58%;
 
-    --success: 110 22% 45%;
+    --success: 152 45% 45%;
     --success-foreground: 0 0% 100%;
   }
 }
@@ -124,7 +125,7 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: 'Open Sans', 'Noto Sans Arabic', sans-serif;
+    font-family: 'Cairo', 'Noto Sans Arabic', 'Open Sans', sans-serif;
     font-size: 1rem;
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
@@ -138,7 +139,7 @@
 
   /* Locked heading rhythm — Montserrat, tight tracking, no competing weights */
   h1, h2, h3, h4 {
-    font-family: 'Montserrat', 'Noto Sans Arabic', sans-serif;
+    font-family: 'Cairo', 'Montserrat', 'Noto Sans Arabic', sans-serif;
     font-weight: 700;
     color: hsl(var(--foreground));
   }
@@ -152,11 +153,11 @@
 
 @layer utilities {
   .font-sans {
-    font-family: 'Open Sans', 'Noto Sans Arabic', sans-serif;
+    font-family: 'Cairo', 'Noto Sans Arabic', 'Open Sans', sans-serif;
   }
 
   .font-heading {
-    font-family: 'Montserrat', 'Noto Sans Arabic', sans-serif;
+    font-family: 'Cairo', 'Montserrat', 'Noto Sans Arabic', sans-serif;
   }
 
   .font-arabic {
@@ -208,7 +209,7 @@
     @apply text-arabic-display;
   }
   .text-english-secondary {
-    font-family: 'Open Sans', 'Noto Sans Arabic', sans-serif;
+    font-family: 'Cairo', 'Noto Sans Arabic', 'Open Sans', sans-serif;
     font-weight: 500;
     color: hsl(var(--muted-foreground));
   }

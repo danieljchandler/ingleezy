@@ -34,8 +34,8 @@ Deno.test("loads a function that calls Deno.serve directly", async () => {
 Deno.test("answers a CORS preflight for an allowed origin", async () => {
   const fn = await loadFunction("grammar-drill");
   try {
-    const response = await fn.handler(optionsRequest("grammar-drill", "https://hakiya.app"));
-    assertEquals(response.headers.get("access-control-allow-origin"), "https://hakiya.app");
+    const response = await fn.handler(optionsRequest("grammar-drill", "https://ingleezy.app"));
+    assertEquals(response.headers.get("access-control-allow-origin"), "https://ingleezy.app");
   } finally {
     fn.restore();
   }

@@ -69,7 +69,7 @@ interface Stubs {
 }
 
 function render({ transcript, classification, extra }: Stubs = {}, dialect = "Gulf") {
-  localStorage.setItem("hakiya_dialect_module", dialect);
+  localStorage.setItem("ingleezy_dialect_module", dialect);
   const harness = renderHookWithProviders(() => useTutorUpload(), {
     persona: "free",
     seed: (backend) => {

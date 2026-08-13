@@ -14,7 +14,7 @@ import { aProfile, TEST_USER_ID } from "../src/test/support/factories";
  */
 
 const STEP_HEADINGS = {
-  welcome: /Welcome to Hakiya/,
+  welcome: /Welcome to Ingleezy/,
   dialect: /Which dialect interests you\?/,
   level: /What's your Arabic level\?/,
   purpose: /What do you want to use Arabic for\?/,

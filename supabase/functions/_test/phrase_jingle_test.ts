@@ -411,7 +411,7 @@ Deno.test("generate-phrase-jingle reports a crash as a message, not an empty bod
         method: "POST",
         headers: {
           "content-type": "application/json",
-          origin: "https://hakiya.app",
+          origin: "https://ingleezy.app",
           // Signed in: the daily cap now gates this endpoint, and an anonymous
           // crash would be a 401 before the body was ever parsed.
           authorization: `Bearer ${fixtureJwt()}`,

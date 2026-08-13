@@ -3,8 +3,8 @@ import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { X, ChevronRight } from "lucide-react";
 
-const TOUR_KEY = "hakiya:tourCompleted";
-const TRIGGER_KEY = "hakiya:showTour";
+const TOUR_KEY = "ingleezy:tourCompleted";
+const TRIGGER_KEY = "ingleezy:showTour";
 
 export function markTourPending() {
   try { localStorage.setItem(TRIGGER_KEY, "1"); } catch {}

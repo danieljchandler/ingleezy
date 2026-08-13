@@ -1,24 +1,24 @@
 /**
  * One-time migration of localStorage keys from the old `lahja*` brand
- * to `hakiya*`. Runs at app boot and is a no-op after the first run.
+ * to `ingleezy*`. Runs at app boot and is a no-op after the first run.
  *
  * Keep this file dependency-free so it can be imported from main.tsx
  * before the React tree mounts.
  */
-const MIGRATED_FLAG = "hakiya:migrated:v1";
+const MIGRATED_FLAG = "ingleezy:migrated:v1";
 
 // Exact key renames (no prefix, just whole keys).
 const EXACT_KEYS: Array<[string, string]> = [
-  ["lahja_dialect_module", "hakiya_dialect_module"],
-  ["lahja_bridge_view_enabled", "hakiya_bridge_view_enabled"],
-  ["lahja_bible_session", "hakiya_bible_session"],
-  ["lahja_freechat_v1", "hakiya_freechat_v1"],
+  ["lahja_dialect_module", "ingleezy_dialect_module"],
+  ["lahja_bridge_view_enabled", "ingleezy_bridge_view_enabled"],
+  ["lahja_bible_session", "ingleezy_bible_session"],
+  ["lahja_freechat_v1", "ingleezy_freechat_v1"],
 ];
 
-// Every key starting with `lahja:` becomes `hakiya:` (matches review-queue
+// Every key starting with `lahja:` becomes `ingleezy:` (matches review-queue
 // per-user keys, display-prefs, home-layout, continue, image style, etc.).
 const PREFIX_FROM = "lahja:";
-const PREFIX_TO = "hakiya:";
+const PREFIX_TO = "ingleezy:";
 
 export function runBrandMigration() {
   if (typeof window === "undefined") return;

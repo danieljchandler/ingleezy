@@ -68,7 +68,7 @@ interface Options {
 }
 
 async function render({ persona = "free", dialect = "Gulf", seed }: Options = {}) {
-  localStorage.setItem("hakiya_dialect_module", dialect);
+  localStorage.setItem("ingleezy_dialect_module", dialect);
   const harness = renderWithProviders(<RequestSituationCard />, {
     persona,
     // DialectProvider syncs from the profile on mount and overwrites what is in

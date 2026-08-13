@@ -71,7 +71,7 @@ Deno.test("convert-to-fusha answers CORS preflight", async () => {
   try {
     const response = await fn.handler(optionsRequest("convert-to-fusha"));
     assertEquals(response.status, 200);
-    assertEquals(response.headers.get("access-control-allow-origin"), "https://hakiya.app");
+    assertEquals(response.headers.get("access-control-allow-origin"), "https://ingleezy.app");
   } finally {
     fn.restore();
   }

@@ -1,15 +1,15 @@
 {
-  "name": "Hakiya — Learn Spoken Arabic",
-  "short_name": "Hakiya",
-  "description": "Learn real spoken Arabic — Gulf, Egyptian, and Yemeni dialects — with native audio, smart flashcards, and lessons built from real media.",
+  "name": "Ingleezy — اتعلم إنجليزي",
+  "short_name": "Ingleezy",
+  "description": "اتعلم الإنجليزي اللي الناس بتتكلمه فعلاً — فيديوهات حقيقية، بطاقات ذكية، وتصحيح نطق، للناطقين بالعربية.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#F9F7F2",
-  "theme_color": "#F9F7F2",
-  "lang": "en",
-  "dir": "ltr",
+  "background_color": "#FAFAFC",
+  "theme_color": "#FAFAFC",
+  "lang": "ar",
+  "dir": "rtl",
   "categories": ["education"],
   "icons": [
     {
@@ -27,16 +27,16 @@
   ],
   "shortcuts": [
     {
-      "name": "Review due cards",
-      "short_name": "Review",
+      "name": "مراجعة البطاقات",
+      "short_name": "مراجعة",
       "url": "/review",
-      "description": "Start today's spaced-repetition session"
+      "description": "ابدأ جلسة المراجعة اليومية"
     },
     {
-      "name": "Practice",
-      "short_name": "Practice",
+      "name": "تدريب",
+      "short_name": "تدريب",
       "url": "/practice",
-      "description": "Speaking, listening and reading practice"
+      "description": "تدريب على المحادثة والاستماع والقراءة"
     }
   ]
 }

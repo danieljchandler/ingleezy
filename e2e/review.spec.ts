@@ -353,7 +353,7 @@ test.describe("saved-word decks", () => {
     ]);
 
     await page.addInitScript(() => {
-      window.localStorage.setItem("hakiya:root-families-enabled", "false");
+      window.localStorage.setItem("ingleezy:root-families-enabled", "false");
     });
 
     await page.goto("/review/my-words");

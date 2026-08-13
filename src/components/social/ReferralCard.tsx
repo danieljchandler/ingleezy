@@ -72,8 +72,8 @@ export function ReferralCard() {
 
   const shareText = (i: ReferralInfo) =>
     i.rewards_enabled
-      ? `I'm learning spoken Arabic on Hakiya — join with my code ${i.code} and your first month is free: https://hakiya.app/?ref=${i.code}`
-      : `I'm learning spoken Arabic on Hakiya — join me with my code ${i.code}: https://hakiya.app/?ref=${i.code}`;
+      ? `I'm learning spoken Arabic on Ingleezy — join with my code ${i.code} and your first month is free: https://ingleezy.app/?ref=${i.code}`
+      : `I'm learning spoken Arabic on Ingleezy — join me with my code ${i.code}: https://ingleezy.app/?ref=${i.code}`;
 
   const redeem = async () => {
     const code = redeemInput.trim();

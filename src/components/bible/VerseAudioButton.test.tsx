@@ -93,7 +93,7 @@ interface Options {
 }
 
 function render({ text = VERSE, dialect, label, activeDialect = "Gulf" }: Options = {}) {
-  localStorage.setItem("hakiya_dialect_module", activeDialect);
+  localStorage.setItem("ingleezy_dialect_module", activeDialect);
   const harness = renderWithProviders(
     <VerseAudioButton text={text} dialect={dialect} label={label} />,
   );

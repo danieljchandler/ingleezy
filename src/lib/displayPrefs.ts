@@ -10,7 +10,7 @@
  * Persisted in localStorage; synced across components in the same tab via a
  * custom event, and across tabs via the native `storage` event.
  *
- * Originally introduced for Bible Lessons (key: hakiya:bible-display-prefs);
+ * Originally introduced for Bible Lessons (key: ingleezy:bible-display-prefs);
  * promoted to a global setting. We migrate the old key on first read.
  */
 
@@ -21,9 +21,9 @@ export type DisplayPrefs = {
   showEnglish: boolean;  // English translation row, when available
 };
 
-const STORAGE_KEY = "hakiya:display-prefs";
-const LEGACY_KEY = "hakiya:bible-display-prefs";
-const EVENT = "hakiya:display-prefs-changed";
+const STORAGE_KEY = "ingleezy:display-prefs";
+const LEGACY_KEY = "ingleezy:bible-display-prefs";
+const EVENT = "ingleezy:display-prefs-changed";
 
 export const DEFAULT_DISPLAY_PREFS: DisplayPrefs = {
   showArabic: true,

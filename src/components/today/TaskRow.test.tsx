@@ -45,7 +45,7 @@ function render({
   hint,
   dialect = "Gulf",
 }: Options = {}) {
-  localStorage.setItem("hakiya_dialect_module", dialect);
+  localStorage.setItem("ingleezy_dialect_module", dialect);
   const onClick = vi.fn();
   const harness = renderWithProviders(
     <TaskRow

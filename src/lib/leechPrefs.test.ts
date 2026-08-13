@@ -15,7 +15,7 @@ import {
  * makes a change in one tab reach the review session running in another.
  */
 
-const KEY = "hakiya:leech-tracking-enabled";
+const KEY = "ingleezy:leech-tracking-enabled";
 
 beforeEach(() => {
   window.localStorage.clear();

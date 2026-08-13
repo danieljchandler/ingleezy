@@ -149,7 +149,7 @@ describe("scoring a take", () => {
   });
 
   it("tells the scorer which dialect to record mistakes against", async () => {
-    localStorage.setItem("hakiya_dialect_module", "Gulf");
+    localStorage.setItem("ingleezy_dialect_module", "Gulf");
     const { result, backend } = render(withBothScorers);
 
     await act(async () => {

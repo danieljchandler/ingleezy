@@ -380,7 +380,7 @@ describe("desktop notifications", () => {
     // A toast on a tab nobody is looking at is not an alert.
     expect(notifications.created).toEqual([
       {
-        title: "Hakiya alert: translate",
+        title: "Ingleezy alert: translate",
         options: { body: "Listen latency spiking", tag: alertId(9) },
       },
     ]);

@@ -27,7 +27,7 @@ export const HOME_SECTIONS: HomeSectionMeta[] = [
   { id: "phrase-of-the-day", label: "Phrase of the Day", description: "Daily dialect phrase" },
 ];
 
-const STORAGE_KEY = "hakiya:home-layout:v1";
+const STORAGE_KEY = "ingleezy:home-layout:v1";
 
 export interface HomeLayoutState {
   /** Ordered list of section ids. */
@@ -66,7 +66,7 @@ export function saveHomeLayout(state: HomeLayoutState) {
   if (typeof window === "undefined") return;
   try {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    window.dispatchEvent(new CustomEvent("hakiya:home-layout-changed"));
+    window.dispatchEvent(new CustomEvent("ingleezy:home-layout-changed"));
   } catch {
     // ignore quota/private-mode errors
   }

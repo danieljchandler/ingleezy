@@ -110,7 +110,7 @@ describe("rendering the passage", () => {
 
   it("strips the vowels when the learner has turned them off", async () => {
     localStorage.setItem(
-      "hakiya:display-prefs",
+      "ingleezy:display-prefs",
       JSON.stringify({ showArabic: true, showTashkil: false, showFormal: false, showEnglish: false }),
     );
 

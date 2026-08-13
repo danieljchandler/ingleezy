@@ -7,8 +7,8 @@ import { Badge } from '@/components/ui/badge';
 import { Loader2, Plus, ArrowLeft, BookOpen, Pencil, Trash2 } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import hakiyaIconAsset from '@/assets/hakiya-icon.png.asset.json';
-const lahjaIcon = hakiyaIconAsset.url;
+import ingleezyIconAsset from '@/assets/ingleezy-icon.png.asset.json';
+const lahjaIcon = ingleezyIconAsset.url;
 
 const AdminStories = () => {
   const navigate = useNavigate();
@@ -56,7 +56,7 @@ const AdminStories = () => {
             <Button variant="ghost" size="icon" onClick={() => navigate('/admin')}>
               <ArrowLeft className="h-5 w-5" />
             </Button>
-            <img src={lahjaIcon} alt="Hakiya" className="h-8 w-8" />
+            <img src={lahjaIcon} alt="Ingleezy" className="h-8 w-8" />
             <h1 className="text-xl font-bold font-heading">Interactive Stories</h1>
           </div>
           <Button onClick={() => navigate('/admin/stories/new')}>

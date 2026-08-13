@@ -31,7 +31,7 @@ function render(profile?: Record<string, unknown> | null, dialect = "Gulf") {
   // DialectContext seeds itself from localStorage and then re-syncs from
   // `profiles.preferred_dialect` on mount, so both have to agree or the
   // provider snaps back to whatever the row says.
-  localStorage.setItem("hakiya_dialect_module", dialect);
+  localStorage.setItem("ingleezy_dialect_module", dialect);
   const seed = (backend: SupabaseBackend) => {
     backend.db.seed(
       "profiles",

@@ -16,7 +16,7 @@ import { fixtureJwt, loadFunction } from "./harness.ts";
  */
 
 const FUNCTION_ORIGIN = "https://e2e.supabase.co/functions/v1";
-const ORIGIN = "https://hakiya.app";
+const ORIGIN = "https://ingleezy.app";
 
 async function functionNames(): Promise<string[]> {
   const names: string[] = [];

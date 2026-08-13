@@ -179,12 +179,12 @@ Deno.test("create-checkout returns the origin the request came from", async () =
   const fn = await loadFunction("create-checkout", { upstreams: upstreams() });
   try {
     await fn.handler(
-      jsonRequest("create-checkout", { tier: "standard" }, { origin: "https://hakiya.app" }),
+      jsonRequest("create-checkout", { tier: "standard" }, { origin: "https://ingleezy.app" }),
     );
 
     const form = stripeForm(fn.callsTo("checkout/sessions").at(-1)?.body ?? null);
-    assertStringIncludes(form.get("success_url") ?? "", "https://hakiya.app");
-    assertStringIncludes(form.get("cancel_url") ?? "", "https://hakiya.app");
+    assertStringIncludes(form.get("success_url") ?? "", "https://ingleezy.app");
+    assertStringIncludes(form.get("cancel_url") ?? "", "https://ingleezy.app");
   } finally {
     fn.restore();
   }
@@ -211,7 +211,7 @@ Deno.test("create-checkout keeps its CORS headers on the error path", async () =
   try {
     const response = await fn.handler(jsonRequest("create-checkout", { tier: "standard" }));
 
-    assertEquals(response.headers.get("access-control-allow-origin"), "https://hakiya.app");
+    assertEquals(response.headers.get("access-control-allow-origin"), "https://ingleezy.app");
   } finally {
     fn.restore();
   }
