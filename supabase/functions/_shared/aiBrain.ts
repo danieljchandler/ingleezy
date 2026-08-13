@@ -12,6 +12,11 @@ import {
   type Dialect,
 } from './dialectHelpers.ts';
 import { detectMsaLeaks, type MsaLeakResult } from './msaLeakDetector.ts';
+import {
+  getEnglishIdentity,
+  getInterferenceGuidance,
+  primeEnglishPrompt,
+} from './englishHelpers.ts';
 import { logMsaViolations, logValidatorResult } from './msaViolationLogger.ts';
 import { validateDialectCrossChecked, type ValidatorResult } from './dialectValidator.ts';
 import { decideCriticOutcome } from './criticDecision.ts';
@@ -29,8 +34,14 @@ import {
 } from './modelRegistry.ts';
 
 // Helper: scan with both hardcoded and rulebook-derived forbidden tokens.
-function scanLeaks(text: string, dialect: Dialect): MsaLeakResult {
-  return detectMsaLeaks(text, dialect, getDialectForbiddenTokens(dialect));
+// English-target tasks skip the scan entirely: the MSA-authenticity
+// machinery guards Arabic output (Ingleezy's scaffold direction), and
+// running an Arabic token blacklist against English text is meaningless.
+const NO_LEAKS: MsaLeakResult = { leaks: [], severity: 'none' };
+
+function scanLeaks(task: Pick<BrainTask, 'target' | 'dialect'>, text: string): MsaLeakResult {
+  if (task.target === 'english') return NO_LEAKS;
+  return detectMsaLeaks(text, task.dialect, getDialectForbiddenTokens(task.dialect));
 }
 
 export type Strategy = 'solo' | 'ensemble' | 'draft_critic' | 'council';
@@ -93,7 +104,23 @@ export type MultimodalContent =
 
 export interface BrainTask {
   purpose: string;
+  /**
+   * The learner's dialect. For Arabic-target tasks (default) this is the
+   * generation target; for English-target tasks it is the learner's L1,
+   * selecting which interference rules apply and which dialect any Arabic
+   * scaffold text is written in.
+   */
   dialect: Dialect;
+  /**
+   * What language the output is. 'arabic' (default — every pre-fork caller)
+   * runs the full dialect machinery: identity + Rulebook prompt, MSA-leak
+   * scan, repair pass, native validator. 'english' swaps the prompt to the
+   * English identity + L1-interference guidance and skips the Arabic-only
+   * passes — English quality is graded by the strategy passes themselves.
+   */
+  target?: 'arabic' | 'english';
+  /** CEFR level for English-target output conditioning (A1–C1). */
+  cefr?: string;
   userPrompt: MultimodalContent;
   systemPromptExtra?: string;
   strategy?: Strategy;
@@ -184,7 +211,8 @@ export async function askBrain<T = unknown>(task: BrainTask): Promise<BrainResul
   const apiKey = Deno.env.get('LOVABLE_API_KEY');
   if (!apiKey) throw new BrainHttpError(500, 'LOVABLE_API_KEY not configured');
 
-  await primeDialectPrompt(task.dialect);
+  if (task.target === 'english') await primeEnglishPrompt(task.dialect);
+  else await primeDialectPrompt(task.dialect);
 
   const strategy: Strategy = task.strategy ?? pickStrategy(task.purpose);
   const start = Date.now();
@@ -254,7 +282,7 @@ export async function askBrain<T = unknown>(task: BrainTask): Promise<BrainResul
   // Skipped when enforceDialect already ran one inside the strategy — that
   // verdict is the same judgment on the same text, and re-asking costs a second
   // call to learn nothing.
-  if (task.validateDialect && !result.validator) {
+  if (task.validateDialect && task.target !== 'english' && !result.validator) {
     try {
       const scanText = extractScanText(task, result.output, result.raw);
       const v = await validateDialectCrossChecked(scanText, task.dialect, { apiKey });
@@ -353,10 +381,8 @@ function pickStrategy(purpose: string): Strategy {
 // ----------------- Prompt builder -----------------
 
 function buildSystem(task: BrainTask): string {
-  const identity = getDialectIdentity(task.dialect);
-  const rules = getDialectVocabRules(task.dialect);
-  const extra = task.systemPromptExtra ? `\n\n${task.systemPromptExtra}` : '';
-  return `${identity}\n\n${rules}${extra}`;
+  const { stable, volatile } = buildSystemParts(task);
+  return volatile ? `${stable}\n\n${volatile}` : stable;
 }
 
 /**
@@ -368,10 +394,15 @@ function buildSystem(task: BrainTask): string {
  * everything behind it on every call.
  */
 function buildSystemParts(task: BrainTask): { stable: string; volatile: string } {
-  const identity = getDialectIdentity(task.dialect);
-  const rules = getDialectVocabRules(task.dialect);
+  // English-target: identity + interference guidance replace the dialect
+  // blocks. CEFR sits in the stable half deliberately — there are only a
+  // handful of levels, so each level's prefix is its own cache entry rather
+  // than a cache-buster.
+  const stable = task.target === 'english'
+    ? `${getEnglishIdentity(task.cefr)}\n\n${getInterferenceGuidance(task.dialect)}`
+    : `${getDialectIdentity(task.dialect)}\n\n${getDialectVocabRules(task.dialect)}`;
   return {
-    stable: `${identity}\n\n${rules}`,
+    stable,
     volatile: task.systemPromptExtra ?? '',
   };
 }
@@ -648,7 +679,7 @@ async function runSolo<T>(task: BrainTask, apiKey: string, deadline: Deadline): 
     strategy: 'solo',
     models: [usedModel],
     agreementScore: 1,
-    msaLeaks: scanLeaks(text, task.dialect),
+    msaLeaks: scanLeaks(task, text),
     msaRepairs: 0,
     totalLatencyMs: 0,
     passes,
@@ -697,7 +728,7 @@ async function runEnsemble<T>(task: BrainTask, apiKey: string, deadline: Deadlin
   const ranked = successes
     .map(({ s, model }) => {
       const text = extractScanText(task, s.value.parsed, s.value.raw);
-      const leaks = scanLeaks(text, task.dialect);
+      const leaks = scanLeaks(task, text);
       const weight = getModelWeight(model);
       const score = leaks.leaks.length / weight;
       return { model, parsed: s.value.parsed, raw: s.value.raw, leaks, text, weight, score };
@@ -743,7 +774,7 @@ async function runDraftCritic<T>(task: BrainTask, apiKey: string, deadline: Dead
   }, deadline));
 
   const draftText = extractScanText(task, draft.parsed, draft.raw);
-  const draftLeaks = scanLeaks(draftText, task.dialect);
+  const draftLeaks = scanLeaks(task, draftText);
   // `validator` is assigned below, before any call site of shipDraft that can
   // observe it; declared here so the shipped draft always carries the verdict.
   let validator: ValidatorResult | undefined;
@@ -790,7 +821,7 @@ async function runDraftCritic<T>(task: BrainTask, apiKey: string, deadline: Dead
   // "rewrite" verdict into a budget with nothing left to rewrite with — paying
   // for a judgment we then have to ignore. The validator's own timeout is
   // likewise clipped to leave the critic its floor.
-  if (task.enforceDialect && remainingMs(deadline) > MIN_PASS_BUDGET_MS * 2) {
+  if (task.enforceDialect && task.target !== 'english' && remainingMs(deadline) > MIN_PASS_BUDGET_MS * 2) {
     const vStart = Date.now();
     try {
       validator = await validateDialectCrossChecked(draftText, task.dialect, {
@@ -856,7 +887,7 @@ async function runDraftCritic<T>(task: BrainTask, apiKey: string, deadline: Dead
   }
 
   const text = extractScanText(task, critiqued.parsed, critiqued.raw);
-  const criticLeaks = scanLeaks(text, task.dialect);
+  const criticLeaks = scanLeaks(task, text);
 
   // The critic rewrote the whole payload, so it had its shot at the leaks too.
   // If the same tokens survived it unchanged, a further repair pass carrying the
@@ -994,7 +1025,7 @@ async function runCouncil<T>(task: BrainTask, apiKey: string, deadline: Deadline
     strategy: 'council',
     models: judgeUsed ? [...ok.map((x) => x.model), judge] : ok.map((x) => x.model),
     agreementScore: ok.length / drafters.length,
-    msaLeaks: scanLeaks(text, task.dialect),
+    msaLeaks: scanLeaks(task, text),
     msaRepairs: 0,
     totalLatencyMs: 0,
     passes,
@@ -1022,7 +1053,7 @@ async function runRepair<T>(task: BrainTask, prior: BrainResult<T>, apiKey: stri
     output: parsed as T,
     raw,
     models: [...prior.models, DEFAULT_JUDGE],
-    msaLeaks: scanLeaks(text, task.dialect),
+    msaLeaks: scanLeaks(task, text),
     passes: [...prior.passes, { pass: 'repair', model: DEFAULT_JUDGE, ms: Date.now() - repairStart }],
   };
 }
@@ -1061,6 +1092,11 @@ export { BrainHttpError };
 export interface StreamBrainTask {
   purpose: string;
   dialect: Dialect;
+  /** Same semantics as BrainTask.target — 'english' swaps the prompt to the
+   *  English identity + interference guidance and disables the MSA-leak tap. */
+  target?: 'arabic' | 'english';
+  /** CEFR level for English-target output conditioning (A1–C1). */
+  cefr?: string;
   /** Prior conversation messages (excluding the system prompt — that is built here). */
   messages: Array<{ role: 'user' | 'assistant' | 'system'; content: string }>;
   systemPromptExtra?: string;
@@ -1081,7 +1117,8 @@ export interface StreamBrainTask {
  *  (both speak OpenAI-shaped SSE, so the passthrough and tap are unchanged).
  *  Returns a Response with text/event-stream body, ready to return from a Deno handler. */
 export async function streamBrain(task: StreamBrainTask): Promise<Response> {
-  await primeDialectPrompt(task.dialect);
+  if (task.target === 'english') await primeEnglishPrompt(task.dialect);
+  else await primeDialectPrompt(task.dialect);
 
   const model = task.model ?? DEFAULT_DRAFTERS[1] ?? MODEL_IDS.GEMINI_FLASH;
   const isGpt5 = /^openai\/gpt-5/.test(model);
@@ -1100,6 +1137,8 @@ export async function streamBrain(task: StreamBrainTask): Promise<Response> {
   const streamTask = {
     purpose: task.purpose,
     dialect: task.dialect,
+    target: task.target,
+    cefr: task.cefr,
     userPrompt: '',
     systemPromptExtra: task.systemPromptExtra,
   } as BrainTask;
@@ -1184,7 +1223,7 @@ export async function streamBrain(task: StreamBrainTask): Promise<Response> {
       const full = accumulator.join('');
       if (full && task.dialect) {
         try {
-          const leaks = scanLeaks(full, task.dialect);
+          const leaks = scanLeaks(task, full);
           if (leaks.leaks.length > 0) {
             console.warn(`[aiBrain.stream] MSA leak in ${task.purpose} (${task.dialect}):`, leaks.leaks.join(', '));
             logMsaViolations({

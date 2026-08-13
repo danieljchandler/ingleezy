@@ -76,13 +76,31 @@ generation conditioning.
       (onboarding choice, drives scaffold rendering), not the studied target
 
 ### The Brain — FLIP
-- [ ] `_shared/aiBrain.ts`: system-prompt layering per table above
-- [ ] `dialect_rules` table → `interference_rules` (same shape: pattern,
-      good/bad examples, priority, status workflow, admin CRUD)
-- [ ] MSA-leak detector → transfer-error detector (deterministic checks where
-      possible: missing articles, missing copula, known calques)
+- [x] `_shared/aiBrain.ts`: `target: 'english'` mode on both entry points
+      (askBrain + streamBrain) — English identity + interference guidance
+      replace the dialect blocks; MSA scan/repair/validator skipped for
+      English output. **Design decision:** the dialect machinery is NOT
+      deleted — Arabic-target calls still run it in full, because Ingleezy
+      generates Arabic scaffold (dialect + Fusha lines) that must stay
+      authentic. Default target is 'arabic', so every pre-fork caller is
+      unchanged until explicitly flipped.
+- [x] `interference_rules` table (20260813150000) — same shape/workflow as
+      dialect_rules; `dialect` NULL = all Arabic speakers; `explanation_ar`
+      carries the learner-facing Fusha explanation. Seeded with the 12
+      documented core transfer patterns (articles, copula, /p/-/b/,
+      epenthesis, /v/-/f/, prepositions, calques, word order, 3sg -s,
+      resumptive pronouns, spelling).
+- [x] Transfer-error detector (`transferErrorDetector.ts`) — lexical matcher
+      for calques/prepositions/spelling; grammar-shaped categories are
+      deliberately NOT string-matched ("he go" is innocent in "where did he
+      go") — those need AI grading. Pure core in `englishPromptCore.ts`;
+      Vitest + Deno tested.
+- [ ] Admin CRUD for interference_rules (mirror AdminDialectRules)
+- [ ] First English-target caller end-to-end, then flip generators one by one
 - [ ] `learnerProfile.ts`: semantics flip only; CEFR placement quiz re-aimed
       at English
+- [ ] Prune corpus-mining pipeline (mine-dialect-corpus, derive-yemeni
+      scripts, docs/yemeni) — dialect_rules itself STAYS (scaffold direction)
 
 ### SRS / flashcards — FLIP (mostly renames)
 - [ ] Decks: front = English word/phrase (clickable-word save flow KEEP),
@@ -122,7 +140,7 @@ generation conditioning.
 - [ ] Dialect Compare → PRUNE (or later: "how do Brits vs Americans say it")
 - [ ] Yemeni corpus tooling (`docs/yemeni`, mine-dialect-corpus,
       derive-yemeni-* scripts) → PRUNE
-- [ ] Bible reading (Arabic scripture) → PRUNE pending product decision
+- [x] Bible reading (Arabic scripture) → PRUNED
 - [ ] Meme analyzer / Souq news / Learn-from-X: FLIP if cheap, else defer
 
 ### Arabic-first UI — FLIP (dedicated pass)
