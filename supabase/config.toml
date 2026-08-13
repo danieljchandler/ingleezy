@@ -202,3 +202,9 @@ verify_jwt = true
 # runnable by an admin. Guarded inside as well.
 [functions.pregenerate-daily]
 verify_jwt = true
+
+# Hakiya content bridge: admin-triggered snapshot sync of the sibling app's
+# published videos (dialect Arabic with English + Fusha transcript lines).
+# Admin role re-checked inside; verify_jwt keeps anonymous traffic out.
+[functions.sync-hakiya-videos]
+verify_jwt = true

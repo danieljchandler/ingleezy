@@ -108,9 +108,11 @@ Deno.test("the undeclared functions are listed, so the default is a choice", asy
   // Adjust deliberately, in the same commit that adds or declares a function.
   assertEquals(
     undeclared.length,
-    // 37 since `convert-to-fusha`, which is capped per user and answers 401
-    // without a JWT anyway — the inherited default is the one it wants.
-    37,
+    // 36 since `sync-hakiya-videos` was declared explicitly (admin-only
+    // bridge; previously 37 since `convert-to-fusha`, which is capped per
+    // user and answers 401 without a JWT anyway — the inherited default is
+    // the one it wants).
+    36,
     `The number of functions with no config.toml entry changed (now ${undeclared.length}: ` +
       `${undeclared.join(", ")}). They inherit verify_jwt = true. If that is right, ` +
       `update this count; if not, add a block.`,
