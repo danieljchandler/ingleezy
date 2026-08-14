@@ -18,15 +18,15 @@ const PracticeHub = () => {
 
   return (
     <AppShell>
-      <HubHeader title="Practice" subtitle="Sharpen what you've learned." />
+      <HubHeader title="تدرّب" subtitle="اصقل ما تعلّمته." />
 
       <HubSection
-        title="Spaced repetition"
+        title="التكرار المتباعد"
         tiles={[
           {
             id: "review",
-            label: "Review",
-            description: due > 0 ? `${due} cards due now` : "Curriculum SRS",
+            label: "المراجعة",
+            description: due > 0 ? `${due} بطاقة مستحقة الآن` : "مراجعة المنهج المتباعدة",
             icon: Brain,
             to: "/review",
             accent: "bg-primary/10 text-primary",
@@ -34,8 +34,8 @@ const PracticeHub = () => {
           },
           {
             id: "my-words-review",
-            label: "My Words Review",
-            description: "Drill your saved vocabulary",
+            label: "مراجعة كلماتي",
+            description: "تدرّب على مفرداتك المحفوظة",
             icon: BookOpen,
             to: "/review/my-words",
             accent: "bg-primary/10 text-primary",
@@ -43,8 +43,8 @@ const PracticeHub = () => {
           },
           {
             id: "my-phrases-review",
-            label: "My Phrases Review",
-            description: "Drill your saved phrases",
+            label: "مراجعة عباراتي",
+            description: "تدرّب على عباراتك المحفوظة",
             icon: MessageCircle,
             to: "/review/my-phrases",
             accent: "bg-emerald-500/10 text-emerald-600",
@@ -54,28 +54,28 @@ const PracticeHub = () => {
       />
 
       <HubSection
-        title="Speaking"
+        title="التحدث"
         tiles={[
           {
             id: "pronunciation",
-            label: "Pronunciation Practice",
-            description: "Record yourself & get AI feedback",
+            label: "تدريب النطق",
+            description: "سجّل صوتك واحصل على ملاحظات الذكاء الاصطناعي",
             icon: Mic,
             to: "/pronunciation",
             accent: "bg-primary/10 text-primary",
           },
           {
             id: "conversation",
-            label: "Conversation Simulator",
-            description: "Free-form chat with native voices",
+            label: "محاكي المحادثة",
+            description: "حوار حر بأصوات متحدثين أصليين",
             icon: MessageSquare,
             to: "/conversation",
             accent: "bg-primary/10 text-primary",
           },
           {
             id: "native-feedback",
-            label: "Native Feedback",
-            description: "A real native speaker corrects your writing",
+            label: "تصحيح من متحدث أصلي",
+            description: "متحدث أصلي حقيقي يصحّح كتابتك",
             icon: PenLine,
             to: "/native-feedback",
             accent: "bg-emerald-500/10 text-emerald-600",
@@ -83,8 +83,8 @@ const PracticeHub = () => {
           },
           {
             id: "mistakes",
-            label: "Your Mistakes",
-            description: "What keeps tripping you up",
+            label: "أخطاؤك",
+            description: "ما الذي يتعثّر معك باستمرار",
             icon: AlertTriangle,
             to: "/mistakes",
             accent: "bg-amber-500/10 text-amber-600",
@@ -101,12 +101,12 @@ const PracticeHub = () => {
       />
 
       <HubSection
-        title="Skills"
+        title="المهارات"
         tiles={[
           {
             id: "writing",
-            label: "Writing",
-            description: "Reply in dialect & get corrected",
+            label: "الكتابة",
+            description: "اكتب بالإنجليزية واحصل على التصحيح",
             icon: PenLine,
             to: "/write",
             accent: "bg-violet-500/10 text-violet-600",
@@ -114,16 +114,16 @@ const PracticeHub = () => {
           },
           {
             id: "listening",
-            label: "Listening Practice",
-            description: "Dictation, comprehension & speed drills",
+            label: "تدريب الاستماع",
+            description: "إملاء وفهم وتمارين سرعة",
             icon: Headphones,
             to: "/listening",
             accent: "bg-cyan-500/10 text-cyan-600",
           },
           {
             id: "reading",
-            label: "Reading Practice",
-            description: "Passages with tap-to-translate",
+            label: "تدريب القراءة",
+            description: "نصوص مع ترجمة بلمسة واحدة",
             icon: FileText,
             to: "/reading",
             accent: "bg-indigo-500/10 text-indigo-600",
@@ -132,20 +132,20 @@ const PracticeHub = () => {
       />
 
       <HubSection
-        title="Play"
+        title="العب"
         tiles={[
           {
             id: "vocab-games",
-            label: "Vocabulary Games",
-            description: "Matching, memory & fill-in-the-blank",
+            label: "ألعاب المفردات",
+            description: "توصيل وذاكرة وملء الفراغات",
             icon: Gamepad2,
             to: "/vocab-games",
             accent: "bg-primary/10 text-primary",
           },
           {
             id: "battles",
-            label: "Vocab Battles",
-            description: "Head-to-head vocabulary duels",
+            label: "معارك المفردات",
+            description: "منافسات مفردات وجهاً لوجه",
             icon: Swords,
             to: "/battles",
             accent: "bg-red-500/10 text-red-500",
@@ -153,8 +153,8 @@ const PracticeHub = () => {
           },
           {
             id: "daily",
-            label: "Daily Challenge",
-            description: "Fresh bite-sized mission for bonus XP",
+            label: "تحدي اليوم",
+            description: "مهمة قصيرة جديدة كل يوم لنقاط إضافية",
             icon: Flame,
             to: "/daily-challenge",
             accent: "bg-orange-500/10 text-orange-600",

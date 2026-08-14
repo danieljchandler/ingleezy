@@ -10,55 +10,55 @@ const MeHub = () => {
 
   return (
     <AppShell>
-      <HubHeader title="Me" subtitle="Your library, tools & profile." />
+      <HubHeader title="أنا" subtitle="مكتبتك وأدواتك وملفك الشخصي." />
 
       <HubSection
-        title="My library"
+        title="مكتبتي"
         tiles={[
-          { id: "my-words", label: "My Words", description: "Saved vocabulary flashcards", icon: BookOpen, to: "/my-words", show: isAuthenticated },
-          { id: "saved-translations", label: "Saved Translations", description: "Re-read past breakdowns", icon: Languages, to: "/translate/saved", show: isAuthenticated },
-          { id: "my-transcriptions", label: "My Transcriptions", description: "Saved transcripts", icon: FileText, to: "/my-transcriptions", show: isAuthenticated },
-          { id: "liked", label: "Liked Videos", description: "Videos you saved from Discover", icon: Heart, to: "/liked-videos", accent: "bg-red-500/10 text-red-500", show: isAuthenticated },
+          { id: "my-words", label: "كلماتي", description: "بطاقات مفرداتك المحفوظة", icon: BookOpen, to: "/my-words", show: isAuthenticated },
+          { id: "saved-translations", label: "ترجمات محفوظة", description: "ارجع إلى تحليلاتك السابقة", icon: Languages, to: "/translate/saved", show: isAuthenticated },
+          { id: "my-transcriptions", label: "نصوصي المفرّغة", description: "تفريغات صوتية محفوظة", icon: FileText, to: "/my-transcriptions", show: isAuthenticated },
+          { id: "liked", label: "فيديوهات أعجبتني", description: "فيديوهات حفظتها من اكتشف", icon: Heart, to: "/liked-videos", accent: "bg-red-500/10 text-red-500", show: isAuthenticated },
         ]}
       />
 
       <HubSection
-        title="Tools"
+        title="الأدوات"
         tiles={[
-          { id: "translate", label: "Translate & Save", description: "Paste Arabic, save vocabulary", icon: Languages, to: "/translate" },
-          { id: "transcribe", label: "Transcribe Audio", description: "Convert Arabic audio to text", icon: Mic, to: "/transcribe" },
-          { id: "tutor", label: "Tutor Upload", description: "Auto-extract flashcards from tutor audio", icon: GraduationCap, to: "/tutor-upload", show: isAuthenticated },
-          { id: "how-do-i-say", label: "How do I say…?", description: "Translate phrases into dialect", icon: MessageCircleQuestion, to: "/how-do-i-say" },
-          { id: "culture", label: "What should I do?", description: "Culture & etiquette guide", icon: Compass, to: "/culture-guide" },
+          { id: "translate", label: "ترجم واحفظ", description: "الصق نصاً إنجليزياً واحفظ المفردات", icon: Languages, to: "/translate" },
+          { id: "transcribe", label: "تفريغ الصوت", description: "حوّل المقاطع الصوتية إلى نص", icon: Mic, to: "/transcribe" },
+          { id: "tutor", label: "رفع درس خصوصي", description: "استخراج بطاقات تلقائياً من تسجيل درسك", icon: GraduationCap, to: "/tutor-upload", show: isAuthenticated },
+          { id: "how-do-i-say", label: "كيف أقول…؟", description: "ترجم عباراتك إلى الإنجليزية", icon: MessageCircleQuestion, to: "/how-do-i-say" },
+          { id: "culture", label: "ماذا أفعل؟", description: "دليل الثقافة وآداب التعامل", icon: Compass, to: "/culture-guide" },
         ]}
       />
 
       <HubSection
-        title="Content"
+        title="المحتوى"
         tiles={[
-          { id: "stories", label: "Interactive Stories", description: "Choose-your-adventure in Arabic", icon: Stories, to: "/stories", accent: "bg-amber-500/10 text-amber-600" },
-          { id: "souq", label: "Souq News", description: "Headlines retold in dialect", icon: Newspaper, to: "/souq-news", accent: "bg-emerald-500/10 text-emerald-600" },
-          { id: "meme", label: "Meme Analyzer", description: "Break down Arabic memes", icon: Laugh, to: "/meme" },
-          { id: "learn-from-x", label: "Learn from X Post", description: "Analyze Arabic X posts", icon: Twitter, to: "/learn-from-x" },
+          { id: "stories", label: "قصص تفاعلية", description: "اختر مغامرتك بالإنجليزية", icon: Stories, to: "/stories", accent: "bg-amber-500/10 text-amber-600" },
+          { id: "souq", label: "أخبار السوق", description: "عناوين الأخبار بإنجليزية مبسّطة", icon: Newspaper, to: "/souq-news", accent: "bg-emerald-500/10 text-emerald-600" },
+          { id: "meme", label: "محلل الميمز", description: "تحليل ميمز عربية (قيد التحويل للإنجليزية)", icon: Laugh, to: "/meme" },
+          { id: "learn-from-x", label: "تعلّم من منشور X", description: "تحليل منشورات X عربية (قيد التحويل للإنجليزية)", icon: Twitter, to: "/learn-from-x" },
         ]}
       />
 
       <HubSection
-        title="Progress & social"
+        title="التقدم والأصدقاء"
         tiles={[
-          { id: "analytics", label: "Learning Analytics", description: "Charts of your progress", icon: BarChart3, to: "/analytics", accent: "bg-blue-500/10 text-blue-600", show: isAuthenticated },
-          { id: "leaderboard", label: "Leaderboard", description: "Where you stack up this week", icon: Trophy, to: "/leaderboard", accent: "bg-yellow-500/10 text-yellow-600" },
-          { id: "friends", label: "Friends", description: "Add friends & share progress", icon: Users, to: "/friends", show: isAuthenticated },
+          { id: "analytics", label: "إحصاءات التعلم", description: "رسوم بيانية لتقدّمك", icon: BarChart3, to: "/analytics", accent: "bg-blue-500/10 text-blue-600", show: isAuthenticated },
+          { id: "leaderboard", label: "لوحة الصدارة", description: "ترتيبك هذا الأسبوع", icon: Trophy, to: "/leaderboard", accent: "bg-yellow-500/10 text-yellow-600" },
+          { id: "friends", label: "الأصدقاء", description: "أضف أصدقاء وشاركهم تقدّمك", icon: Users, to: "/friends", show: isAuthenticated },
         ]}
       />
 
       <HubSection
-        title="Account"
+        title="الحساب"
         tiles={[
-          { id: "profile", label: "Profile", icon: User, to: "/profile", show: isAuthenticated },
-          { id: "settings", label: "Settings", icon: Settings, to: "/settings", show: isAuthenticated },
-          { id: "pricing", label: "Pricing & Plans", icon: CreditCard, to: "/pricing" },
-          { id: "admin", label: "Admin", description: "Content & moderation console", icon: GraduationCap, to: "/admin", show: isAdmin },
+          { id: "profile", label: "الملف الشخصي", icon: User, to: "/profile", show: isAuthenticated },
+          { id: "settings", label: "الإعدادات", icon: Settings, to: "/settings", show: isAuthenticated },
+          { id: "pricing", label: "الأسعار والباقات", icon: CreditCard, to: "/pricing" },
+          { id: "admin", label: "الإدارة", description: "لوحة المحتوى والإشراف", icon: GraduationCap, to: "/admin", show: isAdmin },
         ]}
       />
     </AppShell>

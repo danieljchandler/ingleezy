@@ -260,8 +260,12 @@ generation conditioning.
       (⚠ port Hakiya's usage-cap findings: meter minutes, not sessions)
 
 ### Arabic-only surfaces — PRUNE or REPURPOSE
-- [ ] Alphabet Journey → **English Sounds** journey (phonics for Arabic
-      speakers) — repurpose structure, all-new content
+- [~] Alphabet Journey → **English Sounds** journey (phonics for Arabic
+      speakers) — repurpose structure, all-new content. Its learner-facing
+      entry points are now hidden (LearnHub tile, Home progression card,
+      DailyLetterGoalRing) since teaching the Arabic alphabet to Arabic
+      speakers is absurd post-flip; the /alphabet routes and components
+      remain in place as the skeleton for the English Sounds rebuild.
 - [x] MSA Bridge → PRUNED (only stale generated-types references remain
       until types regeneration)
 - [x] Dialect Compare → PRUNED (revisit later as "how do Brits vs
@@ -285,7 +289,17 @@ generation conditioning.
       (Today heading, task titles/subtitles/hints, goal popover, states,
       placement banner, review nudge, video card, top-bar actions), with an
       `arCount` helper carrying Arabic one/two/3-10/11+ number agreement.
-      Remaining — no hardcoded
+      The three hub pages (Learn/Practice/Me) are migrated — titles,
+      section headers, tile labels and descriptions — with stale
+      Arabic-era descriptions corrected to flipped semantics in the same
+      pass (Reading Library / Listen / Translate / Writing / Stories /
+      Souq now describe English content; Meme & Learn-from-X honestly
+      labeled as still-Arabic pending their flip/prune decision;
+      Transcribe kept language-neutral until the pipeline flips).
+      Hub strings stay page-local per the strings-module doc (single
+      use); shared/counted strings live in `strings.ts`.
+      Remaining: Discover chrome, Review session, Me pages, Settings,
+      Auth/Onboarding, remaining pages — no hardcoded
       learner-facing English; admin exempt
 - [ ] Mirror-aware components (icons, arrows, progress) — Tailwind logical
       properties where needed
