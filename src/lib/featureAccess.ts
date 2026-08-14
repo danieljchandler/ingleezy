@@ -40,15 +40,20 @@ export const STANDARD_TIER_LIMITS = {
   vocabularyWords: 100,
 } as const;
 
+/**
+ * The name a learner meets on the paywall card, so it is Arabic and it matches
+ * the wording of the plan bullets in SUBSCRIPTION_TIERS — someone who read
+ * "محلل الميمز" on the pricing page should meet the same name at the gate.
+ */
 export function featureLabel(feature: PremiumFeature): string {
   switch (feature) {
-    case 'transcribe': return 'Transcribe tool';
-    case 'meme_analyzer': return 'Meme Analyzer';
-    case 'how_do_i_say': return 'How Do I Say';
-    case 'learn_from_x': return 'Learn from X posts';
-    case 'unlimited_vocab': return 'Unlimited vocabulary';
-    case 'full_discover': return 'Full Discover library';
-    case 'priority_ai': return 'Priority AI processing';
-    case 'early_access': return 'Early access features';
+    case 'transcribe': return 'أداة التفريغ';
+    case 'meme_analyzer': return 'محلل الميمز';
+    case 'how_do_i_say': return 'ميزة «كيف أقول…؟»';
+    case 'learn_from_x': return 'التعلّم من منشورات X';
+    case 'unlimited_vocab': return 'المفردات بلا حدود';
+    case 'full_discover': return 'مكتبة اكتشف كاملة';
+    case 'priority_ai': return 'أولوية معالجة الذكاء الاصطناعي';
+    case 'early_access': return 'الوصول المبكر للميزات';
   }
 }

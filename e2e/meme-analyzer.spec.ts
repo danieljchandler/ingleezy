@@ -29,17 +29,26 @@ const anImage = (name = "meme.png") => ({
   ),
 });
 
+// The meme is English. `english` is the caption as written and `arabic` is the
+// gloss under it; the explanation is in the learner's dialect, because that is
+// the language they are having the joke explained in.
 const aResult = (over: Record<string, unknown> = {}) => ({
   memeExplanation: {
-    casual: "It's about dreading Sunday morning at work.",
-    cultural: "The Gulf working week starts on Sunday, so this is the Monday-morning joke.",
+    casual: "الميم عن كره الصحيان بدري يوم الاثنين.",
+    cultural: "أسبوع العمل بالغرب يبدأ الاثنين، فصار الاثنين نكتة ثابتة عندهم.",
   },
   onScreenText: {
-    rawTranscriptArabic: "لما تصحى بدري",
+    rawTranscriptArabic: "when you wake up early",
     lines: [
-      { id: "line-0", arabic: "لما تصحى بدري", translation: "When you wake up early", tokens: [] },
+      {
+        id: "line-0",
+        english: "when you wake up early",
+        arabic: "لما تصحى بدري",
+        translation: "لما تصحى بدري",
+        tokens: [],
+      },
     ],
-    vocabulary: [{ arabic: "تصحى", english: "you wake up", root: "ص ح و" }],
+    vocabulary: [{ english: "wake up", arabic: "تصحى" }],
     grammarPoints: [],
   },
   ...over,
@@ -52,7 +61,7 @@ function seedMeme(db: MemoryDb) {
 /** Pick a file and wait for the page to take it. */
 async function chooseImage(page: Page, file = anImage()) {
   await page.setInputFiles("input[type=file]", file);
-  await expect(page.getByRole("button", { name: /Analyze Meme/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: "حلّل الميم" })).toBeVisible();
 }
 
 test.describe("choosing something to analyse", () => {
@@ -66,7 +75,7 @@ test.describe("choosing something to analyse", () => {
 
     await page.setInputFiles("input[type=file]", anImage("joke.png"));
 
-    await expect(page.getByRole("button", { name: /Analyze Meme/ })).toBeVisible();
+    await expect(page.getByRole("button", { name: "حلّل الميم" })).toBeVisible();
   });
 
   test("refuses a file that is neither image nor video", async ({ page }) => {
@@ -78,13 +87,13 @@ test.describe("choosing something to analyse", () => {
       buffer: Buffer.from("not a meme"),
     });
 
-    await expect(page.getByText("Unsupported file type")).toBeVisible();
-    await expect(page.getByRole("button", { name: /Analyze Meme/ })).toHaveCount(0);
+    await expect(page.getByText("نوع ملف غير مدعوم")).toBeVisible();
+    await expect(page.getByRole("button", { name: "حلّل الميم" })).toHaveCount(0);
   });
 
   test("refuses a dropped file of the wrong type too", async ({ page }) => {
     await page.goto("/meme");
-    await expect(page.getByText("Drop a meme here or tap to upload")).toBeVisible();
+    await expect(page.getByText("أفلت الميم هنا أو اضغط للرفع")).toBeVisible();
 
     await page.evaluate(() => {
       const transfer = new DataTransfer();
@@ -95,13 +104,13 @@ test.describe("choosing something to analyse", () => {
 
     // Unlike Transcribe, the drop handler here repeats the same check the
     // picker makes rather than trusting the drop.
-    await expect(page.getByText("Unsupported file type")).toBeVisible();
+    await expect(page.getByText("نوع ملف غير مدعوم")).toBeVisible();
   });
 
   test("offers nothing to analyse before a file is chosen", async ({ page }) => {
     await page.goto("/meme");
 
-    await expect(page.getByRole("button", { name: /Analyze Meme/ })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "حلّل الميم" })).toHaveCount(0);
   });
 
   test("offers no way to change the file before analysing", async ({ page }) => {
@@ -109,11 +118,11 @@ test.describe("choosing something to analyse", () => {
     await chooseImage(page);
 
     // Worth knowing: the only control that clears the selection is
-    // "Analyze Another Meme", which renders with the *result*. Picking the
+    // "حلّل ميم ثاني", which renders with the *result*. Picking the
     // wrong image means analysing it — a paid vision call — before the page
     // will let you pick a different one.
-    await expect(page.getByRole("button", { name: /Analyze Another Meme/ })).toHaveCount(0);
-    await expect(page.getByText("Drop a meme here or tap to upload")).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "حلّل ميم ثاني" })).toHaveCount(0);
+    await expect(page.getByText("أفلت الميم هنا أو اضغط للرفع")).toHaveCount(0);
   });
 
   test("clears the file once a result is in", async ({ page, backend }) => {
@@ -121,13 +130,13 @@ test.describe("choosing something to analyse", () => {
 
     await page.goto("/meme");
     await chooseImage(page);
-    await page.getByRole("button", { name: /Analyze Meme/ }).click();
-    await expect(page.getByText(/dreading Sunday morning/)).toBeVisible();
+    await page.getByRole("button", { name: "حلّل الميم" }).click();
+    await expect(page.getByText(/كره الصحيان بدري/)).toBeVisible();
 
-    await page.getByRole("button", { name: /Analyze Another Meme/ }).click();
+    await page.getByRole("button", { name: "حلّل ميم ثاني" }).click();
 
-    await expect(page.getByText("Drop a meme here or tap to upload")).toBeVisible();
-    await expect(page.getByText(/dreading Sunday morning/)).toHaveCount(0);
+    await expect(page.getByText("أفلت الميم هنا أو اضغط للرفع")).toBeVisible();
+    await expect(page.getByText(/كره الصحيان بدري/)).toHaveCount(0);
   });
 });
 
@@ -142,7 +151,7 @@ test.describe("analysing an image", () => {
 
     await page.goto("/meme");
     await chooseImage(page);
-    await page.getByRole("button", { name: /Analyze Meme/ }).click();
+    await page.getByRole("button", { name: "حلّل الميم" }).click();
 
     await expect.poll(() => backend.lastCallTo("analyze-meme")?.body).toMatchObject({
       isVideo: false,
@@ -154,8 +163,8 @@ test.describe("analysing an image", () => {
 
     await page.goto("/meme");
     await chooseImage(page);
-    await page.getByRole("button", { name: /Analyze Meme/ }).click();
-    await expect(page.getByText(/dreading Sunday morning/)).toBeVisible();
+    await page.getByRole("button", { name: "حلّل الميم" }).click();
+    await expect(page.getByText(/كره الصحيان بدري/)).toBeVisible();
 
     // An image has no audio; a Deepgram call here would be a paid request for
     // a file with nothing in it.
@@ -167,12 +176,12 @@ test.describe("analysing an image", () => {
 
     await page.goto("/meme");
     await chooseImage(page);
-    await page.getByRole("button", { name: /Analyze Meme/ }).click();
+    await page.getByRole("button", { name: "حلّل الميم" }).click();
 
     // Casual and cultural are different answers to different questions: what
     // it means, and why it is funny to the people sharing it.
-    await expect(page.getByText(/dreading Sunday morning/)).toBeVisible();
-    await expect(page.getByText(/Gulf working week starts on Sunday/)).toBeVisible();
+    await expect(page.getByText(/كره الصحيان بدري/)).toBeVisible();
+    await expect(page.getByText(/أسبوع العمل بالغرب/)).toBeVisible();
   });
 
   test("shows the caption and its translation", async ({ page, backend }) => {
@@ -180,23 +189,25 @@ test.describe("analysing an image", () => {
 
     await page.goto("/meme");
     await chooseImage(page);
-    await page.getByRole("button", { name: /Analyze Meme/ }).click();
+    await page.getByRole("button", { name: "حلّل الميم" }).click();
 
-    await expect(page.getByRole("heading", { name: "On-Screen Text" })).toBeVisible();
-    await expect(page.getByText("لما تصحى بدري")).toBeVisible();
-    await expect(page.getByText("When you wake up early")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "النص المكتوب" })).toBeVisible();
+    // The caption leads and the gloss sits under it: the learner is reading
+    // the English, not the Arabic.
+    await expect(page.getByText("when you wake up early")).toBeVisible();
+    await expect(page.getByText("لما تصحى بدري").first()).toBeVisible();
   });
 
-  test("lists the vocabulary with its roots", async ({ page, backend }) => {
+  test("lists the vocabulary English first", async ({ page, backend }) => {
     backend.stubFunction("analyze-meme", { success: true, result: aResult() });
 
     await page.goto("/meme");
     await chooseImage(page);
-    await page.getByRole("button", { name: /Analyze Meme/ }).click();
+    await page.getByRole("button", { name: "حلّل الميم" }).click();
 
-    // The root is what connects a meme word to the rest of the language — it
-    // is the difference between a one-off joke and a word worth keeping.
-    await expect(page.getByText("Root: ص ح و")).toBeVisible();
+    // The English is the item being learned; the Arabic is what it means.
+    await expect(page.getByText("wake up", { exact: true })).toBeVisible();
+    await expect(page.getByText("تصحى", { exact: true })).toBeVisible();
   });
 });
 
@@ -216,7 +227,7 @@ test.describe("analysing a video", () => {
     await page.goto("/meme");
     await page.setInputFiles("input[type=file]", aVideo());
 
-    await expect(page.getByRole("button", { name: /Analyze Meme/ })).toBeVisible();
+    await expect(page.getByRole("button", { name: "حلّل الميم" })).toBeVisible();
   });
 
   test("reports a video whose frames cannot be read", async ({
@@ -229,7 +240,7 @@ test.describe("analysing a video", () => {
 
     await page.goto("/meme");
     await page.setInputFiles("input[type=file]", aVideo());
-    await page.getByRole("button", { name: /Analyze Meme/ }).click();
+    await page.getByRole("button", { name: "حلّل الميم" }).click();
 
     // The video branch runs `extractFramesWithTimestamps` in the browser
     // before anything is sent, so a file Chromium cannot decode fails here and
@@ -238,7 +249,7 @@ test.describe("analysing a video", () => {
     // happy path is covered by the frames step's own behaviour rather than
     // end to end. What is asserted is that an unreadable file is *reported*
     // rather than silently producing an empty analysis.
-    await expect(page.getByText("Analysis failed")).toBeVisible();
+    await expect(page.getByText("فشل التحليل")).toBeVisible();
     expect(backend.callsTo("analyze-meme")).toHaveLength(0);
   });
 });
@@ -265,12 +276,12 @@ test.describe("when it cannot explain the meme", () => {
 
     await page.goto("/meme");
     await chooseImage(page);
-    await page.getByRole("button", { name: /Analyze Meme/ }).click();
+    await page.getByRole("button", { name: "حلّل الميم" }).click();
 
     // `success: true` is not enough. A result with neither an explanation nor
     // a caption is a blank page dressed as an answer, and the learner is told
     // to try a clearer image rather than left looking at nothing.
-    await expect(page.getByText(/couldn't extract any content/)).toBeVisible();
+    await expect(page.getByText(/ما قدرنا نطلع أي نص إنجليزي/)).toBeVisible();
   });
 
   test("accepts a result with only on-screen text", async ({ page, backend }) => {
@@ -279,9 +290,15 @@ test.describe("when it cannot explain the meme", () => {
       result: {
         memeExplanation: { casual: "", cultural: "" },
         onScreenText: {
-          rawTranscriptArabic: "لما تصحى بدري",
+          rawTranscriptArabic: "when you wake up early",
           lines: [
-            { id: "line-0", arabic: "لما تصحى بدري", translation: "When you wake up early", tokens: [] },
+            {
+              id: "line-0",
+              english: "when you wake up early",
+              arabic: "لما تصحى بدري",
+              translation: "لما تصحى بدري",
+              tokens: [],
+            },
           ],
           vocabulary: [],
           grammarPoints: [],
@@ -291,11 +308,11 @@ test.describe("when it cannot explain the meme", () => {
 
     await page.goto("/meme");
     await chooseImage(page);
-    await page.getByRole("button", { name: /Analyze Meme/ }).click();
+    await page.getByRole("button", { name: "حلّل الميم" }).click();
 
     // Either half is enough. A caption with no explanation is still a caption
     // the learner could not otherwise read.
-    await expect(page.getByText("لما تصحى بدري")).toBeVisible();
+    await expect(page.getByText("when you wake up early")).toBeVisible();
   });
 
   test("reports a refused analysis", async ({ page, backend, expectConsoleErrors }) => {
@@ -304,9 +321,9 @@ test.describe("when it cannot explain the meme", () => {
 
     await page.goto("/meme");
     await chooseImage(page);
-    await page.getByRole("button", { name: /Analyze Meme/ }).click();
+    await page.getByRole("button", { name: "حلّل الميم" }).click();
 
-    await expect(page.getByText("Analysis failed")).toBeVisible();
+    await expect(page.getByText("فشل التحليل")).toBeVisible();
   });
 
   test("reports an in-band failure as one", async ({ page, backend, expectConsoleErrors }) => {
@@ -315,7 +332,7 @@ test.describe("when it cannot explain the meme", () => {
 
     await page.goto("/meme");
     await chooseImage(page);
-    await page.getByRole("button", { name: /Analyze Meme/ }).click();
+    await page.getByRole("button", { name: "حلّل الميم" }).click();
 
     await expect(page.getByText("Image too small to read")).toBeVisible();
   });
@@ -331,8 +348,8 @@ test.describe("keeping a word from a meme", () => {
   async function analyse(page: Page) {
     await page.goto("/meme");
     await chooseImage(page);
-    await page.getByRole("button", { name: /Analyze Meme/ }).click();
-    await expect(page.getByText(/dreading Sunday morning/)).toBeVisible();
+    await page.getByRole("button", { name: "حلّل الميم" }).click();
+    await expect(page.getByText(/كره الصحيان بدري/)).toBeVisible();
   }
 
   test("saves a word with the caption it came from", async ({ page, db }) => {
@@ -340,12 +357,17 @@ test.describe("keeping a word from a meme", () => {
     // The vocabulary row's save control is icon-only and unnamed — counted
     // against the app-wide icon-button baseline rather than worked around
     // silently.
-    await page.locator("div").filter({ hasText: /^Root: ص ح و$/ }).locator("xpath=../..").getByRole("button").click();
+    await page.locator("div").filter({ hasText: /^wake upتصحى$/ }).locator("xpath=..").getByRole("button").click();
 
     await expect.poll(() => db.rows("user_vocabulary").length).toBeGreaterThan(0);
     expect(db.rows("user_vocabulary")[0]).toMatchObject({
       user_id: TEST_USER_ID,
+      // word_english is the word being learned; word_arabic its gloss. The
+      // caption travels with it, English side and scaffold side both.
+      word_english: "wake up",
       word_arabic: "تصحى",
+      sentence_english: "when you wake up early",
+      sentence_text: "لما تصحى بدري",
       source: "meme-analyzer",
     });
   });

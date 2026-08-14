@@ -95,8 +95,8 @@ describe("gating", () => {
 
   it("shows the upgrade path to a free user instead of a dead button", () => {
     render();
-    expect(screen.getByText(/premium feature/)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /See plans/ })).toHaveAttribute("href", "/pricing");
+    expect(screen.getByText(/ميزة مدفوعة/)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "شوف الباقات" })).toHaveAttribute("href", "/pricing");
     expect(screen.queryByRole("button", { name: /Start voice call/ })).toBeNull();
   });
 });

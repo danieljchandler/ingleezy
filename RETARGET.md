@@ -328,7 +328,28 @@ generation conditioning.
       Americans say it")
 - [x] Yemeni corpus tooling → PRUNED
 - [x] Bible reading (Arabic scripture) → PRUNED
-- [ ] Meme analyzer / Souq news / Learn-from-X: FLIP if cheap, else defer
+- [x] **Meme analyzer → FLIPPED**, not pruned. Memes carry the hardest
+      English there is — sarcasm, slang, abbreviations, references — and a
+      learner who can read every word still misses the joke, which is
+      exactly the gap this app exists for. analyze-meme now reads the
+      ENGLISH off the frames and writes every gloss, explanation and
+      grammar note in the learner's dialect; the dialect identity and MSA
+      rules still lead the prompt because everything it *generates* is the
+      Arabic scaffold. Lines come back `english` + `arabic` + `literal`,
+      a line with no English is dropped rather than rendered blank, and
+      word tokens come off the English with a case- and
+      punctuation-insensitive gloss lookup. `deepgram-transcribe` gained a
+      per-call `language` (default "ar", so the Arabic-era callers are
+      untouched) and the meme video's audio now goes out as English —
+      before this it came back as garbled Arabic and every gloss
+      downstream was built on it.
+- [x] **Learn-from-X → FLIPPED**: new `analyze-english-text` replaces
+      analyze-gulf-arabic on that page. Same TranscriptResult shape, same
+      transcript components, `english` set so they take the English-first
+      path. Auth posture kept identical to the function it replaced
+      (verify_jwt = false, no cap) — the route has no guard and a
+      signed-out visitor can already read a post there.
+- [ ] Souq news: still Arabic news. FLIP to English news or prune.
 
 ### Arabic-first UI — FLIP (dedicated pass)
 - [x] `dir="rtl"` root landed: `<html lang="ar" dir="rtl">`; manifest was
@@ -349,9 +370,9 @@ generation conditioning.
       section headers, tile labels and descriptions — with stale
       Arabic-era descriptions corrected to flipped semantics in the same
       pass (Reading Library / Listen / Translate / Writing / Stories /
-      Souq now describe English content; Meme & Learn-from-X honestly
-      labeled as still-Arabic pending their flip/prune decision;
-      Transcribe kept language-neutral until the pipeline flips).
+      Souq now describe English content; Meme & Learn-from-X have since
+      flipped for real and their tiles say so; Transcribe kept
+      language-neutral until the pipeline flips).
       Hub strings stay page-local per the strings-module doc (single
       use); shared/counted strings live in `strings.ts`.
       Since migrated: the three hubs, Discover chrome (+ feed reason
@@ -363,7 +384,10 @@ generation conditioning.
       the learner-facing pass is now COMPLETE — every
       hub, practice surface, content page, Me-area tool and the video
       player speak Arabic. Admin stays English by design. What is left
-      is the meme / learn-from-X flip-or-prune decision
+      is Souq news (still Arabic) and the Transcribe/tutor-upload
+      pipelines. **Correction**: "complete" was overstated — the
+      subscription paywall (RequireSubscription, featureLabel, the Ask-AI
+      live-voice gate) was still English and has since been migrated.
       — grammar drills, listening practice, conversation + live voice,
       and the vocab games/battles now done. Backend flips landed with
       them: listening-quiz generates English audio via the Brain's

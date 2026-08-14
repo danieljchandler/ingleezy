@@ -38,8 +38,8 @@ const MeHub = () => {
         tiles={[
           { id: "stories", label: "قصص تفاعلية", description: "اختر مغامرتك بالإنجليزية", icon: Stories, to: "/stories", accent: "bg-amber-500/10 text-amber-600" },
           { id: "souq", label: "أخبار السوق", description: "عناوين الأخبار بإنجليزية مبسّطة", icon: Newspaper, to: "/souq-news", accent: "bg-emerald-500/10 text-emerald-600" },
-          { id: "meme", label: "محلل الميمز", description: "تحليل ميمز عربية (قيد التحويل للإنجليزية)", icon: Laugh, to: "/meme" },
-          { id: "learn-from-x", label: "تعلّم من منشور X", description: "تحليل منشورات X عربية (قيد التحويل للإنجليزية)", icon: Twitter, to: "/learn-from-x" },
+          { id: "meme", label: "محلل الميمز", description: "ارفع ميم إنجليزي ونشرح لك النكتة", icon: Laugh, to: "/meme" },
+          { id: "learn-from-x", label: "تعلّم من منشور X", description: "الصق منشوراً إنجليزياً ونفكّكه لك", icon: Twitter, to: "/learn-from-x" },
         ]}
       />
 

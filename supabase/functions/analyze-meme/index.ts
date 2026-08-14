@@ -85,12 +85,23 @@ function safeJsonParse<T>(content: string): T | null {
   }
 }
 
-function toWordTokens(arabic: string, glosses: Record<string, string> = {}): WordToken[] {
-  const words = arabic.split(/\s+/).filter(Boolean);
+/**
+ * Tokenise the meme's own line, glossed word by word.
+ *
+ * Post-flip the line is English and `glosses` maps an English word to its
+ * Arabic meaning, so the lookup is keyed lowercase — the model returns
+ * "Bruh" in the line and "bruh" in the map often enough that an exact match
+ * loses half of them. Punctuation is trimmed off the key for the same reason;
+ * the surface keeps it so the line still reads as it was written.
+ */
+function toWordTokens(line: string, glosses: Record<string, string> = {}): WordToken[] {
+  const lookup: Record<string, string> = {};
+  for (const [k, v] of Object.entries(glosses)) lookup[k.trim().toLowerCase()] = v;
+  const words = line.split(/\s+/).filter(Boolean);
   return words.map((surface, idx) => ({
     id: `tok-${generateId()}-${idx}`,
     surface,
-    gloss: glosses[surface],
+    gloss: lookup[surface.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, "").toLowerCase()],
   }));
 }
 
@@ -203,86 +214,93 @@ async function callAI(
   }
 }
 
+// The meme is ENGLISH; the dialect identity and vocab rules still lead because
+// everything the model *generates* here is Arabic scaffold — the glosses, the
+// explanations, the grammar notes. The English is read off the image, never
+// written. Field names are inherited from the Arabic-target era: `english` is
+// the meme's own text and `arabic` is its gloss.
 function buildMemePrompt(dialect: Dialect): string {
   const label = getDialectLabel(dialect);
   return `${getDialectIdentity(dialect)}
 
 ${getDialectVocabRules(dialect)}
 
-You are analyzing an Arabic meme (image or video frames) for ${label} Arabic learners.
+You are explaining an ENGLISH meme (image or video frames) to a native ${label} Arabic speaker who is learning English. Memes carry the hardest English there is — sarcasm, slang, abbreviations, references — and a learner who can read every word still misses the joke.
 
-Look at ALL Arabic text visible in the image(s). Also consider any audio transcript text provided.
+Read ALL English text visible in the image(s). Also consider any audio transcript text provided.
 
 Output ONLY valid JSON matching this schema:
 {
   "memeExplanation": {
-    "casual": "string - fun, casual explanation of what's funny (2-3 sentences, in English)",
-    "cultural": "string - deeper cultural/linguistic breakdown explaining the humor, references, and dialect nuances (3-5 sentences, in English)"
+    "casual": "string - fun, casual explanation of what's funny, written in ${label} Arabic (2-3 sentences)",
+    "cultural": "string - deeper breakdown of the humour, the reference and the English being played with, written in ${label} Arabic (3-5 sentences)"
   },
   "onScreenText": {
-    "rawTranscriptArabic": "string - all Arabic text visible on screen, combined",
+    "rawTranscriptArabic": "string - all ENGLISH text visible on screen, combined (historical field name)",
     "lines": [
       {
-        "arabic": "string - one line/segment of on-screen text in authentic ${label} Arabic spelling",
-        "translation": "string - natural English translation",
-        "literal": "string - word-for-word English gloss preserving Arabic word order (may sound stiff; shows how the line is built)"
+        "english": "string - one line/segment of the on-screen ENGLISH, verbatim: same spelling, same capitals, same typos",
+        "arabic": "string - natural ${label} Arabic translation of that line",
+        "literal": "string - word-for-word Arabic gloss preserving the ENGLISH word order (may sound stiff; shows how the line is built)"
       }
     ],
     "vocabulary": [
-      {"arabic": "string", "english": "string", "root": "string (optional)"}
+      {"english": "string - the word or phrase as it appears", "arabic": "string - its meaning in ${label} Arabic"}
     ],
     "grammarPoints": [
-      {"title": "string", "explanation": "string", "examples": ["string"]}
+      {"title": "string - short title in ${label} Arabic", "explanation": "string - 1-3 sentences in ${label} Arabic", "examples": ["string - real ENGLISH lines quoted from the meme"]}
     ]
   },
   "glosses": {
-    "arabicWord": "english meaning"
+    "englishWord": "its meaning in ${label} Arabic"
   }
 }
 
 Rules:
-- Read ALL Arabic text in the image carefully, including meme captions, overlaid text, watermarks with Arabic.
-- Keep dialect spelling as spoken (${label} Arabic). NEVER convert to Modern Standard Arabic (فصحى).
-- Vocabulary: 3-8 useful ${label} words from the meme.
-- Grammar points: 1-3 ${label}-dialect-specific points.
-- Glosses: provide English meaning for EVERY unique Arabic word found.
-- If there's no Arabic text visible, set rawTranscriptArabic to empty string and lines to empty array.
+- Read ALL English text in the image carefully, including meme captions, overlaid text and watermarks.
+- Quote the English VERBATIM. Never fix spelling, capitalisation or grammar — the broken English is often the joke.
+- Every Arabic string you write is authentic spoken ${label} Arabic. NEVER Modern Standard Arabic (فصحى).
+- Vocabulary: 3-8 useful English words or phrases from the meme, favouring slang, abbreviations and phrasal verbs over easy nouns.
+- Grammar points: 1-3 English patterns the meme demonstrates, favouring what Arabic speakers get wrong (articles, the missing "to be", third-person -s, prepositions, word order).
+- Glosses: give the ${label} Arabic meaning of EVERY unique English word found.
+- If there's no English text visible, set rawTranscriptArabic to empty string and lines to empty array.
 - The casual explanation should be fun and relatable.
-- The cultural explanation should teach about ${label}-region culture, humor patterns, or linguistic features.
+- The cultural explanation should teach the reference or the wordplay the learner would otherwise read straight past.
 
 No additional text outside JSON.`;
 }
 
 function buildAudioPrompt(dialect: Dialect): string {
   const label = getDialectLabel(dialect);
-  return `You are processing ${label} Arabic audio transcript from a meme video for language learners.
+  return `You are processing the ENGLISH audio transcript of a meme video for a native ${label} Arabic speaker learning English.
 
 Output ONLY valid JSON matching this schema:
 {
   "lines": [
     {
-      "arabic": "string - one segment of spoken text in authentic ${label} Arabic",
-      "translation": "string - natural English translation",
-      "literal": "string - word-for-word English gloss preserving Arabic word order (may sound stiff; shows how the line is built)"
+      "english": "string - one segment of the spoken ENGLISH, verbatim",
+      "arabic": "string - natural ${label} Arabic translation",
+      "literal": "string - word-for-word Arabic gloss preserving the ENGLISH word order (may sound stiff; shows how the line is built)"
     }
   ],
   "vocabulary": [
-    {"arabic": "string", "english": "string", "root": "string (optional)"}
+    {"english": "string", "arabic": "string - its meaning in ${label} Arabic"}
   ],
   "grammarPoints": [
-    {"title": "string", "explanation": "string", "examples": ["string"]}
+    {"title": "string - in ${label} Arabic", "explanation": "string - in ${label} Arabic", "examples": ["string - real ENGLISH lines"]}
   ],
   "glosses": {
-    "arabicWord": "english meaning"
+    "englishWord": "its meaning in ${label} Arabic"
   }
 }
 
 Rules:
 - Split into segments of 3-12 words each.
-- Keep dialect spelling as spoken (${label} Arabic). NEVER MSA.
-- Vocabulary: 3-6 useful words.
-- Grammar points: 1-2 relevant ${label}-dialect points.
-- Glosses: English meaning for EVERY unique Arabic word.
+- Quote the English VERBATIM — do not tidy the speech.
+- Every Arabic string is authentic spoken ${label} Arabic. NEVER MSA.
+- Vocabulary: 3-6 useful English words or phrases.
+- Grammar points: 1-2 English patterns Arabic speakers trip on.
+- Glosses: the ${label} Arabic meaning of EVERY unique English word.
 
 No additional text outside JSON.`;
 }
@@ -457,25 +475,33 @@ ${audioTranscript}`,
       },
     };
 
-    // Process on-screen text lines with tokens
+    // Process on-screen text lines with tokens. `english` set is what makes
+    // the transcript components render the meme's own words on top with the
+    // Arabic underneath; a line without it has nothing to teach and is
+    // dropped rather than shown as a blank card. `translation` mirrors the
+    // scaffold for the components that predate the English path.
     const onScreenGlosses = onScreenResult?.glosses ?? {};
     if (onScreenResult?.onScreenText?.lines) {
-      result.onScreenText.lines = onScreenResult.onScreenText.lines.map((l: any, idx: number) => ({
-        id: `line-${generateId()}-${idx}`,
-        arabic: String(l.arabic ?? ''),
-        translation: String(l.translation ?? ''),
-        literal: String(l.literal ?? '').trim(),
-        tokens: toWordTokens(String(l.arabic ?? ''), onScreenGlosses),
-      }));
+      result.onScreenText.lines = onScreenResult.onScreenText.lines
+        .filter((l: Record<string, unknown>) => String(l?.english ?? '').trim())
+        .map((l: any, idx: number) => ({
+          id: `line-${generateId()}-${idx}`,
+          english: String(l.english).trim(),
+          arabic: String(l.arabic ?? ''),
+          translation: String(l.arabic ?? ''),
+          literal: String(l.literal ?? '').trim(),
+          tokens: toWordTokens(String(l.english).trim(), onScreenGlosses),
+        }));
     }
 
     if (onScreenResult?.onScreenText?.vocabulary) {
       result.onScreenText.vocabulary = onScreenResult.onScreenText.vocabulary
-        .filter((v: any) => v?.arabic)
+        // english is the item being learned, so an entry without one is a
+        // gloss with nothing to gloss.
+        .filter((v: any) => v?.english)
         .map((v: any) => ({
-          arabic: String(v.arabic),
-          english: String(v.english ?? ''),
-          root: v.root ? String(v.root) : undefined,
+          english: String(v.english),
+          arabic: String(v.arabic ?? ''),
         }));
     }
 
@@ -493,20 +519,23 @@ ${audioTranscript}`,
     if (audioResult) {
       const audioGlosses = audioResult.glosses ?? {};
       result.audioText = {
-        rawTranscriptArabic: audioResult.lines?.map((l: any) => l.arabic).join(' ') ?? '',
-        lines: (audioResult.lines ?? []).map((l: any, idx: number) => ({
-          id: `audio-line-${generateId()}-${idx}`,
-          arabic: String(l.arabic ?? ''),
-          translation: String(l.translation ?? ''),
-          literal: String(l.literal ?? '').trim(),
-          tokens: toWordTokens(String(l.arabic ?? ''), audioGlosses),
-        })),
+        // Historical field name: it now holds the spoken English.
+        rawTranscriptArabic: audioResult.lines?.map((l: any) => l.english ?? '').join(' ').trim() ?? '',
+        lines: (audioResult.lines ?? [])
+          .filter((l: Record<string, unknown>) => String(l?.english ?? '').trim())
+          .map((l: any, idx: number) => ({
+            id: `audio-line-${generateId()}-${idx}`,
+            english: String(l.english).trim(),
+            arabic: String(l.arabic ?? ''),
+            translation: String(l.arabic ?? ''),
+            literal: String(l.literal ?? '').trim(),
+            tokens: toWordTokens(String(l.english).trim(), audioGlosses),
+          })),
         vocabulary: (audioResult.vocabulary ?? [])
-          .filter((v: any) => v?.arabic)
+          .filter((v: any) => v?.english)
           .map((v: any) => ({
-            arabic: String(v.arabic),
-            english: String(v.english ?? ''),
-            root: v.root ? String(v.root) : undefined,
+            english: String(v.english),
+            arabic: String(v.arabic ?? ''),
           })),
         grammarPoints: (audioResult.grammarPoints ?? [])
           .filter((g: any) => g?.title)

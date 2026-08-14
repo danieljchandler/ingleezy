@@ -88,7 +88,7 @@ describe("RequireSubscription — while the plan is still being resolved", () =>
     // branch exists to prevent.
     const { container } = await render({ loading: true, tier: "allin" });
     expect(paidFeature()).not.toBeInTheDocument();
-    expect(screen.queryByText(/premium feature$/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/ميزة مدفوعة$/)).not.toBeInTheDocument();
     expect(container.querySelector(".animate-spin")).toBeInTheDocument();
   });
 
@@ -122,7 +122,7 @@ describe("RequireSubscription — letting a subscriber through", () => {
 
   it("shows no paywall alongside the feature", async () => {
     await render({ feature: "transcribe", tier: "standard" });
-    expect(screen.queryByRole("link", { name: /View plans|Sign up/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /شوف الباقات|سجّل حساب/ })).not.toBeInTheDocument();
   });
 });
 
@@ -140,30 +140,30 @@ describe("RequireSubscription — holding a non-subscriber back", () => {
 
   it("names the feature being asked for", async () => {
     await render({ feature: "meme_analyzer", tier: "free" });
-    expect(screen.getByText("Meme Analyzer is a premium feature")).toBeInTheDocument();
+    expect(screen.getByText("محلل الميمز ميزة مدفوعة")).toBeInTheDocument();
   });
 
   it.each([
-    ["transcribe", "Transcribe tool"],
-    ["how_do_i_say", "How Do I Say"],
-    ["learn_from_x", "Learn from X posts"],
-    ["full_discover", "Full Discover library"],
-    ["priority_ai", "Priority AI processing"],
-    ["early_access", "Early access features"],
+    ["transcribe", "أداة التفريغ"],
+    ["how_do_i_say", "ميزة «كيف أقول…؟»"],
+    ["learn_from_x", "التعلّم من منشورات X"],
+    ["full_discover", "مكتبة اكتشف كاملة"],
+    ["priority_ai", "أولوية معالجة الذكاء الاصطناعي"],
+    ["early_access", "الوصول المبكر للميزات"],
   ] as const)("labels %s properly", async (feature, label) => {
     await render({ feature, tier: "free" });
-    expect(screen.getByText(`${label} is a premium feature`)).toBeInTheDocument();
+    expect(screen.getByText(`${label} ميزة مدفوعة`)).toBeInTheDocument();
   });
 
   it("says which plan would unlock a Standard feature", async () => {
     await render({ feature: "transcribe", tier: "free" });
-    expect(screen.getByText("Subscribe to Standard or All-In to unlock this.")).toBeInTheDocument();
+    expect(screen.getByText("اشترك في Standard أو All-In عشان تفتحها.")).toBeInTheDocument();
   });
 
   it("says which plan would unlock an All-In feature", async () => {
     // Telling a Standard subscriber to "subscribe" would be wrong — they have.
     await render({ feature: "priority_ai", tier: "standard" });
-    expect(screen.getByText("Upgrade to the All-In plan to unlock this.")).toBeInTheDocument();
+    expect(screen.getByText("رقّي لباقة All-In عشان تفتحها.")).toBeInTheDocument();
   });
 
   it("marks an All-In feature with the crown", async () => {
@@ -178,14 +178,14 @@ describe("RequireSubscription — holding a non-subscriber back", () => {
 
   it("offers the way to the plans", async () => {
     await render({ feature: "transcribe", tier: "free" });
-    expect(screen.getByRole("link", { name: "View plans" })).toHaveAttribute("href", "/pricing");
+    expect(screen.getByRole("link", { name: "شوف الباقات" })).toHaveAttribute("href", "/pricing");
   });
 
   it("asks a signed-out visitor to sign up instead", async () => {
-    // "View plans" implies an account to attach one to; a visitor needs the
+    // "شوف الباقات" implies an account to attach one to; a visitor needs the
     // earlier step named.
     await render({ feature: "transcribe", tier: "free", persona: "anonymous" });
-    expect(screen.getByRole("link", { name: "Sign up" })).toHaveAttribute("href", "/pricing");
+    expect(screen.getByRole("link", { name: "سجّل حساب" })).toHaveAttribute("href", "/pricing");
   });
 });
 
@@ -193,7 +193,7 @@ describe("RequireSubscription — a caller's own fallback", () => {
   it("replaces the paywall card", async () => {
     await render({ tier: "free", fallback: <p>custom fallback</p> });
     expect(screen.getByText("custom fallback")).toBeInTheDocument();
-    expect(screen.queryByText(/is a premium feature$/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/ميزة مدفوعة$/)).not.toBeInTheDocument();
   });
 
   it("is not shown to a subscriber", async () => {

@@ -41,13 +41,19 @@ serve(async (req) => {
       throw new Error("DEEPGRAM_API_KEY is not configured");
     }
 
-    const baseDeepgramParams = new URLSearchParams({
-      model: "nova-3",
-      language: "ar",
-      diarize: "true",
-      punctuate: "true",
-      smart_format: "true",
-    });
+    // The language is per-call now that the app transcribes both directions:
+    // an English meme's audio came back as garbled Arabic while this was
+    // pinned. Arabic stays the default so the Arabic-era callers (tutor
+    // upload, Transcribe) are unaffected until they flip.
+    const language = (raw: unknown) => (raw === "en" || raw === "ar" ? raw : "ar");
+    const paramsFor = (lang: string) =>
+      new URLSearchParams({
+        model: "nova-3",
+        language: lang,
+        diarize: "true",
+        punctuate: "true",
+        smart_format: "true",
+      });
 
     const contentType = req.headers.get("content-type") || "";
 
@@ -65,6 +71,7 @@ serve(async (req) => {
       // entire file in edge function memory, so large video files work fine.
       const body = await req.json();
       const { audioUrl, keyterms } = body;
+      const baseDeepgramParams = paramsFor(language(body?.language));
 
       // Deepgram Nova-3 Keyterm Prompting: boost recognition of known vocabulary.
       // Pass lesson word list from the caller (e.g. current lesson's Arabic words).
@@ -115,8 +122,10 @@ serve(async (req) => {
     } else {
       // FormData-based input: buffer and forward bytes (small audio files only)
       // Keyterm prompting is not supported in form-data mode (no JSON body to read terms from).
-      const deepgramUrl = `https://api.deepgram.com/v1/listen?${baseDeepgramParams}`;
       const formData = await req.formData();
+      // No JSON body in this mode, so the language rides as a form field.
+      const deepgramUrl =
+        `https://api.deepgram.com/v1/listen?${paramsFor(language(formData.get("language")))}`;
       const audioFile = (formData.get("audio") || formData.get("file")) as File;
 
       if (!audioFile) {

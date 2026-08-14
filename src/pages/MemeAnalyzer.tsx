@@ -16,7 +16,6 @@ import type { VocabItem } from "@/types/transcript";
 import { AppShell } from "@/components/layout/AppShell";
 import { extractFramesWithTimestamps } from "@/lib/videoFrameExtractor";
 import { decodeAudioFile, clipToWav } from "@/lib/audioClipper";
-import { findLineContainingWord } from "@/lib/vocabularyAudioContext";
 import { InfoHint } from "@/components/InfoHint";
 import { PAGE_HINTS } from "@/lib/pageHints";
 
@@ -55,7 +54,7 @@ const MemeAnalyzer = () => {
     const isImg = selectedFile.type.startsWith("image/");
 
     if (!isVid && !isImg) {
-      toast.error("Unsupported file type", { description: "Please upload an image or video file" });
+      toast.error("نوع ملف غير مدعوم", { description: "ارفع صورة أو فيديو" });
       return;
     }
 
@@ -75,7 +74,7 @@ const MemeAnalyzer = () => {
     const isImg = droppedFile.type.startsWith("image/");
 
     if (!isVid && !isImg) {
-      toast.error("Unsupported file type", { description: "Please upload an image or video file" });
+      toast.error("نوع ملف غير مدعوم", { description: "ارفع صورة أو فيديو" });
       return;
     }
 
@@ -99,31 +98,42 @@ const MemeAnalyzer = () => {
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
+  // Keyed lowercase on the English, matching TappableEnglishText — the other
+  // way words reach these handlers. Keying on the Arabic gloss would leave a
+  // word saved from the transcript still showing unsaved in the list.
+  const wordKey = (word: VocabItem) => word.english.trim().toLowerCase();
+
   const handleAddToVocabSection = useCallback((word: VocabItem) => {
-    setVocabSectionWords((prev) => new Set(prev).add(word.arabic));
+    setVocabSectionWords((prev) => new Set(prev).add(word.english.trim().toLowerCase()));
   }, []);
 
   const handleSaveToMyWords = useCallback(async (word: VocabItem) => {
     if (!isAuthenticated || !user) {
-      toast.error("Please log in to save words");
+      toast.error("سجّل دخولك عشان تحفظ الكلمات");
       return;
     }
 
-    // Resolve sentence context: use provided or auto-match from audio lines
-    let resolvedSentenceText = word.sentenceText;
-    let resolvedSentenceEnglish = word.sentenceEnglish;
+    // Resolve sentence context: use what the caller supplied, or find the line
+    // the word came from. Named for what they hold rather than for the columns
+    // they land in — the meme's own line is English and the Arabic under it is
+    // the scaffold, and getting those two the wrong way round puts an Arabic
+    // sentence on the front of a flashcard whose answer is English.
+    let sentenceArabic = word.sentenceText;
+    let sentenceEnglish = word.sentenceEnglish;
     let resolvedStartMs = word.startMs;
     let resolvedEndMs = word.endMs;
 
-    if (!resolvedSentenceText) {
+    if (!sentenceEnglish) {
       const allLines = [...(result?.audioText?.lines ?? []), ...(result?.onScreenText?.lines ?? [])];
-      const matched = findLineContainingWord(
-        allLines.map(l => ({ arabic: l.arabic, translation: l.translation, startMs: l.startMs, endMs: l.endMs })),
-        word.arabic
-      );
+      // Matched on the English, not through findLineContainingWord: that
+      // helper strips Arabic diacritics before comparing, which does nothing
+      // for an English needle, and its return field names are crosswired for
+      // this direction.
+      const needle = wordKey(word);
+      const matched = allLines.find((l) => (l.english ?? "").toLowerCase().includes(needle));
       if (matched) {
-        resolvedSentenceText = matched.sentenceText;
-        resolvedSentenceEnglish = matched.sentenceEnglish;
+        sentenceEnglish = matched.english;
+        sentenceArabic = matched.arabic;
         resolvedStartMs = matched.startMs;
         resolvedEndMs = matched.endMs;
       }
@@ -149,18 +159,19 @@ const MemeAnalyzer = () => {
 
     try {
       await addUserVocabulary.mutateAsync({
-        word_arabic: word.arabic,
+        // word_english is the English being learned; word_arabic its gloss.
         word_english: word.english,
-        root: word.root,
+        word_arabic: word.arabic,
         source: "meme-analyzer",
-        sentence_text: resolvedSentenceText,
-        sentence_english: resolvedSentenceEnglish,
+        // sentence_text holds the scaffold, sentence_english the line itself.
+        sentence_text: sentenceArabic,
+        sentence_english: sentenceEnglish,
         sentence_audio_url: sentenceAudioUrl,
       });
-      setSavedWords((prev) => new Set(prev).add(word.arabic));
-      toast.success("Saved to My Words!", { description: word.arabic });
+      setSavedWords((prev) => new Set(prev).add(wordKey(word)));
+      toast.success("حفظناها في كلماتي!", { description: word.english });
     } catch {
-      toast.error("Failed to save word");
+      toast.error("تعذّر حفظ الكلمة");
     }
   }, [isAuthenticated, user, addUserVocabulary, isVideo, file, result]);
 
@@ -180,16 +191,20 @@ const MemeAnalyzer = () => {
       if (isVideo) {
         // Extract frames for vision (up to 4 evenly-spaced frames)
         setProgress(10);
-        toast.info("Extracting video frames...");
+        toast.info("نستخرج لقطات من الفيديو…");
         const videoFrames = await extractFramesWithTimestamps(file, 4, 4, 1024);
         imageBase64 = videoFrames.map((f) => f.dataUri);
 
         // Transcribe audio via Deepgram
         setProgress(30);
-        toast.info("Transcribing audio...");
+        toast.info("نفرّغ الصوت…");
         try {
           const formData = new FormData();
           formData.append("audio", file);
+          // The meme is spoken in English. Left on the function's Arabic
+          // default the speech came back as garbled Arabic, and every gloss
+          // and grammar note downstream was built on it.
+          formData.append("language", "en");
 
           const { data: transcriptionData, error: transcriptionError } = await supabase.functions.invoke(
             "deepgram-transcribe",
@@ -209,7 +224,7 @@ const MemeAnalyzer = () => {
 
       // Send to analyze-meme edge function
       setProgress(60);
-      toast.info("Analyzing meme with AI...");
+      toast.info("نحلّل الميم…");
 
       const { data, error } = await supabase.functions.invoke("analyze-meme", {
         body: {
@@ -220,7 +235,7 @@ const MemeAnalyzer = () => {
       });
 
       if (error) throw new Error(error.message);
-      if (!data?.success || !data?.result) throw new Error(data?.error || "Analysis failed");
+      if (!data?.success || !data?.result) throw new Error(data?.error || "فشل التحليل");
 
       const analysisResult = data.result as MemeAnalysisResult;
       
@@ -228,16 +243,16 @@ const MemeAnalyzer = () => {
       const hasExplanation = analysisResult.memeExplanation?.casual || analysisResult.memeExplanation?.cultural;
       const hasLines = (analysisResult.onScreenText?.lines?.length ?? 0) > 0;
       if (!hasExplanation && !hasLines) {
-        throw new Error("The AI couldn't extract any content from this meme. Try a clearer image.");
+        throw new Error("ما قدرنا نطلع أي نص إنجليزي من الميم. جرّب صورة أوضح.");
       }
 
       setResult(analysisResult);
       setProgress(100);
-      toast.success("Meme analyzed! 🎉");
+      toast.success("حلّلنا الميم! 🎉");
     } catch (err) {
       console.error("Meme analysis error:", err);
-      toast.error("Analysis failed", {
-        description: err instanceof Error ? err.message : "An unexpected error occurred",
+      toast.error("فشل التحليل", {
+        description: err instanceof Error ? err.message : "صار خطأ غير متوقع",
       });
     } finally {
       clearInterval(progressInterval);
@@ -263,11 +278,11 @@ const MemeAnalyzer = () => {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
           <Laugh className="h-7 w-7 text-primary" />
-          Meme Analyzer
+          محلّل الميمز
           <InfoHint {...PAGE_HINTS["meme"]} size="md" />
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Upload an Arabic meme to get a full breakdown
+          ارفع ميم إنجليزي ونفكّكه لك كلمة كلمة
         </p>
       </div>
 
@@ -287,14 +302,14 @@ const MemeAnalyzer = () => {
             className="hidden"
           />
           <Upload className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-          <p className="text-foreground font-medium">Drop a meme here or tap to upload</p>
-          <p className="text-sm text-muted-foreground mt-1">Images and videos supported</p>
+          <p className="text-foreground font-medium">أفلت الميم هنا أو اضغط للرفع</p>
+          <p className="text-sm text-muted-foreground mt-1">نقبل الصور والفيديوهات</p>
           <div className="flex items-center justify-center gap-2 mt-3">
             <Badge variant="outline" className="gap-1">
-              <ImageIcon className="h-3 w-3" /> Images
+              <ImageIcon className="h-3 w-3" /> صور
             </Badge>
             <Badge variant="outline" className="gap-1">
-              <Video className="h-3 w-3" /> Videos
+              <Video className="h-3 w-3" /> فيديو
             </Badge>
           </div>
         </div>
@@ -336,12 +351,12 @@ const MemeAnalyzer = () => {
             {isProcessing ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Analyzing...
+                نحلّل…
               </>
             ) : (
               <>
                 <Sparkles className="h-4 w-4" />
-                Analyze Meme
+                حلّل الميم
               </>
             )}
           </Button>
@@ -384,7 +399,7 @@ const MemeAnalyzer = () => {
               <CardHeader className="pb-2">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <Laugh className="h-5 w-5 text-primary" />
-                  What's Funny
+                  وش الطريف فيه
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
@@ -397,7 +412,7 @@ const MemeAnalyzer = () => {
                   <div className="pt-2 border-t border-border/50">
                     <div className="flex items-center gap-1.5 mb-1">
                       <GraduationCap className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Cultural & Linguistic Context</span>
+                      <span className="text-xs font-medium text-muted-foreground">السياق الثقافي واللغوي</span>
                     </div>
                     <p className="text-sm text-muted-foreground leading-relaxed">
                       {result.memeExplanation.cultural}
@@ -413,7 +428,7 @@ const MemeAnalyzer = () => {
             <div>
               <div className="flex items-center gap-2 mb-3">
                 <Languages className="h-5 w-5 text-primary" />
-                <h2 className="text-lg font-semibold text-foreground">On-Screen Text</h2>
+                <h2 className="text-lg font-semibold text-foreground">النص المكتوب</h2>
               </div>
               <ErrorBoundary name="OnScreenTranscript">
                 <LineByLineTranscript
@@ -432,7 +447,7 @@ const MemeAnalyzer = () => {
             <div>
               <div className="flex items-center gap-2 mb-3">
                 <Languages className="h-5 w-5 text-primary" />
-                <h2 className="text-lg font-semibold text-foreground">Audio Transcript</h2>
+                <h2 className="text-lg font-semibold text-foreground">تفريغ الصوت</h2>
               </div>
               <ErrorBoundary name="AudioTranscript">
                 <LineByLineTranscript
@@ -452,7 +467,7 @@ const MemeAnalyzer = () => {
               <CardHeader className="pb-2">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <BookOpen className="h-5 w-5 text-primary" />
-                  Vocabulary
+                  المفردات
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -463,19 +478,13 @@ const MemeAnalyzer = () => {
                       className="flex items-center justify-between p-3 rounded-lg bg-muted/50 border border-border/50"
                     >
                       <div className="flex items-center gap-3">
-                        <span
-                          className="text-lg font-semibold text-foreground"
-                          dir="rtl"
-                          style={{ fontFamily: "'Amiri', serif" }}
-                        >
+                        {/* English leads — it is the word being learned. */}
+                        <span className="font-english text-lg font-semibold text-foreground">
+                          {word.english}
+                        </span>
+                        <span dir="rtl" className="font-arabic text-sm text-muted-foreground">
                           {word.arabic}
                         </span>
-                        <span className="text-sm text-muted-foreground">{word.english}</span>
-                        {word.root && (
-                          <Badge variant="outline" className="text-xs">
-                            Root: {word.root}
-                          </Badge>
-                        )}
                       </div>
                       {isAuthenticated && (
                         <Button
@@ -483,9 +492,9 @@ const MemeAnalyzer = () => {
                           size="sm"
                           className="gap-1"
                           onClick={() => handleSaveToMyWords(word)}
-                          disabled={savedWords.has(word.arabic)}
+                          disabled={savedWords.has(wordKey(word))}
                         >
-                          {savedWords.has(word.arabic) ? (
+                          {savedWords.has(wordKey(word)) ? (
                             <Check className="h-4 w-4 text-primary" />
                           ) : (
                             <Plus className="h-4 w-4" />
@@ -505,7 +514,7 @@ const MemeAnalyzer = () => {
               <CardHeader className="pb-2">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <Sparkles className="h-5 w-5 text-primary" />
-                  Grammar Points
+                  ملاحظات القواعد
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -516,8 +525,9 @@ const MemeAnalyzer = () => {
                       <p className="text-sm text-muted-foreground mt-1">{point.explanation}</p>
                       {point.examples && point.examples.length > 0 && (
                         <div className="mt-2 flex flex-wrap gap-1.5">
+                          {/* Quoted lines from the meme — English, so LTR. */}
                           {point.examples.map((ex, exIdx) => (
-                            <Badge key={exIdx} variant="secondary" className="text-xs" dir="rtl">
+                            <Badge key={exIdx} variant="secondary" className="font-english text-xs">
                               {ex}
                             </Badge>
                           ))}
@@ -533,7 +543,7 @@ const MemeAnalyzer = () => {
           {/* Analyze another */}
           <Button variant="outline" onClick={clearFile} className="w-full gap-2">
             <Upload className="h-4 w-4" />
-            Analyze Another Meme
+            حلّل ميم ثاني
           </Button>
         </div>
       )}

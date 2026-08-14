@@ -48,16 +48,18 @@ export const RequireSubscription = ({ feature, children, fallback }: Props) => {
             <Lock className="h-6 w-6 text-primary" />
           )}
         </div>
-        <CardTitle>{featureLabel(feature)} is a premium feature</CardTitle>
+        {/* Plan names stay Latin — they are the brand, and the pricing page
+            prints them the same way. */}
+        <CardTitle>{featureLabel(feature)} ميزة مدفوعة</CardTitle>
         <CardDescription>
           {required === 'allin'
-            ? 'Upgrade to the All-In plan to unlock this.'
-            : 'Subscribe to Standard or All-In to unlock this.'}
+            ? 'رقّي لباقة All-In عشان تفتحها.'
+            : 'اشترك في Standard أو All-In عشان تفتحها.'}
         </CardDescription>
       </CardHeader>
       <CardContent className="flex justify-center">
         <Button asChild>
-          <Link to="/pricing">{user ? 'View plans' : 'Sign up'}</Link>
+          <Link to="/pricing">{user ? 'شوف الباقات' : 'سجّل حساب'}</Link>
         </Button>
       </CardContent>
     </Card>

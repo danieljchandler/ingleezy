@@ -95,7 +95,7 @@ test.describe("subscription tiers", () => {
       await page.goto(path);
 
       await expect(page).toHaveURL(new RegExp(`${path.replace(/\//g, "\\/")}$`));
-      await expect(page.getByText(/premium feature/i)).toHaveCount(0);
+      await expect(page.getByText(/ميزة مدفوعة/)).toHaveCount(0);
     });
   }
 
@@ -103,7 +103,7 @@ test.describe("subscription tiers", () => {
     await signInAs("standard");
     await page.goto("/transcribe");
 
-    await expect(page.getByText(/premium feature/i)).toHaveCount(0);
+    await expect(page.getByText(/ميزة مدفوعة/)).toHaveCount(0);
   });
 
   test("the pricing page offers both plans", async ({ page, signInAs }) => {

@@ -59,13 +59,13 @@ export function VoiceTab() {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-3 p-6 text-center">
         <Crown className="h-6 w-6 text-amber-500" />
-        <p className="text-sm font-medium">Live voice is a premium feature</p>
+        <p className="text-sm font-medium">المكالمة المباشرة ميزة مدفوعة</p>
         <p className="max-w-xs text-xs text-muted-foreground">
-          Talk to the AI tutor about anything on your screen — real conversation, in dialect,
-          hands-free. Available on any paid plan.
+          تكلّم إنجليزي مع المدرّب عن أي شي على شاشتك — محادثة حقيقية بدون كتابة، ويشرح لك
+          بلهجتك. متوفرة في أي باقة مدفوعة.
         </p>
         <Button asChild size="sm">
-          <Link to="/pricing">See plans</Link>
+          <Link to="/pricing">شوف الباقات</Link>
         </Button>
       </div>
     );

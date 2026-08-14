@@ -5,12 +5,18 @@ import { chatCompletion, json, type UpstreamHandler } from "./upstreams.ts";
 /**
  * `analyze-meme` — vision plus, optionally, audio.
  *
+ * The meme is ENGLISH and the learner is an Arabic speaker, so `english` on a
+ * line is the caption as written and `arabic` is the gloss under it; the same
+ * way round in the vocabulary. Everything the model *generates* here is that
+ * Arabic scaffold, which is why the dialect identity and the MSA rules still
+ * lead the prompt.
+ *
  * The interesting property is that it must never 500 on a model that would not
  * answer in JSON. A meme upload is expensive for the learner (they have already
- * waited for the file) and cheap for the model to refuse — Arabic memes trip
- * safety filters routinely, and the usual failure is an Arabic apology rather
- * than an error. So the function retries once with a stricter instruction and
- * then degrades to an empty structure, which lets the audio half still render.
+ * waited for the file) and cheap for the model to refuse — meme content trips
+ * safety filters routinely, and the usual failure is an apology rather than an
+ * error. So the function retries once with a stricter instruction and then
+ * degrades to an empty structure, which lets the audio half still render.
  *
  * The other thing worth pinning is the separation of on-screen text from
  * spoken text. Both halves feed the same result shape, and the prompt goes out
@@ -36,12 +42,12 @@ function caller(extra: Record<string, UpstreamHandler> = {}): Record<string, Ups
 }
 
 const anAnalysis = (over: Record<string, unknown> = {}) => ({
-  memeExplanation: { casual: "It is a joke about traffic.", cultural: "Gulf drivers." },
+  memeExplanation: { casual: "نكتة عن الزحمة.", cultural: "سواقة الخليج." },
   onScreenText: {
-    rawTranscriptArabic: "الزحمة قاتلة",
-    lines: [{ arabic: "الزحمة قاتلة", translation: "The traffic is killing me" }],
-    vocabulary: [{ arabic: "زحمة", english: "traffic", root: "ز ح م" }],
-    grammarPoints: [{ title: "Nominal sentence", explanation: "No verb needed." }],
+    rawTranscriptArabic: "the traffic is killing me",
+    lines: [{ english: "the traffic is killing me", arabic: "الزحمة قاتلة" }],
+    vocabulary: [{ english: "traffic", arabic: "زحمة" }],
+    grammarPoints: [{ title: "الجملة الاسمية", explanation: "ما تحتاج فعل." }],
   },
   glosses: {},
   ...over,
@@ -93,7 +99,7 @@ Deno.test("analyze-meme wraps its result in a success envelope", async () => {
     memeExplanation: { casual: string };
     onScreenText: { lines: unknown[]; vocabulary: unknown[] };
   };
-  assertStringIncludes(result.memeExplanation.casual, "joke about traffic");
+  assertStringIncludes(result.memeExplanation.casual, "نكتة عن الزحمة");
   assertEquals(result.onScreenText.lines.length, 1);
   assertEquals(result.onScreenText.vocabulary.length, 1);
 });
@@ -244,18 +250,18 @@ Deno.test("analyze-meme recovers JSON wrapped in markdown fences", async () => {
   assertEquals(result.onScreenText.lines.length, 1);
 });
 
-Deno.test("analyze-meme drops vocabulary entries with no Arabic", async () => {
+Deno.test("analyze-meme drops vocabulary entries with no English", async () => {
   const { body } = await call(
     { imageBase64: IMAGE },
     caller({
       "ai.gateway.lovable.dev": vision(
         anAnalysis({
           onScreenText: {
-            rawTranscriptArabic: "الزحمة",
-            lines: [{ arabic: "الزحمة قاتلة", translation: "traffic" }],
+            rawTranscriptArabic: "the traffic is killing me",
+            lines: [{ english: "the traffic is killing me", arabic: "الزحمة قاتلة" }],
             vocabulary: [
-              { arabic: "زحمة", english: "traffic" },
-              { english: "orphaned entry" },
+              { english: "traffic", arabic: "زحمة" },
+              { arabic: "بدون إنجليزي" },
               {},
             ],
             grammarPoints: [],
@@ -266,9 +272,60 @@ Deno.test("analyze-meme drops vocabulary entries with no Arabic", async () => {
   );
 
   const result = body.result as { onScreenText: { vocabulary: unknown[] } };
-  // A vocabulary card with no Arabic on it is a blank card the learner can
-  // still tap to save.
+  // The English is the word being learned. An entry without one is a blank
+  // card the learner can still tap to save.
   assertEquals(result.onScreenText.vocabulary.length, 1);
+});
+
+Deno.test("analyze-meme drops a line with no English", async () => {
+  const { body } = await call(
+    { imageBase64: IMAGE },
+    caller({
+      "ai.gateway.lovable.dev": vision(
+        anAnalysis({
+          onScreenText: {
+            rawTranscriptArabic: "the traffic is killing me",
+            lines: [
+              { english: "the traffic is killing me", arabic: "الزحمة قاتلة" },
+              { arabic: "سطر بدون إنجليزي" },
+              { english: "   ", arabic: "فاضي" },
+            ],
+            vocabulary: [],
+            grammarPoints: [],
+          },
+        }),
+      ),
+    }),
+  );
+
+  const result = body.result as { onScreenText: { lines: unknown[] } };
+  // The caption is what the learner is reading; a line with only the gloss
+  // renders as an empty card with a translation of nothing underneath it.
+  assertEquals(result.onScreenText.lines.length, 1);
+});
+
+Deno.test("analyze-meme glosses the caption's own words", async () => {
+  const { body } = await call(
+    { imageBase64: IMAGE },
+    caller({
+      "ai.gateway.lovable.dev": vision(
+        anAnalysis({
+          glosses: { traffic: "زحمة", KILLING: "قاتل" },
+        }),
+      ),
+    }),
+  );
+
+  const result = body.result as {
+    onScreenText: { lines: Array<{ tokens: Array<{ surface: string; gloss?: string }> }> };
+  };
+  const tokens = result.onScreenText.lines[0].tokens;
+  // Tokens come off the English now, and the lookup is case- and
+  // punctuation-insensitive: the model routinely keys the map in a different
+  // case from the caption, and an exact match loses half the glosses.
+  assertEquals(tokens.map((t) => t.surface).join(" "), "the traffic is killing me");
+  assertEquals(tokens.find((t) => t.surface === "traffic")?.gloss, "زحمة");
+  assertEquals(tokens.find((t) => t.surface === "killing")?.gloss, "قاتل");
 });
 
 Deno.test("analyze-meme drops grammar points with no title", async () => {
