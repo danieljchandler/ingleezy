@@ -326,8 +326,12 @@ generation conditioning.
       Onboarding, placement CTA.
       Remaining: Me-area pages (MyWords, Profile, analytics…),
       individual practice/content pages (grammar, listening practice,
-      conversation, vocab games/battles, mistakes, how-do-i-say,
-      culture guide…), DiscoverVideo player chrome, scoreBand labels
+      conversation, vocab games/battles…), DiscoverVideo player
+      chrome, scoreBand labels
+      — mistakes/profile/how-do-i-say now done; culture-guide needs a
+      BACKEND flip first (its prompt still answers about Arab culture
+      in dialect — should become Anglosphere etiquette explained in
+      the learner's dialect), so it flips as its own slice
       with the pronunciation pages — no hardcoded learner-facing
       English; admin exempt
 - [ ] Mirror-aware components (icons, arrows, progress) — Tailwind logical
