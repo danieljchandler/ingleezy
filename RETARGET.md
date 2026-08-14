@@ -258,7 +258,10 @@ generation conditioning.
       Munsit to Deepgram EN with English normalisation (case/punctuation/
       apostrophes), learner_errors carrying English targets. Practice/hub
       pages and RequestSituationCard flipped English-primary. Shadowing
-      still Arabic — it echoes native clips (immersion), revisit with the
+      follows the CLIP's language now (English lines from English
+      videos scored against en-US; Hakiya-bridged Arabic clips scored
+      against the dialect) — it echoes native clips (immersion),
+      revisit with the
       Hakiya-bridge listening decisions.
       **Phrase of the day + jingle DONE**: an English expression a native
       would say today (category wheel re-aimed at English life; one shared
@@ -325,10 +328,10 @@ generation conditioning.
       Settings (+ Arabic labels on reasons/topics data), Auth,
       Onboarding, placement CTA.
       Remaining: Me-area pages (MyWords, Profile, analytics…),
-      DiscoverVideo player chrome, pronunciation pages +
-      scoreBand labels, the smaller Me-area tools (Transcribe,
-      TutorUpload, LikedVideos, analytics, friends, leaderboard,
-      pricing)
+      DiscoverVideo player chrome, the smaller Me-area
+      tools (Transcribe, TutorUpload, LikedVideos, analytics, friends,
+      leaderboard, pricing) — pronunciation pages and scoreBand
+      labels now done
       — grammar drills, listening practice, conversation + live voice,
       and the vocab games/battles now done. Backend flips landed with
       them: listening-quiz generates English audio via the Brain's

@@ -60,7 +60,7 @@ export function ShadowPlayer({ clip, threshold, autoAdvance, showEnglish, onResu
       onComplete: async (blob, reason) => {
         if (!blob) {
           setState("error");
-          setPlayerError(reason === "no-audio" ? "We didn't hear you — try again." : "Recording failed");
+          setPlayerError(reason === "no-audio" ? "لم نسمعك — حاول من جديد." : "تعذّر التسجيل");
           return;
         }
         setState("scoring");
@@ -144,7 +144,7 @@ export function ShadowPlayer({ clip, threshold, autoAdvance, showEnglish, onResu
           className="gap-2"
         >
           <Volume2 className="h-4 w-4" />
-          {state === "playing" ? "Listening…" : "Listen"}
+          {state === "playing" ? "يعمل الآن…" : "استمع"}
         </Button>
       </div>
 
@@ -161,7 +161,7 @@ export function ShadowPlayer({ clip, threshold, autoAdvance, showEnglish, onResu
             <CountdownRing durationMs={clipDurationMs} className="w-20 h-20" colorClass="text-primary">
               <Volume2 className="h-7 w-7 text-primary" />
             </CountdownRing>
-            <p className="text-xs text-muted-foreground">Listen carefully…</p>
+            <p className="text-xs text-muted-foreground">استمع جيداً…</p>
           </div>
         )}
 
@@ -171,7 +171,7 @@ export function ShadowPlayer({ clip, threshold, autoAdvance, showEnglish, onResu
               <button
                 onClick={() => recorder.stop("manual")}
                 className="h-14 w-14 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center animate-pulse"
-                aria-label="Stop recording"
+                aria-label="أوقف التسجيل"
               >
                 <Mic className="h-6 w-6" />
               </button>
@@ -216,20 +216,20 @@ export function ShadowPlayer({ clip, threshold, autoAdvance, showEnglish, onResu
             <div>
               <p className={cn("text-base font-semibold", band.color)}>{band.label}</p>
               <p className="text-xs text-muted-foreground">
-                Acc {Math.round(result.accuracy)} · Flu {Math.round(result.fluency)} · Comp {Math.round(result.completeness)}
+                الدقة {Math.round(result.accuracy)} · الطلاقة {Math.round(result.fluency)} · الاكتمال {Math.round(result.completeness)}
               </p>
               {passed && autoAdvance && (
-                <p className="text-xs text-primary mt-1 flex items-center gap-1"><Gauge className="h-3 w-3" /> Advancing…</p>
+                <p className="text-xs text-primary mt-1 flex items-center gap-1"><Gauge className="h-3 w-3" /> ننتقل…</p>
               )}
             </div>
           </div>
           <div className="flex gap-2">
             <Button variant="outline" className="flex-1 gap-1.5" onClick={handleLoop}>
               <RotateCcw className="h-4 w-4" />
-              Loop
+              كرّر
             </Button>
             <Button className="flex-1 gap-1.5" onClick={() => { if (autoAdvanceTimerRef.current) clearTimeout(autoAdvanceTimerRef.current); onNext(); }}>
-              Next
+              التالي
               <ArrowRight className="h-4 w-4" />
             </Button>
           </div>
@@ -239,10 +239,10 @@ export function ShadowPlayer({ clip, threshold, autoAdvance, showEnglish, onResu
       {state === "error" && !result && (
         <div className="flex gap-2">
           <Button variant="outline" className="flex-1" onClick={handleLoop}>
-            <RotateCcw className="h-4 w-4 mr-1.5" /> Try again
+            <RotateCcw className="h-4 w-4 mr-1.5" /> حاول من جديد
           </Button>
           <Button variant="ghost" className="flex-1" onClick={onNext}>
-            Skip <ArrowRight className="h-4 w-4 ml-1.5" />
+            تخطَّ <ArrowRight className="h-4 w-4 ml-1.5" />
           </Button>
         </div>
       )}

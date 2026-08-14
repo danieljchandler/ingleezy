@@ -153,7 +153,7 @@ function render({
 
 /** Play the clip through to its end, which is what opens the microphone. */
 const listenThrough = async () => {
-  fireEvent.click(screen.getByRole("button", { name: /^listen$/i }));
+  fireEvent.click(screen.getByRole("button", { name: "استمع" }));
   await act(async () => {
     await Promise.resolve();
   });
@@ -209,7 +209,7 @@ describe("setting up the take", () => {
   it("plays the clip at full speed to begin with", async () => {
     render();
 
-    fireEvent.click(screen.getByRole("button", { name: /^listen$/i }));
+    fireEvent.click(screen.getByRole("button", { name: "استمع" }));
 
     await waitFor(() => expect(player.play).toHaveBeenCalledWith(1));
   });
@@ -218,7 +218,7 @@ describe("setting up the take", () => {
     render();
 
     fireEvent.click(screen.getByRole("button", { name: "0.5×" }));
-    fireEvent.click(screen.getByRole("button", { name: /^listen$/i }));
+    fireEvent.click(screen.getByRole("button", { name: "استمع" }));
 
     // Half speed is how a learner hears the consonants they are missing; the
     // reference is still the native voice, just slower.
@@ -229,11 +229,11 @@ describe("setting up the take", () => {
     player.play.mockResolvedValue(false);
     render();
 
-    fireEvent.click(screen.getByRole("button", { name: /^listen$/i }));
+    fireEvent.click(screen.getByRole("button", { name: "استمع" }));
 
     // A YouTube embed that autoplay blocked must not leave the learner
     // watching a countdown for a clip that is not playing.
-    await waitFor(() => expect(screen.getByRole("button", { name: /^listen$/i })).toBeEnabled());
+    await waitFor(() => expect(screen.getByRole("button", { name: "استمع" })).toBeEnabled());
   });
 });
 
@@ -276,7 +276,7 @@ describe("the echo window", () => {
     render();
     await listenThrough();
 
-    fireEvent.click(screen.getByRole("button", { name: /stop recording/i }));
+    fireEvent.click(screen.getByRole("button", { name: "أوقف التسجيل" }));
 
     expect(recorder.stop).toHaveBeenCalledWith("manual");
   });
@@ -289,7 +289,7 @@ describe("the echo window", () => {
 
     // Silence sent to the scorer comes back as a very low score, which blames
     // the learner for a microphone problem.
-    expect(screen.getByText("We didn't hear you — try again.")).toBeInTheDocument();
+    expect(screen.getByText("لم نسمعك — حاول من جديد.")).toBeInTheDocument();
     expect(azure.assess).not.toHaveBeenCalled();
   });
 
@@ -299,7 +299,7 @@ describe("the echo window", () => {
 
     await finishRecording(null, "error");
 
-    expect(screen.getByText("Recording failed")).toBeInTheDocument();
+    expect(screen.getByText("تعذّر التسجيل")).toBeInTheDocument();
   });
 
   it("offers another go or a way past after a failed take", async () => {
@@ -310,8 +310,8 @@ describe("the echo window", () => {
 
     // Being stuck on a clip whose microphone will not cooperate is how a
     // learner leaves the exercise.
-    expect(screen.getByRole("button", { name: /try again/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /skip/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /حاول من جديد/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /تخطَّ/ })).toBeInTheDocument();
   });
 
   it("explains a refused microphone rather than showing a bare error", async () => {
@@ -342,7 +342,7 @@ describe("the score", () => {
     expect(screen.getByText("82")).toBeInTheDocument();
     // Accuracy, fluency and completeness are what tell a learner whether to
     // work on sounds, on speed, or on saying the whole thing.
-    expect(screen.getByText("Acc 83 · Flu 80 · Comp 100")).toBeInTheDocument();
+    expect(screen.getByText("الدقة 83 · الطلاقة 80 · الاكتمال 100")).toBeInTheDocument();
   });
 
   it("names the band rather than leaving a bare number", async () => {
@@ -350,7 +350,7 @@ describe("the score", () => {
 
     await takeScoring(92);
 
-    expect(screen.getByText("Excellent")).toBeInTheDocument();
+    expect(screen.getByText("ممتاز")).toBeInTheDocument();
   });
 
   it("tells the page what was scored", async () => {
@@ -368,7 +368,7 @@ describe("the score", () => {
     await takeScoring(40);
 
     expect(onResult).toHaveBeenCalledWith(40);
-    expect(screen.getByText("Needs practice")).toBeInTheDocument();
+    expect(screen.getByText("يحتاج تدريباً")).toBeInTheDocument();
   });
 
   it("shows the failure branch when scoring came back with nothing", async () => {
@@ -380,7 +380,7 @@ describe("the score", () => {
 
     // Azure returning nothing is not the learner's fault and must not read as
     // a zero.
-    expect(screen.getByRole("button", { name: /try again/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /حاول من جديد/ })).toBeInTheDocument();
     expect(screen.queryByText("Needs practice")).not.toBeInTheDocument();
   });
 });
@@ -391,7 +391,7 @@ describe("what happens next", () => {
     const { onNext } = render({ autoAdvance: true, threshold: 75 });
 
     await takeScoring(88);
-    expect(screen.getByText(/Advancing…/)).toBeInTheDocument();
+    expect(screen.getByText(/ننتقل…/)).toBeInTheDocument();
     act(() => {
       vi.advanceTimersByTime(1400);
     });
@@ -432,7 +432,7 @@ describe("what happens next", () => {
     const { onNext } = render({ autoAdvance: true, threshold: 75 });
     await takeScoring(88);
 
-    fireEvent.click(screen.getByRole("button", { name: /next/i }));
+    fireEvent.click(screen.getByRole("button", { name: /التالي/ }));
     act(() => {
       vi.advanceTimersByTime(1400);
     });
@@ -447,7 +447,7 @@ describe("what happens next", () => {
     const { onNext } = render({ autoAdvance: true, threshold: 75 });
     await takeScoring(88);
 
-    fireEvent.click(screen.getByRole("button", { name: /loop/i }));
+    fireEvent.click(screen.getByRole("button", { name: /كرّر/ }));
     act(() => {
       vi.advanceTimersByTime(1400);
     });
@@ -463,7 +463,7 @@ describe("what happens next", () => {
     await takeScoring(88);
     player.play.mockClear();
 
-    fireEvent.click(screen.getByRole("button", { name: /loop/i }));
+    fireEvent.click(screen.getByRole("button", { name: /كرّر/ }));
 
     await waitFor(() => expect(player.play).toHaveBeenCalled());
     expect(screen.queryByText("88")).not.toBeInTheDocument();

@@ -146,7 +146,7 @@ function render({ clip = A_CLIP, nativeClipWav, externalYouTubeController }: Opt
 }
 
 const listenThrough = async () => {
-  fireEvent.click(screen.getByRole("button", { name: /listen & repeat/i }));
+  fireEvent.click(screen.getByRole("button", { name: /استمع وكرّر/ }));
   await act(async () => {
     await Promise.resolve();
   });
@@ -188,7 +188,7 @@ describe("opening the panel", () => {
   it("gives the line back when the learner is done with it", () => {
     const { onClose } = render();
 
-    fireEvent.click(screen.getByRole("button", { name: /close/i }));
+    fireEvent.click(screen.getByRole("button", { name: /إغلاق/ }));
 
     expect(onClose).toHaveBeenCalled();
   });
@@ -219,7 +219,7 @@ describe("hearing it and repeating it", () => {
   it("plays at full speed by default", async () => {
     render();
 
-    fireEvent.click(screen.getByRole("button", { name: /listen & repeat/i }));
+    fireEvent.click(screen.getByRole("button", { name: /استمع وكرّر/ }));
 
     await waitFor(() => expect(player.play).toHaveBeenCalledWith(1));
   });
@@ -228,7 +228,7 @@ describe("hearing it and repeating it", () => {
     render();
 
     fireEvent.click(screen.getByRole("button", { name: "0.75×" }));
-    fireEvent.click(screen.getByRole("button", { name: /listen & repeat/i }));
+    fireEvent.click(screen.getByRole("button", { name: /استمع وكرّر/ }));
 
     // Three-quarter speed is where a learner can still hear the rhythm but has
     // time to place the consonants.
@@ -239,10 +239,10 @@ describe("hearing it and repeating it", () => {
     player.play.mockResolvedValue(false);
     render();
 
-    fireEvent.click(screen.getByRole("button", { name: /listen & repeat/i }));
+    fireEvent.click(screen.getByRole("button", { name: /استمع وكرّر/ }));
 
     await waitFor(() =>
-      expect(screen.getByRole("button", { name: /listen & repeat/i })).toBeEnabled(),
+      expect(screen.getByRole("button", { name: /استمع وكرّر/ })).toBeEnabled(),
     );
   });
 
@@ -270,7 +270,7 @@ describe("hearing it and repeating it", () => {
     render();
     await listenThrough();
 
-    fireEvent.click(screen.getByRole("button", { name: /stop recording/i }));
+    fireEvent.click(screen.getByRole("button", { name: "أوقف التسجيل" }));
 
     expect(recorder.stop).toHaveBeenCalledWith("manual");
   });
@@ -281,7 +281,7 @@ describe("hearing it and repeating it", () => {
 
     await finishRecording(null, "no-audio");
 
-    expect(screen.getByText("We didn't hear you — try again.")).toBeInTheDocument();
+    expect(screen.getByText("لم نسمعك — حاول من جديد.")).toBeInTheDocument();
     expect(scorer.score).not.toHaveBeenCalled();
   });
 
@@ -291,8 +291,8 @@ describe("hearing it and repeating it", () => {
 
     await finishRecording(null, "error");
 
-    expect(screen.getByText("Recording failed")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /try again/i })).toBeInTheDocument();
+    expect(screen.getByText("تعذّر التسجيل")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /حاول من جديد/ })).toBeInTheDocument();
   });
 
   it("explains a refused microphone", async () => {
@@ -354,7 +354,7 @@ describe("scoring against the clip", () => {
 
     expect(screen.getByText("82")).toBeInTheDocument();
     expect(screen.getByText("Words 88 · Sound 74")).toBeInTheDocument();
-    expect(screen.getByText("Good")).toBeInTheDocument();
+    expect(screen.getByText("جيد")).toBeInTheDocument();
   });
 
   it("leaves the sound score out when there was no clip audio to compare", async () => {
@@ -375,7 +375,7 @@ describe("scoring against the clip", () => {
 
     // Half of "that is not what I said" is the recogniser, and the learner can
     // only tell by reading it back.
-    expect(screen.getByText(/Heard: وين رايح/)).toBeInTheDocument();
+    expect(screen.getByText(/سمعنا: وين رايح/)).toBeInTheDocument();
   });
 
   it("passes on the coaching tips", async () => {
@@ -404,10 +404,10 @@ describe("scoring against the clip", () => {
 
     await finishRecording(aTake());
 
-    expect(screen.getByRole("button", { name: /try again/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /حاول من جديد/ })).toBeInTheDocument();
     // Alongside the cross in the header: a learner who cannot get a score out
     // of the panel needs the way out where they are looking.
-    expect(screen.getAllByRole("button", { name: /close/i })).toHaveLength(2);
+    expect(screen.getAllByRole("button", { name: /إغلاق/ })).toHaveLength(2);
     expect(screen.queryByText("82")).not.toBeInTheDocument();
   });
 });
@@ -418,7 +418,7 @@ describe("after the score", () => {
     await takeScoring();
     player.play.mockClear();
 
-    fireEvent.click(screen.getByRole("button", { name: /try again/i }));
+    fireEvent.click(screen.getByRole("button", { name: /حاول من جديد/ }));
 
     await waitFor(() => expect(player.play).toHaveBeenCalled());
     expect(screen.queryByText("82")).not.toBeInTheDocument();
@@ -428,7 +428,7 @@ describe("after the score", () => {
     const { onClose } = render();
     await takeScoring();
 
-    fireEvent.click(screen.getByRole("button", { name: /^done$/i }));
+    fireEvent.click(screen.getByRole("button", { name: /^تم$/ }));
 
     // Shadowing one line is meant to be a detour, not a session.
     expect(onClose).toHaveBeenCalled();

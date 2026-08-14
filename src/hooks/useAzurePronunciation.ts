@@ -62,10 +62,10 @@ export interface PronunciationResult {
 
 /** Score band labels for UI display */
 export function scoreBand(score: number): { label: string; color: string } {
-  if (score >= 90) return { label: 'Excellent', color: 'text-green-600' };
-  if (score >= 75) return { label: 'Good', color: 'text-blue-600' };
-  if (score >= 60) return { label: 'Fair', color: 'text-yellow-600' };
-  return { label: 'Needs practice', color: 'text-red-600' };
+  if (score >= 90) return { label: 'ممتاز', color: 'text-green-600' };
+  if (score >= 75) return { label: 'جيد', color: 'text-blue-600' };
+  if (score >= 60) return { label: 'مقبول', color: 'text-yellow-600' };
+  return { label: 'يحتاج تدريباً', color: 'text-red-600' };
 }
 
 /** Convert a Blob to base64 string */

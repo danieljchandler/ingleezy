@@ -37,12 +37,31 @@ export interface ShadowClip {
 
 interface RawLine {
   id?: string;
+  /** Set on native English videos: the sentence as spoken. See types/transcript.ts. */
+  english?: string;
   arabic?: string;
   text?: string;
   translation?: string;
   startMs?: number;
   endMs?: number;
   tokens?: unknown[];
+}
+
+/**
+ * What is actually spoken in a clip, and the locale it must be scored against.
+ *
+ * Shadowing means repeating what you just heard, so the language follows the
+ * clip rather than the app: an English video's lines carry `english` (the
+ * Hakiya-bridged Arabic ones do not), and scoring an English attempt against
+ * an Arabic model — or the reverse — marks correct speech wrong.
+ */
+function spokenLine(line: RawLine, dialect: string): { text: string; locale: string } {
+  const english = (line.english ?? "").trim();
+  if (english) return { text: english, locale: "en-US" };
+  return {
+    text: (line.arabic || line.text || "").trim(),
+    locale: DIALECT_LOCALE[dialect] ?? "ar-SA",
+  };
 }
 
 export const DIALECT_LOCALE: Record<string, string> = {
@@ -92,7 +111,7 @@ export function extractYouTubeId(embedUrl: string | null, sourceUrl: string | nu
 }
 
 function eligibleLine(line: RawLine): boolean {
-  const text = (line.arabic || line.text || "").trim();
+  const text = (line.english || line.arabic || line.text || "").trim();
   if (!text || text.split(/\s+/).length < 2) return false;
   const start = (line.startMs ?? 0) / 1000;
   const end = (line.endMs ?? 0) / 1000;
@@ -137,16 +156,17 @@ export function useShadowQueue(maxClips = 20) {
         const lines = (v.transcript_lines as RawLine[]) ?? [];
         for (const line of lines) {
           if (!eligibleLine(line)) continue;
+          const spoken = spokenLine(line, v.dialect);
           collected.push({
             id: `yt-${v.id}-${line.id ?? `${line.startMs}`}`,
             source: "youtube",
             youtubeId: ytId,
-            text: (line.arabic || line.text || "").trim(),
+            text: spoken.text,
             translation: line.translation,
             startSec: (line.startMs ?? 0) / 1000,
             endSec: (line.endMs ?? 0) / 1000,
             dialect: v.dialect,
-            locale: DIALECT_LOCALE[v.dialect] ?? "ar-SA",
+            locale: spoken.locale,
             sourceTitle: v.title,
           });
         }
@@ -166,16 +186,17 @@ export function useShadowQueue(maxClips = 20) {
         const lines = (s.lines as RawLine[]) ?? [];
         for (const line of lines) {
           if (!eligibleLine(line)) continue;
+          const spoken = spokenLine(line, sd);
           collected.push({
             id: `sv-${s.id}-${line.id ?? `${line.startMs}`}`,
             source: "audio",
             audioUrl: s.audio_url,
-            text: (line.arabic || line.text || "").trim(),
+            text: spoken.text,
             translation: line.translation,
             startSec: (line.startMs ?? 0) / 1000,
             endSec: (line.endMs ?? 0) / 1000,
             dialect: sd,
-            locale: DIALECT_LOCALE[sd] ?? "ar-SA",
+            locale: spoken.locale,
             sourceTitle: s.title,
           });
         }

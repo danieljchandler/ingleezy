@@ -57,7 +57,7 @@ export function LineShadowPanel({ clip, nativeClipWav, externalYouTubeController
       onComplete: async (blob, reason) => {
         if (!blob) {
           setState("error");
-          setPlayerError(reason === "no-audio" ? "We didn't hear you — try again." : "Recording failed");
+          setPlayerError(reason === "no-audio" ? "لم نسمعك — حاول من جديد." : "تعذّر التسجيل");
           return;
         }
         setState("scoring");
@@ -91,7 +91,7 @@ export function LineShadowPanel({ clip, nativeClipWav, externalYouTubeController
       {/* Header */}
       <div className="flex items-center justify-between">
         <span className="text-xs font-semibold text-primary uppercase tracking-wide">Shadow this line</span>
-        <button onClick={onClose} className="text-muted-foreground hover:text-foreground" aria-label="Close">
+        <button onClick={onClose} className="text-muted-foreground hover:text-foreground" aria-label="إغلاق">
           <X className="h-4 w-4" />
         </button>
       </div>
@@ -146,7 +146,7 @@ export function LineShadowPanel({ clip, nativeClipWav, externalYouTubeController
           className="gap-2"
         >
           <Volume2 className="h-4 w-4" />
-          {state === "playing" ? "Listening…" : "Listen & repeat"}
+          {state === "playing" ? "يعمل الآن…" : "استمع وكرّر"}
         </Button>
       </div>
 
@@ -170,7 +170,7 @@ export function LineShadowPanel({ clip, nativeClipWav, externalYouTubeController
               <button
                 onClick={() => recorder.stop("manual")}
                 className="h-11 w-11 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center animate-pulse"
-                aria-label="Stop recording"
+                aria-label="أوقف التسجيل"
               >
                 <Mic className="h-5 w-5" />
               </button>
@@ -223,8 +223,8 @@ export function LineShadowPanel({ clip, nativeClipWav, externalYouTubeController
                 {result.acousticSimilarity != null && ` · Sound ${result.acousticSimilarity}`}
               </p>
               {result.recognizedText && (
-                <p className="text-[11px] text-muted-foreground mt-0.5 max-w-[180px] truncate" dir="rtl">
-                  Heard: {result.recognizedText}
+                <p className="text-[11px] text-muted-foreground mt-0.5 max-w-[180px] truncate">
+                  سمعنا: {result.recognizedText}
                 </p>
               )}
             </div>
@@ -244,10 +244,10 @@ export function LineShadowPanel({ clip, nativeClipWav, externalYouTubeController
           <div className="flex gap-2">
             <Button variant="outline" size="sm" className="flex-1 gap-1.5" onClick={handleLoop}>
               <RotateCcw className="h-3.5 w-3.5" />
-              Try again
+              حاول من جديد
             </Button>
             <Button size="sm" variant="ghost" className="flex-1" onClick={onClose}>
-              Done
+              تم
             </Button>
           </div>
         </div>
@@ -256,10 +256,10 @@ export function LineShadowPanel({ clip, nativeClipWav, externalYouTubeController
       {state === "error" && !result && (
         <div className="flex gap-2">
           <Button variant="outline" size="sm" className="flex-1" onClick={handleLoop}>
-            <RotateCcw className="h-3.5 w-3.5 mr-1.5" /> Try again
+            <RotateCcw className="h-3.5 w-3.5 mr-1.5" /> حاول من جديد
           </Button>
           <Button variant="ghost" size="sm" className="flex-1" onClick={onClose}>
-            Close
+            إغلاق
           </Button>
         </div>
       )}

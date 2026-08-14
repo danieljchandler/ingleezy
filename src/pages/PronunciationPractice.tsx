@@ -162,9 +162,9 @@ const PronunciationPractice = () => {
         <div className="mb-8"><HomeButton /></div>
         <div className="text-center py-16">
           <Mic className="h-16 w-16 text-muted-foreground/30 mx-auto mb-4" />
-          <h1 className="text-2xl font-bold mb-2 font-heading">Pronunciation Practice</h1>
-          <p className="text-muted-foreground mb-6">Sign in to practice your English pronunciation</p>
-          <Button onClick={() => navigate("/auth")}>Sign In</Button>
+          <h1 className="text-2xl font-bold mb-2 font-heading">تدريب النطق</h1>
+          <p className="text-muted-foreground mb-6">سجّل الدخول للتدرب على نطقك بالإنجليزية</p>
+          <Button onClick={() => navigate("/auth")}>تسجيل الدخول</Button>
         </div>
       </AppShell>
     );
@@ -187,11 +187,11 @@ const PronunciationPractice = () => {
         <div className="mb-8"><HomeButton /></div>
         <div className="text-center py-16">
           <Mic className="h-16 w-16 text-muted-foreground/30 mx-auto mb-4" />
-          <h1 className="text-2xl font-bold mb-2 font-heading">Pronunciation Practice</h1>
+          <h1 className="text-2xl font-bold mb-2 font-heading">تدريب النطق</h1>
           <p className="text-muted-foreground mb-6">
-            Add some words to your vocabulary first, then come back to practice!
+            احفظ بعض الكلمات أولاً، ثم عد للتدرب على نطقها!
           </p>
-          <Button onClick={() => navigate("/my-words")}>Go to My Words</Button>
+          <Button onClick={() => navigate("/my-words")}>اذهب إلى كلماتي</Button>
         </div>
       </AppShell>
     );
@@ -214,7 +214,7 @@ const PronunciationPractice = () => {
             </div>
           </div>
           <p className="text-sm text-muted-foreground">
-            Word {currentIndex + 1} of {words.length}
+            كلمة {currentIndex + 1} من {words.length}
           </p>
         </div>
 
@@ -223,7 +223,7 @@ const PronunciationPractice = () => {
           <div className="flex items-center justify-between bg-card border border-border rounded-lg px-4 py-2 mb-6">
             <div className="flex items-center gap-2 text-sm">
               <Trophy className="h-4 w-4 text-primary" />
-              <span className="text-muted-foreground">Session avg:</span>
+              <span className="text-muted-foreground">متوسط الجلسة:</span>
               <span className={cn("font-bold", scoreBand(sessionAverage).color)}>
                 {sessionAverage}
               </span>
@@ -245,7 +245,7 @@ const PronunciationPractice = () => {
             size="sm"
             onClick={() => { setMode("word"); reset(); }}
           >
-            Word
+            كلمة
           </Button>
           <Button
             variant={mode === "sentence" ? "default" : "outline"}
@@ -253,7 +253,7 @@ const PronunciationPractice = () => {
             onClick={() => { setMode("sentence"); reset(); }}
             disabled={!currentWord?.sentence_english}
           >
-            Sentence
+            جملة
           </Button>
           <Button
             variant={mode === "shadow" ? "default" : "outline"}
@@ -262,7 +262,7 @@ const PronunciationPractice = () => {
             className="gap-1.5"
           >
             <Headphones className="h-3.5 w-3.5" />
-            Shadow
+            محاكاة
           </Button>
         </div>
 
@@ -315,7 +315,7 @@ const PronunciationPractice = () => {
 
           {!result && !isLoading && (
             <p className="text-sm text-muted-foreground">
-              {isRecording ? "Tap to stop recording" : "Tap to record your pronunciation"}
+              {isRecording ? "المس لإيقاف التسجيل" : "المس لتسجيل نطقك"}
             </p>
           )}
 
@@ -328,7 +328,7 @@ const PronunciationPractice = () => {
               {error}
               <Button variant="ghost" size="sm" onClick={reset} className="ml-2">
                 <RotateCcw className="h-3.5 w-3.5 mr-1" />
-                Retry
+                أعد المحاولة
               </Button>
             </div>
           )}
@@ -355,9 +355,9 @@ const PronunciationPractice = () => {
             {/* Sub-scores */}
             <div className="grid grid-cols-3 gap-3 mb-5">
               {[
-                { label: "Accuracy", value: result.accuracy },
-                { label: "Fluency", value: result.fluency },
-                { label: "Completeness", value: result.completeness },
+                { label: "الدقة", value: result.accuracy },
+                { label: "الطلاقة", value: result.fluency },
+                { label: "الاكتمال", value: result.completeness },
               ].map(({ label, value }) => (
                 <div key={label} className="text-center">
                   <p className="text-xl font-bold text-foreground">{Math.round(value)}</p>
@@ -401,11 +401,11 @@ const PronunciationPractice = () => {
             <div className="flex gap-2">
               <Button variant="outline" className="flex-1 gap-1.5" onClick={reset}>
                 <RotateCcw className="h-4 w-4" />
-                Try Again
+                حاول من جديد
               </Button>
               {currentIndex < words.length - 1 && (
                 <Button className="flex-1 gap-1.5" onClick={goToNext}>
-                  Next Word
+                  الكلمة التالية
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               )}
@@ -423,7 +423,7 @@ const PronunciationPractice = () => {
               disabled={currentIndex === 0}
             >
               <ChevronLeft className="h-4 w-4 mr-1" />
-              Previous
+              السابق
             </Button>
             <Button
               variant="ghost"
@@ -431,7 +431,7 @@ const PronunciationPractice = () => {
               onClick={goToNext}
               disabled={currentIndex === words.length - 1}
             >
-              Next
+              التالي
               <ChevronRight className="h-4 w-4 ml-1" />
             </Button>
           </div>
@@ -467,7 +467,7 @@ const ShadowMode = ({ showEnglish, onScore }: ShadowModeProps) => {
     return (
       <div className="text-center py-8 text-destructive">
         {error}
-        <Button variant="outline" size="sm" onClick={refresh} className="ml-2">Retry</Button>
+        <Button variant="outline" size="sm" onClick={refresh} className="ml-2">أعد المحاولة</Button>
       </div>
     );
   }
@@ -476,13 +476,13 @@ const ShadowMode = ({ showEnglish, onScore }: ShadowModeProps) => {
     return (
       <div className="text-center py-12 bg-card border border-border rounded-2xl">
         <Headphones className="h-12 w-12 text-muted-foreground/30 mx-auto mb-3" />
-        <h3 className="font-semibold mb-2">No native clips available yet</h3>
+        <h3 className="font-semibold mb-2">لا توجد مقاطع أصلية بعد</h3>
         <p className="text-sm text-muted-foreground mb-4 px-6">
-          Shadow mode plays real native-speaker clips. Browse videos or upload audio to build a queue.
+          تشغّل المحاكاة مقاطع بأصوات متحدثين أصليين. تصفح الفيديوهات أو ارفع صوتاً لبناء قائمة.
         </p>
         <div className="flex gap-2 justify-center">
-          <Button size="sm" onClick={() => navigate("/discover")}>Browse videos</Button>
-          <Button size="sm" variant="outline" onClick={() => navigate("/transcribe")}>Upload audio</Button>
+          <Button size="sm" onClick={() => navigate("/discover")}>تصفح الفيديوهات</Button>
+          <Button size="sm" variant="outline" onClick={() => navigate("/transcribe")}>ارفع صوتاً</Button>
         </div>
       </div>
     );
@@ -492,9 +492,9 @@ const ShadowMode = ({ showEnglish, onScore }: ShadowModeProps) => {
     return (
       <div className="text-center py-10 bg-card border-2 border-border rounded-2xl">
         <Trophy className="h-12 w-12 text-primary mx-auto mb-3" />
-        <h3 className="font-semibold text-lg mb-1">Session complete</h3>
+        <h3 className="font-semibold text-lg mb-1">انتهت الجلسة</h3>
         <p className="text-sm text-muted-foreground mb-4">{clips.length} clips shadowed</p>
-        <Button onClick={() => { setIndex(0); refresh(); }}>New session</Button>
+        <Button onClick={() => { setIndex(0); refresh(); }}>جلسة جديدة</Button>
       </div>
     );
   }

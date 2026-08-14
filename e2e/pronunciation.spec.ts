@@ -84,7 +84,7 @@ const micButton = (page: Page) => page.locator("button:has(svg.lucide-mic)").fir
 async function recordTake(page: Page, backend: SupabaseBackend) {
   const before = backend.callsTo("azure-pronunciation").length;
   await micButton(page).click();
-  await expect(page.getByText("Tap to stop recording")).toBeVisible();
+  await expect(page.getByText("المس لإيقاف التسجيل")).toBeVisible();
   await page.waitForTimeout(250);
   await page.locator("button:has(svg.lucide-mic-off)").first().click();
   await expect
@@ -103,7 +103,7 @@ test.describe("getting in", () => {
 
     // No route guard here — the page gates itself, so the redirect specs would
     // not catch this changing.
-    await expect(page.getByText("Sign in to practice your English pronunciation")).toBeVisible();
+    await expect(page.getByText("سجّل الدخول للتدرب على نطقك بالإنجليزية")).toBeVisible();
     await expect(micButton(page)).toHaveCount(0);
   });
 
@@ -119,8 +119,8 @@ test.describe("getting in", () => {
 
     // The queue *is* the learner's own vocabulary — there is no fallback deck,
     // so an empty library is a dead page rather than a short one.
-    await expect(page.getByText(/Add some words to your vocabulary first/)).toBeVisible();
-    await page.getByRole("button", { name: "Go to My Words" }).click();
+    await expect(page.getByText(/احفظ بعض الكلمات أولاً/)).toBeVisible();
+    await page.getByRole("button", { name: "اذهب إلى كلماتي" }).click();
     await expect(page).toHaveURL(/\/my-words/);
   });
 
@@ -129,12 +129,12 @@ test.describe("getting in", () => {
     seedWords(db, 25);
 
     await page.goto("/pronunciation");
-    await expect(page.getByText(/Word 1 of/)).toBeVisible();
+    await expect(page.getByText(/كلمة 1 من/)).toBeVisible();
 
     // Capped at 20 and ordered newest-first. The cap is what keeps a learner
     // with a thousand saved words from loading all of them to practise five,
     // and newest-first is what puts the word they just saved in front of them.
-    await expect(page.getByText("Word 1 of 20")).toBeVisible();
+    await expect(page.getByText("كلمة 1 من 20")).toBeVisible();
     const read = db.readsOf("user_vocabulary").at(-1);
     expect(read?.search).toContain("limit=20");
     expect(read?.search).toContain("created_at.desc");
@@ -155,7 +155,7 @@ test.describe("scoring a word", () => {
 
     await recordTake(page, backend);
 
-    await expect(page.getByText("Good")).toBeVisible();
+    await expect(page.getByText("جيد")).toBeVisible();
     const call = backend.lastCallTo("azure-pronunciation")?.body as {
       referenceText: string;
       locale: string;
@@ -173,9 +173,9 @@ test.describe("scoring a word", () => {
     await page.goto("/pronunciation");
     await recordTake(page, backend);
 
-    await expect(page.getByText("Accuracy")).toBeVisible();
-    await expect(page.getByText("Fluency")).toBeVisible();
-    await expect(page.getByText("Completeness")).toBeVisible();
+    await expect(page.getByText("الدقة")).toBeVisible();
+    await expect(page.getByText("الطلاقة")).toBeVisible();
+    await expect(page.getByText("الاكتمال")).toBeVisible();
   });
 
   test("marks the word that was mispronounced", async ({ page, backend }) => {
@@ -190,11 +190,11 @@ test.describe("scoring a word", () => {
   test("keeps a running average across takes", async ({ page, backend }) => {
     await page.goto("/pronunciation");
     await recordTake(page, backend);
-    await expect(page.getByText("Session avg:")).toBeVisible();
+    await expect(page.getByText("متوسط الجلسة:")).toBeVisible();
     await expect(page.getByText("1 attempts")).toBeVisible();
 
     backend.stubFunction("azure-pronunciation", aScore({ overall: 62 }));
-    await page.getByRole("button", { name: "Try Again" }).click();
+    await page.getByRole("button", { name: "حاول من جديد" }).click();
     await recordTake(page, backend);
 
     // (82 + 62) / 2 = 72, rounded. The average is the session's only record —
@@ -206,7 +206,7 @@ test.describe("scoring a word", () => {
   test("persists nothing at all", async ({ page, db, backend }) => {
     await page.goto("/pronunciation");
     await recordTake(page, backend);
-    await expect(page.getByText("Good")).toBeVisible();
+    await expect(page.getByText("جيد")).toBeVisible();
 
     // Pinned, not endorsed. Every other practice surface in the app writes an
     // attempt row or awards XP; this one scores the learner and forgets. There
@@ -224,10 +224,10 @@ test.describe("the score bands", () => {
   });
 
   for (const [overall, label] of [
-    [95, "Excellent"],
-    [80, "Good"],
-    [65, "Fair"],
-    [40, "Needs practice"],
+    [95, "ممتاز"],
+    [80, "جيد"],
+    [65, "مقبول"],
+    [40, "يحتاج تدريباً"],
   ] as const) {
     test(`calls ${overall} "${label}"`, async ({ page, backend }) => {
       backend.stubFunction("azure-pronunciation", aScore({ overall }));
@@ -249,7 +249,7 @@ test.describe("word, sentence and dialect", () => {
 
   test("assesses the whole sentence in sentence mode", async ({ page, backend }) => {
     await page.goto("/pronunciation");
-    await page.getByRole("button", { name: "Sentence", exact: true }).click();
+    await page.getByRole("button", { name: "جملة", exact: true }).click();
     await expect(page.getByText(SENTENCE)).toBeVisible();
 
     await recordTake(page, backend);
@@ -263,11 +263,11 @@ test.describe("word, sentence and dialect", () => {
 
   test("offers no sentence mode for a word saved without one", async ({ page }) => {
     await page.goto("/pronunciation");
-    await page.getByRole("button", { name: "Next" }).click();
+    await page.getByRole("button", { name: "التالي" }).click();
 
     // The second fixture word has no `sentence_text`. Most saved words do not —
     // only the ones captured from a transcript carry their line.
-    await expect(page.getByRole("button", { name: "Sentence", exact: true })).toBeDisabled();
+    await expect(page.getByRole("button", { name: "جملة", exact: true })).toBeDisabled();
   });
 
   test("assesses English and buckets errors under the learner's dialect", async ({
@@ -312,46 +312,46 @@ test.describe("moving through the deck", () => {
 
   test("walks forwards and back", async ({ page }) => {
     await page.goto("/pronunciation");
-    await expect(page.getByText("Word 1 of 3")).toBeVisible();
+    await expect(page.getByText("كلمة 1 من 3")).toBeVisible();
 
-    await page.getByRole("button", { name: "Next" }).click();
-    await expect(page.getByText("Word 2 of 3")).toBeVisible();
+    await page.getByRole("button", { name: "التالي" }).click();
+    await expect(page.getByText("كلمة 2 من 3")).toBeVisible();
 
-    await page.getByRole("button", { name: "Previous" }).click();
-    await expect(page.getByText("Word 1 of 3")).toBeVisible();
+    await page.getByRole("button", { name: "السابق" }).click();
+    await expect(page.getByText("كلمة 1 من 3")).toBeVisible();
   });
 
   test("stops at both ends", async ({ page }) => {
     await page.goto("/pronunciation");
 
-    await expect(page.getByRole("button", { name: "Previous" })).toBeDisabled();
-    await page.getByRole("button", { name: "Next" }).click();
-    await page.getByRole("button", { name: "Next" }).click();
-    await expect(page.getByRole("button", { name: "Next" })).toBeDisabled();
+    await expect(page.getByRole("button", { name: "السابق" })).toBeDisabled();
+    await page.getByRole("button", { name: "التالي" }).click();
+    await page.getByRole("button", { name: "التالي" }).click();
+    await expect(page.getByRole("button", { name: "التالي" })).toBeDisabled();
   });
 
   test("clears the last score when the word changes", async ({ page, backend }) => {
     await page.goto("/pronunciation");
     await recordTake(page, backend);
-    await expect(page.getByText("Good")).toBeVisible();
+    await expect(page.getByText("جيد")).toBeVisible();
 
-    await page.getByRole("button", { name: "Next Word" }).click();
+    await page.getByRole("button", { name: "الكلمة التالية" }).click();
 
     // A stale score against the previous word is worse than none — it reads as
     // a score for the word now on screen.
-    await expect(page.getByText("Good")).toHaveCount(0);
-    await expect(page.getByText("Tap to record your pronunciation")).toBeVisible();
+    await expect(page.getByText("جيد")).toHaveCount(0);
+    await expect(page.getByText("المس لتسجيل نطقك")).toBeVisible();
   });
 
   test("offers no Next Word on the last card", async ({ page, backend }) => {
     await page.goto("/pronunciation");
-    await page.getByRole("button", { name: "Next" }).click();
-    await page.getByRole("button", { name: "Next" }).click();
+    await page.getByRole("button", { name: "التالي" }).click();
+    await page.getByRole("button", { name: "التالي" }).click();
     await recordTake(page, backend);
-    await expect(page.getByText("Good")).toBeVisible();
+    await expect(page.getByText("جيد")).toBeVisible();
 
-    await expect(page.getByRole("button", { name: "Next Word" })).toHaveCount(0);
-    await expect(page.getByRole("button", { name: "Try Again" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "الكلمة التالية" })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "حاول من جديد" })).toBeVisible();
   });
 });
 
@@ -371,8 +371,8 @@ test.describe("when scoring fails", () => {
     // The function reports failure in-band as `{ error }` on a 200, so a test
     // that only covered non-2xx would miss the common case entirely.
     await expect(page.getByText("Speech service unavailable")).toBeVisible();
-    await page.getByRole("button", { name: "Retry" }).click();
-    await expect(page.getByText("Tap to record your pronunciation")).toBeVisible();
+    await page.getByRole("button", { name: "أعد المحاولة" }).click();
+    await expect(page.getByText("المس لتسجيل نطقك")).toBeVisible();
   });
 
   test("shows the reason when the function itself is refused", async ({
@@ -386,7 +386,7 @@ test.describe("when scoring fails", () => {
     await page.goto("/pronunciation");
     await recordTake(page, backend);
 
-    await expect(page.getByRole("button", { name: "Retry" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "أعد المحاولة" })).toBeVisible();
   });
 });
 
@@ -398,13 +398,13 @@ test.describe("shadow mode", () => {
 
   test("points an empty clip queue at the two places clips come from", async ({ page }) => {
     await page.goto("/pronunciation");
-    await page.getByRole("button", { name: "Shadow" }).click();
+    await page.getByRole("button", { name: "محاكاة" }).click();
 
-    await expect(page.getByText("No native clips available yet")).toBeVisible();
+    await expect(page.getByText("لا توجد مقاطع أصلية بعد")).toBeVisible();
     // Both routes are offered because the queue draws from both: published
     // Discover videos and the learner's own uploaded transcriptions.
-    await expect(page.getByRole("button", { name: "Browse videos" })).toBeVisible();
-    await expect(page.getByRole("button", { name: "Upload audio" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "تصفح الفيديوهات" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "ارفع صوتاً" })).toBeVisible();
   });
 
   test("builds a queue from published Discover transcripts", async ({ page, db }) => {
@@ -421,7 +421,7 @@ test.describe("shadow mode", () => {
     ]);
 
     await page.goto("/pronunciation");
-    await page.getByRole("button", { name: "Shadow" }).click();
+    await page.getByRole("button", { name: "محاكاة" }).click();
 
     await expect(page.getByText("كيف حالك اليوم")).toBeVisible();
     await expect(page.getByText("Clip 1 / 1")).toBeVisible();
@@ -444,7 +444,7 @@ test.describe("shadow mode", () => {
     ]);
 
     await page.goto("/pronunciation");
-    await page.getByRole("button", { name: "Shadow" }).click();
+    await page.getByRole("button", { name: "محاكاة" }).click();
 
     await expect(page.getByText("Clip 1 / 1")).toBeVisible();
     await expect(page.getByText("هذا يصلح تماما")).toBeVisible();
@@ -462,11 +462,11 @@ test.describe("shadow mode", () => {
     ]);
 
     await page.goto("/pronunciation");
-    await page.getByRole("button", { name: "Shadow" }).click();
+    await page.getByRole("button", { name: "محاكاة" }).click();
 
     // A Gulf learner shadowing Egyptian would be scored against a Gulf locale
     // on Egyptian speech and told they are wrong.
-    await expect(page.getByText("No native clips available yet")).toBeVisible();
+    await expect(page.getByText("لا توجد مقاطع أصلية بعد")).toBeVisible();
   });
 
   test("treats every Gulf country as Gulf", async ({ page, db }) => {
@@ -479,7 +479,7 @@ test.describe("shadow mode", () => {
     ]);
 
     await page.goto("/pronunciation");
-    await page.getByRole("button", { name: "Shadow" }).click();
+    await page.getByRole("button", { name: "محاكاة" }).click();
 
     // "Gulf" is the module; Kuwaiti, Saudi, Emirati, Bahraini, Qatari and Omani
     // are all inside it. Matching on the exact string would empty the queue for
@@ -512,8 +512,8 @@ test.describe("shadow mode", () => {
     // native Arabic clips (immersion) through the Arabic scoring path.
     expect(backend.lastCallTo("azure-pronunciation")?.body).toMatchObject({ locale: "en-US" });
 
-    await page.getByRole("button", { name: "Try Again" }).click();
-    await page.getByRole("button", { name: "Shadow" }).click();
+    await page.getByRole("button", { name: "حاول من جديد" }).click();
+    await page.getByRole("button", { name: "محاكاة" }).click();
     await expect(page.getByText("كيف حالك اليوم")).toBeVisible();
   });
 
@@ -531,7 +531,7 @@ test.describe("shadow mode", () => {
     ]);
 
     await page.goto("/pronunciation");
-    await page.getByRole("button", { name: "Shadow" }).click();
+    await page.getByRole("button", { name: "محاكاة" }).click();
 
     // Pinned. The query filters on `audio_url is not null` and nothing else —
     // there is no `user_id` filter, so this list is correct only because RLS on
@@ -551,7 +551,7 @@ test.describe("shadow mode", () => {
     ]);
 
     await page.goto("/pronunciation");
-    await page.getByRole("button", { name: "Shadow" }).click();
+    await page.getByRole("button", { name: "محاكاة" }).click();
     await expect(page.getByText("كيف حالك اليوم")).toBeVisible();
 
     // Shadowing at native speed is the goal, not the starting point.
@@ -569,7 +569,7 @@ test.describe("shadow mode", () => {
     ]);
 
     await page.goto("/pronunciation");
-    await page.getByRole("button", { name: "Shadow" }).click();
+    await page.getByRole("button", { name: "محاكاة" }).click();
     await expect(page.getByText("كيف حالك اليوم")).toBeVisible();
 
     // Pinned. `ShadowMode` holds `threshold` in state at 75 and never calls its
