@@ -98,7 +98,7 @@ serve(async (req) => {
     // have no `english` at all. There is no English grammar to observe in an
     // Arabic clip, so rather than let the model invent points off a machine
     // translation, say so — the bridge serves those clips as immersion.
-    if (!lines.some((l: any) => (l?.english ?? "").trim())) {
+    if (!lines.some((l) => String(l?.english ?? "").trim())) {
       return new Response(
         JSON.stringify({
           error: "This clip is spoken in Arabic — there is no English grammar to extract.",

@@ -11,12 +11,21 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { supabase } from "@/integrations/supabase/client";
 import { LineByLineTranscript } from "@/components/transcript/LineByLineTranscript";
 import { useAuth } from "@/hooks/useAuth";
+import { useDialect } from "@/contexts/DialectContext";
 import { useAddUserVocabulary } from "@/hooks/useUserVocabulary";
 import { Twitter, Loader2, Search, BookOpen, MessageSquare, Globe, Plus, Check } from "lucide-react";
 import type { TranscriptResult, VocabItem, GrammarPoint } from "@/types/transcript";
 import { InfoHint } from "@/components/InfoHint";
 import { PAGE_HINTS } from "@/lib/pageHints";
 
+/**
+ * A post from X, read as English.
+ *
+ * The line's spoken text is `english` and `arabic` is the dialect scaffold
+ * beneath it — the convention in src/types/transcript.ts — so a line with no
+ * English is not a line this page can teach from and is dropped. Vocabulary is
+ * keyed the same way round: `english` is the item being learned.
+ */
 function normalizeTranscriptResult(input: TranscriptResult): TranscriptResult {
   const safeLines = Array.isArray(input.lines) ? input.lines : [];
   const safeVocab = Array.isArray(input.vocabulary) ? input.vocabulary : [];
@@ -29,11 +38,10 @@ function normalizeTranscriptResult(input: TranscriptResult): TranscriptResult {
     vocabulary: safeVocab
       .filter((v) => v && typeof v === "object")
       .map((v) => ({
-        arabic: String((v as VocabItem).arabic ?? ""),
         english: String((v as VocabItem).english ?? ""),
-        root: (v as VocabItem).root ? String((v as VocabItem).root) : undefined,
+        arabic: String((v as VocabItem).arabic ?? ""),
       }))
-      .filter((v) => v.arabic.length > 0),
+      .filter((v) => v.english.length > 0),
     grammarPoints: safeGrammar
       .filter((g) => g && typeof g === "object")
       .map((g) => ({
@@ -49,10 +57,16 @@ function normalizeTranscriptResult(input: TranscriptResult): TranscriptResult {
       .map((l, idx) => {
         const line = l as TranscriptResult["lines"][number];
         const tokens = Array.isArray(line.tokens) ? line.tokens : [];
+        const arabic = String(line.arabic ?? "");
         return {
           id: typeof line.id === "string" && line.id ? line.id : `line-${idx}`,
-          arabic: String(line.arabic ?? ""),
-          translation: String(line.translation ?? ""),
+          english: String(line.english ?? ""),
+          arabic,
+          // The scaffold doubles as the line's translation for the components
+          // that predate the English path.
+          translation: String(line.translation ?? arabic),
+          fusha: line.fusha ? String(line.fusha) : undefined,
+          literal: line.literal ? String(line.literal) : undefined,
           tokens: tokens
             .filter((t) => t && typeof t === "object")
             .map((t, tIdx) => ({
@@ -64,7 +78,7 @@ function normalizeTranscriptResult(input: TranscriptResult): TranscriptResult {
             .filter((t) => t.surface.length > 0),
         };
       })
-      .filter((l) => l.arabic.length > 0),
+      .filter((l) => (l.english ?? "").length > 0),
   };
 }
 
@@ -82,11 +96,12 @@ async function readInvokeError(err: unknown): Promise<string> {
       if (body?.message) return body.message;
     } catch { /* ignore parse failure */ }
   }
-  return (err as Error).message ?? "Unknown error";
+  return (err as Error).message ?? "خطأ غير معروف";
 }
 
 const LearnFromX = () => {
   const { isAuthenticated } = useAuth();
+  const { activeDialect } = useDialect();
   const addUserVocabulary = useAddUserVocabulary();
 
   const [urlInput, setUrlInput] = useState("");
@@ -108,7 +123,7 @@ const LearnFromX = () => {
     // Validate it looks like an X/Twitter URL
     const isXUrl = /^https?:\/\/(x\.com|twitter\.com)\/.+\/status\/\d+/i.test(trimmed);
     if (!isXUrl) {
-      toast.error("Invalid URL", { description: "Please paste an X post URL, e.g. https://x.com/username/status/123" });
+      toast.error("رابط غير صالح", { description: "الصق رابط منشور من X، مثل https://x.com/username/status/123" });
       return;
     }
 
@@ -123,32 +138,32 @@ const LearnFromX = () => {
       });
 
       if (scrapeError) throw new Error(await readInvokeError(scrapeError));
-      if (!scrapeData?.success) throw new Error(scrapeData?.error ?? "Failed to extract post text");
+      if (!scrapeData?.success) throw new Error(scrapeData?.error ?? "تعذّر استخراج نص المنشور");
 
       const text: string = scrapeData.text;
       setExtractedText(text);
       setIsScraping(false);
       setIsAnalyzing(true);
 
-      toast.success("Post extracted!", { description: "Analyzing Arabic content…" });
+      toast.success("تم استخراج المنشور!", { description: "نحلّل الإنجليزي…" });
 
-      // Step 2: Analyze with Gulf Arabic pipeline
-      const { data: analyzeData, error: analyzeError } = await supabase.functions.invoke("analyze-gulf-arabic", {
-        body: { transcript: text },
+      // Step 2: break the English down, scaffolded in the learner's dialect
+      const { data: analyzeData, error: analyzeError } = await supabase.functions.invoke("analyze-english-text", {
+        body: { text, dialect: activeDialect },
       });
 
       if (analyzeError) throw new Error(await readInvokeError(analyzeError));
-      if (!analyzeData?.success || !analyzeData.result) throw new Error(analyzeData?.error ?? "Analysis failed");
+      if (!analyzeData?.success || !analyzeData.result) throw new Error(analyzeData?.error ?? "فشل التحليل");
 
       const normalized = normalizeTranscriptResult(analyzeData.result);
       setResult(normalized);
 
-      toast.success("Analysis complete!", {
-        description: `Found ${normalized.vocabulary.length} vocabulary words`,
+      toast.success("خلص التحليل!", {
+        description: `لقينا ${normalized.vocabulary.length} كلمة`,
       });
     } catch (err) {
       console.error("Error:", err);
-      toast.error("Failed", { description: err instanceof Error ? err.message : "An unexpected error occurred" });
+      toast.error("فشل", { description: err instanceof Error ? err.message : "صار خطأ غير متوقع" });
     } finally {
       setIsScraping(false);
       setIsAnalyzing(false);
@@ -157,31 +172,33 @@ const LearnFromX = () => {
 
   const handleSaveWord = async (vocab: VocabItem) => {
     if (!isAuthenticated) {
-      toast.error("Sign in to save words");
+      toast.error("سجّل دخولك عشان تحفظ الكلمات");
       return;
     }
-    if (savedWords.has(vocab.arabic)) return;
+    // Keyed lowercase to match TappableEnglishText, which is the other way
+    // into this handler — otherwise a word saved from the transcript would
+    // still show as unsaved in the vocabulary list.
+    const key = vocab.english.toLowerCase();
+    if (savedWords.has(key)) return;
 
-    // Match to a transcript line for sentence context
-    const matchedLine = lines.find(
-      (l) =>
-        l.tokens?.some((t) => t.surface === vocab.arabic) ||
-        l.arabic.includes(vocab.arabic)
+    // Match to a line for sentence context.
+    const matchedLine = lines.find((l) =>
+      (l.english ?? "").toLowerCase().includes(key),
     );
 
     try {
       await addUserVocabulary.mutateAsync({
-        word_arabic: vocab.arabic,
+        // word_english is the English being learned; word_arabic its gloss.
         word_english: vocab.english,
-        root: vocab.root,
+        word_arabic: vocab.arabic,
         source: "x_post",
         sentence_text: vocab.sentenceText ?? matchedLine?.arabic,
-        sentence_english: vocab.sentenceEnglish ?? matchedLine?.translation,
+        sentence_english: vocab.sentenceEnglish ?? matchedLine?.english,
       });
-      setSavedWords((prev) => new Set([...prev, vocab.arabic]));
-      toast.success(`Saved "${vocab.arabic}"`);
+      setSavedWords((prev) => new Set([...prev, key]));
+      toast.success(`حفظنا "${vocab.english}"`);
     } catch {
-      toast.error("Failed to save word");
+      toast.error("تعذّر حفظ الكلمة");
     }
   };
 
@@ -198,11 +215,11 @@ const LearnFromX = () => {
               <Twitter className="h-4 w-4 text-primary" />
             </div>
             <div>
-              <h1 className="text-lg font-bold text-foreground inline-flex items-center gap-2" style={{ fontFamily: "'Montserrat', sans-serif" }}>
-                Learn from X Post
+              <h1 className="text-lg font-bold text-foreground inline-flex items-center gap-2">
+                تعلّم من منشور X
                 <InfoHint {...PAGE_HINTS["learn-from-x"]} />
               </h1>
-              <p className="text-xs text-muted-foreground">Paste an Arabic X post URL to analyze</p>
+              <p className="text-xs text-muted-foreground">الصق رابط منشور إنجليزي ونحلّله لك</p>
             </div>
           </div>
         </div>
@@ -237,14 +254,15 @@ const LearnFromX = () => {
             {isScraping && (
               <div className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                Fetching post…
+                نجيب المنشور…
               </div>
             )}
             {isAnalyzing && extractedText && (
               <div className="mt-3 space-y-2">
                 <LoadingPanel task="analyze" variant="inline" size="sm" />
                 <div className="p-3 rounded-lg bg-muted/50 border border-border">
-                  <p className="text-sm text-foreground leading-relaxed" dir="rtl" style={{ fontFamily: "'Noto Naskh Arabic', 'Noto Sans Arabic', serif" }}>
+                  {/* The post itself — English, so it reads left to right. */}
+                  <p className="font-english text-sm text-foreground leading-relaxed">
                     {extractedText}
                   </p>
                 </div>
@@ -259,18 +277,18 @@ const LearnFromX = () => {
             <TabsList className="w-full">
               <TabsTrigger value="transcript" className="flex-1 gap-1.5">
                 <MessageSquare className="h-3.5 w-3.5" />
-                Transcript
+                المنشور
                 <Badge variant="secondary" className="text-xs px-1.5 py-0">{lines.length}</Badge>
               </TabsTrigger>
               <TabsTrigger value="vocabulary" className="flex-1 gap-1.5">
                 <BookOpen className="h-3.5 w-3.5" />
-                Vocabulary
+                المفردات
                 <Badge variant="secondary" className="text-xs px-1.5 py-0">{vocabulary.length}</Badge>
               </TabsTrigger>
               {(grammarPoints.length > 0 || culturalContext) && (
                 <TabsTrigger value="grammar" className="flex-1 gap-1.5">
                   <Globe className="h-3.5 w-3.5" />
-                  Notes
+                  ملاحظات
                 </TabsTrigger>
               )}
             </TabsList>
@@ -289,48 +307,43 @@ const LearnFromX = () => {
             {/* Vocabulary Tab */}
             <TabsContent value="vocabulary">
               <div className="space-y-2">
-                {vocabulary.map((vocab) => (
-                  <Card key={vocab.arabic} className="border-border">
-                    <CardContent className="py-3 px-4">
-                      <div className="flex items-center justify-between gap-3">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span
-                              className="text-xl font-bold text-foreground"
-                              dir="rtl"
-                              style={{ fontFamily: "'Noto Naskh Arabic', 'Noto Sans Arabic', serif" }}
-                            >
-                              {vocab.arabic}
+                {vocabulary.map((vocab) => {
+                  const key = vocab.english.toLowerCase();
+                  return (
+                    <Card key={vocab.english} className="border-border">
+                      <CardContent className="py-3 px-4">
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="flex-1 min-w-0">
+                            {/* English leads — it is the word being learned. */}
+                            <span className="font-english text-xl font-bold text-foreground">
+                              {vocab.english}
                             </span>
-                            {vocab.root && (
-                              <Badge variant="outline" className="text-xs">
-                                {vocab.root}
-                              </Badge>
-                            )}
+                            <p dir="rtl" className="font-arabic text-sm text-muted-foreground">
+                              {vocab.arabic}
+                            </p>
                           </div>
-                          <p className="text-sm text-muted-foreground">{vocab.english}</p>
+                          {isAuthenticated && (
+                            <Button
+                              variant={savedWords.has(key) ? "secondary" : "ghost"}
+                              size="icon"
+                              className="h-8 w-8 shrink-0"
+                              onClick={() => handleSaveWord(vocab)}
+                              disabled={savedWords.has(key) || addUserVocabulary.isPending}
+                            >
+                              {savedWords.has(key) ? (
+                                <Check className="h-4 w-4 text-primary" />
+                              ) : (
+                                <Plus className="h-4 w-4" />
+                              )}
+                            </Button>
+                          )}
                         </div>
-                        {isAuthenticated && (
-                          <Button
-                            variant={savedWords.has(vocab.arabic) ? "secondary" : "ghost"}
-                            size="icon"
-                            className="h-8 w-8 shrink-0"
-                            onClick={() => handleSaveWord(vocab)}
-                            disabled={savedWords.has(vocab.arabic) || addUserVocabulary.isPending}
-                          >
-                            {savedWords.has(vocab.arabic) ? (
-                              <Check className="h-4 w-4 text-primary" />
-                            ) : (
-                              <Plus className="h-4 w-4" />
-                            )}
-                          </Button>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                      </CardContent>
+                    </Card>
+                  );
+                })}
                 {vocabulary.length === 0 && (
-                  <p className="text-sm text-muted-foreground text-center py-6">No vocabulary extracted</p>
+                  <p className="text-sm text-muted-foreground text-center py-6">ما طلعت مفردات</p>
                 )}
               </div>
             </TabsContent>
@@ -341,7 +354,7 @@ const LearnFromX = () => {
                 {culturalContext && (
                   <Card className="border-primary/20 bg-primary/5">
                     <CardHeader className="pb-2 pt-4">
-                      <CardTitle className="text-sm font-semibold text-primary">Cultural Context</CardTitle>
+                      <CardTitle className="text-sm font-semibold text-primary">السياق الثقافي</CardTitle>
                     </CardHeader>
                     <CardContent className="pb-4">
                       <p className="text-sm text-foreground">{culturalContext}</p>
@@ -358,7 +371,8 @@ const LearnFromX = () => {
                       {gp.examples && gp.examples.length > 0 && (
                         <ul className="space-y-1">
                           {gp.examples.map((ex, j) => (
-                            <li key={j} className="text-sm text-foreground bg-muted/50 rounded px-2 py-1" dir="rtl" style={{ fontFamily: "'Noto Naskh Arabic', 'Noto Sans Arabic', serif" }}>
+                            // Quoted lines from the post — English, so LTR.
+                            <li key={j} className="font-english text-sm text-foreground bg-muted/50 rounded px-2 py-1">
                               {ex}
                             </li>
                           ))}
@@ -376,8 +390,8 @@ const LearnFromX = () => {
         {!result && !isLoading && (
           <div className="text-center py-12 text-muted-foreground">
             <Twitter className="h-12 w-12 mx-auto mb-3 opacity-20" />
-            <p className="text-sm">Paste an X post URL above to get started</p>
-            <p className="text-xs mt-1 opacity-70">Works best with Arabic text posts</p>
+            <p className="text-sm">الصق رابط منشور من X فوق عشان تبدأ</p>
+            <p className="text-xs mt-1 opacity-70">أفضل شي مع المنشورات الإنجليزية النصية</p>
           </div>
         )}
       </div>

@@ -7,11 +7,12 @@ import type { Page } from "@playwright/test";
  * Learn from an X post.
  *
  * Two functions in series, and the ordering is the whole feature: scrape the
- * post, then hand its text to the same analyser Transcribe uses. Either step
- * can fail on its own and they fail differently — a scrape failure means the
- * post is private, deleted or not a post at all, while an analysis failure
- * means the text came back but could not be read. The page has one error
- * surface for both, so the tests check that the *message* distinguishes them.
+ * post, then hand its text to `analyze-english-text`, which breaks the English
+ * down and writes every gloss in the learner's dialect. Either step can fail on
+ * its own and they fail differently — a scrape failure means the post is
+ * private, deleted or not a post at all, while an analysis failure means the
+ * text came back but could not be read. The page has one error surface for
+ * both, so the tests check that the *message* distinguishes them.
  *
  * The URL check runs before either call. It is not politeness: `scrape-x-post`
  * fetches whatever it is given, so an unvalidated box is an open proxy pointed
@@ -20,12 +21,22 @@ import type { Page } from "@playwright/test";
 
 const POST_URL = "https://x.com/someone/status/1234567890";
 
+const POST_TEXT = "The weather is lovely today.";
+
+// `english` is the line as posted; `arabic` is the dialect scaffold under it.
+// A line with no English is not something this page can teach from.
 const anAnalysis = (over: Record<string, unknown> = {}) => ({
-  rawTranscriptArabic: "الجو حلو اليوم",
+  rawTranscriptArabic: POST_TEXT,
   lines: [
-    { id: "line-0", arabic: "الجو حلو اليوم", translation: "The weather is nice today", tokens: [] },
+    {
+      id: "line-0",
+      english: "The weather is lovely today.",
+      arabic: "الجو حلو اليوم",
+      translation: "الجو حلو اليوم",
+      tokens: [],
+    },
   ],
-  vocabulary: [{ arabic: "الجو", english: "the weather", root: "ج و و" }],
+  vocabulary: [{ english: "lovely", arabic: "حلو" }],
   grammarPoints: [],
   ...over,
 });
@@ -52,8 +63,8 @@ async function analyse(page: Page, url = POST_URL) {
 /**
  * Open one of the result tabs.
  *
- * The result is split three ways — Transcript, Vocabulary, Notes — and only
- * Transcript is mounted on arrival. The other two panels are not merely
+ * The result is split three ways — المنشور, المفردات, ملاحظات — and only the
+ * first is mounted on arrival. The other two panels are not merely
  * off-screen; Radix unmounts inactive panels, so their content does not exist
  * until the tab is clicked. Any assertion about vocabulary or cultural notes
  * has to go through here.
@@ -74,7 +85,7 @@ test.describe("what it will accept", () => {
     // The guard is a security boundary as much as a usability one: the
     // function fetches whatever it is handed, so an unvalidated box would make
     // this an open proxy running on the app's credentials.
-    await expect(page.getByText("Invalid URL")).toBeVisible();
+    await expect(page.getByText("رابط غير صالح")).toBeVisible();
     expect(backend.callsTo("scrape-x-post")).toHaveLength(0);
   });
 
@@ -82,13 +93,13 @@ test.describe("what it will accept", () => {
     await analyse(page, "https://x.com/someone");
 
     // The pattern requires `/status/<digits>` — a profile has no text to read.
-    await expect(page.getByText("Invalid URL")).toBeVisible();
+    await expect(page.getByText("رابط غير صالح")).toBeVisible();
     expect(backend.callsTo("scrape-x-post")).toHaveLength(0);
   });
 
   test("accepts the old twitter.com host", async ({ page, backend }) => {
-    backend.stubFunction("scrape-x-post", { success: true, text: "الجو حلو اليوم" });
-    backend.stubFunction("analyze-gulf-arabic", { success: true, result: anAnalysis() });
+    backend.stubFunction("scrape-x-post", { success: true, text: POST_TEXT });
+    backend.stubFunction("analyze-english-text", { success: true, result: anAnalysis() });
 
     await analyse(page, "https://twitter.com/someone/status/1234567890");
 
@@ -124,30 +135,32 @@ test.describe("the two steps", () => {
   });
 
   test("scrapes the post and then analyses what came back", async ({ page, backend }) => {
-    backend.stubFunction("scrape-x-post", { success: true, text: "الجو حلو اليوم" });
-    backend.stubFunction("analyze-gulf-arabic", { success: true, result: anAnalysis() });
+    backend.stubFunction("scrape-x-post", { success: true, text: POST_TEXT });
+    backend.stubFunction("analyze-english-text", { success: true, result: anAnalysis() });
 
     await analyse(page);
 
-    await expect(page.getByText("The weather is nice today")).toBeVisible();
+    await expect(page.getByText("The weather is lovely today.")).toBeVisible();
     expect(backend.lastCallTo("scrape-x-post")?.body).toMatchObject({ url: POST_URL });
     // The analyser is handed the *scraped* text, not the URL — this is the
     // seam where the two functions meet, and passing the wrong thing would
-    // have it analysing a link.
-    expect(backend.lastCallTo("analyze-gulf-arabic")?.body).toMatchObject({
-      transcript: "الجو حلو اليوم",
+    // have it analysing a link. The dialect rides along: it picks which Arabic
+    // the glosses come back in, not anything about the English.
+    expect(backend.lastCallTo("analyze-english-text")?.body).toMatchObject({
+      text: POST_TEXT,
+      dialect: "Gulf",
     });
   });
 
   test("shows the post's own text before the analysis lands", async ({ page, backend }) => {
-    backend.stubFunction("scrape-x-post", { success: true, text: "الجو حلو اليوم" });
-    backend.stubFunction("analyze-gulf-arabic", { success: true, result: anAnalysis() });
+    backend.stubFunction("scrape-x-post", { success: true, text: POST_TEXT });
+    backend.stubFunction("analyze-english-text", { success: true, result: anAnalysis() });
 
     await analyse(page);
 
     // The scrape is the fast half; showing its text immediately is what makes
     // the wait for the analysis feel like progress rather than a hang.
-    await expect(page.getByText("Post extracted!")).toBeVisible();
+    await expect(page.getByText("تم استخراج المنشور!")).toBeVisible();
   });
 
   test("never analyses when the scrape failed", async ({ page, backend, expectConsoleErrors }) => {
@@ -159,7 +172,7 @@ test.describe("the two steps", () => {
     // A private or deleted post is the common case, and running the analyser
     // on nothing would spend a model call to produce an empty result.
     await expect(page.getByText("Post is private")).toBeVisible();
-    expect(backend.callsTo("analyze-gulf-arabic")).toHaveLength(0);
+    expect(backend.callsTo("analyze-english-text")).toHaveLength(0);
   });
 
   test("says so when the scrape itself is refused", async ({
@@ -172,8 +185,8 @@ test.describe("the two steps", () => {
 
     await analyse(page);
 
-    await expect(page.getByText("Failed")).toBeVisible();
-    expect(backend.callsTo("analyze-gulf-arabic")).toHaveLength(0);
+    await expect(page.getByText("فشل", { exact: true })).toBeVisible();
+    expect(backend.callsTo("analyze-english-text")).toHaveLength(0);
   });
 
   test("distinguishes an analysis failure from a scrape failure", async ({
@@ -182,15 +195,15 @@ test.describe("the two steps", () => {
     expectConsoleErrors,
   }) => {
     expectConsoleErrors([/.*/]);
-    backend.stubFunction("scrape-x-post", { success: true, text: "الجو حلو اليوم" });
-    backend.stubFunction("analyze-gulf-arabic", { success: false, error: "Not enough Arabic" });
+    backend.stubFunction("scrape-x-post", { success: true, text: POST_TEXT });
+    backend.stubFunction("analyze-english-text", { success: false, error: "Not enough English" });
 
     await analyse(page);
 
     // Both steps report through the same toast, so the message is the only
     // thing telling a learner whether to try a different post or a different
     // link.
-    await expect(page.getByText("Not enough Arabic")).toBeVisible();
+    await expect(page.getByText("Not enough English")).toBeVisible();
     expect(backend.callsTo("scrape-x-post")).toHaveLength(1);
   });
 });
@@ -199,21 +212,21 @@ test.describe("the result", () => {
   test.beforeEach(async ({ signInAs, db, backend }) => {
     await signInAs("free");
     seedX(db);
-    backend.stubFunction("scrape-x-post", { success: true, text: "الجو حلو اليوم" });
-    backend.stubFunction("analyze-gulf-arabic", { success: true, result: anAnalysis() });
+    backend.stubFunction("scrape-x-post", { success: true, text: POST_TEXT });
+    backend.stubFunction("analyze-english-text", { success: true, result: anAnalysis() });
   });
 
   test("shows the post line by line", async ({ page }) => {
     await analyse(page);
 
-    await expect(page.getByText("The weather is nice today")).toBeVisible();
+    await expect(page.getByText("The weather is lovely today.")).toBeVisible();
   });
 
   test("offers the vocabulary it found", async ({ page }) => {
     await analyse(page);
-    await openTab(page, /Vocabulary/);
+    await openTab(page, /المفردات/);
 
-    await expect(page.getByText("the weather")).toBeVisible();
+    await expect(page.getByText("lovely", { exact: true })).toBeVisible();
   });
 
   test("counts what it found on the tabs themselves", async ({ page }) => {
@@ -221,36 +234,36 @@ test.describe("the result", () => {
 
     // One sentence, one word. The counts are the only thing telling a learner
     // there is anything behind the other tabs — without them an empty-looking
-    // Transcript panel reads as the whole result.
-    await expect(page.getByRole("tab", { name: /Transcript 1/ })).toBeVisible();
-    await expect(page.getByRole("tab", { name: /Vocabulary 1/ })).toBeVisible();
+    // post panel reads as the whole result.
+    await expect(page.getByRole("tab", { name: /المنشور 1/ })).toBeVisible();
+    await expect(page.getByRole("tab", { name: /المفردات 1/ })).toBeVisible();
   });
 
   test("adds the cultural note when there is one", async ({ page, backend }) => {
-    backend.stubFunction("analyze-gulf-arabic", {
+    backend.stubFunction("analyze-english-text", {
       success: true,
-      result: anAnalysis({ culturalContext: "Weather small talk opens most Gulf conversations." }),
+      result: anAnalysis({ culturalContext: "الكلام عن الجو يفتح أغلب المحادثات بالإنجليزي." }),
     });
 
     await analyse(page);
-    await openTab(page, /Notes/);
+    await openTab(page, /ملاحظات/);
 
-    await expect(page.getByText(/opens most Gulf conversations/)).toBeVisible();
+    await expect(page.getByText(/يفتح أغلب المحادثات/)).toBeVisible();
   });
 
-  test("hides the Notes tab when there is nothing to put in it", async ({ page }) => {
+  test("hides the notes tab when there is nothing to put in it", async ({ page }) => {
     // The default analysis carries no cultural context and no grammar points.
     // An empty third tab would be a dead end, so the tab itself is conditional.
     await analyse(page);
-    await expect(page.getByRole("tab", { name: /Vocabulary/ })).toBeVisible();
+    await expect(page.getByRole("tab", { name: /المفردات/ })).toBeVisible();
 
-    await expect(page.getByRole("tab", { name: "Notes" })).toHaveCount(0);
+    await expect(page.getByRole("tab", { name: "ملاحظات" })).toHaveCount(0);
   });
 
   test("saves a word with the line it came from", async ({ page, db }) => {
     await analyse(page);
-    await openTab(page, /Vocabulary/);
-    await expect(page.getByText("the weather")).toBeVisible();
+    await openTab(page, /المفردات/);
+    await expect(page.getByText("lovely", { exact: true })).toBeVisible();
 
     // Icon-only and unnamed, like the submit control — located by its icon
     // because there is no role+name that reaches it. Counted against the
@@ -262,16 +275,19 @@ test.describe("the result", () => {
     // out of context later, and this page is the only place that line exists.
     expect(db.rows("user_vocabulary")[0]).toMatchObject({
       user_id: TEST_USER_ID,
-      word_arabic: "الجو",
+      // word_english is the word being learned; word_arabic its gloss.
+      word_english: "lovely",
+      word_arabic: "حلو",
+      // The English sentence and its scaffold both travel with the word.
       sentence_text: "الجو حلو اليوم",
-      sentence_english: "The weather is nice today",
+      sentence_english: "The weather is lovely today.",
       source: "x_post",
     });
   });
 
   test("confirms the save on the row itself", async ({ page }) => {
     await analyse(page);
-    await openTab(page, /Vocabulary/);
+    await openTab(page, /المفردات/);
     await page.locator("button:has(svg.lucide-plus)").first().click();
 
     // The row swaps its plus for a tick and goes disabled. Without that the
@@ -289,12 +305,12 @@ test.describe("the result", () => {
   }) => {
     await signInAs("anonymous");
     seedX(db);
-    backend.stubFunction("scrape-x-post", { success: true, text: "الجو حلو اليوم" });
-    backend.stubFunction("analyze-gulf-arabic", { success: true, result: anAnalysis() });
+    backend.stubFunction("scrape-x-post", { success: true, text: POST_TEXT });
+    backend.stubFunction("analyze-english-text", { success: true, result: anAnalysis() });
 
     await analyse(page);
-    await openTab(page, /Vocabulary/);
-    await expect(page.getByText("the weather")).toBeVisible();
+    await openTab(page, /المفردات/);
+    await expect(page.getByText("lovely", { exact: true })).toBeVisible();
 
     // Pinned as-is. The route has no guard, so reading a post is free and
     // keeping a word is the gate — but the gate is enforced by *omitting the

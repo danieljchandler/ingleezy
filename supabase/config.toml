@@ -37,6 +37,11 @@ verify_jwt = false
 [functions.analyze-gulf-arabic]
 verify_jwt = false
 
+# Same posture as analyze-gulf-arabic, which it replaces on /learn-from-x:
+# the route has no guard, so reading a post is open and only saving is gated.
+[functions.analyze-english-text]
+verify_jwt = false
+
 [functions.download-media]
 verify_jwt = false
 

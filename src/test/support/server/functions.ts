@@ -306,6 +306,9 @@ export const defaultFunctions: Record<string, FunctionHandler> = {
   // rather than a non-2xx, so the default has to carry the flag.
   "analyze-gulf-arabic": () =>
     ok({ success: true, result: { lines: [], vocabulary: [], grammarPoints: [] } }),
+  // Learn-from-X's analyser: same in-band `success` flag, English-first result.
+  "analyze-english-text": () =>
+    ok({ success: true, result: { lines: [], vocabulary: [], grammarPoints: [] } }),
   "scrape-x-post": () => ok({ text: "" }),
   "camel-analyze": () => ok({ dialect: "Gulf", confidence: 1 }),
   "farasa": () => ok({ segments: [] }),
