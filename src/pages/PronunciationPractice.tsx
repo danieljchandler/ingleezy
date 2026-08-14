@@ -9,7 +9,7 @@ import { HomeButton } from "@/components/HomeButton";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Mic, MicOff, RotateCcw, Loader2, ChevronRight, ChevronLeft, Volume2, Trophy, Target, ArrowRight, Languages, Headphones } from "lucide-react";
+import { Mic, MicOff, RotateCcw, Loader2, ChevronRight, ChevronLeft, Trophy, Target, ArrowRight, Languages, Headphones } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
@@ -21,20 +21,6 @@ import { useShadowQueue } from "@/hooks/useShadowQueue";
 import { useDialect } from "@/contexts/DialectContext";
 
 const MAX_DURATION_MS = 5000;
-
-const DIALECT_MAP: Record<string, string> = {
-  Saudi: "ar-SA",
-  Kuwaiti: "ar-KW",
-  UAE: "ar-AE",
-  Bahraini: "ar-BH",
-  Qatari: "ar-QA",
-  Omani: "ar-OM",
-  Egyptian: "ar-EG",
-  Yemeni: "ar-YE",
-  Levantine: "ar-JO",
-  Gulf: "ar-SA",
-  MSA: "ar-SA",
-};
 
 interface VocabWord {
   id: string;
@@ -50,9 +36,10 @@ const PronunciationPractice = () => {
   const { user, loading: authLoading } = useAuth();
   const { assess, result, isLoading, error, reset } = useAzurePronunciation();
   const { activeDialect } = useDialect();
-  // Assess against the learner's active dialect locale — previously hardcoded
-  // to ar-SA, so Egyptian/Yemeni learners were scored against Saudi norms.
-  const assessLocale = DIALECT_MAP[activeDialect] ?? "ar-SA";
+  // The studied language is English; the learner's dialect only buckets the
+  // recorded errors. (Word/sentence modes assess English — shadow mode still
+  // echoes native Arabic clips and scores through the Munsit path.)
+  const assessLocale = "en-US";
 
   const [words, setWords] = useState<VocabWord[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -60,7 +47,7 @@ const PronunciationPractice = () => {
   const [mode, setMode] = useState<"word" | "sentence" | "shadow">("word");
   const [sessionScores, setSessionScores] = useState<number[]>([]);
   const [wordsLoading, setWordsLoading] = useState(true);
-  const [showEnglish, setShowEnglish] = useState(false);
+  const [showMeaning, setShowMeaning] = useState(false);
 
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -89,9 +76,11 @@ const PronunciationPractice = () => {
   }, [user]);
 
   const currentWord = words[currentIndex];
-  const referenceText = mode === "sentence" && currentWord?.sentence_text
-    ? currentWord.sentence_text
-    : currentWord?.word_arabic || "";
+  // The ENGLISH side is what the learner pronounces now; the Arabic is its
+  // meaning, behind the reveal.
+  const referenceText = mode === "sentence" && currentWord?.sentence_english
+    ? currentWord.sentence_english
+    : currentWord?.word_english || "";
 
   const stopRecording = useCallback(() => {
     recorderRef.current?.stop();
@@ -119,7 +108,7 @@ const PronunciationPractice = () => {
         stream.getTracks().forEach((t) => t.stop());
         const blob = new Blob(chunksRef.current, { type: mimeType });
         if (blob.size > 0) {
-          const res = await assess(blob, referenceText, assessLocale);
+          const res = await assess(blob, referenceText, assessLocale, activeDialect);
           if (res) {
             setSessionScores((prev) => [...prev, res.overall]);
           }
@@ -138,7 +127,7 @@ const PronunciationPractice = () => {
     } catch {
       console.error("Microphone access denied");
     }
-  }, [referenceText, assess, reset, assessLocale]);
+  }, [referenceText, assess, reset, assessLocale, activeDialect]);
 
   const goToNext = () => {
     reset();
@@ -148,13 +137,6 @@ const PronunciationPractice = () => {
   const goToPrev = () => {
     reset();
     setCurrentIndex((prev) => Math.max(prev - 1, 0));
-  };
-
-  const playNativeAudio = () => {
-    if (currentWord?.word_audio_url) {
-      const audio = new Audio(currentWord.word_audio_url);
-      audio.play();
-    }
   };
 
   const sessionAverage =
@@ -181,7 +163,7 @@ const PronunciationPractice = () => {
         <div className="text-center py-16">
           <Mic className="h-16 w-16 text-muted-foreground/30 mx-auto mb-4" />
           <h1 className="text-2xl font-bold mb-2 font-heading">Pronunciation Practice</h1>
-          <p className="text-muted-foreground mb-6">Sign in to practice your Arabic pronunciation</p>
+          <p className="text-muted-foreground mb-6">Sign in to practice your English pronunciation</p>
           <Button onClick={() => navigate("/auth")}>Sign In</Button>
         </div>
       </AppShell>
@@ -227,8 +209,8 @@ const PronunciationPractice = () => {
             <h1 className="text-2xl font-bold font-heading inline-flex items-center gap-2">Pronunciation Practice <InfoHint {...PAGE_HINTS["pronunciation"]} size="md" /></h1>
             <div className="flex items-center gap-1.5">
               <Languages className="h-3.5 w-3.5 text-muted-foreground" />
-              <span className="text-xs text-muted-foreground">EN</span>
-              <Switch checked={showEnglish} onCheckedChange={setShowEnglish} className="h-5 w-9 data-[state=checked]:bg-primary data-[state=unchecked]:bg-input [&>span]:h-4 [&>span]:w-4 [&>span]:data-[state=checked]:translate-x-4" />
+              <span className="text-xs text-muted-foreground">ع</span>
+              <Switch checked={showMeaning} onCheckedChange={setShowMeaning} className="h-5 w-9 data-[state=checked]:bg-primary data-[state=unchecked]:bg-input [&>span]:h-4 [&>span]:w-4 [&>span]:data-[state=checked]:translate-x-4" />
             </div>
           </div>
           <p className="text-sm text-muted-foreground">
@@ -269,7 +251,7 @@ const PronunciationPractice = () => {
             variant={mode === "sentence" ? "default" : "outline"}
             size="sm"
             onClick={() => { setMode("sentence"); reset(); }}
-            disabled={!currentWord?.sentence_text}
+            disabled={!currentWord?.sentence_english}
           >
             Sentence
           </Button>
@@ -285,7 +267,7 @@ const PronunciationPractice = () => {
         </div>
 
         {mode === "shadow" && (
-          <ShadowMode showEnglish={showEnglish} onScore={(s) => setSessionScores((prev) => [...prev, s])} />
+          <ShadowMode showEnglish={showMeaning} onScore={(s) => setSessionScores((prev) => [...prev, s])} />
         )}
         {mode !== "shadow" && (
         <>
@@ -293,29 +275,22 @@ const PronunciationPractice = () => {
 
         {/* Word card */}
         <div className="bg-card border-2 border-border rounded-2xl p-8 text-center mb-6">
-          {/* Arabic text */}
-          <p className="text-4xl font-bold mb-3 leading-relaxed" dir="rtl">
-            {mode === "sentence" && currentWord?.sentence_text
-              ? currentWord.sentence_text
-              : currentWord?.word_arabic}
+          {/* The English to pronounce */}
+          <p className="text-4xl font-bold mb-3 leading-relaxed font-english">
+            {referenceText}
           </p>
 
-          {/* English translation */}
-          {showEnglish && (
-            <p className="text-muted-foreground text-lg mb-4 animate-in fade-in duration-200">
-              {mode === "sentence" && currentWord?.sentence_english
-                ? currentWord.sentence_english
-                : currentWord?.word_english}
+          {/* Arabic meaning behind the reveal */}
+          {showMeaning && (
+            <p dir="rtl" className="text-muted-foreground text-lg mb-4 animate-in fade-in duration-200 font-arabic">
+              {mode === "sentence" && currentWord?.sentence_text
+                ? currentWord.sentence_text
+                : currentWord?.word_arabic}
             </p>
           )}
 
-          {/* Listen button */}
-          {currentWord?.word_audio_url && mode === "word" && (
-            <Button variant="ghost" size="sm" onClick={playNativeAudio} className="gap-2">
-              <Volume2 className="h-4 w-4" />
-              Listen first
-            </Button>
-          )}
+          {/* Deck audio is Arabic-era (the saved word's Arabic pronunciation),
+              so no "listen first" here until English card audio exists. */}
         </div>
 
         {/* Recording area */}
@@ -397,7 +372,7 @@ const PronunciationPractice = () => {
                 <p className="text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider">
                   Word Breakdown
                 </p>
-                <div className="flex flex-wrap justify-center gap-2" dir="rtl">
+                <div className="flex flex-wrap justify-center gap-2">
                   {result.words.map((w: WordResult, i: number) => {
                     const wb = scoreBand(w.accuracy);
                     return (

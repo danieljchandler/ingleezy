@@ -1,11 +1,16 @@
 /**
- * azure-pronunciation — Azure Cognitive Services Pronunciation Assessment for Arabic.
+ * azure-pronunciation — Azure Cognitive Services Pronunciation Assessment.
  *
- * Evaluates learner pronunciation against a reference Arabic text and returns
- * granular scores at the overall, word, and phoneme levels.
+ * Evaluates learner pronunciation against a reference text and returns
+ * granular scores at the overall, word, and phoneme levels. Flipped: the
+ * primary target is ENGLISH (en-US default, en-GB supported); the Arabic
+ * locales stay supported for the shadowing surfaces that still echo native
+ * Arabic clips.
  *
- * Supported Gulf Arabic locales (pass as `locale` in request body):
- *   ar-SA  Saudi Arabia (default)
+ * Supported locales (pass as `locale` in request body):
+ *   en-US  English, United States (default)
+ *   en-GB  English, United Kingdom
+ *   ar-SA  Saudi Arabia
  *   ar-QA  Qatar
  *   ar-KW  Kuwait
  *   ar-BH  Bahrain
@@ -16,8 +21,10 @@
  * Request body:
  *   {
  *     audioBase64:  string   // Base64-encoded audio blob (WebM/Opus from MediaRecorder)
- *     referenceText: string  // Arabic text the learner was asked to pronounce
- *     locale?:      string   // BCP-47 locale, default "ar-SA"
+ *     referenceText: string  // Text the learner was asked to pronounce
+ *     locale?:      string   // BCP-47 locale, default "en-US"
+ *     dialect?:     string   // Learner's L1 bucket for recorded errors when
+ *                            // assessing English (Gulf/Egyptian/Yemeni)
  *     audioMimeType?: string // MIME type, default "audio/webm"
  *   }
  *
@@ -71,14 +78,19 @@ function getSttEndpoint(): string {
 // ar-YE included: localeToDialect below already maps it to 'Yemeni' — its
 // omission here meant Yemeni learners got a hard 400 from a branch that was
 // clearly meant to work.
-const SUPPORTED_LOCALES = ['ar-SA', 'ar-QA', 'ar-KW', 'ar-BH', 'ar-AE', 'ar-OM', 'ar-EG', 'ar-YE'];
+const SUPPORTED_LOCALES = ['en-US', 'en-GB', 'ar-SA', 'ar-QA', 'ar-KW', 'ar-BH', 'ar-AE', 'ar-OM', 'ar-EG', 'ar-YE'];
 
 /**
  * Map an Azure locale back to the app's dialect module, so recorded errors land
  * in the same bucket the learner's deck uses. Every Gulf country locale folds to
  * "Gulf"; ar-EG is the only non-Gulf locale Azure assessment supports here.
  */
-function localeToDialect(locale: string): string {
+function localeToDialect(locale: string, bodyDialect?: string): string {
+  // An English locale says nothing about the learner's L1 bucket; the client
+  // sends it alongside. Arabic locales keep the original mapping.
+  if (locale.startsWith('en')) {
+    return ['Gulf', 'Egyptian', 'Yemeni'].includes(bodyDialect ?? '') ? (bodyDialect as string) : 'Gulf';
+  }
   if (locale === 'ar-EG') return 'Egyptian';
   if (locale === 'ar-YE') return 'Yemeni';
   return 'Gulf';
@@ -202,7 +214,7 @@ Deno.serve(async (req: Request) => {
 
   try {
     // Parse request body — return 400 for malformed JSON
-    let body: { audioBase64: string; referenceText: string; locale?: string; audioMimeType?: string };
+    let body: { audioBase64: string; referenceText: string; locale?: string; audioMimeType?: string; dialect?: string };
     try {
       body = await req.json();
     } catch {
@@ -215,7 +227,7 @@ Deno.serve(async (req: Request) => {
     const {
       audioBase64,
       referenceText,
-      locale = 'ar-SA',
+      locale = 'en-US',
       audioMimeType = 'audio/webm',
     } = body;
 
@@ -355,7 +367,7 @@ Deno.serve(async (req: Request) => {
         cap.userId,
         mispronounced.map((w) => ({
           source: 'pronunciation' as const,
-          dialect: localeToDialect(locale),
+          dialect: localeToDialect(locale, body.dialect),
           targetArabic: w.word,
           errorKind: String(w.errorType).toLowerCase(),
           detail: { locale, accuracy: w.accuracy, overall: result.overall },
@@ -366,7 +378,7 @@ Deno.serve(async (req: Request) => {
       // not on referenceText: errors are recorded against individual words, so
       // resolving the whole utterance would never match anything.
       const spoken = result.words.map((w) => w.word).filter(Boolean);
-      void resolveLearnerErrors(cap.userId, spoken, localeToDialect(locale));
+      void resolveLearnerErrors(cap.userId, spoken, localeToDialect(locale, body.dialect));
     }
 
     // Opt-in audio contribution (profiles.contribute_audio, off by default):
@@ -374,7 +386,7 @@ Deno.serve(async (req: Request) => {
     // flywheel's W5 lane. Fire-and-forget; the module checks consent itself.
     contributeLearnerAudio({
       userId: cap.userId,
-      dialect: localeToDialect(locale),
+      dialect: localeToDialect(locale, body.dialect),
       audioBytes,
       mimeType: baseMime,
       referenceText,

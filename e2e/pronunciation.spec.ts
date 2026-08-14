@@ -21,8 +21,11 @@ import type { Page } from "@playwright/test";
  * queue they draw from.
  */
 
-const WORD = "مرحبا";
-const SENTENCE = "مرحبا كيف حالك اليوم";
+// The ENGLISH side of the deck is the reference now; the Arabic is its
+// meaning behind the reveal.
+const WORD = "hello";
+const SENTENCE = "Hello how are you today";
+const WORD_MEANING = "مرحبا";
 
 const aScore = (over: Record<string, unknown> = {}) => ({
   overall: 82,
@@ -30,10 +33,10 @@ const aScore = (over: Record<string, unknown> = {}) => ({
   fluency: 78,
   completeness: 100,
   recognizedText: WORD,
-  locale: "ar-SA",
+  locale: "en-US",
   words: [
     { word: WORD, accuracy: 85, errorType: "None", phonemes: [] },
-    { word: "كيف", accuracy: 40, errorType: "Mispronunciation", phonemes: [] },
+    { word: "how", accuracy: 40, errorType: "Mispronunciation", phonemes: [] },
   ],
   ...over,
 });
@@ -44,10 +47,10 @@ function seedWords(db: MemoryDb, rows = 2) {
     Array.from({ length: rows }, (_, i) =>
       aUserVocabulary({
         id: `voc-${i}`,
-        word_arabic: i === 0 ? WORD : `كلمة${i}`,
-        word_english: i === 0 ? "hello" : `word ${i}`,
-        sentence_text: i === 0 ? SENTENCE : null,
-        sentence_english: i === 0 ? "Hello how are you today" : null,
+        word_arabic: i === 0 ? WORD_MEANING : `كلمة${i}`,
+        word_english: i === 0 ? WORD : `word ${i}`,
+        sentence_text: i === 0 ? "مرحبا كيف حالك اليوم" : null,
+        sentence_english: i === 0 ? SENTENCE : null,
         created_at: new Date(Date.now() - i * 60_000).toISOString(),
       }),
     ),
@@ -100,7 +103,7 @@ test.describe("getting in", () => {
 
     // No route guard here — the page gates itself, so the redirect specs would
     // not catch this changing.
-    await expect(page.getByText("Sign in to practice your Arabic pronunciation")).toBeVisible();
+    await expect(page.getByText("Sign in to practice your English pronunciation")).toBeVisible();
     await expect(micButton(page)).toHaveCount(0);
   });
 
@@ -135,7 +138,7 @@ test.describe("getting in", () => {
     const read = db.readsOf("user_vocabulary").at(-1);
     expect(read?.search).toContain("limit=20");
     expect(read?.search).toContain("created_at.desc");
-    await expect(page.getByText(WORD)).toBeVisible();
+    await expect(page.getByText(WORD, { exact: true })).toBeVisible();
   });
 });
 
@@ -267,7 +270,7 @@ test.describe("word, sentence and dialect", () => {
     await expect(page.getByRole("button", { name: "Sentence", exact: true })).toBeDisabled();
   });
 
-  test("scores an Egyptian learner against an Egyptian locale", async ({
+  test("assesses English and buckets errors under the learner's dialect", async ({
     page,
     signInAs,
     db,
@@ -280,22 +283,23 @@ test.describe("word, sentence and dialect", () => {
     await page.goto("/pronunciation");
     await recordTake(page, backend);
 
-    // Previously hardcoded to ar-SA, which scored Egyptian and Yemeni learners
-    // against Saudi norms and marked correct speech wrong.
+    // The studied language is English for every learner; the dialect rides
+    // along so recorded errors land in the L1 bucket the profile reads.
     expect(backend.lastCallTo("azure-pronunciation")?.body).toMatchObject({
-      locale: "ar-EG",
+      locale: "en-US",
+      dialect: "Egyptian",
     });
   });
 
-  test("hides the English until it is asked for", async ({ page }) => {
+  test("hides the Arabic meaning until it is asked for", async ({ page }) => {
     await page.goto("/pronunciation");
+    await expect(page.getByText(WORD, { exact: true })).toBeVisible();
 
-    await expect(page.getByText("hello")).toHaveCount(0);
+    await expect(page.getByText(WORD_MEANING)).toHaveCount(0);
     await page.getByRole("switch").first().click();
-    // Showing the translation by default turns a production drill into a
-    // reading drill — the learner reads the English and never decodes the
-    // Arabic.
-    await expect(page.getByText("hello")).toBeVisible();
+    // Showing the meaning by default is harmless — but hiding it keeps the
+    // card clean, and revealing it is one tap for a learner who needs it.
+    await expect(page.getByText(WORD_MEANING)).toBeVisible();
   });
 });
 
@@ -483,7 +487,7 @@ test.describe("shadow mode", () => {
     await expect(page.getByText("شلونك اليوم")).toBeVisible();
   });
 
-  test("scores a Yemeni learner against a different locale in each mode", async ({
+  test("scores English in word mode and Arabic in shadow mode", async ({
     page,
     signInAs,
     db,
@@ -503,18 +507,14 @@ test.describe("shadow mode", () => {
     await page.goto("/pronunciation");
     await recordTake(page, backend);
 
-    // Pinned as a disagreement, not a behaviour worth keeping. Two locale
-    // tables exist for one job: `DIALECT_MAP` in PronunciationPractice.tsx maps
-    // Yemeni to ar-YE, while `DIALECT_LOCALE` in useShadowQueue.ts maps the
-    // same dialect to ar-SA. So the same learner saying the same word is
-    // assessed against a different Azure voice model depending on which tab of
-    // one page they are on.
-    expect(backend.lastCallTo("azure-pronunciation")?.body).toMatchObject({ locale: "ar-YE" });
+    // The two tabs really are two exercises now: word/sentence mode drills the
+    // learner's ENGLISH deck against en-US, while shadow mode still echoes
+    // native Arabic clips (immersion) through the Arabic scoring path.
+    expect(backend.lastCallTo("azure-pronunciation")?.body).toMatchObject({ locale: "en-US" });
 
     await page.getByRole("button", { name: "Try Again" }).click();
     await page.getByRole("button", { name: "Shadow" }).click();
     await expect(page.getByText("كيف حالك اليوم")).toBeVisible();
-    await expect(page.getByText(/ar-SA|Yemeni/)).toBeVisible();
   });
 
   test("shows only the learner's own uploads", async ({ page, db }) => {

@@ -78,18 +78,19 @@ Give exactly 2-3 short, actionable tips (one sentence each) to help them match t
       })
       .join("\n");
 
-    // Accept both Azure locale codes (ar-EG / ar-YE) and the canonical dialect
-    // keys (Egyptian / Yemeni / Gulf) used elsewhere in the app.
+    // Accept both Azure locale codes and the canonical dialect keys used
+    // elsewhere; either way it names the learner's L1, not the studied
+    // language.
     const d = String(dialect ?? "");
-    const dialectLabel = (d === "ar-EG" || d === "Egyptian")
+    const l1Label = (d === "ar-EG" || d === "Egyptian")
       ? "Egyptian Arabic"
       : (d === "ar-YE" || d === "Yemeni")
         ? "Yemeni Arabic"
-        : "Gulf Arabic (Saudi/Khaliji)";
+        : "Gulf Arabic";
 
-    prompt = `You are a friendly Arabic pronunciation coach specializing in ${dialectLabel}.
+    prompt = `You are a friendly ENGLISH pronunciation coach for a native ${l1Label} speaker.
 
-A learner just attempted to pronounce: "${word_arabic}"${word_english ? ` (meaning: "${word_english}")` : ""}.
+A learner just attempted to pronounce: "${word_english || word_arabic}"${word_arabic && word_english ? ` (meaning: "${word_arabic}")` : ""}.
 
 Here are their Azure Speech Assessment scores:
 - Overall: ${Math.round(scores.overall)}/100
@@ -105,7 +106,9 @@ ${isSingleWord
   ? "This is a single word. Focus on phoneme-level feedback."
   : "This is a phrase. Include word-level and fluency feedback."}
 
-Give exactly 2-3 short, actionable tips (one sentence each) to improve their pronunciation. Be encouraging but specific. Reference the actual Arabic words/sounds. Do not repeat the scores.`;
+Watch specifically for the sounds that trip Arabic speakers — /p/ said as /b/, /v/ said as /f/, collapsed vowel pairs (ship/sheep, pen/pan), vowels inserted into consonant clusters ("isport" for "sport"), and dropped final consonants — and name the fix when the scores point at one of them.
+
+Give exactly 2-3 short, actionable tips (one sentence each) to improve their pronunciation. Be encouraging but specific. Reference the actual English words/sounds. Do not repeat the scores.`;
     }
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -117,7 +120,7 @@ Give exactly 2-3 short, actionable tips (one sentence each) to improve their pro
       body: JSON.stringify({
         model: MODEL_IDS.GEMINI_FAST,
         messages: [
-          { role: "system", content: "You are a concise Arabic pronunciation coach. Return ONLY a JSON array of tip strings, no markdown, no explanation." },
+          { role: "system", content: "You are a concise pronunciation coach. Return ONLY a JSON array of tip strings, no markdown, no explanation." },
           { role: "user", content: prompt },
         ],
         tools: [

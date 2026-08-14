@@ -215,9 +215,17 @@ generation conditioning.
       Arabic-era.
 
 ### Speaking / audio — FLIP
-- [ ] Pronunciation practice: English phoneme scoring, seeded with the
-      Arabic-speaker confusion set (/p/-/b/, /v/-/f/, vowel pairs,
-      clusters) — this *replaces* Alphabet Journey's role
+- [x] Pronunciation practice FLIPPED: word/sentence modes drill the
+      learner's English deck against Azure en-US phoneme scoring (en-GB
+      supported), with the learner's dialect riding along as the
+      learner_errors bucket; the feedback coach names the Arabic-speaker
+      confusion set (/p/-/b/, /v/-/f/, vowel pairs, epenthesis, dropped
+      finals) when the scores point at it. The card shows the English to
+      pronounce with the Arabic meaning behind a reveal; deck "listen
+      first" audio removed until English card audio exists. Shadow mode
+      deliberately stays Arabic (immersion echo of native clips).
+      Still open: a seeded minimal-pairs drill set — goes with the
+      English Sounds journey.
 - [~] Shadowing, sentence coach, set phrases: KEEP loops, English targets.
       **Set phrases DONE**: English phrases with dialect glosses, phonetic_ar
       in the transliteration columns, Arabic-in-English-order literals, and

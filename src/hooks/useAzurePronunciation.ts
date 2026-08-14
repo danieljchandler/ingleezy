@@ -8,7 +8,7 @@
  *   const { assess, result, isLoading, error, reset } = useAzurePronunciation();
  *
  *   // After recording a Blob from MediaRecorder:
- *   const scores = await assess(audioBlob, 'مرحبا، كيف حالك؟');
+ *   const scores = await assess(audioBlob, 'How are you today?');
  *   // scores.overall => 0–100 overall pronunciation score
  *   // scores.words   => per-word accuracy + error type + phoneme breakdown
  *
@@ -100,7 +100,8 @@ export function useAzurePronunciation() {
     async (
       audioBlob: Blob,
       referenceText: string,
-      locale = 'ar-SA'
+      locale = 'en-US',
+      dialect?: string,
     ): Promise<PronunciationResult | null> => {
       // Fail-fast guard for empty inputs
       if (!audioBlob || audioBlob.size === 0) {
@@ -134,7 +135,7 @@ export function useAzurePronunciation() {
         const { data, error: fnError } = await supabase.functions.invoke(
           'azure-pronunciation',
           {
-            body: { audioBase64, referenceText, locale, audioMimeType },
+            body: { audioBase64, referenceText, locale, audioMimeType, dialect },
           }
         );
 

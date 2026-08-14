@@ -339,6 +339,54 @@ Deno.test("asks Azure for the requested locale", async () => {
   assertStringIncludes(url, "format=detailed");
 });
 
+Deno.test("defaults to English assessment since the retarget", async () => {
+  const { calls } = await call({ audioBase64: AUDIO, referenceText: "How are you today?" });
+
+  // en-US is the studied language's locale; the Arabic locales stay supported
+  // for the shadowing surfaces that still echo native Arabic clips.
+  const url = calls.find((u) => u.includes("stt.speech.microsoft.com")) ?? "";
+  assertStringIncludes(url, "language=en-US");
+});
+
+Deno.test("buckets an English attempt's errors under the learner's dialect", async () => {
+  const fn = await loadFunction("azure-pronunciation", {
+    upstreams: caller({
+      "stt.speech.microsoft.com": azure({
+        PronScore: 40,
+        AccuracyScore: 40,
+        FluencyScore: 40,
+        CompletenessScore: 40,
+        Display: "bark",
+        Words: [{ Word: "park", AccuracyScore: 30, ErrorType: "Mispronunciation" }],
+      }),
+    }),
+  });
+  try {
+    await fn.handler(
+      jsonRequest("azure-pronunciation", {
+        audioBase64: AUDIO,
+        referenceText: "park",
+        locale: "en-US",
+        dialect: "Egyptian",
+      }),
+    );
+
+    // An English locale says nothing about the learner's L1; the client sends
+    // it alongside so recorded errors land in the bucket the profile reads.
+    for (let i = 0; i < 50; i++) {
+      const write = fn.calls.find((c) => c.url.includes("learner_errors"));
+      if (write) {
+        assertStringIncludes(write.body ?? "", "Egyptian");
+        return;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 5));
+    }
+    throw new Error("no learner_errors write was issued");
+  } finally {
+    fn.restore();
+  }
+});
+
 Deno.test("prefers a custom endpoint over the region", async () => {
   const { calls } = await call(ok, caller({
     "custom.cognitiveservices.azure.com": azure({
