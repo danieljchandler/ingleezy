@@ -178,6 +178,21 @@
     unicode-bidi: isolate;
   }
 
+  /* Directional icons mirror with the text direction. lucide names icons by
+     their LTR-drawn direction, and every arrow/chevron in the app encodes
+     "forward" or "back", not a compass direction — under the RTL root,
+     forward is visually leftward. :dir() (not [dir]) so icons inside
+     .font-english LTR islands keep their drawn direction. Chevron-down/up and
+     non-directional icons are untouched. */
+  .lucide-arrow-left:dir(rtl),
+  .lucide-arrow-right:dir(rtl),
+  .lucide-chevron-left:dir(rtl),
+  .lucide-chevron-right:dir(rtl),
+  .lucide-chevrons-left:dir(rtl),
+  .lucide-chevrons-right:dir(rtl) {
+    transform: scaleX(-1);
+  }
+
   /* ── Semantic typography tokens — single source of truth ── */
   .text-t-display {
     @apply font-heading text-display font-bold;
