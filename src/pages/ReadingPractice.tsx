@@ -162,6 +162,9 @@ const TappableEnglishLine = ({
           <Eye className="h-3.5 w-3.5" />
         )}
       </button>
+      {/* Same per-line Ask AI affordance the other readers carry; dropped by
+          accident when the word-enrichment machinery was removed. */}
+      <AskAISentence arabic={line.arabic} english={line.english} variant="chip" />
       {revealedLines.has(lineIdx) && (
         <div className="flex-1 space-y-1">
           <p dir="rtl" className="font-arabic text-sm text-foreground">{line.arabic}</p>

@@ -1,15 +1,16 @@
 import { NavLink, useLocation } from "react-router-dom";
 import { Sparkles, GraduationCap, Play, Brain, User } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { AR } from "@/lib/strings";
 
 const TABS = [
   // The daily task queue lives directly on this tab (Index.tsx) — labeled
-  // "Home" since it also carries onboarding/explore content, not "Today".
-  { to: "/", label: "Home", icon: Sparkles, match: (p: string) => p === "/", tourId: "nav-today" },
-  { to: "/learn-hub", label: "Learn", icon: GraduationCap, match: (p: string) => p.startsWith("/learn-hub"), tourId: "nav-learn" },
-  { to: "/discover", label: "Discover", icon: Play, match: (p: string) => p === "/discover", tourId: "nav-discover" },
-  { to: "/practice", label: "Practice", icon: Brain, match: (p: string) => p.startsWith("/practice"), tourId: "nav-practice" },
-  { to: "/me", label: "Me", icon: User, match: (p: string) => p.startsWith("/me"), tourId: "nav-me" },
+  // "home" since it also carries onboarding/explore content, not "Today".
+  { to: "/", label: AR.nav.home, icon: Sparkles, match: (p: string) => p === "/", tourId: "nav-today" },
+  { to: "/learn-hub", label: AR.nav.learn, icon: GraduationCap, match: (p: string) => p.startsWith("/learn-hub"), tourId: "nav-learn" },
+  { to: "/discover", label: AR.nav.discover, icon: Play, match: (p: string) => p === "/discover", tourId: "nav-discover" },
+  { to: "/practice", label: AR.nav.practice, icon: Brain, match: (p: string) => p.startsWith("/practice"), tourId: "nav-practice" },
+  { to: "/me", label: AR.nav.me, icon: User, match: (p: string) => p.startsWith("/me"), tourId: "nav-me" },
 ];
 
 /**

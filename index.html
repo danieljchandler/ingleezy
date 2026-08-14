@@ -1,7 +1,8 @@
 <!doctype html>
-<!-- lang/dir flip to ar/rtl lands with the Arabic-first UI pass (RETARGET.md);
-     flipping the root while the layout is still LTR breaks it. -->
-<html lang="en">
+<!-- Arabic-first: the app chrome speaks the learner's language and lays out
+     right-to-left. English CONTENT blocks opt back out via .font-english
+     (direction:ltr + bidi isolation) and per-element dir attributes. -->
+<html lang="ar" dir="rtl">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />

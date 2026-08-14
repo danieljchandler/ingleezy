@@ -165,6 +165,19 @@
     line-height: 1.7;
   }
 
+  /* English CONTENT block — the studied language. The class was a semantic
+     marker with no CSS behind it; now it carries the two things every English
+     block needs once the app root is Arabic-first RTL: its own left-to-right
+     direction, and bidi isolation so surrounding Arabic punctuation cannot
+     reorder around it. No text-align on purpose — direction:ltr makes the
+     default `start` resolve to left, while deliberately centered or inherited
+     alignments still win. */
+  .font-english {
+    font-family: 'Open Sans', 'Noto Sans Arabic', sans-serif;
+    direction: ltr;
+    unicode-bidi: isolate;
+  }
+
   /* ── Semantic typography tokens — single source of truth ── */
   .text-t-display {
     @apply font-heading text-display font-bold;

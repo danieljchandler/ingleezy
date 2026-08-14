@@ -107,8 +107,9 @@ test.describe("Ask AI panel", () => {
     await page.getByText("Read a Passage").click();
     await page.getByRole("button", { name: /beginner/i }).click();
 
-    // The passage renders one tappable span per word, so match a word.
-    const line = page.getByText("المقهى", { exact: true }).first();
+    // The flipped passage renders one tappable ENGLISH word per span; the
+    // Arabic scaffold sits behind each line's reveal.
+    const line = page.getByRole("button", { name: "cafe", exact: true }).first();
     await expect(line).toBeVisible();
 
     // The per-line chip and the floating action button share the name "Ask AI";

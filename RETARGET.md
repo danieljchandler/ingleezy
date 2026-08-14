@@ -271,8 +271,17 @@ generation conditioning.
 - [ ] Meme analyzer / Souq news / Learn-from-X: FLIP if cheap, else defer
 
 ### Arabic-first UI — FLIP (dedicated pass)
-- [ ] `dir="rtl"` root, manifest `lang: ar`
-- [ ] Strings module (`src/lib/strings.ts` or i18n lib TBD) — no hardcoded
+- [x] `dir="rtl"` root landed: `<html lang="ar" dir="rtl">`; manifest was
+      already ar/rtl. The `.font-english` marker class (previously CSS-less)
+      now carries `direction: ltr; unicode-bidi: isolate`, so every English
+      content block keeps left-to-right order and left alignment inside the
+      RTL page — that one rule is what made the root flip safe. Full e2e
+      sweep: 1764/1767 on first run; the three failures were two stale pins
+      from earlier flips plus one selector colliding with the now-RTL root.
+- [~] Strings module landed (`src/lib/strings.ts`, plain module — one UI
+      language, no i18n framework) with the bottom-nav labels in Arabic
+      (الرئيسية / تعلّم / اكتشف / تدرّب / أنا). Pages migrate onto it
+      incrementally — no hardcoded
       learner-facing English; admin exempt
 - [ ] Mirror-aware components (icons, arrows, progress) — Tailwind logical
       properties where needed

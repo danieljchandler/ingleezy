@@ -774,7 +774,7 @@ const EnglishLineCard = ({
           </button>
         )}
         <div className="flex-1 min-w-0">
-          <p className="text-lg leading-relaxed">
+          <p className="font-english text-lg leading-relaxed">
             <TappableEnglishText
               text={line.english ?? ""}
               sentenceArabic={line.arabic}

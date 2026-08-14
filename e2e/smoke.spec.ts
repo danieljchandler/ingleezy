@@ -302,7 +302,11 @@ test.describe("signed in — grammar drills", () => {
     await signIn(page);
     await stubSupabase(page, {
       tables: drilled([
+        // All eight rungs attempted — with any tile untouched the nudge
+        // switches to "You haven't tried X yet", which is the other branch.
+        ["articles", "Articles", 10, 9],
         ["verb-conjugation", "Verb Conjugation", 10, 9],
+        ["prepositions", "Prepositions", 10, 9],
         ["pronouns", "Pronouns", 10, 9],
         ["negation", "Negation", 10, 2],
         ["possessives", "Possessives", 10, 9],
@@ -422,7 +426,9 @@ test.describe("signed in — mistakes", () => {
     });
     await page.goto("/mistakes");
 
-    const headings = page.locator("[dir='rtl']").filter({ hasText: /once|thrice/ });
+    // Not [dir='rtl']: since the Arabic-first flip the <html> root itself is
+    // rtl and matches first — and the mistake targets are English besides.
+    const headings = page.locator("h1, h2, h3, p, span").filter({ hasText: /^(once|thrice)$/ });
     await expect(headings.first()).toHaveText("thrice");
   });
 
