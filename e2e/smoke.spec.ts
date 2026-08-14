@@ -33,8 +33,8 @@ test.describe("signed in — home", () => {
     await page.goto("/");
 
     // The queue itself, not a "Start today" card that navigates elsewhere.
-    await expect(page.getByRole("heading", { name: "Today", exact: true })).toBeVisible();
-    await expect(page.getByText(/of \d+ tasks done/)).toBeVisible();
+    await expect(page.getByRole("heading", { name: "اليوم", exact: true })).toBeVisible();
+    await expect(page.getByText(/أنجزت \d+ من \d+ مهام/)).toBeVisible();
     await expect(page.getByRole("button", { name: /start today/i })).toHaveCount(0);
   });
 
@@ -44,7 +44,7 @@ test.describe("signed in — home", () => {
     await page.goto("/");
 
     // 2 curriculum + 3 saved words — the banner used to show only one deck.
-    const banner = page.getByRole("button", { name: /5 cards due for review/i });
+    const banner = page.getByRole("button", { name: /5 بطاقات مستحقة للمراجعة/ });
     await expect(banner).toBeVisible();
 
     await banner.click();

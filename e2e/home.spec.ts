@@ -91,8 +91,8 @@ test.describe("the daily queue", () => {
   test("shows the queue with a task count", async ({ page }) => {
     await page.goto("/");
 
-    await expect(page.getByRole("heading", { name: "Today", exact: true })).toBeVisible();
-    await expect(page.getByText(/\d+ of \d+ tasks done/)).toBeVisible();
+    await expect(page.getByRole("heading", { name: "اليوم", exact: true })).toBeVisible();
+    await expect(page.getByText(/أنجزت \d+ من \d+ مهام/)).toBeVisible();
   });
 
   test("lists the tasks that are always available", async ({ page }) => {
@@ -100,10 +100,10 @@ test.describe("the daily queue", () => {
 
     // These four have no precondition — hiding one is how a learner ends up
     // with an empty-looking day.
-    await expect(page.getByText("Daily challenge")).toBeVisible();
-    await expect(page.getByText("Today's story")).toBeVisible();
-    await expect(page.getByText("Read 1 short passage")).toBeVisible();
-    await expect(page.getByText("1 Souq article")).toBeVisible();
+    await expect(page.getByText("تحدي اليوم")).toBeVisible();
+    await expect(page.getByText("قصة اليوم")).toBeVisible();
+    await expect(page.getByText("اقرأ نصاً قصيراً")).toBeVisible();
+    await expect(page.getByText("مقال من أخبار السوق")).toBeVisible();
   });
 
   test("counts every deck in the flashcards task, not just one", async ({ page, db }) => {
@@ -116,7 +116,7 @@ test.describe("the daily queue", () => {
     // never appeared in the queue at all.
     await expect(async () => {
       await page.goto("/");
-      await expect(page.getByText("Review 3 words")).toBeVisible();
+      await expect(page.getByText("راجع 3 كلمات")).toBeVisible();
     }).toPass();
   });
 
@@ -124,7 +124,7 @@ test.describe("the daily queue", () => {
     seedDueCurriculum(db, 1);
     await page.goto("/");
 
-    await expect(page.getByText("Review 1 word", { exact: true })).toBeVisible();
+    await expect(page.getByText("راجع كلمة واحدة", { exact: true })).toBeVisible();
   });
 
   test("hides the flashcards task when no card is due and none was reviewed", async ({
@@ -135,8 +135,8 @@ test.describe("the daily queue", () => {
     db.seed("user_vocabulary", []);
 
     await page.goto("/");
-    await expect(page.getByText(/Review \d+ words?/)).toHaveCount(0);
-    await expect(page.getByText("Flashcards reviewed")).toHaveCount(0);
+    await expect(page.getByText(/راجع .*(كلمة|كلمتين|كلمات)/)).toHaveCount(0);
+    await expect(page.getByText("أنجزت مراجعة البطاقات")).toHaveCount(0);
   });
 
   test("hides the video card when the feed is empty", async ({ page, db }) => {
@@ -145,14 +145,14 @@ test.describe("the daily queue", () => {
 
     // Offering a video with nothing to watch sends the learner to an empty
     // page.
-    await expect(page.getByRole("heading", { name: /Watch today's video/ })).toHaveCount(0);
+    await expect(page.getByRole("heading", { name: /شاهد فيديو اليوم/ })).toHaveCount(0);
   });
 
   test("leads with the video once the feed has something in it", async ({ page, db }) => {
     db.seed("discover_videos", [aDiscoverVideo({ id: videoId(0), dialect: "Gulf" })]);
     await page.goto("/");
 
-    await expect(page.getByRole("heading", { name: /Watch today's video/ })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /شاهد فيديو اليوم/ })).toBeVisible();
   });
 
   test("puts the video above the rest of the day", async ({ page, db }) => {
@@ -164,10 +164,10 @@ test.describe("the daily queue", () => {
     // past everything else. It now deliberately follows the daily-goals
     // header ("learners see their target first" — see Index.tsx), so the
     // guard is: video below the goals, but above every queue row.
-    const video = await page.getByRole("heading", { name: /Watch today's video/ }).boundingBox();
-    const goals = await page.getByRole("heading", { name: "Today", exact: true }).boundingBox();
+    const video = await page.getByRole("heading", { name: /شاهد فيديو اليوم/ }).boundingBox();
+    const goals = await page.getByRole("heading", { name: "اليوم", exact: true }).boundingBox();
     const firstQueueRow = await page
-      .getByRole("button", { name: /estimated \d+ minutes/ })
+      .getByRole("button", { name: /تقريباً \d+ دقائق/ })
       .first()
       .boundingBox();
     expect(video!.y).toBeGreaterThan(goals!.y);
@@ -182,22 +182,22 @@ test.describe("the daily queue", () => {
     // It renders as the card at the top rather than as a queue row, but it is
     // still one of today's tasks — dropping it out of the count would make a
     // finished day read as unfinished.
-    await expect(page.getByText(/1 of \d+ tasks done/)).toBeVisible();
-    await expect(page.getByText("Watched")).toBeVisible();
+    await expect(page.getByText(/أنجزت 1 من \d+ مهام/)).toBeVisible();
+    await expect(page.getByText("شاهدته")).toBeVisible();
   });
 
   test("counts due set phrases", async ({ page, db }) => {
     seedDuePhrases(db, 4);
     await page.goto("/");
 
-    await expect(page.getByText("Practice 4 phrases")).toBeVisible();
+    await expect(page.getByText("تدرّب على 4 عبارات")).toBeVisible();
   });
 
   test("remembers what was finished earlier today", async ({ page }) => {
     await completeTasks(page, "reading", "souq");
     await page.goto("/");
 
-    await expect(page.getByText(/2 of \d+ tasks done/)).toBeVisible();
+    await expect(page.getByText(/أنجزت 2 من \d+ مهام/)).toBeVisible();
   });
 
   test("congratulates a fully cleared queue", async ({ page, db }) => {
@@ -209,7 +209,7 @@ test.describe("the daily queue", () => {
 
     await page.goto("/");
 
-    await expect(page.getByText("Daily goal complete")).toBeVisible();
+    await expect(page.getByText("أكملت هدف اليوم")).toBeVisible();
   });
 });
 
@@ -221,7 +221,7 @@ test.describe("starting a task", () => {
 
   test("a task row opens its page", async ({ page }) => {
     await page.goto("/");
-    await page.getByText("1 Souq article").click();
+    await page.getByText("مقال من أخبار السوق").click();
 
     await expect(page).toHaveURL(/\/souq-news$/);
   });
@@ -229,7 +229,7 @@ test.describe("starting a task", () => {
   test("the flashcards task goes to the session that walks every deck", async ({ page, db }) => {
     seedDueCurriculum(db, 2);
     await page.goto("/");
-    await page.getByText("Review 2 words").click();
+    await page.getByText("راجع كلمتين").click();
 
     // "/review" rather than a single deck — otherwise cards due elsewhere are
     // stranded until the learner remembers to visit that deck.
@@ -255,7 +255,7 @@ test.describe("starting a task", () => {
     page,
   }) => {
     await page.goto("/");
-    await page.getByText("Read 1 short passage").click();
+    await page.getByText("اقرأ نصاً قصيراً").click();
     await expect(page).toHaveURL(/\/reading$/);
 
     // Reading marks itself done when a passage is actually finished. Marking it
@@ -292,9 +292,9 @@ test.describe("the daily goal", () => {
   test("saves a new goal and applies it without a reload", async ({ page }) => {
     await page.goto("/");
 
-    await page.getByRole("button", { name: /daily goal/i }).click();
+    await page.getByRole("button", { name: /الهدف اليومي/ }).click();
     await page.getByRole("spinbutton").fill("250");
-    await page.getByRole("button", { name: /^save$/i }).click();
+    await page.getByRole("button", { name: "حفظ" }).click();
 
     const stored = await page.evaluate(() => window.localStorage.getItem("today.goal"));
     expect(stored).toBe("250");
@@ -303,9 +303,9 @@ test.describe("the daily goal", () => {
   test("refuses a goal that is not a positive number", async ({ page }) => {
     await page.goto("/");
 
-    await page.getByRole("button", { name: /daily goal/i }).click();
+    await page.getByRole("button", { name: /الهدف اليومي/ }).click();
     await page.getByRole("spinbutton").fill("0");
-    await page.getByRole("button", { name: /^save$/i }).click();
+    await page.getByRole("button", { name: "حفظ" }).click();
 
     // A zero goal would divide by zero in the ring; the input is left as-is
     // rather than being stored.
@@ -320,7 +320,7 @@ test.describe("prompts on the home page", () => {
     db.seed("profiles", [aProfile({ placement_level: null, placement_level_gulf: null })]);
 
     await page.goto("/");
-    await expect(page.getByText(/Take the Placement Quiz/)).toBeVisible();
+    await expect(page.getByText(/اختبار تحديد المستوى/)).toBeVisible();
   });
 
   test("stops asking once a level is on file for the active dialect", async ({
@@ -332,7 +332,7 @@ test.describe("prompts on the home page", () => {
     db.seed("profiles", [aProfile({ placement_level_gulf: "B1" })]);
 
     await page.goto("/");
-    await expect(page.getByText(/Take the Placement Quiz/)).toHaveCount(0);
+    await expect(page.getByText(/اختبار تحديد المستوى/)).toHaveCount(0);
   });
 
   test("a level in another dialect does not count as placed", async ({ page, signInAs, db }) => {
@@ -345,7 +345,7 @@ test.describe("prompts on the home page", () => {
     await page.goto("/");
     // Placement is per dialect deliberately: fluency in Egyptian says nothing
     // about Gulf, and treating it as equivalent mis-levels the whole feed.
-    await expect(page.getByText(/Take the Placement Quiz/)).toBeVisible();
+    await expect(page.getByText(/اختبار تحديد المستوى/)).toBeVisible();
   });
 
   test("sends a learner who never finished onboarding back to it", async ({
@@ -366,7 +366,7 @@ test.describe("prompts on the home page", () => {
     seedDueCurriculum(db, 3);
 
     await page.goto("/");
-    await expect(page.getByText(/3 cards due for review/)).toBeVisible();
+    await expect(page.getByText(/3 بطاقات مستحقة للمراجعة/)).toBeVisible();
   });
 });
 
@@ -375,7 +375,7 @@ test.describe("signed out", () => {
     await signInAs("anonymous");
     await page.goto("/");
 
-    await expect(page.getByRole("heading", { name: "Today", exact: true })).toHaveCount(0);
+    await expect(page.getByRole("heading", { name: "اليوم", exact: true })).toHaveCount(0);
     await expect(page.getByRole("button", { name: /join the beta/i })).toBeVisible();
   });
 });
@@ -390,7 +390,7 @@ test.describe("the header", () => {
     db.seed("profiles", [aProfile({ placement_level_gulf: "A2" })]);
 
     await page.goto("/");
-    await expect(page.getByRole("button", { name: "Admin" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "الإدارة" })).toBeVisible();
   });
 
   test("hides the admin control from a plain learner", async ({ page, signInAs, db }) => {
@@ -398,7 +398,7 @@ test.describe("the header", () => {
     db.seed("profiles", [aProfile({ placement_level_gulf: "A2" })]);
 
     await page.goto("/");
-    await expect(page.getByRole("button", { name: "Admin" })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "الإدارة" })).toHaveCount(0);
   });
 
   test("signing out returns the learner to the landing page", async ({ page, signInAs, db }) => {
@@ -406,7 +406,7 @@ test.describe("the header", () => {
     db.seed("profiles", [aProfile({ placement_level_gulf: "A2" })]);
 
     await page.goto("/");
-    await page.getByRole("button", { name: "Sign out" }).click();
+    await page.getByRole("button", { name: "تسجيل الخروج" }).click();
 
     // The landing hero, not a signed-in shell with the data blanked out.
     await expect(page.getByRole("button", { name: /join the beta/i })).toBeVisible();

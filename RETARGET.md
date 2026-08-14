@@ -281,7 +281,11 @@ generation conditioning.
 - [~] Strings module landed (`src/lib/strings.ts`, plain module — one UI
       language, no i18n framework) with the bottom-nav labels in Arabic
       (الرئيسية / تعلّم / اكتشف / تدرّب / أنا). Pages migrate onto it
-      incrementally — no hardcoded
+      incrementally — Home's daily-queue loop is the first migrated page
+      (Today heading, task titles/subtitles/hints, goal popover, states,
+      placement banner, review nudge, video card, top-bar actions), with an
+      `arCount` helper carrying Arabic one/two/3-10/11+ number agreement.
+      Remaining — no hardcoded
       learner-facing English; admin exempt
 - [ ] Mirror-aware components (icons, arrows, progress) — Tailwind logical
       properties where needed

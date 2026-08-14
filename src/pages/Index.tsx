@@ -37,38 +37,14 @@ import { getDailyGoal, setDailyGoal } from "@/lib/todayCompletion";
 import { ContinueCard } from "@/components/ContinueCard";
 import { LandingHero } from "@/components/LandingHero";
 import { Footer } from "@/components/Footer";
+import { AR } from "@/lib/strings";
 
 
-// Daily-queue task hints, keyed by useTodayQueue's TodayTaskId — moved here
-// from the old standalone Today.tsx page now that the queue is inline.
-const TASK_HINTS: Record<string, { title: string; body: string }> = {
-  flashcards: {
-    title: "Flashcards review",
-    body: "We surface only the words your brain is about to forget — quick taps now mean long-term memory later.",
-  },
-  "daily-challenge": {
-    title: "Daily challenge",
-    body: "A fresh bite-sized mission every day. Finish it to fire up your streak multiplier and earn bonus XP.",
-  },
-  reading: {
-    title: "Reading practice",
-    body: "Short passages with tap-to-translate. Build comprehension without ever reaching for a dictionary.",
-  },
-  "daily-story": {
-    title: "Today's story",
-    body: "A fresh ~200-word story written around words you already know, with a few new ones gently introduced. Tap any word for an instant gloss.",
-  },
-  // No "listening" entry: today's video renders as WatchTodayCard at the top of
-  // the page rather than as a queue row, and carries its own hint.
-  souq: {
-    title: "Souq News",
-    body: "Today's headlines, retold like a friend gossiping in dialect. Casual Arabic + current events in one go.",
-  },
-  "set-phrases": {
-    title: "Set phrases",
-    body: "Greetings, weddings, Eid wishes — the go-to expressions natives use on autopilot. Voice-quiz yourself.",
-  },
-};
+// Daily-queue task hints, keyed by useTodayQueue's TodayTaskId — the hint
+// content lives in the strings module with the rest of the chrome Arabic.
+// No "listening" entry: today's video renders as WatchTodayCard at the top of
+// the page rather than as a queue row, and carries its own hint.
+const TASK_HINTS: Record<string, { title: string; body: string }> = AR.taskHints;
 
 const DIALECT_MODULES: { id: DialectModule; label: string; flag: string }[] = [
   { id: 'Gulf', label: 'Gulf Arabic', flag: '🌊' },
@@ -179,30 +155,30 @@ const Index = () => {
               <span className="text-sm text-muted-foreground hidden sm:inline">
                 {user?.email?.split("@")[0]}
               </span>
-              <Button variant="ghost" size="icon" onClick={handleSignOut} className="text-muted-foreground hover:text-foreground" title="Sign out" aria-label="Sign out">
+              <Button variant="ghost" size="icon" onClick={handleSignOut} className="text-muted-foreground hover:text-foreground" title={AR.common.signOut} aria-label={AR.common.signOut}>
                 <LogOut className="h-4 w-4" />
               </Button>
             </div>
           ) : (
             <Button variant="ghost" size="sm" onClick={() => navigate("/auth")} className="text-muted-foreground hover:text-foreground">
               <LogIn className="h-4 w-4 mr-1.5" />
-              Login
+              {AR.common.login}
             </Button>
           ))}
 
           {isAuthenticated && (
             <>
               <NotificationBell />
-              <Button variant="ghost" size="icon" onClick={() => navigate("/profile")} className="text-muted-foreground hover:text-foreground" title="Profile" aria-label="Profile">
+              <Button variant="ghost" size="icon" onClick={() => navigate("/profile")} className="text-muted-foreground hover:text-foreground" title={AR.common.profile} aria-label={AR.common.profile}>
                 <Users className="h-4 w-4" />
               </Button>
-              <Button variant="ghost" size="icon" onClick={() => navigate("/settings")} className="text-muted-foreground hover:text-foreground" title="Settings" aria-label="Settings">
+              <Button variant="ghost" size="icon" onClick={() => navigate("/settings")} className="text-muted-foreground hover:text-foreground" title={AR.common.settings} aria-label={AR.common.settings}>
                 <Settings className="h-4 w-4" />
               </Button>
             </>
           )}
           {isAdmin && (
-            <Button variant="ghost" size="icon" onClick={() => navigate("/admin")} className="text-muted-foreground/50 hover:text-muted-foreground" title="Admin" aria-label="Admin">
+            <Button variant="ghost" size="icon" onClick={() => navigate("/admin")} className="text-muted-foreground/50 hover:text-muted-foreground" title={AR.common.admin} aria-label={AR.common.admin}>
               <GraduationCap className="h-4 w-4" />
             </Button>
           )}
@@ -246,12 +222,12 @@ const Index = () => {
                       nesting one inside violates DOM nesting and made the
                       routes sweep red. The tile's own copy carries the hint's
                       content. */}
-                  <p className="font-bold text-foreground text-base mb-1 flex items-center gap-1.5">Take the Placement Quiz</p>
+                  <p className="font-bold text-foreground text-base mb-1 flex items-center gap-1.5">{AR.home.placementTitle}</p>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    Answer 20 adaptive questions so we can tailor lessons, vocabulary, and exercises to your exact level.
+                    {AR.home.placementBody}
                   </p>
                   <div className="flex items-center gap-2 mt-2.5">
-                    <Badge className="bg-primary/10 text-primary border-primary/20 text-xs">~5 minutes</Badge>
+                    <Badge className="bg-primary/10 text-primary border-primary/20 text-xs">{AR.home.placementMinutes}</Badge>
                     <Badge className="bg-primary/10 text-primary border-primary/20 text-xs">CEFR A1–C2</Badge>
                   </div>
                 </div>
@@ -268,28 +244,28 @@ const Index = () => {
                 <DailyGoalRing current={xpToday} goal={dailyGoal} size={100} />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <h2 className="text-lg font-bold text-foreground" style={{ fontFamily: "'Montserrat', sans-serif" }}>
-                      Today
+                    <h2 className="text-lg font-bold text-foreground font-heading">
+                      {AR.home.today}
                     </h2>
                     <InfoHint
                       size="md"
-                      title="Your daily queue"
-                      body="Everything Ingleezy recommends for you today — reviews, a challenge, listening, reading and more. Knock them out to hit your goal and grow your streak."
+                      title={AR.home.queueHintTitle}
+                      body={AR.home.queueHintBody}
                     />
                   </div>
                   <p className="text-sm text-muted-foreground mt-0.5">
-                    {tasksCompleted} of {tasksTotal} tasks done
+                    {AR.home.tasksDone(tasksCompleted, tasksTotal)}
                   </p>
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button variant="ghost" size="sm" className="mt-1 -ml-2 h-7 text-xs">
                         <Settings2 className="h-3.5 w-3.5 mr-1" />
-                        Daily goal
+                        {AR.home.dailyGoal}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent align="start" className="w-56">
                       <div className="space-y-2">
-                        <label className="text-xs font-semibold text-muted-foreground">Daily XP goal</label>
+                        <label className="text-xs font-semibold text-muted-foreground">{AR.home.dailyGoalXpLabel}</label>
                         <Input
                           type="number"
                           min={10}
@@ -308,7 +284,7 @@ const Index = () => {
                             }
                           }}
                         >
-                          Save
+                          {AR.common.save}
                         </Button>
                       </div>
                     </PopoverContent>
@@ -343,8 +319,8 @@ const Index = () => {
                 {visibleTasks.length === 0 && (
                   <div className="text-center py-8 text-muted-foreground">
                     <Sparkles className="h-8 w-8 mx-auto mb-2 text-primary" />
-                    <p className="font-semibold text-foreground">All caught up!</p>
-                    <p className="text-sm mt-1">No tasks due today. Explore something new below.</p>
+                    <p className="font-semibold text-foreground">{AR.home.allCaughtUpTitle}</p>
+                    <p className="text-sm mt-1">{AR.home.allCaughtUpBody}</p>
                   </div>
                 )}
               </div>
@@ -352,8 +328,8 @@ const Index = () => {
               {tasksCompleted > 0 && tasksCompleted === tasksTotal && (
                 <div className="rounded-2xl border-2 border-primary/30 bg-primary/5 p-4 text-center">
                   <Sparkles className="h-6 w-6 mx-auto mb-1 text-primary" />
-                  <p className="font-semibold text-foreground text-sm">Daily goal complete</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">Come back tomorrow to keep your streak.</p>
+                  <p className="font-semibold text-foreground text-sm">{AR.home.goalCompleteTitle}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{AR.home.goalCompleteBody}</p>
                 </div>
               )}
 
@@ -369,10 +345,10 @@ const Index = () => {
                   <div className="flex items-center gap-2">
                     <Brain className="h-4 w-4 text-amber-600" />
                     <span className="text-sm font-medium text-foreground">
-                      {srsStats.totalDueNow} {srsStats.totalDueNow === 1 ? "card" : "cards"} due for review
+                      {AR.home.cardsDue(srsStats.totalDueNow)}
                     </span>
                   </div>
-                  <span className="text-xs text-amber-600 font-semibold">Review now →</span>
+                  <span className="text-xs text-amber-600 font-semibold">{AR.home.reviewNow} ←</span>
                 </button>
               )}
 

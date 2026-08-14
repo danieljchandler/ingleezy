@@ -133,7 +133,7 @@ describe("flashcards", () => {
     cleanup = rendered.cleanup;
 
     await waitFor(() =>
-      expect(taskById(rendered.result.current, "flashcards")?.title).toBe("Review 1 word"),
+      expect(taskById(rendered.result.current, "flashcards")?.title).toBe("راجع كلمة واحدة"),
     );
   });
 
@@ -234,7 +234,7 @@ describe("today's video", () => {
     cleanup = rendered.cleanup;
 
     await waitFor(() => expect(visible(rendered.result.current)).toContain("listening"));
-    expect(taskById(rendered.result.current, "listening")?.title).toBe("Watch today's video");
+    expect(taskById(rendered.result.current, "listening")?.title).toBe("شاهد فيديو اليوم");
   });
 
   it("routes straight to the clip rather than the browse list", async () => {

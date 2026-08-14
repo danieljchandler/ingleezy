@@ -70,7 +70,7 @@ function render({
   return { ...harness, onClick };
 }
 
-const row = () => screen.getByRole("button", { name: /minutes$/ });
+const row = () => screen.getByRole("button", { name: /دقائق$/ });
 const rail = (container: HTMLElement) => container.querySelector("[aria-hidden]")!;
 
 describe("what the row says", () => {
@@ -123,7 +123,7 @@ describe("what the row says", () => {
 
     // The row is a single button full of decorative spans; without this its
     // accessible name would be the whole jumble.
-    expect(row()).toHaveAccessibleName("Review — estimated 8 minutes");
+    expect(row()).toHaveAccessibleName("Review — تقريباً 8 دقائق");
   });
 });
 
@@ -133,8 +133,8 @@ describe("once the task is done", () => {
 
     // A row that only looks different is not different to somebody using a
     // screen reader.
-    expect(screen.getByRole("button", { name: /^Completed:/ })).toHaveAccessibleName(
-      "Completed: Review — estimated 8 minutes",
+    expect(screen.getByRole("button", { name: /^مكتملة:/ })).toHaveAccessibleName(
+      "مكتملة: Review — تقريباً 8 دقائق",
     );
   });
 

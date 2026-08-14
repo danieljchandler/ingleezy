@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { AR } from "@/lib/strings";
 import { Check, ChevronRight, Play } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { InfoHint } from "@/components/InfoHint";
@@ -60,16 +61,16 @@ export function WatchTodayCard({ done = false, className }: WatchTodayCardProps)
           className="text-lg font-bold text-foreground flex items-center gap-1.5"
           style={{ fontFamily: "'Montserrat', sans-serif" }}
         >
-          Watch today's video
+          {AR.queue.watchVideo}
           <InfoHint
-            title="Today's video"
-            body="Real native video with synced subtitles — tap any word to learn it and save it for review. A fresh pick every day."
+            title={AR.queue.videoHintTitle}
+            body={AR.queue.videoHintBody}
           />
         </h2>
         {done && (
           <span className="ml-auto inline-flex items-center gap-1 px-2 py-1 rounded-full bg-primary/10 text-primary text-[11px] font-semibold">
             <Check className="h-3 w-3" aria-hidden />
-            Watched
+            {AR.queue.watched}
           </span>
         )}
       </div>

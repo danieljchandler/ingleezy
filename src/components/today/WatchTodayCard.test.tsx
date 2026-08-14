@@ -44,7 +44,7 @@ describe("today's video card", () => {
     renderCard([aDiscoverVideo({ id: videoId(0), title: "Ordering coffee in Doha" })]);
 
     await waitFor(() =>
-      expect(screen.getByRole("heading", { name: /Watch today's video/ })).toBeInTheDocument(),
+      expect(screen.getByRole("heading", { name: /شاهد فيديو اليوم/ })).toBeInTheDocument(),
     );
   });
 
@@ -90,6 +90,6 @@ describe("today's video card", () => {
   it("shows the day's video as watched once it is done", async () => {
     renderCard([aDiscoverVideo({ id: videoId(0) })], { done: true });
 
-    await waitFor(() => expect(screen.getByText("Watched")).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText("شاهدته")).toBeInTheDocument());
   });
 });

@@ -1,4 +1,5 @@
 import { ChevronRight, Check, type LucideIcon } from "lucide-react";
+import { AR } from "@/lib/strings";
 import { cn } from "@/lib/utils";
 import { InfoHint } from "@/components/InfoHint";
 import { useDialect } from "@/contexts/DialectContext";
@@ -64,7 +65,7 @@ export const TaskRow = ({
           button synthesises into a click) bubbles to the wrapper's onClick,
           so pointer and keyboard share one code path. */}
       <button
-        aria-label={`${done ? "Completed: " : ""}${title} — estimated ${estMinutes} minutes`}
+        aria-label={AR.queue.taskAria(done, title, estMinutes)}
         className="absolute inset-0 z-0 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       />
       {/* Left dialect rail */}

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { AR } from "@/lib/strings";
 import { useReviewSession } from "@/hooks/useReviewSession";
 import { useUserSetPhrasesDueCount } from "@/hooks/useSetPhrases";
 import { useTodaysVideo } from "@/hooks/useTodaysVideo";
@@ -52,8 +53,8 @@ export const useTodayQueue = (): TodayTask[] => {
   const tasks: TodayTask[] = [
     {
       id: "flashcards",
-      title: vocabDueCount > 0 ? `Review ${vocabDueCount} word${vocabDueCount === 1 ? "" : "s"}` : "Flashcards reviewed",
-      subtitle: "Spaced repetition",
+      title: vocabDueCount > 0 ? AR.queue.reviewWords(vocabDueCount) : AR.queue.flashcardsDone,
+      subtitle: AR.queue.srs,
       countBadge: vocabDueCount > 0 ? String(vocabDueCount) : undefined,
       estMinutes: Math.max(2, Math.min(15, Math.ceil(vocabDueCount * 0.4))),
       icon: Brain,
@@ -66,8 +67,8 @@ export const useTodayQueue = (): TodayTask[] => {
     },
     {
       id: "daily-challenge",
-      title: "Daily challenge",
-      subtitle: "Streak multiplier",
+      title: AR.queue.dailyChallenge,
+      subtitle: AR.queue.streakMultiplier,
       estMinutes: 3,
       icon: Flame,
       route: "/daily-challenge",
@@ -76,8 +77,8 @@ export const useTodayQueue = (): TodayTask[] => {
     },
     {
       id: "daily-story",
-      title: "Today's story",
-      subtitle: "Built from your words",
+      title: AR.queue.todaysStory,
+      subtitle: AR.queue.builtFromYourWords,
       estMinutes: 4,
       icon: Sparkles,
       route: "/today/story",
@@ -86,8 +87,8 @@ export const useTodayQueue = (): TodayTask[] => {
     },
     {
       id: "reading",
-      title: "Read 1 short passage",
-      subtitle: "Reading Practice",
+      title: AR.queue.readPassage,
+      subtitle: AR.queue.readingPractice,
       estMinutes: 5,
       icon: BookOpen,
       route: "/reading",
@@ -101,8 +102,8 @@ export const useTodayQueue = (): TodayTask[] => {
       // one as the WatchTodayCard hero rather than as a queue row, so it still
       // counts towards "n of m tasks done" without appearing twice.
       id: "listening",
-      title: "Watch today's video",
-      subtitle: "Discover",
+      title: AR.queue.watchVideo,
+      subtitle: AR.queue.discover,
       estMinutes: 3,
       icon: Play,
       // Straight to today's clip rather than the browse list — the point of the
@@ -114,8 +115,8 @@ export const useTodayQueue = (): TodayTask[] => {
     },
     {
       id: "souq",
-      title: "1 Souq article",
-      subtitle: "News in dialect",
+      title: AR.queue.souqArticle,
+      subtitle: AR.queue.newsInEnglish,
       estMinutes: 4,
       icon: Newspaper,
       route: "/souq-news",
@@ -124,8 +125,8 @@ export const useTodayQueue = (): TodayTask[] => {
     },
     {
       id: "set-phrases",
-      title: phrasesDue && phrasesDue > 0 ? `Practice ${phrasesDue} phrase${phrasesDue === 1 ? "" : "s"}` : "Set phrases reviewed",
-      subtitle: "Everyday expressions",
+      title: phrasesDue && phrasesDue > 0 ? AR.queue.practicePhrases(phrasesDue) : AR.queue.phrasesDone,
+      subtitle: AR.queue.everydayExpressions,
       countBadge: phrasesDue && phrasesDue > 0 ? String(phrasesDue) : undefined,
       estMinutes: 3,
       icon: MessageCircle,
