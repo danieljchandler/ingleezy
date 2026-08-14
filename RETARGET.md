@@ -325,12 +325,18 @@ generation conditioning.
       Settings (+ Arabic labels on reasons/topics data), Auth,
       Onboarding, placement CTA.
       Remaining: Me-area pages (MyWords, Profile, analytics…),
-      individual practice/content pages (conversation, vocab
-      games/battles…), DiscoverVideo player chrome, scoreBand labels
-      — grammar drills and listening practice now done (listening-quiz
-      flipped backend-side to English audio via the Brain's
-      english-target mode, dialect glosses + phonetic_ar riding in the
-      Arabic-era columns)
+      DiscoverVideo player chrome, pronunciation pages +
+      scoreBand labels, the smaller Me-area tools (Transcribe,
+      TutorUpload, LikedVideos, analytics, friends, leaderboard,
+      pricing)
+      — grammar drills, listening practice, conversation + live voice,
+      and the vocab games/battles now done. Backend flips landed with
+      them: listening-quiz generates English audio via the Brain's
+      english-target mode, and realtime-session-token's practice
+      persona is an English immersion partner (assistant persona
+      explains in dialect) with the input transcriber switched from
+      "ar" to "en" for practice calls and auto-detect for the
+      bilingual assistant.
       — mistakes/profile/how-do-i-say/culture-guide now done
       (culture-guide's backend prompt flipped with it: Anglosphere
       etiquette answered in the learner's dialect, exact English
