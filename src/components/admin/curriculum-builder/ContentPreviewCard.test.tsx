@@ -39,11 +39,14 @@ function render(ui: React.ReactElement) {
   return harness;
 }
 
+// question_english is the English drill a learner answers; question_arabic is
+// its gloss in their dialect. The field names are inherited from the
+// Arabic-target era — only the content flipped.
 const anExercise = (index: number) => ({
-  question_arabic: `سؤال${index}`,
   question_english: `question ${index}`,
-  grammar_point: "negation with ما",
-  choices: ["ما", "لا"],
+  question_arabic: `سؤال${index}`,
+  grammar_point: "negation with don't",
+  choices: ["don't", "doesn't"],
   correct_index: 0,
 });
 
@@ -187,15 +190,17 @@ describe("grammar exercises", () => {
 
     // The point is what the drill is filed under; an exercise mislabelled here
     // is served to learners practising something else.
-    expect(screen.getByText("Point: negation with ما")).toBeInTheDocument();
+    expect(screen.getByText("Point: negation with don't")).toBeInTheDocument();
   });
 
-  it("renders the Arabic right to left", () => {
+  it("renders the Arabic right to left and the English left to right", () => {
     render(<GrammarPreviewCard data={{ exercises: [anExercise(1)] }} onApprove={() => {}} />);
 
     // Arabic laid out left to right is unreadable to a native speaker checking
-    // it, which is exactly who this preview is for.
+    // it, which is exactly who this preview is for. The drill itself is English
+    // now, so the two halves need opposite directions on the same card.
     expect(screen.getByText("سؤال1")).toHaveAttribute("dir", "rtl");
+    expect(screen.getByText("question 1")).toHaveAttribute("dir", "ltr");
   });
 
   it("survives a draft with no exercises in it", () => {
@@ -212,9 +217,11 @@ describe("listening exercises", () => {
       <ListeningPreviewCard
         data={{
           mode: "dictation",
+          // audio_text is the English that gets spoken; audio_text_english is
+          // its dialect gloss, despite what the field name says.
           exercises: [
-            { audio_text: "رحت السوق", audio_text_english: "I went to the market" },
-            { audio_text: "زين", audio_text_english: "good" },
+            { audio_text: "I went to the market", audio_text_english: "رحت السوق" },
+            { audio_text: "good", audio_text_english: "زين" },
           ],
         }}
         onApprove={() => {}}
@@ -223,9 +230,25 @@ describe("listening exercises", () => {
 
     // These become spoken audio a learner transcribes; a typo in one is only
     // catchable by reading all of them.
-    expect(screen.getByText("رحت السوق")).toBeInTheDocument();
-    expect(screen.getByText("زين")).toBeInTheDocument();
+    expect(screen.getByText("I went to the market")).toBeInTheDocument();
+    expect(screen.getByText("good")).toBeInTheDocument();
     expect(screen.getByText("Listening Exercises (2)")).toBeInTheDocument();
+  });
+
+  it("leads with the English clip and puts the dialect gloss under it", () => {
+    render(
+      <ListeningPreviewCard
+        data={{
+          exercises: [{ audio_text: "I went to the market", audio_text_english: "رحت السوق" }],
+        }}
+        onApprove={() => {}}
+      />,
+    );
+
+    // The clip is English audio now. Rendering it RTL — as this card did when
+    // the audio was Arabic — mangles the punctuation the admin is checking.
+    expect(screen.getByText("I went to the market")).toHaveAttribute("dir", "ltr");
+    expect(screen.getByText("رحت السوق")).toHaveAttribute("dir", "rtl");
   });
 
   it("labels the mode the exercises were drafted for", () => {
@@ -245,12 +268,15 @@ describe("listening exercises", () => {
 });
 
 describe("a reading passage", () => {
+  // The flipped builder emits the English as `title`/`passage` and the dialect
+  // scaffold as `title_arabic`/`passage_arabic`.
   const passage = {
-    title: "في السوق",
-    title_english: "At the market",
-    passage: "ا".repeat(500),
+    title: "At the market",
+    title_arabic: "في السوق",
+    passage: "a".repeat(500),
+    passage_arabic: "ا".repeat(500),
     questions: [{ q: "1" }, { q: "2" }],
-    vocabulary: [{ word: "سوق" }],
+    vocabulary: [{ word: "market" }],
   };
 
   it("leads with the English title and keeps the Arabic beneath it", () => {
@@ -264,8 +290,31 @@ describe("a reading passage", () => {
     render(<ReadingPreviewCard data={{ passage }} onApprove={() => {}} />);
 
     // A whole passage would push the publish button off the screen; the first
-    // two hundred characters are enough to hear the dialect.
-    expect(screen.getByText(`${"ا".repeat(200)}...`)).toBeInTheDocument();
+    // two hundred characters are enough to judge the level by.
+    expect(screen.getByText(`${"a".repeat(200)}...`)).toBeInTheDocument();
+  });
+
+  it("reads an Arabic-era draft the same way round as publishing will", () => {
+    // Sessions opened before the flip still hold drafts with the English in
+    // `*_english`. useCurriculumApproval crosswires those on publish; a preview
+    // that didn't would show the admin the Arabic where the English will land.
+    render(
+      <ReadingPreviewCard
+        data={{
+          passage: {
+            title: "في السوق",
+            title_english: "At the market",
+            passage: "ا".repeat(500),
+            passage_english: "a".repeat(500),
+          },
+        }}
+        onApprove={() => {}}
+      />,
+    );
+
+    expect(screen.getByText("At the market")).toBeInTheDocument();
+    expect(screen.getByText("في السوق")).toBeInTheDocument();
+    expect(screen.getByText(`${"a".repeat(200)}...`)).toBeInTheDocument();
   });
 
   it("counts the questions and the glossary", () => {
@@ -363,16 +412,17 @@ describe("a vocabulary game set", () => {
     );
 
     // Both halves together: a matching game is only checkable by reading the
-    // pairing, not either side of it.
-    expect(screen.getByText("كلمة0 = word 0")).toBeInTheDocument();
+    // pairing, not either side of it. English leads — it is the side the
+    // learner is being taught.
+    expect(screen.getByText("word 0 = كلمة0")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Publish game set (2 words)" })).toBeInTheDocument();
   });
 
   it("shows the first eight and counts the rest", () => {
     render(<GameSetPreviewCard data={{ word_pairs: pairs(12) }} onApprove={() => {}} />);
 
-    expect(screen.getByText("كلمة7 = word 7")).toBeInTheDocument();
-    expect(screen.queryByText("كلمة8 = word 8")).not.toBeInTheDocument();
+    expect(screen.getByText("word 7 = كلمة7")).toBeInTheDocument();
+    expect(screen.queryByText("word 8 = كلمة8")).not.toBeInTheDocument();
     expect(screen.getByText("+4 more")).toBeInTheDocument();
   });
 

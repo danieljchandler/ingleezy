@@ -93,8 +93,22 @@ serve(async (req) => {
       });
     }
 
+    // English videos carry the spoken line in `english` and the dialect gloss
+    // in `arabic` (see src/types/transcript.ts); Hakiya-bridged Arabic videos
+    // have no `english` at all. There is no English grammar to observe in an
+    // Arabic clip, so rather than let the model invent points off a machine
+    // translation, say so — the bridge serves those clips as immersion.
+    if (!lines.some((l: any) => (l?.english ?? "").trim())) {
+      return new Response(
+        JSON.stringify({
+          error: "This clip is spoken in Arabic — there is no English grammar to extract.",
+        }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
     const transcriptSnippet = lines.slice(0, 60).map((l: any, i: number) =>
-      `${i + 1}. ${l.arabic ?? ""}${l.translation ? "  —  " + l.translation : ""}`
+      `${i + 1}. ${l.english ?? ""}${l.arabic ? "  —  " + l.arabic : ""}`
     ).join("\n");
 
     const dialect = video.dialect || "Gulf";
@@ -105,18 +119,18 @@ serve(async (req) => {
       });
     }
 
-    const systemPrompt = `You are a ${dialect} Arabic dialect coach. Extract grammar notes from a real transcript that are useful for a learner at CEFR ${target_level}.
+    const systemPrompt = `You are an English coach for native ${dialect} Arabic speakers. Extract ENGLISH grammar notes from a real transcript that are useful for a learner at CEFR ${target_level}.
 
 LEVEL GUIDANCE for ${target_level}:
 ${LEVEL_GUIDE[target_level]}
 
 RULES:
-- Focus on ${dialect}-specific grammar, NOT MSA. Note dialect↔MSA contrasts when illuminating.
-- Each point must be GROUNDED in the transcript — quote 1–2 real Arabic lines as examples.
+- Focus on ENGLISH grammar, and favour the patterns ${dialect} speakers get wrong: articles (a/an/the), the missing copula ("he tired"), verb tense and the third-person -s, prepositions that do not map, word order, plurals and countability.
+- Each point must be GROUNDED in the transcript — quote 1–2 real ENGLISH lines from it as examples.
 - Difficulty must match ${target_level}: do NOT pick patterns that are too basic or too advanced.
 - AVOID these titles already covered for this video (do not return any near-duplicates): ${existingTitles.length ? existingTitles.map((t) => `"${t}"`).join(", ") : "(none)"}.
-- Titles must be short (≤ 6 words) and describe the pattern, not the example.
-- Explanations should be 1–3 sentences, plain English, learner-friendly.
+- Titles must be short (≤ 6 words), IN ARABIC, and describe the pattern, not the example.
+- Explanations must be 1–3 sentences in ${dialect} Arabic — that is the language the learner thinks in. Name the English structure in English inside the Arabic sentence when it helps.
 - Return exactly ${count} new points.`;
 
     const userPrompt = `Transcript (first ${lines.length > 60 ? 60 : lines.length} lines):

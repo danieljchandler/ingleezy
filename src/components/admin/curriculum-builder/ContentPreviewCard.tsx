@@ -90,8 +90,10 @@ export const GrammarPreviewCard = ({
       <div className="space-y-2 max-h-60 overflow-y-auto">
         {exercises.slice(0, 3).map((ex, i) => (
           <div key={i} className="text-xs p-2 bg-background rounded border">
-            <p className="font-medium" dir="rtl">{ex.question_arabic as string}</p>
-            <p className="text-muted-foreground">{ex.question_english as string}</p>
+            {/* question_english is the English drill, question_arabic its
+                dialect gloss — Arabic-era field names, flipped content. */}
+            <p className="font-medium" dir="ltr">{ex.question_english as string}</p>
+            <p className="text-muted-foreground" dir="rtl">{ex.question_arabic as string}</p>
             <p className="text-[10px] text-muted-foreground mt-1">
               Point: {ex.grammar_point as string}
             </p>
@@ -130,9 +132,11 @@ export const ListeningPreviewCard = ({
     >
       <div className="space-y-2 max-h-60 overflow-y-auto">
         {exercises.map((ex, i) => (
+          // audio_text is the English that gets spoken, audio_text_english its
+          // dialect gloss — the field names are Arabic-era, the content is not.
           <div key={i} className="text-xs p-2 bg-background rounded border">
-            <p className="font-medium" dir="rtl">{ex.audio_text as string}</p>
-            <p className="text-muted-foreground">{ex.audio_text_english as string}</p>
+            <p className="font-medium" dir="ltr">{ex.audio_text as string}</p>
+            <p className="text-muted-foreground" dir="rtl">{ex.audio_text_english as string}</p>
           </div>
         ))}
       </div>
@@ -152,10 +156,19 @@ export const ReadingPreviewCard = ({
   isApproving?: boolean;
 }) => {
   const passage = data.passage as Record<string, unknown>;
+  // Flipped builder: `title`/`passage` are the English the learner reads and
+  // `title_arabic`/`passage_arabic` the dialect scaffold. Arabic-era payloads
+  // still around in old sessions carry it the other way round, detected by the
+  // `*_english` fields only they have — same crosswire useCurriculumApproval
+  // applies on publish, so the preview shows what would actually be saved.
+  const legacy = passage?.title_english != null || passage?.passage_english != null;
+  const englishTitle = (legacy ? passage?.title_english : passage?.title) as string;
+  const arabicTitle = (legacy ? passage?.title : passage?.title_arabic) as string;
+  const englishBody = ((legacy ? passage?.passage_english : passage?.passage) as string) || '';
   return (
     <ContentPreviewCard
-      title={passage?.title_english as string || 'Reading Passage'}
-      subtitle={passage?.title as string}
+      title={englishTitle || 'Reading Passage'}
+      subtitle={arabicTitle}
       icon="📖"
       badges={[data.difficulty as string].filter(Boolean)}
       onApprove={onApprove}
@@ -163,7 +176,7 @@ export const ReadingPreviewCard = ({
       isApproving={isApproving}
     >
       <div className="text-xs p-2 bg-background rounded border max-h-40 overflow-y-auto">
-        <p dir="rtl" className="leading-relaxed">{(passage?.passage as string || '').slice(0, 200)}...</p>
+        <p dir="ltr" className="leading-relaxed">{englishBody.slice(0, 200)}...</p>
       </div>
       <p className="text-[10px] text-muted-foreground">
         {((passage?.questions as unknown[]) || []).length} questions · {((passage?.vocabulary as unknown[]) || []).length} vocab items
@@ -252,7 +265,7 @@ export const GameSetPreviewCard = ({
       <div className="flex flex-wrap gap-1">
         {wordPairs.slice(0, 8).map((wp, i) => (
           <Badge key={i} variant="secondary" className="text-[10px]">
-            {wp.word_arabic as string} = {wp.word_english as string}
+            {wp.word_english as string} = {wp.word_arabic as string}
           </Badge>
         ))}
         {wordPairs.length > 8 && (

@@ -77,9 +77,12 @@ export const VocabPreviewCard = ({ data, onApprove }: VocabPreviewCardProps) => 
                     onCheckedChange={toggleAll}
                   />
                 </th>
-                <th className="text-right px-3 py-2 font-medium">Arabic</th>
-                <th className="text-left px-3 py-2 font-medium">Transliteration</th>
+                {/* English is what's taught; transliteration is phonetic_ar,
+                    the English respelled in Arabic letters; word_arabic is the
+                    dialect gloss. Field names are Arabic-era, content is not. */}
                 <th className="text-left px-3 py-2 font-medium">English</th>
+                <th className="text-right px-3 py-2 font-medium">Phonetic (ع)</th>
+                <th className="text-right px-3 py-2 font-medium">Meaning</th>
                 <th className="text-left px-3 py-2 font-medium">Category</th>
               </tr>
             </thead>
@@ -99,9 +102,9 @@ export const VocabPreviewCard = ({ data, onApprove }: VocabPreviewCardProps) => 
                       onClick={(e) => e.stopPropagation()}
                     />
                   </td>
-                  <td className="px-3 py-2 font-arabic text-right">{word.word_arabic}</td>
-                  <td className="px-3 py-2 text-muted-foreground">{word.transliteration ?? '-'}</td>
                   <td className="px-3 py-2">{word.word_english}</td>
+                  <td className="px-3 py-2 font-arabic text-right text-muted-foreground">{word.transliteration ?? '-'}</td>
+                  <td className="px-3 py-2 font-arabic text-right">{word.word_arabic}</td>
                   <td className="px-3 py-2">
                     {word.category && (
                       <Badge variant="outline" className="text-[10px]">
@@ -123,7 +126,7 @@ export const VocabPreviewCard = ({ data, onApprove }: VocabPreviewCardProps) => 
               .filter((w) => w.teaching_note)
               .map((w, i) => (
                 <p key={i}>
-                  <span className="font-arabic">{w.word_arabic}</span>: {w.teaching_note}
+                  <span className="font-medium">{w.word_english}</span>: {w.teaching_note}
                 </p>
               ))}
           </div>

@@ -84,34 +84,39 @@ const aPreview = (outputType: string, structured: Record<string, unknown>, index
     structured_output: structured,
   });
 
+// question_english is the English drill; question_arabic is its gloss in the
+// learner's dialect, and the explanation is written in that dialect too.
 const GRAMMAR = {
   category: "verb-conjugation",
   difficulty: "beginner",
   exercises: [
     {
-      question_arabic: "أنا ___ إلى السوق",
-      question_english: "I ___ to the market",
-      grammar_point: "present tense",
-      choices: ["أروح", "راح", "يروح"],
+      question_english: "I ___ to the market every Friday.",
+      question_arabic: "أنا ___ السوق كل جمعة.",
+      grammar_point: "present simple",
+      choices: ["go", "goes", "going"],
       correct_index: 0,
-      explanation: "First person present.",
+      explanation: "مع I ما نزيد s على الفعل.",
     },
     {
-      question_arabic: "هو ___ الكتاب",
-      question_english: "He ___ the book",
-      grammar_point: "present tense",
-      choices: ["يقرأ", "أقرأ", "نقرأ"],
+      question_english: "He ___ the book.",
+      question_arabic: "هو ___ الكتاب.",
+      grammar_point: "present simple",
+      choices: ["reads", "read", "reading"],
       correct_index: 0,
-      explanation: "Third person present.",
+      explanation: "مع he/she/it نزيد s على الفعل.",
     },
   ],
 };
 
+// word_english is the English being taught, word_arabic its dialect gloss, and
+// transliteration is phonetic_ar — the English respelled in Arabic letters so a
+// learner can sound it out. The field names are Arabic-era; the content is not.
 const VOCAB = {
   vocabulary: [
-    { word_arabic: "باب", word_english: "door", transliteration: "baab", category: "objects" },
-    { word_arabic: "كتاب", word_english: "book", transliteration: "kitaab", category: "objects" },
-    { word_arabic: "كرسي", word_english: "chair", transliteration: "kursi", category: "objects" },
+    { word_english: "door", word_arabic: "باب", transliteration: "دور", category: "objects" },
+    { word_english: "book", word_arabic: "كتاب", transliteration: "بوك", category: "objects" },
+    { word_english: "chair", word_arabic: "كرسي", transliteration: "تشير", category: "objects" },
   ],
 };
 
@@ -496,8 +501,8 @@ test.describe("previewing what the model wrote", () => {
 
     await page.goto(`/admin/curriculum-builder/${SESSION}`);
 
-    await expect(page.getByText("أنا ___ إلى السوق")).toBeVisible();
-    await expect(page.getByText("I ___ to the market")).toBeVisible();
+    await expect(page.getByText("I ___ to the market every Friday.")).toBeVisible();
+    await expect(page.getByText("أنا ___ السوق كل جمعة.")).toBeVisible();
     await expect(page.getByText("verb-conjugation")).toBeVisible();
   });
 
@@ -523,8 +528,8 @@ test.describe("previewing what the model wrote", () => {
     const rows = db.lastWriteTo("grammar_exercises")?.payload as Record<string, unknown>[];
     expect(rows).toHaveLength(2);
     expect(rows[0]).toMatchObject({
-      question_arabic: "أنا ___ إلى السوق",
-      grammar_point: "present tense",
+      question_english: "I ___ to the market every Friday.",
+      grammar_point: "present simple",
       correct_index: 0,
       category: "verb-conjugation",
       difficulty: "beginner",
@@ -579,9 +584,11 @@ test.describe("previewing what the model wrote", () => {
     await page.goto(`/admin/curriculum-builder/${SESSION}`);
     await page.getByRole("button", { name: /Publish/ }).click();
 
-    // The builder still emits the Arabic-era payload; the approval crosswires
-    // it into the flipped columns, where `title`/`passage` are the ENGLISH the
-    // reader treats as the passage and the Arabic becomes its scaffold.
+    // An Arabic-era draft, of the kind still sitting in sessions opened before
+    // the flip. The approval crosswires it into the flipped columns, where
+    // `title`/`passage` are the ENGLISH the reader treats as the passage and
+    // the Arabic becomes its scaffold. (curriculum-chat now emits that shape
+    // directly — covered in useCurriculumApproval.test.ts.)
     const row = (await writtenTo(db, "reading_passages"))[0];
     expect(row).toMatchObject({
       title: "At the market",
@@ -600,7 +607,8 @@ test.describe("previewing what the model wrote", () => {
           mode: "dictation",
           difficulty: "beginner",
           exercises: [
-            { audio_text: "شلونك", audio_text_english: "How are you", options: [], hint: "greeting" },
+            // audio_text is the English clip; audio_text_english its gloss.
+            { audio_text: "How are you", audio_text_english: "شلونك", options: [], hint: "greeting" },
           ],
         }),
       ],
@@ -611,8 +619,8 @@ test.describe("previewing what the model wrote", () => {
 
     expect((await writtenTo(db, "listening_exercises"))[0]).toMatchObject({
       mode: "dictation",
-      audio_text: "شلونك",
-      audio_text_english: "How are you",
+      audio_text: "How are you",
+      audio_text_english: "شلونك",
       hint: "greeting",
       session_id: SESSION,
     });
@@ -666,7 +674,7 @@ test.describe("approving vocabulary", () => {
     await page.getByRole("button", { name: /^Add \d+ Words$/ }).click();
 
     const rows = await writtenTo(db, "vocabulary_words");
-    expect(rows.map((r) => r.word_arabic)).toEqual(["باب", "كرسي"]);
+    expect(rows.map((r) => r.word_english)).toEqual(["door", "chair"]);
   });
 
   test("attaches the words to the lesson that was picked", async ({ page, db }) => {

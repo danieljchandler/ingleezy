@@ -561,9 +561,9 @@ const GrammarNotesSection = ({
                 {p.examples.slice(0, 2).map((ex, j) => (
                   <li
                     key={j}
-                    dir="rtl"
-                    className="text-sm text-foreground/90 px-2 py-1 rounded bg-background/60"
-                    style={{ fontFamily: "'Noto Naskh Arabic', 'Noto Sans Arabic', serif" }}
+                    // The examples are quoted transcript lines — English on an
+                    // English video. Titles and explanations stay Arabic.
+                    className="font-english text-sm text-foreground/90 px-2 py-1 rounded bg-background/60"
                   >
                     {ex}
                   </li>

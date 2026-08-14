@@ -111,8 +111,11 @@ export async function planCoverage(opts: {
   const _reinf = trim(reinforce);
   const _next = trim(next_up);
 
+  // Lead with the English — it is the thing being taught, and the generator
+  // reading this plan is drafting English. The dialect gloss follows in
+  // brackets so an admin scanning the log still recognises the item.
   const fmt = (c: ConceptLite) =>
-    `${c.display_arabic ?? c.key}${c.display_english ? ` (${c.display_english})` : ""}`;
+    `${c.display_english ?? c.key}${c.display_arabic ? ` (${c.display_arabic})` : ""}`;
 
   const lines: string[] = [];
   lines.push("=== COVERAGE PLAN — IMPORTANT ===");

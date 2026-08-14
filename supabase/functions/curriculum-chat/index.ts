@@ -46,6 +46,11 @@ const MODEL_REGISTRY: Record<string, ModelConfig> = {
   fanar: { endpoint: FANAR_ENDPOINT, model: MODEL_IDS.FANAR, keyEnv: "FANAR_API_KEY" },
 };
 
+// The dialect no longer names the language being TAUGHT — the curriculum is
+// English throughout. It names the learner's first language, i.e. the Arabic
+// every gloss, explanation and instruction is written in. The "do NOT use
+// X vocabulary" rules still matter: a Cairo learner reading Khaleeji glosses
+// is being scaffolded in a dialect that isn't theirs.
 const DIALECT_CONTEXT: Record<string, string> = {
   Gulf: "general Gulf Arabic (Khaleeji) — covering shared vocabulary and grammar across all six GCC states",
   Saudi: "Saudi Arabian Arabic — Najdi and Hejazi dialects, using Saudi-specific vocabulary (e.g., إيش for 'what', وش for 'what' in Najdi)",
@@ -60,6 +65,14 @@ const DIALECT_CONTEXT: Record<string, string> = {
 
 // ─── MODE-SPECIFIC JSON SCHEMAS ─────────────────────────
 
+// Field-name convention across every schema below: the names are inherited
+// from the Arabic-target era and the CONTENT is what flipped. `word_english`,
+// `question_english`, `text_english`, `audio_text`, `passage` carry the
+// ENGLISH the learner is studying; `word_arabic`, `question_arabic`,
+// `text_arabic`, `audio_text_english`, `passage_arabic` carry the dialect
+// scaffold. `transliteration` is phonetic_ar — the English word written in
+// Arabic letters (menu → مينيو), a reading aid, never Latin transliteration.
+// Explanations, hints and notes are written in the learner's dialect.
 const MODE_INSTRUCTIONS: Record<string, string> = {
   generate_lesson: `
 IMPORTANT: Generate a structured lesson. Include a JSON code block:
@@ -69,17 +82,17 @@ IMPORTANT: Generate a structured lesson. Include a JSON code block:
   "type": "lesson_preview",
   "lesson": {
     "title": "Lesson title in English",
-    "title_arabic": "عنوان الدرس",
+    "title_arabic": "عنوان الدرس بالعامية",
     "description": "Brief description",
     "duration_minutes": 20,
     "cefr_target": "A1",
     "approach": "Teaching approach",
     "icon": "📚",
     "vocabulary": [
-      { "word_arabic": "كلمة", "word_english": "word", "transliteration": "kilma", "category": "noun", "teaching_note": "", "image_scene_description": "" }
+      { "word_english": "menu", "word_arabic": "المنيو / قائمة الأكل", "transliteration": "مينيو", "category": "noun", "teaching_note": "", "image_scene_description": "" }
     ],
     "cultural_notes": "Cultural context",
-    "dialect_notes": "Dialect variations"
+    "dialect_notes": "Where the learner's Arabic interferes with this English (sounds, word order, missing articles)"
   }
 }
 \`\`\``,
@@ -91,14 +104,14 @@ IMPORTANT: Generate vocabulary words. Include a JSON code block:
 {
   "type": "vocab_preview",
   "vocabulary": [
-    { "word_arabic": "كلمة", "word_english": "word", "transliteration": "kilma", "category": "noun", "teaching_note": "", "image_scene_description": "" }
+    { "word_english": "menu", "word_arabic": "المنيو / قائمة الأكل", "transliteration": "مينيو", "category": "noun", "teaching_note": "", "image_scene_description": "" }
   ],
-  "dialect_notes": "How these words vary across Gulf countries"
+  "dialect_notes": "Which of these words the learner's dialect has no clean equivalent for, and what trips them up"
 }
 \`\`\``,
 
   generate_grammar: `
-IMPORTANT: Generate grammar drill exercises. Include a JSON code block with 5-10 questions:
+IMPORTANT: Generate ENGLISH grammar drill exercises. Include a JSON code block with 5-10 questions:
 
 \`\`\`json
 {
@@ -107,24 +120,25 @@ IMPORTANT: Generate grammar drill exercises. Include a JSON code block with 5-10
   "difficulty": "beginner|intermediate|advanced",
   "exercises": [
     {
-      "question_arabic": "اختر الإجابة الصحيحة: أنا ___ إلى السوق",
-      "question_english": "Choose the correct answer: I ___ to the market",
-      "grammar_point": "verb conjugation - past tense",
+      "question_english": "Choose the correct answer: She ___ to the market yesterday.",
+      "question_arabic": "اختار الجواب الصحيح: هي ___ السوق أمس.",
+      "grammar_point": "past simple - irregular verb",
       "choices": [
-        { "text_arabic": "رحت", "text_english": "I went" },
-        { "text_arabic": "راح", "text_english": "He went" },
-        { "text_arabic": "رحنا", "text_english": "We went" },
-        { "text_arabic": "رحتي", "text_english": "You (f) went" }
+        { "text_english": "went", "text_arabic": "راحت" },
+        { "text_english": "goed", "text_arabic": "صيغة غلط" },
+        { "text_english": "go", "text_arabic": "تروح" },
+        { "text_english": "is going", "text_arabic": "رايحة الحين" }
       ],
       "correct_index": 0,
-      "explanation": "For 'I' (أنا) in past tense, we use رحت (ruht)"
+      "explanation": "الشرح بالعامية: فعل go فعل شاذ، ماضيه went مو goed."
     }
   ]
 }
-\`\`\``,
+\`\`\`
+Favour the points Arabic speakers actually lose marks on: a/an/the, the missing "to be", third-person -s, prepositions, adjective order, countable vs uncountable, question word order. The explanation is ALWAYS in the learner's dialect.`,
 
   generate_listening: `
-IMPORTANT: Generate listening exercise content. Include a JSON code block with 3-5 exercises:
+IMPORTANT: Generate listening exercise content — the audio is ENGLISH. Include a JSON code block with 3-5 exercises:
 
 \`\`\`json
 {
@@ -133,45 +147,46 @@ IMPORTANT: Generate listening exercise content. Include a JSON code block with 3
   "difficulty": "beginner|intermediate|advanced",
   "exercises": [
     {
-      "audio_text": "وين تبي تروح اليوم؟",
-      "audio_text_english": "Where do you want to go today?",
-      "hint": "A question about plans",
+      "audio_text": "Where do you want to go today?",
+      "audio_text_english": "وين تبي تروح اليوم؟",
+      "hint": "سؤال عن خططك اليوم",
       "options": [
-        { "text": "He's asking about your destination", "textArabic": "يسأل عن وجهتك", "correct": true },
-        { "text": "He's asking about food", "textArabic": "يسأل عن الأكل", "correct": false },
-        { "text": "He's asking about the weather", "textArabic": "يسأل عن الطقس", "correct": false }
+        { "text": "يسأل عن وجهتك", "textArabic": "He's asking where you're going", "correct": true },
+        { "text": "يسأل عن الأكل", "textArabic": "He's asking about food", "correct": false },
+        { "text": "يسأل عن الطقس", "textArabic": "He's asking about the weather", "correct": false }
       ]
     }
   ]
 }
-\`\`\``,
+\`\`\`
+Note the crosswire the runtime expects: \`audio_text\` is the English that gets spoken, \`audio_text_english\` is its dialect gloss, option \`text\` is the dialect answer the learner picks and \`textArabic\` is the same answer in English.`,
 
   generate_reading: `
-IMPORTANT: Generate a reading passage with comprehension questions. Include a JSON code block:
+IMPORTANT: Generate an ENGLISH reading passage with comprehension questions. Include a JSON code block:
 
 \`\`\`json
 {
   "type": "reading_preview",
   "difficulty": "beginner|intermediate|advanced",
   "passage": {
-    "title": "عنوان القصة",
-    "title_english": "Story Title",
-    "passage": "النص العربي الكامل...",
-    "passage_english": "Full English translation...",
+    "title": "Story Title",
+    "title_arabic": "عنوان القصة بالعامية",
+    "passage": "The full English text...",
+    "passage_arabic": "الترجمة الكاملة بالعامية...",
     "vocabulary": [
-      { "arabic": "كلمة", "english": "word", "inContext": "الكلمة في جملة" }
+      { "english": "word", "arabic": "كلمة", "inContext": "the word inside its English sentence" }
     ],
     "questions": [
       {
-        "question": "سؤال بالعربي؟",
-        "questionEnglish": "Question in English?",
+        "question": "Question in English?",
+        "questionArabic": "السؤال بالعامية؟",
         "options": [
-          { "text": "إجابة ١", "textEnglish": "Answer 1", "correct": true },
-          { "text": "إجابة ٢", "textEnglish": "Answer 2", "correct": false }
+          { "text": "Answer 1", "textArabic": "الجواب الأول", "correct": true },
+          { "text": "Answer 2", "textArabic": "الجواب الثاني", "correct": false }
         ]
       }
     ],
-    "cultural_note": "Cultural context about the passage"
+    "cultural_note": "ملاحظة ثقافية بالعامية عن النص"
   }
 }
 \`\`\``,
@@ -189,44 +204,45 @@ IMPORTANT: Generate a daily challenge set with mixed question types. Include a J
   "questions": [
     {
       "type": "translate",
-      "prompt": "How do you say 'hello' in Gulf Arabic?",
-      "answer": "هلا",
-      "options": ["هلا", "مرحبا", "سلام", "أهلاً"],
-      "hint": "Common informal greeting"
+      "prompt": "كيف تقول \\"صباح الخير\\" بالإنجليزي؟",
+      "answer": "good morning",
+      "options": ["good morning", "good night", "good evening", "goodbye"],
+      "hint": "تحية الصباح"
     },
     {
       "type": "fill-blank",
-      "sentence": "أنا ___ من الكويت",
-      "sentenceEnglish": "I am ___ from Kuwait",
-      "answer": "أكون",
-      "hint": "verb 'to be'"
+      "sentence": "I ___ from Kuwait.",
+      "sentenceEnglish": "أنا من الكويت.",
+      "answer": "am",
+      "hint": "فعل to be مع I"
     },
     {
       "type": "unscramble",
-      "scrambled": "السوق إلى رحت",
-      "answer": "رحت إلى السوق",
-      "hint": "I went to the market"
+      "scrambled": "market the to went I",
+      "answer": "I went to the market",
+      "hint": "رحت السوق"
     }
   ]
 }
-\`\`\``,
+\`\`\`
+The learner always answers in English; the prompt and hint are in their dialect.`,
 
   generate_conversation: `
-IMPORTANT: Generate a conversation scenario for practice. Include a JSON code block:
+IMPORTANT: Generate an ENGLISH conversation scenario for practice. Include a JSON code block:
 
 \`\`\`json
 {
   "type": "conversation_preview",
   "scenario": {
     "title": "Scenario Title",
-    "title_arabic": "عنوان السيناريو",
+    "title_arabic": "عنوان السيناريو بالعامية",
     "description": "Brief description of the scenario",
     "difficulty": "Beginner|Intermediate|Advanced",
     "icon_name": "Coffee|MapPin|ShoppingBag|Users|UtensilsCrossed|Building2|Stethoscope|Phone|Plane|MessageCircle",
-    "system_prompt": "You are a [role] at [location]. Speak ONLY in Gulf Arabic ([dialect] dialect). Keep responses short (1-2 sentences). Start by [opening]. After each Arabic response, add a line break then provide the English translation in parentheses.",
+    "system_prompt": "You are a [role] at [location] talking to a learner of English whose first language is Arabic. Speak ONLY English, at the [difficulty] level — short sentences (1-2), common words, no idioms above the level. Start by [opening]. Never switch to Arabic, even if the learner does; rephrase in simpler English instead.",
     "example_exchanges": [
-      { "role": "assistant", "content": "هلا والله! شلونك؟\n(Hello! How are you?)" },
-      { "role": "user", "content": "الحمد لله بخير" }
+      { "role": "assistant", "content": "Hi! What can I get you today?" },
+      { "role": "user", "content": "A coffee, please." }
     ]
   }
 }
@@ -234,20 +250,20 @@ IMPORTANT: Generate a conversation scenario for practice. Include a JSON code bl
 
   suggest_lessons: `
 IMPORTANT: The admin is brainstorming. Do NOT generate full lesson content and do NOT include any \`\`\`json code blocks.
-Instead, propose 6-10 distinct LESSON IDEAS appropriate for the target dialect and stage/CEFR.
+Instead, propose 6-10 distinct ENGLISH LESSON IDEAS appropriate for the stage/CEFR and for Arabic-speaking learners.
 Format the response as a markdown numbered list. For each idea include:
-- **Title** (English) — *Arabic title*
+- **Title** (English) — *the same title in the learner's dialect*
 - One short sentence describing the focus and what learners will be able to do
-- A "Why" note (1 line) explaining why it fits the stage / learner needs
+- A "Why" note (1 line) explaining why it fits the stage / what Arabic-L1 problem it fixes
 End with a short prompt telling the admin they can reply with the number (e.g. "Build #3") to generate the full lesson.`,
 
   suggest_vocab: `
 IMPORTANT: The admin is brainstorming vocabulary themes. Do NOT generate full vocab lists and do NOT include any \`\`\`json code blocks.
-Instead, propose 6-10 distinct VOCAB SET IDEAS (themes/categories) appropriate for the target dialect and stage/CEFR.
+Instead, propose 6-10 distinct ENGLISH VOCAB SET IDEAS (themes/categories) appropriate for the stage/CEFR.
 Format as a markdown numbered list. For each idea include:
-- **Theme** (English) — *Arabic label*
+- **Theme** (English) — *label in the learner's dialect*
 - A short sentence describing the use case (where/when learners need these words)
-- 3-5 example words in the target dialect (Arabic + transliteration + English) as a sub-list
+- 3-5 example English words with their dialect gloss as a sub-list
 End with a short prompt telling the admin they can reply with the number (e.g. "Generate #2") to produce the full vocab set.`,
 
   generate_game_set: `
@@ -260,8 +276,8 @@ IMPORTANT: Generate a vocabulary game set with word pairs. Include a JSON code b
   "title": "Game Set Title",
   "difficulty": "beginner|intermediate|advanced",
   "word_pairs": [
-    { "word_arabic": "كتاب", "word_english": "book" },
-    { "word_arabic": "قلم", "word_english": "pen" }
+    { "word_english": "book", "word_arabic": "كتاب" },
+    { "word_english": "pen", "word_arabic": "قلم" }
   ]
 }
 \`\`\``,
@@ -296,10 +312,6 @@ function buildSystemPrompt(
 
   const modeInstructions = mode && MODE_INSTRUCTIONS[mode] ? MODE_INSTRUCTIONS[mode] : "";
 
-  const isEgyptian = dialect === "Egyptian";
-  const isYemeni = dialect === "Yemeni";
-  const appDesc = isEgyptian ? "an Egyptian Arabic learning module" : isYemeni ? "a Yemeni Arabic learning module" : "a Gulf Arabic learning app";
-
   const isSuggestMode = mode === "suggest_lessons" || mode === "suggest_vocab";
 
   // Always include all available JSON schemas so the AI knows the formats
@@ -312,29 +324,40 @@ ${Object.entries(MODE_INSTRUCTIONS).filter(([k]) => !k.startsWith('suggest_')).m
 
 REMEMBER: Always include the \`\`\`json code block when generating content. The "type" field inside the JSON determines which preview card appears. Without this JSON block, the admin cannot approve and save the content.`;
   
-  return `You are an expert ${isEgyptian ? "Egyptian" : isYemeni ? "Yemeni" : "Gulf"} Arabic curriculum designer and language teacher. You are helping an admin build lessons and vocabulary for "Ingleezy" (حكية), ${appDesc}.
+  const isEgyptian = dialect === "Egyptian";
+  const isYemeni = dialect === "Yemeni";
+  const dialectName = isEgyptian
+    ? "Egyptian Arabic (مصري)"
+    : isYemeni
+      ? "Yemeni Arabic (يمني)"
+      : "Gulf Arabic (خليجي)";
 
-Target dialect: ${dialectDesc}
+  return `You are an expert English curriculum designer and ESL teacher. You are helping an admin build lessons and vocabulary for "Ingleezy" (إنجليزي), an English learning app for native Arabic speakers.
+
+The learners are native ${dialectName} speakers. Everything you teach is ENGLISH; everything you teach it IN is their dialect.
+
+Learner's first language: ${dialectDesc}
 ${stageInfo}
 
 The Ingleezy curriculum has 6 stages:
-1. Foundations (Pre-A1 → A1): 50+ survival phrases, Arabic script, Gulf sounds. 4–6 weeks.
-2. Building Blocks (A1 → A2): Basic sentences, slow Gulf speech, 500+ words. 8–12 weeks.
-3. The Bridge (A2 → B1): Authentic content with scaffolding, familiar topics, 1,500+ words. 8–16 weeks.
+1. Foundations (Pre-A1 → A1): 50+ survival phrases, the Latin alphabet, the English sounds Arabic doesn't have (p/v, short i, consonant clusters). 4–6 weeks.
+2. Building Blocks (A1 → A2): Basic sentences, articles and the verb "to be", slow clear speech, 500+ words. 8–12 weeks.
+3. The Bridge (A2 → B1): Authentic English content with scaffolding, familiar topics, 1,500+ words. 8–16 weeks.
 4. Immersion (B1 → B2): Primary learning through authentic content, opinions, 3,000+ words. 12–20 weeks.
-5. Fluency (B2 → C1): Complex discussions, rapid speech, slang, 5,000+ words. 16–24 weeks.
+5. Fluency (B2 → C1): Complex discussions, rapid connected speech, phrasal verbs and slang, 5,000+ words. 16–24 weeks.
 6. Mastery (C1 → C2): Near-native comprehension, cultural fluency, register shifting. Ongoing.
 
 Guidelines:
-- CRITICAL: You are building content EXCLUSIVELY for ${isEgyptian ? "Egyptian Arabic (مصري)" : isYemeni ? "Yemeni Arabic (يمني)" : "Gulf Arabic (خليجي)"}. Do NOT mix dialects.
-${isEgyptian ? "- Use ONLY Egyptian Arabic vocabulary and grammar (إزيك، فين، دلوقتي، عايز، كويس، ماشي، بتاع، مش). Do NOT use Gulf Arabic terms like شلونك، وين، هالحين." : isYemeni ? "- Use ONLY Yemeni Arabic vocabulary and grammar (كيفك، وين، ذحين، بغيت، زين، مبسوط). Do NOT use Gulf Arabic terms like شلونك، هالحين or Egyptian terms like إزيك، دلوقتي." : "- Use ONLY Gulf Arabic vocabulary and grammar (شلونك، وين، هالحين، أبي/أبغى). Do NOT use Egyptian Arabic terms like إزيك، فين، دلوقتي، عايز."}
-- Always use the target dialect's vocabulary and expressions, NOT Modern Standard Arabic (unless explicitly asked).
-- Include transliterations that are easy for English speakers to read.
-- ${isEgyptian ? "Note when a word/phrase differs between Upper and Lower Egypt." : isYemeni ? "Note when a word/phrase differs between Sana'a, Aden, Hadramaut, and Ta'izz regions." : "Note when a word/phrase differs significantly between Gulf countries."}
-- Provide cultural context and usage notes where helpful.
+- CRITICAL: The content being TAUGHT is English. Never generate an Arabic word as the answer, the prompt to be produced, or the thing being drilled.
+- CRITICAL: Every gloss, explanation, hint and instruction is written in ${dialectName} — the learner's own dialect, in Arabic script, NOT Modern Standard Arabic.
+${isEgyptian ? "- Gloss in Egyptian Arabic only (إزيك، فين، دلوقتي، عايز، كويس، ماشي، بتاع، مش). Do NOT use Gulf terms like شلونك، وين، هالحين." : isYemeni ? "- Gloss in Yemeni Arabic only (كيفك، وين، ذحين، بغيت، زين، مبسوط). Do NOT use Gulf terms like شلونك، هالحين or Egyptian terms like إزيك، دلوقتي." : "- Gloss in Gulf Arabic only (شلونك، وين، هالحين، أبي/أبغى). Do NOT use Egyptian terms like إزيك، فين، دلوقتي، عايز."}
+- \`transliteration\` is phonetic_ar: the ENGLISH word respelled in Arabic letters so a learner can sound it out (menu → مينيو, thank you → ثانك يو). It is never Latin transliteration of an Arabic word.
+- Teach the English that Arabic speakers actually get wrong: a/an/the, the missing "to be", third-person -s, prepositions (depend on, arrive at), P vs B, adjective order, countable vs uncountable, question word order.
+- Prefer natural, current English — what a native speaker would really say, not textbook English.
+- Provide cultural context and usage notes (in the learner's dialect) where helpful.
 - Organize vocabulary by practical categories (greetings, food, directions, etc.).
 - For each vocabulary word, suggest a category: noun, verb, adjective, phrase, or expression.
-- Be creative and practical — focus on what learners actually need in real ${isEgyptian ? "Egyptian" : "Gulf"} conversations.
+- Be creative and practical — focus on the English learners actually need at work, while travelling, and online.
 ${modeInstructions}
 
 ${allFormats}`;
@@ -536,6 +559,12 @@ serve(async (req) => {
       try {
         const brain = await askBrain<string>({
           purpose: "lesson_generation",
+          // English-target: the dialect names the learner's L1, so the brain
+          // swaps its native-speaker identity for the English identity plus
+          // that dialect's interference guidance. The dialect-gloss rules the
+          // content still needs ride along in systemPromptExtra below.
+          target: "english",
+          cefr: stageContext?.cefr,
           dialect: dialect as Dialect,
           userPrompt: conversationText,
           systemPromptExtra: [systemPrompt, coveragePlan?.promptBlock]
@@ -576,8 +605,12 @@ serve(async (req) => {
     }
 
     // --- MSA Leak Detection + repair for non-brain paths (#8) ---
-    // When content didn't go through askBrain, detect leaks and run a single
-    // gateway repair pass. Falls back to the original text on failure.
+    // The generated content is English, but every gloss and explanation inside
+    // it has to be the learner's dialect — MSA scaffolding is exactly the
+    // stiff, unspoken Arabic this app is trying not to explain in. The scan
+    // only ever matches Arabic tokens, so the English half passes through it
+    // untouched. When content didn't go through askBrain, detect leaks and run
+    // a single gateway repair pass. Falls back to the original text on failure.
     if (!useBrain) {
       const leakResult = detectMsaLeaks(responseContent, dialect as Dialect);
       if (leakResult.leaks.length > 0) {
@@ -587,7 +620,7 @@ serve(async (req) => {
         try {
           const repairKey = Deno.env.get("LOVABLE_API_KEY")?.trim();
           if (repairKey) {
-            const repairSys = `You are a ${dialect} Arabic editor. The text below leaked MSA tokens: ${leakResult.leaks.join(", ")}. Rewrite it in authentic ${dialect} dialect ONLY, preserving any \`\`\`json code blocks and all field values' structure EXACTLY (only rewrite Arabic strings inside). Return ONLY the corrected text — no commentary.`;
+            const repairSys = `You are a ${dialect} Arabic editor working on English-teaching material. The Arabic in the text below leaked MSA tokens: ${leakResult.leaks.join(", ")}. Rewrite ONLY the Arabic strings into authentic ${dialect} dialect. Leave every English string exactly as it is — do NOT translate English into Arabic, and do NOT translate Arabic into English. Preserve any \`\`\`json code blocks and all field names and structure EXACTLY. Return ONLY the corrected text — no commentary.`;
             const repairResp = await fetch(LOVABLE_GATEWAY, {
               method: "POST",
               headers: {

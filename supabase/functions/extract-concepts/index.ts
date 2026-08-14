@@ -34,12 +34,19 @@ function extractFromContent(
   const norm = (s: string) =>
     (s ?? "").trim().normalize("NFC").replace(/[\u064B-\u0652\u0670]/g, "");
 
+  // The concept key is what the coverage planner dedupes and compares on, so
+  // it has to name the thing being TAUGHT \u2014 the English. Keying on the Arabic
+  // gloss (as this did when Arabic was the target) would file the same English
+  // word under a different concept for every dialect that glosses it
+  // differently, and the planner would keep re-introducing it.
+  const key = (s: string) => norm(s).toLowerCase();
+
   // theme / scenario from titles
-  const themeText = row.theme || row.title_arabic || row.title;
+  const themeText = row.title || row.theme || row.title_arabic;
   if (themeText) {
     push({
       kind: contentType === "conversation" ? "scenario" : "theme",
-      key: norm(themeText).toLowerCase(),
+      key: key(themeText),
       display_arabic: row.title_arabic || row.theme,
       display_english: row.title || row.description,
       role: "introduce",
@@ -50,11 +57,15 @@ function extractFromContent(
   const vocabArrays = [row.vocabulary, row.words, row.vocab].filter(Array.isArray);
   for (const arr of vocabArrays) {
     for (const w of arr) {
-      const ar = w?.arabic || w?.word_arabic || w?.word;
-      const en = w?.english || w?.word_english || w?.translation;
-      if (ar) push({
+      const en = w?.english || w?.word_english;
+      // A bare `word`/`translation` is the ambiguous legacy shape \u2014 no explicit
+      // side, so it falls in with the Arabic and only keys the concept if
+      // there's no English at all, rather than being guessed at as English.
+      const ar = w?.arabic || w?.word_arabic || w?.word || w?.translation;
+      const headword = en || ar;
+      if (headword) push({
         kind: "vocab",
-        key: norm(ar),
+        key: key(headword),
         display_arabic: ar,
         display_english: en,
         role: "introduce",

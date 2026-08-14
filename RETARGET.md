@@ -218,11 +218,11 @@ generation conditioning.
       lines. Curriculum-approval publish crosswires the Arabic-era
       builder payload into the flipped columns (detected by its
       *_english fields); a flipped builder can emit english/arabic
-      fields directly. Remaining in this area: the curriculum builder's
-      own prompts (still Arabic-era), and the authentic-stories media
-      pipeline (import → dialect translate → audio/slideshow), which
-      still serves Arabic content — flip or prune with the memes
-      decision.
+      fields directly — and curriculum-chat now does, so the crosswire
+      only serves drafts left in sessions opened before the flip.
+      Remaining in this area: the authentic-stories media pipeline
+      (import → dialect translate → audio/slideshow), which still
+      serves Arabic content — flip or prune with the memes decision.
 
 ### Grammar — FLIP (drills done)
 - [x] Grammar drills flipped: English questions with dialect instruction
@@ -232,8 +232,7 @@ generation conditioning.
       orphans mastery) — keyword parity migration 20260813180000. The
       mastery ladder (ids, record-grammar-outcome, user_concept_mastery)
       carries over unchanged. Open: admin grammar-exercise authoring form
-      relabel; extract-concepts/extract-grammar-points prompts still
-      Arabic-era.
+      relabel.
 
 ### Speaking / audio — FLIP
 - [x] Pronunciation practice FLIPPED: word/sentence modes drill the
@@ -283,6 +282,39 @@ generation conditioning.
 - [ ] Realtime conversation simulator: KEEP, English persona
       (⚠ port Hakiya's usage-cap findings: meter minutes, not sessions)
 
+### Content generators (admin) — FLIP
+- [x] `curriculum-chat` FLIPPED: the builder now drafts ENGLISH lessons,
+      vocab, grammar drills, listening clips, reading passages, daily
+      challenges, conversation scenarios and game sets for native Arabic
+      speakers, with every gloss, hint and explanation written in the
+      learner's dialect. The dialect argument stopped naming the taught
+      language and now names the learner's L1 (the "do NOT use Egyptian
+      terms" rules still apply — to the scaffold). generate_* routes
+      through the Brain with `target: 'english'` + the stage's CEFR; the
+      non-brain MSA repair pass survives because the Arabic *scaffold*
+      still has to be dialect, and it now explicitly leaves English
+      strings alone. Reading drafts emit title/title_arabic and
+      passage/passage_arabic directly, so the approval crosswire is only
+      for pre-flip drafts. Field names throughout stay Arabic-era with
+      flipped content: `word_english`/`question_english`/`text_english`/
+      `audio_text`/`passage` carry the English, their `_arabic` twins the
+      scaffold, and `transliteration` is phonetic_ar (menu → مينيو).
+- [x] Admin preview cards follow: English leads and renders LTR, the
+      dialect gloss sits under it RTL; vocab tables read English →
+      phonetic (ع) → meaning; the reading preview crosswires legacy
+      drafts the same way the publish path does, so the admin sees what
+      would actually be saved.
+- [x] `extract-concepts` keys concepts on the ENGLISH headword — keying
+      on the Arabic gloss filed one English word under a different
+      concept per dialect, and the coverage planner would keep
+      re-introducing it. `coveragePlanner`'s prompt block leads with the
+      English for the same reason.
+- [x] `extract-grammar-points` extracts ENGLISH grammar notes from a
+      transcript (articles, copula, third-person -s, prepositions, word
+      order, countability), quoting real English lines, with Arabic
+      titles and dialect explanations; DiscoverVideo renders the quoted
+      examples as English rather than RTL Arabic.
+
 ### Arabic-only surfaces — PRUNE or REPURPOSE
 - [~] Alphabet Journey → **English Sounds** journey (phonics for Arabic
       speakers) — repurpose structure, all-new content. Its learner-facing
@@ -331,9 +363,7 @@ generation conditioning.
       the learner-facing pass is now COMPLETE — every
       hub, practice surface, content page, Me-area tool and the video
       player speak Arabic. Admin stays English by design. What is left
-      is content-generator prompts (curriculum builder,
-      extract-concepts, extract-grammar-points) and the meme /
-      learn-from-X flip-or-prune decision
+      is the meme / learn-from-X flip-or-prune decision
       — grammar drills, listening practice, conversation + live voice,
       and the vocab games/battles now done. Backend flips landed with
       them: listening-quiz generates English audio via the Brain's

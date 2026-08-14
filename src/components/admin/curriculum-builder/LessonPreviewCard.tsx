@@ -86,18 +86,20 @@ export const LessonPreviewCard = ({ data, onApprove }: LessonPreviewCardProps) =
             <table className="w-full text-sm">
               <thead className="bg-muted/50">
                 <tr>
-                  <th className="text-right px-3 py-2 font-medium">Arabic</th>
-                  <th className="text-left px-3 py-2 font-medium">Transliteration</th>
+                  {/* English is the taught word; transliteration is phonetic_ar
+                      (the English in Arabic letters); word_arabic is the gloss. */}
                   <th className="text-left px-3 py-2 font-medium">English</th>
+                  <th className="text-right px-3 py-2 font-medium">Phonetic (ع)</th>
+                  <th className="text-right px-3 py-2 font-medium">Meaning</th>
                   <th className="text-left px-3 py-2 font-medium">Category</th>
                 </tr>
               </thead>
               <tbody>
                 {vocabulary.map((word, i) => (
                   <tr key={i} className="border-t">
-                    <td className="px-3 py-2 font-arabic text-right">{word.word_arabic}</td>
-                    <td className="px-3 py-2 text-muted-foreground">{word.transliteration ?? '-'}</td>
                     <td className="px-3 py-2">{word.word_english}</td>
+                    <td className="px-3 py-2 font-arabic text-right text-muted-foreground">{word.transliteration ?? '-'}</td>
+                    <td className="px-3 py-2 font-arabic text-right">{word.word_arabic}</td>
                     <td className="px-3 py-2">
                       {word.category && <Badge variant="outline" className="text-[10px]">{word.category}</Badge>}
                     </td>

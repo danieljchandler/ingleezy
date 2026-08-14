@@ -312,11 +312,11 @@ export function useCurriculumApproval() {
       const passage = data.passage as Record<string, unknown>;
 
       // Direction flip: `title`/`passage` carry the ENGLISH the learner reads,
-      // `title_arabic`/`passage_arabic` its dialect scaffold. The curriculum
-      // builder still emits the Arabic-era payload (title/passage Arabic, with
-      // *_english translations), detected here by the *_english fields only
-      // that payload carries — a flipped builder passes title/title_arabic and
-      // passage/passage_arabic directly and skips the crosswire.
+      // `title_arabic`/`passage_arabic` its dialect scaffold. curriculum-chat
+      // now emits that shape directly and skips the crosswire below; the
+      // crosswire stays for Arabic-era drafts (title/passage Arabic, with
+      // *_english translations) still sitting in chat sessions opened before
+      // the flip, detected by the *_english fields only they carry.
       const legacy = passage.title_english != null || passage.passage_english != null;
       const { data: inserted, error } = await supabase
         .from('reading_passages' as never)

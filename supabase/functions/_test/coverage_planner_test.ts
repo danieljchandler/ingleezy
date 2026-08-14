@@ -258,9 +258,9 @@ Deno.test("the prompt block names the items to hold back and to reinforce", asyn
       const { promptBlock } = await mod.planCoverage({ dialect: "Gulf", contentType: "lesson" });
 
       assert(promptBlock.includes("DO NOT REINTRODUCE"), promptBlock);
-      assert(promptBlock.includes("عربي-c1 (english c1)"), promptBlock);
+      assert(promptBlock.includes("english c1 (عربي-c1)"), promptBlock);
       assert(promptBlock.includes("REINFORCE"), promptBlock);
-      assert(promptBlock.includes("عربي-c2 (english c2)"), promptBlock);
+      assert(promptBlock.includes("english c2 (عربي-c2)"), promptBlock);
     },
   );
 });
@@ -279,11 +279,11 @@ Deno.test("the prompt block never lists the candidates themselves", async () => 
     // that passes `promptBlock` straight through (which is all of them) throws
     // the useful half away.
     assertEquals(ids(next_up), ["c1"]);
-    assert(!promptBlock.includes("عربي-c1"), promptBlock);
+    assert(!promptBlock.includes("english c1"), promptBlock);
   });
 });
 
-Deno.test("a concept with no Arabic display falls back to its key", async () => {
+Deno.test("a concept with no English display falls back to its key", async () => {
   await withPlanner(
     {
       concepts: [aConcept("c1", { display_arabic: null, display_english: null })],

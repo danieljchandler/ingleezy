@@ -443,8 +443,10 @@ describe("publishing the other content types", () => {
         difficulty: "advanced",
         exercises: [
           {
-            audio_text: "رحت السوق أمس",
-            audio_text_english: "I went to the market yesterday",
+            // audio_text is the English clip that gets spoken;
+            // audio_text_english is its dialect gloss, name notwithstanding.
+            audio_text: "I went to the market yesterday",
+            audio_text_english: "رحت السوق أمس",
             options: [{ question: "Where did they go?" }],
             hint: "Listen for the place",
           },
@@ -455,7 +457,7 @@ describe("publishing the other content types", () => {
     expect(harness.backend.db.rows("listening_exercises")[0]).toMatchObject({
       mode: "comprehension",
       difficulty: "advanced",
-      audio_text: "رحت السوق أمس",
+      audio_text: "I went to the market yesterday",
       hint: "Listen for the place",
       status: "published",
     });
@@ -467,7 +469,7 @@ describe("publishing the other content types", () => {
     await harness.result.current.approveListeningExercises.mutateAsync({
       ...approvalArgs,
       data: {
-        exercises: [{ audio_text: "زين", audio_text_english: "good" }],
+        exercises: [{ audio_text: "good", audio_text_english: "زين" }],
       },
     });
 
