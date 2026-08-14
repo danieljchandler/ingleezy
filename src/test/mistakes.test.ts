@@ -102,19 +102,19 @@ describe("describeMistake", () => {
     )[0];
 
   it("uses the singular for a one-off", () => {
-    expect(describeMistake(group(1, daysAgo(0)), NOW)).toBe("Once · last today");
+    expect(describeMistake(group(1, daysAgo(0)), NOW)).toBe("مرة واحدة · آخرها اليوم");
   });
 
   it("counts repeats and names the day", () => {
-    expect(describeMistake(group(4, daysAgo(1)), NOW)).toBe("4 times · last yesterday");
-    expect(describeMistake(group(2, daysAgo(5)), NOW)).toBe("2 times · last 5 days ago");
+    expect(describeMistake(group(4, daysAgo(1)), NOW)).toBe("4 مرات · آخرها أمس");
+    expect(describeMistake(group(2, daysAgo(5)), NOW)).toBe("مرتين · آخرها قبل 5 أيام");
   });
 });
 
 describe("labels", () => {
   it("gives readable wording for the known values", () => {
-    expect(labelForSource("sentence_coach")).toBe("Sentence practice");
-    expect(labelForKind("msa_leak")).toBe("Slipped into MSA");
+    expect(labelForSource("sentence_coach")).toBe("تدريب الجمل");
+    expect(labelForKind("msa_leak")).toBe("تسرب فصحى");
   });
 
   it("passes unknown values through instead of dropping them", () => {

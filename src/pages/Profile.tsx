@@ -82,7 +82,7 @@ const Profile = () => {
         longest: streakRow?.longest_streak ?? 0,
       });
     } catch (e) {
-      setError("Failed to load profile data. Please try again.");
+      setError("تعذّر تحميل بيانات الملف الشخصي. حاول من جديد.");
     } finally {
       setLoading(false);
     }
@@ -98,7 +98,7 @@ const Profile = () => {
   const totalWords = dialectStudy.reduce((s, d) => s + d.wordCount, 0);
   const totalMature = dialectStudy.reduce((s, d) => s + d.matureCount, 0);
   const memberSince = profile?.created_at
-    ? new Date(profile.created_at).toLocaleDateString(undefined, { month: "short", year: "numeric" })
+    ? new Date(profile.created_at).toLocaleDateString("ar-u-nu-latn", { month: "short", year: "numeric" })
     : "—";
   const initial = (profile?.display_name?.[0] ?? user?.email?.[0] ?? "?").toUpperCase();
 
@@ -108,10 +108,10 @@ const Profile = () => {
         {/* Top bar */}
         <div className="flex items-center justify-between mb-4">
           <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="gap-1.5 -ml-2">
-            <ArrowLeft className="h-4 w-4" /> Back
+            <ArrowLeft className="h-4 w-4" /> رجوع
           </Button>
           <Button variant="ghost" size="sm" onClick={() => navigate("/settings")} className="gap-1.5">
-            <SettingsIcon className="h-4 w-4" /> Settings
+            <SettingsIcon className="h-4 w-4" /> الإعدادات
           </Button>
         </div>
 
@@ -119,7 +119,7 @@ const Profile = () => {
           <div className="rounded-2xl border-2 border-destructive/40 bg-destructive/5 p-6 text-center mb-4">
             <p className="text-sm text-destructive font-medium">{error}</p>
             <Button variant="outline" size="sm" className="mt-3" onClick={loadProfile}>
-              Try again
+              أعد المحاولة
             </Button>
           </div>
         )}
@@ -152,15 +152,15 @@ const Profile = () => {
             </div>
 
             <h1 className="mt-5 text-title font-heading font-bold text-foreground">
-              {loading ? <Skeleton className="h-7 w-40 mx-auto" /> : (profile?.display_name ?? "Traveler")}
+              {loading ? <Skeleton className="h-7 w-40 mx-auto" /> : (profile?.display_name ?? "مسافر")}
             </h1>
-            <p className="text-overline mt-1">Member since {memberSince}</p>
+            <p className="text-overline mt-1">عضو منذ {memberSince}</p>
 
             {/* XP rail */}
             <div className="mt-4 w-full max-w-xs">
               <div className="flex justify-between text-caption mb-1">
                 <span>{progress.current} XP</span>
-                <span>{progress.needed} to LV {level + 1}</span>
+                <span>{progress.needed} للمستوى {level + 1}</span>
               </div>
               <div className="h-2 rounded-full bg-muted overflow-hidden">
                 <div
@@ -174,9 +174,9 @@ const Profile = () => {
 
         {/* ── Headline stats ── */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-3">
-          <StatCard icon={<Flame className="h-4 w-4" />} label="Streak" value={streak?.current ?? 0} sub={`best ${streak?.longest ?? 0}`} />
-          <StatCard icon={<BookOpen className="h-4 w-4" />} label="Words" value={totalWords} sub={`${totalMature} mature`} />
-          <StatCard icon={<Trophy className="h-4 w-4" />} label="Badges" value={achievements?.length ?? 0} sub="earned" />
+          <StatCard icon={<Flame className="h-4 w-4" />} label="السلسلة" value={streak?.current ?? 0} sub={`الأفضل ${streak?.longest ?? 0}`} />
+          <StatCard icon={<BookOpen className="h-4 w-4" />} label="الكلمات" value={totalWords} sub={`${totalMature} متقنة`} />
+          <StatCard icon={<Trophy className="h-4 w-4" />} label="الأوسمة" value={achievements?.length ?? 0} sub="مكتسبة" />
         </div>
 
         {/* ── Assessed level ── */}
@@ -192,8 +192,8 @@ const Profile = () => {
         {/* ── Dialect stamps ── */}
         <section className="mt-6">
           <div className="flex items-baseline justify-between mb-3 px-1">
-            <h2 className="text-subtitle font-heading font-bold">Dialects studied</h2>
-            <span className="text-caption">{dialectStudy.length} stamp{dialectStudy.length === 1 ? "" : "s"}</span>
+            <h2 className="text-subtitle font-heading font-bold">كلماتك حسب اللهجة</h2>
+            <span className="text-caption">{dialectStudy.length === 1 ? "طابع واحد" : dialectStudy.length === 2 ? "طابعان" : `${dialectStudy.length} طوابع`}</span>
           </div>
 
           {loading ? (
@@ -203,8 +203,8 @@ const Profile = () => {
             </div>
           ) : dialectStudy.length === 0 ? (
             <div className="rounded-2xl border-2 border-dashed border-desert-red/40 bg-card-cream/60 p-8 text-center">
-              <p className="text-body-strong font-heading">No stamps yet</p>
-              <p className="text-caption mt-1">Save a word from any dialect to earn your first stamp.</p>
+              <p className="text-body-strong font-heading">لا طوابع بعد</p>
+              <p className="text-caption mt-1">احفظ كلمة لتكسب أول طابع.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -236,8 +236,7 @@ const Profile = () => {
                       </span>
                     </div>
                     <div className="mt-3">
-                      <div className="text-arabic-display text-xl" dir="rtl">{meta.arabic}</div>
-                      <div className="text-caption mt-0.5">{meta.label}</div>
+                      <div className="text-arabic-display text-xl">{meta.arabic}</div>
                     </div>
                     <div className="mt-3 h-1 rounded-full bg-muted overflow-hidden">
                       <div
@@ -258,17 +257,17 @@ const Profile = () => {
         {/* ── Recent badges ── */}
         <section className="mt-6">
           <div className="flex items-baseline justify-between mb-3 px-1">
-            <h2 className="text-subtitle font-heading font-bold">Recent badges</h2>
+            <h2 className="text-subtitle font-heading font-bold">أحدث الأوسمة</h2>
             {(achievements?.length ?? 0) > 6 && (
               <button onClick={() => navigate("/leaderboard")} className="text-caption underline">
-                view all
+                عرض الكل
               </button>
             )}
           </div>
           {(achievements?.length ?? 0) === 0 ? (
             <div className="rounded-2xl border-2 border-dashed border-desert-red/40 bg-card-cream/60 p-6 text-center">
               <Sparkles className="h-5 w-5 mx-auto text-muted-foreground" />
-              <p className="text-caption mt-2">Earn your first badge by completing a daily challenge.</p>
+              <p className="text-caption mt-2">اكسب أول وسام بإكمال تحدي اليوم.</p>
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -281,7 +280,7 @@ const Profile = () => {
                 >
                   <div className="text-2xl">{ua.achievement?.icon ?? "🏅"}</div>
                   <div className="text-caption mt-1 font-medium text-foreground truncate">
-                    {ua.achievement?.name ?? "Badge"}
+                    {ua.achievement?.name ?? "وسام"}
                   </div>
                 </div>
               ))}

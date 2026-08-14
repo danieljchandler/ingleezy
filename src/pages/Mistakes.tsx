@@ -32,8 +32,8 @@ const Mistakes = () => {
     <AppShell>
       <HomeButton />
       <HubHeader
-        title="Your mistakes"
-        subtitle={`What keeps tripping you up in ${activeDialect} Arabic.`}
+        title="أخطاؤك"
+        subtitle="ما الذي يتكرر تعثرك فيه بالإنجليزية."
       />
 
       {isLoading ? (
@@ -43,10 +43,10 @@ const Mistakes = () => {
       ) : !groups || groups.length === 0 ? (
         <div className="py-12 text-center space-y-3">
           <CheckCircle2 className="h-10 w-10 text-muted-foreground/30 mx-auto" />
-          <p className="text-muted-foreground">Nothing outstanding.</p>
+          <p className="text-muted-foreground">لا شيء عالق.</p>
           <p className="text-xs text-muted-foreground max-w-sm mx-auto">
-            Mistakes show up here after speaking practice — pronunciation,
-            shadowing and sentence practice all feed this list.
+            تظهر الأخطاء هنا بعد تدريبات التحدث — النطق والمحاكاة
+            وتدريب الجمل كلها تغذي هذه القائمة.
           </p>
         </div>
       ) : (
@@ -78,7 +78,8 @@ function MistakeCard({ group, onDismiss, dismissing }: MistakeCardProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const { ttsUrl, isLoading: ttsLoading } = useAzureTTS({
     text: group.target,
-    dialect: group.dialect,
+    // The target is English — an English voice, not the learner's dialect.
+    voice: "en-US-JennyNeural",
     skip: !requested,
   });
 
@@ -96,11 +97,7 @@ function MistakeCard({ group, onDismiss, dismissing }: MistakeCardProps) {
     <div className="rounded-xl border border-border bg-card p-4">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p
-            className="text-2xl font-bold text-foreground break-words"
-            style={{ fontFamily: "'Amiri', 'Traditional Arabic', serif" }}
-            dir="rtl"
-          >
+          <p className="font-english text-2xl font-bold text-foreground break-words">
             {group.target}
           </p>
           <p className="text-xs text-muted-foreground mt-1">{describeMistake(group)}</p>
@@ -113,7 +110,7 @@ function MistakeCard({ group, onDismiss, dismissing }: MistakeCardProps) {
             className="h-8 w-8"
             onClick={() => setRequested(true)}
             disabled={ttsLoading}
-            title="Hear it said correctly"
+            title="اسمعها منطوقة صحيحاً"
           >
             {ttsLoading
               ? <Loader2 className="h-4 w-4 animate-spin" />
@@ -125,7 +122,7 @@ function MistakeCard({ group, onDismiss, dismissing }: MistakeCardProps) {
             className="h-8 w-8"
             onClick={onDismiss}
             disabled={dismissing}
-            title="I've got this now"
+            title="أتقنتها الآن"
           >
             <Check className="h-4 w-4" />
           </Button>
@@ -134,11 +131,9 @@ function MistakeCard({ group, onDismiss, dismissing }: MistakeCardProps) {
 
       {/* What actually came out. Omitted for sources with no utterance (quiz). */}
       {group.attempts.length > 0 && (
-        <p className="mt-2 text-sm text-muted-foreground" dir="rtl">
-          <span className="text-xs uppercase tracking-wide me-2" dir="ltr">
-            You said
-          </span>
-          {group.attempts.join("، ")}
+        <p className="mt-2 text-sm text-muted-foreground">
+          <span className="text-xs uppercase tracking-wide me-2">قلت</span>
+          <span className="font-english">{group.attempts.join(", ")}</span>
         </p>
       )}
 

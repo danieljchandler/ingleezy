@@ -68,13 +68,13 @@ test.describe("the passport", () => {
 
     // The name is optional at signup, so the fallback is the common case for a
     // new account rather than an edge case.
-    await expect(page.getByRole("heading", { name: "Traveler" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "مسافر" })).toBeVisible();
   });
 
   test("shows when the account was opened", async ({ page }) => {
     await page.goto("/profile");
 
-    await expect(page.getByText(/Member since Mar 2024/)).toBeVisible();
+    await expect(page.getByText(/عضو منذ مارس 2024/)).toBeVisible();
   });
 
   test("shows an em dash rather than an invalid date", async ({ page, db }) => {
@@ -84,7 +84,7 @@ test.describe("the passport", () => {
 
     // A null `created_at` through `new Date()` renders "Invalid Date", which is
     // how this class of bug shows up elsewhere in the app.
-    await expect(page.getByText("Member since —")).toBeVisible();
+    await expect(page.getByText("عضو منذ —")).toBeVisible();
   });
 
   test("derives the level from total XP", async ({ page, db }) => {
@@ -134,9 +134,9 @@ test.describe("the headline stats", () => {
 
     // Mature is `interval_days >= 7` — the boundary is inclusive, so the
     // seven-day word counts.
-    await expect(page.getByText("Words")).toBeVisible();
+    await expect(page.getByText("الكلمات")).toBeVisible();
     await expect(page.getByText("4", { exact: true }).first()).toBeVisible();
-    await expect(page.getByText("2 mature")).toBeVisible();
+    await expect(page.getByText("2 متقنة")).toBeVisible();
   });
 
   test("shows the current streak and the best one", async ({ page, db }) => {
@@ -146,8 +146,8 @@ test.describe("the headline stats", () => {
 
     await page.goto("/profile");
 
-    await expect(page.getByText("Streak")).toBeVisible();
-    await expect(page.getByText("best 21")).toBeVisible();
+    await expect(page.getByText("السلسلة")).toBeVisible();
+    await expect(page.getByText("الأفضل 21")).toBeVisible();
   });
 
   test("shows zeros rather than blanks for a learner with no streak row", async ({
@@ -158,7 +158,7 @@ test.describe("the headline stats", () => {
 
     await page.goto("/profile");
 
-    await expect(page.getByText("best 0")).toBeVisible();
+    await expect(page.getByText("الأفضل 0")).toBeVisible();
   });
 });
 
@@ -177,7 +177,7 @@ test.describe("dialect stamps", () => {
 
     await page.goto("/profile");
 
-    await expect(page.getByText("3 stamps")).toBeVisible();
+    await expect(page.getByText("3 طوابع")).toBeVisible();
     await expect(page.getByText("خليجي")).toBeVisible();
     await expect(page.getByText("مصري")).toBeVisible();
     await expect(page.getByText("يمني")).toBeVisible();
@@ -188,7 +188,7 @@ test.describe("dialect stamps", () => {
 
     await page.goto("/profile");
 
-    await expect(page.getByText("1 stamp", { exact: true })).toBeVisible();
+    await expect(page.getByText("طابع واحد", { exact: true })).toBeVisible();
   });
 
   test("orders the stamps by how much was studied", async ({ page, db }) => {
@@ -229,8 +229,8 @@ test.describe("dialect stamps", () => {
     // `dialect` is nullable on `user_vocabulary`, and words saved before the
     // column existed have none. Without the default they would bucket under
     // "null" and render a stamp with no name.
-    await expect(page.getByText("Gulf", { exact: true })).toBeVisible();
-    await expect(page.getByText("1 stamp", { exact: true })).toBeVisible();
+    await expect(page.getByText("خليجي", { exact: true })).toBeVisible();
+    await expect(page.getByText("طابع واحد", { exact: true })).toBeVisible();
   });
 
   test("keeps a stamp for a dialect the app no longer offers", async ({ page, db }) => {
@@ -247,8 +247,8 @@ test.describe("dialect stamps", () => {
   test("points an empty passport at saving a word", async ({ page }) => {
     await page.goto("/profile");
 
-    await expect(page.getByText("No stamps yet")).toBeVisible();
-    await expect(page.getByText(/Save a word from any dialect/)).toBeVisible();
+    await expect(page.getByText("لا طوابع بعد")).toBeVisible();
+    await expect(page.getByText(/احفظ كلمة لتكسب أول طابع/)).toBeVisible();
   });
 });
 
@@ -261,7 +261,7 @@ test.describe("badges", () => {
   test("points an empty case at the daily challenge", async ({ page }) => {
     await page.goto("/profile");
 
-    await expect(page.getByText(/Earn your first badge/)).toBeVisible();
+    await expect(page.getByText(/اكسب أول وسام/)).toBeVisible();
   });
 
   test("shows earned badges with their icons", async ({ page, db }) => {
@@ -308,7 +308,7 @@ test.describe("badges", () => {
 
     // Six is the grid; the overflow link only appears when there is overflow.
     await expect(page.getByText(/^Badge \d$/)).toHaveCount(6);
-    await expect(page.getByRole("button", { name: "view all" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "عرض الكل" })).toBeVisible();
   });
 
   test("offers no view-all link for six or fewer", async ({ page, db }) => {
@@ -322,7 +322,7 @@ test.describe("badges", () => {
     await page.goto("/profile");
     await expect(page.getByText("Only Badge")).toBeVisible();
 
-    await expect(page.getByRole("button", { name: "view all" })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "عرض الكل" })).toHaveCount(0);
   });
 });
 
@@ -349,10 +349,10 @@ test.describe("when the profile will not load", () => {
     // learner sees a fully-rendered passport belonging to "Traveler" with zero
     // words, zero streak and no stamps, which is indistinguishable from a
     // brand-new account.
-    await expect(page.getByRole("heading", { name: "Traveler" })).toBeVisible();
-    await expect(page.getByText("No stamps yet")).toBeVisible();
-    await expect(page.getByText(/Failed to load profile data/)).toHaveCount(0);
-    await expect(page.getByRole("button", { name: "Try again" })).toHaveCount(0);
+    await expect(page.getByRole("heading", { name: "مسافر" })).toBeVisible();
+    await expect(page.getByText("لا طوابع بعد")).toBeVisible();
+    await expect(page.getByText(/تعذّر تحميل بيانات الملف الشخصي/)).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "أعد المحاولة" })).toHaveCount(0);
   });
 });
 
@@ -363,7 +363,7 @@ test.describe("the Me hub", () => {
 
     await page.goto("/me");
 
-    for (const tile of ["My Words", "Saved Translations", "My Transcriptions", "Liked Videos"]) {
+    for (const tile of ["كلماتي", "ترجمات محفوظة", "نصوصي المفرّغة", "فيديوهات أعجبتني"]) {
       await expect(page.getByRole("button", { name: new RegExp(tile) })).toBeVisible();
     }
   });
@@ -385,12 +385,12 @@ test.describe("the Me hub", () => {
     await signInAs("free");
     seedProfile(db);
     await page.goto("/me");
-    await expect(page.getByRole("button", { name: /Admin/ })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /الإدارة/ })).toHaveCount(0);
 
     await signInAs("admin");
     seedProfile(db);
     await page.goto("/me");
 
-    await expect(page.getByRole("button", { name: /Admin/ })).toBeVisible();
+    await expect(page.getByRole("button", { name: /الإدارة/ })).toBeVisible();
   });
 });

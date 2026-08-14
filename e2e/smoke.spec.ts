@@ -15,7 +15,7 @@ test.describe("signed out", () => {
     await page.goto("/review");
 
     await expect(page).toHaveURL(/\/auth$/);
-    await expect(page.getByRole("heading", { name: /welcome back/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /أهلاً بعودتك/ })).toBeVisible();
   });
 
   test("/today still resolves after the page was merged into Home", async ({ page }) => {
@@ -408,7 +408,7 @@ test.describe("signed in — mistakes", () => {
     // Every one of these was recorded and fed to the AI; none of it was ever
     // shown to the person who made them.
     await expect(page.getByText("شغل", { exact: true })).toBeVisible();
-    await expect(page.getByText("2 times · last today")).toBeVisible();
+    await expect(page.getByText("مرتين · آخرها اليوم")).toBeVisible();
     await expect(page.getByText("شغال")).toBeVisible();
   });
 
@@ -437,6 +437,6 @@ test.describe("signed in — mistakes", () => {
     await stubSupabase(page, { tables: { learner_errors: [] } });
     await page.goto("/mistakes");
 
-    await expect(page.getByText("Nothing outstanding.")).toBeVisible();
+    await expect(page.getByText("لا شيء عالق.")).toBeVisible();
   });
 });

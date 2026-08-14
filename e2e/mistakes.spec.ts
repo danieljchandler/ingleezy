@@ -54,7 +54,7 @@ test.describe("reaching the page", () => {
 
     await page.goto("/mistakes");
 
-    await expect(page.getByRole("heading", { name: "Your mistakes" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "أخطاؤك" })).toBeVisible();
   });
 });
 
@@ -144,8 +144,8 @@ test.describe("the list", () => {
 
     // An empty list here is good news, and the copy says where entries come
     // from so it does not read as a broken page.
-    await expect(page.getByText("Nothing outstanding.")).toBeVisible();
-    await expect(page.getByText(/pronunciation,\s*shadowing and sentence practice/)).toBeVisible();
+    await expect(page.getByText("لا شيء عالق.")).toBeVisible();
+    await expect(page.getByText(/النطق والمحاكاة/)).toBeVisible();
   });
 
   test("shows nothing belonging to another learner", async ({ page, db }) => {
@@ -184,7 +184,7 @@ test.describe("hearing it said correctly", () => {
     backend.stubFunction("munsit-tts", { audioContent: "" });
 
     await page.goto("/mistakes");
-    await page.getByRole("button", { name: "Hear it said correctly" }).click();
+    await page.getByRole("button", { name: "اسمعها منطوقة صحيحاً" }).click();
 
     // `useAzureTTS` is named for its fallback, not its default: Gulf goes to
     // munsit-tts and everything else to azure-tts. Sending a Gulf mistake to
@@ -209,7 +209,7 @@ test.describe("dismissing a mistake", () => {
     ]);
 
     await page.goto("/mistakes");
-    await page.getByRole("button", { name: "I've got this now" }).click();
+    await page.getByRole("button", { name: "أتقنتها الآن" }).click();
 
     // The entry is a group, so dismissing it has to clear all three rows —
     // resolving only the one that named the group would leave the entry on the
@@ -229,7 +229,7 @@ test.describe("dismissing a mistake", () => {
     await page
       .locator("div.rounded-xl")
       .filter({ hasText: "مرحبا" })
-      .getByRole("button", { name: "I've got this now" })
+      .getByRole("button", { name: "أتقنتها الآن" })
       .click();
 
     await expect(page.getByText("مرحبا")).toHaveCount(0);
@@ -240,11 +240,11 @@ test.describe("dismissing a mistake", () => {
     seedMistakes(db, [anError(1)]);
 
     await page.goto("/mistakes");
-    await page.getByRole("button", { name: "I've got this now" }).click();
+    await page.getByRole("button", { name: "أتقنتها الآن" }).click();
 
     // The list refetches rather than filtering in place, so the empty state is
     // the same one a learner with a clean slate sees.
-    await expect(page.getByText("Nothing outstanding.")).toBeVisible();
+    await expect(page.getByText("لا شيء عالق.")).toBeVisible();
   });
 
   test("keeps the entry when the update fails", async ({ page, db, expectConsoleErrors }) => {
@@ -253,7 +253,7 @@ test.describe("dismissing a mistake", () => {
     db.failWrites("learner_errors", 500);
 
     await page.goto("/mistakes");
-    await page.getByRole("button", { name: "I've got this now" }).click();
+    await page.getByRole("button", { name: "أتقنتها الآن" }).click();
 
     // Nothing was resolved, so the entry has to stay — a learner told their
     // mistake was cleared when it was not will simply never see it again.
