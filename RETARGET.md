@@ -319,9 +319,17 @@ generation conditioning.
       Transcribe kept language-neutral until the pipeline flips).
       Hub strings stay page-local per the strings-module doc (single
       use); shared/counted strings live in `strings.ts`.
-      Remaining: Discover chrome, Review session, Me pages, Settings,
-      Auth/Onboarding, remaining pages — no hardcoded
-      learner-facing English; admin exempt
+      Since migrated: the three hubs, Discover chrome (+ feed reason
+      chips server-side), PAGE_HINTS/assistant context, the whole
+      review surface (curriculum + personal decks + panels + cloze),
+      Settings (+ Arabic labels on reasons/topics data), Auth,
+      Onboarding, placement CTA.
+      Remaining: Me-area pages (MyWords, Profile, analytics…),
+      individual practice/content pages (grammar, listening practice,
+      conversation, vocab games/battles, mistakes, how-do-i-say,
+      culture guide…), DiscoverVideo player chrome, scoreBand labels
+      with the pronunciation pages — no hardcoded learner-facing
+      English; admin exempt
 - [ ] Mirror-aware components (icons, arrows, progress) — Tailwind logical
       properties where needed
 
