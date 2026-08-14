@@ -22,7 +22,7 @@ export const PAGE_HINTS: Record<string, { title: string; body: string; cta?: str
   },
   discover: {
     title: "Discover",
-    body: "Curated native videos with tap-to-translate subtitles. The fastest way to train your ear on real-world Arabic.",
+    body: "Curated native videos with tap-to-translate subtitles. The fastest way to train your ear on real-world English.",
     cta: "Tap any word in the subtitles to save it.",
   },
   transcribe: {
@@ -71,7 +71,7 @@ export const PAGE_HINTS: Record<string, { title: string; body: string; cta?: str
   },
   "placement-quiz": {
     title: "Placement Quiz",
-    body: "20 adaptive questions that pinpoint your CEFR level so we can tune every lesson to where you actually are.",
+    body: "20 adaptive questions that pinpoint your English CEFR level so we can tune every lesson to where you actually are.",
   },
   "set-phrases": {
     title: "Set Phrases",
@@ -119,7 +119,7 @@ export const PAGE_HINTS: Record<string, { title: string; body: string; cta?: str
   },
   "how-do-i-say": {
     title: "How Do I Say...",
-    body: "Type anything in English and get the natural way to say it in your chosen dialect — not just a dictionary swap.",
+    body: "Type anything in Arabic and get the natural way to say it in English — not just a dictionary swap.",
   },
   "my-transcriptions": {
     title: "My Transcriptions",

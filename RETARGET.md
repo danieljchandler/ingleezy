@@ -104,7 +104,14 @@ generation conditioning.
       interference categories. Remaining generators flip one by one.
 - [x] `learnerProfile.ts` / `learnerProfileCore.ts`: `target: 'english'`
       rendering — English side primary, lexicon named "English"; data path
-      untouched (decks are bilingual). CEFR placement re-aim still open.
+      untouched (decks are bilingual).
+- [x] CEFR placement re-aimed: placement-quiz generates ENGLISH questions
+      (vocabulary/grammar/reading/translation, grammar favouring the
+      points that trip Arabic speakers), with the prompt and every choice
+      glossed in the learner's dialect; A1-A2 keep full Arabic support.
+      The page leads with the English; the dialect support sits behind
+      the toggle. The dialect still buckets placement_history — it names
+      the learner's L1, not the tested language.
 - [x] Corpus-mining pipeline pruned: mine-dialect-corpus +
       vet-corpus-sentences functions, corpusExampleGuard/corpusVettingCore,
       derive-yemeni + corpus-seed scripts, docs/yemeni, embed-content's

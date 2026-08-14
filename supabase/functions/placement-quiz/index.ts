@@ -159,28 +159,28 @@ serve(async (req) => {
         ? `Previous performance: ${history.filter((h: any) => h.correct).length}/${history.length} correct. `
         : "";
 
-    const prompt = `You are an Arabic language placement test generator for ${dialectName} Arabic dialect.
+    const prompt = `You are an ENGLISH placement test generator for native ${dialectName} Arabic speakers.
 
 ${historyStr}Generate exactly 5 multiple-choice questions at CEFR level ${difficulty} (batch ${batchNum}/4).
 
 Mix these question types across the 5 questions:
-- vocabulary: Match a word to its meaning (show Arabic word, English choices or vice versa)
-- grammar: Fill-in-the-blank or choose correct form
-- reading: Short Arabic sentence/passage with comprehension question
-- translation: Translate a short phrase
+- vocabulary: Match an English word to its meaning (English word with Arabic choices, or Arabic word with English choices)
+- grammar: English fill-in-the-blank or choose the correct form — favour the points that trip Arabic speakers (articles, prepositions, third-person -s, tense)
+- reading: Short English sentence/passage with a comprehension question
+- translation: Pick the natural English rendering of a short Arabic phrase
 
 IMPORTANT RULES:
-- Use authentic ${dialectName} Arabic, NOT Modern Standard Arabic (MSA)
-- Each question must have exactly 4 choices
-- Vary the skill types across the batch
-- Make difficulty appropriate for ${difficulty} level
-- Include diacritics (tashkeel) for A1-A2 level questions
+- The English is the thing being tested: contemporary, natural English at ${difficulty} level.
+- question_arabic is the question prompt in the learner's OWN dialect (authentic ${dialectName} Arabic, NOT MSA) so a true beginner understands the task; question_english is the same prompt in English.
+- Each question must have exactly 4 choices; "text" is the choice in English, "text_arabic" its ${dialectName} gloss.
+- Vary the skill types across the batch.
+- At A1-A2 keep the Arabic support full; from B1 up the questions may lean more English-only.
 
 Return a JSON object with this exact structure:
 {
   "questions": [
     {
-      "question_arabic": "the question prompt in Arabic",
+      "question_arabic": "the question prompt in the learner's dialect Arabic",
       "question_english": "the question prompt in English",
       "skill_type": "vocabulary|grammar|reading|translation",
       "difficulty": "${difficulty}",
@@ -205,7 +205,7 @@ Return a JSON object with this exact structure:
       body: JSON.stringify({
         model: MODEL_IDS.GEMINI_FAST,
         messages: [
-          { role: "system", content: "You are a precise Arabic language assessment tool. Always respond with valid JSON only, no markdown fences." },
+          { role: "system", content: "You are a precise English language assessment tool for Arabic-speaking learners. Always respond with valid JSON only, no markdown fences." },
           { role: "user", content: prompt },
         ],
         tools: [

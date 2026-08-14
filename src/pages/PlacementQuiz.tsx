@@ -224,13 +224,13 @@ export default function PlacementQuiz() {
             <CaravanMedallion className="max-w-[200px] sm:max-w-[240px]" />
             <div>
               <h1 className="text-3xl font-bold font-heading text-foreground mb-3">
-                {DIALECT_LABELS[activeDialect]} Placement
+                English Placement
               </h1>
               <p className="text-muted-foreground leading-relaxed max-w-sm">
-                No matter where you are in your Arabic journey, we'll get you to the right test to show you exactly where you stand right now.
+                No matter where you are in your English journey, we'll get you to the right test to show you exactly where you stand right now.
               </p>
               <p className="text-sm text-muted-foreground leading-relaxed max-w-sm mt-3">
-                Answer 20 adaptive questions in <span className="font-semibold">{DIALECT_LABELS[activeDialect]}</span> to find your CEFR level for this dialect. Your placement is tracked separately for each dialect.
+                Answer 20 adaptive questions to find your CEFR level, with <span className="font-semibold">{DIALECT_LABELS[activeDialect]}</span> support a toggle away.
               </p>
             </div>
             <div className="grid grid-cols-2 gap-3 w-full max-w-xs">
@@ -291,12 +291,12 @@ export default function PlacementQuiz() {
 
                 {/* Question */}
                 <div className="bg-card border border-border rounded-2xl p-5 mb-6">
-                  <p className="text-xl font-semibold text-foreground leading-relaxed" dir="rtl">
-                    {currentQuestion.question_arabic}
+                  <p className="text-xl font-semibold text-foreground leading-relaxed font-english">
+                    {currentQuestion.question_english}
                   </p>
                   {showEnglish && (
-                    <p className="text-sm text-muted-foreground mt-2">
-                      {currentQuestion.question_english}
+                    <p className="text-sm text-muted-foreground mt-2 font-arabic" dir="rtl">
+                      {currentQuestion.question_arabic}
                     </p>
                   )}
                 </div>
@@ -329,11 +329,11 @@ export default function PlacementQuiz() {
                           {String.fromCharCode(65 + idx)}
                         </span>
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium text-foreground" dir="rtl">
-                            {choice.text_arabic}
+                          <p className="font-medium text-foreground font-english">
+                            {choice.text}
                           </p>
                           {showEnglish && (
-                            <p className="text-sm text-muted-foreground">{choice.text}</p>
+                            <p className="text-sm text-muted-foreground font-arabic" dir="rtl">{choice.text_arabic}</p>
                           )}
                         </div>
                         {showFeedback && isCorrect && (

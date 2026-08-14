@@ -221,13 +221,13 @@ test.describe("onboarding", () => {
 test.describe("the placement quiz", () => {
   /** One generated question; `correct` picks which choice is right. */
   const question = (index: number, correct = 0) => ({
-    question_arabic: `سؤال ${index}`,
     question_english: `question ${index}`,
+    question_arabic: `سؤال ${index}`,
     skill_type: "vocabulary",
     difficulty: "B1",
     choices: [
-      { text: "right", text_arabic: `صح ${index}` },
-      { text: "wrong", text_arabic: `خطأ ${index}` },
+      { text: `right ${index}`, text_arabic: `صح ${index}` },
+      { text: `wrong ${index}`, text_arabic: `خطأ ${index}` },
     ],
     correct_index: correct,
   });
@@ -263,7 +263,7 @@ test.describe("the placement quiz", () => {
     stubQuiz(backend);
     await page.goto("/placement");
 
-    await expect(page.getByRole("heading", { name: /Gulf Arabic Placement/ })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /English Placement/ })).toBeVisible();
     await expect(page.getByText("20", { exact: true })).toBeVisible();
     // Nothing generated until the learner opts in — the quiz costs an AI call.
     expect(backend.callsTo("placement-quiz")).toHaveLength(0);
@@ -274,8 +274,10 @@ test.describe("the placement quiz", () => {
     await page.goto("/placement");
     await page.getByRole("button", { name: /start quiz/i }).click();
 
-    await expect(page.getByText("سؤال 1")).toBeVisible();
+    await expect(page.getByText("question 1", { exact: true })).toBeVisible();
 
+    // The dialect still travels: it names the language of the Arabic support
+    // and the placement_history bucket, not the language being tested.
     const body = backend.lastCallTo("placement-quiz")?.body as Record<string, unknown>;
     expect(body.action).toBe("generate");
     expect(body.dialect).toBe("Gulf");
@@ -288,7 +290,7 @@ test.describe("the placement quiz", () => {
     await page.getByRole("button", { name: /start quiz/i }).click();
 
     await expect(page.getByText("Question 1 / 20")).toBeVisible();
-    await page.getByRole("button", { name: /صح 1/ }).click();
+    await page.getByRole("button", { name: /right 1/ }).click();
     await expect(page.getByText("Question 2 / 20")).toBeVisible();
   });
 
@@ -297,12 +299,12 @@ test.describe("the placement quiz", () => {
     await page.goto("/placement");
     await page.getByRole("button", { name: /start quiz/i }).click();
 
-    await page.getByRole("button", { name: /خطأ 1/ }).click();
+    await page.getByRole("button", { name: /wrong 1/ }).click();
 
     // The wrong choice is marked, and so is the right one — feedback that only
     // said "wrong" would teach nothing.
-    await expect(page.getByRole("button", { name: /خطأ 1/ })).toHaveClass(/border-destructive/);
-    await expect(page.getByRole("button", { name: /صح 1/ })).toHaveClass(/border-green-500/);
+    await expect(page.getByRole("button", { name: /wrong 1/ })).toHaveClass(/border-destructive/);
+    await expect(page.getByRole("button", { name: /right 1/ })).toHaveClass(/border-green-500/);
   });
 
   test("ignores a second click on the same question", async ({ page, backend }) => {
@@ -310,20 +312,22 @@ test.describe("the placement quiz", () => {
     await page.goto("/placement");
     await page.getByRole("button", { name: /start quiz/i }).click();
 
-    await page.getByRole("button", { name: /صح 1/ }).click();
+    await page.getByRole("button", { name: /right 1/ }).click();
     // Both choices are disabled during feedback, so a double-tap cannot record
     // two answers for one question and desynchronise the 20-question count.
-    await expect(page.getByRole("button", { name: /خطأ 1/ })).toBeDisabled();
+    await expect(page.getByRole("button", { name: /wrong 1/ })).toBeDisabled();
   });
 
-  test("shows the English only when asked", async ({ page, backend }) => {
+  test("shows the Arabic support only when asked", async ({ page, backend }) => {
     stubQuiz(backend);
     await page.goto("/placement");
     await page.getByRole("button", { name: /start quiz/i }).click();
 
-    await expect(page.getByText("question 1", { exact: true })).toHaveCount(0);
+    // The English is the test; the dialect support is there for a learner who
+    // cannot yet parse the question, not shown by default.
+    await expect(page.getByText("سؤال 1", { exact: true })).toHaveCount(0);
     await page.getByRole("switch").click();
-    await expect(page.getByText("question 1", { exact: true })).toBeVisible();
+    await expect(page.getByText("سؤال 1", { exact: true })).toBeVisible();
   });
 
   test("fetches a fresh batch every fifth question", async ({ page, backend }) => {
@@ -332,12 +336,12 @@ test.describe("the placement quiz", () => {
     await page.getByRole("button", { name: /start quiz/i }).click();
 
     for (let index = 1; index <= 5; index++) {
-      await page.getByRole("button", { name: new RegExp(`صح ${index}$`) }).click();
+      await page.getByRole("button", { name: new RegExp(`right ${index}$`) }).click();
     }
 
     // Question six comes from a second generate call, and that call carries the
     // answer history the adaptive difficulty is based on.
-    await expect(page.getByText("سؤال 6")).toBeVisible();
+    await expect(page.getByText("question 6", { exact: true })).toBeVisible();
     const calls = backend.callsTo("placement-quiz");
     expect(calls).toHaveLength(2);
     const body = calls[1].body as { question_number: number; history: unknown[] };
@@ -369,7 +373,7 @@ test.describe("the placement quiz", () => {
     async function completeQuiz(page: Page) {
       await page.getByRole("button", { name: /start quiz/i }).click();
       for (let index = 1; index <= 20; index++) {
-        await page.getByRole("button", { name: new RegExp(`صح ${index}$`) }).click();
+        await page.getByRole("button", { name: new RegExp(`right ${index}$`) }).click();
       }
       await expect(page.getByRole("heading", { name: "B2" })).toBeVisible({ timeout: 20_000 });
     }
@@ -437,7 +441,7 @@ test.describe("the placement quiz", () => {
       await page.goto("/placement");
       await page.getByRole("button", { name: /start quiz/i }).click();
       for (let index = 1; index <= 20; index++) {
-        await page.getByRole("button", { name: new RegExp(`صح ${index}$`) }).click();
+        await page.getByRole("button", { name: new RegExp(`right ${index}$`) }).click();
       }
 
       // Twenty questions answered and no level to show for it would be the worst
