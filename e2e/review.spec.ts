@@ -328,11 +328,11 @@ test.describe("saved-word decks", () => {
     await expect(page.getByText("كتاب")).toBeVisible();
 
     // Nothing before the learner has committed to an answer.
-    await expect(page.getByText(/shares this root/i)).toHaveCount(0);
+    await expect(page.getByText(/في هذا الجذر/)).toHaveCount(0);
 
     await page.getByRole("button", { name: /أظهر/ }).click();
 
-    const footnote = page.getByRole("button", { name: /1 word you know shares this root/i });
+    const footnote = page.getByRole("button", { name: /كلمة واحدة تعرفها تشترك في هذا الجذر/ });
     await expect(footnote).toBeVisible();
     // Collapsed until asked: the learner is mid-recall.
     await expect(footnote).toHaveAttribute("aria-expanded", "false");
@@ -360,7 +360,7 @@ test.describe("saved-word decks", () => {
     await page.goto("/review/my-words");
     await page.getByRole("button", { name: /أظهر/ }).click();
 
-    await expect(page.getByText(/shares this root/i)).toHaveCount(0);
+    await expect(page.getByText(/في هذا الجذر/)).toHaveCount(0);
   });
 
   test("reports the deck finished when nothing is due", async ({ page, db }) => {

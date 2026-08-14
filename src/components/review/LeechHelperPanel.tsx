@@ -98,12 +98,12 @@ export function LeechHelperPanel({
         .update({ mnemonic: text })
         .eq("id", rowId);
       invalidate();
-      toast.success("Mnemonic ready!");
+      toast.success("جاهزة! وسيلة تذكّر جديدة");
     } catch (err: any) {
       const msg = err?.message || "";
-      if (msg.includes("429")) toast.error("Rate limited — try again shortly");
-      else if (msg.includes("402")) toast.error("AI credits exhausted");
-      else toast.error("Failed to generate mnemonic");
+      if (msg.includes("429")) toast.error("طلبات كثيرة — حاول بعد قليل");
+      else if (msg.includes("402")) toast.error("نفد رصيد الذكاء الاصطناعي");
+      else toast.error("تعذّر توليد وسيلة التذكّر");
     } finally {
       setMnLoading(false);
     }
@@ -120,9 +120,9 @@ export function LeechHelperPanel({
         })
         .eq("id", rowId);
       invalidate();
-      toast.success("Cleared — we'll stop flagging this card.");
+      toast.success("تم — لن نعلّم هذه البطاقة بعد الآن.");
     } catch {
-      toast.error("Couldn't clear leech status");
+      toast.error("تعذّر إزالة العلامة");
     }
   };
 
@@ -132,10 +132,10 @@ export function LeechHelperPanel({
         <AlertTriangle className="h-4 w-4 text-[hsl(var(--primary))] mt-0.5 shrink-0" />
         <div className="flex-1">
           <p className="text-xs font-semibold uppercase tracking-wide text-[hsl(var(--primary))]">
-            Stuck on this one?
+            متعثر مع هذه البطاقة؟
           </p>
           <p className="text-xs text-muted-foreground mt-0.5">
-            You've missed it a few times. Let AI help you lock it in.
+            أخطأت فيها عدة مرات. دع الذكاء الاصطناعي يساعدك على تثبيتها.
           </p>
         </div>
         <Button
@@ -143,7 +143,7 @@ export function LeechHelperPanel({
           size="icon"
           className="h-6 w-6 shrink-0"
           onClick={dismissLeech}
-          title="Not stuck — clear leech flag"
+          title="لست متعثراً — أزل العلامة"
         >
           <X className="h-3.5 w-3.5" />
         </Button>
@@ -154,7 +154,7 @@ export function LeechHelperPanel({
         <div className="mb-3 rounded-lg bg-card border border-border p-3">
           <div className="flex items-center justify-between gap-2 mb-1.5">
             <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground inline-flex items-center gap-1">
-              <Brain className="h-3 w-3" /> Mnemonic
+              <Brain className="h-3 w-3" /> وسيلة تذكّر
             </span>
             <Button
               variant="ghost"
@@ -162,7 +162,7 @@ export function LeechHelperPanel({
               className="h-6 w-6"
               onClick={generateMnemonic}
               disabled={mnLoading}
-              title="Regenerate mnemonic"
+              title="أعد التوليد"
             >
               {mnLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
             </Button>
@@ -178,7 +178,7 @@ export function LeechHelperPanel({
           disabled={mnLoading}
         >
           {mnLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Brain className="h-4 w-4" />}
-          {mnLoading ? "Crafting mnemonic..." : "Generate AI mnemonic"}
+          {mnLoading ? "جارٍ التوليد..." : "ولّد وسيلة تذكّر بالذكاء الاصطناعي"}
         </Button>
       )}
     </div>

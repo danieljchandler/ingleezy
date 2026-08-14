@@ -347,7 +347,7 @@ test.describe("signed in — curriculum leeches", () => {
 
     // The personal decks have had this since leech tracking landed; the deck
     // the app hands every learner had nothing.
-    await expect(page.getByText("Stuck on this one?")).toBeVisible();
+    await expect(page.getByText("متعثر مع هذه البطاقة؟")).toBeVisible();
     await expect(page.getByRole("button", { name: /Generate AI mnemonic/ })).toBeVisible();
   });
 
@@ -374,7 +374,7 @@ test.describe("signed in — curriculum leeches", () => {
     await page.goto("/review");
 
     await expect(page.getByText("word 1")).toBeVisible();
-    await expect(page.getByText("Stuck on this one?")).toHaveCount(0);
+    await expect(page.getByText("متعثر مع هذه البطاقة؟")).toHaveCount(0);
   });
 });
 

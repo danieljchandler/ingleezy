@@ -85,8 +85,10 @@ export const SiblingWordsPanel = ({
         </span>
         <span className="text-left">
           {total === 1
-            ? "1 word you know shares this root"
-            : `${total} words you know share this root`}
+            ? "كلمة واحدة تعرفها تشترك في هذا الجذر"
+            : total === 2
+            ? "كلمتان تعرفهما تشتركان في هذا الجذر"
+            : `${total} كلمات تعرفها تشترك في هذا الجذر`}
         </span>
         <ChevronDown
           className={cn("ml-auto h-3.5 w-3.5 shrink-0 transition-transform", open && "rotate-180")}
@@ -119,7 +121,7 @@ export const SiblingWordsPanel = ({
                   size="icon"
                   className="h-7 w-7 shrink-0"
                   onClick={() => onPlayAudio(sibling.word_audio_url!)}
-                  aria-label={`Play ${sibling.word_english}`}
+                  aria-label={`شغّل ${sibling.word_english}`}
                 >
                   <Volume2 className="h-3.5 w-3.5" />
                 </Button>
@@ -134,7 +136,7 @@ export const SiblingWordsPanel = ({
                 onClick={() => onOpenFamily(familyKey)}
                 className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2"
               >
-                +{total - siblings.length} more
+                +{total - siblings.length} أخرى
               </button>
             </li>
           )}

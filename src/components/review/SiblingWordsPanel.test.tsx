@@ -63,7 +63,7 @@ function render(rows: Record<string, unknown>[], props: Partial<{ onOpenFamily: 
   return harness;
 }
 
-const summary = () => screen.findByRole("button", { name: /share[sd]? this root/i });
+const summary = () => screen.findByRole("button", { name: /في هذا الجذر/ });
 
 /**
  * Open the list, whatever it was showing when it mounted.
@@ -106,7 +106,7 @@ describe("staying out of the way", () => {
   it("starts collapsed, showing only how many words there are", async () => {
     render([aWord(0), aWord(1), aWord(2)]);
 
-    expect(await screen.findByText("2 words you know share this root")).toBeInTheDocument();
+    expect(await screen.findByText("كلمتان تعرفهما تشتركان في هذا الجذر")).toBeInTheDocument();
     // The words themselves are an opt-in: the learner is mid-recall.
     expect(screen.queryByText("word 1")).not.toBeInTheDocument();
   });
@@ -114,7 +114,7 @@ describe("staying out of the way", () => {
   it("counts one sibling in the singular", async () => {
     render([aWord(0), aWord(1)]);
 
-    expect(await screen.findByText("1 word you know shares this root")).toBeInTheDocument();
+    expect(await screen.findByText("كلمة واحدة تعرفها تشترك في هذا الجذر")).toBeInTheDocument();
   });
 
   it("shows the root spaced out so it reads as a root", async () => {
@@ -178,7 +178,7 @@ describe("the family behind the list", () => {
 
     await expand(user);
     // Eight siblings, five shown.
-    await user.click(screen.getByRole("button", { name: "+3 more" }));
+    await user.click(screen.getByRole("button", { name: "+3 أخرى" }));
 
     expect(onOpenFamily).toHaveBeenCalledWith("كتب");
   });
@@ -189,7 +189,7 @@ describe("the family behind the list", () => {
 
     await expand(user);
 
-    expect(screen.queryByRole("button", { name: /more/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /أخرى/ })).not.toBeInTheDocument();
   });
 
   it("plays a sibling's audio, named for a screen reader", async () => {
@@ -200,7 +200,7 @@ describe("the family behind the list", () => {
     });
 
     await expand(user);
-    await user.click(screen.getByRole("button", { name: "Play word 1" }));
+    await user.click(screen.getByRole("button", { name: "شغّل word 1" }));
 
     expect(onPlayAudio).toHaveBeenCalledWith("https://cdn.test/book.mp3");
   });

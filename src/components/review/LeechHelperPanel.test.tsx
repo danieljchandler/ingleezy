@@ -103,9 +103,9 @@ const settleAuth = () =>
     await new Promise((resolve) => setTimeout(resolve, 0));
   });
 
-const generateButton = () => screen.getByRole("button", { name: /Generate AI mnemonic/ });
-const regenerateButton = () => screen.getByRole("button", { name: "Regenerate mnemonic" });
-const clearButton = () => screen.getByRole("button", { name: /clear leech flag/ });
+const generateButton = () => screen.getByRole("button", { name: /ولّد وسيلة تذكّر/ });
+const regenerateButton = () => screen.getByRole("button", { name: "أعد التوليد" });
+const clearButton = () => screen.getByRole("button", { name: /أزل العلامة/ });
 
 const click = async (button: HTMLElement) => {
   await settleAuth();
@@ -124,8 +124,8 @@ describe("what the panel says", () => {
 
     // A learner who has failed the same card seven times is already frustrated;
     // the copy has to read as an offer of help rather than a scolding.
-    expect(screen.getByText("Stuck on this one?")).toBeInTheDocument();
-    expect(screen.getByText(/Let AI help you lock it in/)).toBeInTheDocument();
+    expect(screen.getByText("متعثر مع هذه البطاقة؟")).toBeInTheDocument();
+    expect(screen.getByText(/دع الذكاء الاصطناعي يساعدك/)).toBeInTheDocument();
   });
 
   it("offers to make a memory hook when there is none", async () => {
@@ -133,7 +133,7 @@ describe("what the panel says", () => {
     await settleAuth();
 
     expect(generateButton()).toBeInTheDocument();
-    expect(screen.queryByText("Mnemonic")).toBeNull();
+    expect(screen.queryByText("وسيلة تذكّر")).toBeNull();
   });
 
   it("shows the hook the card already has", async () => {
@@ -143,7 +143,7 @@ describe("what the panel says", () => {
     // Once there is a hook, the panel's job is to keep it in front of the
     // learner on every failed attempt.
     expect(screen.getByText("picture a welcome mat")).toBeInTheDocument();
-    expect(screen.getByText("Mnemonic")).toBeInTheDocument();
+    expect(screen.getByText("وسيلة تذكّر")).toBeInTheDocument();
     expect(regenerateButton()).toBeInTheDocument();
   });
 
@@ -216,7 +216,7 @@ describe("making a memory hook", () => {
     expect(updatesTo(backend, "user_vocabulary")[0]).toMatchObject({
       mnemonic: expect.stringContaining("welcome mat"),
     });
-    expect(toasts.success).toHaveBeenCalledWith("Mnemonic ready!");
+    expect(toasts.success).toHaveBeenCalledWith("جاهزة! وسيلة تذكّر جديدة");
   });
 
   it("keeps a curriculum hook on the learner's own row", async () => {
@@ -272,7 +272,7 @@ describe("making a memory hook", () => {
       fireEvent.click(generateButton());
     });
 
-    expect(screen.getByRole("button", { name: /Crafting mnemonic/ })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /جارٍ التوليد/ })).toBeDisabled();
 
     await act(async () => {
       release!();
@@ -294,10 +294,10 @@ describe("making a memory hook", () => {
     // through the real client and a rate limit reads as a fault, which is the
     // one case where "try again shortly" would have been the right advice.
     await waitFor(() =>
-      expect(toasts.error).toHaveBeenCalledWith("Failed to generate mnemonic"),
+      expect(toasts.error).toHaveBeenCalledWith("تعذّر توليد وسيلة التذكّر"),
     );
-    expect(toasts.error).not.toHaveBeenCalledWith("Rate limited — try again shortly");
-    expect(toasts.error).not.toHaveBeenCalledWith("AI credits exhausted");
+    expect(toasts.error).not.toHaveBeenCalledWith("طلبات كثيرة — حاول بعد قليل");
+    expect(toasts.error).not.toHaveBeenCalledWith("نفد رصيد الذكاء الاصطناعي");
   });
 
   it("falls back to a plain failure", async () => {
@@ -306,7 +306,7 @@ describe("making a memory hook", () => {
     await click(generateButton());
 
     await waitFor(() =>
-      expect(toasts.error).toHaveBeenCalledWith("Failed to generate mnemonic"),
+      expect(toasts.error).toHaveBeenCalledWith("تعذّر توليد وسيلة التذكّر"),
     );
   });
 
@@ -345,7 +345,7 @@ describe("saying the card is not stuck after all", () => {
       lapses: 0,
       production_lapses: 0,
     });
-    expect(toasts.success).toHaveBeenCalledWith("Cleared — we'll stop flagging this card.");
+    expect(toasts.success).toHaveBeenCalledWith("تم — لن نعلّم هذه البطاقة بعد الآن.");
   });
 
   it("clears the production count on a curriculum card too", async () => {
@@ -378,6 +378,6 @@ describe("saying the card is not stuck after all", () => {
     // eventually removes it. Until that lands, the learner sees the same
     // "Stuck on this one?" prompt they just dismissed.
     await waitFor(() => expect(toasts.success).toHaveBeenCalled());
-    expect(screen.getByText("Stuck on this one?")).toBeInTheDocument();
+    expect(screen.getByText("متعثر مع هذه البطاقة؟")).toBeInTheDocument();
   });
 });
