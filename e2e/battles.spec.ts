@@ -34,7 +34,7 @@ async function writtenTo(db: MemoryDb, table: string): Promise<Record<string, un
 
 /** Answer both questions correctly and wait for the score to be submitted. */
 async function playThrough(page: Page, correct = true) {
-  await page.getByRole("button", { name: /Start/ }).click();
+  await page.getByRole("button", { name: /ابدأ المعركة/ }).click();
   await page.getByRole("button", { name: correct ? "door" : "chair" }).click();
   await expect(page.getByRole("button", { name: "book" })).toBeVisible();
   await page.getByRole("button", { name: correct ? "book" : "chair" }).click();
@@ -61,9 +61,9 @@ test.describe("the battle list", () => {
   test("points an empty list at the friends page", async ({ page }) => {
     await page.goto("/battles");
 
-    await expect(page.getByRole("heading", { name: /Vocab Battles/ })).toBeVisible();
-    await expect(page.getByText("No battles yet")).toBeVisible();
-    await expect(page.getByRole("button", { name: /Find Friends to Battle/ })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /معارك المفردات/ })).toBeVisible();
+    await expect(page.getByText("لا معارك بعد")).toBeVisible();
+    await expect(page.getByRole("button", { name: /ابحث عن أصدقاء للمنافسة/ })).toBeVisible();
   });
 
   test("offers a way to start one", async ({ page, db }) => {
@@ -71,7 +71,7 @@ test.describe("the battle list", () => {
 
     await page.goto("/battles");
 
-    await expect(page.getByRole("button", { name: /Challenge a Friend/ })).toBeVisible();
+    await expect(page.getByRole("button", { name: /تحدَّ صديقاً/ })).toBeVisible();
   });
 
   test("shows a battle this learner started", async ({ page, db }) => {
@@ -81,8 +81,8 @@ test.describe("the battle list", () => {
 
     await page.goto("/battles");
 
-    await expect(page.getByText("You challenged")).toBeVisible();
-    await expect(page.getByText("Play your turn")).toBeVisible();
+    await expect(page.getByText("تحديت")).toBeVisible();
+    await expect(page.getByText("العب دورك")).toBeVisible();
   });
 
   test("shows a battle someone started against this learner", async ({ page, db }) => {
@@ -98,8 +98,8 @@ test.describe("the battle list", () => {
 
     await page.goto("/battles");
 
-    await expect(page.getByText("Challenged by")).toBeVisible();
-    await expect(page.getByText("Your turn to play!")).toBeVisible();
+    await expect(page.getByText("تحداك")).toBeVisible();
+    await expect(page.getByText("دورك للعب!")).toBeVisible();
   });
 
   test("calls out the challenges waiting on this learner", async ({ page, db }) => {
@@ -136,7 +136,7 @@ test.describe("the battle list", () => {
 
     await page.goto("/battles");
 
-    await expect(page.getByText("Waiting for opponent")).toBeVisible();
+    await expect(page.getByText("بانتظار الخصم")).toBeVisible();
     // Nothing to do here — the row must not look tappable.
     await expect(battleRows(page).first()).toBeDisabled();
   });
@@ -168,9 +168,9 @@ test.describe("the battle list", () => {
 
     await page.goto("/battles");
 
-    await expect(page.getByText("You Won! 🎉")).toBeVisible();
-    await expect(page.getByText("You Lost")).toBeVisible();
-    await expect(page.getByText("Draw")).toBeVisible();
+    await expect(page.getByText("فزت! 🎉")).toBeVisible();
+    await expect(page.getByText("خسرت")).toBeVisible();
+    await expect(page.getByText("تعادل")).toBeVisible();
   });
 
   test("shows both scores against the question count", async ({ page, db }) => {
@@ -187,8 +187,8 @@ test.describe("the battle list", () => {
 
     await page.goto("/battles");
 
-    await expect(page.getByText("You: 2/2")).toBeVisible();
-    await expect(page.getByText("Them: 1/2")).toBeVisible();
+    await expect(page.getByText("أنت: 2/2")).toBeVisible();
+    await expect(page.getByText("الخصم: 1/2")).toBeVisible();
   });
 
   test("puts the challenges awaiting a reply first", async ({ page, db }) => {
@@ -212,7 +212,7 @@ test.describe("the battle list", () => {
 
     // The one thing on this page that needs doing goes at the top, regardless
     // of when it arrived.
-    await expect(battleRows(page).first()).toContainText("Your turn to play!");
+    await expect(battleRows(page).first()).toContainText("دورك للعب!");
   });
 
   test("opens a playable battle and leaves a finished one alone", async ({ page, db }) => {
@@ -252,14 +252,14 @@ test.describe("playing a battle", () => {
 
     // The clock is the whole game; starting it on page load would cost a
     // learner their turn to a slow connection.
-    await expect(page.getByRole("heading", { name: "Vocab Battle" })).toBeVisible();
-    await expect(page.getByRole("button", { name: /Start/ })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "معركة مفردات" })).toBeVisible();
+    await expect(page.getByRole("button", { name: /ابدأ المعركة/ })).toBeVisible();
   });
 
   test("says so when the battle does not exist", async ({ page }) => {
     await page.goto(`/battles/${makeBattleId(9)}`);
 
-    await expect(page.getByRole("button", { name: /Back to Battles/ })).toBeVisible();
+    await expect(page.getByRole("button", { name: /العودة إلى المعارك/ })).toBeVisible();
   });
 
   test("refuses a turn that has already been taken", async ({ page, db }) => {
@@ -276,8 +276,8 @@ test.describe("playing a battle", () => {
     await page.goto(`/battles/${BATTLE}`);
 
     // Replaying would let a learner improve their score after seeing it.
-    await expect(page.getByRole("heading", { name: "Battle Already Played" })).toBeVisible();
-    await expect(page.getByRole("button", { name: /Start/ })).toHaveCount(0);
+    await expect(page.getByRole("heading", { name: "لعبت هذه المعركة" })).toBeVisible();
+    await expect(page.getByRole("button", { name: /ابدأ المعركة/ })).toHaveCount(0);
   });
 
   test("asks one word at a time with its choices", async ({ page, db }) => {
@@ -286,7 +286,7 @@ test.describe("playing a battle", () => {
     ]);
 
     await page.goto(`/battles/${BATTLE}`);
-    await page.getByRole("button", { name: /Start/ }).click();
+    await page.getByRole("button", { name: /ابدأ المعركة/ }).click();
 
     await expect(page.getByText("باب")).toBeVisible();
     await expect(page.getByRole("button", { name: "door" })).toBeVisible();
@@ -408,9 +408,9 @@ test.describe("finishing a battle", () => {
     // result. Asserting either one races the refetch, and `getByText("Score
     // submitted!")` matched the toast and the heading at once besides, since
     // that matcher is case-insensitive.
-    await expect(page.getByRole("heading", { name: /You Won!|Draw!|Nice Try!/ })).toBeVisible();
-    await expect(page.getByRole("button", { name: "All Battles" })).toBeVisible();
-    await expect(page.getByRole("button", { name: "New Challenge" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /فزت!|تعادل!|محاولة طيبة!/ })).toBeVisible();
+    await expect(page.getByRole("button", { name: "كل المعارك" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "تحدٍّ جديد" })).toBeVisible();
   });
 
   test("says so when the score cannot be submitted", async ({ page, db }) => {

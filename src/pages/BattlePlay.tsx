@@ -100,9 +100,9 @@ const BattlePlay = () => {
           timeMs: elapsed,
         });
       }
-      toast.success('Score submitted!');
+      toast.success('أُرسلت نتيجتك!');
     } catch (err: any) {
-      toast.error(err.message || 'Failed to submit score');
+      toast.error(err.message || 'تعذّر إرسال النتيجة');
     }
   }, [battleId, isChallenger, submitChallenger, submitOpponent]);
 
@@ -147,9 +147,9 @@ const BattlePlay = () => {
       <AppShell>
         <div className="mb-6"><HomeButton /></div>
         <div className="text-center py-16">
-          <p className="text-muted-foreground">Battle not found</p>
+          <p className="text-muted-foreground">لم نعثر على المعركة</p>
           <Button variant="outline" className="mt-4" onClick={() => navigate('/battles')}>
-            Back to Battles
+            العودة إلى المعارك
           </Button>
         </div>
       </AppShell>
@@ -167,15 +167,15 @@ const BattlePlay = () => {
         <div className="mb-6"><HomeButton /></div>
         <div className="max-w-md mx-auto text-center py-16">
           <Swords className="h-16 w-16 text-muted-foreground/30 mx-auto mb-4" />
-          <h1 className="text-xl font-bold mb-2">Battle Already Played</h1>
+          <h1 className="text-xl font-bold mb-2">لعبت هذه المعركة</h1>
           <p className="text-muted-foreground mb-6">
             {battle.status === 'completed'
-              ? 'This battle is complete.'
+              ? 'انتهت هذه المعركة.'
               : isChallenger
-              ? 'Waiting for your opponent to play.'
-              : 'Waiting for the challenger to play first.'}
+              ? 'بانتظار خصمك ليلعب.'
+              : 'بانتظار المتحدي ليلعب أولاً.'}
           </p>
-          <Button onClick={() => navigate('/battles')}>Back to Battles</Button>
+          <Button onClick={() => navigate('/battles')}>العودة إلى المعارك</Button>
         </div>
       </AppShell>
     );
@@ -191,26 +191,26 @@ const BattlePlay = () => {
             <Swords className="h-10 w-10 text-primary" />
           </div>
 
-          <h1 className="text-2xl font-bold font-heading mb-2">Vocab Battle</h1>
+          <h1 className="text-2xl font-bold font-heading mb-2">معركة مفردات</h1>
           <p className="text-muted-foreground mb-8">
-            Answer {battle.question_count} vocabulary questions as fast as you can!
+            أجب عن {battle.question_count} أسئلة مفردات بأسرع ما يمكنك!
           </p>
 
           <div className="bg-card border-2 border-border rounded-2xl p-6 mb-6">
             <div className="grid grid-cols-2 gap-4 text-center">
               <div>
                 <p className="text-3xl font-bold text-primary">{battle.question_count}</p>
-                <p className="text-sm text-muted-foreground">Questions</p>
+                <p className="text-sm text-muted-foreground">أسئلة</p>
               </div>
               <div>
                 <p className="text-3xl font-bold text-primary">{battle.time_limit_seconds}s</p>
-                <p className="text-sm text-muted-foreground">Time Limit</p>
+                <p className="text-sm text-muted-foreground">المهلة</p>
               </div>
             </div>
 
             {!isChallenger && battle.challenger_score !== null && (
               <div className="mt-4 pt-4 border-t border-border">
-                <p className="text-sm text-muted-foreground">Score to beat:</p>
+                <p className="text-sm text-muted-foreground">النتيجة المطلوب تجاوزها:</p>
                 <p className="text-2xl font-bold">
                   {battle.challenger_score}/{battle.question_count}
                 </p>
@@ -220,7 +220,7 @@ const BattlePlay = () => {
 
           <Button size="lg" className="w-full gap-2" onClick={startGame}>
             <Swords className="h-5 w-5" />
-            Start Battle!
+            ابدأ المعركة!
           </Button>
         </div>
       </AppShell>
@@ -250,11 +250,11 @@ const BattlePlay = () => {
           <h1 className="text-3xl font-bold font-heading mb-2">
             {battle.status === 'completed'
               ? isWinner
-                ? '🎉 You Won!'
+                ? '🎉 فزت!'
                 : isDraw
-                ? '🤝 Draw!'
-                : 'Nice Try!'
-              : 'Score Submitted!'}
+                ? '🤝 تعادل!'
+                : 'محاولة طيبة!'
+              : 'أُرسلت نتيجتك!'}
           </h1>
 
           <div className="bg-card border-2 border-border rounded-2xl p-6 my-6">
@@ -262,25 +262,25 @@ const BattlePlay = () => {
               {score}/{questions.length}
             </p>
             <p className="text-muted-foreground">
-              Completed in {(totalTimeMs / 1000).toFixed(1)}s
+              أنهيتها في {(totalTimeMs / 1000).toFixed(1)} ثانية
             </p>
 
             {battle.status === 'pending' && isChallenger && (
               <p className="mt-4 text-sm text-muted-foreground">
-                Waiting for your opponent to play...
+                بانتظار خصمك ليلعب...
               </p>
             )}
 
             {battle.status === 'completed' && (
               <div className="mt-4 pt-4 border-t border-border grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <p className="text-muted-foreground">You</p>
+                  <p className="text-muted-foreground">أنت</p>
                   <p className="font-bold">
                     {isChallenger ? battle.challenger_score : battle.opponent_score}/{questions.length}
                   </p>
                 </div>
                 <div>
-                  <p className="text-muted-foreground">Opponent</p>
+                  <p className="text-muted-foreground">الخصم</p>
                   <p className="font-bold">
                     {isChallenger ? battle.opponent_score : battle.challenger_score}/{questions.length}
                   </p>
@@ -291,10 +291,10 @@ const BattlePlay = () => {
 
           <div className="flex gap-3">
             <Button variant="outline" className="flex-1" onClick={() => navigate('/battles')}>
-              All Battles
+              كل المعارك
             </Button>
             <Button className="flex-1" onClick={() => navigate('/friends')}>
-              New Challenge
+              تحدٍّ جديد
             </Button>
           </div>
         </div>
@@ -329,9 +329,9 @@ const BattlePlay = () => {
           <div className="animate-in fade-in slide-in-from-right-4 duration-300">
             <div className="bg-card border-2 border-border rounded-2xl p-8 text-center mb-6">
               <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">
-                What does this mean?
+                كيف تقولها بالإنجليزية؟
               </p>
-              <p className="text-4xl font-bold" dir="rtl">
+              <p className="text-4xl font-bold">
                 {question.word_arabic}
               </p>
             </div>
@@ -362,7 +362,7 @@ const BattlePlay = () => {
                       !showResult && 'active:scale-[0.98]'
                     )}
                   >
-                    <span className="font-medium">{choice}</span>
+                    <span className="font-english font-medium">{choice}</span>
                     {showCorrect && <Check className="h-5 w-5 text-green-500" />}
                     {showWrong && <X className="h-5 w-5 text-red-500" />}
                   </button>
@@ -372,7 +372,7 @@ const BattlePlay = () => {
 
             {/* Score tracker */}
             <div className="text-center mt-6 text-sm text-muted-foreground">
-              Score: <span className="font-bold text-foreground">{score}</span>
+              النتيجة: <span className="font-bold text-foreground">{score}</span>
             </div>
           </div>
         )}

@@ -32,9 +32,11 @@ const PAIRS = [
   { arabic: "مفتاح", english: "key" },
 ];
 
-const matchingCard = (page: Page) => page.getByText("Word Matching");
-const arabicColumn = (page: Page) => page.locator("div.grid-cols-2 > div").first();
-const englishColumn = (page: Page) => page.locator("div.grid-cols-2 > div").nth(1);
+const matchingCard = (page: Page) => page.getByText("توصيل الكلمات");
+// The English column anchors the board and comes first; the Arabic meanings
+// are the shuffled column matched against it.
+const englishColumn = (page: Page) => page.locator("div.grid-cols-2 > div").first();
+const arabicColumn = (page: Page) => page.locator("div.grid-cols-2 > div").nth(1);
 
 /** Nothing anywhere — the empty state. */
 function seedNothing(db: MemoryDb) {
@@ -64,8 +66,8 @@ function seedCurriculum(db: MemoryDb, count = 6) {
  */
 async function playMatching(page: Page, pairs = PAIRS) {
   for (const pair of pairs) {
-    await arabicColumn(page).getByRole("button", { name: pair.arabic }).click();
     await englishColumn(page).getByRole("button", { name: pair.english }).click();
+    await arabicColumn(page).getByRole("button", { name: pair.arabic }).click();
   }
 }
 
@@ -80,10 +82,10 @@ test.describe("choosing a game", () => {
 
     await page.goto("/vocab-games");
 
-    await expect(page.getByRole("heading", { name: /Vocabulary Games/ })).toBeVisible();
-    await expect(page.getByText("Word Matching")).toBeVisible();
-    await expect(page.getByText("Memory Cards")).toBeVisible();
-    await expect(page.getByText("Fill in the Blank")).toBeVisible();
+    await expect(page.getByRole("heading", { name: /ألعاب المفردات/ })).toBeVisible();
+    await expect(page.getByText("توصيل الكلمات")).toBeVisible();
+    await expect(page.getByText("بطاقات الذاكرة")).toBeVisible();
+    await expect(page.getByText("أكمل الفراغ")).toBeVisible();
   });
 
   test("describes what each game does", async ({ page, db }) => {
@@ -91,8 +93,8 @@ test.describe("choosing a game", () => {
 
     await page.goto("/vocab-games");
 
-    await expect(page.getByText("Connect Arabic words to their English meanings")).toBeVisible();
-    await expect(page.getByText("Flip and find matching Arabic-English pairs")).toBeVisible();
+    await expect(page.getByText("وصّل الكلمات الإنجليزية بمعانيها")).toBeVisible();
+    await expect(page.getByText("اقلب البطاقات واعثر على الأزواج المتطابقة")).toBeVisible();
   });
 
   test("sends a learner with too few words to go and learn some", async ({ page, db }) => {
@@ -102,15 +104,15 @@ test.describe("choosing a game", () => {
 
     // Six is the smallest board any of the three games can lay out; offering a
     // game that cannot start is worse than saying why.
-    await expect(page.getByText("Need at least 6 words to play")).toBeVisible();
-    await expect(page.getByText("Word Matching")).toHaveCount(0);
-    await expect(page.getByRole("button", { name: "Start Learning" })).toBeVisible();
+    await expect(page.getByText("تحتاج 6 كلمات على الأقل للعب")).toBeVisible();
+    await expect(page.getByText("توصيل الكلمات")).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "ابدأ التعلم" })).toBeVisible();
   });
 
   test("says the same with no words at all", async ({ page }) => {
     await page.goto("/vocab-games");
 
-    await expect(page.getByText("Need at least 6 words to play")).toBeVisible();
+    await expect(page.getByText("تحتاج 6 كلمات على الأقل للعب")).toBeVisible();
   });
 });
 
@@ -165,7 +167,7 @@ test.describe("where the words come from", () => {
 
     await page.goto("/vocab-games");
 
-    await expect(page.getByText("Word Matching")).toBeVisible();
+    await expect(page.getByText("توصيل الكلمات")).toBeVisible();
   });
 
   test("uses the learner's own words before the curriculum", async ({ page, db }) => {
@@ -208,7 +210,7 @@ test.describe("where the words come from", () => {
     await page.goto("/vocab-games");
 
     // No account, no saved deck — but the games are still playable.
-    await expect(page.getByText("Word Matching")).toBeVisible();
+    await expect(page.getByText("توصيل الكلمات")).toBeVisible();
   });
 });
 
@@ -223,8 +225,8 @@ test.describe("word matching", () => {
     await page.goto("/vocab-games");
     await matchingCard(page).click();
 
-    await expect(page.getByRole("heading", { name: "Match the Pairs" })).toBeVisible();
-    await expect(page.getByText("Tap an Arabic word, then its English match")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "وصّل الأزواج" })).toBeVisible();
+    await expect(page.getByText("المس كلمة إنجليزية، ثم معناها")).toBeVisible();
     await expect(arabicColumn(page).getByRole("button")).toHaveCount(6);
     await expect(englishColumn(page).getByRole("button")).toHaveCount(6);
   });
@@ -233,33 +235,33 @@ test.describe("word matching", () => {
     await page.goto("/vocab-games");
     await matchingCard(page).click();
 
-    await expect(page.getByText("0/6 matched", { exact: false })).toBeVisible();
-    await arabicColumn(page).getByRole("button", { name: "باب" }).click();
+    await expect(page.getByText("0/6 موصولة", { exact: false })).toBeVisible();
     await englishColumn(page).getByRole("button", { name: "door" }).click();
-    await expect(page.getByText("1/6 matched", { exact: false })).toBeVisible();
+    await arabicColumn(page).getByRole("button", { name: "باب" }).click();
+    await expect(page.getByText("1/6 موصولة", { exact: false })).toBeVisible();
   });
 
   test("takes a wrong pairing without matching it", async ({ page }) => {
     await page.goto("/vocab-games");
     await matchingCard(page).click();
 
-    await arabicColumn(page).getByRole("button", { name: "باب" }).click();
-    await englishColumn(page).getByRole("button", { name: "book" }).click();
+    await englishColumn(page).getByRole("button", { name: "door" }).click();
+    await arabicColumn(page).getByRole("button", { name: "كتاب" }).click();
 
-    await expect(page.getByText("0/6 matched", { exact: false })).toBeVisible();
-    await expect(page.getByText("1 mistakes", { exact: false })).toBeVisible();
+    await expect(page.getByText("0/6 موصولة", { exact: false })).toBeVisible();
+    await expect(page.getByText("1 أخطاء", { exact: false })).toBeVisible();
   });
 
-  test("takes no English tap until an Arabic word is chosen", async ({ page }) => {
+  test("takes no meaning tap until an English word is chosen", async ({ page }) => {
     await page.goto("/vocab-games");
     await matchingCard(page).click();
 
-    // Disabled rather than ignored — tapping answers in isolation would let a
-    // learner brute force the board without reading the Arabic at all, and a
+    // Disabled rather than ignored — tapping meanings in isolation would let a
+    // learner brute force the board without reading the English at all, and a
     // silently dead button reads as a broken one.
-    await expect(englishColumn(page).getByRole("button", { name: "door" })).toBeDisabled();
-    await arabicColumn(page).getByRole("button", { name: "باب" }).click();
-    await expect(englishColumn(page).getByRole("button", { name: "door" })).toBeEnabled();
+    await expect(arabicColumn(page).getByRole("button", { name: "باب" })).toBeDisabled();
+    await englishColumn(page).getByRole("button", { name: "door" }).click();
+    await expect(arabicColumn(page).getByRole("button", { name: "باب" })).toBeEnabled();
   });
 
   test("scores a clean run at full marks", async ({ page }) => {
@@ -267,8 +269,8 @@ test.describe("word matching", () => {
     await matchingCard(page).click();
     await playMatching(page);
 
-    await expect(page.getByRole("heading", { name: "Word Matching Complete!" })).toBeVisible();
-    await expect(page.getByText("6 / 6 correct")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "أنهيت توصيل الكلمات!" })).toBeVisible();
+    await expect(page.getByText("6 / 6 صحيحة")).toBeVisible();
     await expect(page.getByText("100%")).toBeVisible();
   });
 
@@ -276,16 +278,16 @@ test.describe("word matching", () => {
     await page.goto("/vocab-games");
     await matchingCard(page).click();
 
-    await arabicColumn(page).getByRole("button", { name: "باب" }).click();
-    await englishColumn(page).getByRole("button", { name: "book" }).click();
+    await englishColumn(page).getByRole("button", { name: "door" }).click();
+    await arabicColumn(page).getByRole("button", { name: "كتاب" }).click();
     // A wrong pairing shakes for 600ms and then clears the selection. Playing
     // on before that lands would have the pending timeout deselect mid-move.
-    await expect(englishColumn(page).getByRole("button", { name: "book" })).toBeDisabled();
+    await expect(arabicColumn(page).getByRole("button", { name: "كتاب" })).toBeDisabled();
     await playMatching(page);
 
     // Six pairs found, one mistake made — the score is the board minus the
     // errors, not the pairs found.
-    await expect(page.getByText("5 / 6 correct")).toBeVisible();
+    await expect(page.getByText("5 / 6 صحيحة")).toBeVisible();
   });
 
   test("offers another go and a way back", async ({ page }) => {
@@ -293,9 +295,9 @@ test.describe("word matching", () => {
     await matchingCard(page).click();
     await playMatching(page);
 
-    await expect(page.getByRole("button", { name: "Play Again" })).toBeVisible();
-    await page.getByRole("button", { name: "Menu" }).click();
-    await expect(page.getByText("Memory Cards")).toBeVisible();
+    await expect(page.getByRole("button", { name: "العب مرة أخرى" })).toBeVisible();
+    await page.getByRole("button", { name: "القائمة" }).click();
+    await expect(page.getByText("بطاقات الذاكرة")).toBeVisible();
   });
 });
 
@@ -305,47 +307,47 @@ test.describe("fill in the blank", () => {
     seedNothing(db);
     db.seed("vocab_game_sets", [aVocabGameSet({ id: gameSetId(0) })]);
     await page.goto("/vocab-games");
-    await page.getByText("Fill in the Blank").click();
+    await page.getByText("أكمل الفراغ").click();
   });
 
   test("asks for the English of one word at a time", async ({ page }) => {
-    await expect(page.getByRole("heading", { name: "Fill in the Blank" })).toBeVisible();
-    await expect(page.getByText("What does this mean?")).toBeVisible();
-    await expect(page.getByPlaceholder("Type the English meaning...")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "أكمل الفراغ" })).toBeVisible();
+    await expect(page.getByText("كيف تقولها بالإنجليزية؟")).toBeVisible();
+    await expect(page.getByPlaceholder("Type it in English...")).toBeVisible();
   });
 
   test("will not check an empty answer", async ({ page }) => {
-    await expect(page.getByRole("button", { name: "Check" })).toBeDisabled();
+    await expect(page.getByRole("button", { name: "تحقق" })).toBeDisabled();
   });
 
   test("accepts an answer in any case", async ({ page }) => {
     const arabic = await page.locator('p[dir="rtl"]').first().innerText();
     const english = PAIRS.find((p) => p.arabic === arabic)!.english;
 
-    await page.getByPlaceholder("Type the English meaning...").fill(english.toUpperCase());
-    await page.getByRole("button", { name: "Check" }).click();
+    await page.getByPlaceholder("Type it in English...").fill(english.toUpperCase());
+    await page.getByRole("button", { name: "تحقق" }).click();
 
     // Nobody types "Door" meaning something different from "door"; a
     // case-sensitive check would just be a typing test.
-    await expect(page.getByText(/Correct/i)).toBeVisible();
+    await expect(page.getByText("صحيح!")).toBeVisible();
   });
 
   test("ignores surrounding whitespace", async ({ page }) => {
     const arabic = await page.locator('p[dir="rtl"]').first().innerText();
     const english = PAIRS.find((p) => p.arabic === arabic)!.english;
 
-    await page.getByPlaceholder("Type the English meaning...").fill(`  ${english}  `);
-    await page.getByRole("button", { name: "Check" }).click();
+    await page.getByPlaceholder("Type it in English...").fill(`  ${english}  `);
+    await page.getByRole("button", { name: "تحقق" }).click();
 
-    await expect(page.getByText(/Correct/i)).toBeVisible();
+    await expect(page.getByText("صحيح!")).toBeVisible();
   });
 
   test("shows the answer after a wrong guess", async ({ page }) => {
     const arabic = await page.locator('p[dir="rtl"]').first().innerText();
     const english = PAIRS.find((p) => p.arabic === arabic)!.english;
 
-    await page.getByPlaceholder("Type the English meaning...").fill("something else");
-    await page.getByRole("button", { name: "Check" }).click();
+    await page.getByPlaceholder("Type it in English...").fill("something else");
+    await page.getByRole("button", { name: "تحقق" }).click();
 
     await expect(page.getByText(english, { exact: false }).first()).toBeVisible();
   });
@@ -354,13 +356,13 @@ test.describe("fill in the blank", () => {
     for (let i = 0; i < 6; i++) {
       const arabic = await page.locator('p[dir="rtl"]').first().innerText();
       const english = PAIRS.find((p) => p.arabic === arabic)!.english;
-      await page.getByPlaceholder("Type the English meaning...").fill(english);
-      await page.getByRole("button", { name: "Check" }).click();
-      await page.getByRole("button", { name: /Next|Finish|See Results/ }).click();
+      await page.getByPlaceholder("Type it in English...").fill(english);
+      await page.getByRole("button", { name: "تحقق" }).click();
+      await page.getByRole("button", { name: /التالي|النتائج/ }).click();
     }
 
-    await expect(page.getByRole("heading", { name: "Fill in the Blank Complete!" })).toBeVisible();
-    await expect(page.getByText("6 / 6 correct")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "أنهيت أكمل الفراغ!" })).toBeVisible();
+    await expect(page.getByText("6 / 6 صحيحة")).toBeVisible();
   });
 });
 
@@ -370,19 +372,19 @@ test.describe("memory cards", () => {
     seedNothing(db);
     db.seed("vocab_game_sets", [aVocabGameSet({ id: gameSetId(0) })]);
     await page.goto("/vocab-games");
-    await page.getByText("Memory Cards").click();
+    await page.getByText("بطاقات الذاكرة").click();
   });
 
   test("deals a card per side of every pair", async ({ page }) => {
     // Six pairs means twelve cards; a board with an odd count has an
     // unmatchable card on it.
-    await expect(page.getByRole("heading", { name: "Memory Cards" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "بطاقات الذاكرة" })).toBeVisible();
     await expect(page.locator("div.grid-cols-3 > button")).toHaveCount(12);
   });
 
   test("goes back to the menu without finishing", async ({ page }) => {
-    await page.getByRole("button", { name: "Back" }).click();
+    await page.getByRole("button", { name: /العودة إلى الألعاب/ }).click();
 
-    await expect(page.getByText("Word Matching")).toBeVisible();
+    await expect(page.getByText("توصيل الكلمات")).toBeVisible();
   });
 });

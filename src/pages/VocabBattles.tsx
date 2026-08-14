@@ -39,9 +39,9 @@ const VocabBattles = () => {
         <div className="mb-6"><HomeButton /></div>
         <div className="text-center py-16">
           <Swords className="h-16 w-16 text-muted-foreground/30 mx-auto mb-4" />
-          <h1 className="text-2xl font-bold mb-2 font-heading">Vocab Battles</h1>
-          <p className="text-muted-foreground mb-6">Sign in to challenge friends to vocabulary battles</p>
-          <Button onClick={() => navigate('/auth')}>Sign In</Button>
+          <h1 className="text-2xl font-bold mb-2 font-heading">معارك المفردات</h1>
+          <p className="text-muted-foreground mb-6">سجّل الدخول لتتحدى أصدقاءك في معارك المفردات</p>
+          <Button onClick={() => navigate('/auth')}>تسجيل الدخول</Button>
         </div>
       </AppShell>
     );
@@ -63,18 +63,18 @@ const VocabBattles = () => {
     const isChallenger = battle.challenger_id === user.id;
 
     if (battle.status === 'completed') {
-      if (battle.winner_id === user.id) return { text: 'You Won! 🎉', color: 'text-green-600' };
-      if (battle.winner_id === null) return { text: 'Draw', color: 'text-yellow-600' };
-      return { text: 'You Lost', color: 'text-red-600' };
+      if (battle.winner_id === user.id) return { text: 'فزت! 🎉', color: 'text-green-600' };
+      if (battle.winner_id === null) return { text: 'تعادل', color: 'text-yellow-600' };
+      return { text: 'خسرت', color: 'text-red-600' };
     }
 
     if (battle.status === 'pending') {
       if (isChallenger) {
         return battle.challenger_score !== null
-          ? { text: 'Waiting for opponent', color: 'text-muted-foreground' }
-          : { text: 'Play your turn', color: 'text-primary' };
+          ? { text: 'بانتظار الخصم', color: 'text-muted-foreground' }
+          : { text: 'العب دورك', color: 'text-primary' };
       } else {
-        return { text: 'Your turn to play!', color: 'text-primary' };
+        return { text: 'دورك للعب!', color: 'text-primary' };
       }
     }
 
@@ -102,8 +102,8 @@ const VocabBattles = () => {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mb-4">
             <Swords className="h-8 w-8 text-primary" />
           </div>
-          <h1 className="text-2xl font-bold font-heading mb-1 inline-flex items-center gap-2 justify-center">Vocab Battles <InfoHint {...PAGE_HINTS["vocab-battles"]} size="md" /></h1>
-          <p className="text-muted-foreground">Challenge friends to vocabulary showdowns</p>
+          <h1 className="text-2xl font-bold font-heading mb-1 inline-flex items-center gap-2 justify-center">معارك المفردات <InfoHint {...PAGE_HINTS["vocab-battles"]} size="md" /></h1>
+          <p className="text-muted-foreground">تحدَّ أصدقاءك في مواجهات مفردات</p>
         </div>
 
         {/* Challenge friends CTA */}
@@ -113,7 +113,7 @@ const VocabBattles = () => {
           onClick={() => navigate('/friends')}
         >
           <Users className="h-4 w-4" />
-          Challenge a Friend
+          تحدَّ صديقاً
         </Button>
 
         {/* Pending challenges alert */}
@@ -155,7 +155,7 @@ const VocabBattles = () => {
                       <div className="flex items-center gap-2 mb-1">
                         <Swords className="h-4 w-4 text-primary shrink-0" />
                         <span className="font-semibold truncate">
-                          {isChallenger ? 'You challenged' : 'Challenged by'}
+                          {isChallenger ? 'تحديت' : 'تحداك'}
                         </span>
                         <Badge variant="outline" className={cn('text-xs', statusColors[battle.status])}>
                           {battle.status}
@@ -170,12 +170,12 @@ const VocabBattles = () => {
                       <div className="flex gap-4 mt-2 text-xs text-muted-foreground">
                         {battle.challenger_score !== null && (
                           <span>
-                            {isChallenger ? 'You' : 'Them'}: {battle.challenger_score}/{battle.question_count}
+                            {isChallenger ? 'أنت' : 'الخصم'}: {battle.challenger_score}/{battle.question_count}
                           </span>
                         )}
                         {battle.opponent_score !== null && (
                           <span>
-                            {!isChallenger ? 'You' : 'Them'}: {battle.opponent_score}/{battle.question_count}
+                            {!isChallenger ? 'أنت' : 'الخصم'}: {battle.opponent_score}/{battle.question_count}
                           </span>
                         )}
                       </div>
@@ -200,10 +200,10 @@ const VocabBattles = () => {
         ) : (
           <div className="text-center py-16">
             <Swords className="h-16 w-16 text-muted-foreground/20 mx-auto mb-4" />
-            <p className="text-muted-foreground mb-4">No battles yet</p>
+            <p className="text-muted-foreground mb-4">لا معارك بعد</p>
             <Button onClick={() => navigate('/friends')}>
               <Users className="h-4 w-4 mr-2" />
-              Find Friends to Battle
+              ابحث عن أصدقاء للمنافسة
             </Button>
           </div>
         )}

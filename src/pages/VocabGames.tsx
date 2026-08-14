@@ -36,22 +36,24 @@ interface WordPair {
 // ─── WORD MATCHING GAME ─────────────────────────
 const WordMatchingGame = ({ words, onComplete }: { words: WordPair[]; onComplete: (score: number, total: number) => void }) => {
   const gameWords = useMemo(() => words.slice(0, 6), [words]);
-  const [selectedArabic, setSelectedArabic] = useState<string | null>(null);
+  // Anchored on the ENGLISH word: the learner reads the target language and
+  // retrieves its meaning, not the other way round.
+  const [selectedEnglish, setSelectedEnglish] = useState<string | null>(null);
   const [matched, setMatched] = useState<Set<string>>(new Set());
   const [wrongPair, setWrongPair] = useState<string | null>(null);
   const [mistakes, setMistakes] = useState(0);
 
-  const shuffledEnglish = useMemo(
+  const shuffledArabic = useMemo(
     () => [...gameWords].sort(() => Math.random() - 0.5),
     [gameWords]
   );
 
-  const handleEnglishClick = (word: WordPair) => {
-    if (!selectedArabic || matched.has(word.id)) return;
+  const handleArabicClick = (word: WordPair) => {
+    if (!selectedEnglish || matched.has(word.id)) return;
 
-    if (word.word_arabic === selectedArabic) {
+    if (word.word_english === selectedEnglish) {
       setMatched((prev) => new Set([...prev, word.id]));
-      setSelectedArabic(null);
+      setSelectedEnglish(null);
 
       if (matched.size + 1 === gameWords.length) {
         setTimeout(() => onComplete(gameWords.length - mistakes, gameWords.length), 500);
@@ -61,7 +63,7 @@ const WordMatchingGame = ({ words, onComplete }: { words: WordPair[]; onComplete
       setMistakes((m) => m + 1);
       setTimeout(() => {
         setWrongPair(null);
-        setSelectedArabic(null);
+        setSelectedEnglish(null);
       }, 600);
     }
   };
@@ -69,44 +71,42 @@ const WordMatchingGame = ({ words, onComplete }: { words: WordPair[]; onComplete
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h2 className="text-lg font-bold text-foreground">Match the Pairs</h2>
-        <p className="text-sm text-muted-foreground">Tap an Arabic word, then its English match</p>
+        <h2 className="text-lg font-bold text-foreground">وصّل الأزواج</h2>
+        <p className="text-sm text-muted-foreground">المس كلمة إنجليزية، ثم معناها</p>
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        {/* Arabic column */}
+        {/* English column — the anchor */}
         <div className="space-y-2">
-          <p className="text-xs font-semibold text-muted-foreground uppercase text-center mb-1">Arabic</p>
+          <p className="text-xs font-semibold text-muted-foreground uppercase text-center mb-1">إنجليزي</p>
           {gameWords.map((w) => (
             <button
-              key={w.id + "-ar"}
+              key={w.id + "-en"}
               disabled={matched.has(w.id)}
-              onClick={() => setSelectedArabic(w.word_arabic)}
+              onClick={() => setSelectedEnglish(w.word_english)}
               className={cn(
-                "w-full p-3 rounded-xl text-center font-semibold transition-all text-lg",
+                "font-english w-full p-3 rounded-xl text-center font-semibold transition-all text-lg",
                 "border-2",
                 matched.has(w.id)
                   ? "bg-primary/10 border-primary/30 text-primary opacity-60"
-                  : selectedArabic === w.word_arabic
+                  : selectedEnglish === w.word_english
                   ? "bg-primary text-primary-foreground border-primary shadow-lg scale-[1.02]"
                   : "bg-card border-border hover:border-primary/40"
               )}
-              style={{ fontFamily: "'Noto Naskh Arabic', 'Noto Sans Arabic', serif" }}
-              dir="rtl"
             >
-              {w.word_arabic}
+              {w.word_english}
             </button>
           ))}
         </div>
 
-        {/* English column */}
+        {/* Arabic column — the meanings to match against */}
         <div className="space-y-2">
-          <p className="text-xs font-semibold text-muted-foreground uppercase text-center mb-1">English</p>
-          {shuffledEnglish.map((w) => (
+          <p className="text-xs font-semibold text-muted-foreground uppercase text-center mb-1">المعنى</p>
+          {shuffledArabic.map((w) => (
             <button
-              key={w.id + "-en"}
-              disabled={matched.has(w.id) || !selectedArabic}
-              onClick={() => handleEnglishClick(w)}
+              key={w.id + "-ar"}
+              disabled={matched.has(w.id) || !selectedEnglish}
+              onClick={() => handleArabicClick(w)}
               className={cn(
                 "w-full p-3 rounded-xl text-center font-medium transition-all",
                 "border-2",
@@ -116,8 +116,9 @@ const WordMatchingGame = ({ words, onComplete }: { words: WordPair[]; onComplete
                   ? "bg-destructive/10 border-destructive text-destructive animate-shake"
                   : "bg-card border-border hover:border-primary/40"
               )}
+              style={{ fontFamily: "'Noto Naskh Arabic', 'Noto Sans Arabic', serif" }}
             >
-              {w.word_english}
+              {w.word_arabic}
             </button>
           ))}
         </div>
@@ -125,7 +126,7 @@ const WordMatchingGame = ({ words, onComplete }: { words: WordPair[]; onComplete
 
       <div className="flex justify-center">
         <Badge variant="secondary" className="text-sm">
-          {matched.size}/{gameWords.length} matched · {mistakes} mistakes
+          {matched.size}/{gameWords.length} موصولة · {mistakes} أخطاء
         </Badge>
       </div>
     </div>
@@ -200,8 +201,8 @@ const MemoryCardGame = ({ words, onComplete }: { words: WordPair[]; onComplete: 
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h2 className="text-lg font-bold text-foreground">Memory Cards</h2>
-        <p className="text-sm text-muted-foreground">Find matching Arabic-English pairs</p>
+        <h2 className="text-lg font-bold text-foreground">بطاقات الذاكرة</h2>
+        <p className="text-sm text-muted-foreground">اعثر على أزواج الكلمة ومعناها</p>
       </div>
 
       <div className="grid grid-cols-3 gap-2">
@@ -283,8 +284,8 @@ const FillBlankGame = ({ words, onComplete }: { words: WordPair[]; onComplete: (
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h2 className="text-lg font-bold text-foreground">Fill in the Blank</h2>
-        <p className="text-sm text-muted-foreground">Type the English meaning</p>
+        <h2 className="text-lg font-bold text-foreground">أكمل الفراغ</h2>
+        <p className="text-sm text-muted-foreground">اكتب الكلمة بالإنجليزية</p>
       </div>
 
       {/* Progress */}
@@ -308,7 +309,7 @@ const FillBlankGame = ({ words, onComplete }: { words: WordPair[]; onComplete: (
 
       {/* Question Card */}
       <div className="bg-card border border-border rounded-2xl p-8 text-center space-y-4">
-        <p className="text-sm text-muted-foreground">What does this mean?</p>
+        <p className="text-sm text-muted-foreground">كيف تقولها بالإنجليزية؟</p>
         <p
           className="text-4xl font-bold text-foreground"
           dir="rtl"
@@ -324,12 +325,12 @@ const FillBlankGame = ({ words, onComplete }: { words: WordPair[]; onComplete: (
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && input.trim() && handleCheck()}
-              placeholder="Type the English meaning..."
+              placeholder="Type it in English..."
               className="w-full p-3 rounded-xl bg-muted border border-border text-center text-foreground text-lg focus:outline-none focus:ring-2 focus:ring-primary"
               autoFocus
             />
             <Button onClick={handleCheck} disabled={!input.trim()} className="w-full">
-              Check
+              تحقق
             </Button>
           </div>
         ) : (
@@ -345,22 +346,22 @@ const FillBlankGame = ({ words, onComplete }: { words: WordPair[]; onComplete: (
               {input.trim().toLowerCase() === word.word_english.toLowerCase() ? (
                 <div className="flex items-center justify-center gap-2">
                   <Check className="h-5 w-5 text-primary" />
-                  <span className="font-semibold text-primary">Correct!</span>
+                  <span className="font-semibold text-primary">صحيح!</span>
                 </div>
               ) : (
                 <div className="text-center space-y-1">
                   <div className="flex items-center justify-center gap-2">
                     <X className="h-5 w-5 text-destructive" />
-                    <span className="font-semibold text-destructive">Not quite</span>
+                    <span className="font-semibold text-destructive">ليس تماماً</span>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    Correct answer: <span className="font-semibold text-foreground">{word.word_english}</span>
+                    الإجابة: <span className="font-english font-semibold text-foreground">{word.word_english}</span>
                   </p>
                 </div>
               )}
             </div>
             <Button onClick={handleNext} className="w-full">
-              {current + 1 >= gameWords.length ? "See Results" : "Next"}
+              {current + 1 >= gameWords.length ? "النتائج" : "التالي"}
               <ChevronRight className="h-4 w-4 ml-1" />
             </Button>
           </div>
@@ -398,21 +399,21 @@ const ResultsScreen = ({
         <Trophy className="h-10 w-10 text-primary" />
       </div>
       <div>
-        <h2 className="text-2xl font-bold text-foreground">{gameName} Complete!</h2>
+        <h2 className="text-2xl font-bold text-foreground">أنهيت {gameName}!</h2>
         <p className="text-muted-foreground mt-1">
-          {pct >= 80 ? "Excellent work! 🎉" : pct >= 50 ? "Good effort! Keep practicing 💪" : "Keep it up! You'll get there 🌟"}
+          {pct >= 80 ? "عمل ممتاز! 🎉" : pct >= 50 ? "جهد طيب! واصل التدريب 💪" : "واصل — ستصل! 🌟"}
         </p>
       </div>
       <div className="bg-card border border-border rounded-2xl p-6 max-w-xs mx-auto">
         <p className="text-4xl font-bold text-primary">{pct}%</p>
-        <p className="text-sm text-muted-foreground">{score} / {total} correct</p>
+        <p className="text-sm text-muted-foreground">{score} / {total} صحيحة</p>
       </div>
       <div className="flex gap-3 justify-center">
         <Button variant="outline" onClick={onMenu}>
-          <RotateCcw className="h-4 w-4 mr-1.5" /> Menu
+          <RotateCcw className="h-4 w-4 mr-1.5" /> القائمة
         </Button>
         <Button onClick={onPlayAgain}>
-          <Sparkles className="h-4 w-4 mr-1.5" /> Play Again
+          <Sparkles className="h-4 w-4 mr-1.5" /> العب مرة أخرى
         </Button>
       </div>
     </div>
@@ -532,7 +533,7 @@ const VocabGames = () => {
                 <Gamepad2 className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-foreground inline-flex items-center gap-2">Vocabulary Games <InfoHint {...PAGE_HINTS["vocab-games"]} /></h1>
+                <h1 className="text-xl font-bold text-foreground inline-flex items-center gap-2">ألعاب المفردات <InfoHint {...PAGE_HINTS["vocab-games"]} /></h1>
                 <p className="text-sm text-muted-foreground">
                   Practice words through fun games
                 </p>
@@ -542,12 +543,12 @@ const VocabGames = () => {
             {words.length < 6 ? (
               <div className="bg-card border border-border rounded-2xl p-8 text-center space-y-3">
                 <Gamepad2 className="h-12 w-12 text-muted-foreground/30 mx-auto" />
-                <p className="text-muted-foreground">Need at least 6 words to play</p>
+                <p className="text-muted-foreground">تحتاج 6 كلمات على الأقل للعب</p>
                 <p className="text-sm text-muted-foreground/70">
                   Learn some vocabulary first, then come back!
                 </p>
                 <Button variant="outline" onClick={() => navigate("/learn")}>
-                  Start Learning
+                  ابدأ التعلم
                 </Button>
               </div>
             ) : (
@@ -567,9 +568,9 @@ const VocabGames = () => {
                     <Shuffle className="h-6 w-6 text-primary" />
                   </div>
                   <div className="text-left flex-1">
-                    <p className="font-bold text-foreground">Word Matching</p>
+                    <p className="font-bold text-foreground">توصيل الكلمات</p>
                     <p className="text-sm text-muted-foreground">
-                      Connect Arabic words to their English meanings
+                      وصّل الكلمات الإنجليزية بمعانيها
                     </p>
                   </div>
                   <ChevronRight className="h-5 w-5 text-muted-foreground" />
@@ -590,9 +591,9 @@ const VocabGames = () => {
                     <Grid3X3 className="h-6 w-6 text-accent-foreground" />
                   </div>
                   <div className="text-left flex-1">
-                    <p className="font-bold text-foreground">Memory Cards</p>
+                    <p className="font-bold text-foreground">بطاقات الذاكرة</p>
                     <p className="text-sm text-muted-foreground">
-                      Flip and find matching Arabic-English pairs
+                      اقلب البطاقات واعثر على الأزواج المتطابقة
                     </p>
                   </div>
                   <ChevronRight className="h-5 w-5 text-muted-foreground" />
@@ -613,9 +614,9 @@ const VocabGames = () => {
                     <PenLine className="h-6 w-6 text-secondary-foreground" />
                   </div>
                   <div className="text-left flex-1">
-                    <p className="font-bold text-foreground">Fill in the Blank</p>
+                    <p className="font-bold text-foreground">أكمل الفراغ</p>
                     <p className="text-sm text-muted-foreground">
-                      Type the English meaning from Arabic
+                      اكتب الكلمة بالإنجليزية من معناها العربي
                     </p>
                   </div>
                   <ChevronRight className="h-5 w-5 text-muted-foreground" />
@@ -626,25 +627,25 @@ const VocabGames = () => {
         ) : (
           <>
             <Button variant="ghost" size="sm" onClick={() => setMode("menu")}>
-              ← Back to Games
+              → العودة إلى الألعاب
             </Button>
 
             {mode === "matching" && (
               <WordMatchingGame
                 words={words}
-                onComplete={(s, t) => handleComplete(s, t, "Word Matching")}
+                onComplete={(s, t) => handleComplete(s, t, "توصيل الكلمات")}
               />
             )}
             {mode === "memory" && (
               <MemoryCardGame
                 words={words}
-                onComplete={(s, t) => handleComplete(s, t, "Memory Cards")}
+                onComplete={(s, t) => handleComplete(s, t, "بطاقات الذاكرة")}
               />
             )}
             {mode === "fill-blank" && (
               <FillBlankGame
                 words={words}
-                onComplete={(s, t) => handleComplete(s, t, "Fill in the Blank")}
+                onComplete={(s, t) => handleComplete(s, t, "أكمل الفراغ")}
               />
             )}
           </>
