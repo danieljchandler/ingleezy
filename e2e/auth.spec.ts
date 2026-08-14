@@ -17,9 +17,9 @@ async function fillCredentials(
   page: import("@playwright/test").Page,
   { email = EMAIL, password = PASSWORD, invite }: { email?: string; password?: string; invite?: string } = {},
 ) {
-  await page.getByLabel(/email/i).fill(email);
-  await page.getByLabel(/password/i).fill(password);
-  if (invite !== undefined) await page.getByLabel(/invite code/i).fill(invite);
+  await page.getByLabel(/البريد الإلكتروني/).fill(email);
+  await page.getByLabel(/كلمة المرور/).fill(password);
+  if (invite !== undefined) await page.getByLabel(/رمز الدعوة/).fill(invite);
 }
 
 test.describe("the form validates before it hits the network", () => {
@@ -34,36 +34,36 @@ test.describe("the form validates before it hits the network", () => {
     // domain with no dot is the gap between the two — native validation allows
     // it, EMAIL_RE in Auth.tsx does not.
     await fillCredentials(page, { email: "a@b" });
-    await page.getByRole("button", { name: /^log in$/i }).click();
+    await page.getByRole("button", { name: "تسجيل الدخول", exact: true }).click();
 
-    await expect(page.getByText(/valid email address/i)).toBeVisible();
+    await expect(page.getByText(/بريداً إلكترونياً صحيحاً/)).toBeVisible();
     // Nothing should have been sent.
     expect(backend.db.reads).toHaveLength(0);
   });
 
   test("the browser stops a value with no @ before the app sees it", async ({ page, backend }) => {
     await fillCredentials(page, { email: "not-an-email" });
-    await page.getByRole("button", { name: /^log in$/i }).click();
+    await page.getByRole("button", { name: "تسجيل الدخول", exact: true }).click();
 
     // Native constraint validation blocks the submit entirely, so neither the
     // app's message nor a request appears.
-    await expect(page.getByText(/valid email address/i)).toHaveCount(0);
+    await expect(page.getByText(/بريداً إلكترونياً صحيحاً/)).toHaveCount(0);
     expect(backend.db.reads).toHaveLength(0);
   });
 
   test("rejects a password under six characters", async ({ page }) => {
     await fillCredentials(page, { password: "short" });
-    await page.getByRole("button", { name: /^log in$/i }).click();
+    await page.getByRole("button", { name: "تسجيل الدخول", exact: true }).click();
 
-    await expect(page.getByText(/at least 6 characters/i)).toBeVisible();
+    await expect(page.getByText(/6 أحرف/)).toBeVisible();
   });
 
   test("requires an invite code to sign up", async ({ page }) => {
-    await page.getByRole("button", { name: /create an account/i }).click();
+    await page.getByRole("button", { name: /أنشئ حساباً/ }).click();
     await fillCredentials(page, { invite: "" });
-    await page.getByRole("button", { name: /^sign up$/i }).click();
+    await page.getByRole("button", { name: "إنشاء حساب", exact: true }).click();
 
-    await expect(page.getByText(/invite code required/i)).toBeVisible();
+    await expect(page.getByText(/رمز الدعوة مطلوب/)).toBeVisible();
   });
 });
 
@@ -75,9 +75,9 @@ test.describe("signing in", () => {
 
     await page.goto("/auth");
     await fillCredentials(page);
-    await page.getByRole("button", { name: /^log in$/i }).click();
+    await page.getByRole("button", { name: "تسجيل الدخول", exact: true }).click();
 
-    await expect(page.getByText(/welcome back/i).first()).toBeVisible();
+    await expect(page.getByText(/أهلاً بعودتك/).first()).toBeVisible();
     await expect(page).toHaveURL(/127\.0\.0\.1:\d+\/$/);
   });
 
@@ -89,9 +89,9 @@ test.describe("signing in", () => {
     await page.goto("/auth");
 
     await fillCredentials(page, { password: "wrong-password" });
-    await page.getByRole("button", { name: /^log in$/i }).click();
+    await page.getByRole("button", { name: "تسجيل الدخول", exact: true }).click();
 
-    await expect(page.getByText(/wrong email or password/i)).toBeVisible();
+    await expect(page.getByText(/غير صحيحة/)).toBeVisible();
     await expect(page).toHaveURL(/\/auth$/);
   });
 
@@ -106,7 +106,7 @@ test.describe("signing in", () => {
 
     await page.goto("/auth");
     await fillCredentials(page);
-    await page.getByRole("button", { name: /^log in$/i }).click();
+    await page.getByRole("button", { name: "تسجيل الدخول", exact: true }).click();
 
     await expect(page).toHaveURL(/\/onboarding$/);
   });
@@ -126,7 +126,7 @@ test.describe("signing in", () => {
     await expect(page).toHaveURL(/\/auth$/);
 
     await fillCredentials(page);
-    await page.getByRole("button", { name: /^log in$/i }).click();
+    await page.getByRole("button", { name: "تسجيل الدخول", exact: true }).click();
 
     await expect(page).toHaveURL(/\/my-words$/);
   });
@@ -136,16 +136,16 @@ test.describe("signing up with an invite code", () => {
   test.beforeEach(async ({ signInAs, page }) => {
     await signInAs("anonymous");
     await page.goto("/auth");
-    await page.getByRole("button", { name: /create an account/i }).click();
+    await page.getByRole("button", { name: /أنشئ حساباً/ }).click();
   });
 
   test("a valid code creates the account and redeems the code", async ({ page, backend }) => {
     backend.db.seed("invite_codes", [anInviteCode({ code: "INGLEEZY-GOOD", uses: 0, max_uses: 5 })]);
 
     await fillCredentials(page, { email: "new@example.com", invite: "ingleezy-good" });
-    await page.getByRole("button", { name: /^sign up$/i }).click();
+    await page.getByRole("button", { name: "إنشاء حساب", exact: true }).click();
 
-    await expect(page.getByText(/account created/i)).toBeVisible();
+    await expect(page.getByText(/تم إنشاء الحساب/)).toBeVisible();
 
     // The redemption is the half that actually matters — a code that verifies
     // but never redeems would let one code create unlimited accounts.
@@ -156,8 +156,8 @@ test.describe("signing up with an invite code", () => {
   test("uppercases the code, so a lowercase paste still works", async ({ page, backend }) => {
     backend.db.seed("invite_codes", [anInviteCode({ code: "INGLEEZY-GOOD" })]);
 
-    await page.getByLabel(/invite code/i).fill("ingleezy-good");
-    await expect(page.getByLabel(/invite code/i)).toHaveValue("INGLEEZY-GOOD");
+    await page.getByLabel(/رمز الدعوة/).fill("ingleezy-good");
+    await expect(page.getByLabel(/رمز الدعوة/)).toHaveValue("INGLEEZY-GOOD");
   });
 
   test("a code that does not exist is refused before the account is created", async ({
@@ -167,9 +167,9 @@ test.describe("signing up with an invite code", () => {
     backend.db.seed("invite_codes", []);
 
     await fillCredentials(page, { email: "new@example.com", invite: "NOPE-1234" });
-    await page.getByRole("button", { name: /^sign up$/i }).click();
+    await page.getByRole("button", { name: "إنشاء حساب", exact: true }).click();
 
-    await expect(page.getByText(/invalid, expired, or fully used code/i)).toBeVisible();
+    await expect(page.getByText(/غير صالح أو منتهٍ أو مستنفد/)).toBeVisible();
     // The comment in Auth.tsx says this ordering exists so bad codes don't
     // leave orphan users behind. Assert it actually does.
     expect(backend.db.rows("invite_redemptions")).toHaveLength(0);
@@ -179,18 +179,18 @@ test.describe("signing up with an invite code", () => {
     backend.db.seed("invite_codes", [anInviteCode({ code: "INGLEEZY-FULL", uses: 5, max_uses: 5 })]);
 
     await fillCredentials(page, { email: "new@example.com", invite: "INGLEEZY-FULL" });
-    await page.getByRole("button", { name: /^sign up$/i }).click();
+    await page.getByRole("button", { name: "إنشاء حساب", exact: true }).click();
 
-    await expect(page.getByText(/invalid, expired, or fully used code/i)).toBeVisible();
+    await expect(page.getByText(/غير صالح أو منتهٍ أو مستنفد/)).toBeVisible();
   });
 
   test("an expired code is refused", async ({ page, backend }) => {
     backend.db.seed("invite_codes", [anInviteCode({ code: "INGLEEZY-OFF", expires_at: daysAgo(1) })]);
 
     await fillCredentials(page, { email: "new@example.com", invite: "INGLEEZY-OFF" });
-    await page.getByRole("button", { name: /^sign up$/i }).click();
+    await page.getByRole("button", { name: "إنشاء حساب", exact: true }).click();
 
-    await expect(page.getByText(/invalid, expired, or fully used code/i)).toBeVisible();
+    await expect(page.getByText(/غير صالح أو منتهٍ أو مستنفد/)).toBeVisible();
   });
 
   test("an email that already has an account says so", async ({ page, backend }) => {
@@ -200,9 +200,9 @@ test.describe("signing up with an invite code", () => {
     backend.addUser("00000000-0000-4000-8000-000000000077", "taken@example.com");
 
     await fillCredentials(page, { email: "taken@example.com", invite: "INGLEEZY-GOOD" });
-    await page.getByRole("button", { name: /^sign up$/i }).click();
+    await page.getByRole("button", { name: "إنشاء حساب", exact: true }).click();
 
-    await expect(page.getByText(/already registered/i)).toBeVisible();
+    await expect(page.getByText(/مسجّل من قبل/)).toBeVisible();
   });
 
   test("a redemption that loses the race signs the new account back out", async ({
@@ -218,9 +218,9 @@ test.describe("signing up with an invite code", () => {
     });
 
     await fillCredentials(page, { email: "new@example.com", invite: "INGLEEZY-RACE" });
-    await page.getByRole("button", { name: /^sign up$/i }).click();
+    await page.getByRole("button", { name: "إنشاء حساب", exact: true }).click();
 
-    await expect(page.getByText(/couldn't be redeemed/i)).toBeVisible();
+    await expect(page.getByText(/تعذّر استخدام رمز الدعوة/)).toBeVisible();
 
     // What matters is that the session is gone: an account that reached the app
     // without redeeming a code would have bypassed the beta gate entirely.
@@ -248,7 +248,7 @@ test.describe("signing up with an invite code", () => {
     });
 
     await fillCredentials(page, { email: "new2@example.com", invite: "INGLEEZY-RACE2" });
-    await page.getByRole("button", { name: /^sign up$/i }).click();
+    await page.getByRole("button", { name: "إنشاء حساب", exact: true }).click();
 
     await expect(page).toHaveURL(/127\.0\.0\.1:\d+\/$/);
   });
@@ -259,19 +259,19 @@ test.describe("password reset", () => {
     await signInAs("anonymous");
     await page.goto("/auth");
 
-    await page.getByLabel(/email/i).fill(EMAIL);
-    await page.getByRole("button", { name: /forgot password/i }).click();
+    await page.getByLabel(/البريد الإلكتروني/).fill(EMAIL);
+    await page.getByRole("button", { name: /نسيت كلمة المرور/ }).click();
 
-    await expect(page.getByText(/check your inbox/i)).toBeVisible();
+    await expect(page.getByText(/تفقد بريدك الوارد/)).toBeVisible();
   });
 
   test("asks for the email first when the field is empty", async ({ page, signInAs }) => {
     await signInAs("anonymous");
     await page.goto("/auth");
 
-    await page.getByRole("button", { name: /forgot password/i }).click();
+    await page.getByRole("button", { name: /نسيت كلمة المرور/ }).click();
 
-    await expect(page.getByText(/enter your email above first/i)).toBeVisible();
+    await expect(page.getByText(/أعلاه أولاً/)).toBeVisible();
   });
 });
 
@@ -280,10 +280,10 @@ test.describe("switching between modes", () => {
     await signInAs("anonymous");
     await page.goto("/auth");
 
-    await expect(page.getByLabel(/invite code/i)).toHaveCount(0);
+    await expect(page.getByLabel(/رمز الدعوة/)).toHaveCount(0);
 
-    await page.getByRole("button", { name: /create an account/i }).click();
-    await expect(page.getByLabel(/invite code/i)).toBeVisible();
-    await expect(page.getByRole("heading", { name: /join ingleezy/i })).toBeVisible();
+    await page.getByRole("button", { name: /أنشئ حساباً/ }).click();
+    await expect(page.getByLabel(/رمز الدعوة/)).toBeVisible();
+    await expect(page.getByRole("heading", { name: /انضم إلى إنجليزي/ })).toBeVisible();
   });
 });

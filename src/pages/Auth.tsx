@@ -22,9 +22,9 @@ const validateAuthInput = (
   isSignup: boolean,
 ) => {
   const errors: { email?: string; password?: string; inviteCode?: string } = {};
-  if (!EMAIL_RE.test(email.trim())) errors.email = "Please enter a valid email address";
-  if (password.length < 6) errors.password = "Password must be at least 6 characters";
-  if (isSignup && inviteCode.trim().length < 4) errors.inviteCode = "Invite code required";
+  if (!EMAIL_RE.test(email.trim())) errors.email = "أدخل بريداً إلكترونياً صحيحاً";
+  if (password.length < 6) errors.password = "يجب ألا تقل كلمة المرور عن 6 أحرف";
+  if (isSignup && inviteCode.trim().length < 4) errors.inviteCode = "رمز الدعوة مطلوب";
   return errors;
 };
 
@@ -79,16 +79,16 @@ const Auth = () => {
         const { error } = await signIn(email, password);
         if (error) {
           toast({
-            title: "Login Failed",
+            title: "فشل تسجيل الدخول",
             description: error.message === "Invalid login credentials"
-              ? "Wrong email or password. Please try again."
+              ? "البريد الإلكتروني أو كلمة المرور غير صحيحة. حاول من جديد."
               : error.message,
             variant: "destructive",
           });
         } else {
           toast({
-            title: "Welcome back",
-            description: "Ready to continue learning?",
+            title: "أهلاً بعودتك",
+            description: "جاهز لمواصلة التعلم؟",
           });
         }
       } else {
@@ -101,17 +101,17 @@ const Auth = () => {
         );
         if (verifyError) {
           toast({
-            title: "Couldn't check invite code",
+            title: "تعذّر التحقق من رمز الدعوة",
             description: verifyError.message,
             variant: "destructive",
           });
           return;
         }
         if (!codeOk) {
-          setErrors((prev) => ({ ...prev, inviteCode: "Invalid, expired, or fully used code" }));
+          setErrors((prev) => ({ ...prev, inviteCode: "رمز غير صالح أو منتهٍ أو مستنفد" }));
           toast({
-            title: "Invite code not accepted",
-            description: "Double-check the code or ask for a new one.",
+            title: "لم يُقبل رمز الدعوة",
+            description: "تأكد من الرمز أو اطلب رمزاً جديداً.",
             variant: "destructive",
           });
           return;
@@ -120,9 +120,9 @@ const Auth = () => {
         const { error } = await signUp(email, password);
         if (error) {
           toast({
-            title: "Sign Up Failed",
+            title: "فشل إنشاء الحساب",
             description: error.message.includes("already registered")
-              ? "This email is already registered. Try logging in."
+              ? "هذا البريد مسجّل من قبل. جرّب تسجيل الدخول."
               : error.message,
             variant: "destructive",
           });
@@ -138,16 +138,16 @@ const Auth = () => {
         if (redeemError) {
           await supabase.auth.signOut();
           toast({
-            title: "Invite code couldn't be redeemed",
-            description: redeemError.message || "Please try again with a different code.",
+            title: "تعذّر استخدام رمز الدعوة",
+            description: redeemError.message || "حاول برمز آخر.",
             variant: "destructive",
           });
           return;
         }
 
         toast({
-          title: "Account created",
-          description: "You're all set to start learning.",
+          title: "تم إنشاء الحساب",
+          description: "كل شيء جاهز لتبدأ التعلم.",
         });
       }
     } finally {
@@ -182,12 +182,12 @@ const Auth = () => {
             className="h-14 w-14 mx-auto mb-5"
           />
           <h1 className="text-2xl font-bold text-foreground mb-2 font-heading">
-            {isLogin ? "Welcome Back" : "Join Ingleezy"}
+            {isLogin ? "أهلاً بعودتك" : "انضم إلى إنجليزي"}
           </h1>
           <p className="text-muted-foreground">
             {isLogin
-              ? "Log in to continue your learning journey"
-              : "Create an account to track your progress"}
+              ? "سجّل الدخول لمواصلة رحلة تعلمك"
+              : "أنشئ حساباً لتتبع تقدمك"}
           </p>
         </div>
 
@@ -198,7 +198,7 @@ const Auth = () => {
             <div className="space-y-2">
               <Label htmlFor="email" className="text-sm font-medium flex items-center gap-2">
                 <Mail className="h-4 w-4 text-muted-foreground" />
-                Email
+                البريد الإلكتروني
               </Label>
               <Input
                 id="email"
@@ -220,7 +220,7 @@ const Auth = () => {
             <div className="space-y-2">
               <Label htmlFor="password" className="text-sm font-medium flex items-center gap-2">
                 <Lock className="h-4 w-4 text-muted-foreground" />
-                Password
+                كلمة المرور
               </Label>
               <Input
                 id="password"
@@ -242,7 +242,7 @@ const Auth = () => {
                     disabled={isSubmitting}
                     onClick={async () => {
                       if (!EMAIL_RE.test(email.trim())) {
-                        setErrors((prev) => ({ ...prev, email: "Enter your email above first" }));
+                        setErrors((prev) => ({ ...prev, email: "أدخل بريدك الإلكتروني أعلاه أولاً" }));
                         return;
                       }
                       setIsSubmitting(true);
@@ -252,14 +252,14 @@ const Auth = () => {
                         });
                         if (error) {
                           toast({
-                            title: "Couldn't send reset email",
+                            title: "تعذّر إرسال رابط إعادة التعيين",
                             description: error.message,
                             variant: "destructive",
                           });
                         } else {
                           toast({
-                            title: "Check your inbox",
-                            description: "We've sent you a link to reset your password.",
+                            title: "تفقد بريدك الوارد",
+                            description: "أرسلنا لك رابطاً لإعادة تعيين كلمة المرور.",
                           });
                         }
                       } finally {
@@ -268,7 +268,7 @@ const Auth = () => {
                     }}
                     className="text-xs text-muted-foreground hover:text-primary transition-colors"
                   >
-                    Forgot password?
+                    نسيت كلمة المرور؟
                   </button>
                 </div>
               )}
@@ -279,7 +279,7 @@ const Auth = () => {
               <div className="space-y-2">
                 <Label htmlFor="inviteCode" className="text-sm font-medium flex items-center gap-2">
                   <Ticket className="h-4 w-4 text-muted-foreground" />
-                  Beta invite code
+                  رمز الدعوة التجريبي
                 </Label>
                 <Input
                   id="inviteCode"
@@ -297,7 +297,7 @@ const Auth = () => {
                   <p className="text-destructive text-sm">{errors.inviteCode}</p>
                 )}
                 <p className="text-xs text-muted-foreground">
-                  Ingleezy is in closed beta. Don't have a code? Email us at hello@ingleezy.app.
+                  إنجليزي في مرحلة تجريبية مغلقة. لا تملك رمزاً؟ راسلنا على hello@ingleezy.app
                 </p>
               </div>
             )}
@@ -314,12 +314,12 @@ const Auth = () => {
               ) : isLogin ? (
                 <>
                   <LogIn className="h-4 w-4 mr-2" />
-                  Log In
+                  تسجيل الدخول
                 </>
               ) : (
                 <>
                   <UserPlus className="h-4 w-4 mr-2" />
-                  Sign Up
+                  إنشاء حساب
                 </>
               )}
             </Button>
@@ -331,7 +331,7 @@ const Auth = () => {
               <span className="w-full border-t border-border" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
+              <span className="bg-card px-2 text-muted-foreground">أو تابع باستخدام</span>
             </div>
           </div>
 
@@ -349,7 +349,7 @@ const Auth = () => {
                 });
                 if (error) {
                   toast({
-                    title: "Google Sign In Failed",
+                    title: "فشل تسجيل الدخول عبر Google",
                     description: String(error),
                     variant: "destructive",
                   });
@@ -365,7 +365,7 @@ const Auth = () => {
               <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
               <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
             </svg>
-            Continue with Google
+            المتابعة عبر Google
           </Button>
 
           <div className="mt-5 text-center">
@@ -379,13 +379,13 @@ const Auth = () => {
             >
               {isLogin ? (
                 <>
-                  New here?{" "}
-                  <span className="font-medium text-primary">Create an account</span>
+                  جديد هنا؟{" "}
+                  <span className="font-medium text-primary">أنشئ حساباً</span>
                 </>
               ) : (
                 <>
-                  Already have an account?{" "}
-                  <span className="font-medium text-primary">Log in</span>
+                  لديك حساب بالفعل؟{" "}
+                  <span className="font-medium text-primary">سجّل الدخول</span>
                 </>
               )}
             </button>
