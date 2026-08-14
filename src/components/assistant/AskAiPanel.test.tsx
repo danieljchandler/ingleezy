@@ -110,7 +110,7 @@ describe("AskAiPanel", () => {
     const page = body.pageContext as Record<string, unknown>;
     expect(page.route).toBe("/reading");
     // /reading is unregistered here, so the PAGE_HINTS fallback describes it.
-    expect(page.title).toBe("Reading Practice");
+    expect(page.title).toBe("تدريب القراءة");
     expect((body.messages as unknown[]).length).toBe(1);
   });
 

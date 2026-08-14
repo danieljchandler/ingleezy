@@ -121,7 +121,7 @@ describe("the call", () => {
     expect(args.mode).toBe("assistant");
     expect(args.dialect).toBe("Gulf");
     // The route is unregistered here, so the PAGE_HINTS fallback describes it.
-    expect(args.context).toContain("Reading Practice");
+    expect(args.context).toContain("تدريب القراءة");
   });
 
   it("shows the transcript with speaker labels while live", () => {

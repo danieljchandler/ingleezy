@@ -1,144 +1,146 @@
 /**
  * Centralized friendly explanations for major pages and tools.
- * Used by <InfoHint /> next to page headers and section titles.
+ * Used by <InfoHint /> next to page headers and section titles, and as the
+ * assistant's fallback page context (see pageAiContext.ts) — so the copy here
+ * is learner-facing Arabic describing the *English*-learning behavior.
  */
 export const PAGE_HINTS: Record<string, { title: string; body: string; cta?: string }> = {
   review: {
-    title: "Review",
-    body: "Your daily spaced-repetition session. Rate each card honestly — we'll resurface it at just the right moment so it sticks for good.",
-    cta: "Try a quick 5-card warmup.",
+    title: "المراجعة",
+    body: "جلسة التكرار المتباعد اليومية. قيّم كل بطاقة بصدق — سنعيد عرضها في اللحظة المناسبة تماماً لترسخ في ذاكرتك.",
+    cta: "جرّب إحماءً سريعاً من 5 بطاقات.",
   },
   "my-words": {
-    title: "My Words",
-    body: "Every word you've saved across the app lives here. Filter by dialect, search, or jump straight into a flashcard review.",
+    title: "كلماتي",
+    body: "كل كلمة حفظتها في التطبيق تعيش هنا. صفِّ وابحث، أو انتقل مباشرة إلى مراجعة بالبطاقات.",
   },
   "my-phrases": {
-    title: "My Phrases",
-    body: "Set phrases and useful expressions you've saved. Practice them in context so they roll off the tongue when you need them.",
+    title: "عباراتي",
+    body: "العبارات والتعابير المفيدة التي حفظتها. تدرّب عليها في سياقها حتى تنساب بسهولة عندما تحتاجها.",
   },
   "mywords-review": {
-    title: "Flashcard Review",
-    body: "Audio plays, image shows — your job is to recall the word. Self-rate to teach the algorithm how well you knew it.",
+    title: "مراجعة البطاقات",
+    body: "الصوت يُسمَع والصورة تظهر — مهمتك تذكُّر الكلمة. قيّم نفسك لتعلّم الخوارزمية كم كنت تعرفها.",
   },
   discover: {
-    title: "Discover",
-    body: "Curated native videos with tap-to-translate subtitles. The fastest way to train your ear on real-world English.",
-    cta: "Tap any word in the subtitles to save it.",
+    title: "اكتشف",
+    body: "فيديوهات منتقاة بأصوات أصلية مع ترجمة تفاعلية بلمسة واحدة. أسرع طريقة لتدريب أذنك على الإنجليزية الحقيقية.",
+    cta: "المس أي كلمة في الترجمة لحفظها.",
   },
   transcribe: {
-    title: "Transcribe",
-    body: "Drop in audio, video, TikTok, or YouTube and get a word-by-word transcript with translations, dialect notes, and tappable vocab.",
+    title: "تفريغ الصوت",
+    body: "أدخل صوتاً أو فيديو أو رابط تيك توك أو يوتيوب واحصل على نص كلمة بكلمة مع الترجمة ومفردات قابلة للحفظ.",
   },
   translate: {
-    title: "Translate & Save",
-    body: "Paste Arabic text and get a sentence-by-sentence breakdown — literal + natural + cultural notes. Tap any word to save it to My Words.",
+    title: "ترجم واحفظ",
+    body: "الصق نصاً إنجليزياً واحصل على تحليل جملة بجملة — ترجمة حرفية وطبيعية وملاحظات ثقافية. المس أي كلمة لحفظها في كلماتي.",
   },
   quiz: {
-    title: "Quiz",
-    body: "Quick multiple-choice rounds to test recall. Great as a 2-minute warmup or cooldown between bigger sessions.",
+    title: "اختبار قصير",
+    body: "جولات اختيار من متعدد سريعة لاختبار التذكّر. مثالية كإحماء أو ختام لدقيقتين بين الجلسات الأكبر.",
   },
   "reading-practice": {
-    title: "Reading Practice",
-    body: "Curated short stories at your level. Tap any word for instant meaning, or ask the tutor anything about the passage.",
+    title: "تدريب القراءة",
+    body: "قصص قصيرة منتقاة على مستواك. المس أي كلمة لمعناها الفوري، أو اسأل المعلّم أي شيء عن النص.",
   },
   pronunciation: {
-    title: "Pronunciation Practice",
-    body: "Speak a phrase and get instant scoring on accuracy, fluency, and individual sounds. Powered by speech-recognition AI.",
+    title: "تدريب النطق",
+    body: "انطق عبارة واحصل على تقييم فوري للدقة والطلاقة والأصوات المنفردة. مدعوم بذكاء اصطناعي للتعرف على الكلام.",
   },
   meme: {
-    title: "Meme Analyzer",
-    body: "Paste any Arabic meme and we'll break down the text, the joke, and the dialect cues — culture and comprehension in one go.",
+    title: "محلل الميمز",
+    body: "الصق أي ميم عربي وسنحلل النص والنكتة وإشارات اللهجة — ثقافة وفهم معاً. (قيد التحويل إلى ميمز إنجليزية.)",
   },
   "learn-from-x": {
-    title: "Learn from X",
-    body: "Drop in an X (Twitter) post URL. We'll extract the Arabic, translate it, and turn the vocabulary into flashcards.",
+    title: "تعلّم من X",
+    body: "أدخل رابط منشور من X (تويتر). سنستخرج النص ونترجمه ونحوّل المفردات إلى بطاقات. (قيد التحويل إلى منشورات إنجليزية.)",
   },
   "tutor-upload": {
-    title: "Tutor Upload",
-    body: "Upload a lesson recording with your tutor and we'll auto-cut it into flashcards with audio, translations, and images.",
+    title: "رفع درس خصوصي",
+    body: "ارفع تسجيل درسك مع معلّمك وسنقصّه تلقائياً إلى بطاقات مع الصوت والترجمة والصور.",
   },
   conversation: {
-    title: "Conversation Simulator",
-    body: "Free-form chat in English with an AI tutor that explains things in your dialect. No judgment — just speaking reps.",
+    title: "محاكي المحادثة",
+    body: "دردشة حرة بالإنجليزية مع معلّم ذكي يشرح لك بالعربية. بلا أحكام — مجرد تمرين على الكلام.",
   },
   "souq-news": {
-    title: "Souq News",
-    body: "Today's news from your region retold in easy English, with a quick comprehension quiz at the end.",
+    title: "أخبار السوق",
+    body: "أخبار اليوم من منطقتك مرويّة بإنجليزية سهلة، مع اختبار فهم سريع في النهاية.",
   },
   stories: {
-    title: "Interactive Stories",
-    body: "Choose-your-own-adventure stories in English. Decisions branch the narrative and reinforce vocab in context.",
+    title: "قصص تفاعلية",
+    body: "قصص «اختر مغامرتك» بالإنجليزية. قراراتك تفرّع الحكاية وترسّخ المفردات في سياقها.",
   },
   "placement-quiz": {
-    title: "Placement Quiz",
-    body: "20 adaptive questions that pinpoint your English CEFR level so we can tune every lesson to where you actually are.",
+    title: "اختبار تحديد المستوى",
+    body: "٢٠ سؤالاً متكيّفاً تحدد مستواك في الإنجليزية بدقة (CEFR) لنضبط كل درس على مستواك الفعلي.",
   },
   "set-phrases": {
-    title: "Set Phrases",
-    body: "High-frequency English expressions for real-life situations — greetings, small talk, phone calls, and more.",
+    title: "عبارات جاهزة",
+    body: "تعابير إنجليزية عالية التكرار لمواقف الحياة الحقيقية — تحيات ودردشة قصيرة ومكالمات هاتفية وأكثر.",
   },
   "daily-challenge": {
-    title: "Daily Challenge",
-    body: "A bite-size mixed-skill workout. Keep your streak alive and earn bonus XP — bigger multipliers the longer you go.",
+    title: "تحدي اليوم",
+    body: "تمرين قصير متنوع المهارات. حافظ على سلسلتك واكسب نقاطاً إضافية — المضاعفات تكبر كلما واصلت.",
   },
   leaderboard: {
-    title: "Leaderboard",
-    body: "See how your XP stacks up against other learners this week. Friendly competition = consistent practice.",
+    title: "لوحة الصدارة",
+    body: "شاهد ترتيب نقاطك بين المتعلمين الآخرين هذا الأسبوع. منافسة ودّية = تدريب منتظم.",
   },
   friends: {
-    title: "Friends",
-    body: "Add learning buddies, share streaks, and cheer each other on. Studying together makes it stick.",
+    title: "الأصدقاء",
+    body: "أضف رفاق تعلّم، وشاركهم سلاسلك، وشجّعوا بعضكم. الدراسة معاً ترسّخ أكثر.",
   },
   today: {
-    title: "Today",
-    body: "Your personalized daily plan. Finish the ring and you've hit your goal — everything else is bonus reps.",
+    title: "اليوم",
+    body: "خطتك اليومية المخصصة. أكمل الحلقة وستكون قد حققت هدفك — وكل ما بعدها تمرين إضافي.",
   },
   settings: {
-    title: "Settings",
-    body: "Tune dialects, display preferences, audio, hints, and more. Everything that shapes your learning experience.",
+    title: "الإعدادات",
+    body: "اضبط اللغة والعرض والصوت والتلميحات وأكثر. كل ما يشكّل تجربة تعلّمك.",
   },
   "grammar-drills": {
-    title: "Grammar Drills",
-    body: "Targeted exercises on verb forms, agreement, and tricky constructions. Build the scaffolding under your vocab.",
+    title: "تمارين القواعد",
+    body: "تمارين مركّزة على تصريف الأفعال والمطابقة والتراكيب الصعبة. ابنِ الهيكل الذي يحمل مفرداتك.",
   },
   "listening-practice": {
-    title: "Listening Practice",
-    body: "Audio-only drills that train your ear. Listen, recall, check — no reading allowed.",
+    title: "تدريب الاستماع",
+    body: "تمارين صوتية فقط تدرّب أذنك. استمع وتذكّر وتحقق — بلا قراءة.",
   },
   "vocab-games": {
-    title: "Vocab Games",
-    body: "Quick playful rounds — matching, speed rounds, and battles. Learning that doesn't feel like studying.",
+    title: "ألعاب المفردات",
+    body: "جولات مرحة سريعة — توصيل وجولات سرعة ومعارك. تعلّم لا يشبه المذاكرة.",
   },
   "vocab-battles": {
-    title: "Vocab Battles",
-    body: "Head-to-head vocab duels against other learners or the AI. Fast-paced, points-based, addictive.",
+    title: "معارك المفردات",
+    body: "منافسات مفردات وجهاً لوجه ضد متعلمين آخرين أو الذكاء الاصطناعي. سريعة وبالنقاط ومسبّبة للإدمان.",
   },
   "culture-guide": {
-    title: "Culture Guide",
-    body: "Customs, etiquette, and context that turn language into real communication. Avoid the awkward moments.",
+    title: "دليل الثقافة",
+    body: "عادات وآداب وسياقات تحوّل اللغة إلى تواصل حقيقي. تجنّب المواقف المحرجة.",
   },
   "how-do-i-say": {
-    title: "How Do I Say...",
-    body: "Type anything in Arabic and get the natural way to say it in English — not just a dictionary swap.",
+    title: "كيف أقول…؟",
+    body: "اكتب أي شيء بالعربية واحصل على الطريقة الطبيعية لقوله بالإنجليزية — لا مجرد ترجمة قاموسية.",
   },
   "my-transcriptions": {
-    title: "My Transcriptions",
-    body: "Everything you've transcribed, organized and searchable. Jump back into any session anytime.",
+    title: "نصوصي المفرّغة",
+    body: "كل ما فرّغته من صوت، منظّم وقابل للبحث. عد إلى أي جلسة متى شئت.",
   },
   "liked-videos": {
-    title: "Liked Videos",
-    body: "Your saved Discover videos in one place. Rewatch favorites, mine them for vocab, or share with friends.",
+    title: "فيديوهات أعجبتني",
+    body: "فيديوهات اكتشف التي حفظتها في مكان واحد. أعد مشاهدة المفضلة، أو استخرج منها مفردات، أو شاركها.",
   },
   "learning-analytics": {
-    title: "Learning Analytics",
-    body: "Charts of your streak, time spent, words learned, and weak spots. See your progress in numbers.",
+    title: "إحصاءات التعلم",
+    body: "رسوم بيانية لسلسلتك ووقتك وكلماتك ونقاط ضعفك. شاهد تقدّمك بالأرقام.",
   },
   pricing: {
-    title: "Plans",
-    body: "Compare what's included on each plan. Upgrade anytime — your progress is always yours.",
+    title: "الباقات",
+    body: "قارن ما تتضمنه كل باقة. رقِّ اشتراكك متى شئت — تقدّمك يبقى لك دائماً.",
   },
   onboarding: {
-    title: "Welcome",
-    body: "A 60-second setup so we can personalize your dialect, goals, and pace. Skip anytime.",
+    title: "أهلاً بك",
+    body: "إعداد لا يتجاوز الدقيقة لنخصص لك لهجتك وأهدافك وإيقاعك. يمكنك التخطي في أي وقت.",
   },
 };
