@@ -307,9 +307,9 @@ test.describe("pricing", () => {
     await signInAs("free");
     await page.goto("/pricing");
 
-    await expect(page.getByRole("heading", { name: /choose your plan/i })).toBeVisible();
-    await expect(page.getByText("Free", { exact: true })).toBeVisible();
-    await expect(page.getByRole("button", { name: /^subscribe$/i })).toHaveCount(2);
+    await expect(page.getByRole("heading", { name: /اختر باقتك/ })).toBeVisible();
+    await expect(page.getByText("مجاني", { exact: true })).toBeVisible();
+    await expect(page.getByRole("button", { name: "اشترك" })).toHaveCount(2);
   });
 
   test("starts checkout for the tier that was clicked", async ({ page, signInAs, backend }) => {
@@ -317,7 +317,7 @@ test.describe("pricing", () => {
     backend.stubFunction("create-checkout", { url: "https://checkout.stripe.com/pay/allin" });
 
     await page.goto("/pricing");
-    await page.getByRole("button", { name: /^subscribe$/i }).last().click();
+    await page.getByRole("button", { name: "اشترك" }).last().click();
 
     await expect.poll(() => backend.callsTo("create-checkout").length).toBe(1);
     // The tier is the whole content of the request — sending the wrong one
@@ -333,9 +333,9 @@ test.describe("pricing", () => {
     await page.goto("/pricing");
 
     await expect(page.getByText("Your Plan", { exact: true })).toBeVisible();
-    await expect(page.getByText(/You're on the/)).toBeVisible();
+    await expect(page.getByText(/أنت على باقة/)).toBeVisible();
     // No second charge offered for the plan they already have.
-    await expect(page.getByRole("button", { name: /^subscribe$/i })).toHaveCount(1);
+    await expect(page.getByRole("button", { name: "اشترك" })).toHaveCount(1);
   });
 
   test("sends a signed-out visitor to sign up rather than to Stripe", async ({
@@ -346,7 +346,7 @@ test.describe("pricing", () => {
     await signInAs("anonymous");
     await page.goto("/pricing");
 
-    await page.getByRole("button", { name: /sign up to subscribe/i }).first().click();
+    await page.getByRole("button", { name: "أنشئ حساباً للاشتراك" }).first().click();
 
     await expect(page).toHaveURL(/\/auth$/);
     expect(backend.callsTo("create-checkout")).toHaveLength(0);
@@ -363,8 +363,8 @@ test.describe("pricing", () => {
     backend.stubFunctionFailure("create-checkout");
 
     await page.goto("/pricing");
-    await page.getByRole("button", { name: /^subscribe$/i }).first().click();
+    await page.getByRole("button", { name: "اشترك" }).first().click();
 
-    await expect(page.getByText(/failed to start checkout/i)).toBeVisible();
+    await expect(page.getByText(/تعذّر بدء عملية الدفع/)).toBeVisible();
   });
 });

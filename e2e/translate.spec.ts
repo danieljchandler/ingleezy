@@ -57,7 +57,10 @@ test.describe("translating a passage", () => {
     await page.goto("/translate");
     await translate(page);
 
-    await expect(page.getByText("How are you today?").first()).toBeVisible();
+    // Assert on a line that only exists in the stubbed response, not on the
+    // passage text: ENGLISH_TEXT contains "How are you today?", so matching
+    // that would pass off the textarea before any request went out.
+    await expect(page.getByText("تعال نشرب قهوة معنا.")).toBeVisible();
     // "My dialect" resolves to the active dialect before the call — there is
     // nothing to auto-detect about pasted English.
     expect(backend.lastCallTo("translate-text")?.body).toMatchObject({

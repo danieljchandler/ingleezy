@@ -71,7 +71,7 @@ test.describe("signed in — analytics", () => {
     });
     await page.goto("/analytics");
 
-    const mastered = page.locator("div").filter({ hasText: /^Mastered/ }).first();
+    const mastered = page.locator("div").filter({ hasText: /^متقنة/ }).first();
     await expect(mastered).toContainText("2");
     await expect(mastered).toContainText("100%");
   });
