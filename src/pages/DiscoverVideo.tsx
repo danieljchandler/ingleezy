@@ -147,11 +147,11 @@ const ClickableWord = ({
             {!displayGloss && isTranslating && (
               <div className="flex items-center justify-center gap-2 mt-1">
                 <div className="h-3 w-3 rounded-full border-2 border-primary border-t-transparent animate-spin" />
-                <span className="text-xs text-muted-foreground">Translating…</span>
+                <span className="text-xs text-muted-foreground">جارٍ الترجمة…</span>
               </div>
             )}
             {!displayGloss && !isTranslating && (
-              <p className="text-xs text-muted-foreground italic">No definition available</p>
+              <p className="text-xs text-muted-foreground">لا يتوفر تعريف</p>
             )}
           </div>
           {onSave && displayGloss && (
@@ -322,7 +322,7 @@ const TranscriptRow = ({
               )}
             >
               <Mic className="h-3.5 w-3.5" />
-              {isShadowing ? "Close" : "Practice shadowing"}
+              {isShadowing ? "إغلاق" : "تدرّب بالمحاكاة"}
             </Button>
           )}
         </div>
@@ -416,7 +416,7 @@ const LikeButton = ({ videoId, isAuthenticated }: { videoId: string; isAuthentic
 
   const handleToggle = async () => {
     if (!isAuthenticated) {
-      toast.error("Sign in to like videos");
+      toast.error("سجّل الدخول للإعجاب بالفيديوهات");
       return;
     }
     try {
@@ -426,7 +426,7 @@ const LikeButton = ({ videoId, isAuthenticated }: { videoId: string; isAuthentic
         await likeVideo.mutateAsync(videoId);
       }
     } catch {
-      toast.error("Failed to update like");
+      toast.error("تعذّر تحديث الإعجاب");
     }
   };
 
@@ -504,13 +504,13 @@ const GrammarNotesSection = ({
       });
       if (error) throw error;
       if ((data as any)?.added > 0) {
-        toast.success(`Added ${(data as any).added} new grammar note${(data as any).added === 1 ? "" : "s"}`);
+        toast.success(`أُضيفت ${(data as any).added} ملاحظة قواعد جديدة`);
         qc.invalidateQueries({ queryKey: ["discover-video", videoId] });
       } else {
-        toast.info((data as any)?.message || "No new grammar notes found");
+        toast.info((data as any)?.message || "لا ملاحظات قواعد جديدة");
       }
     } catch (e: any) {
-      toast.error(e?.message || "Failed to generate grammar notes");
+      toast.error(e?.message || "تعذّر توليد ملاحظات القواعد");
     } finally {
       setGenerating(false);
     }
@@ -521,7 +521,7 @@ const GrammarNotesSection = ({
       <summary className="flex items-center justify-between gap-2 cursor-pointer text-sm font-semibold text-foreground">
         <span className="flex items-center gap-2">
           <ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180 text-muted-foreground" />
-          Grammar Notes ({filtered.length}
+          ملاحظات القواعد ({filtered.length}
           {points.length !== filtered.length ? `/${points.length}` : ""})
         </span>
         <span className="flex items-center gap-2">
@@ -534,7 +534,7 @@ const GrammarNotesSection = ({
               }}
               className="text-xs text-muted-foreground hover:text-foreground underline-offset-2 hover:underline"
             >
-              {showAll ? `My level (${userLevel})` : "All levels"}
+              {showAll ? `مستواي (${userLevel})` : "كل المستويات"}
             </button>
           )}
         </span>
@@ -543,8 +543,8 @@ const GrammarNotesSection = ({
         {filtered.length === 0 && (
           <p className="text-sm text-muted-foreground">
             {points.length === 0
-              ? "No grammar notes yet."
-              : `No notes at your level (${userLevel}). Try "All levels" or generate more.`}
+              ? "لا ملاحظات قواعد بعد."
+              : `لا ملاحظات على مستواك (${userLevel}). جرّب «كل المستويات» أو ولّد المزيد.`}
           </p>
         )}
         {filtered.map((p, i) => (
@@ -584,7 +584,7 @@ const GrammarNotesSection = ({
           ) : (
             <Sparkles className="h-3.5 w-3.5 mr-2" />
           )}
-          Generate more at my level ({userLevel})
+          ولّد المزيد على مستواي ({userLevel})
         </Button>
       </div>
     </details>
@@ -763,7 +763,7 @@ const DiscoverVideo = () => {
     if (typeof startMs === "number") {
       audio.currentTime = Math.max(0, startMs / 1000);
     }
-    audio.play().catch(() => toast.error("Audio playback failed"));
+    audio.play().catch(() => toast.error("تعذّر تشغيل الصوت"));
   }, [tiktokAudioReady]);
 
   const handleSeek = useCallback((ms: number) => {
@@ -819,7 +819,7 @@ const DiscoverVideo = () => {
   const handleSaveToMyWords = useCallback(
     async (word: VocabItem) => {
       if (!isAuthenticated || !user) {
-        toast.error("Please log in to save words");
+        toast.error("سجّل الدخول لحفظ الكلمات");
         return;
       }
       try {
@@ -873,13 +873,13 @@ const DiscoverVideo = () => {
           source: "discover",
         });
         setSavedWords((prev) => new Set(prev).add(word.arabic));
-        toast.success("Saved to My Words");
+        toast.success("حُفظت في كلماتي");
       } catch (err: any) {
         if (err?.code === "23505") {
           setSavedWords((prev) => new Set(prev).add(word.arabic));
-          toast.info("Already in My Words");
+          toast.info("موجودة في كلماتي");
         } else {
-          toast.error("Failed to save word");
+          toast.error("تعذّر حفظ الكلمة");
         }
       }
     },
@@ -1573,7 +1573,7 @@ const DiscoverVideo = () => {
                       rel="noreferrer"
                       className="flex h-full w-full items-center justify-center text-sm text-white/80"
                     >
-                      View on TikTok
+                      شاهد على تيك توك
                     </a>
                   )}
                   {/* Fallback prompt when the muted iframe never confirms it
@@ -1583,7 +1583,7 @@ const DiscoverVideo = () => {
                   {tiktokNeedsManualPlay && (
                     <div className="pointer-events-none absolute inset-x-0 bottom-3 flex justify-center px-3">
                       <span className="rounded-full bg-black/75 px-3 py-1 text-xs font-medium text-white shadow-lg">
-                        Tap the video to start it
+                        المس الفيديو لتشغيله
                       </span>
                     </div>
                   )}
@@ -1667,14 +1667,14 @@ const DiscoverVideo = () => {
                     audio.pause();
                     ensureTikTokVideoPlaying(false);
                   } else {
-                    audio.play().catch(() => toast.error("Audio playback failed"));
+                    audio.play().catch(() => toast.error("تعذّر تشغيل الصوت"));
                     ensureTikTokVideoPlaying(true);
                   }
                 }}
                 disabled={!tiktokAudioReady}
               >
                 {isTiktokAudioPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-                {isTiktokAudioPlaying ? "Pause" : "Play"}
+                {isTiktokAudioPlaying ? "إيقاف مؤقت" : "تشغيل"}
               </Button>
               <span className="text-xs text-muted-foreground tabular-nums">
                 {Math.floor(currentTimeMs / 1000)}s
@@ -1707,7 +1707,7 @@ const DiscoverVideo = () => {
               }}
             >
               {timerPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-              {timerPlaying ? "Pause sync" : "Start subtitle sync"}
+              {timerPlaying ? "أوقف المزامنة" : "ابدأ مزامنة الترجمة"}
             </Button>
             <Button
               variant="ghost"
@@ -1737,7 +1737,7 @@ const DiscoverVideo = () => {
                 "hover:bg-muted active:scale-95",
                 "disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-muted/60"
               )}
-              aria-label="Previous line"
+              aria-label="السطر السابق"
             >
               <ChevronLeft className="h-5 w-5 text-foreground" />
             </button>
@@ -1774,7 +1774,7 @@ const DiscoverVideo = () => {
                       />
                     ) : fushaStatus === "loading" ? (
                       <p className="text-[10px] uppercase tracking-wide text-muted-foreground/60 text-center">
-                        Converting to فصحى…
+                        جارٍ التحويل إلى الفصحى…
                       </p>
                     ) : null
                   )}
@@ -1820,7 +1820,7 @@ const DiscoverVideo = () => {
                           )}
                         >
                           <Mic className="h-3.5 w-3.5" />
-                          {shadowLineId === displayLine.id ? "Close" : "Practice shadowing"}
+                          {shadowLineId === displayLine.id ? "إغلاق" : "تدرّب بالمحاكاة"}
                         </Button>
                       )}
                     </div>
@@ -1841,7 +1841,7 @@ const DiscoverVideo = () => {
                 </div>
               ) : (
                 <p className="text-center text-sm text-muted-foreground italic">
-                  {lines.length > 0 ? (isYouTube ? "Play video to see subtitles" : "Tap play on the video to begin") : "No transcript available"}
+                  {lines.length > 0 ? (isYouTube ? "شغّل الفيديو لترى الترجمة" : "المس تشغيل على الفيديو للبدء") : "لا يتوفر نص للفيديو"}
                 </p>
               )}
             </div>
@@ -1856,7 +1856,7 @@ const DiscoverVideo = () => {
                 "hover:bg-muted active:scale-95",
                 "disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-muted/60"
               )}
-              aria-label="Next line"
+              aria-label="السطر التالي"
             >
               <ChevronRight className="h-5 w-5 text-foreground" />
             </button>
@@ -1873,7 +1873,7 @@ const DiscoverVideo = () => {
           onClick={() => setShowFullTranscript(!showFullTranscript)}
         >
           <List className="h-3.5 w-3.5" />
-          {showFullTranscript ? "Hide" : "Show"} Transcript ({lines.length})
+          {showFullTranscript ? "أخفِ" : "أظهر"} النص ({lines.length})
         </Button>
         <div className="flex items-center gap-1.5">
           {/* Speed control */}
@@ -1904,28 +1904,31 @@ const DiscoverVideo = () => {
             onClick={() => setPlaybackMode((prev) => (prev === "continuous" ? "line" : "continuous"))}
           >
             {playbackMode === "continuous" ? <Play className="h-3.5 w-3.5" /> : <Pause className="h-3.5 w-3.5" />}
-            {playbackMode === "continuous" ? "Continuous" : "Phrase"}
+            {playbackMode === "continuous" ? "متواصل" : "جملة بجملة"}
           </Button>
           {showTranslations ? (
             <Eye className="h-3.5 w-3.5 text-muted-foreground" />
           ) : (
             <EyeOff className="h-3.5 w-3.5 text-muted-foreground" />
           )}
-          <span className="text-xs text-muted-foreground">EN</span>
+          {/* On an English video the spoken line is English, so what these
+              reveal is the Arabic support: the dialect gloss, the word-for-word
+              literal in English word order, and the Fusha rendering. */}
+          <span className="text-xs text-muted-foreground">المعنى</span>
           <Switch
             checked={showTranslations}
             onCheckedChange={setShowTranslations}
           />
-          <span className="text-xs text-muted-foreground ml-2">Literal</span>
+          <span className="text-xs text-muted-foreground ml-2">حرفي</span>
           <Switch
             checked={showLiteral}
             onCheckedChange={setShowLiteral}
           />
-          <span className="text-xs text-muted-foreground ml-2">Fusha</span>
+          <span className="text-xs text-muted-foreground ml-2">فصحى</span>
           <Switch
             checked={showFusha}
             onCheckedChange={setShowFusha}
-            aria-label="Show Fusha (MSA) line"
+            aria-label="أظهر سطر الفصحى"
           />
         </div>
       </div>
@@ -2034,7 +2037,7 @@ const DiscoverVideo = () => {
           <details className="group" open={!!video.is_meme}>
             <summary className="flex items-center gap-2 cursor-pointer text-sm font-semibold text-foreground">
               <ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180 text-muted-foreground" />
-              {video.is_meme ? "Meme Insight" : "Cultural Context"}
+              {video.is_meme ? "تحليل الميم" : "السياق الثقافي"}
             </summary>
             <p className="mt-2 text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
               {video.cultural_context}

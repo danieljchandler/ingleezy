@@ -389,7 +389,7 @@ test.describe("requesting content", () => {
    * baseline already counts. Enter is a path the component supports on purpose.
    */
   /** The request input, distinguished from the Browse search box beside it. */
-  const requestBox = (page: Page) => page.getByPlaceholder(/describe a video|creator|topic/i);
+  const requestBox = (page: Page) => page.getByPlaceholder(/صف الفيديو|صانع محتوى|موضوع/);
 
   async function submitRequest(page: Page, text: string) {
     await page.getByRole("button", { name: /اطلب محتوى/ }).click();
