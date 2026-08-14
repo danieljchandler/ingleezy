@@ -2,16 +2,18 @@ import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Check, X, Volume2, Play, Loader2, Quote } from "lucide-react";
 import { useAzureTTS } from "@/hooks/useAzureTTS";
-import { useDialect } from "@/contexts/DialectContext";
 import { cn } from "@/lib/utils";
 
 interface Props {
   wordArabic: string;
   wordEnglish: string;
+  /** The ENGLISH sentence the blank lives in. */
   sentenceText: string;
-  sentenceEnglish?: string | null;
+  /** Arabic translation of the sentence, revealed on demand after answering. */
+  sentenceArabic?: string | null;
+  /** Recorded audio of the sentence, when it exists and is English audio. */
   sentenceAudioUrl?: string | null;
-  distractors: string[]; // other Arabic words from due queue
+  distractors: string[]; // other English words from the due queue
   onAnswered?: (correct: boolean) => void;
 }
 
@@ -24,10 +26,11 @@ const shuffle = <T,>(arr: T[]): T[] => {
   return a;
 };
 
-// Replace first occurrence of the target word (whitespace-bounded) with a blank
+// Replace first occurrence of the target word (whitespace-bounded) with a
+// blank. Case-insensitive: "Market" at the sentence start still blanks "market".
 const buildCloze = (sentence: string, word: string) => {
   const escaped = word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const re = new RegExp(`(^|\\s|[،.,!؟?])${escaped}(?=$|\\s|[،.,!؟?])`);
+  const re = new RegExp(`(^|\\s|[،.,!؟?])${escaped}(?=$|\\s|[،.,!؟?])`, "i");
   const m = sentence.match(re);
   if (!m) return null;
   const before = sentence.slice(0, m.index! + m[1].length);
@@ -39,16 +42,15 @@ export const ReviewClozeCard = ({
   wordArabic,
   wordEnglish,
   sentenceText,
-  sentenceEnglish,
+  sentenceArabic,
   sentenceAudioUrl,
   distractors,
   onAnswered,
 }: Props) => {
-  const { activeDialect } = useDialect();
   const [selected, setSelected] = useState<string | null>(null);
   const [showTranslation, setShowTranslation] = useState(false);
 
-  const cloze = useMemo(() => buildCloze(sentenceText, wordArabic), [sentenceText, wordArabic]);
+  const cloze = useMemo(() => buildCloze(sentenceText, wordEnglish), [sentenceText, wordEnglish]);
 
   // Sentence with the target word masked out so the audio doesn't reveal the
   // answer. Recorded sentence audio always contains the word, so we ignore it
@@ -60,33 +62,34 @@ export const ReviewClozeCard = ({
   }, [cloze, sentenceText]);
 
   const options = useMemo(() => {
-    // Only keep Arabic-script options so we never offer English answers when
-    // the prompt requires an Arabic word.
-    const ARABIC_RE = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/;
+    // Only keep Latin-script options so we never offer Arabic answers when
+    // the blank requires an English word.
+    const LATIN_RE = /[A-Za-z]/;
     const pool = distractors.filter(
-      (d) => d && d !== wordArabic && ARABIC_RE.test(d),
+      (d) => d && d.toLowerCase() !== wordEnglish.toLowerCase() && LATIN_RE.test(d),
     );
     const picks = shuffle(pool).slice(0, 3);
-    return shuffle([wordArabic, ...picks]);
-  }, [distractors, wordArabic]);
+    return shuffle([wordEnglish, ...picks]);
+  }, [distractors, wordEnglish]);
 
   // Reset when card changes
   useEffect(() => {
     setSelected(null);
     setShowTranslation(false);
-  }, [wordArabic, sentenceText]);
+  }, [wordEnglish, sentenceText]);
 
-  // Masked-sentence TTS (used before the learner answers).
+  // Masked-sentence TTS (used before the learner answers). English voice —
+  // the sentence is the English target material.
   const { ttsUrl: maskedUrl, isLoading: maskedLoading } = useAzureTTS({
     text: maskedSentence,
     skip: !cloze,
-    dialect: activeDialect,
+    voice: "en-US-JennyNeural",
   });
   // Full-sentence TTS fallback (used after answering, when no recording exists).
   const { ttsUrl: fullTtsUrl, isLoading: fullTtsLoading } = useAzureTTS({
     text: sentenceText,
     skip: Boolean(sentenceAudioUrl) || selected == null,
-    dialect: activeDialect,
+    voice: "en-US-JennyNeural",
   });
   const fullAudioUrl = sentenceAudioUrl || fullTtsUrl;
   const audioUrl = selected == null ? maskedUrl : fullAudioUrl;
@@ -111,23 +114,19 @@ export const ReviewClozeCard = ({
   const handleSelect = (opt: string) => {
     if (selected) return;
     setSelected(opt);
-    onAnswered?.(opt === wordArabic);
+    onAnswered?.(opt === wordEnglish);
   };
 
   return (
     <div className="rounded-3xl bg-card border border-[#5C3A46]/15 p-7 text-center shadow-elegant">
       <div className="flex items-center justify-center gap-2 mb-6">
         <span className="text-[10px] uppercase tracking-[0.18em] font-semibold text-muted-foreground">
-          Fill in the missing word
+          أكمل الكلمة الناقصة
         </span>
       </div>
 
       {/* Sentence with blank */}
-      <div
-        className="text-3xl leading-loose text-foreground mb-7"
-        style={{ fontFamily: "'Amiri', 'Traditional Arabic', serif" }}
-        dir="rtl"
-      >
+      <div className="font-english text-3xl leading-loose text-foreground mb-7">
         <span>{cloze.before}</span>
         <span
           className={cn(
@@ -137,7 +136,7 @@ export const ReviewClozeCard = ({
             selected != null && selected !== wordArabic && "border-red-600 bg-red-500/15 text-red-700 border-solid"
           )}
         >
-          {selected ?? "ـــ"}
+          {selected ?? "___"}
         </span>
         <span>{cloze.after}</span>
       </div>
@@ -148,7 +147,7 @@ export const ReviewClozeCard = ({
           type="button"
           onClick={() => audioUrl && playAudio(audioUrl)}
           disabled={!audioUrl || ttsLoading}
-          aria-label={selected == null ? "Play sentence with word muted" : "Play full sentence"}
+          aria-label={selected == null ? "شغّل الجملة مع حجب الكلمة" : "شغّل الجملة كاملة"}
           className={cn(
             "h-14 w-14 rounded-full flex items-center justify-center",
             "bg-primary text-primary-foreground shadow-elegant",
@@ -159,7 +158,7 @@ export const ReviewClozeCard = ({
           {ttsLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : <Play className="h-6 w-6 ml-0.5" />}
         </button>
         <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
-          {selected == null ? "Word muted" : "Full sentence"}
+          {selected == null ? "الكلمة محجوبة" : "الجملة كاملة"}
         </span>
       </div>
 
@@ -167,7 +166,7 @@ export const ReviewClozeCard = ({
       <div className="grid grid-cols-2 gap-2.5 mb-2">
         {options.map((opt) => {
           const isPicked = selected === opt;
-          const isTarget = opt === wordArabic;
+          const isTarget = opt === wordEnglish;
           const reveal = selected != null;
           return (
             <button
@@ -175,15 +174,13 @@ export const ReviewClozeCard = ({
               onClick={() => handleSelect(opt)}
               disabled={selected != null}
               className={cn(
-                "rounded-xl border-2 border-[#5C3A46]/15 bg-card px-3 min-h-[56px] text-xl transition-all",
+                "font-english rounded-xl border-2 border-[#5C3A46]/15 bg-card px-3 min-h-[56px] text-xl transition-all",
                 "hover:border-primary/40 hover:bg-primary/5 hover:-translate-y-0.5",
                 "disabled:hover:translate-y-0",
                 reveal && isTarget && "border-green-600 bg-green-500/12",
                 reveal && isPicked && !isTarget && "border-red-600 bg-red-500/12",
                 reveal && !isTarget && !isPicked && "opacity-50",
               )}
-              style={{ fontFamily: "'Amiri', 'Traditional Arabic', serif" }}
-              dir="rtl"
             >
               <span className="inline-flex items-center gap-1.5">
                 {opt}
@@ -198,10 +195,10 @@ export const ReviewClozeCard = ({
       {selected != null && (
         <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 mt-5 text-center">
           <p className="text-base text-foreground">
-            <span className="font-semibold">{wordArabic}</span>
-            <span className="text-muted-foreground"> — {wordEnglish}</span>
+            <span className="font-english font-semibold">{wordEnglish}</span>
+            <span className="text-muted-foreground"> — {wordArabic}</span>
           </p>
-          {sentenceEnglish && (
+          {sentenceArabic && (
             <div className="mt-3">
               {!showTranslation ? (
                 <Button
@@ -211,10 +208,15 @@ export const ReviewClozeCard = ({
                   onClick={() => setShowTranslation(true)}
                 >
                   <Quote className="h-4 w-4" />
-                  Show translation
+                  أظهر الترجمة
                 </Button>
               ) : (
-                <p className="text-sm text-muted-foreground italic">{sentenceEnglish}</p>
+                <p
+                  className="text-sm text-muted-foreground"
+                  style={{ fontFamily: "'Amiri', 'Traditional Arabic', serif" }}
+                >
+                  {sentenceArabic}
+                </p>
               )}
             </div>
           )}

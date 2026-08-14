@@ -348,49 +348,52 @@ const MyWordsReview = () => {
   const newRemaining = remainingFromIndex.filter((c) => c.repetitions === 0).length;
   const reviewRemaining = remainingFromIndex.length - newRemaining;
 
-  // Cloze variant: enable for recognition cards that have sentence context
-  // containing the target word AND at least 3 distractor words available.
-  // Falls back to auto-mined sentences from the user's saved transcripts (#13).
+  // Cloze variant: blank the ENGLISH word inside its English sentence, with
+  // English distractors — the learner's target language fills the gap.
   //
   // Robustness: some saved cards have `word_arabic` / `word_english` swapped
-  // (e.g. an English gloss in `word_arabic`). Pick whichever side actually
-  // contains Arabic characters so the multiple-choice options never end up
-  // in English when Arabic is the only logical answer.
+  // (e.g. an Arabic gloss in `word_english`). Pick whichever side actually
+  // contains Latin characters so the multiple-choice options never end up
+  // in Arabic when English is the only logical answer. The Arabic side rides
+  // along for the answer line.
   const ARABIC_RE = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/;
-  const pickArabic = (a?: string | null, b?: string | null): string | null => {
-    if (a && ARABIC_RE.test(a)) return a;
-    if (b && ARABIC_RE.test(b)) return b;
+  const pickEnglish = (a?: string | null, b?: string | null): string | null => {
+    if (a && /[A-Za-z]/.test(a) && !ARABIC_RE.test(a)) return a;
+    if (b && /[A-Za-z]/.test(b) && !ARABIC_RE.test(b)) return b;
     return null;
   };
+  const currentEnglish = currentWord
+    ? pickEnglish(currentWord.word_english, currentWord.word_arabic)
+    : null;
   const currentArabic = currentWord
-    ? pickArabic(currentWord.word_arabic, currentWord.word_english)
+    ? (currentEnglish === currentWord.word_english ? currentWord.word_arabic : currentWord.word_english)
     : null;
   const distractorPool = (dueWords || [])
-    .map((d) => pickArabic(d.word_arabic, d.word_english))
-    .filter((w): w is string => !!w && w !== currentArabic);
+    .map((d) => pickEnglish(d.word_english, d.word_arabic))
+    .filter((w): w is string => !!w && w.toLowerCase() !== currentEnglish?.toLowerCase());
+  // The English sentence lives in sentence_english; sentence_text carries the
+  // Arabic translation (column names are Arabic-era, semantics flipped).
   const sentenceHasOwnWord =
-    !!currentWord?.sentence_text &&
-    !!currentArabic &&
-    currentWord.sentence_text.includes(currentArabic);
-  // Look up a transcript-sourced cloze sentence only when the card lacks one.
+    !!currentWord?.sentence_english &&
+    !!currentEnglish &&
+    currentWord.sentence_english.toLowerCase().includes(currentEnglish.toLowerCase());
+  // Transcript-mined cloze sentences are Arabic-era material — re-enable when
+  // the English transcription pipeline lands (see RETARGET media pipeline).
   const { data: transcriptCloze } = useTranscriptCloze({
-    wordArabic: currentArabic ?? undefined,
+    wordArabic: undefined,
     dialect: activeDialect,
-    enabled: !!currentWord && !!currentArabic && !sentenceHasOwnWord && !isProduction,
+    enabled: false,
   });
   const clozeSentenceText = sentenceHasOwnWord
-    ? currentWord!.sentence_text!
-    : transcriptCloze?.arabic ?? null;
-  const clozeSentenceEnglish = sentenceHasOwnWord
-    ? currentWord?.sentence_english ?? null
-    : transcriptCloze?.english ?? null;
-  const clozeSentenceAudio = sentenceHasOwnWord
-    ? currentWord?.sentence_audio_url ?? null
+    ? currentWord!.sentence_english!
+    : null;
+  const clozeSentenceArabic = sentenceHasOwnWord
+    ? currentWord?.sentence_text ?? null
     : null;
   const clozeFromTranscript = !sentenceHasOwnWord && !!transcriptCloze;
   const useCloze =
     !isProduction &&
-    !!currentArabic &&
+    !!currentEnglish &&
     !!clozeSentenceText &&
     distractorPool.length >= 3 &&
     currentIndex % 2 === 0;
@@ -737,11 +740,14 @@ const MyWordsReview = () => {
           {useCloze ? (
             <div>
               <ReviewClozeCard
-                wordArabic={currentArabic!}
-                wordEnglish={currentWord.word_english}
+                wordArabic={currentArabic ?? currentWord.word_arabic}
+                wordEnglish={currentEnglish!}
                 sentenceText={clozeSentenceText!}
-                sentenceEnglish={clozeSentenceEnglish}
-                sentenceAudioUrl={clozeSentenceAudio}
+                sentenceArabic={clozeSentenceArabic}
+                // sentence_audio_url is Arabic-era audio of the Arabic
+                // sentence — wrong language for an English cloze, so always
+                // synthesise until English sentence audio exists.
+                sentenceAudioUrl={null}
                 distractors={distractorPool}
               />
               {clozeFromTranscript && transcriptCloze && (

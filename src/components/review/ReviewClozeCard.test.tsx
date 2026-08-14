@@ -4,8 +4,8 @@ import { renderWithProviders } from "@/test/support/react/harness";
 import { ReviewClozeCard } from "./ReviewClozeCard";
 
 /**
- * The cloze card in the review deck: the learner's own sentence with the word
- * taken out of it.
+ * The cloze card in the review deck: the learner's own English sentence with
+ * the English word taken out of it.
  *
  * A flashcard asks whether a word can be recognised. This asks whether it can
  * be placed — which is nearly the whole of using a word, and is the reason the
@@ -34,10 +34,10 @@ vi.mock("@/hooks/useAzureTTS", () => ({
   },
 }));
 
-const SENTENCE = "رحت السوق أمس";
-const WORD = "السوق";
-const MASKED = "رحت ... أمس";
-const DISTRACTORS = ["بيت", "مدرسة", "مطعم"];
+const SENTENCE = "I went to the market yesterday";
+const WORD = "market";
+const MASKED = "I went to the ... yesterday";
+const DISTRACTORS = ["house", "school", "restaurant"];
 
 const play = HTMLMediaElement.prototype.play as ReturnType<typeof vi.fn>;
 let audios: HTMLAudioElement[] = [];
@@ -73,8 +73,8 @@ function render(over: Props = {}) {
   const onAnswered = vi.fn();
   const harness = renderWithProviders(
     <ReviewClozeCard
-      wordArabic={WORD}
-      wordEnglish="the market"
+      wordArabic="السوق"
+      wordEnglish={WORD}
       sentenceText={SENTENCE}
       distractors={DISTRACTORS}
       onAnswered={onAnswered}
@@ -86,10 +86,10 @@ function render(over: Props = {}) {
 }
 
 const choices = () =>
-  screen.getAllByRole("button").filter((b) => b.getAttribute("dir") === "rtl");
+  screen.getAllByRole("button").filter((b) => b.className.includes("font-english"));
 const choose = (word: string) =>
   fireEvent.click(choices().find((b) => b.textContent?.trim() === word)!);
-const audioButton = () => screen.getByRole("button", { name: /play .* sentence|play sentence/i });
+const audioButton = () => screen.getByRole("button", { name: /شغّل الجملة/ });
 const askedFor = (text: string) => tts.asked.filter((a) => a.text === text);
 
 describe("posing the question", () => {
@@ -98,14 +98,14 @@ describe("posing the question", () => {
 
     // The surrounding words are the clue. Blanking more than the target would
     // turn a placement exercise into a guess.
-    expect(screen.getByText("رحت")).toBeInTheDocument();
-    expect(screen.getByText("أمس")).toBeInTheDocument();
-    expect(screen.getByText("ـــ")).toBeInTheDocument();
-    expect(screen.getByText("Fill in the missing word")).toBeInTheDocument();
+    expect(screen.getByText("I went to the")).toBeInTheDocument();
+    expect(screen.getByText("yesterday")).toBeInTheDocument();
+    expect(screen.getByText("___")).toBeInTheDocument();
+    expect(screen.getByText("أكمل الكلمة الناقصة")).toBeInTheDocument();
   });
 
   it("declines the card when the word is not in the sentence", () => {
-    const { container } = render({ sentenceText: "رحت المطعم أمس" });
+    const { container } = render({ sentenceText: "I went to the shop yesterday" });
 
     // The caller falls back to an ordinary flashcard; a blank that never
     // appeared would be an unanswerable question.
@@ -113,17 +113,24 @@ describe("posing the question", () => {
   });
 
   it("does not blank a word that is only part of a longer one", () => {
-    const { container } = render({ wordArabic: "سوق", sentenceText: SENTENCE });
+    const { container } = render({ wordEnglish: "market", sentenceText: "The supermarket is open" });
 
-    // "سوق" inside "السوق" is the same root, not the same word, and blanking
-    // half a word leaves nonsense on screen.
+    // "market" inside "supermarket" is not the same word, and blanking half a
+    // word leaves nonsense on screen.
     expect(container).toBeEmptyDOMElement();
   });
 
-  it("finds a word that ends the sentence at a full stop", () => {
-    render({ sentenceText: "رحت السوق." });
+  it("blanks the word whatever its capitalisation", () => {
+    render({ sentenceText: "Market day is busy" });
 
-    expect(screen.getByText("Fill in the missing word")).toBeInTheDocument();
+    // "Market" at the sentence start is still the learner's word.
+    expect(screen.getByText("أكمل الكلمة الناقصة")).toBeInTheDocument();
+  });
+
+  it("finds a word that ends the sentence at a full stop", () => {
+    render({ sentenceText: "I went to the market." });
+
+    expect(screen.getByText("أكمل الكلمة الناقصة")).toBeInTheDocument();
   });
 });
 
@@ -132,7 +139,7 @@ describe("the options", () => {
     render();
 
     // Distractors drawn from the learner's own due queue are words they are
-    // meant to be able to tell apart; random Arabic would be a reading test.
+    // meant to be able to tell apart; random English would be a reading test.
     const labels = choices().map((b) => b.textContent?.trim());
     expect(labels).toHaveLength(4);
     expect(labels).toContain(WORD);
@@ -145,14 +152,14 @@ describe("the options", () => {
     expect(choices().filter((b) => b.textContent?.trim() === WORD)).toHaveLength(1);
   });
 
-  it("throws away distractors that are not Arabic", () => {
-    render({ distractors: ["house", "school", "بيت"] });
+  it("throws away distractors that are not English", () => {
+    render({ distractors: ["بيت", "مدرسة", "house"] });
 
-    // The due queue holds both halves of a card, so an English gloss can reach
+    // The due queue holds both halves of a card, so an Arabic gloss can reach
     // the distractor list; offered as an answer it is obviously wrong and the
     // question stops testing anything.
     const labels = choices().map((b) => b.textContent?.trim());
-    expect(labels).toEqual(expect.arrayContaining([WORD, "بيت"]));
+    expect(labels).toEqual(expect.arrayContaining([WORD, "house"]));
     expect(labels).toHaveLength(2);
   });
 
@@ -173,7 +180,7 @@ describe("the audio", () => {
     // Playing the recording here would read the answer out loud.
     expect(askedFor(MASKED)[0]).toMatchObject({ skip: false });
     expect(audios[0].src).toContain("blob:masked");
-    expect(screen.getByText("Word muted")).toBeInTheDocument();
+    expect(screen.getByText("الكلمة محجوبة")).toBeInTheDocument();
   });
 
   it("does not ask for the full sentence until it has been answered", () => {
@@ -191,7 +198,7 @@ describe("the audio", () => {
     // Hearing the word in the sentence, said by a person, is the point of
     // having the sentence at all.
     expect(audios.at(-1)!.src).toBe("https://audio.test/sentence.mp3");
-    expect(screen.getByText("Full sentence")).toBeInTheDocument();
+    expect(screen.getByText("الجملة كاملة")).toBeInTheDocument();
   });
 
   it("falls back to speech when the sentence was never recorded", () => {
@@ -226,12 +233,12 @@ describe("answering", () => {
   it("puts the chosen word into the blank", () => {
     const { container } = render();
 
-    choose("بيت");
+    choose("house");
 
     // Seeing the wrong word in the sentence is what makes it wrong — the
     // learner reads back something that does not mean anything.
     const blank = container.querySelector("span.border-dashed, span.border-solid")!;
-    expect(blank.textContent).toBe("بيت");
+    expect(blank.textContent).toBe("house");
     expect(blank.className).toContain("border-red");
   });
 
@@ -246,7 +253,7 @@ describe("answering", () => {
   it("reports a wrong one", () => {
     const { onAnswered } = render();
 
-    choose("بيت");
+    choose("house");
 
     expect(onAnswered).toHaveBeenCalledWith(false);
   });
@@ -254,7 +261,7 @@ describe("answering", () => {
   it("marks the answer even when the learner missed it", () => {
     render();
 
-    choose("بيت");
+    choose("house");
 
     // Being told you were wrong without being shown the answer teaches nothing.
     const target = choices().find((b) => b.textContent?.trim() === WORD)!;
@@ -264,7 +271,7 @@ describe("answering", () => {
   it("stops taking answers once one is given", () => {
     const { onAnswered } = render();
 
-    choose("بيت");
+    choose("house");
     choose(WORD);
 
     // Otherwise the learner taps until the green one appears and the review
@@ -278,57 +285,57 @@ describe("answering", () => {
 
     choose(WORD);
 
-    expect(screen.getByText("— the market")).toBeInTheDocument();
+    expect(screen.getByText("— السوق")).toBeInTheDocument();
   });
 });
 
 describe("the sentence translation", () => {
   it("stays behind a tap", () => {
-    render({ sentenceEnglish: "I went to the market yesterday" });
+    render({ sentenceArabic: "رحت السوق أمس" });
     choose(WORD);
 
-    // Working the sentence out from the Arabic is the exercise; the English is
+    // Working the sentence out from the English is the exercise; the Arabic is
     // the check on it.
-    expect(screen.queryByText("I went to the market yesterday")).toBeNull();
-    expect(screen.getByRole("button", { name: /show translation/i })).toBeInTheDocument();
+    expect(screen.queryByText("رحت السوق أمس")).toBeNull();
+    expect(screen.getByRole("button", { name: "أظهر الترجمة" })).toBeInTheDocument();
   });
 
   it("appears when the learner asks", () => {
-    render({ sentenceEnglish: "I went to the market yesterday" });
+    render({ sentenceArabic: "رحت السوق أمس" });
     choose(WORD);
 
-    fireEvent.click(screen.getByRole("button", { name: /show translation/i }));
+    fireEvent.click(screen.getByRole("button", { name: "أظهر الترجمة" }));
 
-    expect(screen.getByText("I went to the market yesterday")).toBeInTheDocument();
+    expect(screen.getByText("رحت السوق أمس")).toBeInTheDocument();
   });
 
   it("is not offered before the answer", () => {
-    render({ sentenceEnglish: "I went to the market yesterday" });
+    render({ sentenceArabic: "رحت السوق أمس" });
 
-    expect(screen.queryByRole("button", { name: /show translation/i })).toBeNull();
+    expect(screen.queryByRole("button", { name: "أظهر الترجمة" })).toBeNull();
   });
 
   it("says nothing when the sentence has no translation", () => {
     render();
     choose(WORD);
 
-    expect(screen.queryByRole("button", { name: /show translation/i })).toBeNull();
+    expect(screen.queryByRole("button", { name: "أظهر الترجمة" })).toBeNull();
   });
 });
 
 describe("moving to the next card", () => {
   it("clears the answer and the translation", () => {
-    const { rerender } = render({ sentenceEnglish: "I went to the market yesterday" });
+    const { rerender } = render({ sentenceArabic: "رحت السوق أمس" });
     choose(WORD);
-    fireEvent.click(screen.getByRole("button", { name: /show translation/i }));
+    fireEvent.click(screen.getByRole("button", { name: "أظهر الترجمة" }));
 
     act(() => {
       rerender(
         <ReviewClozeCard
           wordArabic="البيت"
-          wordEnglish="the house"
-          sentenceText="البيت كبير"
-          sentenceEnglish="The house is big"
+          wordEnglish="villa"
+          sentenceText="The villa is big"
+          sentenceArabic="البيت كبير"
           distractors={DISTRACTORS}
         />,
       );
@@ -336,8 +343,8 @@ describe("moving to the next card", () => {
 
     // A card arriving already answered would skip the exercise, and the
     // previous sentence's English under a new sentence is simply wrong.
-    expect(screen.getByText("Word muted")).toBeInTheDocument();
-    expect(screen.queryByText("I went to the market yesterday")).toBeNull();
+    expect(screen.getByText("الكلمة محجوبة")).toBeInTheDocument();
+    expect(screen.queryByText("رحت السوق أمس")).toBeNull();
     expect(choices()[0]).toBeEnabled();
   });
 });

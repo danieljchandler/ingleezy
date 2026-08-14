@@ -136,8 +136,13 @@ generation conditioning.
       English TTS for word/phrase audio (transliteration = phonetic_ar
       shown with the English answer as a reading aid), Arabic chrome and
       toasts throughout. LeechHelperPanel + SiblingWordsPanel are Arabic.
-      Remaining: quiz/cloze/image card internals, scoreBand labels (flip
-      with the pronunciation pages).
+      The cloze card now blanks the ENGLISH word inside its English
+      sentence (case-insensitive) with English distractors and masked
+      English TTS; the Arabic translation sits behind the reveal.
+      Transcript-mined cloze fallback is parked until the English
+      transcription pipeline lands. ReviewQuizCard and
+      ReviewImageQuizCard had no consumers — pruned. Remaining:
+      scoreBand labels (flip with the pronunciation pages).
 - [ ] Clickable transcript words → save-as-flashcard: KEEP mechanism,
       direction flips (tap English word, card scaffolds in Arabic)
 - [ ] Root-morphology sibling cards → English **word families**
