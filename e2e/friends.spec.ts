@@ -132,8 +132,8 @@ test.describe("the following list", () => {
 
     await page.goto("/friends");
 
-    await expect(page.getByText("You're not following anyone yet")).toBeVisible();
-    await expect(page.getByPlaceholder("Search users by name...")).toBeVisible();
+    await expect(page.getByText("لا تتابع أحداً بعد")).toBeVisible();
+    await expect(page.getByPlaceholder("ابحث عن مستخدمين بالاسم...")).toBeVisible();
   });
 
   test("falls back to Anonymous for a learner with no display name", async ({ page, db }) => {
@@ -142,7 +142,7 @@ test.describe("the following list", () => {
 
     await page.goto("/friends");
 
-    await expect(page.getByText("Anonymous")).toBeVisible();
+    await expect(page.getByText("مجهول")).toBeVisible();
   });
 
   test("still lists someone who has no XP row yet", async ({ page, db }) => {
@@ -182,7 +182,7 @@ test.describe("the following list", () => {
     // production. The query rethrows rather than defaulting the streak to zero,
     // so the decorative number is load-bearing: losing it empties the list and
     // the page says the learner follows nobody.
-    await expect(page.getByText("You're not following anyone yet")).toBeVisible();
+    await expect(page.getByText("لا تتابع أحداً بعد")).toBeVisible();
     await expect(page.getByText("Layla")).toHaveCount(0);
   });
 });
@@ -204,28 +204,28 @@ test.describe("finding someone to follow", () => {
 
   test("waits for more than one character before searching", async ({ page, db }) => {
     await page.goto("/friends");
-    await page.getByPlaceholder("Search users by name...").fill("O");
+    await page.getByPlaceholder("ابحث عن مستخدمين بالاسم...").fill("O");
 
     // A single letter matches most of the user table; the floor is what stops
     // the search box from being a directory dump.
-    await expect(page.getByText("Search Results")).toHaveCount(0);
+    await expect(page.getByText("نتائج البحث")).toHaveCount(0);
     expect(db.readsOf("profiles").filter((r) => r.search.includes("ilike"))).toHaveLength(0);
   });
 
   test("finds a learner by part of their name", async ({ page }) => {
     await page.goto("/friends");
-    await page.getByPlaceholder("Search users by name...").fill("oma");
+    await page.getByPlaceholder("ابحث عن مستخدمين بالاسم...").fill("oma");
 
-    await expect(page.getByText("Search Results")).toBeVisible();
+    await expect(page.getByText("نتائج البحث")).toBeVisible();
     await expect(page.getByText("Omar")).toBeVisible();
     await expect(page.getByText("Level 7")).toBeVisible();
   });
 
   test("says so when nobody matches", async ({ page }) => {
     await page.goto("/friends");
-    await page.getByPlaceholder("Search users by name...").fill("zzzz");
+    await page.getByPlaceholder("ابحث عن مستخدمين بالاسم...").fill("zzzz");
 
-    await expect(page.getByText("No users found")).toBeVisible();
+    await expect(page.getByText("لم نجد مستخدمين")).toBeVisible();
   });
 
   test("leaves out anyone who opted off the leaderboard", async ({ page, db }) => {
@@ -235,11 +235,11 @@ test.describe("finding someone to follow", () => {
     ]);
 
     await page.goto("/friends");
-    await page.getByPlaceholder("Search users by name...").fill("oma");
+    await page.getByPlaceholder("ابحث عن مستخدمين بالاسم...").fill("oma");
 
     // The same switch that hides someone from the leaderboard makes them
     // unsearchable — one opt-out covers being found as well as being ranked.
-    await expect(page.getByText("No users found")).toBeVisible();
+    await expect(page.getByText("لم نجد مستخدمين")).toBeVisible();
   });
 
   test("never returns the searcher themselves", async ({ page, db }) => {
@@ -249,7 +249,7 @@ test.describe("finding someone to follow", () => {
     ]);
 
     await page.goto("/friends");
-    await page.getByPlaceholder("Search users by name...").fill("omar");
+    await page.getByPlaceholder("ابحث عن مستخدمين بالاسم...").fill("omar");
 
     await expect(page.getByText("Omar", { exact: true })).toBeVisible();
     await expect(page.getByText("Omar Prime")).toHaveCount(0);
@@ -257,12 +257,12 @@ test.describe("finding someone to follow", () => {
 
   test("follows a learner from the results", async ({ page, db }) => {
     await page.goto("/friends");
-    await page.getByPlaceholder("Search users by name...").fill("oma");
+    await page.getByPlaceholder("ابحث عن مستخدمين بالاسم...").fill("oma");
     await expect(page.getByText("Omar")).toBeVisible();
 
-    await page.getByRole("button", { name: "Follow" }).click();
+    await page.getByRole("button", { name: "متابعة" }).click();
 
-    await expect(page.getByText("Following!")).toBeVisible();
+    await expect(page.getByText("تتابعه الآن!")).toBeVisible();
     await expect.poll(() => db.rows("user_follows").length).toBe(1);
     expect(db.rows("user_follows")[0]).toMatchObject({
       follower_id: TEST_USER_ID,
@@ -276,9 +276,9 @@ test.describe("finding someone to follow", () => {
     await page.goto("/friends");
     await expect(page.getByText("Layla")).toBeVisible();
 
-    await page.getByRole("button", { name: "Unfollow" }).click();
+    await page.getByRole("button", { name: "إلغاء المتابعة" }).click();
 
-    await expect(page.getByText("Unfollowed")).toBeVisible();
+    await expect(page.getByText("ألغيت المتابعة")).toBeVisible();
     await expect.poll(() => db.rows("user_follows").length).toBe(0);
   });
 
@@ -287,10 +287,10 @@ test.describe("finding someone to follow", () => {
     db.failWrites("user_follows", 500);
 
     await page.goto("/friends");
-    await page.getByPlaceholder("Search users by name...").fill("oma");
-    await page.getByRole("button", { name: "Follow" }).click();
+    await page.getByPlaceholder("ابحث عن مستخدمين بالاسم...").fill("oma");
+    await page.getByRole("button", { name: "متابعة" }).click();
 
-    await expect(page.getByText("Failed to update follow status")).toBeVisible();
+    await expect(page.getByText("تعذّر تحديث المتابعة")).toBeVisible();
   });
 
   test("offers to follow someone already followed on a slow load", async ({ page, db }) => {
@@ -299,7 +299,7 @@ test.describe("finding someone to follow", () => {
     db.delay("user_follows", 2500);
 
     await page.goto("/friends");
-    await page.getByPlaceholder("Search users by name...").fill("oma");
+    await page.getByPlaceholder("ابحث عن مستخدمين بالاسم...").fill("oma");
     await expect(page.getByText("Omar")).toBeVisible();
 
     // A bug, pinned. `useSearchUsers` computes `is_following` from
@@ -307,8 +307,8 @@ test.describe("finding someone to follow", () => {
     // so whichever query resolves first decides, permanently. React Query has
     // no reason to recompute, and pressing Follow here writes a duplicate row
     // rather than doing nothing.
-    await expect(page.getByRole("button", { name: "Follow", exact: true })).toBeVisible();
-    await expect(page.getByRole("button", { name: "Unfollow" })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "متابعة", exact: true })).toBeVisible();
+    await expect(page.getByRole("button", { name: "إلغاء المتابعة" })).toHaveCount(0);
   });
 });
 
@@ -340,7 +340,7 @@ test.describe("challenges", () => {
     ]);
 
     await page.goto("/friends");
-    await page.getByPlaceholder("Search users by name...").fill("oma");
+    await page.getByPlaceholder("ابحث عن مستخدمين بالاسم...").fill("oma");
     await expect(page.getByText("Omar")).toBeVisible();
 
     // A challenge is a commitment between two people who have opted in; the
@@ -381,7 +381,7 @@ test.describe("challenges", () => {
 
     await page.goto("/friends");
 
-    await expect(page.getByText("Incoming Challenges")).toBeVisible();
+    await expect(page.getByText("تحديات واردة")).toBeVisible();
   });
 
   test("keeps a challenge the learner sent out of the incoming pile", async ({ page, db }) => {
@@ -410,6 +410,6 @@ test.describe("challenges", () => {
     // Both sides read the same table, so the filter on `challenged_id` is the
     // only thing stopping a learner being offered Accept/Decline on their own
     // challenge.
-    await expect(page.getByText("Incoming Challenges")).toHaveCount(0);
+    await expect(page.getByText("تحديات واردة")).toHaveCount(0);
   });
 });

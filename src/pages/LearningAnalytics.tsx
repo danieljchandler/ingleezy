@@ -94,8 +94,8 @@ const LearningAnalytics = () => {
         <HomeButton />
         <div className="py-12 text-center space-y-4">
           <BarChart3 className="h-12 w-12 text-muted-foreground/30 mx-auto" />
-          <p className="text-muted-foreground">Sign in to see your learning analytics</p>
-          <Button onClick={() => navigate("/auth")}>Sign In</Button>
+          <p className="text-muted-foreground">سجّل الدخول لرؤية إحصاءات تعلمك</p>
+          <Button onClick={() => navigate("/auth")}>تسجيل الدخول</Button>
         </div>
       </AppShell>
     );
@@ -126,26 +126,25 @@ const LearningAnalytics = () => {
             <BarChart3 className="h-6 w-6 text-primary" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-foreground inline-flex items-center gap-2">Learning Analytics <InfoHint {...PAGE_HINTS["learning-analytics"]} /></h1>
-            <p className="text-sm text-muted-foreground">Your complete progress overview</p>
+            <h1 className="text-xl font-bold text-foreground inline-flex items-center gap-2">إحصاءات التعلم <InfoHint {...PAGE_HINTS["learning-analytics"]} /></h1>
+            <p className="text-sm text-muted-foreground">نظرة كاملة على تقدّمك</p>
           </div>
         </div>
 
         {/* Hero Stats */}
         <div className="grid grid-cols-2 gap-3">
-          <StatCard icon={BookOpen} label="Total Words" value={analytics.totalWords} accent />
-          <StatCard icon={Star} label="Mastered" value={analytics.masteredWords} sublabel={`${masteryPercent}%`} />
-          <StatCard icon={Target} label="Accuracy" value={`${analytics.accuracy}%`} sublabel={`${analytics.totalReviews} reviews`} />
-          <StatCard icon={Zap} label="XP" value={analytics.totalXP.toLocaleString()} sublabel={`Level ${analytics.level}`} />
-          <StatCard icon={Flame} label="Streak" value={analytics.currentStreak} sublabel={`Best: ${analytics.longestStreak}`} />
-          <StatCard icon={Clock} label="Study Time" value={`${analytics.studyMinutes}m`} sublabel="estimated" />
+          <StatCard icon={BookOpen} label="إجمالي الكلمات" value={analytics.totalWords} accent />
+          <StatCard icon={Star} label="متقنة" value={analytics.masteredWords} sublabel={`${masteryPercent}%`} />
+          <StatCard icon={Target} label="الدقة" value={`${analytics.accuracy}%`} sublabel={`${analytics.totalReviews} مراجعة`} />
+          <StatCard icon={Zap} label="XP" value={analytics.totalXP.toLocaleString()} sublabel={`المستوى ${analytics.level}`} />
+          <StatCard icon={Flame} label="السلسلة" value={analytics.currentStreak} sublabel={`الأفضل: ${analytics.longestStreak}`} />
+          <StatCard icon={Clock} label="وقت الدراسة" value={`${analytics.studyMinutes}m`} sublabel="تقديري" />
         </div>
 
         {/* This Week Summary */}
         <div className="bg-gradient-to-r from-primary/5 to-accent/5 border border-primary/20 rounded-2xl p-4 space-y-2">
           <h2 className="font-semibold text-foreground flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-primary" /> This Week
-          </h2>
+            <Sparkles className="h-4 w-4 text-primary" />هذا الأسبوع</h2>
           <div className="flex items-center gap-6 text-sm">
             <div>
               <span className="text-2xl font-bold text-primary">{analytics.wordsLearnedThisWeek}</span>
@@ -153,7 +152,7 @@ const LearningAnalytics = () => {
             </div>
             <div>
               <span className="text-2xl font-bold text-foreground">{analytics.challengesCompleted}</span>
-              <span className="text-muted-foreground ml-1">challenges</span>
+              <span className="text-muted-foreground ml-1">تحديات</span>
             </div>
           </div>
         </div>
@@ -161,8 +160,7 @@ const LearningAnalytics = () => {
         {/* Skill Radar Chart */}
         <div className="bg-card border border-border rounded-2xl p-4 space-y-3">
           <h2 className="font-semibold text-foreground flex items-center gap-2">
-            <Target className="h-4 w-4 text-primary" /> Skill Breakdown
-          </h2>
+            <Target className="h-4 w-4 text-primary" />تفصيل المهارات</h2>
           <div className="h-52">
             <ResponsiveContainer width="100%" height="100%">
               <RadarChart data={analytics.skillRadar} outerRadius="70%">
@@ -193,8 +191,7 @@ const LearningAnalytics = () => {
         <div className="bg-card border border-border rounded-2xl p-4 space-y-3">
           <div className="flex items-center justify-between">
             <h2 className="font-semibold text-foreground flex items-center gap-2">
-              <Brain className="h-4 w-4 text-primary" /> Word Mastery
-            </h2>
+              <Brain className="h-4 w-4 text-primary" />إتقان الكلمات</h2>
             <span className="text-sm text-primary font-medium">{masteryPercent}%</span>
           </div>
           <Progress value={masteryPercent} className="h-3" />
@@ -226,7 +223,7 @@ const LearningAnalytics = () => {
           </h2>
           <p className="text-xs text-muted-foreground">Combined across curriculum and your saved words</p>
           <div className="rounded-xl bg-primary/5 border border-primary/20 p-3">
-            <p className="text-xs text-muted-foreground">Due today</p>
+            <p className="text-xs text-muted-foreground">مستحقة اليوم</p>
             <p className="text-2xl font-bold text-primary">{srsStats?.forecast[0]?.count ?? 0}</p>
           </div>
           <SRSForecastChart forecast={srsStats?.forecast ?? []} />
@@ -250,11 +247,11 @@ const LearningAnalytics = () => {
           />
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
             <div className="rounded-lg bg-muted/50 p-3">
-              <p className="text-xs text-muted-foreground">Retention rate</p>
+              <p className="text-xs text-muted-foreground">معدل الاحتفاظ</p>
               <p className="text-lg font-bold text-foreground">{srsStats?.retentionRate ?? 0}%</p>
             </div>
             <div className="rounded-lg bg-muted/50 p-3">
-              <p className="text-xs text-muted-foreground">Total cards</p>
+              <p className="text-xs text-muted-foreground">إجمالي البطاقات</p>
               <p className="text-lg font-bold text-foreground">{srsStats?.totalCards ?? 0}</p>
               <p className="text-xs text-muted-foreground">
                 curriculum: {srsStats?.curriculumCards ?? 0} · my words: {srsStats?.myWordsCards ?? 0}
@@ -267,8 +264,7 @@ const LearningAnalytics = () => {
         {analytics.vocabGrowth.length > 1 && (
           <div className="bg-card border border-border rounded-2xl p-4 space-y-3">
             <h2 className="font-semibold text-foreground flex items-center gap-2">
-              <TrendingUp className="h-4 w-4 text-primary" /> Vocabulary Growth
-            </h2>
+              <TrendingUp className="h-4 w-4 text-primary" />نمو المفردات</h2>
             <div className="h-40">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={analytics.vocabGrowth}>
@@ -288,7 +284,7 @@ const LearningAnalytics = () => {
                   />
                   <YAxis tick={{ fontSize: 10 }} width={30} />
                   <Tooltip
-                    formatter={(value: number) => [`${value} words`, "Total"]}
+                    formatter={(value: number) => [`${value} كلمة`, "الإجمالي"]}
                     labelFormatter={(label: string) =>
                       new Date(label).toLocaleDateString("en-US", { month: "short", day: "numeric" })
                     }
@@ -329,7 +325,7 @@ const LearningAnalytics = () => {
                   <Tooltip
                     formatter={(value: number, name: string) => [
                       `${value}`,
-                      name === "reviews" ? "Reviews" : "Correct",
+                      name === "reviews" ? "مراجعات" : "صحيحة",
                     ]}
                     labelFormatter={(label: string) =>
                       new Date(label).toLocaleDateString("en-US", { month: "short", day: "numeric" })
@@ -341,7 +337,7 @@ const LearningAnalytics = () => {
             </div>
           ) : (
             <div className="h-40 flex items-center justify-center">
-              <p className="text-muted-foreground text-sm">No activity yet — start reviewing!</p>
+              <p className="text-muted-foreground text-sm">لا نشاط بعد — ابدأ المراجعة!</p>
             </div>
           )}
         </div>
@@ -357,7 +353,7 @@ const LearningAnalytics = () => {
                 <LineChart data={analytics.weeklyAccuracy}>
                   <XAxis dataKey="week" tick={{ fontSize: 11 }} />
                   <YAxis domain={[0, 100]} tick={{ fontSize: 10 }} width={30} tickFormatter={(v) => `${v}%`} />
-                  <Tooltip formatter={(v: number) => [`${v}%`, "Accuracy"]} />
+                  <Tooltip formatter={(v: number) => [`${v}%`, "الدقة"]} />
                   <Line
                     type="monotone"
                     dataKey="accuracy"
@@ -375,8 +371,7 @@ const LearningAnalytics = () => {
         {analytics.topMistakes.length > 0 && (
           <div className="bg-card border border-border rounded-2xl p-4 space-y-3">
             <h2 className="font-semibold text-foreground flex items-center gap-2">
-              <AlertTriangle className="h-4 w-4 text-destructive" /> Words to Focus On
-            </h2>
+              <AlertTriangle className="h-4 w-4 text-destructive" />كلمات تحتاج تركيزاً</h2>
             <div className="space-y-2">
               {analytics.topMistakes.map((w, i) => (
                 <div key={i} className="flex items-center gap-3">

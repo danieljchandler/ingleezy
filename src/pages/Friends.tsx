@@ -118,13 +118,13 @@ const FriendCard = ({
     try {
       if (friend.is_following) {
         await unfollowUser.mutateAsync(friend.user_id);
-        toast.success("Unfollowed");
+        toast.success("ألغيت المتابعة");
       } else {
         await followUser.mutateAsync(friend.user_id);
-        toast.success("Following!");
+        toast.success("تتابعه الآن!");
       }
     } catch {
-      toast.error("Failed to update follow status");
+      toast.error("تعذّر تحديث المتابعة");
     }
   };
 
@@ -147,7 +147,7 @@ const FriendCard = ({
 
         <div className="flex-1 min-w-0">
           <p className="font-semibold text-foreground truncate">
-            {friend.display_name || "Anonymous"}
+            {friend.display_name || "مجهول"}
           </p>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <span>Level {friend.level}</span>
@@ -165,7 +165,7 @@ const FriendCard = ({
 
         <div className="text-right shrink-0">
           <p className="font-bold text-primary">{friend.xp_this_week}</p>
-          <p className="text-xs text-muted-foreground">XP this week</p>
+          <p className="text-xs text-muted-foreground">نقاط هذا الأسبوع</p>
         </div>
       </div>
 
@@ -181,14 +181,10 @@ const FriendCard = ({
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : friend.is_following ? (
             <>
-              <UserMinus className="h-4 w-4 mr-1.5" />
-              Unfollow
-            </>
+              <UserMinus className="h-4 w-4 mr-1.5" />إلغاء المتابعة</>
           ) : (
             <>
-              <UserPlus className="h-4 w-4 mr-1.5" />
-              Follow
-            </>
+              <UserPlus className="h-4 w-4 mr-1.5" />متابعة</>
           )}
         </Button>
         {friend.is_following && (
@@ -231,7 +227,7 @@ const FriendCard = ({
               )}
             </div>
           ) : (
-            <p className="text-xs text-muted-foreground py-2">No liked videos yet</p>
+            <p className="text-xs text-muted-foreground py-2">لا فيديوهات بعد</p>
           )}
         </div>
       )}
@@ -256,7 +252,7 @@ const ChallengeCard = ({
     ? challenge.challenged_id
     : challenge.challenger_id;
   const opponent = friendsMap[opponentId];
-  const opponentName = opponent?.display_name || "Someone";
+  const opponentName = opponent?.display_name || "أحدهم";
 
   const myProgress = isChallenger
     ? challenge.challenger_progress
@@ -288,18 +284,18 @@ const ChallengeCard = ({
   const handleAccept = async () => {
     try {
       await acceptChallenge.mutateAsync(challenge.id);
-      toast.success("Challenge accepted!");
+      toast.success("قبلت التحدي!");
     } catch {
-      toast.error("Failed to accept challenge");
+      toast.error("تعذّر قبول التحدي");
     }
   };
 
   const handleDecline = async () => {
     try {
       await declineChallenge.mutateAsync(challenge.id);
-      toast("Challenge declined");
+      toast("رفضت التحدي");
     } catch {
-      toast.error("Failed to decline challenge");
+      toast.error("تعذّر رفض التحدي");
     }
   };
 
@@ -323,8 +319,8 @@ const ChallengeCard = ({
               : isActive
               ? `vs ${opponentName}`
               : challenge.winner_id === currentUserId
-              ? "You won!"
-              : "Challenge ended"}
+              ? "فزت!"
+              : "انتهى التحدي"}
           </span>
         </div>
         <Badge
@@ -332,14 +328,14 @@ const ChallengeCard = ({
             isPending ? "secondary" : isActive ? "default" : "outline"
           }
         >
-          {isPending ? "Pending" : isActive ? `${daysLeft}d left` : challenge.status}
+          {isPending ? "بانتظار الرد" : isActive ? `باقٍ ${daysLeft} يوم` : challenge.status}
         </Badge>
       </div>
 
       {isActive && (
         <div className="space-y-2 mb-3">
           <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">You</span>
+            <span className="text-muted-foreground">أنت</span>
             <span className="font-semibold text-primary">
               {myProgress} / {challenge.target_xp} XP
             </span>
@@ -377,9 +373,7 @@ const ChallengeCard = ({
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
               <>
-                <Check className="h-4 w-4 mr-1.5" />
-                Accept
-              </>
+                <Check className="h-4 w-4 mr-1.5" />قبول</>
             )}
           </Button>
           <Button
@@ -423,7 +417,7 @@ const CreateChallengeDialog = ({
           questionCount: 10,
           timeLimitSeconds: 60,
         });
-        toast.success("Vocab battle created! Play your turn now.");
+        toast.success("أُنشئت معركة المفردات! العب دورك الآن.");
         onClose();
         navigate(`/battles/${battle.id}`);
       } else {
@@ -432,11 +426,11 @@ const CreateChallengeDialog = ({
           targetXp,
           durationDays,
         });
-        toast.success("Challenge sent!");
+        toast.success("أُرسل التحدي!");
         onClose();
       }
     } catch {
-      toast.error("Failed to send challenge");
+      toast.error("تعذّر إرسال التحدي");
     }
   };
 
@@ -450,7 +444,7 @@ const CreateChallengeDialog = ({
       <div className="space-y-4 pt-4">
         {/* Challenge Type Selector */}
         <div className="space-y-2">
-          <label className="text-sm font-medium">Challenge Type</label>
+          <label className="text-sm font-medium">نوع التحدي</label>
           <div className="grid grid-cols-2 gap-2">
             <button
               onClick={() => setChallengeType('vocab')}
@@ -462,8 +456,8 @@ const CreateChallengeDialog = ({
               )}
             >
               <Swords className="h-5 w-5 text-primary mb-1" />
-              <p className="font-semibold text-sm">Vocab Battle</p>
-              <p className="text-xs text-muted-foreground">Timed vocabulary quiz</p>
+              <p className="font-semibold text-sm">معركة مفردات</p>
+              <p className="text-xs text-muted-foreground">اختبار مفردات موقوت</p>
             </button>
             <button
               onClick={() => setChallengeType('xp')}
@@ -475,8 +469,8 @@ const CreateChallengeDialog = ({
               )}
             >
               <Zap className="h-5 w-5 text-yellow-500 mb-1" />
-              <p className="font-semibold text-sm">XP Race</p>
-              <p className="text-xs text-muted-foreground">First to target XP wins</p>
+              <p className="font-semibold text-sm">سباق النقاط</p>
+              <p className="text-xs text-muted-foreground">من يبلغ النقاط أولاً يفوز</p>
             </button>
           </div>
         </div>
@@ -484,7 +478,7 @@ const CreateChallengeDialog = ({
         {challengeType === 'xp' && (
           <>
             <div className="space-y-2">
-              <label className="text-sm font-medium">Target XP</label>
+              <label className="text-sm font-medium">النقاط المستهدفة</label>
               <div className="flex gap-2">
                 {[50, 100, 200, 500].map((xp) => (
                   <Button
@@ -500,7 +494,7 @@ const CreateChallengeDialog = ({
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Duration</label>
+              <label className="text-sm font-medium">المدة</label>
               <div className="flex gap-2">
                 {[3, 7, 14].map((days) => (
                   <Button
@@ -515,8 +509,7 @@ const CreateChallengeDialog = ({
               </div>
             </div>
 
-            <div className="bg-muted rounded-xl p-4 text-sm text-muted-foreground">
-              First to earn <strong className="text-foreground">{targetXp} XP</strong> within{" "}
+            <div className="bg-muted rounded-xl p-4 text-sm text-muted-foreground">أول من يجمع<strong className="text-foreground">{targetXp} XP</strong> within{" "}
               <strong className="text-foreground">{durationDays} days</strong> wins!
             </div>
           </>
@@ -540,7 +533,7 @@ const CreateChallengeDialog = ({
           ) : (
             <Swords className="h-4 w-4 mr-2" />
           )}
-          {challengeType === 'vocab' ? 'Start Vocab Battle' : 'Send XP Challenge'}
+          {challengeType === 'vocab' ? 'ابدأ معركة المفردات' : 'أرسل تحدي النقاط'}
         </Button>
       </div>
     </DialogContent>
@@ -577,7 +570,7 @@ const Friends = () => {
     const friend = friendsMap[userId];
     setChallengeTarget({
       id: userId,
-      name: friend?.display_name || "Friend",
+      name: friend?.display_name || "صديق",
     });
   };
 
@@ -587,13 +580,9 @@ const Friends = () => {
         <HomeButton />
         <div className="py-12 text-center">
           <Users className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
-          <h2 className="text-lg font-semibold text-foreground mb-2">
-            Sign in to see friends
-          </h2>
-          <p className="text-muted-foreground mb-4">
-            Follow other learners and challenge them!
-          </p>
-          <Button onClick={() => navigate("/auth")}>Sign In</Button>
+          <h2 className="text-lg font-semibold text-foreground mb-2">سجّل الدخول لرؤية الأصدقاء</h2>
+          <p className="text-muted-foreground mb-4">تابع متعلمين آخرين وتحدَّهم!</p>
+          <Button onClick={() => navigate("/auth")}>تسجيل الدخول</Button>
         </div>
       </AppShell>
     );
@@ -610,19 +599,15 @@ const Friends = () => {
             <Users className="h-6 w-6 text-primary" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-foreground inline-flex items-center gap-2">Friends <InfoHint {...PAGE_HINTS["friends"]} /></h1>
-            <p className="text-sm text-muted-foreground">
-              Follow & challenge other learners
-            </p>
+            <h1 className="text-xl font-bold text-foreground inline-flex items-center gap-2">الأصدقاء<InfoHint {...PAGE_HINTS["friends"]} /></h1>
+            <p className="text-sm text-muted-foreground">تابع متعلمين آخرين وتحدَّهم</p>
           </div>
         </div>
 
         {/* Pending Challenges */}
         {pendingChallenges.length > 0 && (
           <div className="space-y-2">
-            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-              Incoming Challenges
-            </h2>
+            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">تحديات واردة</h2>
             {pendingChallenges.map((challenge) => (
               <ChallengeCard
                 key={challenge.id}
@@ -637,9 +622,7 @@ const Friends = () => {
         {/* Active Challenges */}
         {activeChallenges.length > 0 && (
           <div className="space-y-2">
-            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-              Active Challenges
-            </h2>
+            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">تحديات جارية</h2>
             {activeChallenges.map((challenge) => (
               <ChallengeCard
                 key={challenge.id}
@@ -655,7 +638,7 @@ const Friends = () => {
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search users by name..."
+            placeholder="ابحث عن مستخدمين بالاسم..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10"
@@ -665,9 +648,7 @@ const Friends = () => {
         {/* Search Results */}
         {searchTerm.length >= 2 && (
           <div className="space-y-2">
-            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-              Search Results
-            </h2>
+            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">نتائج البحث</h2>
             {searchLoading ? (
               <div className="flex items-center justify-center py-8">
                 <Loader2 className="h-6 w-6 animate-spin text-primary" />
@@ -681,9 +662,7 @@ const Friends = () => {
                 />
               ))
             ) : (
-              <p className="text-center text-muted-foreground py-4">
-                No users found
-              </p>
+              <p className="text-center text-muted-foreground py-4">لم نجد مستخدمين</p>
             )}
           </div>
         )}
@@ -709,12 +688,8 @@ const Friends = () => {
             ) : (
               <div className="text-center py-8">
                 <UserPlus className="h-10 w-10 text-muted-foreground/30 mx-auto mb-3" />
-                <p className="text-muted-foreground">
-                  You're not following anyone yet
-                </p>
-                <p className="text-sm text-muted-foreground/70">
-                  Search for users above to start following!
-                </p>
+                <p className="text-muted-foreground">لا تتابع أحداً بعد</p>
+                <p className="text-sm text-muted-foreground/70">ابحث عن مستخدمين بالأعلى لتبدأ المتابعة!</p>
               </div>
             )}
           </div>

@@ -89,7 +89,7 @@ test.describe("the headline figures", () => {
 
     // Two decks, one total. A learner does not think of them separately, and
     // splitting the figure would make both look smaller than their effort.
-    await expect(page.getByText("Total Words")).toBeVisible();
+    await expect(page.getByText("إجمالي الكلمات")).toBeVisible();
     await expect(page.getByText("2", { exact: true }).first()).toBeVisible();
   });
 
@@ -104,7 +104,7 @@ test.describe("the headline figures", () => {
     // 15 of 20. Weighted by reviews rather than averaged per word, so a word
     // reviewed once does not count as much as one reviewed fifty times.
     await expect(page.getByText("75%").first()).toBeVisible();
-    await expect(page.getByText("20 reviews")).toBeVisible();
+    await expect(page.getByText("20 مراجعة")).toBeVisible();
   });
 
   test("shows zero accuracy rather than NaN for an unreviewed deck", async ({ page, db }) => {
@@ -122,10 +122,10 @@ test.describe("the headline figures", () => {
 
     await page.goto("/analytics");
 
-    // Half a minute per review, labelled "estimated" — nothing times a session,
+    // Half a minute per review, labelled "تقديري" — nothing times a session,
     // so the number is presented as the guess it is.
     await expect(page.getByText("20m")).toBeVisible();
-    await expect(page.getByText("estimated")).toBeVisible();
+    await expect(page.getByText("تقديري")).toBeVisible();
   });
 
   test("shows XP and level from the gamification row", async ({ page, db }) => {
@@ -136,7 +136,7 @@ test.describe("the headline figures", () => {
     // Formatted with separators: five figures of XP is normal by the time a
     // learner looks at this page.
     await expect(page.getByText("12,500")).toBeVisible();
-    await expect(page.getByText("Level 7")).toBeVisible();
+    await expect(page.getByText("المستوى 7")).toBeVisible();
   });
 
   test("shows the streak and the best one", async ({ page, db }) => {
@@ -146,7 +146,7 @@ test.describe("the headline figures", () => {
 
     await page.goto("/analytics");
 
-    await expect(page.getByText("Best: 30")).toBeVisible();
+    await expect(page.getByText("الأفضل: 30")).toBeVisible();
   });
 });
 
@@ -171,7 +171,7 @@ test.describe("word mastery", () => {
     // The stage is computed from `repetitions` and stability, not read from a
     // column. The persisted `stage` this replaced was only ever written by the
     // Anki importer, so for words added in-app this chart never moved.
-    await expect(page.getByText("Word Mastery")).toBeVisible();
+    await expect(page.getByText("إتقان الكلمات")).toBeVisible();
     await expect(page.getByText("33%").first()).toBeVisible();
   });
 
@@ -186,7 +186,7 @@ test.describe("word mastery", () => {
     // Two charts, one helper. They are computed independently from the same
     // rows, so a change to one bucketing rule and not the other shows up as
     // two different answers on one screen.
-    await expect(page.getByText("Word Mastery")).toBeVisible();
+    await expect(page.getByText("إتقان الكلمات")).toBeVisible();
     await expect(page.getByText("Card Health")).toBeVisible();
     await expect(page.getByText("50%").first()).toBeVisible();
   });
@@ -195,7 +195,7 @@ test.describe("word mastery", () => {
     db.seed("user_vocabulary", [aReviewed("a", { reps: 0, stability: 0 })]);
 
     await page.goto("/analytics");
-    await expect(page.getByText("Word Mastery")).toBeVisible();
+    await expect(page.getByText("إتقان الكلمات")).toBeVisible();
 
     // Six fixed bands. Hiding the empty ones would make progress look like it
     // had nowhere left to go.
@@ -206,7 +206,7 @@ test.describe("word mastery", () => {
   test("reports zero mastery rather than dividing by zero", async ({ page }) => {
     await page.goto("/analytics");
 
-    await expect(page.getByText("Word Mastery")).toBeVisible();
+    await expect(page.getByText("إتقان الكلمات")).toBeVisible();
     await expect(page.getByText(/NaN|Infinity/)).toHaveCount(0);
   });
 });
@@ -229,7 +229,7 @@ test.describe("this week", () => {
 
     await page.goto("/analytics");
 
-    await expect(page.getByText("This Week")).toBeVisible();
+    await expect(page.getByText("هذا الأسبوع")).toBeVisible();
     await expect(page.getByText("new words")).toBeVisible();
     await expect(page.getByText("2", { exact: true }).first()).toBeVisible();
   });
@@ -242,7 +242,7 @@ test.describe("this week", () => {
     // A null date through `new Date()` is Invalid, and `Invalid >= weekAgo` is
     // false — but relying on that would be an accident. The explicit guard is
     // what makes it deliberate.
-    await expect(page.getByText("This Week")).toBeVisible();
+    await expect(page.getByText("هذا الأسبوع")).toBeVisible();
     await expect(page.getByText("new words")).toBeVisible();
   });
 
@@ -259,7 +259,7 @@ test.describe("this week", () => {
 
     await page.goto("/analytics");
 
-    await expect(page.getByText("challenges")).toBeVisible();
+    await expect(page.getByText("تحديات")).toBeVisible();
   });
 });
 
@@ -282,7 +282,7 @@ test.describe("the skill radar", () => {
 
     await page.goto("/analytics");
 
-    await expect(page.getByText("Skill Breakdown")).toBeVisible();
+    await expect(page.getByText("تفصيل المهارات")).toBeVisible();
     for (const skill of ["Vocabulary", "Listening", "Reading", "Speaking", "Culture"]) {
       await expect(page.getByText(skill, { exact: true })).toBeVisible();
     }
@@ -299,7 +299,7 @@ test.describe("the skill radar", () => {
     // 0.5 across the board rather than an empty chart — a new learner has no
     // measurements, and a radar collapsed to a point reads as "you are bad at
     // everything".
-    await expect(page.getByText("Skill Breakdown")).toBeVisible();
+    await expect(page.getByText("تفصيل المهارات")).toBeVisible();
     await expect(page.getByText("Vocabulary")).toBeVisible();
   });
 });
@@ -321,13 +321,13 @@ test.describe("the review forecast", () => {
     // Named as combined, because the two decks have separate review pages and
     // a learner otherwise has to add the two numbers themselves.
     await expect(page.getByText(/Combined across curriculum and your saved words/)).toBeVisible();
-    await expect(page.getByText("Due today")).toBeVisible();
+    await expect(page.getByText("مستحقة اليوم")).toBeVisible();
   });
 
   test("shows zero due rather than a blank on a clear day", async ({ page }) => {
     await page.goto("/analytics");
 
-    await expect(page.getByText("Due today")).toBeVisible();
+    await expect(page.getByText("مستحقة اليوم")).toBeVisible();
     await expect(page.getByText("0").first()).toBeVisible();
   });
 });
@@ -355,7 +355,7 @@ test.describe("when the data will not load", () => {
     // reach. So the intended behaviour never happens: the learner gets an
     // indefinite spinner with no message and no retry.
     await expect(page.locator("svg.lucide-loader-circle")).toBeVisible();
-    await expect(page.getByText("Total Words")).toHaveCount(0);
+    await expect(page.getByText("إجمالي الكلمات")).toHaveCount(0);
     await expect(page.getByText(/failed|error|try again/i)).toHaveCount(0);
   });
 
@@ -378,7 +378,7 @@ test.describe("when the data will not load", () => {
     // Only the two word sources are rethrown; streaks, XP and difficulty are
     // read with `?? default`, so losing them degrades individual tiles rather
     // than the page.
-    await expect(page.getByText("Total Words")).toBeVisible();
-    await expect(page.getByText("Best: 0")).toBeVisible();
+    await expect(page.getByText("إجمالي الكلمات")).toBeVisible();
+    await expect(page.getByText("الأفضل: 0")).toBeVisible();
   });
 });
