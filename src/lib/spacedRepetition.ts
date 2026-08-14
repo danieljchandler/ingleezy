@@ -271,20 +271,21 @@ export function calculateNextReview(
 // ── Display helpers ───────────────────────────────────────────────────────────
 
 export function getIntervalDisplay(intervalDays: number): string {
+  // Arabic single-letter units: د دقيقة · س ساعة · ي يوم · ش شهر
   if (intervalDays < 1 / 60) {
-    return '< 1m';
+    return '< 1د';
   } else if (intervalDays < 1 / 24) {
     const minutes = Math.round(intervalDays * 24 * 60);
-    return `${minutes}m`;
+    return `${minutes}د`;
   } else if (intervalDays < 1) {
     const hours = Math.round(intervalDays * 24);
-    return `${hours}h`;
+    return `${hours}س`;
   } else if (intervalDays < 30) {
-    return `${Math.round(intervalDays)}d`;
+    return `${Math.round(intervalDays)}ي`;
   } else if (intervalDays < 365) {
-    return `${Math.round(intervalDays / 30)}mo`;
+    return `${Math.round(intervalDays / 30)}ش`;
   } else {
-    return `${Math.round(intervalDays / 365 * 10) / 10}y`;
+    return `${Math.round(intervalDays / 365 * 10) / 10}سنة`;
   }
 }
 

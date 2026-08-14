@@ -9,7 +9,7 @@ import { SessionHandoff } from "./SessionHandoff";
  *
  * The daily session spans three separate decks, and the failure this component
  * exists to prevent is dead-ending: finishing the curriculum deck, being told
- * "All caught up!", and leaving twenty mined words due in a deck the learner
+ * "أنجزت كل المراجعات", and leaving twenty mined words due in a deck the learner
  * would have to remember to visit. So the end of one deck is the offer to start
  * the next, and the celebration is held back until there is genuinely nothing
  * left anywhere.
@@ -26,8 +26,7 @@ afterEach(() => vi.clearAllMocks());
 
 const aDeck = (over: Partial<ReviewDeckInfo> = {}): ReviewDeckInfo => ({
   id: "my-words",
-  label: "My Words",
-  cardNoun: "word",
+  label: "كلماتي",
   route: "/review/my-words",
   due: 3,
   ...over,
@@ -72,7 +71,7 @@ function renderHandoff({
 describe("SessionHandoff — when everything is done", () => {
   it("celebrates", () => {
     renderHandoff({ next: null });
-    expect(screen.getByRole("heading", { name: "All caught up!" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "أنجزت كل المراجعات!" })).toBeInTheDocument();
   });
 
   it("shows the caller's own message unchanged", () => {
@@ -91,25 +90,25 @@ describe("SessionHandoff — when another deck still has cards", () => {
   it("holds the celebration back", () => {
     // "All caught up" over twenty due cards is the exact mistake this avoids.
     renderHandoff({ next: aDeck() });
-    expect(screen.getByRole("heading", { name: "Deck complete" })).toBeInTheDocument();
-    expect(screen.queryByText("All caught up!")).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "أنهيت هذه المجموعة" })).toBeInTheDocument();
+    expect(screen.queryByText("أنجزت كل المراجعات!")).not.toBeInTheDocument();
   });
 
   it("says how many are left and where", () => {
-    renderHandoff({ next: aDeck({ due: 3, label: "My Words", cardNoun: "word" }) });
+    renderHandoff({ next: aDeck({ due: 3, label: "كلماتي" }) });
     expect(
-      screen.getByText("Nothing left in the curriculum deck. 3 words still due in My Words."),
+      screen.getByText("Nothing left in the curriculum deck. 3 بطاقات ما زالت مستحقة في كلماتي."),
     ).toBeInTheDocument();
   });
 
   it("offers to carry straight on", () => {
-    renderHandoff({ next: aDeck({ due: 3, cardNoun: "word" }) });
-    expect(screen.getByRole("button", { name: "Continue with 3 words" })).toBeInTheDocument();
+    renderHandoff({ next: aDeck({ due: 3 }) });
+    expect(screen.getByRole("button", { name: "تابع مع 3 بطاقات في كلماتي" })).toBeInTheDocument();
   });
 
   it("goes to that deck", () => {
     renderHandoff({ next: aDeck({ route: "/review/my-phrases" }) });
-    fireEvent.click(screen.getByRole("button", { name: /^Continue with/ }));
+    fireEvent.click(screen.getByRole("button", { name: /^تابع مع/ }));
     expect(navigate).toHaveBeenCalledWith("/review/my-phrases");
   });
 
@@ -118,17 +117,16 @@ describe("SessionHandoff — when another deck still has cards", () => {
     expect(screen.queryByRole("button", { name: "Back to review" })).not.toBeInTheDocument();
   });
 
-  it("counts one card in the singular", () => {
-    renderHandoff({ next: aDeck({ due: 1, cardNoun: "word" }) });
-    expect(screen.getByRole("button", { name: "Continue with 1 word" })).toBeInTheDocument();
-    expect(screen.getByText(/1 word still due/)).toBeInTheDocument();
+  it("counts one card with the Arabic singular form", () => {
+    renderHandoff({ next: aDeck({ due: 1 }) });
+    expect(screen.getByRole("button", { name: "تابع مع بطاقة واحدة في كلماتي" })).toBeInTheDocument();
+    expect(screen.getByText(/بطاقة واحدة ما زالت مستحقة/)).toBeInTheDocument();
   });
 
-  it("uses each deck's own noun", () => {
-    // "3 phrases" rather than "3 cards" — the decks hold different things and
-    // the learner thinks in those terms.
-    renderHandoff({ next: aDeck({ due: 3, cardNoun: "phrase", label: "My Phrases" }) });
-    expect(screen.getByRole("button", { name: "Continue with 3 phrases" })).toBeInTheDocument();
+  it("uses the dual form for two cards", () => {
+    // Arabic number agreement: 1 بطاقة واحدة · 2 بطاقتان · 3-10 بطاقات · 11+ بطاقة.
+    renderHandoff({ next: aDeck({ due: 2, label: "عباراتي" }) });
+    expect(screen.getByRole("button", { name: "تابع مع بطاقتان في عباراتي" })).toBeInTheDocument();
   });
 
   it("asks the session what comes after this deck", () => {
@@ -161,6 +159,6 @@ describe("SessionHandoff — the caller's extra content", () => {
 
   it("renders without any", () => {
     renderHandoff({ next: null });
-    expect(screen.getByRole("heading", { name: "All caught up!" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "أنجزت كل المراجعات!" })).toBeInTheDocument();
   });
 });

@@ -83,9 +83,9 @@ test.describe("signed in — review session", () => {
     await stubSupabase(page, { curriculumDue: 2, myWordsDue: 4, phrasesDue: 1 });
     await page.goto("/review");
 
-    await expect(page.getByText("كلمة1")).toBeVisible();
+    await expect(page.getByText("word 1")).toBeVisible();
     // Progress spans the whole day, not just the deck in front of you.
-    await expect(page.getByText(/Curriculum · 1 \/ 2 due · 5 more in other decks/)).toBeVisible();
+    await expect(page.getByText(/المنهج · 1 \/ 2 مستحقة · 5 أخرى في مجموعات ثانية/)).toBeVisible();
   });
 
   test("forwards past an empty deck into one that has cards", async ({ page }) => {
@@ -95,7 +95,7 @@ test.describe("signed in — review session", () => {
     await page.goto("/review");
 
     await expect(page).toHaveURL(/\/review\/my-words$/);
-    await expect(page.getByText(/My Words · 1 \/ 3 due/)).toBeVisible();
+    await expect(page.getByText(/كلماتي · 1 \/ 3 مستحقة/)).toBeVisible();
   });
 
   test("offers the next deck instead of dead-ending when a deck is clear", async ({ page }) => {
@@ -104,8 +104,8 @@ test.describe("signed in — review session", () => {
     await stubSupabase(page, { myWordsDue: 0, phrasesDue: 2 });
     await page.goto("/review/my-words");
 
-    await expect(page.getByRole("heading", { name: /deck complete/i })).toBeVisible();
-    await expect(page.getByRole("button", { name: /continue with 2 phrase cards/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /أنهيت هذه المجموعة/ })).toBeVisible();
+    await expect(page.getByRole("button", { name: "تابع مع بطاقتان في عباراتي" })).toBeVisible();
   });
 
   test("reports the session finished when every deck is clear", async ({ page }) => {
@@ -113,8 +113,8 @@ test.describe("signed in — review session", () => {
     await stubSupabase(page, { curriculumDue: 0, myWordsDue: 0, phrasesDue: 0 });
     await page.goto("/review/my-words");
 
-    await expect(page.getByRole("heading", { name: /all caught up/i })).toBeVisible();
-    await expect(page.getByRole("button", { name: /continue with/i })).toHaveCount(0);
+    await expect(page.getByRole("heading", { name: /أنجزت كل المراجعات/ })).toBeVisible();
+    await expect(page.getByRole("button", { name: /تابع مع/ })).toHaveCount(0);
   });
 });
 
@@ -373,7 +373,7 @@ test.describe("signed in — curriculum leeches", () => {
     });
     await page.goto("/review");
 
-    await expect(page.getByText("كلمة1")).toBeVisible();
+    await expect(page.getByText("word 1")).toBeVisible();
     await expect(page.getByText("Stuck on this one?")).toHaveCount(0);
   });
 });

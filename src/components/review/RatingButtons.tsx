@@ -35,25 +35,25 @@ export const RatingButtons = ({
   const buttons: { rating: Rating; label: string; icon: React.ReactNode; color: string }[] = [
     {
       rating: 'again',
-      label: 'Again',
+      label: 'من جديد',
       icon: <RotateCcw className="w-4 h-4" />,
       color: 'bg-destructive/8 border-destructive/25 text-destructive hover:bg-destructive/12 hover:border-destructive/45',
     },
     {
       rating: 'hard',
-      label: 'Hard',
+      label: 'صعب',
       icon: <ThumbsDown className="w-4 h-4" />,
       color: 'bg-amber-500/8 border-amber-500/25 text-amber-700 hover:bg-amber-500/12 hover:border-amber-500/45',
     },
     {
       rating: 'good',
-      label: 'Good',
+      label: 'جيد',
       icon: <ThumbsUp className="w-4 h-4" />,
       color: 'bg-primary/8 border-primary/25 text-primary hover:bg-primary/12 hover:border-primary/45',
     },
     {
       rating: 'easy',
-      label: 'Easy',
+      label: 'سهل',
       icon: <Sparkles className="w-4 h-4" />,
       color: 'bg-success/10 border-success/30 text-success hover:bg-success/15 hover:border-success/50',
     },
@@ -62,7 +62,7 @@ export const RatingButtons = ({
   return (
     <div className="w-full max-w-sm mx-auto">
       <p className="text-center text-muted-foreground mb-3 text-xs uppercase tracking-wider font-medium">
-        How well did you remember?
+        ما مدى تذكّرك لها؟
       </p>
       <div className="grid grid-cols-4 gap-2">
         {buttons.map(({ rating, label, icon, color }) => {

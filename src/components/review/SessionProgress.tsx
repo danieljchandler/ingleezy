@@ -36,8 +36,8 @@ export const SessionProgress = ({
         />
       </div>
       <p className="text-center text-xs text-muted-foreground mt-2">
-        {deckLabel} · {position} / {total} due
-        {elsewhere > 0 && ` · ${elsewhere} more in other decks`}
+        {deckLabel} · {position} / {total} مستحقة
+        {elsewhere > 0 && ` · ${elsewhere} أخرى في مجموعات ثانية`}
       </p>
       {children}
     </div>

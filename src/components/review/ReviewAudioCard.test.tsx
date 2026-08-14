@@ -4,23 +4,22 @@ import { renderWithProviders } from "@/test/support/react/harness";
 import { ReviewAudioCard } from "./ReviewAudioCard";
 
 /**
- * The listening-recall card: hear the word, say what it means.
+ * The listening-recall card: hear the English word, say what it means.
  *
  * Every other deck in the app shows a written word and asks for the meaning,
- * which tests reading. This is the direction that was missing, and it is the
- * one that matters for a spoken-dialect app — recognising سوق on a page says
- * nothing about catching it at conversational speed.
+ * which tests reading. This is the direction that matters for catching real
+ * speech — recognising "market" on a page says nothing about catching it at
+ * conversational speed.
  *
- * So the Arabic is hidden until the learner reveals it, the audio plays itself
- * as soon as it exists (a silent card is unanswerable), and the voice follows
- * the *word's* dialect rather than the one the learner happens to be studying,
- * because the Mix All queue serves cards from all three at once.
+ * So the text is hidden until the learner reveals it, the audio plays itself
+ * as soon as it exists (a silent card is unanswerable), and synthesis always
+ * uses an English voice — the target word is English for every learner.
  */
 
 const tts = vi.hoisted(() => ({
   urls: {} as Record<string, string>,
   loading: false,
-  asked: [] as Array<{ text: string; skip?: boolean; dialect?: string; persist?: unknown }>,
+  asked: [] as Array<{ text: string; skip?: boolean; voice?: string; persist?: unknown }>,
   regenerate: vi.fn(),
 }));
 
@@ -28,7 +27,7 @@ vi.mock("@/hooks/useAzureTTS", () => ({
   useAzureTTS: (options: {
     text: string;
     skip?: boolean;
-    dialect?: string;
+    voice?: string;
     persist?: unknown;
   }) => {
     tts.asked.push(options);
@@ -88,36 +87,37 @@ function render(over: Props = {}) {
   return { ...harness, onReveal };
 }
 
-const speaker = () => screen.getByRole("button", { name: /play the word again/i });
+const speaker = () => screen.getByRole("button", { name: "أعد تشغيل الكلمة" });
 
 describe("posing the question", () => {
   it("says what kind of card this is", () => {
     render();
 
-    expect(screen.getByText("Listen")).toBeInTheDocument();
+    expect(screen.getByText("استمع")).toBeInTheDocument();
   });
 
-  it("keeps the Arabic hidden so the audio is the only way through", () => {
+  it("keeps the text hidden so the audio is the only way through", () => {
     render();
 
     // A written word on screen turns a listening card into a reading card.
     expect(screen.queryByText(WORD)).toBeNull();
     expect(screen.queryByText("market")).toBeNull();
-    expect(screen.getByRole("button", { name: /reveal/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "أظهر الإجابة" })).toBeInTheDocument();
   });
 
   it("shows both halves once the learner reveals", () => {
     render({ showAnswer: true });
 
-    expect(screen.getByText(WORD)).toHaveAttribute("dir", "rtl");
-    expect(screen.getByText("market")).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /reveal/i })).toBeNull();
+    // The English word the learner just heard leads; the Arabic gloss follows.
+    expect(screen.getByText("market")).toHaveClass("font-english");
+    expect(screen.getByText(WORD)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "أظهر الإجابة" })).toBeNull();
   });
 
   it("asks the page to reveal rather than deciding itself", () => {
     const { onReveal } = render();
 
-    fireEvent.click(screen.getByRole("button", { name: /reveal/i }));
+    fireEvent.click(screen.getByRole("button", { name: "أظهر الإجابة" }));
 
     // The review page gates rating on having revealed, so it owns the state.
     expect(onReveal).toHaveBeenCalled();
@@ -131,7 +131,7 @@ describe("the audio", () => {
     // A card the learner has to press play on before it asks anything is a card
     // that reads as broken.
     expect(audio.play).toHaveBeenCalledWith(RECORDING);
-    expect(screen.getByText("What does it mean?")).toBeInTheDocument();
+    expect(screen.getByText("ماذا تعني؟")).toBeInTheDocument();
   });
 
   it("plays again on request", () => {
@@ -194,19 +194,19 @@ describe("the audio", () => {
       />,
     );
 
-    // Mix All serves the same Arabic from several dialects. Keyed on the word
-    // alone, the second card would sit silent.
+    // Mix All serves the same word from several dialect decks. Keyed on the
+    // word alone, the second card would sit silent.
     expect(audio.play).toHaveBeenCalledWith("https://audio.test/souq-eg.mp3");
   });
 });
 
 describe("words with no recording", () => {
-  it("synthesises one in the word's own dialect", () => {
+  it("synthesises the English word with an English voice", () => {
     render({ dialect: "Egyptian" });
 
-    // Not the dialect the learner is studying: an Egyptian word read in a Gulf
-    // voice teaches the wrong sounds for that word.
-    expect(tts.asked[0]).toMatchObject({ text: WORD, skip: false, dialect: "Egyptian" });
+    // The audio is the English target — dialect voices are Arabic-scaffold
+    // machinery and must not leak into it.
+    expect(tts.asked[0]).toMatchObject({ text: "market", skip: false, voice: "en-US-JennyNeural" });
   });
 
   it("does not synthesise over a recording it already has", () => {
@@ -228,12 +228,12 @@ describe("words with no recording", () => {
     tts.loading = true;
     render();
 
-    expect(screen.getByText("Preparing audio…")).toBeInTheDocument();
+    expect(screen.getByText("جارٍ تجهيز الصوت…")).toBeInTheDocument();
     expect(speaker()).toBeDisabled();
   });
 
   it("plays the synthesised clip once it arrives", () => {
-    tts.urls[WORD] = "blob:generated";
+    tts.urls["market"] = "blob:generated";
     render();
 
     expect(audio.play).toHaveBeenCalledWith("blob:generated");
@@ -245,14 +245,14 @@ describe("when there is nothing to hear", () => {
     render();
 
     // The card cannot be answered without audio, so it has to admit that.
-    expect(screen.getByText("Audio unavailable for this word")).toBeInTheDocument();
+    expect(screen.getByText("لا يتوفر صوت لهذه الكلمة")).toBeInTheDocument();
     expect(speaker()).toBeDisabled();
   });
 
   it("offers another attempt at the voice", () => {
     render();
 
-    fireEvent.click(screen.getByRole("button", { name: /try again/i }));
+    fireEvent.click(screen.getByRole("button", { name: "أعد المحاولة" }));
 
     expect(tts.regenerate).toHaveBeenCalled();
   });
@@ -262,13 +262,13 @@ describe("when there is nothing to hear", () => {
 
     // With a recorded clip there is nothing to regenerate — retrying would
     // synthesise over a file that is supposed to exist.
-    expect(screen.getByText("Audio unavailable for this word")).toBeInTheDocument();
+    expect(screen.getByText("لا يتوفر صوت لهذه الكلمة")).toBeInTheDocument();
   });
 
   it("can still be revealed, so the learner is not stuck", () => {
     const { onReveal } = render();
 
-    fireEvent.click(screen.getByRole("button", { name: /reveal/i }));
+    fireEvent.click(screen.getByRole("button", { name: "أظهر الإجابة" }));
 
     expect(onReveal).toHaveBeenCalled();
   });

@@ -7,8 +7,6 @@ export type ReviewDeckId = "curriculum" | "my-words" | "my-phrases";
 export interface ReviewDeckInfo {
   id: ReviewDeckId;
   label: string;
-  /** Noun used in "Continue with 3 <noun>s" copy. */
-  cardNoun: string;
   route: string;
   due: number;
 }
@@ -62,22 +60,19 @@ export function useReviewSession(mixAll = false): ReviewSession {
   const byId: Record<ReviewDeckId, ReviewDeckInfo> = {
     curriculum: {
       id: "curriculum",
-      label: "Curriculum",
-      cardNoun: "curriculum card",
+      label: "المنهج",
       route: "/review",
       due: curriculumStats?.dueCount ?? 0,
     },
     "my-words": {
       id: "my-words",
-      label: "My Words",
-      cardNoun: "My Words card",
+      label: "كلماتي",
       route: "/review/my-words",
       due: myWords?.dueCount ?? 0,
     },
     "my-phrases": {
       id: "my-phrases",
-      label: "My Phrases",
-      cardNoun: "phrase card",
+      label: "عباراتي",
       route: "/review/my-phrases",
       due: phrases?.dueCount ?? 0,
     },

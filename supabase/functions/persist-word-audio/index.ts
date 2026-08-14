@@ -29,25 +29,7 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const BUCKET = "flashcard-audio";
 
-/**
- * Dialect → Azure voice. Mirrors DEFAULT_AZURE_VOICE in src/hooks/useAzureTTS.ts.
- *
- * azure-tts takes `voice`, not `dialect` — passing a dialect name silently falls
- * through to its Gulf default, so every Egyptian and Yemeni curriculum word
- * would have been cached with a Gulf voice.
- */
-const VOICE_BY_DIALECT: Record<string, string> = {
-  egyptian: "ar-EG-ShakirNeural",
-  egypt: "ar-EG-ShakirNeural",
-  yemeni: "ar-YE-MaryamNeural",
-  yemen: "ar-YE-MaryamNeural",
-};
-
-function voiceFor(dialect: string | null | undefined): string | undefined {
-  if (!dialect) return undefined;
-  // Gulf has no entry: azure-tts's own default is already a Gulf voice.
-  return VOICE_BY_DIALECT[String(dialect).toLowerCase()];
-}
+const EN_VOICE = "en-US-JennyNeural";
 
 serve(async (req) => {
   const corsHeaders = getCorsHeaders(req);
@@ -73,7 +55,7 @@ serve(async (req) => {
 
     const { data: word, error: wordErr } = await admin
       .from("vocabulary_words")
-      .select("id, word_arabic, audio_url, dialect_module")
+      .select("id, word_english, audio_url, dialect_module")
       .eq("id", wordId)
       .maybeSingle();
 
@@ -107,8 +89,10 @@ serve(async (req) => {
         apikey: SERVICE_ROLE,
       },
       body: JSON.stringify({
-        text: word.word_arabic,
-        voice: voiceFor(dialect || word.dialect_module),
+        // The card's audio is the ENGLISH target word (the thing being
+        // learned); dialect voices only apply to Arabic scaffold audio.
+        text: word.word_english,
+        voice: EN_VOICE,
       }),
     });
 

@@ -930,10 +930,10 @@ const MyWordsReview = () => {
             )}
 
 
-            {/* Pronunciation practice — only meaningful once Arabic is visible */}
+            {/* Pronunciation practice — score the English target word */}
             {(showAnswer || !isProduction) && (
               <div className="mb-6">
-                <PronunciationButton word={currentWord.word_arabic} />
+                <PronunciationButton word={currentWord.word_english} gloss={currentWord.word_arabic} />
               </div>
             )}
 

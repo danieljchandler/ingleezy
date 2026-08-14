@@ -151,7 +151,7 @@ const Review = () => {
         <div className="flex items-center justify-center py-24">
           <div className="text-center">
             <Loader2 className="h-10 w-10 animate-spin text-primary mx-auto mb-4" />
-            <p className="text-muted-foreground">Loading your reviews...</p>
+            <p className="text-muted-foreground">جارٍ تحميل مراجعاتك...</p>
           </div>
         </div>
       </AppShell>
@@ -168,11 +168,11 @@ const Review = () => {
           <div className="w-14 h-14 rounded-xl bg-muted flex items-center justify-center mx-auto mb-6">
             <LogIn className="h-7 w-7 text-muted-foreground" />
           </div>
-          <h1 className="text-xl font-bold text-foreground mb-3">Login Required</h1>
-          <p className="text-muted-foreground mb-8">Sign in to track your progress with spaced repetition.</p>
+          <h1 className="text-xl font-bold text-foreground mb-3">تسجيل الدخول مطلوب</h1>
+          <p className="text-muted-foreground mb-8">سجّل الدخول لتتبع تقدّمك بالتكرار المتباعد.</p>
           <Button onClick={() => navigate("/auth")}>
             <LogIn className="h-4 w-4 mr-2" />
-            Login to Review
+            سجّل الدخول للمراجعة
           </Button>
         </div>
       </AppShell>
@@ -217,7 +217,7 @@ const Review = () => {
               }`}
             >
               <Shuffle className="h-3.5 w-3.5" />
-              Mix All
+              خلط الكل
             </button>
             {sessionCount > 0 && (
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-card border border-border">
@@ -231,8 +231,8 @@ const Review = () => {
         <SessionHandoff
           deckId="curriculum"
           session={session}
-          message={`You've reviewed all your due ${mixAll ? "" : `${activeDialect} `}curriculum words.`}
-          fallbackLabel="Back to Topics"
+          message="راجعت كل كلمات المنهج المستحقة."
+          fallbackLabel="العودة إلى الرئيسية"
           fallbackRoute="/"
         >
           {stats && (
@@ -240,12 +240,12 @@ const Review = () => {
               <div className="bg-card rounded-xl p-4 border border-border">
                 <Brain className="h-6 w-6 text-primary mx-auto mb-2" />
                 <p className="text-xl font-bold text-foreground">{stats.learnedCount}</p>
-                <p className="text-xs text-muted-foreground">Learning</p>
+                <p className="text-xs text-muted-foreground">قيد التعلم</p>
               </div>
               <div className="bg-card rounded-xl p-4 border border-border">
                 <Sparkles className="h-6 w-6 text-accent mx-auto mb-2" />
                 <p className="text-xl font-bold text-foreground">{stats.masteredCount}</p>
-                <p className="text-xs text-muted-foreground">Mastered</p>
+                <p className="text-xs text-muted-foreground">متقنة</p>
               </div>
             </div>
           )}
@@ -297,11 +297,11 @@ const Review = () => {
             }`}
           >
             <Shuffle className="h-3.5 w-3.5" />
-            Mix All
+            خلط الكل
           </button>
           <div className="px-3 py-1.5 rounded-lg bg-card border border-border">
             <span className="text-sm font-medium text-foreground">
-              {currentWord.topic?.name || 'Review'}
+              {currentWord.topic?.name || "المراجعة"}
             </span>
           </div>
           {pendingCount > 0 && (
@@ -311,14 +311,14 @@ const Review = () => {
                   ? "bg-card border-border text-muted-foreground"
                   : "bg-amber-500/10 border-amber-500/30 text-amber-700 dark:text-amber-400"
               }`}
-              title={isOnline ? "Saving ratings…" : "Offline — will retry when reconnected"}
+              title={isOnline ? "جارٍ حفظ التقييمات…" : "غير متصل — سنعيد المحاولة عند عودة الاتصال"}
             >
               {isOnline ? (
                 <CloudUpload className={`h-3.5 w-3.5 ${isFlushing ? "animate-pulse" : ""}`} />
               ) : (
                 <WifiOff className="h-3.5 w-3.5" />
               )}
-              {isOnline ? `Saving ${pendingCount}` : `${pendingCount} pending`}
+              {isOnline ? `جارٍ حفظ ${pendingCount}` : `${pendingCount} بانتظار الحفظ`}
             </div>
           )}
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-card border border-border">
@@ -367,12 +367,12 @@ const Review = () => {
               {isProduction ? (
                 <>
                   <PenLine className="h-3.5 w-3.5" />
-                  Say it in Arabic
+                  قلها بالإنجليزية
                 </>
               ) : (
                 <>
                   <BookOpen className="h-3.5 w-3.5" />
-                  Recognise
+                  ما معناها؟
                 </>
               )}
             </div>
@@ -401,24 +401,23 @@ const Review = () => {
                   className="gap-1.5 text-muted-foreground"
                 >
                   <ImagePlus className="h-4 w-4" />
-                  {currentWord.image_url ? "Regenerate Image" : "Generate Image"}
+                  {currentWord.image_url ? "أعد توليد الصورة" : "ولّد صورة"}
                 </Button>
               </div>
             )}
 
             {isProduction ? (
-              /* Prompt in English; the Arabic is what the learner has to
+              /* Prompt in Arabic; the English is what the learner has to
                  produce, so it stays hidden until they've committed. */
-              <p className="text-3xl font-bold text-foreground mb-6 break-words max-w-full">
-                {currentWord.word_english}
-              </p>
-            ) : (
               <p
-                className="text-4xl font-bold text-foreground mb-6 break-words max-w-full"
+                className="text-3xl font-bold text-foreground mb-6 break-words max-w-full"
                 style={{ fontFamily: "'Amiri', 'Traditional Arabic', serif" }}
-                dir="rtl"
               >
                 {currentWord.word_arabic}
+              </p>
+            ) : (
+              <p className="font-english text-4xl font-bold text-foreground mb-6 break-words max-w-full">
+                {currentWord.word_english}
               </p>
             )}
 
@@ -433,7 +432,7 @@ const Review = () => {
                   className="gap-1.5"
                 >
                   <Volume2 className="h-4 w-4" />
-                  Word
+                  الكلمة
                 </Button>
               )}
             </div>
@@ -442,7 +441,7 @@ const Review = () => {
                 learner must recall the word before being scored saying it. */}
             {(!isProduction || showAnswer) && (
               <div className="mb-6">
-                <PronunciationButton word={currentWord.word_arabic} />
+                <PronunciationButton word={currentWord.word_english} gloss={currentWord.word_arabic} />
               </div>
             )}
 
@@ -450,15 +449,16 @@ const Review = () => {
             {showAnswer && (
               <div className="animate-in fade-in duration-200 mb-4">
                 {isProduction ? (
+                  <p className="font-english text-3xl font-bold text-foreground break-words">
+                    {currentWord.word_english}
+                  </p>
+                ) : (
                   <p
-                    className="text-3xl font-bold text-foreground break-words"
+                    className="text-xl text-muted-foreground"
                     style={{ fontFamily: "'Amiri', 'Traditional Arabic', serif" }}
-                    dir="rtl"
                   >
                     {currentWord.word_arabic}
                   </p>
-                ) : (
-                  <p className="text-xl text-muted-foreground">{currentWord.word_english}</p>
                 )}
                 {/* Only after the reveal. On a production card the Arabic is
                     the answer, and a root shown alongside the English prompt
@@ -474,7 +474,7 @@ const Review = () => {
                 className="gap-1.5 text-muted-foreground"
               >
                 <Eye className="h-4 w-4" />
-                {isProduction ? "Reveal Arabic" : "Reveal English"}
+                {isProduction ? "أظهر الإنجليزية" : "أظهر المعنى"}
               </Button>
             )}
           </div>

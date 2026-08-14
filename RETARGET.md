@@ -120,8 +120,20 @@ generation conditioning.
       serve the Arabic scaffold direction.
 
 ### SRS / flashcards — FLIP (mostly renames)
-- [ ] Decks: front = English word/phrase (clickable-word save flow KEEP),
-      back = Arabic dialect + Fusha + audio
+- [~] Decks: front = English word/phrase (clickable-word save flow KEEP),
+      back = Arabic dialect + Fusha + audio.
+      Curriculum deck (/review) DONE: recognition shows the English word
+      and reveals the Arabic gloss; production prompts from the Arabic and
+      the learner produces English; the listening card synthesises the
+      English target with an English voice (persist-word-audio caches
+      word_english audio now); PronunciationButton scores against en-US
+      for every learner (dialect shapes coaching only) and sends
+      word_english = spoken target / word_arabic = gloss to
+      pronunciation-feedback. Review chrome is Arabic (rating buttons,
+      session progress/handoff with arCount agreement, Arabic interval
+      units د/س/ي/ش). Remaining: MyWordsReview + MyPhrasesReview pages
+      (PronunciationButton call already flipped), quiz/cloze/image cards,
+      LeechHelperPanel + SiblingWordsPanel strings, scoreBand labels.
 - [ ] Clickable transcript words → save-as-flashcard: KEEP mechanism,
       direction flips (tap English word, card scaffolds in Arabic)
 - [ ] Root-morphology sibling cards → English **word families**

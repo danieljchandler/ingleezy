@@ -8,15 +8,14 @@ import {
   type PronunciationResult,
   type WordResult,
 } from "@/hooks/useAzurePronunciation";
-import { useDialect } from "@/contexts/DialectContext";
 import { supabase } from "@/integrations/supabase/client";
 
 interface PronunciationButtonProps {
-  /** Arabic word/phrase the learner should say */
+  /** English word/phrase the learner should say */
   word: string;
-  /** English translation (used for AI coaching context) */
-  wordEnglish?: string;
-  /** BCP-47 locale, default derived from dialect context */
+  /** Arabic meaning (used for AI coaching context) */
+  gloss?: string;
+  /** BCP-47 locale, default en-US — the target language is English */
   locale?: string;
 }
 
@@ -24,11 +23,10 @@ const MAX_DURATION_MS = 5000;
 
 export const PronunciationButton = ({
   word,
-  wordEnglish,
+  gloss,
   locale: localeProp,
 }: PronunciationButtonProps) => {
-  const { activeDialect } = useDialect();
-  const locale = localeProp ?? (activeDialect === 'Egyptian' ? 'ar-EG' : activeDialect === 'Yemeni' ? 'ar-YE' : 'ar-SA');
+  const locale = localeProp ?? "en-US";
   const { assess, result, isLoading, error, reset } = useAzurePronunciation();
   const [isRecording, setIsRecording] = useState(false);
   const recorderRef = useRef<MediaRecorder | null>(null);
@@ -60,8 +58,8 @@ export const PronunciationButton = ({
           "pronunciation-feedback",
           {
             body: {
-              word_arabic: word,
-              word_english: wordEnglish || "",
+              word_arabic: gloss || "",
+              word_english: word,
               scores: result,
               dialect: locale,
             },
@@ -78,7 +76,7 @@ export const PronunciationButton = ({
     };
     fetchTips();
     return () => { cancelled = true; };
-  }, [result, word, wordEnglish, locale]);
+  }, [result, word, gloss, locale]);
 
   const stopRecording = useCallback(() => {
     recorderRef.current?.stop();
@@ -149,12 +147,12 @@ export const PronunciationButton = ({
           {isRecording ? (
             <>
               <MicOff className="h-4 w-4" />
-              Stop
+              إيقاف
             </>
           ) : (
             <>
               <Mic className="h-4 w-4" />
-              Say it 🎤
+              انطقها 🎤
             </>
           )}
         </Button>
@@ -164,7 +162,7 @@ export const PronunciationButton = ({
       {isLoading && (
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Loader2 className="h-4 w-4 animate-spin" />
-          Checking pronunciation…
+          يتم فحص النطق…
         </div>
       )}
 
@@ -174,7 +172,7 @@ export const PronunciationButton = ({
           {error}
           <Button variant="ghost" size="sm" onClick={handleTryAgain} className="ml-2">
             <RotateCcw className="h-3.5 w-3.5 mr-1" />
-            Retry
+            أعد المحاولة
           </Button>
         </div>
       )}
@@ -195,22 +193,22 @@ export const PronunciationButton = ({
             <div className="grid grid-cols-3 gap-2 text-xs text-muted-foreground mb-4">
               <div>
                 <p className="font-medium text-foreground">{Math.round(result.accuracy)}</p>
-                <p>Accuracy</p>
+                <p>الدقة</p>
               </div>
               <div>
                 <p className="font-medium text-foreground">{Math.round(result.fluency)}</p>
-                <p>Fluency</p>
+                <p>الطلاقة</p>
               </div>
               <div>
                 <p className="font-medium text-foreground">{Math.round(result.completeness)}</p>
-                <p>Complete</p>
+                <p>الاكتمال</p>
               </div>
             </div>
           )}
 
           {/* Per-word breakdown for phrases */}
           {!isSingleWord && result.words.length > 1 && (
-            <div className="flex flex-wrap justify-center gap-2 mb-4" dir="rtl">
+            <div className="font-english flex flex-wrap justify-center gap-2 mb-4">
               {result.words.map((w: WordResult, i: number) => {
                 const wb = scoreBand(w.accuracy);
                 return (
@@ -237,7 +235,7 @@ export const PronunciationButton = ({
             <div className="mt-3 text-left bg-muted/50 rounded-lg p-3 animate-in fade-in slide-in-from-bottom-2 duration-500">
               <div className="flex items-center gap-1.5 mb-2">
                 <Lightbulb className="h-3.5 w-3.5 text-yellow-500" />
-                <span className="text-xs font-medium text-muted-foreground">Tips</span>
+                <span className="text-xs font-medium text-muted-foreground">نصائح</span>
               </div>
               <ul className="space-y-1.5">
                 {tips.map((tip, i) => (
@@ -251,7 +249,7 @@ export const PronunciationButton = ({
 
           <Button variant="ghost" size="sm" onClick={handleTryAgain} className="gap-1.5 mt-3">
             <RotateCcw className="h-3.5 w-3.5" />
-            Try again
+            حاول من جديد
           </Button>
         </div>
       )}

@@ -48,21 +48,21 @@ describe("FSRS-4.5 spacedRepetition", () => {
 
   describe("getIntervalDisplay", () => {
     it("formats minutes correctly", () => {
-      // 1/60 day = 1 minute threshold; values below show "< 1m"
-      expect(getIntervalDisplay(1 / 1440)).toBe("< 1m");
+      // 1/60 day = 1 minute threshold; values below show "< 1د"
+      expect(getIntervalDisplay(1 / 1440)).toBe("< 1د");
       // 5/60 days ≈ 2 hours — but < 1/24 day threshold is 1h
-      expect(getIntervalDisplay(2 / 1440)).toBe("< 1m");
+      expect(getIntervalDisplay(2 / 1440)).toBe("< 1د");
       // 30 minutes = 30/1440 ≈ 0.021 — above 1/60 (0.0167) so shows minutes
-      expect(getIntervalDisplay(30 / 1440)).toBe("30m");
+      expect(getIntervalDisplay(30 / 1440)).toBe("30د");
     });
 
     it("formats days correctly", () => {
-      expect(getIntervalDisplay(1)).toBe("1d");
-      expect(getIntervalDisplay(7)).toBe("7d");
+      expect(getIntervalDisplay(1)).toBe("1ي");
+      expect(getIntervalDisplay(7)).toBe("7ي");
     });
 
     it("formats months correctly", () => {
-      expect(getIntervalDisplay(60)).toBe("2mo");
+      expect(getIntervalDisplay(60)).toBe("2ش");
     });
   });
 

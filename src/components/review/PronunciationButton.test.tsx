@@ -6,18 +6,15 @@ import { PronunciationButton } from "./PronunciationButton";
 import type { SupabaseBackend } from "@/test/support/server/handler";
 
 /**
- * "Say it" — the button on a flashcard that scores how the learner said the
- * word.
+ * "انطقها" — the button on a flashcard that scores how the learner said the
+ * English word.
  *
- * Recognition is the easy half of vocabulary. Producing a word aloud, in a
- * dialect, with sounds English does not have, is where learners actually stall,
- * and it is the one thing they cannot assess for themselves: nobody can hear
- * their own ع. A number and a per-word breakdown is the only feedback available
- * to somebody studying alone.
- *
- * Which makes the locale the load-bearing detail. Scoring Gulf speech against
- * an Egyptian model marks correct pronunciation wrong, and a learner told they
- * are wrong when they are right will change what they say.
+ * Recognition is the easy half of vocabulary. Producing a word aloud, with
+ * sounds Arabic does not have (p/b, v/f, vowel contrasts), is where learners
+ * actually stall, and it is the one thing they cannot assess for themselves.
+ * A number and a per-word breakdown is the only feedback available to
+ * somebody studying alone. Scoring always runs against English (en-US) —
+ * the learner's own dialect shapes the coaching, not the reference model.
  */
 
 // The scorer converts the take to 16 kHz WAV before sending it, which needs a
@@ -27,8 +24,8 @@ vi.mock("@/lib/audioToWav", () => ({
   blobToWav: vi.fn(async (blob: Blob) => blob),
 }));
 
-const A_WORD = "سوق";
-const A_PHRASE = "رحت السوق";
+const A_WORD = "market";
+const A_PHRASE = "I went to the market";
 
 const aResult = (over: Record<string, unknown> = {}) => ({
   overall: 78,
@@ -36,11 +33,11 @@ const aResult = (over: Record<string, unknown> = {}) => ({
   fluency: 72,
   completeness: 90,
   words: [
-    { word: "رحت", accuracy: 90, errorType: "None" },
-    { word: "السوق", accuracy: 60, errorType: "Mispronunciation" },
+    { word: "went", accuracy: 90, errorType: "None" },
+    { word: "market", accuracy: 60, errorType: "Mispronunciation" },
   ],
-  recognizedText: "رحت السوق",
-  locale: "ar-SA",
+  recognizedText: "I went to the market",
+  locale: "en-US",
   ...over,
 });
 
@@ -126,15 +123,15 @@ afterEach(() => {
 
 interface Options {
   word?: string;
-  wordEnglish?: string;
+  gloss?: string;
   dialect?: string;
   seed?: (backend: SupabaseBackend) => void;
 }
 
-function render({ word = A_WORD, wordEnglish, dialect = "Gulf", seed }: Options = {}) {
+function render({ word = A_WORD, gloss, dialect = "Gulf", seed }: Options = {}) {
   localStorage.setItem("ingleezy_dialect_module", dialect);
   const harness = renderWithProviders(
-    <PronunciationButton word={word} wordEnglish={wordEnglish} />,
+    <PronunciationButton word={word} gloss={gloss} />,
     {
       persona: "free",
       seed: (backend) => {
@@ -159,10 +156,10 @@ function render({ word = A_WORD, wordEnglish, dialect = "Gulf", seed }: Options 
  * its back leaves it believing it is still listening.
  */
 async function recordTake() {
-  fireEvent.click(screen.getByRole("button", { name: /say it/i }));
+  fireEvent.click(screen.getByRole("button", { name: /انطقها/ }));
   await waitFor(() => expect(recorders).toHaveLength(1));
   await act(async () => {
-    fireEvent.click(screen.getByRole("button", { name: /stop/i }));
+    fireEvent.click(screen.getByRole("button", { name: /إيقاف/ }));
   });
 }
 
@@ -170,23 +167,23 @@ describe("offering to listen", () => {
   it("starts with an invitation rather than a score", () => {
     render();
 
-    expect(screen.getByRole("button", { name: /say it/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /انطقها/ })).toBeInTheDocument();
   });
 
   it("switches to a stop control while it is listening", async () => {
     render();
 
-    fireEvent.click(screen.getByRole("button", { name: /say it/i }));
+    fireEvent.click(screen.getByRole("button", { name: /انطقها/ }));
 
     // Without a visible stop the learner has no way to end a take early, and
     // the five-second cap would make every short word a four-second wait.
-    await waitFor(() => expect(screen.getByRole("button", { name: /stop/i })).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByRole("button", { name: /إيقاف/ })).toBeInTheDocument());
   });
 
   it("stops on its own after five seconds", async () => {
     vi.useFakeTimers();
     render();
-    fireEvent.click(screen.getByRole("button", { name: /say it/i }));
+    fireEvent.click(screen.getByRole("button", { name: /انطقها/ }));
     await act(async () => {});
 
     await act(async () => {
@@ -213,11 +210,11 @@ describe("offering to listen", () => {
     micThrows = new DOMException("Permission denied", "NotAllowedError");
     render();
 
-    fireEvent.click(screen.getByRole("button", { name: /say it/i }));
+    fireEvent.click(screen.getByRole("button", { name: /انطقها/ }));
 
     // Declining is a decision, and the card is still usable without it — the
     // button simply stays where it was.
-    await waitFor(() => expect(screen.getByRole("button", { name: /say it/i })).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByRole("button", { name: /انطقها/ })).toBeInTheDocument());
   });
 
   it("does not send a take with nothing in it", async () => {
@@ -232,25 +229,18 @@ describe("offering to listen", () => {
   });
 });
 
-describe("scoring against the right dialect", () => {
+describe("scoring against English", () => {
   const localeFor = async (dialect: string) => {
     const { backend } = render({ dialect });
     await recordTake();
     return (backend.lastCallTo("azure-pronunciation")?.body as { locale: string }).locale;
   };
 
-  it("scores a Gulf learner against Gulf", async () => {
-    expect(await localeFor("Gulf")).toBe("ar-SA");
-  });
-
-  it("scores an Egyptian learner against Egyptian", async () => {
-    // The same sentence scored against the wrong locale marks correct
-    // pronunciation wrong, and the learner changes what they say to match.
-    expect(await localeFor("Egyptian")).toBe("ar-EG");
-  });
-
-  it("scores a Yemeni learner against Yemeni", async () => {
-    expect(await localeFor("Yemeni")).toBe("ar-YE");
+  it("scores against English regardless of the learner's dialect", async () => {
+    // The target language is English for every learner; the dialect shapes
+    // the coaching tips, never the reference model.
+    expect(await localeFor("Gulf")).toBe("en-US");
+    expect(await localeFor("Egyptian")).toBe("en-US");
   });
 
   it("sends the word it asked the learner to say", async () => {
@@ -284,9 +274,9 @@ describe("showing the score", () => {
     // On a phrase, pausing in the wrong place and skipping a word are real
     // failures that accuracy alone would hide.
     await waitFor(() => expect(screen.getByText("78")).toBeInTheDocument());
-    expect(screen.getByText("Accuracy")).toBeInTheDocument();
-    expect(screen.getByText("Fluency")).toBeInTheDocument();
-    expect(screen.getByText("Complete")).toBeInTheDocument();
+    expect(screen.getByText("الدقة")).toBeInTheDocument();
+    expect(screen.getByText("الطلاقة")).toBeInTheDocument();
+    expect(screen.getByText("الاكتمال")).toBeInTheDocument();
   });
 
   it("breaks a phrase down word by word", async () => {
@@ -296,8 +286,8 @@ describe("showing the score", () => {
 
     // "78/100" tells a learner they were imperfect; the per-word colours tell
     // them which word to say again.
-    await waitFor(() => expect(screen.getByText("السوق")).toBeInTheDocument());
-    expect(screen.getByText("رحت")).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText("market")).toBeInTheDocument());
+    expect(screen.getByText("went")).toBeInTheDocument();
   });
 
   it("offers another go", async () => {
@@ -307,7 +297,7 @@ describe("showing the score", () => {
 
     // Saying it again immediately is the entire practice loop.
     await waitFor(() =>
-      expect(screen.getByRole("button", { name: /try again/i })).toBeInTheDocument(),
+      expect(screen.getByRole("button", { name: /حاول من جديد/ })).toBeInTheDocument(),
     );
   });
 
@@ -316,26 +306,27 @@ describe("showing the score", () => {
     await recordTake();
     await waitFor(() => expect(screen.getByText("84")).toBeInTheDocument());
 
-    fireEvent.click(screen.getByRole("button", { name: /try again/i }));
+    fireEvent.click(screen.getByRole("button", { name: /حاول من جديد/ }));
 
     expect(screen.queryByText("84")).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /say it/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /انطقها/ })).toBeInTheDocument();
   });
 });
 
 describe("the coaching tips", () => {
   it("asks for advice on what went wrong", async () => {
-    const { backend } = render({ word: A_PHRASE, wordEnglish: "I went to the market" });
+    const { backend } = render({ word: A_PHRASE, gloss: "رحت السوق" });
 
     await recordTake();
 
     // The scores go with the request, so the advice is about this take rather
-    // than about the phrase in general.
+    // than about the phrase in general. Column-named fields: word_english is
+    // the spoken English target, word_arabic the meaning.
     await waitFor(() =>
       expect(backend.lastCallTo("pronunciation-feedback")?.body).toMatchObject({
-        word_arabic: A_PHRASE,
-        word_english: "I went to the market",
-        dialect: "ar-SA",
+        word_arabic: "رحت السوق",
+        word_english: A_PHRASE,
+        dialect: "en-US",
       }),
     );
   });
@@ -358,7 +349,7 @@ describe("the coaching tips", () => {
     // Tips are commentary on a number the learner already has; losing them is
     // not worth losing the score.
     await waitFor(() => expect(screen.getByText("84")).toBeInTheDocument());
-    expect(screen.queryByText("Tips")).not.toBeInTheDocument();
+    expect(screen.queryByText("نصائح")).not.toBeInTheDocument();
   });
 });
 
@@ -369,7 +360,7 @@ describe("when scoring fails", () => {
     await recordTake();
 
     await waitFor(() =>
-      expect(screen.getByRole("button", { name: /retry/i })).toBeInTheDocument(),
+      expect(screen.getByRole("button", { name: /أعد المحاولة/ })).toBeInTheDocument(),
     );
   });
 
@@ -381,7 +372,7 @@ describe("when scoring fails", () => {
     await recordTake();
 
     await waitFor(() =>
-      expect(screen.getByRole("button", { name: /retry/i })).toBeInTheDocument(),
+      expect(screen.getByRole("button", { name: /أعد المحاولة/ })).toBeInTheDocument(),
     );
     expect(backend.callsTo("pronunciation-feedback")).toEqual([]);
   });
@@ -398,6 +389,6 @@ describe("moving to the next card", () => {
     // A score carried over from the previous flashcard would tell the learner
     // how well they said a word they have not been asked for yet.
     await waitFor(() => expect(screen.queryByText("84")).not.toBeInTheDocument());
-    expect(screen.getByRole("button", { name: /say it/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /انطقها/ })).toBeInTheDocument();
   });
 });

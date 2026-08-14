@@ -60,12 +60,13 @@ type RatingLabel = "again" | "hard" | "good" | "easy";
  * Reveal the answer, then rate.
  *
  * Each rating button renders its label followed by the interval that choice
- * would schedule ("Good 8d"), so the accessible name is matched by prefix
+ * would schedule ("جيد 8ي"), so the accessible name is matched by prefix
  * rather than exactly.
  */
 async function rate(page: import("@playwright/test").Page, rating: RatingLabel) {
-  await page.getByRole("button", { name: /show answer|reveal/i }).click();
-  await page.getByRole("button", { name: new RegExp(`^${rating}\\b`, "i") }).click();
+  await page.getByRole("button", { name: /أظهر/ }).click();
+  const labels: Record<RatingLabel, string> = { again: "من جديد", hard: "صعب", good: "جيد", easy: "سهل" };
+  await page.getByRole("button", { name: new RegExp(`^${labels[rating]}`) }).click();
 }
 
 /** Wait for the background queue to flush the rating to the server. */
@@ -87,16 +88,16 @@ test.describe("rating a curriculum card", () => {
   test("shows the first card and the whole session's progress", async ({ page }) => {
     await page.goto("/review");
 
-    await expect(page.getByText("كلمة1")).toBeVisible();
-    await expect(page.getByText(/Curriculum · 1 \/ 3 due/)).toBeVisible();
+    await expect(page.getByText("word 1")).toBeVisible();
+    await expect(page.getByText(/المنهج · 1 \/ 3 مستحقة/)).toBeVisible();
   });
 
   test("hides the answer until asked", async ({ page }) => {
     await page.goto("/review");
 
-    await expect(page.getByText("word 1")).toHaveCount(0);
-    await page.getByRole("button", { name: /show answer|reveal/i }).click();
-    await expect(page.getByText("word 1")).toBeVisible();
+    await expect(page.getByText("كلمة1")).toHaveCount(0);
+    await page.getByRole("button", { name: /أظهر/ }).click();
+    await expect(page.getByText("كلمة1")).toBeVisible();
   });
 
   test("a Good rating extends the interval and records the review", async ({ page, db }) => {
@@ -153,20 +154,20 @@ test.describe("rating a curriculum card", () => {
 
   test("advances to the next card without waiting on the network", async ({ page }) => {
     await page.goto("/review");
-    await expect(page.getByText("كلمة1")).toBeVisible();
+    await expect(page.getByText("word 1")).toBeVisible();
 
     await rate(page, "good");
 
-    await expect(page.getByText("كلمة2")).toBeVisible();
-    await expect(page.getByText(/Curriculum · 2 \/ 3 due/)).toBeVisible();
+    await expect(page.getByText("word 2")).toBeVisible();
+    await expect(page.getByText(/المنهج · 2 \/ 3 مستحقة/)).toBeVisible();
   });
 
   test("hides the answer again on the next card", async ({ page }) => {
     await page.goto("/review");
     await rate(page, "good");
 
-    await expect(page.getByText("كلمة2")).toBeVisible();
-    await expect(page.getByRole("button", { name: /show answer|reveal/i })).toBeVisible();
+    await expect(page.getByText("word 2")).toBeVisible();
+    await expect(page.getByRole("button", { name: /أظهر/ })).toBeVisible();
   });
 
   test("awards XP once the server has confirmed the rating", async ({ page, db }) => {
@@ -329,7 +330,7 @@ test.describe("saved-word decks", () => {
     // Nothing before the learner has committed to an answer.
     await expect(page.getByText(/shares this root/i)).toHaveCount(0);
 
-    await page.getByRole("button", { name: /show answer|reveal/i }).click();
+    await page.getByRole("button", { name: /أظهر/ }).click();
 
     const footnote = page.getByRole("button", { name: /1 word you know shares this root/i });
     await expect(footnote).toBeVisible();
@@ -357,7 +358,7 @@ test.describe("saved-word decks", () => {
     });
 
     await page.goto("/review/my-words");
-    await page.getByRole("button", { name: /show answer|reveal/i }).click();
+    await page.getByRole("button", { name: /أظهر/ }).click();
 
     await expect(page.getByText(/shares this root/i)).toHaveCount(0);
   });
@@ -366,7 +367,7 @@ test.describe("saved-word decks", () => {
     db.seed("user_vocabulary", []);
     await page.goto("/review/my-words");
 
-    await expect(page.getByRole("heading", { name: /all caught up|deck complete/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /أنجزت كل المراجعات|أنهيت هذه المجموعة/ })).toBeVisible();
   });
 
   /**
@@ -432,6 +433,6 @@ test.describe("when the deck cannot load", () => {
 
     // A failed query that renders as "nothing due" tells the learner they are
     // finished when they are not.
-    await expect(page.getByText(/all caught up|nothing due/i)).toHaveCount(0);
+    await expect(page.getByText(/أنجزت كل المراجعات|أنهيت هذه المجموعة/)).toHaveCount(0);
   });
 });
