@@ -22,8 +22,8 @@ function seedGuide(db: MemoryDb) {
 }
 
 async function ask(page: Page, text = "How do I greet my host's mother?") {
-  await page.getByPlaceholder("Describe your situation…").fill(text);
-  await page.getByPlaceholder("Describe your situation…").press("Enter");
+  await page.getByPlaceholder("صف موقفك…").fill(text);
+  await page.getByPlaceholder("صف موقفك…").press("Enter");
 }
 
 test.describe("asking the guide", () => {
@@ -97,12 +97,12 @@ test.describe("asking the guide", () => {
     await page.goto("/culture-guide");
     await ask(page, "My question");
 
-    await expect(page.getByPlaceholder("Describe your situation…")).toHaveValue("");
+    await expect(page.getByPlaceholder("صف موقفك…")).toHaveValue("");
   });
 
   test("sends nothing for an empty box", async ({ page, backend }) => {
     await page.goto("/culture-guide");
-    await page.getByPlaceholder("Describe your situation…").press("Enter");
+    await page.getByPlaceholder("صف موقفك…").press("Enter");
 
     expect(backend.callsTo("culture-guide")).toHaveLength(0);
   });
@@ -160,7 +160,7 @@ test.describe("when the stream goes wrong", () => {
 
     // `[DONE]` is what breaks the read loop. Without it the input would stay
     // disabled and the conversation would be one message long forever.
-    await expect(page.getByPlaceholder("Describe your situation…")).toBeEnabled();
+    await expect(page.getByPlaceholder("صف موقفك…")).toBeEnabled();
   });
 
   test("survives a frame that is not JSON", async ({ page, backend }) => {
@@ -177,7 +177,7 @@ test.describe("when the stream goes wrong", () => {
     await page.goto("/culture-guide");
     await ask(page);
 
-    await expect(page.getByPlaceholder("Describe your situation…")).toBeEnabled();
+    await expect(page.getByPlaceholder("صف موقفك…")).toBeEnabled();
   });
 
   test("ignores a frame carrying no content", async ({ page, backend }) => {

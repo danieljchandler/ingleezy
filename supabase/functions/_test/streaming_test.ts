@@ -516,7 +516,7 @@ Deno.test("culture-guide survives a malformed frame mid-stream", async () => {
   assert(done);
 });
 
-Deno.test("culture-guide says which dialect's culture it is describing", async () => {
+Deno.test("culture-guide answers in the learner's dialect about English-speaking culture", async () => {
   const { bodies } = await call(
     "culture-guide",
     { messages: [{ role: "user", content: "hi" }], dialect: "Yemeni" },
@@ -526,11 +526,12 @@ Deno.test("culture-guide says which dialect's culture it is describing", async (
   );
 
   const sent = bodies.find((b) => b?.includes("systemInstruction")) ?? "";
-  // Not cosmetic: the regional guidance differs per dialect, and the Yemeni
-  // block names customs (qat sessions, مفرج etiquette, جنبية) that have no Gulf
-  // or Egyptian equivalent.
+  // The direction flipped: the advisor explains ANGLOSPHERE etiquette, and the
+  // dialect names the language the ANSWER is written in — not the culture
+  // being described.
   assertStringIncludes(sent, "Yemeni");
-  assertStringIncludes(sent, "qat sessions");
+  assertStringIncludes(sent, "English-speaking countries");
+  assertStringIncludes(sent, "exact English phrase");
 });
 
 Deno.test("culture-guide asks Gemini to search", async () => {

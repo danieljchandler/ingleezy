@@ -328,10 +328,11 @@ generation conditioning.
       individual practice/content pages (grammar, listening practice,
       conversation, vocab games/battles…), DiscoverVideo player
       chrome, scoreBand labels
-      — mistakes/profile/how-do-i-say now done; culture-guide needs a
-      BACKEND flip first (its prompt still answers about Arab culture
-      in dialect — should become Anglosphere etiquette explained in
-      the learner's dialect), so it flips as its own slice
+      — mistakes/profile/how-do-i-say/culture-guide now done
+      (culture-guide's backend prompt flipped with it: Anglosphere
+      etiquette answered in the learner's dialect, exact English
+      phrases quoted with dialect glosses, US/UK differences and
+      transfer traps called out)
       with the pronunciation pages — no hardcoded learner-facing
       English; admin exempt
 - [ ] Mirror-aware components (icons, arrows, progress) — Tailwind logical

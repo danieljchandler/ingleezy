@@ -542,7 +542,7 @@ function storage(): Record<string, UpstreamHandler> {
 
 const aWord = (over: Record<string, unknown> = {}) => ({
   id: WORD_ID,
-  word_arabic: "كتاب",
+  word_english: "book",
   audio_url: null,
   dialect_module: "Gulf",
   ...over,
@@ -586,58 +586,25 @@ Deno.test("persist-word-audio returns the existing audio without synthesising", 
   assert(!calls.some((url) => url.includes("azure-tts")));
 });
 
-Deno.test("persist-word-audio picks the voice for the word's dialect", async () => {
-  for (const [dialect, voice] of [
-    ["Egyptian", "ar-EG-ShakirNeural"],
-    ["Yemeni", "ar-YE-MaryamNeural"],
-  ] as const) {
+Deno.test("persist-word-audio synthesises the English word with the English voice", async () => {
+  // Whatever the word's dialect, the cached audio is the ENGLISH target word.
+  // Dialect voices are Arabic-scaffold machinery and must never leak into it —
+  // a wrong voice here is cached permanently, for every learner.
+  for (const dialect of ["Gulf", "Egyptian", "Yemeni"] as const) {
     const { bodies, calls } = await call(
       "persist-word-audio",
       { wordId: WORD_ID, dialect },
       caller({
         ...storage(),
-        "/rest/v1/vocabulary_words": () => json(aWord()),
+        "/rest/v1/vocabulary_words": () => json(aWord({ dialect_module: dialect })),
       }),
     );
 
     const i = calls.findIndex((u) => u.includes("azure-tts"));
-    // azure-tts takes a *voice*, not a dialect. Passing a dialect name falls
-    // through to its Gulf default, so every Egyptian and Yemeni word would be
-    // cached — permanently, for everyone — in a Gulf voice.
-    assertStringIncludes(bodies[i] ?? "", voice);
+    const sent = JSON.parse(bodies[i] ?? "{}") as { text?: string; voice?: string };
+    assertEquals(sent.text, "book");
+    assertEquals(sent.voice, "en-US-JennyNeural");
   }
-});
-
-Deno.test("persist-word-audio sends no voice for Gulf", async () => {
-  const { bodies, calls } = await call(
-    "persist-word-audio",
-    { wordId: WORD_ID, dialect: "Gulf" },
-    caller({
-      ...storage(),
-      "/rest/v1/vocabulary_words": () => json(aWord()),
-    }),
-  );
-
-  const i = calls.findIndex((u) => u.includes("azure-tts"));
-  const sent = JSON.parse(bodies[i] ?? "{}") as { voice?: string };
-  // azure-tts's own default is already a Gulf voice, so naming one here would
-  // be a second place to keep in sync for no gain.
-  assertEquals(sent.voice, undefined);
-});
-
-Deno.test("persist-word-audio falls back to the word's own dialect", async () => {
-  const { bodies, calls } = await call(
-    "persist-word-audio",
-    { wordId: WORD_ID },
-    caller({
-      ...storage(),
-      "/rest/v1/vocabulary_words": () => json(aWord({ dialect_module: "Egyptian" })),
-    }),
-  );
-
-  const i = calls.findIndex((u) => u.includes("azure-tts"));
-  // Callers do not always know the dialect of a curriculum word; the row does.
-  assertStringIncludes(bodies[i] ?? "", "ar-EG-ShakirNeural");
 });
 
 Deno.test("persist-word-audio only fills an empty audio slot", async () => {

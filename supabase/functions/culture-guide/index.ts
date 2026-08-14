@@ -17,47 +17,30 @@ function buildSystemPrompt(dialect: string): string {
   const identity = getDialectIdentity(dialect);
   const vocabRules = getDialectVocabRules(dialect);
 
-  const regionDesc = dialect === 'Egyptian'
-    ? 'Egyptian Arabic (مصري) — focused on Egyptian culture (Cairo, Alexandria, Upper Egypt, Delta region).'
-    : dialect === 'Yemeni'
-    ? "Yemeni Arabic (يمني) — focused on Yemeni culture (Sana'a, Aden, Hadramaut, Ta'izz, Marib)."
-    : 'Gulf Arabic (Saudi, Emirati, Kuwaiti, Qatari, Bahraini, Omani culture).';
-
-  const regionGuidelines = dialect === 'Egyptian'
-    ? `- Provide the Egyptian Arabic phrase/response in Arabic script and English translation only
-- NEVER include transliteration (no Latin-letter pronunciation guides)
-- Explain the cultural reasoning behind your advice
-- Mention if customs vary between regions of Egypt
-- Cover greetings, hospitality, business etiquette, religious customs, family dynamics, social norms`
-    : dialect === 'Yemeni'
-    ? `- Provide the Yemeni Arabic phrase/response in Arabic script and English translation only
-- NEVER include transliteration
-- Explain the cultural reasoning behind your advice
-- Mention if customs vary between regions of Yemen
-- Cover greetings, hospitality, qat sessions, مفرج etiquette, جنبية traditions, business etiquette, religious customs, family dynamics, social norms`
-    : `- Provide the Gulf Arabic phrase/response in Arabic script and English translation only
-- NEVER include transliteration
-- Explain the cultural reasoning behind your advice
-- Mention if customs vary between Gulf countries
-- Cover greetings, hospitality, business etiquette, religious customs, family dynamics, social norms`;
-
+  // The identity/vocab machinery governs the ARABIC the advisor writes —
+  // the answer is in the learner's own dialect. The subject matter flipped:
+  // English-speaking-world culture, for an Arabic speaker living or working
+  // in (or dealing with) the US, UK, Canada or Australia.
   return `${identity}
 
-You are a ${dialectLabel} cultural advisor for "Ingleezy" — ${regionDesc}
+You are a cultural advisor for "Ingleezy", helping ${dialectLabel}-speaking learners of English navigate everyday life in English-speaking countries (the US, UK, Canada, Australia).
 
-Your role: Help users navigate real-life social situations with culturally appropriate responses, phrases, and etiquette.
+Your role: given a real-life situation — work, invitations, small talk, appointments, tipping, queuing, holidays, neighbours, dating, complaints — explain what is culturally expected and give the exact English to say.
 
 ${vocabRules}
 
 Guidelines:
-${regionGuidelines}
+- ANSWER in the learner's ${dialectLabel} Arabic — that is the language they think in.
+- Give the exact English phrase(s) to say, in English, quoted so they stand out; follow each with a short ${dialectLabel} gloss.
+- Explain the cultural reasoning behind the advice in ${dialectLabel}.
+- Point out where the US and UK differ when it matters (tipping, small talk, directness).
+- Warn about transfer traps: things that are polite in Arab culture but read differently in English-speaking culture, and vice versa.
 - Use Google Search to ground time-sensitive or specific cultural questions in real, citable sources.
 - If religious or sensitive, be respectful and factual.
 - If you're not confident, say so clearly.
 - Keep responses warm, practical, and conversational.
-- Respond in English or Arabic depending on which language the user writes in.
 
-If the question is completely unrelated to Arabic culture, politely redirect them.`;
+If the question is completely unrelated to English-speaking culture or the English language, politely redirect them — in ${dialectLabel}.`;
 }
 
 // Convert chat-style messages to Gemini "contents" array.

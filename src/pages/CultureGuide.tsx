@@ -24,28 +24,30 @@ import { PAGE_HINTS } from "@/lib/pageHints";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
+// Situations an Arabic speaker hits in an English-speaking country, phrased
+// the way each dialect's speaker would actually ask them.
 const GULF_SUGGESTIONS = [
-  "My colleague invited me to their home for dinner in Saudi. What should I bring?",
-  "زميلي عزمني على قهوة، شلون أرد؟",
-  "How do I politely decline an invitation in the Gulf?",
-  "What's the etiquette for meeting someone's parents for the first time?",
-  "كيف أتصرف في مجلس رجال؟",
+  "زميلي الأمريكي عزمني على عشاء في بيته، وش المفروض أجيب معي؟",
+  "كيف أعتذر بأدب عن دعوة بالإنجليزية بدون ما أجرح أحد؟",
+  "وش السالفة مع البقشيش في أمريكا؟ متى وكم أدفع؟",
+  "أول يوم لي في شركة بريطانية — كيف أسلم على الزملاء؟",
+  "جاري قال لي How are you ومشى! وش المفروض أرد؟",
 ];
 
 const EGYPTIAN_SUGGESTIONS = [
-  "My colleague invited me to their home for dinner in Cairo. What should I bring?",
-  "زميلي عزمني على قهوة، أرد إزاي؟",
-  "How do I politely decline an invitation in Egypt?",
-  "What's the etiquette for meeting someone's parents for the first time in Egypt?",
-  "إزاي أتصرف في عزومة عند ناس أول مرة؟",
+  "زميلي الأمريكي عزمني على عشا في بيته، أجيب إيه معايا؟",
+  "أعتذر إزاي بذوق عن عزومة بالإنجليزي من غير ما أزعّل حد؟",
+  "إيه حكاية البقشيش في أمريكا؟ أدفع إمتى وقد إيه؟",
+  "أول يوم ليا في شركة بريطانية — أسلّم على الزمايل إزاي؟",
+  "جاري قال لي How are you ومشي! أرد إيه؟",
 ];
 
 const YEMENI_SUGGESTIONS = [
-  "My colleague invited me for qat in Sana'a. What should I know?",
-  "زميلي عزمني على قات، كيف أتصرف؟",
-  "How do I politely greet elders in Yemen?",
-  "What's the etiquette for visiting someone's مفرج for the first time?",
-  "كيف أتصرف في جلسة قات أول مرة؟",
+  "زميلي الأمريكي عزمني على عشاء في بيته، ماذا آخذ معي؟",
+  "كيف أعتذر بأدب عن دعوة بالإنجليزية بدون ما أجرح أحد؟",
+  "ما قصة البقشيش في أمريكا؟ متى وكم أدفع؟",
+  "أول يوم لي في شركة بريطانية — كيف أسلم على الزملاء؟",
+  "جاري قال لي How are you ومشى! بماذا أرد؟",
 ];
 
 const MAX_HUMAN_REVIEWS_PER_MONTH = 5;
@@ -161,7 +163,7 @@ const CultureGuide = () => {
         }
       } catch (err: unknown) {
         if ((err as Error).name === "AbortError") return;
-        const msg = err instanceof Error ? err.message : "Something went wrong";
+        const msg = err instanceof Error ? err.message : "حدث خطأ ما";
         toast.error(msg);
       } finally {
         setIsStreaming(false);
@@ -175,7 +177,7 @@ const CultureGuide = () => {
     const content = (text ?? input).trim();
     if (!content || isStreaming) return;
     if (content.length > 2000) {
-      toast.error("Message too long (max 2000 characters)");
+      toast.error("الرسالة طويلة جداً (الحد 2000 حرف)");
       return;
     }
 
@@ -189,7 +191,7 @@ const CultureGuide = () => {
   const handleHumanReview = async () => {
     if (!user || !canRequestHumanReview) return;
     if (messages.length < 2) {
-      toast.error("Have a conversation first, then request a review");
+      toast.error("أجرِ محادثة أولاً ثم اطلب المراجعة");
       return;
     }
 
@@ -203,9 +205,9 @@ const CultureGuide = () => {
     });
 
     if (error) {
-      toast.error("Failed to submit review request");
+      toast.error("تعذّر إرسال طلب المراجعة");
     } else {
-      toast.success("Review requested! An expert will look into this.");
+      toast.success("طُلبت المراجعة! سيتابعها خبير.");
       refetchCount();
     }
   };
@@ -228,13 +230,13 @@ const CultureGuide = () => {
         </div>
         <div className="text-center max-w-sm mx-auto py-12">
           <LogIn className="h-7 w-7 text-muted-foreground mx-auto mb-6" />
-          <h1 className="text-xl font-bold text-foreground mb-3">Login Required</h1>
+          <h1 className="text-xl font-bold text-foreground mb-3">تسجيل الدخول مطلوب</h1>
           <p className="text-muted-foreground mb-8">
-            Sign in to get culturally-aware advice for {activeDialect === 'Egyptian' ? 'Egyptian' : activeDialect === 'Yemeni' ? 'Yemeni' : 'Gulf'} situations.
+            سجّل الدخول لتحصل على نصائح ثقافية لمواقفك في البلدان الناطقة بالإنجليزية.
           </p>
           <Button onClick={() => navigate("/auth")}>
             <LogIn className="h-4 w-4 mr-2" />
-            Login
+            تسجيل الدخول
           </Button>
         </div>
       </AppShell>
@@ -253,17 +255,17 @@ const CultureGuide = () => {
             className="gap-1.5 text-xs"
           >
             <UserCheck className="h-3.5 w-3.5" />
-            Ask a human ({MAX_HUMAN_REVIEWS_PER_MONTH - reviewCount} left)
+            اسأل خبيراً بشرياً (متبقٍّ {MAX_HUMAN_REVIEWS_PER_MONTH - reviewCount})
           </Button>
         )}
       </div>
 
       <div className="mb-4">
         <h1 className="text-xl font-bold text-foreground inline-flex items-center gap-2">
-          What should I do? <InfoHint {...PAGE_HINTS["culture-guide"]} />
+          ماذا أفعل؟ <InfoHint {...PAGE_HINTS["culture-guide"]} />
         </h1>
         <p className="text-sm text-muted-foreground">
-          Describe a situation — get culturally appropriate {activeDialect === 'Egyptian' ? 'Egyptian' : activeDialect === 'Yemeni' ? 'Yemeni' : 'Gulf'} Arabic advice
+          صف موقفاً في بلد ناطق بالإنجليزية — واحصل على النصيحة الثقافية وماذا تقول بالإنجليزية
         </p>
       </div>
 
@@ -272,7 +274,7 @@ const CultureGuide = () => {
         {messages.length === 0 && (
           <div className="space-y-2 pt-4">
             <p className="text-xs text-muted-foreground font-medium mb-3">
-              Try asking about…
+              جرّب أن تسأل عن…
             </p>
             {(activeDialect === 'Egyptian' ? EGYPTIAN_SUGGESTIONS : activeDialect === 'Yemeni' ? YEMENI_SUGGESTIONS : GULF_SUGGESTIONS).map((s, i) => (
               <button
@@ -333,7 +335,7 @@ const CultureGuide = () => {
         {!canRequestHumanReview && messages.length >= 2 && (
           <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 rounded-lg p-2">
             <AlertCircle className="h-3.5 w-3.5 shrink-0" />
-            You've used all {MAX_HUMAN_REVIEWS_PER_MONTH} human review requests this month
+            استنفدت طلبات المراجعة البشرية لهذا الشهر ({MAX_HUMAN_REVIEWS_PER_MONTH})
           </div>
         )}
 
@@ -346,7 +348,7 @@ const CultureGuide = () => {
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Describe your situation…"
+            placeholder="صف موقفك…"
             onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
             disabled={isStreaming}
             maxLength={2000}
