@@ -86,9 +86,10 @@ const MyPhrasesReview = () => {
     : undefined;
 
   const { ttsUrl, isLoading: ttsLoading } = useAzureTTS({
-    text: current?.phrase_arabic ?? "",
+    text: current?.phrase_english ?? "",
     skip: !current || Boolean(current?.phrase_audio_url),
-    dialect: activeDialect,
+    // The phrase audio is the English target — not the Arabic scaffold.
+    voice: "en-US-JennyNeural",
     persist: persistPhraseAudio,
   });
 
@@ -105,7 +106,7 @@ const MyPhrasesReview = () => {
         return;
       } catch (err) {
         console.error("Jingle repair failed:", err);
-        toast.error("This jingle is corrupted — tap Regenerate to replace it.");
+        toast.error("الأنشودة تالفة — المس «أعد التوليد» لاستبدالها.");
         return;
       }
     }
@@ -144,13 +145,13 @@ const MyPhrasesReview = () => {
         .eq("id", current.id);
       current.jingle_audio_url = jingleUrl;
       current.jingle_lyrics = lyrics;
-      toast.success("🎵 Jingle created — tap Play to listen.");
+      toast.success("🎵 جاهزة — المس «تشغيل» للاستماع.");
       setShowLyrics(true);
     } catch (err: any) {
       const msg = err?.message || "";
-      if (msg.includes("429")) toast.error("Rate limited — try again shortly");
-      else if (msg.includes("402")) toast.error("AI credits exhausted");
-      else toast.error("Failed to generate jingle");
+      if (msg.includes("429")) toast.error("طلبات كثيرة — حاول بعد قليل");
+      else if (msg.includes("402")) toast.error("نفد رصيد الذكاء الاصطناعي");
+      else toast.error("تعذّر توليد الأنشودة");
     } finally {
       setJingleLoading(false);
     }
@@ -233,10 +234,10 @@ const MyPhrasesReview = () => {
       setShowAnswer(false);
       setLastAction(null);
       await refetch();
-      toast.success("Rating undone");
+      toast.success("تم التراجع عن التقييم");
     } catch (err) {
       console.error("Undo failed:", err);
-      toast.error("Couldn't undo — try again");
+      toast.error("تعذّر التراجع — حاول من جديد");
     } finally {
       setUndoing(false);
     }
@@ -249,11 +250,11 @@ const MyPhrasesReview = () => {
     if (!current) return;
     try {
       await deletePhrase.mutateAsync(current.id);
-      toast.success("Phrase removed");
+      toast.success("تمت إزالة العبارة");
       await refetch();
       setCurrentIndex(0);
     } catch {
-      toast.error("Failed to remove phrase");
+      toast.error("تعذّرت إزالة العبارة");
     }
   };
 
@@ -273,10 +274,10 @@ const MyPhrasesReview = () => {
         <div className="mb-6"><HomeButton /></div>
         <div className="text-center max-w-sm mx-auto py-12">
           <LogIn className="h-7 w-7 text-muted-foreground mx-auto mb-6" />
-          <h1 className="text-xl font-bold mb-3">Login Required</h1>
-          <p className="text-muted-foreground mb-8">Sign in to review your saved phrases.</p>
+          <h1 className="text-xl font-bold mb-3">تسجيل الدخول مطلوب</h1>
+          <p className="text-muted-foreground mb-8">سجّل الدخول لمراجعة عباراتك المحفوظة.</p>
           <Button onClick={() => navigate("/auth")}>
-            <LogIn className="h-4 w-4 mr-2" /> Login
+            <LogIn className="h-4 w-4 mr-2" /> تسجيل الدخول
           </Button>
         </div>
       </AppShell>
@@ -298,8 +299,8 @@ const MyPhrasesReview = () => {
         <SessionHandoff
           deckId="my-phrases"
           session={session}
-          message="No phrases due for review right now."
-          fallbackLabel="Back to My Words"
+          message="لا توجد عبارات مستحقة للمراجعة الآن."
+          fallbackLabel="العودة إلى كلماتي"
           fallbackRoute="/my-words"
         />
       </AppShell>
@@ -317,7 +318,7 @@ const MyPhrasesReview = () => {
         <div className="flex items-center gap-2">
           <div className="px-3 py-1.5 rounded-lg bg-card border border-border flex items-center gap-1.5">
             <MessageCircleQuestion className="h-3.5 w-3.5 text-primary" />
-            <span className="text-sm font-medium">Phrase</span>
+            <span className="text-sm font-medium">عبارة</span>
           </div>
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-card border border-border">
             <Trophy className="h-4 w-4 text-primary" />
@@ -339,23 +340,24 @@ const MyPhrasesReview = () => {
         <div className="max-w-sm mx-auto">
           <div className="rounded-3xl bg-card border border-[#5C3A46]/15 p-7 text-center space-y-5 shadow-elegant">
             <p className="text-[10px] uppercase tracking-[0.18em] font-semibold text-muted-foreground">
-              Say this in {activeDialect} Arabic
+              قلها بالإنجليزية
             </p>
-            <p className="text-2xl font-semibold text-foreground leading-relaxed">
-              {current.phrase_english}
+            <p
+              className="text-2xl font-semibold text-foreground leading-relaxed"
+              style={{ fontFamily: "'Amiri', 'Traditional Arabic', serif" }}
+            >
+              {current.phrase_arabic}
             </p>
 
             {showAnswer ? (
               <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 space-y-4 pt-2">
-                <p
-                  className="text-4xl font-bold text-[#5C3A46] leading-snug"
-                  style={{ fontFamily: "'Amiri', 'Traditional Arabic', serif" }}
-                  dir="rtl"
-                >
-                  {current.phrase_arabic}
+                <p className="font-english text-4xl font-bold text-[#5C3A46] leading-snug">
+                  {current.phrase_english}
                 </p>
+                {/* transliteration carries phonetic_ar — the English phrase in
+                    Arabic letters, a reading aid for the answer. */}
                 {current.transliteration && (
-                  <p className="text-sm italic text-primary/80">{current.transliteration}</p>
+                  <p className="text-sm text-primary/80">{current.transliteration}</p>
                 )}
                 {current.notes && (
                   <p className="text-xs text-muted-foreground italic">{current.notes}</p>
@@ -376,7 +378,7 @@ const MyPhrasesReview = () => {
                     type="button"
                     onClick={() => effectiveAudio && playAudio(effectiveAudio)}
                     disabled={!effectiveAudio || ttsLoading}
-                    aria-label="Play audio"
+                    aria-label="شغّل الصوت"
                     className="h-14 w-14 rounded-full flex items-center justify-center bg-primary text-primary-foreground shadow-elegant transition-all hover:scale-105 active:scale-95 disabled:opacity-50"
                   >
                     {ttsLoading ? (
@@ -401,7 +403,7 @@ const MyPhrasesReview = () => {
                       ) : (
                         <Music className="h-4 w-4" />
                       )}
-                      {jingleLoading ? "Creating..." : current.jingle_audio_url ? "Play jingle" : "Generate jingle"}
+                      {jingleLoading ? "جارٍ الإنشاء..." : current.jingle_audio_url ? "شغّل الأنشودة" : "ولّد أنشودة"}
                     </Button>
 
                     {current.jingle_audio_url && !jingleLoading && (
@@ -410,7 +412,7 @@ const MyPhrasesReview = () => {
                         size="icon"
                         className="h-8 w-8 rounded-full"
                         onClick={() => generateJingle(true)}
-                        title="Regenerate jingle"
+                        title="أعد توليد الأنشودة"
                       >
                         <RefreshCw className="h-3.5 w-3.5 text-muted-foreground" />
                       </Button>
@@ -424,14 +426,14 @@ const MyPhrasesReview = () => {
                       <div className="rounded-xl bg-muted/40 border border-border p-3 text-left animate-in fade-in duration-200">
                         <div className="flex items-center justify-between mb-1.5">
                           <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-                            Lyrics
+                            كلمات الأنشودة
                           </span>
                           <button
                             type="button"
                             onClick={() => setShowLyrics(false)}
                             className="text-[10px] uppercase tracking-wide text-muted-foreground hover:text-foreground"
                           >
-                            Hide
+                            إخفاء
                           </button>
                         </div>
                         <div
@@ -461,7 +463,7 @@ const MyPhrasesReview = () => {
                         onClick={() => setShowLyrics(true)}
                         className="gap-1.5 text-muted-foreground text-xs"
                       >
-                        Show lyrics
+                        أظهر الكلمات
                       </Button>
                     )}
                   </div>
@@ -478,7 +480,7 @@ const MyPhrasesReview = () => {
                 className="gap-2 w-full rounded-full border-2 border-primary/30 text-primary hover:bg-primary/8 hover:border-primary/50"
               >
                 <Eye className="h-4 w-4" />
-                Reveal Arabic
+                أظهر الإنجليزية
               </Button>
             )}
           </div>
@@ -505,7 +507,7 @@ const MyPhrasesReview = () => {
               className="text-muted-foreground hover:text-destructive gap-1.5 text-xs"
             >
               <Trash2 className="h-3.5 w-3.5" />
-              Remove from list
+              أزل من القائمة
             </Button>
           </div>
         </div>
@@ -527,10 +529,10 @@ const MyPhrasesReview = () => {
               size="sm"
               onClick={() => setPracticeOpen(true)}
               className="gap-1.5 text-muted-foreground"
-              title="Practice using this phrase in a sentence"
+              title="تدرّب على استخدام العبارة في جملة"
             >
               <MessageSquarePlus className="h-3.5 w-3.5" />
-              <span className="text-xs font-medium">Practice a sentence</span>
+              <span className="text-xs font-medium">تدرّب في جملة</span>
             </Button>
             {lastAction && (
               <Button
@@ -539,10 +541,10 @@ const MyPhrasesReview = () => {
                 onClick={() => handleUndo()}
                 disabled={undoing}
                 className="gap-1.5 text-muted-foreground"
-                title="Undo last rating"
+                title="تراجع عن آخر تقييم"
               >
                 {undoing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Undo2 className="h-3.5 w-3.5" />}
-                <span className="text-xs font-medium">Undo</span>
+                <span className="text-xs font-medium">تراجع</span>
               </Button>
             )}
           </div>
@@ -559,18 +561,18 @@ const MyPhrasesReview = () => {
       <AlertDialog open={confirmDeleteOpen} onOpenChange={setConfirmDeleteOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Remove this phrase?</AlertDialogTitle>
+            <AlertDialogTitle>أتريد إزالة هذه العبارة؟</AlertDialogTitle>
             <AlertDialogDescription>
-              This removes the phrase from your saved list. You can add it again later.
+              ستُزال العبارة من قائمتك المحفوظة. يمكنك إضافتها من جديد لاحقاً.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>إلغاء</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Remove
+              إزالة
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

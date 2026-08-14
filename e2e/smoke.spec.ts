@@ -348,7 +348,7 @@ test.describe("signed in — curriculum leeches", () => {
     // The personal decks have had this since leech tracking landed; the deck
     // the app hands every learner had nothing.
     await expect(page.getByText("متعثر مع هذه البطاقة؟")).toBeVisible();
-    await expect(page.getByRole("button", { name: /Generate AI mnemonic/ })).toBeVisible();
+    await expect(page.getByRole("button", { name: /ولّد وسيلة تذكّر/ })).toBeVisible();
   });
 
   test("shows an already-saved mnemonic instead of the generate button", async ({ page }) => {
@@ -362,7 +362,7 @@ test.describe("signed in — curriculum leeches", () => {
     await page.goto("/review");
 
     await expect(page.getByText("sounds like the English word")).toBeVisible();
-    await expect(page.getByRole("button", { name: /Generate AI mnemonic/ })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /ولّد وسيلة تذكّر/ })).toHaveCount(0);
   });
 
   test("stays out of the way on a card that isn't stuck", async ({ page }) => {

@@ -131,9 +131,13 @@ generation conditioning.
       word_english = spoken target / word_arabic = gloss to
       pronunciation-feedback. Review chrome is Arabic (rating buttons,
       session progress/handoff with arCount agreement, Arabic interval
-      units د/س/ي/ش). Remaining: MyWordsReview + MyPhrasesReview pages
-      (PronunciationButton call already flipped), quiz/cloze/image cards,
-      LeechHelperPanel + SiblingWordsPanel strings, scoreBand labels.
+      units د/س/ي/ش). MyWordsReview and MyPhrasesReview DONE the same
+      way: English fronts on recognition, Arabic prompts on production,
+      English TTS for word/phrase audio (transliteration = phonetic_ar
+      shown with the English answer as a reading aid), Arabic chrome and
+      toasts throughout. LeechHelperPanel + SiblingWordsPanel are Arabic.
+      Remaining: quiz/cloze/image card internals, scoreBand labels (flip
+      with the pronunciation pages).
 - [ ] Clickable transcript words → save-as-flashcard: KEEP mechanism,
       direction flips (tap English word, card scaffolds in Arabic)
 - [ ] Root-morphology sibling cards → English **word families**

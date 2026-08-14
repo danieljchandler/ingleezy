@@ -275,7 +275,7 @@ test.describe("saved-word decks", () => {
     );
 
     await page.goto("/review/my-words");
-    await expect(page.getByText("محفوظ1")).toBeVisible();
+    await expect(page.getByText("saved 1")).toBeVisible();
 
     await rate(page, "good");
     await waitForWrite(db, "user_vocabulary");
@@ -325,7 +325,7 @@ test.describe("saved-word decks", () => {
     ]);
 
     await page.goto("/review/my-words");
-    await expect(page.getByText("كتاب")).toBeVisible();
+    await expect(page.getByText("book")).toBeVisible();
 
     // Nothing before the learner has committed to an answer.
     await expect(page.getByText(/في هذا الجذر/)).toHaveCount(0);
@@ -402,14 +402,14 @@ test.describe("saved-word decks", () => {
 
     await page.goto("/review/my-words?mixed=1");
 
-    await expect(page.getByText(/1 \/ 2 due/)).toBeVisible();
-    await expect(page.getByText("خليجي")).toBeVisible();
+    await expect(page.getByText(/1 \/ 2 مستحقة/)).toBeVisible();
+    await expect(page.getByText("gulf word")).toBeVisible();
 
     await rate(page, "good");
 
     // The second dialect's word is in the same session rather than behind a
-    // dialect switch — which is what the "3 due" count promised.
-    await expect(page.getByText("مصري")).toBeVisible();
+    // dialect switch — which is what the due count promised.
+    await expect(page.getByText("egyptian word")).toBeVisible();
   });
 
   test("without the flag the deck still holds one dialect", async ({ page, db }) => {
@@ -417,9 +417,9 @@ test.describe("saved-word decks", () => {
 
     await page.goto("/review/my-words");
 
-    await expect(page.getByText(/1 \/ 1 due/)).toBeVisible();
-    await expect(page.getByText("خليجي")).toBeVisible();
-    await expect(page.getByText("مصري")).toHaveCount(0);
+    await expect(page.getByText(/1 \/ 1 مستحقة/)).toBeVisible();
+    await expect(page.getByText("gulf word")).toBeVisible();
+    await expect(page.getByText("egyptian word")).toHaveCount(0);
   });
 });
 

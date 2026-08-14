@@ -180,7 +180,7 @@ const MyWordsReview = () => {
         console.error("Jingle audio repair failed:", repairErr);
         toast.error(
           repairErr instanceof Error && repairErr.message.includes("regenerate")
-            ? "This jingle file is corrupted. Tap Regenerate jingle to replace it."
+            ? "ملف الأنشودة تالف. المس «أعد توليد الأنشودة» لاستبداله."
             : "Couldn't play that audio. Try regenerating it.",
         );
         return;
@@ -193,7 +193,7 @@ const MyWordsReview = () => {
     } catch (err: any) {
       console.error("Audio playback error:", err);
       if (err?.name === "NotAllowedError") return;
-      toast.error("Couldn't play that audio. Try regenerating it.");
+      toast.error("تعذّر تشغيل الصوت. جرّب إعادة توليده.");
     }
   };
 
@@ -421,9 +421,10 @@ const MyWordsReview = () => {
     : undefined;
 
   const { ttsUrl: wordTtsUrl, isLoading: wordTtsLoading } = useAzureTTS({
-    text: currentWord?.word_arabic ?? "",
+    text: currentWord?.word_english ?? "",
     skip: !currentWord || Boolean(currentWord.word_audio_url),
-    dialect: activeDialect,
+    // The word audio is the English target — not the Arabic scaffold.
+    voice: "en-US-JennyNeural",
     persist: persistWordAudio,
   });
 
@@ -436,9 +437,9 @@ const MyWordsReview = () => {
     setShowLyrics(false);
   }, [currentWord?.id, currentWord?.card_type]);
 
-  // Audio never autoplays on card change. The learner taps "Play" or
-  // "Reveal Arabic" to hear the word — this preserves the recall exercise
-  // and prevents the Arabic audio from playing while only English is shown.
+  // Audio never autoplays on card change. The learner taps to hear the word —
+  // this preserves the recall exercise: on a production card the English audio
+  // IS the answer, so it only plays on demand or at reveal.
 
   const generateJingle = async (word: DueCard, regenerate = false) => {
     if (!user) return;
@@ -483,15 +484,15 @@ const MyWordsReview = () => {
           ),
       );
       setShowLyrics(true);
-      toast.success("🎵 Jingle created — tap Play jingle to listen.");
+      toast.success("🎵 جاهزة — المس «شغّل الأنشودة» للاستماع.");
     } catch (err: any) {
       console.error("Jingle generation error:", err);
       if (err?.message?.includes("Rate limit") || err?.message?.includes("429")) {
-        toast.error("Rate limited — try again in a moment");
+        toast.error("طلبات كثيرة — حاول بعد قليل");
       } else if (err?.message?.includes("402") || err?.message?.includes("Credits")) {
-        toast.error("AI credits exhausted — please add funds");
+        toast.error("نفد رصيد الذكاء الاصطناعي");
       } else {
-        toast.error("Failed to generate jingle");
+        toast.error("تعذّر توليد الأنشودة");
       }
     } finally {
       setJingleLoading(false);
@@ -575,7 +576,7 @@ const MyWordsReview = () => {
       // Don't strand the learner on a frozen card with no feedback. The card
       // wasn't updated in the DB, so it stays due and returns on the next fetch.
       console.error("Failed to save review rating:", err);
-      toast.error("Couldn't save your rating — it will come back around. Try again.");
+      toast.error("تعذّر حفظ تقييمك — ستعود البطاقة لاحقاً. حاول من جديد.");
       setShowAnswer(false);
       if (currentIndex < wordCount - 1) {
         setCurrentIndex((prev) => prev + 1);
@@ -602,10 +603,10 @@ const MyWordsReview = () => {
       await queryClient.invalidateQueries({ queryKey: ["user-vocabulary-due-words"] });
       queryClient.invalidateQueries({ queryKey: ["user-vocabulary"] });
       queryClient.invalidateQueries({ queryKey: ["user-vocabulary-due"] });
-      toast.success("Rating undone");
+      toast.success("تم التراجع عن التقييم");
     } catch (err) {
       console.error("Undo failed:", err);
-      toast.error("Couldn't undo — try again");
+      toast.error("تعذّر التراجع — حاول من جديد");
     } finally {
       setUndoing(false);
     }
@@ -617,7 +618,7 @@ const MyWordsReview = () => {
         <div className="flex items-center justify-center py-24">
           <div className="text-center">
             <Loader2 className="h-10 w-10 animate-spin text-primary mx-auto mb-4" />
-            <p className="text-muted-foreground">Loading your reviews...</p>
+            <p className="text-muted-foreground">جارٍ تحميل مراجعاتك...</p>
           </div>
         </div>
       </AppShell>
@@ -630,10 +631,10 @@ const MyWordsReview = () => {
         <div className="mb-6"><HomeButton /></div>
         <div className="text-center max-w-sm mx-auto py-12">
           <LogIn className="h-7 w-7 text-muted-foreground mx-auto mb-6" />
-          <h1 className="text-xl font-bold text-foreground mb-3">Login Required</h1>
-          <p className="text-muted-foreground mb-8">Sign in to review your words.</p>
+          <h1 className="text-xl font-bold text-foreground mb-3">تسجيل الدخول مطلوب</h1>
+          <p className="text-muted-foreground mb-8">سجّل الدخول لمراجعة كلماتك.</p>
           <Button onClick={() => navigate("/auth")}>
-            <LogIn className="h-4 w-4 mr-2" /> Login
+            <LogIn className="h-4 w-4 mr-2" /> تسجيل الدخول
           </Button>
         </div>
       </AppShell>
@@ -655,8 +656,8 @@ const MyWordsReview = () => {
         <SessionHandoff
           deckId="my-words"
           session={session}
-          message="No saved words due for review right now."
-          fallbackLabel="Back to My Words"
+          message="لا توجد كلمات محفوظة مستحقة للمراجعة الآن."
+          fallbackLabel="العودة إلى كلماتي"
           fallbackRoute="/my-words"
         />
       </AppShell>
@@ -687,12 +688,12 @@ const MyWordsReview = () => {
               title="New cards per session"
             >
               <Sparkles className="h-3.5 w-3.5 text-amber-500" />
-              <SelectValue>{formatCap(newCap)}/day</SelectValue>
+              <SelectValue>{formatCap(newCap)}/اليوم</SelectValue>
             </SelectTrigger>
             <SelectContent align="end">
               {NEW_CAP_OPTIONS.map((n) => (
                 <SelectItem key={n} value={String(n)} className="text-xs">
-                  {formatCap(n)} new / session
+                  {formatCap(n)} جديدة / جلسة
                 </SelectItem>
               ))}
             </SelectContent>
@@ -701,7 +702,7 @@ const MyWordsReview = () => {
 
             {isProduction ? <Mic2 className="h-3.5 w-3.5 text-primary" /> : <Brain className="h-3.5 w-3.5 text-primary" />}
             <span className="text-sm font-medium text-foreground">
-              {isProduction ? "Produce" : "Recognize"}
+              {isProduction ? "أنتِج" : "تعرّف"}
             </span>
           </div>
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-card border border-border">
@@ -721,11 +722,11 @@ const MyWordsReview = () => {
         <div className="flex items-center justify-center gap-3 text-xs text-muted-foreground mt-1">
           <span className="inline-flex items-center gap-1">
             <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
-            {newRemaining} new
+            {newRemaining} جديدة
           </span>
           <span className="inline-flex items-center gap-1">
             <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-            {reviewRemaining} review
+            {reviewRemaining} مراجعة
           </span>
         </div>
       </SessionProgress>
@@ -745,7 +746,7 @@ const MyWordsReview = () => {
               />
               {clozeFromTranscript && transcriptCloze && (
                 <p className="mt-2 text-center text-[11px] uppercase tracking-wide text-muted-foreground">
-                  From your transcript · {transcriptCloze.transcriptionTitle}
+                  من تفريغك الصوتي · {transcriptCloze.transcriptionTitle}
                 </p>
               )}
             </div>
@@ -770,7 +771,7 @@ const MyWordsReview = () => {
                 className="gap-1.5 text-muted-foreground"
               >
                 <Sparkles className="h-4 w-4" />
-                {currentWord.image_url ? "Regenerate Image" : "Generate Image"}
+                {currentWord.image_url ? "أعد توليد الصورة" : "ولّد صورة"}
               </Button>
             </div>
 
@@ -780,38 +781,35 @@ const MyWordsReview = () => {
                 {!showAnswer ? (
                   <>
                     <p className="text-xs uppercase tracking-wide text-muted-foreground mb-2">
-                      Say it in Arabic
+                      قلها بالإنجليزية
                     </p>
-                    <p className="text-2xl font-semibold text-foreground mb-6">
-                      {currentWord.word_english}
+                    <p
+                      className="text-2xl font-semibold text-foreground mb-6"
+                      style={{ fontFamily: "'Amiri', 'Traditional Arabic', serif" }}
+                    >
+                      {currentWord.word_arabic}
                     </p>
                   </>
                 ) : (
                   <>
-                    <p
-                      className="text-4xl font-bold text-foreground mb-1 animate-in fade-in duration-200"
-                      style={{ fontFamily: "'Amiri', 'Traditional Arabic', serif" }}
-                      dir="rtl"
-                    >
-                      {currentWord.word_arabic}
+                    <p className="font-english text-4xl font-bold text-foreground mb-1 animate-in fade-in duration-200">
+                      {currentWord.word_english}
                     </p>
+                    {/* transliteration carries phonetic_ar — the English word
+                        written in Arabic letters, a reading aid for the answer. */}
                     {currentWord.transliteration && (
-                      <p className="text-sm text-muted-foreground italic mb-5">{currentWord.transliteration}</p>
+                      <p className="text-sm text-muted-foreground mb-5">{currentWord.transliteration}</p>
                     )}
                   </>
                 )}
               </>
             ) : (
               <>
-                <p
-                  className="text-4xl font-bold text-foreground mb-1"
-                  style={{ fontFamily: "'Amiri', 'Traditional Arabic', serif" }}
-                  dir="rtl"
-                >
-                  {currentWord.word_arabic}
+                <p className="font-english text-4xl font-bold text-foreground mb-1">
+                  {currentWord.word_english}
                 </p>
                 {currentWord.transliteration && (
-                  <p className="text-sm text-muted-foreground italic mb-5">{currentWord.transliteration}</p>
+                  <p className="text-sm text-muted-foreground mb-5">{currentWord.transliteration}</p>
                 )}
               </>
             )}
@@ -842,7 +840,7 @@ const MyWordsReview = () => {
                 ) : (
                   <Play className="h-4 w-4" />
                 )}
-                {isProduction && !showAnswer ? "Hear it" : "Play"}
+                {isProduction && !showAnswer ? "اسمعها" : "تشغيل"}
               </Button>
               {currentWord.sentence_audio_url && (showAnswer || !isProduction) && (
                 <Button
@@ -852,7 +850,7 @@ const MyWordsReview = () => {
                   className="gap-1.5"
                 >
                   <Volume2 className="h-4 w-4" />
-                  Sentence
+                  الجملة
                 </Button>
               )}
 
@@ -864,7 +862,7 @@ const MyWordsReview = () => {
                 className="gap-1.5"
               >
                 {jingleLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : currentWord.jingle_audio_url ? <Play className="h-4 w-4" /> : <Music className="h-4 w-4" />}
-                {jingleLoading ? "Creating..." : currentWord.jingle_audio_url ? "Play jingle" : "Generate jingle"}
+                {jingleLoading ? "جارٍ الإنشاء..." : currentWord.jingle_audio_url ? "شغّل الأنشودة" : "ولّد أنشودة"}
               </Button>
 
               {currentWord.jingle_audio_url && !jingleLoading && (
@@ -873,7 +871,7 @@ const MyWordsReview = () => {
                   size="icon"
                   className="h-8 w-8"
                   onClick={() => generateJingle(currentWord, true)}
-                  title="Regenerate jingle"
+                  title="أعد توليد الأنشودة"
                 >
                   <RefreshCw className="h-3.5 w-3.5 text-muted-foreground" />
                 </Button>
@@ -886,14 +884,14 @@ const MyWordsReview = () => {
                   <div className="rounded-lg bg-muted/40 border border-border p-3 text-left animate-in fade-in duration-200 max-w-md mx-auto">
                     <div className="flex items-center justify-between mb-1.5">
                       <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-                        Jingle lyrics
+                        كلمات الأنشودة
                       </span>
                       <button
                         type="button"
                         onClick={() => setShowLyrics(false)}
                         className="text-[10px] uppercase tracking-wide text-muted-foreground hover:text-foreground"
                       >
-                        Hide
+                        إخفاء
                       </button>
                     </div>
                     <div
@@ -923,7 +921,7 @@ const MyWordsReview = () => {
                     onClick={() => setShowLyrics(true)}
                     className="gap-1.5 text-muted-foreground text-xs"
                   >
-                    Show lyrics
+                    أظهر الكلمات
                   </Button>
                 )}
               </div>
@@ -950,14 +948,19 @@ const MyWordsReview = () => {
                   className="gap-1.5 text-muted-foreground"
                 >
                   <Eye className="h-4 w-4" />
-                  Reveal Arabic
+                  أظهر الإنجليزية
                 </Button>
               )
             ) : (
               <>
                 {showAnswer && (
                   <div className="animate-in fade-in duration-200 mb-4">
-                    <p className="text-xl text-muted-foreground">{currentWord.word_english}</p>
+                    <p
+                      className="text-xl text-muted-foreground"
+                      style={{ fontFamily: "'Amiri', 'Traditional Arabic', serif" }}
+                    >
+                      {currentWord.word_arabic}
+                    </p>
                   </div>
                 )}
                 {!showAnswer && (
@@ -968,7 +971,7 @@ const MyWordsReview = () => {
                     className="gap-1.5 text-muted-foreground"
                   >
                     <Eye className="h-4 w-4" />
-                    Reveal English
+                    أظهر المعنى
                   </Button>
                 )}
               </>
@@ -985,12 +988,12 @@ const MyWordsReview = () => {
                     className="gap-1.5 text-muted-foreground"
                   >
                     <Quote className="h-4 w-4" />
-                    Show original sentence
+                    أظهر الجملة الأصلية
                   </Button>
                 ) : (
                   <div className="text-left bg-muted/40 border-l-2 border-primary/40 rounded-r p-3 animate-in fade-in duration-200">
                     <p className="text-xs uppercase tracking-wide text-muted-foreground mb-1">
-                      Original context
+                      السياق الأصلي
                     </p>
                     <p
                       className="text-base text-foreground/90 font-arabic leading-relaxed"
@@ -1053,10 +1056,10 @@ const MyWordsReview = () => {
               size="sm"
               onClick={() => setPracticeOpen(true)}
               className="gap-1.5 text-muted-foreground"
-              title="Practice using this word in a sentence"
+              title="تدرّب على استخدام الكلمة في جملة"
             >
               <MessageSquarePlus className="h-3.5 w-3.5" />
-              <span className="text-xs font-medium">Practice a sentence</span>
+              <span className="text-xs font-medium">تدرّب في جملة</span>
             </Button>
             {lastAction && (
               <Button
@@ -1065,10 +1068,10 @@ const MyWordsReview = () => {
                 onClick={() => handleUndo()}
                 disabled={undoing}
                 className="gap-1.5 text-muted-foreground"
-                title="Undo last rating"
+                title="تراجع عن آخر تقييم"
               >
                 {undoing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Undo2 className="h-3.5 w-3.5" />}
-                <span className="text-xs font-medium">Undo</span>
+                <span className="text-xs font-medium">تراجع</span>
               </Button>
             )}
           </div>
