@@ -143,10 +143,10 @@ export function comprehensionBarClass(band: ComprehensionBand): string {
 export function comprehensionLabel(band: ComprehensionBand): string {
   switch (band) {
     case "comfortable":
-      return "Comfortable";
+      return "مريح";
     case "stretch":
-      return "Just right";
+      return "مناسب تماماً";
     case "challenge":
-      return "Challenging";
+      return "صعب";
   }
 }

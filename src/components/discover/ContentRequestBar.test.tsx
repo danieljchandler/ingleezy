@@ -58,7 +58,7 @@ const settleAuth = () =>
 
 const openBar = async () => {
   await settleAuth();
-  fireEvent.click(screen.getByRole("button", { name: /Request content/ }));
+  fireEvent.click(screen.getByRole("button", { name: /اطلب محتوى/ }));
 };
 
 const field = () => screen.getByRole("textbox");
@@ -82,7 +82,7 @@ describe("getting to the form", () => {
     // Under an endless feed, a permanent form is scenery. One line that says
     // what it is for is something a learner notices when they want it.
     expect(
-      screen.getByRole("button", { name: /suggest a video, creator, or topic/ }),
+      screen.getByRole("button", { name: /اقترح فيديو أو صانع محتوى أو موضوعاً/ }),
     ).toBeInTheDocument();
     expect(screen.queryByRole("textbox")).toBeNull();
   });
@@ -92,7 +92,7 @@ describe("getting to the form", () => {
 
     await openBar();
 
-    expect(screen.getByText("What do you want to see?")).toBeInTheDocument();
+    expect(screen.getByText("ماذا تريد أن تشاهد؟")).toBeInTheDocument();
     expect(field()).toBeInTheDocument();
   });
 
@@ -101,7 +101,7 @@ describe("getting to the form", () => {
     await openBar();
     fireEvent.change(field(), { target: { value: "half a thought" } });
 
-    fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+    fireEvent.click(screen.getByRole("button", { name: "إلغاء" }));
 
     // Reopening to find an abandoned draft still there is worse than starting
     // clean — the learner has to notice and clear it.
@@ -119,35 +119,35 @@ describe("saying what kind of request it is", () => {
 
     // Video is the common case; the other two are for when the learner does not
     // have a link.
-    expect(screen.getByRole("button", { name: /Video \/ Link/ }).className).toContain(
+    expect(screen.getByRole("button", { name: /فيديو \/ رابط/ }).className).toContain(
       "bg-primary",
     );
-    expect(screen.getByRole("button", { name: /Creator/ })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Topic/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "صانع محتوى" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "موضوع" })).toBeInTheDocument();
   });
 
   it("changes what it asks for with the kind", async () => {
     render();
     await openBar();
-    expect(field()).toHaveAttribute("placeholder", "Paste a link or describe a video you'd like…");
+    expect(field()).toHaveAttribute("placeholder", "الصق رابطاً أو صف الفيديو الذي تريده…");
 
-    fireEvent.click(screen.getByRole("button", { name: /Creator/ }));
-    expect(field()).toHaveAttribute("placeholder", "Name an Arabic creator or influencer…");
+    fireEvent.click(screen.getByRole("button", { name: "صانع محتوى" }));
+    expect(field()).toHaveAttribute("placeholder", "اذكر صانع محتوى أو مؤثراً يتحدث الإنجليزية…");
 
     // The prompt is the only instruction there is; a generic one would produce
     // three kinds of answer in one box.
-    fireEvent.click(screen.getByRole("button", { name: /Topic/ }));
-    expect(field()).toHaveAttribute("placeholder", "What topic do you want to learn about?");
+    fireEvent.click(screen.getByRole("button", { name: "موضوع" }));
+    expect(field()).toHaveAttribute("placeholder", "ما الموضوع الذي تريد أن تتعلم عنه؟");
   });
 
   it("shows which kind is selected", async () => {
     render();
     await openBar();
 
-    fireEvent.click(screen.getByRole("button", { name: /Topic/ }));
+    fireEvent.click(screen.getByRole("button", { name: "موضوع" }));
 
-    expect(screen.getByRole("button", { name: /Topic/ }).className).toContain("bg-primary");
-    expect(screen.getByRole("button", { name: /Video \/ Link/ }).className).not.toContain(
+    expect(screen.getByRole("button", { name: "موضوع" }).className).toContain("bg-primary");
+    expect(screen.getByRole("button", { name: /فيديو \/ رابط/ }).className).not.toContain(
       "bg-primary",
     );
   });
@@ -157,7 +157,7 @@ describe("saying what kind of request it is", () => {
     await openBar();
     fireEvent.change(field(), { target: { value: "something about cooking" } });
 
-    fireEvent.click(screen.getByRole("button", { name: /Topic/ }));
+    fireEvent.click(screen.getByRole("button", { name: "موضوع" }));
 
     // Realising halfway through that this is a topic rather than a video should
     // not cost the sentence already written.
@@ -169,7 +169,7 @@ describe("sending it", () => {
   it("records the request with the kind it was filed under", async () => {
     const { backend } = render();
     await openBar();
-    fireEvent.click(screen.getByRole("button", { name: /Creator/ }));
+    fireEvent.click(screen.getByRole("button", { name: "صانع محتوى" }));
 
     await submit("  أحمد الشقيري  ");
 
@@ -203,7 +203,7 @@ describe("sending it", () => {
     await submit("a cooking channel");
 
     await waitFor(() =>
-      expect(toasts.success).toHaveBeenCalledWith("Request submitted! We'll look into it 🙏"),
+      expect(toasts.success).toHaveBeenCalledWith("تم إرسال الطلب! سننظر فيه 🙏"),
     );
     // Collapsed again: the request is sent, and leaving the form open invites a
     // duplicate.
@@ -243,7 +243,7 @@ describe("sending it", () => {
       fireEvent.click(sendButton());
     });
 
-    expect(toasts.error).toHaveBeenCalledWith("Request is too long (max 500 characters)");
+    expect(toasts.error).toHaveBeenCalledWith("الطلب طويل جداً (الحد الأقصى 500 حرف)");
   });
 
   it("stops a long request at the keyboard too", async () => {
@@ -260,7 +260,7 @@ describe("sending it", () => {
     await submit("a cooking channel");
 
     // Silence would leave the learner believing it was sent.
-    await waitFor(() => expect(toasts.error).toHaveBeenCalledWith("Failed to submit request"));
+    await waitFor(() => expect(toasts.error).toHaveBeenCalledWith("تعذّر إرسال الطلب"));
   });
 
   it("keeps the form open after a failure so it can be retried", async () => {
@@ -283,7 +283,7 @@ describe("when nobody is signed in", () => {
 
     // Discover is browsable signed out, so this is reachable and the refusal
     // has to name its reason rather than fail silently.
-    expect(toasts.error).toHaveBeenCalledWith("Please log in to request content");
+    expect(toasts.error).toHaveBeenCalledWith("سجّل الدخول لطلب محتوى");
   });
 
   it("keeps what was typed so signing in does not cost it", async () => {

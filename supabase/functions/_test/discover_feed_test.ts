@@ -169,7 +169,7 @@ Deno.test("discover-feed labels the sweet spot with the percentage known", async
     }),
   );
 
-  assertEquals(items[0].reason, "90% known words");
+  assertEquals(items[0].reason, "تعرف 90% من كلماته");
   assertEquals(items[0].bucket, "match");
 });
 
@@ -184,7 +184,7 @@ Deno.test("discover-feed calls a too-easy video a review rather than a match", a
 
   // Still worth watching, just not as new input. The bucket is what the variety
   // guarantee later reaches for.
-  assertEquals(items[0].reason, "Easy review");
+  assertEquals(items[0].reason, "مراجعة سهلة");
   assertEquals(items[0].bucket, "comfort");
 });
 
@@ -207,7 +207,7 @@ Deno.test("discover-feed calls a partly-known video a stretch", async () => {
     }),
   );
 
-  assertEquals(items[0].reason, "Stretch your vocab");
+  assertEquals(items[0].reason, "وسّع مفرداتك");
   assertEquals(items[0].bucket, "stretch");
 });
 
@@ -222,7 +222,7 @@ Deno.test("discover-feed says when it picked something because you liked it", as
 
   // Beats every other reason, because it is the only one the learner
   // themselves supplied.
-  assertEquals(items[0].reason, "Because you liked this");
+  assertEquals(items[0].reason, "لأنك أعجبت به");
 });
 
 Deno.test("discover-feed folds Arabic spelling variants when matching vocabulary", async () => {

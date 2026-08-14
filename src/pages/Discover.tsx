@@ -32,8 +32,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+// Values are matched against DB columns — only the display labels are Arabic.
 const DIALECTS = ["All", "Gulf", "Egyptian", "Yemeni", "MSA", "Levantine", "Maghrebi"];
+const DIALECT_LABELS: Record<string, string> = {
+  All: "الكل", Gulf: "خليجي", Egyptian: "مصري", Yemeni: "يمني",
+  MSA: "فصحى", Levantine: "شامي", Maghrebi: "مغاربي",
+};
 const DIFFICULTIES = ["All", "Beginner", "Intermediate", "Advanced", "Expert"];
+const DIFFICULTY_LABELS: Record<string, string> = {
+  All: "الكل", Beginner: "مبتدئ", Intermediate: "متوسط", Advanced: "متقدم", Expert: "خبير",
+};
 
 function difficultyColor(d: string) {
   switch (d) {
@@ -63,7 +71,7 @@ function VideoCard({ video, onClick, feed, comprehension }: CardProps) {
   return (
     <button
       onClick={onClick}
-      aria-label={`Video: ${video.title} — ${video.dialect}, ${video.difficulty}`}
+      aria-label={`فيديو: ${video.title} — ${video.dialect}, ${video.difficulty}`}
       className={cn(
         "rounded-xl overflow-hidden border border-border bg-card",
         "text-left transition-all duration-200",
@@ -100,7 +108,7 @@ function VideoCard({ video, onClick, feed, comprehension }: CardProps) {
           {video.title}
         </h3>
         {feed && (
-          <div className="mb-2" title={`Comprehension ~ ${Math.round(feed.comprehension * 100)}%`}>
+          <div className="mb-2" title={`الفهم ~ ${Math.round(feed.comprehension * 100)}%`}>
             <div className="h-1 w-full bg-muted rounded-full overflow-hidden">
               <div
                 className={cn("h-full transition-all", comprehensionTone(feed.comprehension))}
@@ -115,7 +123,7 @@ function VideoCard({ video, onClick, feed, comprehension }: CardProps) {
           <div className="mb-2">
             <div className="mb-0.5 flex items-center justify-between text-[10px] text-muted-foreground">
               <span>{comprehensionLabel(comprehension.band)}</span>
-              <span>{Math.round(comprehension.coverage * 100)}% words you know</span>
+              <span>تعرف {Math.round(comprehension.coverage * 100)}% من الكلمات</span>
             </div>
             <div className="h-1 w-full bg-muted rounded-full overflow-hidden">
               <div
@@ -128,12 +136,12 @@ function VideoCard({ video, onClick, feed, comprehension }: CardProps) {
         <div className="flex gap-1.5 flex-wrap">
           {video.source === "hakiya" && (
             <Badge variant="outline" className="text-xs bg-accent/10 text-accent-foreground border-accent/40">
-              عربي · immersion
+              عربي · انغماس
             </Badge>
           )}
-          <Badge variant="outline" className="text-xs">{video.dialect}</Badge>
+          <Badge variant="outline" className="text-xs">{DIALECT_LABELS[video.dialect] ?? video.dialect}</Badge>
           <Badge variant="outline" className={cn("text-xs", difficultyColor(video.difficulty))}>
-            {video.difficulty}
+            {DIFFICULTY_LABELS[video.difficulty] ?? video.difficulty}
           </Badge>
           <Badge variant="outline" className="text-xs capitalize">{video.platform}</Badge>
         </div>
@@ -195,11 +203,11 @@ const Discover = () => {
         className="text-2xl font-bold text-foreground mb-2 inline-flex items-center gap-2"
         style={{ fontFamily: "'Montserrat', sans-serif" }}
       >
-        Discover
+        اكتشف
         <InfoHint {...PAGE_HINTS["discover"]} size="md" />
       </h1>
       <p className="text-sm text-muted-foreground mb-6">
-        Watch Arabic videos with synced subtitles and translations
+        شاهد فيديوهات بالإنجليزية مع ترجمة عربية متزامنة
       </p>
 
       <div className="mb-6">
@@ -210,17 +218,17 @@ const Discover = () => {
         <TabsList className="mb-4">
           <TabsTrigger value="feed" disabled={!user}>
             <Sparkles className="h-4 w-4 mr-1.5" />
-            For You
+            لك
           </TabsTrigger>
-          <TabsTrigger value="browse">Browse</TabsTrigger>
+          <TabsTrigger value="browse">تصفح</TabsTrigger>
         </TabsList>
 
         <TabsContent value="feed" className="mt-0">
           <div className="flex items-center justify-between mb-4">
             <p className="text-xs text-muted-foreground">
               {feed?.coldStart
-                ? "Trending picks — take the placement quiz to personalize."
-                : "Ranked by what you know and how you watch."}
+                ? "اختيارات رائجة — أكمل اختبار تحديد المستوى لتخصيصها لك."
+                : "مرتبة حسب ما تعرفه وطريقة مشاهدتك."}
             </p>
             <Button
               variant="ghost"
@@ -229,7 +237,7 @@ const Discover = () => {
               disabled={isFeedFetching}
             >
               <Shuffle className={cn("h-4 w-4 mr-1.5", isFeedFetching && "animate-spin")} />
-              Shuffle
+              خلط
             </Button>
           </div>
 
@@ -251,9 +259,9 @@ const Discover = () => {
           ) : (
             <div className="text-center py-16">
               <Sparkles className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
-              <p className="text-muted-foreground">No personalized picks yet</p>
+              <p className="text-muted-foreground">لا توجد اختيارات مخصصة بعد</p>
               <p className="text-sm text-muted-foreground/70 mt-1">
-                Watch a few videos and save vocab to power your feed.
+                شاهد بعض الفيديوهات واحفظ مفردات لتشغيل صفحتك المخصصة.
               </p>
             </div>
           )}
@@ -264,31 +272,31 @@ const Discover = () => {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search videos..."
+                placeholder="ابحث عن فيديوهات..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-9"
-                aria-label="Search videos"
+                aria-label="ابحث عن فيديوهات"
               />
             </div>
             <div className="flex gap-2">
               <Select value={dialect} onValueChange={setDialect}>
                 <SelectTrigger className="flex-1 min-w-0">
-                  <SelectValue placeholder="Dialect" />
+                  <SelectValue placeholder="اللهجة" />
                 </SelectTrigger>
                 <SelectContent>
                   {DIALECTS.map((d) => (
-                    <SelectItem key={d} value={d}>{d}</SelectItem>
+                    <SelectItem key={d} value={d}>{DIALECT_LABELS[d] ?? d}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
               <Select value={difficulty} onValueChange={setDifficulty}>
                 <SelectTrigger className="flex-1 min-w-0">
-                  <SelectValue placeholder="Level" />
+                  <SelectValue placeholder="المستوى" />
                 </SelectTrigger>
                 <SelectContent>
                   {DIFFICULTIES.map((d) => (
-                    <SelectItem key={d} value={d}>{d}</SelectItem>
+                    <SelectItem key={d} value={d}>{DIFFICULTY_LABELS[d] ?? d}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -302,7 +310,7 @@ const Discover = () => {
                 className="gap-1.5"
               >
                 <Sparkles className="h-3.5 w-3.5" />
-                Just right for me
+                مناسب لي تماماً
               </Button>
             )}
           </div>
@@ -326,12 +334,12 @@ const Discover = () => {
             <div className="text-center py-16">
               <Play className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
               <p className="text-muted-foreground">
-                {justRightOnly ? "Nothing in your sweet spot yet" : "No videos found"}
+                {justRightOnly ? "لا شيء في نطاقك المريح بعد" : "لم يتم العثور على فيديوهات"}
               </p>
               <p className="text-sm text-muted-foreground/70 mt-1">
                 {justRightOnly
-                  ? "Save more words, or turn the filter off to browse everything."
-                  : "Check back later for new content"}
+                  ? "احفظ مزيداً من الكلمات، أو أوقف الفلتر لتتصفح كل شيء."
+                  : "عد لاحقاً لمحتوى جديد"}
               </p>
             </div>
           )}

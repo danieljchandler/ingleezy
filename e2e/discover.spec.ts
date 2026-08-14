@@ -50,7 +50,7 @@ function stubFeed(
 }
 
 /** Switch to the Browse tab. */
-const browse = (page: Page) => page.getByRole("tab", { name: "Browse" }).click();
+const browse = (page: Page) => page.getByRole("tab", { name: "تصفح" }).click();
 
 /**
  * Switch to the For You tab.
@@ -58,7 +58,7 @@ const browse = (page: Page) => page.getByRole("tab", { name: "Browse" }).click()
  * Needed explicitly because the page does not open on it — see "opens on
  * Browse even for a signed-in learner" below.
  */
-const forYou = (page: Page) => page.getByRole("tab", { name: /For You/ }).click();
+const forYou = (page: Page) => page.getByRole("tab", { name: "لك" }).click();
 
 test.describe("browsing the library", () => {
   test.beforeEach(async ({ signInAs, backend, db }) => {
@@ -102,7 +102,7 @@ test.describe("browsing the library", () => {
     await page.goto("/discover");
     await browse(page);
     await page.getByRole("combobox").first().click();
-    await page.getByRole("option", { name: "Egyptian", exact: true }).click();
+    await page.getByRole("option", { name: "مصري", exact: true }).click();
 
     await expect(page.getByRole("button", { name: /Egyptian clip/ })).toBeVisible();
     await expect(page.getByRole("button", { name: /Gulf clip/ })).toHaveCount(0);
@@ -117,7 +117,7 @@ test.describe("browsing the library", () => {
     await page.goto("/discover");
     await browse(page);
     await page.getByRole("combobox").nth(1).click();
-    await page.getByRole("option", { name: "Advanced", exact: true }).click();
+    await page.getByRole("option", { name: "متقدم", exact: true }).click();
 
     await expect(page.getByRole("button", { name: /Hard clip/ })).toBeVisible();
     await expect(page.getByRole("button", { name: /Easy clip/ })).toHaveCount(0);
@@ -128,7 +128,7 @@ test.describe("browsing the library", () => {
 
     await page.goto("/discover");
     await browse(page);
-    await page.getByLabel("Search videos").fill("coffee");
+    await page.getByLabel("ابحث عن فيديوهات").fill("coffee");
 
     // `ilike %term%` — a search that only matched a prefix, or matched case
     // exactly, would find nothing for most of what a learner types.
@@ -145,8 +145,8 @@ test.describe("browsing the library", () => {
     await page.goto("/discover");
     await browse(page);
     await page.getByRole("combobox").first().click();
-    await page.getByRole("option", { name: "Egyptian", exact: true }).click();
-    await page.getByLabel("Search videos").fill("coffee");
+    await page.getByRole("option", { name: "مصري", exact: true }).click();
+    await page.getByLabel("ابحث عن فيديوهات").fill("coffee");
 
     await expect(page.getByRole("button", { name: /Coffee in Cairo/ })).toBeVisible();
     await expect(page.getByRole("button", { name: /Coffee in Kuwait/ })).toHaveCount(0);
@@ -157,9 +157,9 @@ test.describe("browsing the library", () => {
 
     await page.goto("/discover");
     await browse(page);
-    await page.getByLabel("Search videos").fill("nothing like this");
+    await page.getByLabel("ابحث عن فيديوهات").fill("nothing like this");
 
-    await expect(page.getByText("No videos found")).toBeVisible();
+    await expect(page.getByText("لم يتم العثور على فيديوهات")).toBeVisible();
   });
 
   test("does not claim an empty library when the query failed", async ({
@@ -176,7 +176,7 @@ test.describe("browsing the library", () => {
 
     // "Check back later for new content" after a failed request tells the
     // learner the catalogue is empty when it is full.
-    await expect(page.getByText("No videos found")).toHaveCount(0);
+    await expect(page.getByText("لم يتم العثور على فيديوهات")).toHaveCount(0);
   });
 
   test("opens a video", async ({ page, db }) => {
@@ -198,7 +198,7 @@ test.describe("browsing the library", () => {
     // A grid of thumbnails is unusable without this — the accessible name is
     // the only thing distinguishing one card from the next.
     await expect(
-      page.getByRole("button", { name: "Video: Coffee in Kuwait — Gulf, Beginner" }),
+      page.getByRole("button", { name: "فيديو: Coffee in Kuwait — Gulf, Beginner" }),
     ).toBeVisible();
   });
 });
@@ -255,7 +255,7 @@ test.describe("the difficulty a learner starts on", () => {
     await page.goto("/discover");
     await browse(page);
     await page.getByRole("combobox").nth(1).click();
-    await page.getByRole("option", { name: "Advanced", exact: true }).click();
+    await page.getByRole("option", { name: "متقدم", exact: true }).click();
 
     await expect(page.getByRole("button", { name: /Hard clip/ })).toBeVisible();
     await expect(page.getByRole("button", { name: /Easy clip/ })).toHaveCount(0);
@@ -281,7 +281,7 @@ test.describe("the personalised feed", () => {
     // is built around is never what a learner lands on.
     //
     // This test fails once the tab is derived from the resolved session.
-    await expect(page.getByRole("tab", { name: "Browse" })).toHaveAttribute(
+    await expect(page.getByRole("tab", { name: "تصفح" })).toHaveAttribute(
       "aria-selected",
       "true",
     );
@@ -320,7 +320,7 @@ test.describe("the personalised feed", () => {
     // A deleted or unpublished video still in the ranking must vanish, not
     // render as a card with no title that goes nowhere.
     await expect(page.getByRole("button", { name: /Real clip/ })).toBeVisible();
-    await expect(page.getByRole("button", { name: /^Video: —/ })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /^فيديو: —/ })).toHaveCount(0);
   });
 
   test("explains a cold start rather than looking broken", async ({ page, backend, db }) => {
@@ -330,7 +330,7 @@ test.describe("the personalised feed", () => {
     await page.goto("/discover");
     await forYou(page);
 
-    await expect(page.getByText(/take the placement quiz to personalize/i)).toBeVisible();
+    await expect(page.getByText(/اختبار تحديد المستوى/)).toBeVisible();
   });
 
   test("re-ranks with a new seed when shuffled", async ({ page, backend, db }) => {
@@ -341,7 +341,7 @@ test.describe("the personalised feed", () => {
     await forYou(page);
     await expect(page.getByRole("button", { name: /Ranked clip/ })).toBeVisible();
 
-    await page.getByRole("button", { name: /shuffle/i }).click();
+    await page.getByRole("button", { name: "خلط" }).click();
 
     await expect.poll(() => backend.callsTo("discover-feed").length).toBe(2);
     const calls = backend.callsTo("discover-feed");
@@ -358,7 +358,7 @@ test.describe("the personalised feed", () => {
     await page.goto("/discover");
     await forYou(page);
 
-    await expect(page.getByText("No personalized picks yet")).toBeVisible();
+    await expect(page.getByText("لا توجد اختيارات مخصصة بعد")).toBeVisible();
   });
 
   test("is not offered to a signed-out visitor", async ({ page, signInAs, backend, db }) => {
@@ -368,7 +368,7 @@ test.describe("the personalised feed", () => {
     await page.goto("/discover");
 
     // The feed is per-learner, so there is nothing to rank. Browse still works.
-    await expect(page.getByRole("tab", { name: /For You/ })).toBeDisabled();
+    await expect(page.getByRole("tab", { name: "لك" })).toBeDisabled();
     await expect(page.getByRole("button", { name: /Public clip/ })).toBeVisible();
     expect(backend.callsTo("discover-feed")).toHaveLength(0);
   });
@@ -392,7 +392,7 @@ test.describe("requesting content", () => {
   const requestBox = (page: Page) => page.getByPlaceholder(/describe a video|creator|topic/i);
 
   async function submitRequest(page: Page, text: string) {
-    await page.getByRole("button", { name: /request content/i }).click();
+    await page.getByRole("button", { name: /اطلب محتوى/ }).click();
     await requestBox(page).fill(text);
     await requestBox(page).press("Enter");
   }
@@ -401,7 +401,7 @@ test.describe("requesting content", () => {
     await page.goto("/discover");
     await submitRequest(page, "More Kuwaiti cooking shows please");
 
-    await expect(page.getByText(/request submitted/i)).toBeVisible();
+    await expect(page.getByText(/تم إرسال الطلب/)).toBeVisible();
 
     const request = db.rows("content_requests")[0];
     expect(request.user_id).toBe(TEST_USER_ID);
@@ -411,12 +411,12 @@ test.describe("requesting content", () => {
 
   test("records which kind of thing was asked for", async ({ page, db }) => {
     await page.goto("/discover");
-    await page.getByRole("button", { name: /request content/i }).click();
-    await page.getByRole("button", { name: /^creator$/i }).click();
+    await page.getByRole("button", { name: /اطلب محتوى/ }).click();
+    await page.getByRole("button", { name: "صانع محتوى", exact: true }).click();
     await requestBox(page).fill("Anything by this creator");
     await requestBox(page).press("Enter");
 
-    await expect(page.getByText(/request submitted/i)).toBeVisible();
+    await expect(page.getByText(/تم إرسال الطلب/)).toBeVisible();
     // The type is what routes the request to the right admin queue; defaulting
     // everything to "video" would bury creator and topic asks.
     expect(db.rows("content_requests")[0].request_type).toBe("creator");
@@ -426,7 +426,7 @@ test.describe("requesting content", () => {
     await page.goto("/discover");
     await submitRequest(page, "x".repeat(600));
 
-    await expect(page.getByText(/request submitted/i)).toBeVisible();
+    await expect(page.getByText(/تم إرسال الطلب/)).toBeVisible();
     // The input carries maxLength=500, so the over-length text is truncated
     // before it reaches the handler and the handler's own "too long" guard
     // never fires. Belt and braces rather than dead code — the guard still
@@ -442,7 +442,7 @@ test.describe("requesting content", () => {
     db.failWrites("content_requests", 500);
     await submitRequest(page, "More Kuwaiti cooking shows please");
 
-    await expect(page.getByText(/failed to submit request/i)).toBeVisible();
+    await expect(page.getByText(/تعذّر إرسال الطلب/)).toBeVisible();
     // Clearing the box on failure would make the learner retype it.
     await expect(requestBox(page)).toHaveValue("More Kuwaiti cooking shows please");
   });

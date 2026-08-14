@@ -265,22 +265,22 @@ Deno.serve(async (req) => {
           0.10 * noveltyScore;
 
       // Determine reason chip
-      let reason = "Picked for you";
+      let reason = "مختار لك";
       let bucket: FeedItem["bucket"] = "match";
       if (likedSet.has(vid)) {
-        reason = "Because you liked this";
+        reason = "لأنك أعجبت به";
       } else if (overlap >= 0.8 && overlap <= 0.95 && total >= 5) {
-        reason = `${Math.round(overlap * 100)}% known words`;
+        reason = `تعرف ${Math.round(overlap * 100)}% من كلماته`;
       } else if (overlap > 0.95 && total >= 5) {
-        reason = "Easy review";
+        reason = "مراجعة سهلة";
         bucket = "comfort";
       } else if (overlap >= 0.5 && overlap < 0.8) {
-        reason = "Stretch your vocab";
+        reason = "وسّع مفرداتك";
         bucket = "stretch";
       } else if (cefrIdx >= 0 && vIdx === cefrIdx) {
-        reason = `Matches your ${vCefr} level`;
+        reason = `يناسب مستواك ${vCefr}`;
       } else if (ageDays < 7) {
-        reason = `New in ${(v as any).dialect}`;
+        reason = `جديد في ${(v as any).dialect}`;
         bucket = "fresh";
       }
 

@@ -8,9 +8,9 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 const REQUEST_TYPES = [
-  { value: "video", label: "Video / Link", icon: Video },
-  { value: "creator", label: "Creator", icon: User },
-  { value: "topic", label: "Topic", icon: MessageSquare },
+  { value: "video", label: "فيديو / رابط", icon: Video },
+  { value: "creator", label: "صانع محتوى", icon: User },
+  { value: "topic", label: "موضوع", icon: MessageSquare },
 ] as const;
 
 type RequestType = (typeof REQUEST_TYPES)[number]["value"];
@@ -23,20 +23,20 @@ export const ContentRequestBar = () => {
   const [sending, setSending] = useState(false);
 
   const placeholders: Record<RequestType, string> = {
-    video: "Paste a link or describe a video you'd like…",
-    creator: "Name an Arabic creator or influencer…",
-    topic: "What topic do you want to learn about?",
+    video: "الصق رابطاً أو صف الفيديو الذي تريده…",
+    creator: "اذكر صانع محتوى أو مؤثراً يتحدث الإنجليزية…",
+    topic: "ما الموضوع الذي تريد أن تتعلم عنه؟",
   };
 
   const handleSubmit = async () => {
     const trimmed = body.trim();
     if (!trimmed) return;
     if (trimmed.length > 500) {
-      toast.error("Request is too long (max 500 characters)");
+      toast.error("الطلب طويل جداً (الحد الأقصى 500 حرف)");
       return;
     }
     if (!user) {
-      toast.error("Please log in to request content");
+      toast.error("سجّل الدخول لطلب محتوى");
       return;
     }
 
@@ -50,9 +50,9 @@ export const ContentRequestBar = () => {
 
     if (error) {
       console.error("Request error:", error);
-      toast.error("Failed to submit request");
+      toast.error("تعذّر إرسال الطلب");
     } else {
-      toast.success("Request submitted! We'll look into it 🙏");
+      toast.success("تم إرسال الطلب! سننظر فيه 🙏");
       setBody("");
       setOpen(false);
     }
@@ -65,7 +65,7 @@ export const ContentRequestBar = () => {
         className="w-full rounded-xl border border-dashed border-primary/30 bg-primary/5 p-3 text-sm text-primary hover:bg-primary/10 transition-colors flex items-center justify-center gap-2"
       >
         <Sparkles className="h-4 w-4" />
-        Request content — suggest a video, creator, or topic
+        اطلب محتوى — اقترح فيديو أو صانع محتوى أو موضوعاً
       </button>
     );
   }
@@ -74,7 +74,7 @@ export const ContentRequestBar = () => {
     <div className="rounded-xl border border-border bg-card p-4 space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
       <div className="flex items-center gap-2">
         <Sparkles className="h-4 w-4 text-primary shrink-0" />
-        <p className="text-sm font-medium text-foreground">What do you want to see?</p>
+        <p className="text-sm font-medium text-foreground">ماذا تريد أن تشاهد؟</p>
       </div>
 
       {/* Type selector */}
@@ -122,7 +122,7 @@ export const ContentRequestBar = () => {
         onClick={() => { setOpen(false); setBody(""); }}
         className="text-xs text-muted-foreground hover:text-foreground transition-colors"
       >
-        Cancel
+        إلغاء
       </button>
     </div>
   );
