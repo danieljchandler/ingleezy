@@ -26,10 +26,10 @@ import type { Page } from "@playwright/test";
 
 const SESSION_KEY = "session_listening_practice";
 
-const dictationCard = (page: Page) => page.getByText("Dictation", { exact: true });
-const comprehensionCard = (page: Page) => page.getByText("Comprehension", { exact: true });
-const speedCard = (page: Page) => page.getByText("Speed Drill", { exact: true });
-const answerBox = (page: Page) => page.getByPlaceholder("اكتب هنا...");
+const dictationCard = (page: Page) => page.getByText("الإملاء", { exact: true });
+const comprehensionCard = (page: Page) => page.getByText("الفهم", { exact: true });
+const speedCard = (page: Page) => page.getByText("تمرين السرعة", { exact: true });
+const answerBox = (page: Page) => page.getByPlaceholder("Type what you heard...");
 
 /**
  * Wait for a function call to land.
@@ -62,8 +62,8 @@ const aGeneratedQuiz = (over: Record<string, unknown> = {}) => ({
   questions: [
     {
       type: "dictation",
-      audioText: "شلونك اليوم",
-      audioTextEnglish: "How are you today",
+      audioText: "How are you today",
+      audioTextEnglish: "شلونك اليوم",
     },
   ],
   ...over,
@@ -83,9 +83,9 @@ test.describe("choosing a mode", () => {
   test("offers the three modes and says what each is", async ({ page }) => {
     await page.goto("/listening");
 
-    await expect(page.getByRole("heading", { name: /Listening Practice/ })).toBeVisible();
-    await expect(page.getByText("Listen and type what you hear")).toBeVisible();
-    await expect(page.getByText("Answer questions about what you hear")).toBeVisible();
+    await expect(page.getByRole("heading", { name: /تدريب الاستماع/ })).toBeVisible();
+    await expect(page.getByText("استمع واكتب ما تسمعه")).toBeVisible();
+    await expect(page.getByText("أجب عن أسئلة حول ما تسمعه")).toBeVisible();
   });
 });
 
@@ -167,9 +167,9 @@ test.describe("where the questions come from", () => {
     await page.goto("/listening");
     await dictationCard(page).click();
 
-    await expect(page.getByText("Failed to load questions. Please try again.")).toBeVisible();
+    await expect(page.getByText("تعذّر تحميل الأسئلة. حاول من جديد.")).toBeVisible();
     // Back at the menu rather than stranded on an empty quiz.
-    await expect(page.getByText("Listen and type what you hear")).toBeVisible();
+    await expect(page.getByText("استمع واكتب ما تسمعه")).toBeVisible();
   });
 
   test("treats an empty generation as a failure", async ({ page, backend, expectConsoleErrors }) => {
@@ -179,7 +179,7 @@ test.describe("where the questions come from", () => {
     await page.goto("/listening");
     await dictationCard(page).click();
 
-    await expect(page.getByText("Failed to load questions. Please try again.")).toBeVisible();
+    await expect(page.getByText("تعذّر تحميل الأسئلة. حاول من جديد.")).toBeVisible();
   });
 });
 
@@ -194,7 +194,7 @@ test.describe("dictation", () => {
   test("gives the learner somewhere to type and nothing to read", async ({ page }) => {
     // The whole exercise is that the sentence is heard, not seen.
     await expect(answerBox(page)).toHaveValue("");
-    await expect(page.getByRole("button", { name: /Check/ })).toBeVisible();
+    await expect(page.getByRole("button", { name: /تحقق/ })).toBeVisible();
   });
 
   test("marks an exact answer right", async ({ page }) => {
@@ -204,9 +204,9 @@ test.describe("dictation", () => {
     });
 
     await answerBox(page).fill(expected ?? "");
-    await page.getByRole("button", { name: /Check/ }).click();
+    await page.getByRole("button", { name: /تحقق/ }).click();
 
-    await expect(page.getByText(/Correct/i).first()).toBeVisible();
+    await expect(page.getByText(/صحيح/).first()).toBeVisible();
   });
 
   test("forgives only extra whitespace", async ({ page }) => {
@@ -216,11 +216,11 @@ test.describe("dictation", () => {
     });
 
     await answerBox(page).fill(`  ${expected.replace(/\s+/g, "   ")}  `);
-    await page.getByRole("button", { name: /Check/ }).click();
+    await page.getByRole("button", { name: /تحقق/ }).click();
 
     // Runs of spaces are collapsed and the ends trimmed — the only leniency
     // there is.
-    await expect(page.getByText(/Correct/i).first()).toBeVisible();
+    await expect(page.getByText(/صحيح/).first()).toBeVisible();
   });
 
   test("marks a near-miss wrong with no partial credit", async ({ page }) => {
@@ -235,24 +235,24 @@ test.describe("dictation", () => {
     // partial credit and no diff showing what was missed, which is most of what
     // a dictation exercise is for.
     await answerBox(page).fill(expected.slice(0, -1));
-    await page.getByRole("button", { name: /Check/ }).click();
+    await page.getByRole("button", { name: /تحقق/ }).click();
 
     await expect(page.getByText(expected).first()).toBeVisible();
-    await expect(page.getByText(/Correct!/).first()).toHaveCount(0);
+    await expect(page.getByText(/صحيح!/).first()).toHaveCount(0);
   });
 
   test("moves through the session and reports a score", async ({ page }) => {
-    const complete = page.getByRole("heading", { name: "Session Complete!" });
+    const complete = page.getByRole("heading", { name: "انتهت الجلسة!" });
 
     // Four Next clicks, then a fifth Check that ends the session — see the
     // pinned test below for why there is no fifth Next.
     for (let i = 0; i < 4; i++) {
       await answerBox(page).fill("something wrong");
-      await page.getByRole("button", { name: /Check/ }).click();
-      await page.getByRole("button", { name: /^Next/ }).click();
+      await page.getByRole("button", { name: /تحقق/ }).click();
+      await page.getByRole("button", { name: /^التالي/ }).click();
     }
     await answerBox(page).fill("something wrong");
-    await page.getByRole("button", { name: /Check/ }).click();
+    await page.getByRole("button", { name: /تحقق/ }).click();
 
     await expect(complete).toBeVisible();
     // Five wrong out of five: the score is reported, not hidden.
@@ -262,8 +262,8 @@ test.describe("dictation", () => {
   test("swallows the feedback on the very last answer", async ({ page }) => {
     for (let i = 0; i < 4; i++) {
       await answerBox(page).fill("something wrong");
-      await page.getByRole("button", { name: /Check/ }).click();
-      await page.getByRole("button", { name: /^Next/ }).click();
+      await page.getByRole("button", { name: /تحقق/ }).click();
+      await page.getByRole("button", { name: /^التالي/ }).click();
     }
 
     const expected: string = await page.evaluate(() => {
@@ -273,7 +273,7 @@ test.describe("dictation", () => {
     });
 
     await answerBox(page).fill("something wrong");
-    await page.getByRole("button", { name: /Check/ }).click();
+    await page.getByRole("button", { name: /تحقق/ }).click();
 
     // Pinned, not fixed. The completion screen renders on
     // `currentIndex >= questions.length - 1 && showResult`, which is the exact
@@ -281,9 +281,9 @@ test.describe("dictation", () => {
     // the result panel with the score screen. The learner never sees whether
     // the final answer was right, and never sees what the sentence actually
     // was. Every other question in the session shows both.
-    await expect(page.getByRole("heading", { name: "Session Complete!" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "انتهت الجلسة!" })).toBeVisible();
     await expect(page.getByText(expected)).toHaveCount(0);
-    await expect(page.getByText(/Not quite|Correct!/)).toHaveCount(0);
+    await expect(page.getByText(/ليس تماماً|صحيح!/)).toHaveCount(0);
   });
 });
 
@@ -313,7 +313,7 @@ test.describe("comprehension", () => {
     // same place, and colour is the only thing distinguishing their answer
     // from the truth.
     await expect(page.getByRole("button", { name: "بخير" })).toHaveClass(/border-green-500/);
-    await expect(page.getByText(/Correct!|Not quite/)).toHaveCount(0);
+    await expect(page.getByText(/صحيح!|ليس تماماً/)).toHaveCount(0);
   });
 
   test("highlights the right option after a wrong choice too", async ({ page }) => {
@@ -364,15 +364,15 @@ test.describe("resuming a session", () => {
     await page.goto("/listening");
     await dictationCard(page).click();
     await answerBox(page).fill("something");
-    await page.getByRole("button", { name: /Check/ }).click();
-    await page.getByRole("button", { name: /Next|Finish|See Results/ }).click();
+    await page.getByRole("button", { name: /تحقق/ }).click();
+    await page.getByRole("button", { name: /التالي|إنهاء/ }).click();
 
     await page.reload();
 
     // A reload mid-session — a phone locking, a tab restoring — should not cost
     // the learner the quiz.
     await expect(answerBox(page)).toBeVisible();
-    await expect(page.getByText("Listen and type what you hear")).toHaveCount(0);
+    await expect(page.getByText("استمع واكتب ما تسمعه")).toHaveCount(0);
   });
 
   test("discards a session older than four hours", async ({ page, db }) => {
@@ -398,7 +398,7 @@ test.describe("resuming a session", () => {
     await page.reload();
 
     // Yesterday's half-finished quiz is not what anyone means to resume.
-    await expect(page.getByText("Listen and type what you hear")).toBeVisible();
+    await expect(page.getByText("استمع واكتب ما تسمعه")).toBeVisible();
     expect(await page.evaluate((key) => localStorage.getItem(key), SESSION_KEY)).toBeNull();
   });
 
@@ -410,6 +410,6 @@ test.describe("resuming a session", () => {
     await page.reload();
 
     // The parse is wrapped, so a truncated write cannot brick the page.
-    await expect(page.getByText("Listen and type what you hear")).toBeVisible();
+    await expect(page.getByText("استمع واكتب ما تسمعه")).toBeVisible();
   });
 });

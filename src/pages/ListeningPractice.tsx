@@ -161,7 +161,7 @@ const ListeningPractice = () => {
       }
     } catch (e) {
       console.error("Failed to load questions:", e);
-      toast.error("Failed to load questions. Please try again.");
+      toast.error("تعذّر تحميل الأسئلة. حاول من جديد.");
       setMode(null);
     } finally {
       setLoading(false);
@@ -184,7 +184,7 @@ const ListeningPractice = () => {
             apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
             Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           },
-          body: JSON.stringify({ text: currentQuestion.audioText }),
+          body: JSON.stringify({ text: currentQuestion.audioText, voice: "en-US-JennyNeural" }),
         }
       );
 
@@ -214,7 +214,7 @@ const ListeningPractice = () => {
       }
     } catch (e) {
       console.error("Audio playback failed:", e);
-      toast.error("Could not play audio");
+      toast.error("تعذّر تشغيل الصوت");
       setAudioPlaying(false);
     }
   }, [currentQuestion, speedRate, audioPlaying]);
@@ -222,12 +222,11 @@ const ListeningPractice = () => {
   const checkDictationAnswer = () => {
     if (!currentQuestion) return;
 
-    // Normalize and compare
-    const normalizedAnswer = answer.trim().replace(/\s+/g, " ");
-    const normalizedCorrect = currentQuestion.audioText.trim().replace(/\s+/g, " ");
-
-    // Simple character comparison (could be more sophisticated)
-    const correct = normalizedAnswer === normalizedCorrect;
+    // Normalize and compare. English dictation shouldn't fail on
+    // capitalisation or a missing full stop — the ear is what's being tested.
+    const norm = (t: string) =>
+      t.trim().replace(/\s+/g, " ").toLowerCase().replace(/[.!?,;:]+$/g, "");
+    const correct = norm(answer) === norm(currentQuestion.audioText);
     setIsCorrect(correct);
     setShowResult(true);
     setTotalAnswered((prev) => prev + 1);
@@ -266,7 +265,7 @@ const ListeningPractice = () => {
       setAnswer("");
     } else {
       // Session complete
-      toast.success(`Session complete! Score: ${score}/${questions.length}`);
+      toast.success(`انتهت الجلسة! نتيجتك: ${score}/${questions.length}`);
     }
   };
 
@@ -290,8 +289,8 @@ const ListeningPractice = () => {
             <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
               <Headphones className="h-8 w-8 text-primary" />
             </div>
-            <h1 className="text-2xl font-bold text-foreground inline-flex items-center gap-2 justify-center">Listening Practice <InfoHint {...PAGE_HINTS["listening-practice"]} size="md" /></h1>
-            <p className="text-muted-foreground">Train your ear with Arabic audio exercises</p>
+            <h1 className="text-2xl font-bold text-foreground inline-flex items-center gap-2 justify-center">تدريب الاستماع <InfoHint {...PAGE_HINTS["listening-practice"]} size="md" /></h1>
+            <p className="text-muted-foreground">درّب أذنك بتمارين صوتية بالإنجليزية</p>
           </div>
 
           <div className="space-y-3">
@@ -312,8 +311,8 @@ const ListeningPractice = () => {
                 <PenLine className="h-6 w-6 text-blue-600 dark:text-blue-400" />
               </div>
               <div className="flex-1">
-                <p className="font-bold text-foreground">Dictation</p>
-                <p className="text-sm text-muted-foreground">Listen and type what you hear</p>
+                <p className="font-bold text-foreground">الإملاء</p>
+                <p className="text-sm text-muted-foreground">استمع واكتب ما تسمعه</p>
               </div>
               <ChevronRight className="h-5 w-5 text-muted-foreground" />
             </button>
@@ -335,8 +334,8 @@ const ListeningPractice = () => {
                 <BookOpen className="h-6 w-6 text-purple-600 dark:text-purple-400" />
               </div>
               <div className="flex-1">
-                <p className="font-bold text-foreground">Comprehension</p>
-                <p className="text-sm text-muted-foreground">Answer questions about what you hear</p>
+                <p className="font-bold text-foreground">الفهم</p>
+                <p className="text-sm text-muted-foreground">أجب عن أسئلة حول ما تسمعه</p>
               </div>
               <ChevronRight className="h-5 w-5 text-muted-foreground" />
             </button>
@@ -358,8 +357,8 @@ const ListeningPractice = () => {
                 <Zap className="h-6 w-6 text-orange-600 dark:text-orange-400" />
               </div>
               <div className="flex-1">
-                <p className="font-bold text-foreground">Speed Drill</p>
-                <p className="text-sm text-muted-foreground">Fast-paced listening at variable speeds</p>
+                <p className="font-bold text-foreground">تمرين السرعة</p>
+                <p className="text-sm text-muted-foreground">استماع سريع بسرعات متغيرة</p>
               </div>
               <ChevronRight className="h-5 w-5 text-muted-foreground" />
             </button>
@@ -394,23 +393,23 @@ const ListeningPractice = () => {
           <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
             <Check className="h-10 w-10 text-primary" />
           </div>
-          <h1 className="text-2xl font-bold text-foreground">Session Complete!</h1>
+          <h1 className="text-2xl font-bold text-foreground">انتهت الجلسة!</h1>
           <div className="text-4xl font-bold text-primary">
             {score}/{questions.length}
           </div>
           <p className="text-muted-foreground">
             {score === questions.length
-              ? "Perfect! You're a listening pro! 🎉"
+              ? "ممتاز! أذنك محترفة! 🎉"
               : score >= questions.length / 2
-              ? "Great job! Keep practicing! 👍"
-              : "Keep it up! Practice makes perfect! 💪"}
+              ? "أحسنت! واصل التدريب! 👍"
+              : "واصل — بالتدريب يأتي الإتقان! 💪"}
           </p>
           <div className="flex gap-3 justify-center">
             <Button variant="outline" onClick={resetSession}>
               <RotateCcw className="h-4 w-4 mr-2" />
-              Try Again
+              حاول من جديد
             </Button>
-            <Button onClick={() => navigate("/")}>Done</Button>
+            <Button onClick={() => navigate("/")}>تم</Button>
           </div>
         </div>
       </AppShell>
@@ -423,14 +422,14 @@ const ListeningPractice = () => {
       <div className="flex items-center justify-between mb-4">
         <Button variant="ghost" size="sm" onClick={resetSession}>
           <X className="h-4 w-4 mr-1" />
-          Exit
+          خروج
         </Button>
         <Badge variant="secondary">
           {currentIndex + 1}/{questions.length}
         </Badge>
         <div className="flex items-center gap-1.5">
           <Languages className="h-3.5 w-3.5 text-muted-foreground" />
-          <span className="text-xs text-muted-foreground">EN</span>
+          <span className="text-xs text-muted-foreground">ع</span>
           <Switch checked={showEnglish} onCheckedChange={setShowEnglish} className="h-5 w-9 data-[state=checked]:bg-primary data-[state=unchecked]:bg-input [&>span]:h-4 [&>span]:w-4 [&>span]:data-[state=checked]:translate-x-4" />
         </div>
       </div>
@@ -442,7 +441,7 @@ const ListeningPractice = () => {
       {mode === "speed" && (
         <div className="mb-6 space-y-2">
           <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Playback Speed</span>
+            <span className="text-muted-foreground">سرعة التشغيل</span>
             <span className="font-medium text-primary">+{SPEED_RATES.find((r) => r.value === speedRate)?.xp} XP</span>
           </div>
           <div className="flex gap-2">
@@ -488,10 +487,10 @@ const ListeningPractice = () => {
 
         <p className="text-center text-muted-foreground">
           {mode === "dictation"
-            ? "Listen and type the Arabic text"
+            ? "استمع واكتب الجملة الإنجليزية"
             : mode === "comprehension"
-            ? "Listen and answer the question"
-            : "Listen at increased speed and type what you hear"}
+            ? "استمع واختر المعنى"
+            : "استمع بسرعة أعلى واكتب ما تسمعه"}
         </p>
 
         {/* Answer area */}
@@ -500,15 +499,14 @@ const ListeningPractice = () => {
             <Input
               value={answer}
               onChange={(e) => setAnswer(e.target.value)}
-              placeholder="اكتب هنا..."
-              className="text-2xl text-center h-16 font-arabic"
-              dir="rtl"
+              placeholder="Type what you heard..."
+              className="font-english text-2xl text-center h-16"
               disabled={showResult}
             />
 
             {currentQuestion.hint && !showResult && (
               <p className="text-center text-sm text-muted-foreground">
-                Hint: starts with "{currentQuestion.hint}"
+                تلميح: تبدأ بـ "{currentQuestion.hint}"
               </p>
             )}
 
@@ -518,7 +516,7 @@ const ListeningPractice = () => {
                 className="w-full"
                 disabled={!answer.trim()}
               >
-                Check Answer
+                تحقق من الإجابة
               </Button>
             ) : (
               <div className="space-y-4">
@@ -535,26 +533,28 @@ const ListeningPractice = () => {
                       <X className="h-5 w-5 text-red-600" />
                     )}
                     <span className={isCorrect ? "text-green-600" : "text-red-600"}>
-                      {isCorrect ? "Correct!" : "Not quite"}
+                      {isCorrect ? "صحيح!" : "ليس تماماً"}
                     </span>
                   </div>
-                  <p className="text-2xl font-arabic mb-1" dir="rtl">
+                  <p className="font-english text-2xl mb-1">
                     {currentQuestion.audioText}
                   </p>
+                  {/* phonetic_ar — the English in Arabic letters */}
                   {currentQuestion.audioTextTransliteration && (
-                    <p className="text-sm text-muted-foreground italic mb-1">
+                    <p className="font-arabic text-sm text-muted-foreground mb-1">
                       {currentQuestion.audioTextTransliteration}
                     </p>
                   )}
+                  {/* the dialect gloss (column name is Arabic-era) */}
                   {showEnglish && (
-                    <p className="text-sm text-muted-foreground animate-in fade-in duration-200">
+                    <p className="font-arabic text-sm text-muted-foreground animate-in fade-in duration-200">
                       {currentQuestion.audioTextEnglish}
                     </p>
                   )}
                 </div>
 
                 <Button onClick={nextQuestion} className="w-full">
-                  {currentIndex < questions.length - 1 ? "Next" : "Finish"}
+                  {currentIndex < questions.length - 1 ? "التالي" : "إنهاء"}
                   <ChevronRight className="h-4 w-4 ml-1" />
                 </Button>
               </div>
@@ -580,19 +580,22 @@ const ListeningPractice = () => {
                     : "border-border hover:border-primary/50 bg-card"
                 )}
               >
-                <p className="font-medium">{option.text}</p>
+                <p className="font-arabic font-medium">{option.text}</p>
+                {showEnglish && (
+                  <p className="font-english text-xs text-muted-foreground mt-0.5">{option.textArabic}</p>
+                )}
               </button>
             ))}
 
             {showResult && (
               <div className="pt-4">
                 {showEnglish && (
-                  <p className="text-center text-sm text-muted-foreground mb-2 animate-in fade-in duration-200">
-                    "{currentQuestion.audioTextEnglish}"
+                  <p className="font-arabic text-center text-sm text-muted-foreground mb-2 animate-in fade-in duration-200">
+                    {currentQuestion.audioTextEnglish}
                   </p>
                 )}
                 <Button onClick={nextQuestion} className="w-full">
-                  {currentIndex < questions.length - 1 ? "Next" : "Finish"}
+                  {currentIndex < questions.length - 1 ? "التالي" : "إنهاء"}
                   <ChevronRight className="h-4 w-4 ml-1" />
                 </Button>
               </div>

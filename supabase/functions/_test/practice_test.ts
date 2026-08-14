@@ -306,7 +306,7 @@ Deno.test("listening-quiz caps how much vocabulary it puts in the prompt", async
   assert(!sent.includes("كلمة20"));
 });
 
-Deno.test("listening-quiz demands vocalised audio text", async () => {
+Deno.test("listening-quiz asks for English audio with an Arabic-letter phonetic line", async () => {
   const { bodies, calls } = await call(
     "listening-quiz",
     { mode: "dictation", words: [] },
@@ -314,9 +314,11 @@ Deno.test("listening-quiz demands vocalised audio text", async () => {
   );
 
   const i = calls.findIndex((u) => u.includes("ai.gateway"));
-  // Every `audioText` is read aloud by TTS, and unvocalised Arabic is
-  // mispronounced — which in a *listening* exercise teaches the wrong sound.
-  assertStringIncludes(bodies[i] ?? "", "fully vocalized");
+  // The direction flipped: audioText is the ENGLISH the learner hears, the
+  // gloss rides in the dialect, and the phonetic line is English in Arabic
+  // letters so the learner can read how it sounds.
+  assertStringIncludes(bodies[i] ?? "", "audioText is the ENGLISH");
+  assertStringIncludes(bodies[i] ?? "", "phonetically in ARABIC letters");
 });
 
 Deno.test("listening-quiz scales its guidance to the difficulty", async () => {
@@ -357,13 +359,14 @@ Deno.test("listening-quiz answers a generation failure with a single greeting", 
 
   // Pinned, not endorsed. Any non-402/429 failure produces one hardcoded
   // greeting rather than an error, so a learner who asked for five dictation
-  // items gets a one-item quiz saying "hello" and no indication anything went
-  // wrong. The dialect is at least respected — أهلاً for Egyptian, هلا for Gulf.
+  // items gets a one-item quiz saying "Hello" and no indication anything went
+  // wrong. The English is the audio; the dialect shapes only the gloss —
+  // أهلاً for Egyptian, هلا for Gulf.
   assertEquals(status, 200);
   const questions = body.questions as Array<Record<string, unknown>>;
   assertEquals(questions.length, 1);
-  assertEquals(questions[0].audioText, "أهلاً");
-  assertEquals(questions[0].audioTextEnglish, "Hello");
+  assertEquals(questions[0].audioText, "Hello");
+  assertEquals(questions[0].audioTextEnglish, "أهلاً");
 });
 
 Deno.test("listening-quiz fails outright when no words array is sent", async () => {

@@ -1,10 +1,16 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { getDialectLabel, getTashkeelMandate, getDialectTransliterationRules, type Dialect } from "../_shared/dialectHelpers.ts";
+import { getDialectLabel, type Dialect } from "../_shared/dialectHelpers.ts";
 import { askBrain } from "../_shared/aiBrain.ts";
 import { enforceDailyCap } from "../_shared/usageCap.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
 
 
+// Column names are Arabic-era; the content flipped with the app's direction:
+// - audioText           — the ENGLISH sentence the learner hears (the target)
+// - audioTextTransliteration — phonetic_ar: the English in Arabic letters
+// - audioTextEnglish    — the ARABIC gloss in the learner's dialect
+// - options.text        — comprehension option: the meaning, in the dialect
+// - options.textArabic  — that option restated in English (secondary line)
 interface QuizQuestion {
   type: "dictation" | "comprehension" | "speed";
   audioText: string;
@@ -40,42 +46,41 @@ serve(async (req) => {
       ? "Use moderately complex sentences with a mix of common and less common vocabulary."
       : "Use simple, slow, clearly pronounced sentences with basic vocabulary.";
 
-    const systemExtra = `You are a ${dialectLabel} language tutor creating listening comprehension exercises.
+    const cefr = difficulty === "advanced" ? "B2" : difficulty === "intermediate" ? "B1" : "A2";
+
+    const systemExtra = `You are an English tutor for native ${dialectLabel} speakers, creating listening exercises.
 - Generate exercises using these vocabulary words the student knows: ${vocabContext}
 - Student level: ${difficulty}. ${levelGuidance}
-- All audioText fields MUST be authentic ${dialectLabel}, never MSA.
-
-${getTashkeelMandate()}
-- Every audioText field must be fully vocalized — these are read aloud by text-to-speech and unvocalized text causes mispronunciation.
-
-${getDialectTransliterationRules(dialect as Dialect)}
-- Provide a Latin-letter transliteration for every audioText as audioTextTransliteration.
+- audioText is the ENGLISH the student hears — natural, contemporary spoken English.
+- audioTextEnglish carries the ${dialectLabel} gloss of the sentence, in Arabic script, authentic ${dialectLabel} (never MSA).
+- audioTextTransliteration is the English sentence rendered phonetically in ARABIC letters (e.g. "ثانك يو" for "thank you") so the student can read how it sounds.
 
 - Return the structured questions via the provided tool only.`;
 
     let userPrompt = "";
     if (mode === "dictation") {
-      userPrompt = `Generate ${count} ${dialectLabel} sentences for dictation practice. Each item: type="dictation", a ${dialectLabel} audioText, an English audioTextEnglish, and a short hint (e.g. first word).`;
+      userPrompt = `Generate ${count} English sentences for dictation practice. Each item: type="dictation", an English audioText, its ${dialectLabel} gloss as audioTextEnglish, and a short hint (the first word of the English sentence).`;
     } else if (mode === "comprehension") {
-      userPrompt = `Generate ${count} listening comprehension questions in ${dialectLabel}. Each item: type="comprehension", a ${dialectLabel} audioText sentence, an English audioTextEnglish, and 3 options (one correct). Each option has text (English meaning), textArabic (short ${dialectLabel}), and correct boolean.`;
+      userPrompt = `Generate ${count} listening comprehension questions. Each item: type="comprehension", an English audioText sentence, its ${dialectLabel} gloss as audioTextEnglish, and 3 options (one correct) asking what the sentence means. Each option has text (the meaning in ${dialectLabel} Arabic script), textArabic (the same option in English), and correct boolean.`;
     } else {
-      userPrompt = `Generate ${count} short ${dialectLabel} phrases (2-4 words) for speed listening practice. Each item: type="speed", audioText in ${dialectLabel}, audioTextEnglish in English.`;
+      userPrompt = `Generate ${count} short English phrases (2-4 words) for speed listening practice. Each item: type="speed", audioText in English, audioTextEnglish as the ${dialectLabel} gloss.`;
     }
 
     let questions: QuizQuestion[] = [];
     try {
       const brain = await askBrain<{ questions: QuizQuestion[] }>({
         purpose: "listening_quiz",
+        target: "english",
+        cefr,
         dialect: dialect as Dialect,
         strategy: "ensemble",
         systemPromptExtra: systemExtra,
         userPrompt,
         maxTokens: 2048,
         temperature: 0.7,
-        arabicTextPath: (p: any) => (Array.isArray(p?.questions) ? p.questions.map((q: any) => q?.audioText ?? "").join("\n") : ""),
         tool: {
           name: "emit_listening_quiz",
-          description: `Listening quiz items in ${dialectLabel}.`,
+          description: `English listening quiz items glossed in ${dialectLabel}.`,
           parameters: {
             type: "object",
             properties: {
@@ -122,8 +127,8 @@ ${getDialectTransliterationRules(dialect as Dialect)}
       if (e?.status === 429) {
         return new Response(JSON.stringify({ error: "Rate limit exceeded." }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
-      const fallback = dialect === "Egyptian" ? "أهلاً" : "هلا";
-      questions = [{ type: mode, audioText: fallback, audioTextEnglish: "Hello", hint: fallback[0] }];
+      const fallbackGloss = dialect === "Egyptian" ? "أهلاً" : "هلا";
+      questions = [{ type: mode, audioText: "Hello", audioTextEnglish: fallbackGloss, hint: "Hello" }];
     }
 
     return new Response(JSON.stringify({ questions }), {
