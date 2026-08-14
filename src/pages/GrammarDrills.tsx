@@ -48,9 +48,9 @@ interface DrillQuestion {
 }
 
 const DIFFICULTIES = [
-  { id: "beginner", label: "Beginner", color: "text-green-600 dark:text-green-400" },
-  { id: "intermediate", label: "Intermediate", color: "text-yellow-600 dark:text-yellow-400" },
-  { id: "advanced", label: "Advanced", color: "text-red-600 dark:text-red-400" },
+  { id: "beginner", label: "مبتدئ", color: "text-green-600 dark:text-green-400" },
+  { id: "intermediate", label: "متوسط", color: "text-yellow-600 dark:text-yellow-400" },
+  { id: "advanced", label: "متقدم", color: "text-red-600 dark:text-red-400" },
 ];
 
 const GrammarDrills = () => {
@@ -184,7 +184,7 @@ const GrammarDrills = () => {
       }
     } catch (e: any) {
       console.error(e);
-      toast.error(e.message || "Failed to generate drill");
+      toast.error(e.message || "تعذّر توليد التمرين");
       setCategory(null);
     } finally {
       setIsLoading(false);
@@ -246,8 +246,8 @@ const GrammarDrills = () => {
         <HomeButton />
         <div className="py-12 text-center space-y-4">
           <BookOpen className="h-12 w-12 text-muted-foreground/30 mx-auto" />
-          <p className="text-muted-foreground">Sign in to practice grammar drills</p>
-          <Button onClick={() => navigate("/auth")}>Sign In</Button>
+          <p className="text-muted-foreground">سجّل الدخول للتدرب على القواعد</p>
+          <Button onClick={() => navigate("/auth")}>تسجيل الدخول</Button>
         </div>
       </AppShell>
     );
@@ -263,30 +263,30 @@ const GrammarDrills = () => {
           <div className="w-20 h-20 mx-auto rounded-full bg-primary/10 flex items-center justify-center">
             <Zap className="h-10 w-10 text-primary" />
           </div>
-          <h1 className="text-2xl font-bold text-foreground">Drill Complete!</h1>
+          <h1 className="text-2xl font-bold text-foreground">أنهيت التمرين!</h1>
           <p className="text-4xl font-bold text-primary">{pct}%</p>
           <p className="text-muted-foreground">
-            {score} / {questions.length} correct
+            {score} / {questions.length} صحيحة
           </p>
-          {pct >= 80 && <p className="text-sm text-green-600 dark:text-green-400">Excellent! 🎉</p>}
-          {pct >= 50 && pct < 80 && <p className="text-sm text-yellow-600 dark:text-yellow-400">Good effort! Keep practicing 💪</p>}
-          {pct < 50 && <p className="text-sm text-red-600 dark:text-red-400">Keep going — practice makes perfect! 📚</p>}
+          {pct >= 80 && <p className="text-sm text-green-600 dark:text-green-400">ممتاز! 🎉</p>}
+          {pct >= 50 && pct < 80 && <p className="text-sm text-yellow-600 dark:text-yellow-400">جهد طيب! واصل التدريب 💪</p>}
+          {pct < 50 && <p className="text-sm text-red-600 dark:text-red-400">واصل — بالتدريب يأتي الإتقان! 📚</p>}
 
           {/* The round's standing after this attempt, not just this attempt.
               Shown only once the write has landed — claiming a new strength
               before it saves would be a lie the next page load contradicts. */}
           {resultCategory?.strengthLabel && !recordOutcome.isPending && (
             <p className="text-sm text-muted-foreground">
-              {resultCategory.label}: <span className="text-foreground font-medium">{resultCategory.strengthLabel}</span>
-              {" "}overall — {resultCategory.mastery?.correct}/{resultCategory.mastery?.exposures} across all your drills.
+              {resultCategory.labelAr}: <span className="text-foreground font-medium">{resultCategory.strengthLabel}</span>
+              {" "}إجمالاً — {resultCategory.mastery?.correct}/{resultCategory.mastery?.exposures} عبر كل تمارينك.
             </p>
           )}
           <div className="flex gap-3 justify-center pt-4">
             <Button variant="outline" onClick={resetDrill}>
-              <RotateCcw className="h-4 w-4 mr-2" /> New Drill
+              <RotateCcw className="h-4 w-4 mr-2" /> تمرين جديد
             </Button>
             <Button onClick={() => fetchDrill(category!)}>
-              <Sparkles className="h-4 w-4 mr-2" /> Retry
+              <Sparkles className="h-4 w-4 mr-2" /> إعادة
             </Button>
           </div>
         </div>
@@ -304,9 +304,9 @@ const GrammarDrills = () => {
           {/* Progress */}
           <div className="flex items-center justify-between">
             <span className="text-sm text-muted-foreground">
-              Question {currentIndex + 1} of {questions.length}
+              سؤال {currentIndex + 1} من {questions.length}
             </span>
-            <span className="text-sm font-medium text-primary">{score} correct</span>
+            <span className="text-sm font-medium text-primary">{score} صحيحة</span>
           </div>
           <div className="h-1.5 bg-muted rounded-full overflow-hidden">
             <div
@@ -330,7 +330,7 @@ const GrammarDrills = () => {
               )}
             >
               <Languages className="h-3.5 w-3.5" />
-              EN
+              ع
             </button>
           </div>
 
@@ -386,9 +386,9 @@ const GrammarDrills = () => {
               </div>
               <Button onClick={nextQuestion} className="w-full">
                 {currentIndex < questions.length - 1 ? (
-                  <>Next <ChevronRight className="h-4 w-4 ml-1" /></>
+                  <>التالي <ChevronRight className="h-4 w-4 ml-1" /></>
                 ) : (
-                  "See Results"
+                  "النتائج"
                 )}
               </Button>
             </div>
@@ -408,8 +408,8 @@ const GrammarDrills = () => {
             <BookOpen className="h-6 w-6 text-primary" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-foreground inline-flex items-center gap-2">Grammar Drills <InfoHint {...PAGE_HINTS["grammar-drills"]} /></h1>
-            <p className="text-sm text-muted-foreground">Practice {activeDialect === 'Egyptian' ? 'Egyptian' : activeDialect === 'Yemeni' ? 'Yemeni' : 'Gulf'} Arabic grammar</p>
+            <h1 className="text-xl font-bold text-foreground inline-flex items-center gap-2">تمارين القواعد <InfoHint {...PAGE_HINTS["grammar-drills"]} /></h1>
+            <p className="text-sm text-muted-foreground">تدرّب على قواعد الإنجليزية التي تتعثر فيها</p>
           </div>
         </div>
 
@@ -437,8 +437,8 @@ const GrammarDrills = () => {
         {!isLoading && focusCategory && (
           <p className="text-xs text-muted-foreground">
             {focusCategory.mastery
-              ? <>You're weakest on <strong className="text-foreground">{focusCategory.label}</strong> — {focusCategory.accuracyPct}% so far. Worth another round.</>
-              : <>You haven't tried <strong className="text-foreground">{focusCategory.label}</strong> yet.</>}
+              ? <>أضعف نقاطك <strong className="text-foreground">{focusCategory.labelAr}</strong> — {focusCategory.accuracyPct}% حتى الآن. تستحق جولة أخرى.</>
+              : <>لم تجرّب <strong className="text-foreground">{focusCategory.labelAr}</strong> بعد.</>}
           </p>
         )}
 
@@ -460,8 +460,8 @@ const GrammarDrills = () => {
                 )}
               >
                 <span className="text-2xl">{cat.icon}</span>
-                <p className="font-semibold text-foreground text-sm">{cat.label}</p>
-                <p className="text-xs text-muted-foreground" dir="rtl">{cat.labelAr}</p>
+                <p className="font-semibold text-foreground text-sm">{cat.labelAr}</p>
+                <p className="font-english text-xs text-muted-foreground">{cat.label}</p>
                 {/* Strength, once there's something to report. An untouched
                     category shows nothing rather than a zeroed-out bar. */}
                 {cat.strengthLabel && (

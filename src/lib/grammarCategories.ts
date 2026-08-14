@@ -49,11 +49,11 @@ export const GRAMMAR_CATEGORIES: GrammarCategory[] = [
 
 /** Wording shown on a category tile. "new" never appears — an untouched tile shows nothing. */
 const STRENGTH_LABEL: Record<MasteryStrength, string> = {
-  new: "Not started",
-  learning: "Just started",
-  familiar: "Getting there",
-  strong: "Strong",
-  mastered: "Mastered",
+  new: "لم تبدأ",
+  learning: "بداية الطريق",
+  familiar: "تتقدم",
+  strong: "قوي",
+  mastered: "متقن",
 };
 
 const STRENGTH_CLASS: Record<MasteryStrength, string> = {

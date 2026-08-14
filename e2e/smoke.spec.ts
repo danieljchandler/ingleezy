@@ -285,7 +285,7 @@ test.describe("signed in — grammar drills", () => {
     await page.goto("/grammar");
 
     // The score used to be rendered once on the results screen and dropped.
-    await expect(page.getByText(/Just started · 30%/)).toBeVisible();
+    await expect(page.getByText(/بداية الطريق · 30%/)).toBeVisible();
   });
 
   test("shows nothing for categories never drilled", async ({ page }) => {
@@ -316,7 +316,7 @@ test.describe("signed in — grammar drills", () => {
     });
     await page.goto("/grammar");
 
-    await expect(page.getByText(/You're weakest on/)).toContainText("Negation");
+    await expect(page.getByText(/أضعف نقاطك/)).toContainText("النفي");
   });
 });
 

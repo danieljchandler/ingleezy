@@ -58,12 +58,12 @@ function seedApproved(db: MemoryDb, count: number) {
 /** Answer the current question correctly and move on. */
 async function answerCorrectly(page: Page) {
   await page.getByRole("button", { name: /goes/ }).click();
-  await page.getByRole("button", { name: /Next|Finish|See Results/i }).click();
+  await page.getByRole("button", { name: /التالي|النتائج/ }).click();
 }
 
 async function answerWrongly(page: Page) {
   await page.getByRole("button", { name: /go \d/ }).click();
-  await page.getByRole("button", { name: /Next|Finish|See Results/i }).click();
+  await page.getByRole("button", { name: /التالي|النتائج/ }).click();
 }
 
 test.describe("reaching the drills", () => {
@@ -72,7 +72,7 @@ test.describe("reaching the drills", () => {
 
     await page.goto("/grammar");
 
-    await expect(page.getByText("Sign in to practice grammar drills")).toBeVisible();
+    await expect(page.getByText("سجّل الدخول للتدرب على القواعد")).toBeVisible();
   });
 
   test("offers every grammar category to a learner", async ({ page, signInAs, db }) => {
@@ -107,7 +107,7 @@ test.describe("where the questions come from", () => {
     await page.goto("/grammar");
     await page.getByRole("button", { name: new RegExp("Verb Tenses") }).click();
 
-    await expect(page.getByText("Question 1 of 5")).toBeVisible();
+    await expect(page.getByText("سؤال 1 من 5")).toBeVisible();
     // Reviewed content costs nothing per drill and has been checked by a human;
     // generating over the top of it would be paying to do worse.
     expect(backend.callsTo("grammar-drill")).toHaveLength(0);
@@ -189,7 +189,7 @@ test.describe("where the questions come from", () => {
     // Not a dead screen: the category is cleared so the learner is back
     // somewhere they can act, rather than looking at an empty drill.
     await expect(page.getByRole("button", { name: new RegExp("Verb Tenses") })).toBeVisible();
-    await expect(page.getByText(/Question 1 of/)).toHaveCount(0);
+    await expect(page.getByText(/سؤال 1 من/)).toHaveCount(0);
 
     // The toast title is `e.message || "Failed to generate drill"`, and a
     // failed `functions.invoke` supplies a message — so the learner is shown
@@ -209,27 +209,27 @@ test.describe("answering", () => {
   test("counts a right answer", async ({ page }) => {
     await page.goto("/grammar");
     await page.getByRole("button", { name: new RegExp("Verb Tenses") }).click();
-    await expect(page.getByText("Question 1 of 5")).toBeVisible();
+    await expect(page.getByText("سؤال 1 من 5")).toBeVisible();
 
     await page.getByRole("button", { name: /goes/ }).click();
 
-    await expect(page.getByText("1 correct")).toBeVisible();
+    await expect(page.getByText("1 صحيحة")).toBeVisible();
   });
 
   test("leaves the score alone on a wrong answer", async ({ page }) => {
     await page.goto("/grammar");
     await page.getByRole("button", { name: new RegExp("Verb Tenses") }).click();
-    await expect(page.getByText("Question 1 of 5")).toBeVisible();
+    await expect(page.getByText("سؤال 1 من 5")).toBeVisible();
 
     await page.getByRole("button", { name: /go \d/ }).click();
 
-    await expect(page.getByText("0 correct")).toBeVisible();
+    await expect(page.getByText("0 صحيحة")).toBeVisible();
   });
 
   test("shows the explanation once an answer is locked in", async ({ page }) => {
     await page.goto("/grammar");
     await page.getByRole("button", { name: new RegExp("Verb Tenses") }).click();
-    await expect(page.getByText("Question 1 of 5")).toBeVisible();
+    await expect(page.getByText("سؤال 1 من 5")).toBeVisible();
 
     await page.getByRole("button", { name: /go \d/ }).click();
 
@@ -241,7 +241,7 @@ test.describe("answering", () => {
   test("ignores a second answer to the same question", async ({ page }) => {
     await page.goto("/grammar");
     await page.getByRole("button", { name: new RegExp("Verb Tenses") }).click();
-    await expect(page.getByText("Question 1 of 5")).toBeVisible();
+    await expect(page.getByText("سؤال 1 من 5")).toBeVisible();
 
     await page.getByRole("button", { name: /go \d/ }).click();
 
@@ -250,16 +250,16 @@ test.describe("answering", () => {
     // nothing.
     await expect(page.getByRole("button", { name: /goes/ })).toBeDisabled();
     await expect(page.getByRole("button", { name: /go \d/ })).toBeDisabled();
-    await expect(page.getByText("0 correct")).toBeVisible();
+    await expect(page.getByText("0 صحيحة")).toBeVisible();
   });
 
   test("keeps the Arabic support out of the way until asked for", async ({ page }) => {
     await page.goto("/grammar");
     await page.getByRole("button", { name: new RegExp("Verb Tenses") }).click();
-    await expect(page.getByText("Question 1 of 5")).toBeVisible();
+    await expect(page.getByText("سؤال 1 من 5")).toBeVisible();
 
     await expect(page.getByText(/^اختر الشكل الصحيح/)).toHaveCount(0);
-    await page.getByRole("button", { name: "EN" }).click();
+    await page.getByRole("button", { name: "ع" }).click();
     await expect(page.getByText(/^اختر الشكل الصحيح/)).toBeVisible();
   });
 });
@@ -273,26 +273,26 @@ test.describe("finishing a round", () => {
   test("scores the round as a percentage", async ({ page }) => {
     await page.goto("/grammar");
     await page.getByRole("button", { name: new RegExp("Verb Tenses") }).click();
-    await expect(page.getByText("Question 1 of 3")).toBeVisible();
+    await expect(page.getByText("سؤال 1 من 3")).toBeVisible();
 
     await answerCorrectly(page);
     await answerCorrectly(page);
     await answerWrongly(page);
 
-    await expect(page.getByText("Drill Complete!")).toBeVisible();
+    await expect(page.getByText("أنهيت التمرين!")).toBeVisible();
     await expect(page.getByText("67%")).toBeVisible();
-    await expect(page.getByText("2 / 3 correct")).toBeVisible();
+    await expect(page.getByText("2 / 3 صحيحة")).toBeVisible();
   });
 
   test("sends the round's hits and misses in order", async ({ page, backend }) => {
     await page.goto("/grammar");
     await page.getByRole("button", { name: new RegExp("Verb Tenses") }).click();
-    await expect(page.getByText("Question 1 of 3")).toBeVisible();
+    await expect(page.getByText("سؤال 1 من 3")).toBeVisible();
 
     await answerWrongly(page);
     await answerCorrectly(page);
     await answerCorrectly(page);
-    await expect(page.getByText("Drill Complete!")).toBeVisible();
+    await expect(page.getByText("أنهيت التمرين!")).toBeVisible();
 
     // The order is the point: two right after a miss is a different signal
     // from a miss after two right, and the ladder is meant to tell them apart.
@@ -308,12 +308,12 @@ test.describe("finishing a round", () => {
   test("submits the round exactly once", async ({ page, backend }) => {
     await page.goto("/grammar");
     await page.getByRole("button", { name: new RegExp("Verb Tenses") }).click();
-    await expect(page.getByText("Question 1 of 3")).toBeVisible();
+    await expect(page.getByText("سؤال 1 من 3")).toBeVisible();
 
     await answerCorrectly(page);
     await answerCorrectly(page);
     await answerCorrectly(page);
-    await expect(page.getByText("Drill Complete!")).toBeVisible();
+    await expect(page.getByText("أنهيت التمرين!")).toBeVisible();
 
     // The results screen can re-render for reasons that have nothing to do
     // with the learner; a second submit would inflate the ladder.
@@ -330,7 +330,7 @@ test.describe("finishing a round", () => {
 
     await page.goto("/grammar");
     await page.getByRole("button", { name: new RegExp("Verb Tenses") }).click();
-    await expect(page.getByText("Question 1 of 3")).toBeVisible();
+    await expect(page.getByText("سؤال 1 من 3")).toBeVisible();
 
     await answerCorrectly(page);
     await answerCorrectly(page);
@@ -338,23 +338,23 @@ test.describe("finishing a round", () => {
 
     // The learner did the work; losing the bookkeeping should not lose them
     // the result screen too.
-    await expect(page.getByText("Drill Complete!")).toBeVisible();
+    await expect(page.getByText("أنهيت التمرين!")).toBeVisible();
     await expect(page.getByText("100%")).toBeVisible();
   });
 
   test("starts a clean round from New Drill", async ({ page }) => {
     await page.goto("/grammar");
     await page.getByRole("button", { name: new RegExp("Verb Tenses") }).click();
-    await expect(page.getByText("Question 1 of 3")).toBeVisible();
+    await expect(page.getByText("سؤال 1 من 3")).toBeVisible();
     await answerCorrectly(page);
     await answerCorrectly(page);
     await answerCorrectly(page);
-    await expect(page.getByText("Drill Complete!")).toBeVisible();
+    await expect(page.getByText("أنهيت التمرين!")).toBeVisible();
 
-    await page.getByRole("button", { name: "New Drill" }).click();
+    await page.getByRole("button", { name: "تمرين جديد" }).click();
 
     await expect(page.getByRole("button", { name: new RegExp("Verb Tenses") })).toBeVisible();
-    await expect(page.getByText("Drill Complete!")).toHaveCount(0);
+    await expect(page.getByText("أنهيت التمرين!")).toHaveCount(0);
   });
 });
 
@@ -367,26 +367,26 @@ test.describe("a drill interrupted", () => {
   test("resumes where the learner left off", async ({ page }) => {
     await page.goto("/grammar");
     await page.getByRole("button", { name: new RegExp("Verb Tenses") }).click();
-    await expect(page.getByText("Question 1 of 3")).toBeVisible();
+    await expect(page.getByText("سؤال 1 من 3")).toBeVisible();
     await answerCorrectly(page);
-    await expect(page.getByText("Question 2 of 3")).toBeVisible();
+    await expect(page.getByText("سؤال 2 من 3")).toBeVisible();
 
     await page.reload();
 
     // Drills are generated per round, so losing one to a reload means losing
     // the questions themselves, not just the position.
-    await expect(page.getByText("Question 2 of 3")).toBeVisible();
-    await expect(page.getByText("1 correct")).toBeVisible();
+    await expect(page.getByText("سؤال 2 من 3")).toBeVisible();
+    await expect(page.getByText("1 صحيحة")).toBeVisible();
   });
 
   test("brings a finished drill back to its last question", async ({ page, backend }) => {
     await page.goto("/grammar");
     await page.getByRole("button", { name: new RegExp("Verb Tenses") }).click();
-    await expect(page.getByText("Question 1 of 3")).toBeVisible();
+    await expect(page.getByText("سؤال 1 من 3")).toBeVisible();
     await answerCorrectly(page);
     await answerCorrectly(page);
     await answerCorrectly(page);
-    await expect(page.getByText("Drill Complete!")).toBeVisible();
+    await expect(page.getByText("أنهيت التمرين!")).toBeVisible();
     await expect.poll(() => backend.callsTo("record-grammar-outcome").length).toBe(1);
 
     await page.reload();
@@ -395,8 +395,8 @@ test.describe("a drill interrupted", () => {
     // outcomes but not `showResult`, and nothing clears the entry when a drill
     // ends. So reloading after finishing drops the learner back onto the final
     // question with the score already banked and the answer cleared.
-    await expect(page.getByText("Question 3 of 3")).toBeVisible();
-    await expect(page.getByText("3 correct")).toBeVisible();
+    await expect(page.getByText("سؤال 3 من 3")).toBeVisible();
+    await expect(page.getByText("3 صحيحة")).toBeVisible();
 
     // Answering it again re-finishes the round. `submittedRef` is per-mount, so
     // the outcomes are submitted a second time — now four entries for a
