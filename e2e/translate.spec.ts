@@ -70,9 +70,16 @@ test.describe("translating a passage", () => {
     await page.goto("/translate");
     await page.getByRole("combobox").click();
     await page.getByRole("option", { name: "Egyptian" }).click();
+    // Wait for the pick to land before translating. The select closes with an
+    // animation that briefly keeps an overlay over the page, and a Translate
+    // click inside that window is swallowed — the request never goes out.
+    await expect(page.getByRole("combobox")).toContainText("Egyptian");
     await translate(page);
 
-    await expect(page.getByText("How are you today?").first()).toBeVisible();
+    // Note: not asserting on the passage text here. ENGLISH_TEXT contains
+    // "How are you today?", so that would match the textarea and pass whether
+    // or not a translation ever ran.
+    await expect(page.getByText("تعال نشرب قهوة معنا.")).toBeVisible();
     // An explicit pick has to override the default, or a learner studying with
     // Egyptian relatives keeps getting Gulf glosses.
     expect(backend.lastCallTo("translate-text")?.body).toMatchObject({ dialect: "Egyptian" });
