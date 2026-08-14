@@ -11,7 +11,7 @@ import { chatCompletion, json, type UpstreamHandler } from "./upstreams.ts";
  * preferred entry. That normalisation is the part the page depends on and the
  * part a model can break by returning two preferred entries or none.
  *
- * `translate-text` goes Arabic→English per sentence, and its contract is that
+ * `translate-text` goes English→dialect-Arabic per sentence, and its contract is that
  * the Arabic comes back *verbatim* — it is a reading aid, so a model that
  * "helpfully" rewrote the learner's passage into MSA would be showing them
  * something they never read.
@@ -362,59 +362,55 @@ Deno.test("how-do-i-say turns an anonymous caller away", async () => {
 // ── translate-text ──────────────────────────────────────────────────────────
 
 const aSentence = (over: Record<string, unknown> = {}) => ({
+  english: "The weather is nice today",
   arabic: "الجو حلو اليوم",
-  literal: "the-weather nice today",
-  natural: "The weather is nice today",
+  literal: "الـ جو هو حلو اليوم",
   ...over,
 });
 
-Deno.test("translate-text returns a sentence breakdown with the detected dialect", async () => {
+Deno.test("translate-text returns a sentence breakdown in the gloss dialect", async () => {
   const { status, body } = await call(
     "translate-text",
-    { text: "الجو حلو اليوم", dialect: "auto" },
+    { text: "The weather is nice today", dialect: "Egyptian" },
     caller({
       "ai.gateway.lovable.dev": emitting({
-        detected_dialect: "Egyptian",
         sentences: [aSentence()],
       }),
     }),
   );
 
   assertEquals(status, 200);
+  // The key name is historical: it reports the dialect the glosses are in.
   assertEquals(body.detected_dialect, "Egyptian");
-  // The requested dialect is echoed back separately, so the page can show
-  // "you asked for auto, we detected Egyptian" rather than one or the other.
-  assertEquals(body.used_dialect, "auto");
+  assertEquals(body.used_dialect, "Egyptian");
   assertEquals((body.sentences as unknown[]).length, 1);
 });
 
-Deno.test("translate-text keeps both the literal and the natural reading", async () => {
+Deno.test("translate-text keeps both the natural Arabic and the literal gloss", async () => {
   const { body } = await call(
     "translate-text",
-    { text: "الجو حلو اليوم" },
+    { text: "The weather is nice today" },
     caller({
       "ai.gateway.lovable.dev": emitting({
-        detected_dialect: "Gulf",
         sentences: [aSentence()],
       }),
     }),
   );
 
   const sentences = body.sentences as Array<Record<string, unknown>>;
-  // The two together are the teaching: the natural one says what it means, the
-  // literal one shows how the Arabic is built.
-  assertEquals(sentences[0].literal, "the-weather nice today");
-  assertEquals(sentences[0].natural, "The weather is nice today");
+  // The two together are the teaching: the natural Arabic says what it means,
+  // the literal one shows how the English is built.
+  assertEquals(sentences[0].arabic, "الجو حلو اليوم");
+  assertEquals(sentences[0].literal, "الـ جو هو حلو اليوم");
 });
 
 Deno.test("translate-text omits the note when there is nothing to say", async () => {
   const { body } = await call(
     "translate-text",
-    { text: "الجو حلو" },
+    { text: "The weather is nice" },
     caller({
       "ai.gateway.lovable.dev": emitting({
-        detected_dialect: "Gulf",
-        sentences: [aSentence(), aSentence({ arabic: "وبعدين", note: "   " })],
+        sentences: [aSentence(), aSentence({ english: "And then", note: "   " })],
       }),
     }),
   );
@@ -426,47 +422,28 @@ Deno.test("translate-text omits the note when there is nothing to say", async ()
   assert(!("note" in sentences[1]));
 });
 
-Deno.test("translate-text drops sentences with no Arabic", async () => {
+Deno.test("translate-text drops sentences with no English", async () => {
   const { body } = await call(
     "translate-text",
-    { text: "الجو حلو" },
+    { text: "The weather is nice" },
     caller({
       "ai.gateway.lovable.dev": emitting({
-        detected_dialect: "Gulf",
-        sentences: [aSentence(), { natural: "invented" }, { arabic: "   " }],
+        sentences: [aSentence(), { arabic: "مخترع" }, { english: "   " }],
       }),
     }),
   );
 
-  // The Arabic is the anchor — the page renders the translation *under* it, so
-  // a sentence without one has nothing to attach to.
+  // The English is the anchor — the page renders the glosses *under* it, so a
+  // sentence without one has nothing to attach to.
   assertEquals((body.sentences as unknown[]).length, 1);
 });
 
-Deno.test("translate-text falls back to the requested dialect when detection is nonsense", async () => {
-  const { body } = await call(
-    "translate-text",
-    { text: "الجو حلو", dialect: "Yemeni" },
-    caller({
-      "ai.gateway.lovable.dev": emitting({
-        detected_dialect: "Levantine",
-        sentences: [aSentence()],
-      }),
-    }),
-  );
-
-  // Levantine is not a module this app has, and the value is rendered as a
-  // badge and saved with the translation.
-  assertEquals(body.detected_dialect, "Yemeni");
-});
-
-Deno.test("translate-text defaults an auto request's prompt to Gulf", async () => {
+Deno.test("translate-text asks for dialect glosses of the learner's English", async () => {
   const { bodies, calls } = await call(
     "translate-text",
-    { text: "الجو حلو", dialect: "auto" },
+    { text: "The weather is nice", dialect: "Yemeni" },
     caller({
       "ai.gateway.lovable.dev": emitting({
-        detected_dialect: "Gulf",
         sentences: [aSentence()],
       }),
     }),
@@ -474,9 +451,28 @@ Deno.test("translate-text defaults an auto request's prompt to Gulf", async () =
 
   const i = calls.findIndex((u) => u.includes("ai.gateway"));
   const sent = JSON.parse(bodies[i] ?? "{}") as { messages: Array<{ content: string }> };
-  // "auto" still needs a dialect for the rulebook prompt; the model reports
-  // what it actually detected in the output rather than in the prompt.
-  assertStringIncludes(sent.messages.at(-1)?.content ?? "", "Detect the dialect");
+  const prompt = sent.messages.map((m) => m.content).join("\n");
+  // The learner's dialect is the whole point of the gloss — an MSA breakdown
+  // teaches a different language — and the English must come back verbatim.
+  assertStringIncludes(prompt, "NEVER Modern Standard Arabic");
+  assertStringIncludes(prompt, "verbatim");
+  assertStringIncludes(prompt, "ENGLISH word order");
+});
+
+Deno.test("translate-text defaults an auto request's glosses to Gulf", async () => {
+  const { body } = await call(
+    "translate-text",
+    { text: "The weather is nice", dialect: "auto" },
+    caller({
+      "ai.gateway.lovable.dev": emitting({
+        sentences: [aSentence()],
+      }),
+    }),
+  );
+
+  // An old client can still say "auto"; the page resolves it to the learner's
+  // dialect before calling, and the server falls back to Gulf.
+  assertEquals(body.detected_dialect, "Gulf");
 });
 
 Deno.test("translate-text refuses empty input", async () => {
@@ -509,9 +505,9 @@ Deno.test("translate-text refuses a passage that is too long", async () => {
 Deno.test("translate-text reports an empty translation as 502", async () => {
   const { status, body } = await call(
     "translate-text",
-    { text: "الجو حلو" },
+    { text: "The weather is nice" },
     caller({
-      "ai.gateway.lovable.dev": emitting({ detected_dialect: "Gulf", sentences: [] }),
+      "ai.gateway.lovable.dev": emitting({ sentences: [] }),
     }),
   );
 
@@ -524,7 +520,7 @@ Deno.test("translate-text reports an empty translation as 502", async () => {
 Deno.test("translate-text reports a gateway failure as ai_failed", async () => {
   const { status, body } = await call(
     "translate-text",
-    { text: "الجو حلو" },
+    { text: "The weather is nice" },
     caller({ "ai.gateway.lovable.dev": () => json({ error: "boom" }, 429) }),
   );
 

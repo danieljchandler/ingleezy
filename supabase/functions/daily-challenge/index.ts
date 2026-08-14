@@ -17,7 +17,7 @@ serve(async (req) => {
   if (cap.limited) return cap.response;
 
   try {
-    const { userVocab = [], streakDays = 0, dialect = "Gulf", difficulty = "beginner" } = await req.json();
+    const { userVocab = [], streakDays = 0, dialect = "Gulf", difficulty = "beginner", challengeType } = await req.json();
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
@@ -28,7 +28,14 @@ serve(async (req) => {
 
     const dayOfWeek = new Date().getDay();
     const challengeTypes = ["translate", "fill_blank", "unscramble", "match", "dictation", "culture", "speed"];
-    const todayType = challengeTypes[dayOfWeek];
+    // The weekday picks the type; an explicit request overrides it. That is
+    // for retrying a specific challenge — and it is what lets the tests pin
+    // the word-sourcing chain without inheriting a hidden dependence on which
+    // day of the week they ran (Friday is culture day, the one prompt that
+    // uses no vocabulary at all).
+    const todayType = challengeTypes.includes(challengeType)
+      ? (challengeType as string)
+      : challengeTypes[dayOfWeek];
 
     // Source the challenge words from the learner's own deck rather than the
     // client-supplied `userVocab`, which was the whole curriculum shuffled

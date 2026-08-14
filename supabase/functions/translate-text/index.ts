@@ -1,21 +1,25 @@
-// translate-text — paste Arabic, get a nuanced English breakdown
-// Sentence-by-sentence with literal + natural + optional cultural note,
-// plus a detected_dialect string. Used by /translate page.
+// translate-text — paste ENGLISH, get a nuanced dialect-Arabic breakdown.
+// The learner meets English in the wild (an email, a post, a message) and
+// pastes it here: sentence-by-sentence with a natural dialect translation, a
+// word-for-word Arabic gloss in English order, and a note in their own Arabic
+// when an idiom or register shift would mislead. Used by /translate page.
+//
+// The Brain call stays ARABIC-target: the generated text is the scaffold, so
+// the full dialect machinery (identity, rulebook, MSA scan) guards it.
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { askBrain } from "../_shared/aiBrain.ts";
 import { enforceDailyCap } from "../_shared/usageCap.ts";
-import { LITERAL_GLOSS_RULE, literalSchema } from "../_shared/literalGloss.ts";
-import type { Dialect } from "../_shared/dialectHelpers.ts";
+import { getDialectLabel, type Dialect } from "../_shared/dialectHelpers.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
 
 
 const MAX_CHARS = 4000;
 
 interface SentenceOut {
+  english: string;
   arabic: string;
   literal: string;
-  natural: string;
   note?: string;
 }
 
@@ -44,35 +48,30 @@ serve(async (req) => {
       );
     }
 
-    // Pick a dialect for the brain. When the user says "auto" we still need a
-    // value for the dialect rulebook prompt — default to Gulf and let the
-    // model report the *detected* dialect in its output.
+    // The dialect picks which Arabic the glosses are written in. "auto" from
+    // an old client falls back to Gulf; the page resolves it to the learner's
+    // active dialect before calling.
     const dialectForPrompt: Dialect =
       requestedDialect === "Egyptian" || requestedDialect === "Yemeni" || requestedDialect === "Gulf"
         ? (requestedDialect as Dialect)
         : "Gulf";
+    const dialectLabel = getDialectLabel(dialectForPrompt);
 
-    const systemExtra = `You are a careful Arabic-to-English translator and dialect detector.
-You will receive a passage of colloquial Arabic. Your job:
-1. Detect the dialect: one of "Gulf", "Egyptian", "Yemeni" (default to "Gulf" if unclear).
-2. Split the passage into natural sentences (preserve the user's original Arabic exactly — same words, same order, no MSA rewriting).
-3. For each sentence return:
-   - arabic: the Arabic sentence, verbatim from the input
-   - literal: a close word-for-word English gloss (may sound stiff)
-   - natural: a fluent, idiomatic English translation
-   - note: ONLY when the sentence contains an idiom, cultural reference, register shift, sarcasm, or a word whose surface meaning would mislead an English speaker. Otherwise omit the field.
-${LITERAL_GLOSS_RULE}
-Do not add sentences that aren't in the input. Do not translate to MSA. Return ONLY the structured tool call.`;
+    const systemExtra = `You are a careful English-to-${dialectLabel} translator for an Arabic-speaking English learner.
+You will receive a passage of English. Your job:
+1. Split the passage into natural sentences (preserve the user's original English exactly — same words, same order, no rewriting).
+2. For each sentence return:
+   - english: the English sentence, verbatim from the input
+   - arabic: a fluent, natural ${dialectLabel} translation (authentic spoken dialect, NEVER Modern Standard Arabic / فصحى)
+   - literal: a close word-for-word ${dialectLabel} gloss that preserves the ENGLISH word order and structure. It may sound stiff in Arabic — that is expected; its purpose is to show the learner how the English sentence is built. Never merge it with the natural translation.
+   - note: ONLY when the sentence contains an idiom, phrasal verb, cultural reference, register shift, or sarcasm whose surface meaning would mislead an Arabic speaker — written in ${dialectLabel}. Otherwise omit the field.
+Do not add sentences that aren't in the input. Return ONLY the structured tool call.`;
 
-    const userPrompt =
-      requestedDialect === "auto"
-        ? `Translate the following Arabic. Detect the dialect.\n\n"""\n${rawText}\n"""`
-        : `Translate the following ${requestedDialect} Arabic.\n\n"""\n${rawText}\n"""`;
+    const userPrompt = `Translate the following English for a ${dialectLabel} speaker.\n\n"""\n${rawText}\n"""`;
 
     let brain;
     try {
       brain = await askBrain<{
-        detected_dialect: string;
         sentences: SentenceOut[];
       }>({
         purpose: "translate-text",
@@ -82,37 +81,43 @@ Do not add sentences that aren't in the input. Do not translate to MSA. Return O
         userPrompt,
         maxTokens: 4096,
         temperature: 0.2,
-        skipRepair: true, // we preserve the user's original Arabic verbatim
+        // The generated Arabic is scaffold the learner studies from, so the
+        // MSA scan reads every gloss (natural + literal + note).
+        arabicTextPath: (p) => {
+          const out = p as { sentences?: SentenceOut[] };
+          return (out?.sentences ?? [])
+            .map((s) => [s?.arabic, s?.literal, s?.note].filter(Boolean).join(" "))
+            .join("\n");
+        },
         tool: {
           name: "emit_translation",
           description: "Return the per-sentence nuanced translation.",
           parameters: {
             type: "object",
             properties: {
-              detected_dialect: {
-                type: "string",
-                enum: ["Gulf", "Egyptian", "Yemeni"],
-                description: "The dialect of the source passage.",
-              },
               sentences: {
                 type: "array",
                 items: {
                   type: "object",
                   properties: {
-                    arabic: { type: "string", description: "Sentence verbatim from input." },
-                    literal: literalSchema("sentence"),
-                    natural: { type: "string", description: "Fluent English translation." },
+                    english: { type: "string", description: "Sentence verbatim from input." },
+                    arabic: { type: "string", description: "Fluent dialect-Arabic translation (never MSA)." },
+                    literal: {
+                      type: "string",
+                      description:
+                        "Word-for-word Arabic gloss preserving the English word order; may sound stiff; reveals sentence structure.",
+                    },
                     note: {
                       type: "string",
                       description:
-                        "Optional cultural / idiom / register note. Omit when not needed.",
+                        "Optional idiom / phrasal-verb / register note in the learner's dialect. Omit when not needed.",
                     },
                   },
-                  required: ["arabic", "literal", "natural"],
+                  required: ["english", "arabic", "literal"],
                 },
               },
             },
-            required: ["detected_dialect", "sentences"],
+            required: ["sentences"],
           },
         },
       });
@@ -126,18 +131,15 @@ Do not add sentences that aren't in the input. Do not translate to MSA. Return O
       );
     }
 
-    const out = brain.output ?? { detected_dialect: dialectForPrompt, sentences: [] };
-    const detected = ["Gulf", "Egyptian", "Yemeni"].includes(out.detected_dialect)
-      ? out.detected_dialect
-      : dialectForPrompt;
+    const out = brain.output ?? { sentences: [] };
 
     const sentences: SentenceOut[] = Array.isArray(out.sentences)
       ? out.sentences
-          .filter((s) => s && typeof s.arabic === "string" && s.arabic.trim().length > 0)
+          .filter((s) => s && typeof s.english === "string" && s.english.trim().length > 0)
           .map((s) => ({
-            arabic: String(s.arabic).trim(),
+            english: String(s.english).trim(),
+            arabic: String(s.arabic ?? "").trim(),
             literal: String(s.literal ?? "").trim(),
-            natural: String(s.natural ?? "").trim(),
             ...(typeof s.note === "string" && s.note.trim() ? { note: s.note.trim() } : {}),
           }))
       : [];
@@ -151,7 +153,8 @@ Do not add sentences that aren't in the input. Do not translate to MSA. Return O
 
     return new Response(
       JSON.stringify({
-        detected_dialect: detected,
+        // The key name is historical; it now reports the gloss dialect.
+        detected_dialect: dialectForPrompt,
         sentences,
         used_dialect: requestedDialect,
       }),

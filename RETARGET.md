@@ -237,6 +237,15 @@ generation conditioning.
       (dialect gloss shown, English behind the reveal with phonetic_ar),
       notes in the learner's dialect; english-target Brain call. The jingle
       sings the English in an English pop style.
+      **Translate & Save DONE**: translate-text flipped — paste English,
+      get a per-sentence dialect breakdown (natural Arabic + literal
+      Arabic-in-English-order + idiom notes in dialect); the Brain call
+      stays arabic-target so the full dialect machinery guards the
+      generated scaffold, with the MSA scan reading every gloss. Both
+      pages (Translate, SavedTranslations) render tappable English over
+      RTL glosses with word-save wired through translate-phrase; "auto"
+      dialect now means the learner's own. saved_text_translations
+      stores the flipped sentence shape in the same jsonb.
       (sentence coach DONE — the model for the rest)
 - [ ] TTS: English voices for targets; Arabic TTS kept for scaffold audio
 - [ ] Realtime conversation simulator: KEEP, English persona

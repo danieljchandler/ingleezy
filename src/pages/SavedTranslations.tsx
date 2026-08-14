@@ -15,15 +15,32 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { TappableArabicText } from "@/components/shared/TappableArabicText";
+import { TappableEnglishText } from "@/components/shared/TappableEnglishText";
 import { AskAISentence } from "@/components/shared/AskAISentence";
-import { TranslationPair } from "@/components/shared/TranslationPair";
 import { useSavedTranslations, type SavedTranslation } from "@/hooks/useSavedTranslations";
+import { useAddUserVocabulary } from "@/hooks/useUserVocabulary";
 import { toast } from "sonner";
 import { ArrowLeft, BookOpen, ChevronRight, Info, Loader2, Trash2 } from "lucide-react";
 
 const SavedTranslations = () => {
   const { items, loading, remove } = useSavedTranslations();
+  const addVocab = useAddUserVocabulary();
+
+  const saveWord = (word: { english: string; arabic: string; sentenceText?: string; sentenceEnglish?: string }) => {
+    addVocab.mutate(
+      {
+        word_english: word.english,
+        word_arabic: word.arabic,
+        source: "translate-text",
+        sentence_text: word.sentenceText || undefined,
+        sentence_english: word.sentenceEnglish || undefined,
+      },
+      {
+        onSuccess: () => toast.success("Saved to My Words!"),
+        onError: () => toast.error("Failed to save"),
+      },
+    );
+  };
   const [active, setActive] = useState<SavedTranslation | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
@@ -135,26 +152,28 @@ const SavedTranslations = () => {
             {active.sentences.map((s, i) => (
               <Card key={i} className="overflow-hidden">
                 <CardContent className="p-4 space-y-3">
-                  <TappableArabicText
-                    text={s.arabic}
-                    vocabulary={[]}
-                    source="translate-text"
-                    sentenceContext={{ arabic: s.arabic, english: s.natural }}
-                  />
-                  <TranslationPair
-                    variant="grid"
-                    literal={s.literal}
-                    natural={s.natural}
-                    className="pt-1 border-t border-border/40"
-                  />
+                  <p className="font-english text-lg leading-relaxed">
+                    <TappableEnglishText
+                      text={s.english}
+                      sentenceArabic={s.arabic}
+                      source="translate-text"
+                      onSaveWord={saveWord}
+                    />
+                  </p>
+                  <div className="pt-1 border-t border-border/40 space-y-1">
+                    <p dir="rtl" className="font-arabic text-base text-foreground">{s.arabic}</p>
+                    {s.literal && (
+                      <p dir="rtl" className="font-arabic text-sm text-muted-foreground/80">{s.literal}</p>
+                    )}
+                  </div>
                   {s.note && (
                     <div className="rounded-md bg-amber-50 border border-amber-200 p-2.5 flex gap-2 text-xs text-amber-900 dark:bg-amber-950/30 dark:border-amber-900/40 dark:text-amber-200">
                       <Info className="h-3.5 w-3.5 mt-0.5 shrink-0" />
-                      <p>{s.note}</p>
+                      <p dir="rtl" className="font-arabic flex-1">{s.note}</p>
                     </div>
                   )}
                   <div className="flex justify-start pt-1 border-t border-border/40">
-                    <AskAISentence arabic={s.arabic} english={s.natural} variant="chip" />
+                    <AskAISentence arabic={s.arabic} english={s.english} variant="chip" />
                   </div>
                 </CardContent>
               </Card>

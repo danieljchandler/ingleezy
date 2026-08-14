@@ -413,7 +413,10 @@ Deno.test("daily-challenge returns a challenge", async () => {
 Deno.test("daily-challenge sources its words from the learner's deck", async () => {
   const { bodies, calls } = await call(
     "daily-challenge",
-    { dialect: "Gulf", userVocab: [{ word_arabic: "كتاب", word_english: "book" }] },
+    // challengeType pinned: the weekday default rotates through "culture",
+    // which is the one prompt that interpolates no vocabulary — without the
+    // pin this test fails every Friday.
+    { dialect: "Gulf", challengeType: "translate", userVocab: [{ word_arabic: "كتاب", word_english: "book" }] },
     caller({
       "ai.gateway.lovable.dev": speaking(aChallenge),
       "/rest/v1/user_vocabulary": () =>
@@ -439,7 +442,7 @@ Deno.test("daily-challenge sources its words from the learner's deck", async () 
 Deno.test("daily-challenge falls back to the client's words when the deck is empty", async () => {
   const { bodies, calls } = await call(
     "daily-challenge",
-    { dialect: "Gulf", userVocab: [{ word_arabic: "كتاب", word_english: "book" }] },
+    { dialect: "Gulf", challengeType: "translate", userVocab: [{ word_arabic: "كتاب", word_english: "book" }] },
     caller({ "ai.gateway.lovable.dev": speaking(aChallenge) }),
   );
 
@@ -480,7 +483,10 @@ Deno.test("daily-challenge asks about the right culture per dialect", async () =
 Deno.test("daily-challenge survives an unreadable learner profile", async () => {
   const { status } = await call(
     "daily-challenge",
-    { dialect: "Gulf", userVocab: [{ word_arabic: "كتاب", word_english: "book" }] },
+    // challengeType pinned: the weekday default rotates through "culture",
+    // which is the one prompt that interpolates no vocabulary — without the
+    // pin this test fails every Friday.
+    { dialect: "Gulf", challengeType: "translate", userVocab: [{ word_arabic: "كتاب", word_english: "book" }] },
     caller({
       "ai.gateway.lovable.dev": speaking(aChallenge),
       "/rest/v1/user_vocabulary": () => json({ message: "denied" }, 403),

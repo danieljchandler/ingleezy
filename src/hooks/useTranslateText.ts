@@ -2,13 +2,18 @@ import { useCallback, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 export interface TranslatedSentence {
+  /** The English sentence, verbatim from the pasted text. */
+  english: string;
+  /** Its natural dialect-Arabic translation. */
   arabic: string;
+  /** Word-for-word Arabic gloss preserving the English word order. */
   literal: string;
-  natural: string;
+  /** Optional idiom/register note in the learner's dialect. */
   note?: string;
 }
 
 export interface TranslateTextResult {
+  /** Historical key name: the dialect the glosses are written in. */
   detected_dialect: "Gulf" | "Egyptian" | "Yemeni";
   sentences: TranslatedSentence[];
   used_dialect: string;

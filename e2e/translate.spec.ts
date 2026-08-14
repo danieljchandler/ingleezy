@@ -1,23 +1,22 @@
 import { expect, test, type Page } from "./support/fixtures";
-import { aUserVocabulary, vocabId, TEST_USER_ID } from "../src/test/support/factories";
+import { TEST_USER_ID } from "../src/test/support/factories";
 import type { SupabaseBackend } from "../src/test/support/server/handler";
 
 /**
- * Translate & Save, and the tap-to-save component underneath it.
+ * Translate & Save, flipped: paste the English you met in the wild — a
+ * message, an email — and read it back sentence-by-sentence in your own
+ * dialect, with a word-order gloss and a note when an idiom would mislead.
  *
- * `TappableArabicText` is the single most reused piece of the app — Translate,
- * Reading, Souq News, the story player and the transcript view all render Arabic
- * through it, and it is the only route by which a word gets into My Words from
- * free text. A bug in it therefore breaks vocabulary capture everywhere at once,
- * which is why it gets asserted here through a real page rather than in
- * isolation.
+ * The tap-to-save path underneath is TappableEnglishText: every word of the
+ * English is a lookup target glossed through translate-phrase, and the only
+ * route by which a word gets into My Words from free text on this page.
  *
- * Both `translate-text` and `word-enrichment` are AI calls, so the specs also
- * pin what happens when they fail: a page that renders an empty result on a
- * failed translation looks like the text had nothing in it.
+ * `translate-text` is an AI call, so the specs also pin what happens when it
+ * fails: a page that renders an empty result on a failed translation looks
+ * like the text had nothing in it.
  */
 
-const ARABIC = "شخبارك اليوم";
+const ENGLISH_TEXT = "How are you today? Come have coffee with us.";
 
 /** The two-sentence response the translate function returns. */
 const TRANSLATION = {
@@ -25,15 +24,15 @@ const TRANSLATION = {
   used_dialect: "Gulf",
   sentences: [
     {
-      arabic: "شخبارك اليوم",
-      literal: "what-your-news today",
-      natural: "How are you today?",
-      note: "شخبارك is Gulf-specific; Egyptians say إزيك.",
+      english: "How are you today?",
+      arabic: "شخبارك اليوم؟",
+      literal: "كيف انت اليوم؟",
+      note: "تحية يومية بين الأصحاب.",
     },
     {
-      arabic: "تعال نشرب قهوة",
-      literal: "come we-drink coffee",
-      natural: "Come have coffee with us",
+      english: "Come have coffee with us.",
+      arabic: "تعال نشرب قهوة معنا.",
+      literal: "تعال خذ قهوة معنا.",
     },
   ],
 };
@@ -43,7 +42,7 @@ function stubTranslate(backend: SupabaseBackend, response: unknown = TRANSLATION
 }
 
 /** Paste text and run the translation. */
-async function translate(page: Page, text = ARABIC) {
+async function translate(page: Page, text = ENGLISH_TEXT) {
   await page.getByRole("textbox").fill(text);
   await page.getByRole("button", { name: /^translate$/i }).click();
 }
@@ -54,14 +53,16 @@ test.describe("translating a passage", () => {
     stubTranslate(backend);
   });
 
-  test("sends the text and the chosen dialect", async ({ page, backend }) => {
+  test("sends the text and the learner's dialect for the glosses", async ({ page, backend }) => {
     await page.goto("/translate");
     await translate(page);
 
-    await expect(page.getByText("How are you today?")).toBeVisible();
+    await expect(page.getByText("How are you today?").first()).toBeVisible();
+    // "My dialect" resolves to the active dialect before the call — there is
+    // nothing to auto-detect about pasted English.
     expect(backend.lastCallTo("translate-text")?.body).toMatchObject({
-      text: ARABIC,
-      dialect: "auto",
+      text: ENGLISH_TEXT,
+      dialect: "Gulf",
     });
   });
 
@@ -71,36 +72,37 @@ test.describe("translating a passage", () => {
     await page.getByRole("option", { name: "Egyptian" }).click();
     await translate(page);
 
-    await expect(page.getByText("How are you today?")).toBeVisible();
-    // Auto-detect is a guess; an explicit pick has to override it, or a learner
-    // studying Egyptian keeps getting Gulf glosses.
+    await expect(page.getByText("How are you today?").first()).toBeVisible();
+    // An explicit pick has to override the default, or a learner studying with
+    // Egyptian relatives keeps getting Gulf glosses.
     expect(backend.lastCallTo("translate-text")?.body).toMatchObject({ dialect: "Egyptian" });
   });
 
-  test("shows a breakdown per sentence, literal and natural", async ({ page }) => {
+  test("shows a breakdown per sentence, natural and literal", async ({ page }) => {
     await page.goto("/translate");
     await translate(page);
 
     // Both readings, not just the fluent one: the literal is what makes the
-    // grammar visible, and it is the reason this page exists.
-    await expect(page.getByText("what-your-news today")).toBeVisible();
-    await expect(page.getByText("How are you today?")).toBeVisible();
-    await expect(page.getByText("come we-drink coffee")).toBeVisible();
-    await expect(page.getByText("Come have coffee with us")).toBeVisible();
+    // English grammar visible, and it is the reason this page exists.
+    await expect(page.getByText("How are you today?").first()).toBeVisible();
+    await expect(page.getByText("شخبارك اليوم؟")).toBeVisible();
+    await expect(page.getByText("كيف انت اليوم؟")).toBeVisible();
+    await expect(page.getByText("Come have coffee with us.").first()).toBeVisible();
+    await expect(page.getByText("تعال نشرب قهوة معنا.")).toBeVisible();
   });
 
-  test("surfaces the cultural note when there is one", async ({ page }) => {
+  test("surfaces the idiom note when there is one", async ({ page }) => {
     await page.goto("/translate");
     await translate(page);
 
-    await expect(page.getByText(/Gulf-specific/)).toBeVisible();
+    await expect(page.getByText("تحية يومية بين الأصحاب.")).toBeVisible();
   });
 
-  test("reports the dialect it detected", async ({ page }) => {
+  test("names the gloss dialect", async ({ page }) => {
     await page.goto("/translate");
     await translate(page);
 
-    await expect(page.getByText("Detected: Gulf")).toBeVisible();
+    await expect(page.getByText("Glossed in Gulf")).toBeVisible();
   });
 
   test("refuses to call the model with nothing to translate", async ({ page, backend }) => {
@@ -114,7 +116,7 @@ test.describe("translating a passage", () => {
 
   test("refuses text past the length the model accepts", async ({ page, backend }) => {
     await page.goto("/translate");
-    await page.getByRole("textbox").fill("ا".repeat(4100));
+    await page.getByRole("textbox").fill("a".repeat(4100));
     await page.getByRole("button", { name: /^translate$/i }).click();
 
     await expect(page.getByText(/too long/i)).toBeVisible();
@@ -123,7 +125,7 @@ test.describe("translating a passage", () => {
 
   test("fills the box from an example", async ({ page }) => {
     await page.goto("/translate");
-    await page.getByRole("button", { name: /Egyptian example/i }).click();
+    await page.getByRole("button", { name: /Email example/i }).click();
 
     await expect(page.getByRole("textbox")).not.toHaveValue("");
   });
@@ -131,7 +133,7 @@ test.describe("translating a passage", () => {
   test("clears the text and the result together", async ({ page }) => {
     await page.goto("/translate");
     await translate(page);
-    await expect(page.getByText("How are you today?")).toBeVisible();
+    await expect(page.getByText("How are you today?").first()).toBeVisible();
 
     await page.getByRole("button", { name: /clear/i }).click();
 
@@ -158,8 +160,8 @@ test.describe("when the translator fails", () => {
     await page.goto("/translate");
     await translate(page);
 
-    await expect(page.getByText(/Detected:/)).toHaveCount(0);
-    await expect(page.getByRole("textbox")).toHaveValue(ARABIC);
+    await expect(page.getByText(/Glossed in/)).toHaveCount(0);
+    await expect(page.getByRole("textbox")).toHaveValue(ENGLISH_TEXT);
   });
 
   test("flattens the daily cap into a message that helps nobody", async ({ page, backend }) => {
@@ -198,7 +200,7 @@ test.describe("saving a translation", () => {
 
     const saved = db.rows("saved_text_translations")[0];
     expect(saved.user_id).toBe(TEST_USER_ID);
-    expect(saved.source_text).toBe(ARABIC);
+    expect(saved.source_text).toBe(ENGLISH_TEXT);
     expect(saved.detected_dialect).toBe("Gulf");
     // The sentences are the work; storing only the source would mean paying for
     // the model again to read it back.
@@ -224,7 +226,7 @@ test.describe("saving a translation", () => {
     await page.getByRole("button", { name: /save translation/i }).click();
     await expect(page.getByRole("button", { name: /^saved$/i })).toBeVisible();
 
-    expect(db.rows("saved_text_translations")[0].title).toBe(ARABIC);
+    expect(db.rows("saved_text_translations")[0].title).toBe(ENGLISH_TEXT);
   });
 
   test("will not save the same translation twice", async ({ page, db }) => {
@@ -265,8 +267,8 @@ test.describe("the saved-translations library", () => {
   const savedRow = (over: Record<string, unknown> = {}) => ({
     id: "cccccccc-0000-4000-8000-000000000001",
     user_id: TEST_USER_ID,
-    title: "شخبارك اليوم",
-    source_text: ARABIC,
+    title: "How are you today?",
+    source_text: ENGLISH_TEXT,
     source_dialect: null,
     detected_dialect: "Gulf",
     sentences: TRANSLATION.sentences,
@@ -283,7 +285,7 @@ test.describe("the saved-translations library", () => {
     db.seed("saved_text_translations", [savedRow()]);
     await page.goto("/translate/saved");
 
-    await expect(page.getByText("شخبارك اليوم").first()).toBeVisible();
+    await expect(page.getByText("How are you today?").first()).toBeVisible();
     await expect(page.getByText(/2 sentences/)).toBeVisible();
   });
 
@@ -295,8 +297,8 @@ test.describe("the saved-translations library", () => {
 
     // Reading a saved translation must not re-invoke the model; the whole
     // breakdown was stored for exactly this.
-    await expect(page.getByText("How are you today?")).toBeVisible();
-    await expect(page.getByText("what-your-news today")).toBeVisible();
+    await expect(page.getByText("شخبارك اليوم؟")).toBeVisible();
+    await expect(page.getByText("كيف انت اليوم؟")).toBeVisible();
   });
 
   test("points an empty library at the translator", async ({ page, db }) => {
@@ -334,104 +336,65 @@ test.describe("the saved-translations library", () => {
 
     await page.goto("/translate/saved");
 
-    await expect(page.getByText("شخبارك اليوم").first()).toBeVisible();
+    await expect(page.getByText("How are you today?").first()).toBeVisible();
     await expect(page.getByText("لغيري")).toHaveCount(0);
   });
 });
 
 test.describe("tapping a word to save it", () => {
-  const ENRICHMENT = {
-    definition: "your news / how are you",
-    literal: "what is your news",
-    root: "خ ب ر",
-    transliteration: "shakhbarak",
-    uses: [],
-  };
-
   test.beforeEach(async ({ signInAs, backend, db }) => {
     await signInAs("free");
     stubTranslate(backend);
-    backend.stubFunction("word-enrichment", ENRICHMENT);
+    backend.stubFunction("translate-phrase", { translation: "قهوة" });
     db.seed("user_vocabulary", []);
   });
 
-  test("looks the word up in the sentence it appeared in", async ({ page, backend }) => {
+  test("looks the word up in its dialect, in context", async ({ page, backend }) => {
     await page.goto("/translate");
     await translate(page);
 
-    await page.getByRole("button", { name: /Look up/ }).first().click();
+    await page.getByRole("button", { name: "coffee", exact: true }).click();
 
-    await expect(page.getByText("your news / how are you")).toBeVisible();
-    // The surrounding sentence is what lets the model disambiguate; without it
-    // the gloss is a dictionary entry rather than a reading aid.
-    expect(backend.lastCallTo("word-enrichment")?.body).toMatchObject({
+    await expect(page.getByText("قهوة", { exact: true })).toBeVisible();
+    // A single-word lookup through the dialect-aware translator, not a
+    // dictionary: the learner's dialect decides which Arabic comes back.
+    expect(backend.lastCallTo("translate-phrase")?.body).toMatchObject({
+      phrase: "coffee",
       dialect: "Gulf",
-      sentenceArabic: TRANSLATION.sentences[0].arabic,
-      sentenceEnglish: TRANSLATION.sentences[0].natural,
+      mode: "word",
+      direction: "en_to_ar",
     });
   });
 
-  test("saves the word with its root and transliteration", async ({ page, db }) => {
+  test("saves the word with the sentence it appeared in", async ({ page, db }) => {
     await page.goto("/translate");
     await translate(page);
 
-    await page.getByRole("button", { name: /Look up/ }).first().click();
-    await expect(page.getByText("your news / how are you")).toBeVisible();
+    await page.getByRole("button", { name: "coffee", exact: true }).click();
+    await expect(page.getByText("قهوة", { exact: true })).toBeVisible();
     await page.getByRole("button", { name: /save to my words/i }).click();
 
     await expect.poll(() => db.rows("user_vocabulary").length, { timeout: 10_000 }).toBe(1);
 
     const word = db.rows("user_vocabulary")[0];
-    expect(word.word_english).toBe("your news / how are you");
-    expect(word.root).toBe("خ ب ر");
-    expect(word.transliteration).toBe("shakhbarak");
+    expect(word.word_english).toBe("coffee");
+    expect(word.word_arabic).toBe("قهوة");
     // The sentence travels with the card, so the review shows the word in use
     // rather than stranded.
-    expect(word.sentence_text).toBe(TRANSLATION.sentences[0].arabic);
+    expect(word.sentence_english).toBe("Come have coffee with us.");
     expect(word.source).toBe("translate-text");
   });
 
-  test("says the word is already saved rather than duplicating it", async ({ page, db }) => {
-    db.seed("user_vocabulary", [
-      aUserVocabulary({ id: vocabId(0), word_arabic: "شخبارك", word_english: "how are you" }),
-    ]);
+  test("still shows the breakdown when the lookup fails", async ({ page, backend }) => {
+    backend.stubFunctionFailure("translate-phrase");
 
     await page.goto("/translate");
     await translate(page);
-    await page.getByRole("button", { name: /Look up/ }).first().click();
-    await expect(page.getByText("your news / how are you")).toBeVisible();
-
-    db.failWrites("user_vocabulary", 409, {
-      code: "23505",
-      message: 'duplicate key value violates unique constraint "user_vocabulary_user_word_key"',
-      details: null,
-      hint: null,
-    });
-    await page.getByRole("button", { name: /save to my words/i }).click();
-
-    // Recording current behaviour. A duplicate is not an error the learner
-    // caused — the word is simply already in their deck — and
-    // TappableArabicText has an "Already in your words" branch for it. That
-    // branch is dead: useUserVocabulary turns the 23505 into the Arabic message
-    // "هذه الكلمة موجودة بالفعل في قائمتك", and the branch tests
-    // `err.message.includes("duplicate")`, which that string does not. So the
-    // learner is told the save failed when nothing failed.
-    //
-    // This test fails once the two agree on how a duplicate is signalled.
-    await expect(page.getByText(/failed to save/i)).toBeVisible();
-    await expect(page.getByText(/already in your words/i)).toHaveCount(0);
-    expect(db.rows("user_vocabulary")).toHaveLength(1);
-  });
-
-  test("still shows the word when enrichment fails", async ({ page, backend }) => {
-    backend.stubFunctionFailure("word-enrichment");
-
-    await page.goto("/translate");
-    await translate(page);
-    await page.getByRole("button", { name: /Look up/ }).first().click();
+    await page.getByRole("button", { name: "coffee", exact: true }).click();
 
     // The gloss is best-effort; losing it must not take the sentence breakdown
     // down with it.
-    await expect(page.getByText("How are you today?")).toBeVisible();
+    await expect(page.getByText(/no translation available/i)).toBeVisible();
+    await expect(page.getByText("How are you today?").first()).toBeVisible();
   });
 });

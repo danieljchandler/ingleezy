@@ -28,16 +28,16 @@ const TABLE = "saved_text_translations";
  * for the other.
  */
 const aSentence = () => ({
+  english: "How is it going?",
   arabic: "شخبارك؟",
-  natural: "How are you?",
-  literal: "what news-your?",
+  literal: "كيف هو ماشي؟",
 });
 
 const aSavedTranslation = (over: Record<string, unknown> = {}) => ({
   id: "saved-1",
   user_id: TEST_USER_ID,
   title: "A note from a friend",
-  source_text: "شخبارك؟",
+  source_text: "How is it going?",
   source_dialect: "Gulf",
   detected_dialect: "Gulf",
   sentences: [aSentence()],
@@ -145,7 +145,7 @@ describe("saving one", () => {
     await ready(backend);
 
     await act(async () => {
-      await result.current.save({ source_text: "شخبارك؟", sentences: [aSentence()] });
+      await result.current.save({ source_text: "How is it going?", sentences: [aSentence()] });
     });
 
     // Prepended locally rather than refetched: the learner is looking at the
@@ -153,7 +153,7 @@ describe("saving one", () => {
     expect(result.current.items).toHaveLength(1);
     expect(backend.db.lastWriteTo(TABLE)?.payload[0]).toMatchObject({
       user_id: TEST_USER_ID,
-      source_text: "شخبارك؟",
+      source_text: "How is it going?",
     });
   });
 
@@ -193,7 +193,7 @@ describe("saving one", () => {
 
     await act(async () => {
       await result.current.save({
-        source_text: "شخبارك؟",
+        source_text: "How is it going?",
         sentences: [],
         title: "Message from Ahmed",
       });
@@ -210,7 +210,7 @@ describe("saving one", () => {
 
     await act(async () => {
       await result.current.save({
-        source_text: "شخبارك؟",
+        source_text: "How is it going?",
         sentences: [],
         source_dialect: "Gulf",
         detected_dialect: "Egyptian",
@@ -230,7 +230,7 @@ describe("saving one", () => {
     await ready(backend);
 
     await act(async () => {
-      await result.current.save({ source_text: "شخبارك؟", sentences: [] });
+      await result.current.save({ source_text: "How is it going?", sentences: [] });
     });
 
     expect(backend.db.lastWriteTo(TABLE)?.payload[0]).toMatchObject({
@@ -249,7 +249,7 @@ describe("saving one", () => {
     // Translating without an account is allowed; keeping something needs
     // somewhere to keep it.
     await expect(
-      harness.result.current.save({ source_text: "شخبارك؟", sentences: [] }),
+      harness.result.current.save({ source_text: "How is it going?", sentences: [] }),
     ).rejects.toThrow("Not signed in");
   });
 
@@ -259,7 +259,7 @@ describe("saving one", () => {
     backend.db.failWrites(TABLE, 403, { message: "denied" });
 
     await expect(
-      result.current.save({ source_text: "شخبارك؟", sentences: [] }),
+      result.current.save({ source_text: "How is it going?", sentences: [] }),
     ).rejects.toBeTruthy();
 
     // The optimistic prepend happens after the insert resolves, so a failed
@@ -306,7 +306,7 @@ describe("reopening one", () => {
 
     // The detail route loads directly by id rather than searching the list, so
     // a shared or bookmarked URL works without visiting the index first.
-    expect(fetched?.source_text).toBe("شخبارك؟");
+    expect(fetched?.source_text).toBe("How is it going?");
   });
 
   it("returns nothing for an id that is not there", async () => {

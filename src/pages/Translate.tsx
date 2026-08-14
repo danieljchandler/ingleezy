@@ -14,11 +14,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { InfoHint } from "@/components/InfoHint";
-import { TappableArabicText } from "@/components/shared/TappableArabicText";
+import { TappableEnglishText } from "@/components/shared/TappableEnglishText";
 import { AskAISentence } from "@/components/shared/AskAISentence";
-import { TranslationPair } from "@/components/shared/TranslationPair";
 import { useTranslateText } from "@/hooks/useTranslateText";
 import { useSavedTranslations } from "@/hooks/useSavedTranslations";
+import { useAddUserVocabulary } from "@/hooks/useUserVocabulary";
 import { useDialect } from "@/contexts/DialectContext";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -29,18 +29,18 @@ type DialectOpt = "auto" | "Gulf" | "Egyptian" | "Yemeni";
 
 const EXAMPLES: { label: string; text: string }[] = [
   {
-    label: "Gulf",
-    text: "شخبارك؟ والله زمان ما شفتك. تعال نشرب قهوة بكره الصبح إن شاء الله.",
+    label: "Message",
+    text: "Hey, long time no see! Wanna grab a coffee tomorrow morning? My treat.",
   },
   {
-    label: "Egyptian",
-    text: "إزيك يا صاحبي؟ كنت فاكرك. تعالى نتقابل بكرة في وسط البلد ونتغدى سوا.",
+    label: "Email",
+    text: "Thanks for reaching out. I'll get back to you by the end of the week once I've had a chance to look into it.",
   },
 ];
 
 const PAGE_HINT = {
   title: "Translate & Save",
-  body: "Paste any Arabic text — Gulf, Egyptian, or Yemeni — and get a sentence-by-sentence breakdown with literal and natural translations, plus cultural notes when it matters. Tap any word to save it to My Words.",
+  body: "Paste any English text — a message, an email, a post — and get a sentence-by-sentence breakdown in your dialect, with a word-order gloss and notes when an idiom would mislead. Tap any word to save it to My Words.",
 };
 
 const Translate = () => {
@@ -48,6 +48,27 @@ const Translate = () => {
   const { isAuthenticated } = useAuth();
   const { translate, loading, result, error, reset } = useTranslateText();
   const { save } = useSavedTranslations();
+  const addVocab = useAddUserVocabulary();
+
+  const saveWord = (word: { english: string; arabic: string; sentenceText?: string; sentenceEnglish?: string }) => {
+    if (!isAuthenticated) {
+      toast.error("Sign in to save words");
+      return;
+    }
+    addVocab.mutate(
+      {
+        word_english: word.english,
+        word_arabic: word.arabic,
+        source: "translate-text",
+        sentence_text: word.sentenceText || undefined,
+        sentence_english: word.sentenceEnglish || undefined,
+      },
+      {
+        onSuccess: () => toast.success("Saved to My Words!"),
+        onError: () => toast.error("Failed to save"),
+      },
+    );
+  };
 
   const [text, setText] = useState("");
   const [dialectOpt, setDialectOpt] = useState<DialectOpt>("auto");
@@ -78,7 +99,7 @@ const Translate = () => {
   const onSubmit = async () => {
     const trimmed = text.trim();
     if (!trimmed) {
-      toast.error("Paste some Arabic text first");
+      toast.error("Paste some English text first");
       return;
     }
     if (trimmed.length > 4000) {
@@ -87,7 +108,9 @@ const Translate = () => {
     }
     try {
       setSavedId(null);
-      await translate(trimmed, dialectOpt);
+      // "auto" means the learner's own dialect — there is nothing to detect
+      // about pasted English.
+      await translate(trimmed, dialectOpt === "auto" ? (activeDialect as DialectOpt) : dialectOpt);
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Translation failed";
       toast.error(msg);
@@ -127,22 +150,21 @@ const Translate = () => {
         <Card>
           <CardContent className="p-4 space-y-3">
             <Textarea
-              dir="rtl"
               value={text}
               onChange={(e) => setText(e.target.value)}
-              placeholder="ألصق نصاً عربياً هنا..."
-              className="min-h-[140px] text-base leading-relaxed"
+              placeholder="Paste English text here…"
+              className="min-h-[140px] text-base leading-relaxed font-english"
               maxLength={4200}
             />
             <div className="flex items-center justify-between gap-3 flex-wrap">
               <div className="flex items-center gap-2">
-                <span className="text-xs text-muted-foreground">Dialect</span>
+                <span className="text-xs text-muted-foreground">Gloss dialect</span>
                 <Select value={dialectOpt} onValueChange={(v) => setDialectOpt(v as DialectOpt)}>
                   <SelectTrigger className="h-8 w-[140px] text-xs">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="auto">Auto-detect</SelectItem>
+                    <SelectItem value="auto">My dialect</SelectItem>
                     <SelectItem value="Gulf">Gulf</SelectItem>
                     <SelectItem value="Egyptian">Egyptian</SelectItem>
                     <SelectItem value="Yemeni">Yemeni</SelectItem>
@@ -202,37 +224,39 @@ const Translate = () => {
           <div className="space-y-3">
             <div className="flex items-center justify-between gap-3 flex-wrap">
               <Badge variant="secondary" className="text-xs">
-                Detected: {detectedDialect}
+                Glossed in {detectedDialect}
               </Badge>
               <p className="text-xs text-muted-foreground flex items-center gap-1">
                 <BookmarkPlus className="h-3.5 w-3.5" />
-                Tap any Arabic word to save it
+                Tap any English word to save it
               </p>
             </div>
 
             {result.sentences.map((s, i) => (
               <Card key={i} className="overflow-hidden">
                 <CardContent className="p-4 space-y-3">
-                  <TappableArabicText
-                    text={s.arabic}
-                    vocabulary={exampleSentenceVocab}
-                    source="translate-text"
-                    sentenceContext={{ arabic: s.arabic, english: s.natural }}
-                  />
-                  <TranslationPair
-                    variant="grid"
-                    literal={s.literal}
-                    natural={s.natural}
-                    className="pt-1 border-t border-border/40"
-                  />
+                  <p className="font-english text-lg leading-relaxed">
+                    <TappableEnglishText
+                      text={s.english}
+                      sentenceArabic={s.arabic}
+                      source="translate-text"
+                      onSaveWord={saveWord}
+                    />
+                  </p>
+                  <div className="pt-1 border-t border-border/40 space-y-1">
+                    <p dir="rtl" className="font-arabic text-base text-foreground">{s.arabic}</p>
+                    {s.literal && (
+                      <p dir="rtl" className="font-arabic text-sm text-muted-foreground/80">{s.literal}</p>
+                    )}
+                  </div>
                   {s.note && (
                     <div className="rounded-md bg-amber-50 border border-amber-200 p-2.5 flex gap-2 text-xs text-amber-900 dark:bg-amber-950/30 dark:border-amber-900/40 dark:text-amber-200">
                       <Info className="h-3.5 w-3.5 mt-0.5 shrink-0" />
-                      <p>{s.note}</p>
+                      <p dir="rtl" className="font-arabic flex-1">{s.note}</p>
                     </div>
                   )}
                   <div className="flex justify-start pt-1 border-t border-border/40">
-                    <AskAISentence arabic={s.arabic} english={s.natural} variant="chip" />
+                    <AskAISentence arabic={s.arabic} english={s.english} variant="chip" />
                   </div>
                 </CardContent>
               </Card>

@@ -80,17 +80,16 @@ async function call(
 Deno.test("translate-text returns a sentence breakdown the page can render", async () => {
   const { status, body } = await call(
     "translate-text",
-    { text: "شخبارك اليوم", dialect: "auto" },
+    { text: "How are you today?", dialect: "Gulf" },
     {
       ...allowed(),
       ...modelReturns({
-        detected_dialect: "Gulf",
         sentences: [
           {
-            arabic: "شخبارك اليوم",
-            literal: "what-your-news today",
-            natural: "How are you today?",
-            note: "Gulf-specific greeting.",
+            english: "How are you today?",
+            arabic: "شخبارك اليوم؟",
+            literal: "كيف انت اليوم؟",
+            note: "تحية يومية عادية.",
           },
         ],
       }),
@@ -98,52 +97,33 @@ Deno.test("translate-text returns a sentence breakdown the page can render", asy
   );
 
   assertEquals(status, 200);
-  // src/hooks/useTranslateText.ts reads exactly these three.
+  // src/hooks/useTranslateText.ts reads exactly these.
   assertEquals(body.detected_dialect, "Gulf");
-  assertEquals(body.used_dialect, "auto");
+  assertEquals(body.used_dialect, "Gulf");
   const sentences = body.sentences as Array<Record<string, string>>;
   assertEquals(sentences.length, 1);
-  assertEquals(sentences[0].natural, "How are you today?");
-  assertEquals(sentences[0].literal, "what-your-news today");
+  assertEquals(sentences[0].arabic, "شخبارك اليوم؟");
+  assertEquals(sentences[0].literal, "كيف انت اليوم؟");
 });
 
-Deno.test("translate-text keeps the learner's Arabic verbatim", async () => {
-  const original = "تعال نشرب قهوة";
+Deno.test("translate-text keeps the learner's English verbatim", async () => {
+  const original = "Wanna grab a coffee?";
   const { body } = await call(
     "translate-text",
     { text: original, dialect: "Gulf" },
     {
       ...allowed(),
       ...modelReturns({
-        detected_dialect: "Gulf",
-        sentences: [{ arabic: original, literal: "come we-drink coffee", natural: "Come for coffee" }],
+        sentences: [{ english: original, arabic: "تعال نشرب قهوة؟", literal: "تبي تاخذ قهوة؟" }],
       }),
     },
   );
 
   // The page renders this string as tappable words and saves them to My Words.
-  // A model that quietly rewrote it into MSA would put words in the learner's
+  // A model that quietly tidied the English would put words in the learner's
   // deck that they never read.
   const sentences = body.sentences as Array<Record<string, string>>;
-  assertEquals(sentences[0].arabic, original);
-});
-
-Deno.test("translate-text drops a dialect the app does not support", async () => {
-  const { body } = await call(
-    "translate-text",
-    { text: "شخبارك", dialect: "auto" },
-    {
-      ...allowed(),
-      ...modelReturns({
-        detected_dialect: "Levantine",
-        sentences: [{ arabic: "شخبارك", literal: "x", natural: "y" }],
-      }),
-    },
-  );
-
-  // DialectContext knows three dialects. Passing "Levantine" through would
-  // reach the client as a label nothing can act on.
-  assertEquals(body.detected_dialect, "Gulf");
+  assertEquals(sentences[0].english, original);
 });
 
 Deno.test("translate-text refuses an empty passage without calling the model", async () => {
