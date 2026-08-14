@@ -118,7 +118,7 @@ describe("the weekly board", () => {
     await waitFor(() => expect(result.current.data).toEqual([]));
   });
 
-  it("calls a learner with no display name Anonymous", async () => {
+  it("calls a learner with no display name مجهول", async () => {
     const { result } = render(() => useWeeklyLeaderboard(), (backend) => {
       seedBoard(backend);
       backend.db.seed("leaderboard_profiles", [
@@ -129,7 +129,7 @@ describe("the weekly board", () => {
     await waitFor(() => expect(result.current.data).toHaveLength(1));
     // A blank row is unreadable, and falling back to the user id would publish
     // an identifier nobody chose to share.
-    expect(result.current.data?.[0].display_name).toBe("Anonymous");
+    expect(result.current.data?.[0].display_name).toBe("مجهول");
   });
 
   it("names a verified institution", async () => {

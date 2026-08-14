@@ -47,7 +47,7 @@ function buildEntries(
       : null;
     return {
       user_id: xp.user_id,
-      display_name: profile?.display_name || "Anonymous",
+      display_name: profile?.display_name || "مجهول",
       avatar_url: profile?.avatar_url || null,
       total_xp: xp.total_xp,
       level: xp.level,

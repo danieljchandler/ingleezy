@@ -31,11 +31,11 @@ export const SUBSCRIPTION_TIERS = {
     priceId: 'price_1T8t8sHVAO3F9uuDOpwSh2zQ',
     productId: 'prod_U77NfmTFN3mabx',
     features: [
-      'AI-powered Transcribe tool',
-      'Meme Analyzer',
-      'How Do I Say feature',
-      '100 vocabulary words',
-      'Basic Discover content',
+      'أداة التفريغ بالذكاء الاصطناعي',
+      'محلل الميمز',
+      'ميزة «كيف أقول…؟»',
+      '100 كلمة محفوظة',
+      'محتوى أساسي في اكتشف',
     ],
   },
   allin: {
@@ -45,11 +45,11 @@ export const SUBSCRIPTION_TIERS = {
     priceId: 'price_1T8t9QHVAO3F9uuDvaRVzEg4',
     productId: 'prod_U77OH1rRl0YAiF',
     features: [
-      'Everything in Standard',
-      'Unlimited vocabulary storage',
-      'Full Discover content library',
-      'Priority AI processing',
-      'Early access to new features',
+      'كل ما في الباقة القياسية',
+      'حفظ مفردات بلا حدود',
+      'مكتبة اكتشف كاملة',
+      'أولوية في معالجة الذكاء الاصطناعي',
+      'وصول مبكر للميزات الجديدة',
     ],
   },
 } as const;

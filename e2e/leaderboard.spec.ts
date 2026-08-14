@@ -75,7 +75,7 @@ test.describe("who can see the board", () => {
 
     // Unguarded on purpose: the board is a reason to make an account, and the
     // view has already stripped everything that is not public.
-    await expect(page.getByRole("heading", { name: "Leaderboard" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "لوحة الصدارة" })).toBeVisible();
     await expect(page.getByText("Layla")).toBeVisible();
   });
 
@@ -85,8 +85,8 @@ test.describe("who can see the board", () => {
 
     await page.goto("/leaderboard");
 
-    await expect(page.getByRole("button", { name: "Sign in to join the leaderboard" })).toBeVisible();
-    await expect(page.getByText("Your Rank")).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "سجّل الدخول للانضمام إلى لوحة الصدارة" })).toBeVisible();
+    await expect(page.getByText("ترتيبك")).toHaveCount(0);
   });
 
   test("drops the invitation once signed in", async ({ page, signInAs, db }) => {
@@ -96,7 +96,7 @@ test.describe("who can see the board", () => {
     await page.goto("/leaderboard");
     await expect(page.getByText("Test Learner")).toBeVisible();
 
-    await expect(page.getByRole("button", { name: "Sign in to join the leaderboard" })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "سجّل الدخول للانضمام إلى لوحة الصدارة" })).toHaveCount(0);
   });
 });
 
@@ -129,7 +129,7 @@ test.describe("the weekly board", () => {
 
     await page.goto("/leaderboard");
 
-    await expect(page.getByText("(you)")).toBeVisible();
+    await expect(page.getByText("(أنت)")).toBeVisible();
     await expect(page.getByText("Test Learner")).toBeVisible();
   });
 
@@ -154,7 +154,7 @@ test.describe("the weekly board", () => {
 
     await page.goto("/leaderboard");
 
-    await expect(page.getByText("Anonymous")).toBeVisible();
+    await expect(page.getByText("مجهول").first()).toBeVisible();
   });
 
   test("says so when nobody has earned anything", async ({ page, db }) => {
@@ -162,7 +162,7 @@ test.describe("the weekly board", () => {
 
     await page.goto("/leaderboard");
 
-    await expect(page.getByText("No rankings yet")).toBeVisible();
+    await expect(page.getByText("لا ترتيب بعد")).toBeVisible();
   });
 });
 
@@ -179,7 +179,7 @@ test.describe("the all-time board", () => {
     await page.goto("/leaderboard");
     await expect(page.getByText("Layla")).toBeVisible();
 
-    await page.getByRole("button", { name: "All Time" }).click();
+    await page.getByRole("button", { name: "كل الأوقات" }).click();
 
     const names = await page.locator("p.font-semibold.truncate").allTextContents();
     expect(names).toEqual(["Omar", "Layla"]);
@@ -187,7 +187,7 @@ test.describe("the all-time board", () => {
 
   test("still labels every row with this week's XP", async ({ page }) => {
     await page.goto("/leaderboard");
-    await page.getByRole("button", { name: "All Time" }).click();
+    await page.getByRole("button", { name: "كل الأوقات" }).click();
     await expect(page.getByText("Omar")).toBeVisible();
 
     // A bug, pinned. `LeaderboardRow` renders `entry.xp_this_week` under the
@@ -204,10 +204,10 @@ test.describe("the all-time board", () => {
 
   test("goes back to the weekly ordering", async ({ page }) => {
     await page.goto("/leaderboard");
-    await page.getByRole("button", { name: "All Time" }).click();
+    await page.getByRole("button", { name: "كل الأوقات" }).click();
     await expect(page.getByText("Omar")).toBeVisible();
 
-    await page.getByRole("button", { name: "This Week" }).click();
+    await page.getByRole("button", { name: "هذا الأسبوع" }).click();
 
     const names = await page.locator("p.font-semibold.truncate").allTextContents();
     expect(names).toEqual(["Layla", "Omar"]);
@@ -225,7 +225,7 @@ test.describe("the learner's own rank", () => {
 
     await page.goto("/leaderboard");
 
-    await expect(page.getByText("Your Rank")).toBeVisible();
+    await expect(page.getByText("ترتيبك")).toBeVisible();
     await expect(page.getByText("#3")).toBeVisible();
   });
 
@@ -240,7 +240,7 @@ test.describe("the learner's own rank", () => {
     await page.goto("/leaderboard");
     await expect(page.getByText("#3")).toBeVisible();
 
-    await page.getByRole("button", { name: "All Time" }).click();
+    await page.getByRole("button", { name: "كل الأوقات" }).click();
 
     // Third by the week, second by lifetime — the same learner, two honest
     // answers, which is why the card follows the tab.
@@ -341,7 +341,7 @@ test.describe("editing the public profile", () => {
     await expect(page.getByText("Test Learner")).toBeVisible();
 
     await page.locator("button:has(svg.lucide-settings)").click();
-    await page.getByLabel("Display Name").fill("Layla al-Kuwaiti");
+    await page.getByLabel("الاسم الظاهر").fill("Layla al-Kuwaiti");
     await page.getByRole("button", { name: /^Save/ }).click();
 
     await expect
@@ -354,7 +354,7 @@ test.describe("editing the public profile", () => {
     await expect(page.getByText("Test Learner")).toBeVisible();
 
     await page.locator("button:has(svg.lucide-settings)").click();
-    await page.getByRole("switch", { name: /leaderboard/i }).click();
+    await page.getByRole("switch", { name: /لوحة الصدارة/ }).click();
     await page.getByRole("button", { name: /^Save/ }).click();
 
     // The switch behind the whole privacy story above. It has to reach the
@@ -385,8 +385,8 @@ test.describe("editing the public profile", () => {
     // — with no else branch and no effect to catch up when the query lands. Open
     // the dialog before it resolves and the form shows its `useState` defaults:
     // empty name, "Show on Leaderboard" on, no institution.
-    await expect(page.getByLabel("Display Name")).toHaveValue("");
-    await expect(page.getByRole("switch", { name: /leaderboard/i })).toBeChecked();
+    await expect(page.getByLabel("الاسم الظاهر")).toHaveValue("");
+    await expect(page.getByRole("switch", { name: /لوحة الصدارة/ })).toBeChecked();
 
     await page.getByRole("button", { name: /^Save/ }).click();
 
@@ -409,7 +409,7 @@ test.describe("editing the public profile", () => {
     await page.locator("button:has(svg.lucide-settings)").click();
     await page.getByRole("combobox").click();
     await page.getByRole("option", { name: /Other/ }).click();
-    await page.getByLabel("Institution Name").fill("Evening class");
+    await page.getByLabel("اسم المؤسسة").fill("Evening class");
     await page.getByRole("button", { name: /^Save/ }).click();
 
     await expect

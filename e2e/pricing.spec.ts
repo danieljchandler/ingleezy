@@ -32,8 +32,8 @@ test.describe("what each visitor is shown", () => {
     // deciding whether to make an account at all.
     // Exact, because the FAQ below repeats "free", "Standard" and "All-In" in
     // its own headings.
-    await expect(page.getByRole("heading", { name: "Choose Your Plan" })).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Free", exact: true })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "اختر باقتك" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "مجاني", exact: true })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Standard", exact: true })).toBeVisible();
     await expect(page.getByRole("heading", { name: "All-In", exact: true })).toBeVisible();
   });
@@ -46,7 +46,7 @@ test.describe("what each visitor is shown", () => {
 
     await page.goto("/pricing");
 
-    await expect(page.getByRole("button", { name: "Sign Up to Subscribe" })).toHaveCount(2);
+    await expect(page.getByRole("button", { name: "أنشئ حساباً للاشتراك" })).toHaveCount(2);
     await expect(page.getByRole("button", { name: "Subscribe", exact: true })).toHaveCount(0);
   });
 
@@ -57,7 +57,7 @@ test.describe("what each visitor is shown", () => {
     await signInAs("anonymous");
     await page.goto("/pricing");
 
-    await page.getByRole("button", { name: "Sign Up to Subscribe" }).first().click();
+    await page.getByRole("button", { name: "أنشئ حساباً للاشتراك" }).first().click();
 
     await expect(page).toHaveURL(/\/auth/);
   });
@@ -67,9 +67,9 @@ test.describe("what each visitor is shown", () => {
 
     await page.goto("/pricing");
 
-    await expect(page.getByRole("button", { name: "Subscribe" })).toHaveCount(2);
+    await expect(page.getByRole("button", { name: "اشترك" })).toHaveCount(2);
     // The free card's button is inert — there is nothing to buy.
-    await expect(page.getByRole("button", { name: "Current Plan" })).toBeDisabled();
+    await expect(page.getByRole("button", { name: "باقتك الحالية" })).toBeDisabled();
   });
 
   test("marks the plan a Standard subscriber is already on", async ({ page, signInAs }) => {
@@ -77,10 +77,10 @@ test.describe("what each visitor is shown", () => {
 
     await page.goto("/pricing");
 
-    await expect(page.getByText("You're on the Standard plan")).toBeVisible();
+    await expect(page.getByText("أنت على باقة Standard")).toBeVisible();
     await expect(page.getByText("Your Plan", { exact: true })).toBeVisible();
     // Standard subscribers can still see the upgrade, and only the upgrade.
-    await expect(page.getByRole("button", { name: "Subscribe" })).toHaveCount(1);
+    await expect(page.getByRole("button", { name: "اشترك" })).toHaveCount(1);
   });
 
   test("marks an All-In subscriber's plan and offers them the portal", async ({
@@ -91,15 +91,15 @@ test.describe("what each visitor is shown", () => {
 
     await page.goto("/pricing");
 
-    await expect(page.getByText("You're on the All-In plan")).toBeVisible();
-    await expect(page.getByRole("button", { name: "Manage Subscription" })).toHaveCount(1);
+    await expect(page.getByText("أنت على باقة All-In")).toBeVisible();
+    await expect(page.getByRole("button", { name: "إدارة الاشتراك" })).toHaveCount(1);
   });
 
   test("offers an All-In subscriber a Standard checkout", async ({ page, signInAs, backend }) => {
     await signInAs("allin");
 
     await page.goto("/pricing");
-    await expect(page.getByText("You're on the All-In plan")).toBeVisible();
+    await expect(page.getByText("أنت على باقة All-In")).toBeVisible();
 
     // A finding, pinned as-is. Each card branches on `tier === <its own tier>`
     // and nothing compares rank, so the Standard card still renders Subscribe
@@ -107,7 +107,7 @@ test.describe("what each visitor is shown", () => {
     // downgrade through Manage Subscription — this button instead starts a
     // *second* Stripe checkout for the cheaper plan, which is not the same
     // operation and is not what the copy on the page promises.
-    await page.getByRole("button", { name: "Subscribe" }).click();
+    await page.getByRole("button", { name: "اشترك" }).click();
 
     await expect
       .poll(() => backend.lastCallTo("create-checkout")?.body)
@@ -123,7 +123,7 @@ test.describe("what each visitor is shown", () => {
     db.delayFunction("check-subscription", 3000);
 
     await page.goto("/pricing");
-    await expect(page.getByRole("heading", { name: "Choose Your Plan" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "اختر باقتك" })).toBeVisible();
 
     // A bug, pinned. The page does gate on `subLoading` — but `useSubscription`
     // clears that flag before it has an answer. Its effect runs first with
@@ -132,13 +132,13 @@ test.describe("what each visitor is shown", () => {
     // sets it back to true. So the spinner is gone for the whole round trip and
     // the page renders its default state: a paying Standard subscriber is
     // offered a Standard checkout for the plan they are already on.
-    await expect(page.getByRole("button", { name: "Subscribe" })).toHaveCount(2);
-    await expect(page.getByText(/You're on the/)).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "اشترك" })).toHaveCount(2);
+    await expect(page.getByText(/أنت على باقة/)).toHaveCount(0);
 
     // It does settle correctly once the answer lands — the window is the bug,
     // not the end state.
-    await expect(page.getByText("You're on the Standard plan")).toBeVisible();
-    await expect(page.getByRole("button", { name: "Subscribe" })).toHaveCount(1);
+    await expect(page.getByText("أنت على باقة Standard")).toBeVisible();
+    await expect(page.getByRole("button", { name: "اشترك" })).toHaveCount(1);
   });
 });
 
@@ -151,7 +151,7 @@ test.describe("starting a checkout", () => {
     backend.stubFunction("create-checkout", { url: "https://checkout.stripe.test/standard" });
 
     await page.goto("/pricing");
-    await page.getByRole("button", { name: "Subscribe" }).first().click();
+    await page.getByRole("button", { name: "اشترك" }).first().click();
 
     await expect.poll(() => openedUrls(page)).toContain("https://checkout.stripe.test/standard");
     expect(backend.lastCallTo("create-checkout")?.body).toMatchObject({ tier: "standard" });
@@ -161,7 +161,7 @@ test.describe("starting a checkout", () => {
     backend.stubFunction("create-checkout", { url: "https://checkout.stripe.test/allin" });
 
     await page.goto("/pricing");
-    await page.getByRole("button", { name: "Subscribe" }).last().click();
+    await page.getByRole("button", { name: "اشترك" }).last().click();
 
     // The two cards differ only in which tier they send. Crossing them wires a
     // learner to the wrong price with no visible sign until the Stripe page.
@@ -174,7 +174,7 @@ test.describe("starting a checkout", () => {
     backend.stubFunction("create-checkout", { url: "https://checkout.stripe.test/standard" });
 
     await page.goto("/pricing");
-    await page.getByRole("button", { name: "Subscribe" }).first().click();
+    await page.getByRole("button", { name: "اشترك" }).first().click();
 
     // The function identifies the customer from this header. Without it a
     // checkout is created against nobody.
@@ -192,16 +192,16 @@ test.describe("starting a checkout", () => {
     backend.stubFunctionFailure("create-checkout");
 
     await page.goto("/pricing");
-    await page.getByRole("button", { name: "Subscribe" }).first().click();
+    await page.getByRole("button", { name: "اشترك" }).first().click();
 
-    await expect(page.getByText("Failed to start checkout. Please try again.")).toBeVisible();
+    await expect(page.getByText("تعذّر بدء عملية الدفع. حاول من جديد.")).toBeVisible();
   });
 
   test("opens nothing when the function answers without a URL", async ({ page, backend }) => {
     backend.stubFunction("create-checkout", { url: null });
 
     await page.goto("/pricing");
-    await page.getByRole("button", { name: "Subscribe" }).first().click();
+    await page.getByRole("button", { name: "اشترك" }).first().click();
     await expect.poll(() => backend.callsTo("create-checkout").length).toBe(1);
 
     // `window.open(undefined)` navigates a blank tab to about:blank, which
@@ -216,7 +216,7 @@ test.describe("managing an existing subscription", () => {
     backend.stubFunction("customer-portal", { url: "https://billing.stripe.test/portal" });
 
     await page.goto("/pricing");
-    await page.getByRole("button", { name: "Manage", exact: true }).click();
+    await page.getByRole("button", { name: "إدارة", exact: true }).click();
 
     await expect.poll(() => openedUrls(page)).toContain("https://billing.stripe.test/portal");
   });
@@ -226,7 +226,7 @@ test.describe("managing an existing subscription", () => {
     backend.stubFunction("customer-portal", { url: "https://billing.stripe.test/portal" });
 
     await page.goto("/pricing");
-    await page.getByRole("button", { name: "Manage Subscription" }).click();
+    await page.getByRole("button", { name: "إدارة الاشتراك" }).click();
 
     // Cancelling and switching plans both live behind this one button, so
     // there is no in-app path to either if it silently does nothing.
@@ -244,10 +244,10 @@ test.describe("managing an existing subscription", () => {
     backend.stubFunctionFailure("customer-portal");
 
     await page.goto("/pricing");
-    await page.getByRole("button", { name: "Manage", exact: true }).click();
+    await page.getByRole("button", { name: "إدارة", exact: true }).click();
 
     await expect(
-      page.getByText("Failed to open subscription management. Please try again."),
+      page.getByText("تعذّر فتح إدارة الاشتراك. حاول من جديد."),
     ).toBeVisible();
   });
 });
@@ -269,8 +269,8 @@ test.describe("when Stripe cannot be reached", () => {
     // leaves the state at its defaults on error, so a Stripe outage shows a
     // paying All-In subscriber the two Subscribe buttons and no indication
     // that anything went wrong — the failure is only in the console.
-    await expect(page.getByRole("button", { name: "Subscribe" })).toHaveCount(2);
-    await expect(page.getByText(/You're on the/)).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "اشترك" })).toHaveCount(2);
+    await expect(page.getByText(/أنت على باقة/)).toHaveCount(0);
   });
 
   test("treats a subscription with no tier as unsubscribed", async ({
@@ -293,8 +293,8 @@ test.describe("when Stripe cannot be reached", () => {
 
     // The banner needs both `subscribed` and `tier`, so an unmapped product
     // pays without showing a plan. Worth knowing before adding a Stripe price.
-    await expect(page.getByText(/You're on the/)).toHaveCount(0);
-    await expect(page.getByRole("button", { name: "Subscribe" })).toHaveCount(2);
+    await expect(page.getByText(/أنت على باقة/)).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "اشترك" })).toHaveCount(2);
   });
 });
 
@@ -317,16 +317,16 @@ test.describe("what the page promises", () => {
   test("states the vocabulary limits the free tier is capped by", async ({ page }) => {
     await page.goto("/pricing");
 
-    await expect(page.getByText("10 vocabulary words")).toBeVisible();
-    await expect(page.getByText("100 vocabulary words")).toBeVisible();
-    await expect(page.getByText("Unlimited vocabulary storage")).toBeVisible();
+    await expect(page.getByText("10 كلمات محفوظة").first()).toBeVisible();
+    await expect(page.getByText("100 كلمة محفوظة").first()).toBeVisible();
+    await expect(page.getByText("حفظ مفردات بلا حدود")).toBeVisible();
   });
 
   test("answers the questions a buyer asks before paying", async ({ page }) => {
     await page.goto("/pricing");
 
-    await expect(page.getByRole("heading", { name: "Frequently asked questions" })).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Can I switch plans or cancel later?" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "الأسئلة الشائعة" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "هل أستطيع تغيير الباقة أو الإلغاء لاحقاً؟" })).toBeVisible();
     await expect(page.getByText(/7-day money-back guarantee/).first()).toBeVisible();
   });
 });

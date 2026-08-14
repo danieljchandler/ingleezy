@@ -48,7 +48,7 @@ const TutorUpload = () => {
       !validTypes.includes(selectedFile.type) &&
       !selectedFile.name.match(/\.(mp3|wav|m4a|ogg|mp4|webm|mov)$/i)
     ) {
-      toast.error("Unsupported file type", { description: "Please upload an audio or video file" });
+      toast.error("نوع ملف غير مدعوم", { description: "ارفع ملف صوت أو فيديو" });
       return;
     }
 
@@ -68,8 +68,8 @@ const TutorUpload = () => {
       <AppShell>
         <HomeButton />
         <div className="text-center mt-20">
-          <p className="text-muted-foreground mb-4">Please log in to use Tutor Upload</p>
-          <Button onClick={() => navigate("/auth")}>Log in</Button>
+          <p className="text-muted-foreground mb-4">سجّل الدخول لاستخدام رفع الدرس</p>
+          <Button onClick={() => navigate("/auth")}>تسجيل الدخول</Button>
         </div>
       </AppShell>
     );
@@ -78,13 +78,13 @@ const TutorUpload = () => {
   return (
     <AppShell>
       <HomeButton />
-      <h1 className="text-2xl font-heading font-bold text-foreground mb-6 inline-flex items-center gap-2">Tutor Upload <InfoHint {...PAGE_HINTS["tutor-upload"]} size="md" /></h1>
+      <h1 className="text-2xl font-heading font-bold text-foreground mb-6 inline-flex items-center gap-2">رفع درس خصوصي <InfoHint {...PAGE_HINTS["tutor-upload"]} size="md" /></h1>
 
       {/* Upload Step */}
       {step === "upload" && (
         <div className="space-y-6">
           <p className="text-muted-foreground">
-            Upload a recording of your tutor speaking Arabic. The system will extract vocabulary candidates for you to review.
+            ارفع تسجيلاً لمعلّمك وهو يتحدث الإنجليزية، وسنستخرج مفردات مرشّحة لتراجعها.
           </p>
 
           <div
@@ -150,7 +150,7 @@ const TutorUpload = () => {
       {step === "review" && (
         <div className="space-y-6">
           <p className="text-sm text-muted-foreground">
-            Review the extracted vocabulary. Edit, approve, or reject each candidate.
+            راجع المفردات المستخرجة. عدّل أو اعتمد أو ارفض كل مرشّح.
           </p>
 
           <CandidateList

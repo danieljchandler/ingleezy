@@ -101,7 +101,7 @@ const LeaderboardRow = ({
 
       <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center shrink-0 overflow-hidden">
         {entry.avatar_url ? (
-          <img src={entry.avatar_url} alt={`${entry.display_name || "Anonymous"}'s avatar`} loading="lazy" width={40} height={40} className="w-full h-full object-cover" />
+          <img src={entry.avatar_url} alt={`صورة ${entry.display_name || "مجهول"}`} loading="lazy" width={40} height={40} className="w-full h-full object-cover" />
         ) : (
           <User className="h-5 w-5 text-muted-foreground" />
         )}
@@ -109,9 +109,9 @@ const LeaderboardRow = ({
 
       <div className="flex-1 min-w-0">
         <p className="font-semibold text-foreground truncate">
-          {entry.display_name || "Anonymous"}
+          {entry.display_name || "مجهول"}
           {isCurrentUser && (
-            <span className="text-primary text-xs ml-1.5">(you)</span>
+            <span className="text-primary text-xs ml-1.5">(أنت)</span>
           )}
         </p>
         <div className="flex items-center gap-1.5">
@@ -170,10 +170,10 @@ const ProfileEditDialog = () => {
         custom_institution: institutionId === "other" ? customInstitution.trim() || null : null,
         show_institution: showInstitution,
       });
-      toast.success("Profile updated!");
+      toast.success("تم تحديث الملف الشخصي!");
       setOpen(false);
     } catch (e) {
-      toast.error("Failed to update profile");
+      toast.error("تعذّر تحديث الملف الشخصي");
     }
   };
 
@@ -188,16 +188,16 @@ const ProfileEditDialog = () => {
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Edit Profile</DialogTitle>
+          <DialogTitle>تعديل الملف الشخصي</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 pt-4">
           <div className="space-y-2">
-            <Label htmlFor="displayName">Display Name</Label>
+            <Label htmlFor="displayName">الاسم الظاهر</Label>
             <Input
               id="displayName"
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
-              placeholder="Your name on the leaderboard"
+              placeholder="اسمك في لوحة الصدارة"
               maxLength={50}
             />
           </div>
@@ -210,10 +210,10 @@ const ProfileEditDialog = () => {
             </Label>
             <Select value={institutionId} onValueChange={setInstitutionId}>
               <SelectTrigger>
-                <SelectValue placeholder="Select your institution" />
+                <SelectValue placeholder="اختر مؤسستك" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">None</SelectItem>
+                <SelectItem value="none">بدون</SelectItem>
                 {institutions?.map((inst) => (
                   <SelectItem key={inst.id} value={inst.id}>
                     <span className="flex items-center gap-1.5">
@@ -229,7 +229,7 @@ const ProfileEditDialog = () => {
 
           {institutionId === "other" && (
             <div className="space-y-2">
-              <Label htmlFor="customInstitution">Institution Name</Label>
+              <Label htmlFor="customInstitution">اسم المؤسسة</Label>
               <Input
                 id="customInstitution"
                 value={customInstitution}
@@ -241,7 +241,7 @@ const ProfileEditDialog = () => {
 
           {hasInstitution && (
             <div className="flex items-center justify-between">
-              <Label htmlFor="showInstitution">Show institution on profile</Label>
+              <Label htmlFor="showInstitution">أظهر المؤسسة في ملفي</Label>
               <Switch
                 id="showInstitution"
                 checked={showInstitution}
@@ -251,7 +251,7 @@ const ProfileEditDialog = () => {
           )}
 
           <div className="flex items-center justify-between">
-            <Label htmlFor="showOnLeaderboard">Show on Leaderboard</Label>
+            <Label htmlFor="showOnLeaderboard">أظهرني في لوحة الصدارة</Label>
             <Switch
               id="showOnLeaderboard"
               checked={showOnLeaderboard}
@@ -299,9 +299,9 @@ const Leaderboard = () => {
               <Trophy className="h-6 w-6 text-primary" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-foreground inline-flex items-center gap-2">Leaderboard <InfoHint {...PAGE_HINTS["leaderboard"]} /></h1>
+              <h1 className="text-xl font-bold text-foreground inline-flex items-center gap-2">لوحة الصدارة <InfoHint {...PAGE_HINTS["leaderboard"]} /></h1>
               <p className="text-sm text-muted-foreground">
-                Compete with other learners
+                نافس متعلمين آخرين
               </p>
             </div>
           </div>
@@ -315,7 +315,7 @@ const Leaderboard = () => {
               <div className="flex items-center gap-3">
                 <Flame className="h-6 w-6 text-primary" />
                 <div>
-                  <p className="text-sm text-muted-foreground">Your Rank</p>
+                  <p className="text-sm text-muted-foreground">ترتيبك</p>
                   <p className="text-2xl font-bold text-foreground">
                     #{tab === "weekly" ? myRank.weeklyRank : myRank.allTimeRank}
                   </p>
@@ -323,7 +323,7 @@ const Leaderboard = () => {
               </div>
               <div className="text-right">
                 <p className="text-xs text-muted-foreground">
-                  {tab === "weekly" ? "This Week" : "All Time"}
+                  {tab === "weekly" ? "هذا الأسبوع" : "كل الأوقات"}
                 </p>
               </div>
             </div>
@@ -342,7 +342,7 @@ const Leaderboard = () => {
             )}
           >
             <Flame className="h-4 w-4 inline mr-1.5" />
-            This Week
+            هذا الأسبوع
           </button>
           <button
             onClick={() => setTab("all-time")}
@@ -354,7 +354,7 @@ const Leaderboard = () => {
             )}
           >
             <Star className="h-4 w-4 inline mr-1.5" />
-            All Time
+            كل الأوقات
           </button>
         </div>
 
@@ -375,9 +375,9 @@ const Leaderboard = () => {
           ) : (
             <div className="text-center py-12">
               <Trophy className="h-12 w-12 text-muted-foreground/30 mx-auto mb-3" />
-              <p className="text-muted-foreground">No rankings yet</p>
+              <p className="text-muted-foreground">لا ترتيب بعد</p>
               <p className="text-sm text-muted-foreground/70">
-                Start learning to appear on the leaderboard!
+                ابدأ التعلم لتظهر في لوحة الصدارة!
               </p>
             </div>
           )}
@@ -386,7 +386,7 @@ const Leaderboard = () => {
         {/* CTA for non-authenticated users */}
         {!isAuthenticated && (
           <Button onClick={() => navigate("/auth")} className="w-full">
-            Sign in to join the leaderboard
+            سجّل الدخول للانضمام إلى لوحة الصدارة
           </Button>
         )}
       </div>

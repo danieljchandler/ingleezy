@@ -99,7 +99,7 @@ test.describe("reaching the shelf", () => {
 
     await page.goto("/liked-videos");
 
-    await expect(page.getByRole("heading", { name: "Liked Videos" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "فيديوهات أعجبتني" })).toBeVisible();
   });
 });
 
@@ -122,7 +122,7 @@ test.describe("the shelf", () => {
 
     await page.goto("/liked-videos");
 
-    await expect(page.getByText("2 videos liked")).toBeVisible();
+    await expect(page.getByText("فيديوهان أعجباك")).toBeVisible();
   });
 
   test("says one video rather than 1 videos", async ({ page, db }) => {
@@ -130,7 +130,7 @@ test.describe("the shelf", () => {
 
     await page.goto("/liked-videos");
 
-    await expect(page.getByText("1 video liked")).toBeVisible();
+    await expect(page.getByText("فيديو واحد أعجبك")).toBeVisible();
   });
 
   test("puts the most recently liked first", async ({ page, db }) => {
@@ -164,7 +164,7 @@ test.describe("the shelf", () => {
     // the shelf just gets shorter — nothing says a video was pulled.
     await expect(page.getByText("Video 1")).toBeVisible();
     await expect(page.getByText("Video 2")).toHaveCount(0);
-    await expect(page.getByText("1 video liked")).toBeVisible();
+    await expect(page.getByText("فيديو واحد أعجبك")).toBeVisible();
   });
 
   test("points an empty shelf at Discover", async ({ page, db }) => {
@@ -172,7 +172,7 @@ test.describe("the shelf", () => {
 
     await page.goto("/liked-videos");
 
-    await expect(page.getByText("No liked videos yet")).toBeVisible();
+    await expect(page.getByText("لا فيديوهات بعد")).toBeVisible();
     await page.getByRole("button", { name: /Browse Videos/ }).click();
     await expect(page).toHaveURL(/\/discover$/);
   });
@@ -181,7 +181,7 @@ test.describe("the shelf", () => {
     seedLikes(db, [aVideo(1)], []);
 
     await page.goto("/liked-videos");
-    await expect(page.getByText("No liked videos yet")).toBeVisible();
+    await expect(page.getByText("لا فيديوهات بعد")).toBeVisible();
 
     // An empty `.in([])` is a request that can only return nothing; the early
     // return is what keeps an empty shelf to one round trip.
@@ -225,6 +225,6 @@ test.describe("the shelf", () => {
     // to its empty state, so a broken read tells a learner they have liked
     // nothing. The count in the header says the same thing, which makes it
     // convincing.
-    await expect(page.getByText("No liked videos yet")).toBeVisible();
+    await expect(page.getByText("لا فيديوهات بعد")).toBeVisible();
   });
 });

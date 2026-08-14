@@ -38,8 +38,8 @@ const Pricing = () => {
       await createCheckout(selectedTier, cadence);
     } catch (err) {
       toast({
-        title: 'Error',
-        description: 'Failed to start checkout. Please try again.',
+        title: 'خطأ',
+        description: 'تعذّر بدء عملية الدفع. حاول من جديد.',
         variant: 'destructive',
       });
     }
@@ -50,8 +50,8 @@ const Pricing = () => {
       await openCustomerPortal();
     } catch (err) {
       toast({
-        title: 'Error',
-        description: 'Failed to open subscription management. Please try again.',
+        title: 'خطأ',
+        description: 'تعذّر فتح إدارة الاشتراك. حاول من جديد.',
         variant: 'destructive',
       });
     }
@@ -68,13 +68,13 @@ const Pricing = () => {
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12">
           <h1 className="text-3xl font-bold text-foreground mb-3 font-heading inline-flex items-center gap-2 justify-center">
-            Choose Your Plan <InfoHint {...PAGE_HINTS["pricing"]} size="md" />
+            اختر باقتك <InfoHint {...PAGE_HINTS["pricing"]} size="md" />
           </h1>
           <p className="text-muted-foreground text-lg">
-            Unlock the full power of Ingleezy to accelerate your Arabic learning
+            افتح إمكانات إنجليزي كاملة وسرّع تعلمك للإنجليزية
           </p>
           <Badge variant="outline" className="mt-3">
-            Ingleezy is in closed beta — pricing below reflects our upcoming public launch
+            إنجليزي في مرحلة تجريبية مغلقة — الأسعار أدناه للإطلاق العام القادم
           </Badge>
         </div>
 
@@ -90,12 +90,12 @@ const Pricing = () => {
                 <div className="flex items-center gap-3">
                   <Crown className="h-5 w-5 text-primary" />
                   <span className="font-medium">
-                    You're on the <span className="text-primary">{SUBSCRIPTION_TIERS[tier].name}</span> plan
+                    أنت على باقة <span className="text-primary">{SUBSCRIPTION_TIERS[tier].name}</span>
                   </span>
                 </div>
                 <Button variant="outline" size="sm" onClick={handleManageSubscription}>
                   <Settings className="h-4 w-4 mr-2" />
-                  Manage
+                  إدارة
                 </Button>
               </div>
             )}
@@ -107,15 +107,15 @@ const Pricing = () => {
                   size="sm"
                   onClick={() => setCadence('annual')}
                 >
-                  Annual
-                  <Badge variant="secondary" className="ml-2">2 months free</Badge>
+                  سنوي
+                  <Badge variant="secondary" className="ml-2">شهران مجاناً</Badge>
                 </Button>
                 <Button
                   variant={cadence === 'monthly' ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setCadence('monthly')}
                 >
-                  Monthly
+                  شهري
                 </Button>
               </div>
             )}
@@ -124,20 +124,20 @@ const Pricing = () => {
               {/* Free tier */}
               <Card className="border-border">
                 <CardHeader>
-                  <CardTitle className="text-xl">Free</CardTitle>
-                  <CardDescription>Get started with the basics</CardDescription>
+                  <CardTitle className="text-xl">مجاني</CardTitle>
+                  <CardDescription>ابدأ بالأساسيات</CardDescription>
                   <div className="mt-4">
                     <span className="text-3xl font-bold">$0</span>
-                    <span className="text-muted-foreground">/month</span>
+                    <span className="text-muted-foreground">/شهرياً</span>
                   </div>
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-3">
                     {[
-                      'Browse vocabulary topics',
-                      'Basic flashcard review',
-                      '10 vocabulary words',
-                      'Limited Discover videos',
+                      'تصفح مواضيع المفردات',
+                      'مراجعة أساسية بالبطاقات',
+                      '10 كلمات محفوظة',
+                      'فيديوهات محدودة في اكتشف',
                     ].map((feature) => (
                       <li key={feature} className="flex items-start gap-2">
                         <Check className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
@@ -148,7 +148,7 @@ const Pricing = () => {
                 </CardContent>
                 <CardFooter>
                   <Button variant="outline" className="w-full" disabled>
-                    Current Plan
+                    باقتك الحالية
                   </Button>
                 </CardFooter>
               </Card>
@@ -162,20 +162,20 @@ const Pricing = () => {
                       <Badge variant="default" className="bg-primary">Your Plan</Badge>
                     )}
                   </div>
-                  <CardDescription>For serious learners</CardDescription>
+                  <CardDescription>للمتعلم الجاد</CardDescription>
                   <div className="mt-4">
                     {cadence === 'annual' ? (
                       <>
                         <span className="text-3xl font-bold">${SUBSCRIPTION_TIERS.standard.annualPrice}</span>
                         <span className="text-muted-foreground">/year</span>
                         <p className="mt-1 text-xs text-muted-foreground">
-                          ${(SUBSCRIPTION_TIERS.standard.annualPrice / 12).toFixed(2)}/month, billed yearly
+                          ${(SUBSCRIPTION_TIERS.standard.annualPrice / 12).toFixed(2)}/شهرياً، تُدفع سنوياً
                         </p>
                       </>
                     ) : (
                       <>
                         <span className="text-3xl font-bold">${SUBSCRIPTION_TIERS.standard.price}</span>
-                        <span className="text-muted-foreground">/month</span>
+                        <span className="text-muted-foreground">/شهرياً</span>
                       </>
                     )}
                   </div>
@@ -193,11 +193,11 @@ const Pricing = () => {
                 <CardFooter>
                   {tier === 'standard' ? (
                     <Button variant="outline" className="w-full" onClick={handleManageSubscription}>
-                      Manage Subscription
+                      إدارة الاشتراك
                     </Button>
                   ) : (
                     <Button className="w-full" onClick={() => handleSubscribe('standard')}>
-                      {user ? 'Subscribe' : 'Sign Up to Subscribe'}
+                      {user ? 'اشترك' : 'أنشئ حساباً للاشتراك'}
                     </Button>
                   )}
                 </CardFooter>
@@ -218,20 +218,20 @@ const Pricing = () => {
                       <Badge variant="default" className="bg-primary">Your Plan</Badge>
                     )}
                   </div>
-                  <CardDescription>Unlimited everything</CardDescription>
+                  <CardDescription>كل شيء بلا حدود</CardDescription>
                   <div className="mt-4">
                     {cadence === 'annual' ? (
                       <>
                         <span className="text-3xl font-bold">${SUBSCRIPTION_TIERS.allin.annualPrice}</span>
                         <span className="text-muted-foreground">/year</span>
                         <p className="mt-1 text-xs text-muted-foreground">
-                          ${(SUBSCRIPTION_TIERS.allin.annualPrice / 12).toFixed(2)}/month, billed yearly
+                          ${(SUBSCRIPTION_TIERS.allin.annualPrice / 12).toFixed(2)}/شهرياً، تُدفع سنوياً
                         </p>
                       </>
                     ) : (
                       <>
                         <span className="text-3xl font-bold">${SUBSCRIPTION_TIERS.allin.price}</span>
-                        <span className="text-muted-foreground">/month</span>
+                        <span className="text-muted-foreground">/شهرياً</span>
                       </>
                     )}
                   </div>
@@ -249,11 +249,11 @@ const Pricing = () => {
                 <CardFooter>
                   {tier === 'allin' ? (
                     <Button variant="outline" className="w-full" onClick={handleManageSubscription}>
-                      Manage Subscription
+                      إدارة الاشتراك
                     </Button>
                   ) : (
                     <Button className="w-full bg-accent hover:bg-accent/90" onClick={() => handleSubscribe('allin')}>
-                      {user ? 'Subscribe' : 'Sign Up to Subscribe'}
+                      {user ? 'اشترك' : 'أنشئ حساباً للاشتراك'}
                     </Button>
                   )}
                 </CardFooter>
@@ -267,33 +267,33 @@ const Pricing = () => {
             {/* FAQ */}
             <section className="mt-16 max-w-3xl mx-auto">
               <h2 className="text-2xl font-bold text-center mb-8 font-heading">
-                Frequently asked questions
+                الأسئلة الشائعة
               </h2>
               <div className="space-y-6">
                 {[
                   {
-                    q: 'Which dialects are included?',
-                    a: 'Every paid plan unlocks all active dialect modules — Gulf, Egyptian, and Yemeni — with native audio, immersion-first lessons, and the MSA bridge track. New dialects roll out to All-In subscribers first.',
+                    q: 'هل الشرح متاح بلهجتي؟',
+                    a: 'نعم. كل الباقات تشرح الإنجليزية بلهجتك — خليجي أو مصري أو يمني — مع الفصحى كطبقة إضافية. اللهجة تحدد لغة الشرح، لا ما تدرسه: المحتوى الإنجليزي واحد للجميع.',
                   },
                   {
-                    q: 'What counts toward the vocabulary limit?',
-                    a: 'Only words you actively save to "My Words" count. Browsing topics, transcripts, and Discover videos is unlimited. Free covers 10 saved words, Standard 100, and All-In is uncapped.',
+                    q: 'ما الذي يُحتسب ضمن حد المفردات؟',
+                    a: 'الكلمات التي تحفظها في «كلماتي» فقط. تصفح المواضيع والتفريغات وفيديوهات اكتشف بلا حدود. المجانية تشمل 10 كلمات محفوظة، والقياسية 100، والشاملة بلا حد.',
                   },
                   {
-                    q: 'Can I switch plans or cancel later?',
-                    a: 'Yes. Upgrade, downgrade, or cancel anytime from the Manage Subscription button. Cancellations stay active until the end of the billing period — no surprise charges.',
+                    q: 'هل أستطيع تغيير الباقة أو الإلغاء لاحقاً؟',
+                    a: 'نعم. رقِّ أو خفِّض أو ألغِ متى شئت من زر إدارة الاشتراك. يبقى الإلغاء سارياً حتى نهاية فترة الفوترة — بلا رسوم مفاجئة.',
                   },
                   {
-                    q: 'Do I keep my progress if I downgrade?',
-                    a: 'Always. Your streak, XP, saved words, and review history are tied to your account, not your plan. If you exceed a lower tier\'s limits, older items go read-only until you upgrade again.',
+                    q: 'هل أحتفظ بتقدّمي إن خفّضت الباقة؟',
+                    a: 'دائماً. سلسلتك ونقاطك وكلماتك المحفوظة وسجل مراجعاتك مرتبطة بحسابك لا بباقتك. وإن تجاوزت حدود الباقة الأدنى، تصبح العناصر الأقدم للقراءة فقط حتى ترقّي مجدداً.',
                   },
                   {
-                    q: 'Is there a free trial?',
-                    a: 'The Free plan is permanent — use it as long as you like. Paid plans come with a 7-day money-back guarantee instead of a time-boxed trial, so you can fully test every feature.',
+                    q: 'هل توجد تجربة مجانية؟',
+                    a: 'الباقة المجانية دائمة — استخدمها ما شئت. أما الباقات المدفوعة فتأتي بضمان استرداد خلال 7 أيام بدل تجربة محدودة بوقت، لتجرّب كل ميزة بالكامل.',
                   },
                   {
-                    q: 'Do you offer student or annual pricing?',
-                    a: 'Annual plans (2 months free) and student discounts are coming shortly after launch. Email hello@ingleezy.app to be notified.',
+                    q: 'هل لديكم أسعار للطلاب أو اشتراك سنوي؟',
+                    a: 'الاشتراك السنوي (شهران مجاناً) وخصومات الطلاب قادمة بعد الإطلاق بقليل. راسلنا على hello@ingleezy.app لنخبرك.',
                   },
                 ].map(({ q, a }) => (
                   <div key={q} className="border-b border-border pb-4">

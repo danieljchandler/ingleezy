@@ -82,30 +82,33 @@ describe("agreement with the Pricing page", () => {
   const pricing = readFileSync(resolve(__dirname, "../pages/Pricing.tsx"), "utf8");
   const subscription = readFileSync(resolve(__dirname, "../hooks/useSubscription.ts"), "utf8");
 
+  // The copy is Arabic since the Arabic-first pass; the invariant is unchanged
+  // — the page must state the limits and features this module actually
+  // enforces, in whatever language it sells them.
   it("shows the free vocabulary cap this module enforces", () => {
     // Pricing.tsx hardcodes its bullet list rather than reading this file, so
     // the two can disagree without anything failing to compile. Someone
     // charging for a limit is entitled to have the page state the same one.
-    expect(pricing).toContain(`${FREE_TIER_LIMITS.vocabularyWords} vocabulary words`);
+    expect(pricing).toContain(`${FREE_TIER_LIMITS.vocabularyWords} كلمات محفوظة`);
   });
 
   it("shows the standard vocabulary cap this module enforces", () => {
-    expect(subscription).toContain(`${STANDARD_TIER_LIMITS.vocabularyWords} vocabulary words`);
+    expect(subscription).toContain(`${STANDARD_TIER_LIMITS.vocabularyWords} كلمة محفوظة`);
   });
 
   it("sells the Standard features this module gates behind Standard", () => {
     // Matched loosely against the marketing copy: the bullets are written for
     // a buyer, not generated from the feature ids.
-    expect(subscription).toMatch(/Transcribe/i);
-    expect(subscription).toMatch(/Meme Analyzer/i);
-    expect(subscription).toMatch(/How Do I Say/i);
+    expect(subscription).toMatch(/التفريغ/);
+    expect(subscription).toMatch(/الميمز/);
+    expect(subscription).toMatch(/كيف أقول/);
   });
 
   it("sells the All-In features this module gates behind All-In", () => {
-    expect(subscription).toMatch(/Unlimited vocabulary/i);
-    expect(subscription).toMatch(/Full Discover/i);
-    expect(subscription).toMatch(/Priority AI/i);
-    expect(subscription).toMatch(/Early access/i);
+    expect(subscription).toMatch(/مفردات بلا حدود/);
+    expect(subscription).toMatch(/مكتبة اكتشف كاملة/);
+    expect(subscription).toMatch(/أولوية في معالجة/);
+    expect(subscription).toMatch(/وصول مبكر/);
   });
 });
 

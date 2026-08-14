@@ -68,7 +68,7 @@ test.describe("reaching the library", () => {
 
     await page.goto("/my-transcriptions");
 
-    await expect(page.getByRole("heading", { name: "My Transcriptions" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "نصوصي المفرّغة" })).toBeVisible();
   });
 });
 
@@ -126,8 +126,8 @@ test.describe("the shelf", () => {
 
     await page.goto("/my-transcriptions");
 
-    await expect(page.getByText("No saved transcriptions yet.")).toBeVisible();
-    await page.getByRole("button", { name: "Go to Transcribe" }).click();
+    await expect(page.getByText("لا تفريغات محفوظة بعد.")).toBeVisible();
+    await page.getByRole("button", { name: "اذهب إلى التفريغ" }).click();
     await expect(page).toHaveURL(/\/transcribe$/);
   });
 
@@ -138,7 +138,7 @@ test.describe("the shelf", () => {
 
     await page.goto("/my-transcriptions");
 
-    await expect(page.getByText("Couldn't load transcriptions").first()).toBeVisible();
+    await expect(page.getByText("تعذّر تحميل التفريغات").first()).toBeVisible();
   });
 
   test("loads the shelf twice on every visit", async ({ page, db }) => {
@@ -197,7 +197,7 @@ test.describe("the dialect filter", () => {
     await page.goto("/my-transcriptions");
     await page.getByRole("button", { name: "Gulf" }).click();
 
-    await expect(page.getByRole("button", { name: "All dialects" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "كل اللهجات" })).toBeVisible();
     await expect(page.getByText("An Egyptian clip")).toBeVisible();
   });
 
@@ -223,8 +223,8 @@ test.describe("the dialect filter", () => {
     // The two empty states say different things and offer different actions —
     // "you have saved nothing" gets a link to Transcribe, "nothing in this
     // dialect" gets told about the toggle.
-    await expect(page.getByText("No saved transcriptions for Gulf. Toggle to see all.")).toBeVisible();
-    await expect(page.getByRole("button", { name: "Go to Transcribe" })).toHaveCount(0);
+    await expect(page.getByText("لا تفريغات محفوظة لـGulf. بدّل لعرض الكل.")).toBeVisible();
+    await expect(page.getByRole("button", { name: "اذهب إلى التفريغ" })).toHaveCount(0);
   });
 
   test("filters without going back to the server", async ({ page, db }) => {
@@ -266,13 +266,13 @@ test.describe("acting on a transcription", () => {
 
     // The only destructive action in the app that quotes the thing by name.
     // A shelf of near-identical cards is exactly where that matters.
-    await expect(page.getByText(/permanently removes "Recording 1"/)).toBeVisible();
+    await expect(page.getByText(/سيُحذف «Recording 1» نهائياً/)).toBeVisible();
   });
 
   test("keeps the transcription when the learner backs out", async ({ page, db }) => {
     await page.goto("/my-transcriptions");
     await page.locator("button:has(svg.lucide-trash-2), button:has(svg.lucide-trash2)").click();
-    await page.getByRole("button", { name: "Cancel" }).click();
+    await page.getByRole("button", { name: "إلغاء" }).click();
 
     await expect(page.getByRole("heading", { name: "Recording 1" })).toBeVisible();
     expect(db.rows("saved_transcriptions")).toHaveLength(1);
@@ -283,7 +283,7 @@ test.describe("acting on a transcription", () => {
     await page.locator("button:has(svg.lucide-trash-2), button:has(svg.lucide-trash2)").click();
     await page.getByRole("button", { name: "Delete", exact: true }).click();
 
-    await expect(page.getByText("Transcription deleted")).toBeVisible();
+    await expect(page.getByText("حُذف التفريغ")).toBeVisible();
     await expect.poll(() => db.rows("saved_transcriptions")).toHaveLength(0);
     await expect(page.getByText("Recording 1")).toHaveCount(0);
   });
@@ -302,7 +302,7 @@ test.describe("acting on a transcription", () => {
 
     // The list is filtered optimistically on success only — dropping the card
     // on failure would tell a learner their transcript is gone when it is not.
-    await expect(page.getByText("Failed to delete")).toBeVisible();
+    await expect(page.getByText("تعذّر الحذف")).toBeVisible();
     await expect(page.getByRole("heading", { name: "Recording 1" })).toBeVisible();
   });
 });

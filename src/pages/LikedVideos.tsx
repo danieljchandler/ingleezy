@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { Heart, Play, Loader2 } from "lucide-react";
 import { formatDuration } from "@/lib/videoEmbed";
 import type { DiscoverVideo } from "@/hooks/useDiscoverVideos";
+import { arCount } from "@/lib/strings";
 import { InfoHint } from "@/components/InfoHint";
 import { PAGE_HINTS } from "@/lib/pageHints";
 
@@ -87,9 +88,9 @@ const LikedVideos = () => {
         <div className="py-12 text-center">
           <Heart className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
           <h2 className="text-lg font-semibold text-foreground mb-2">
-            Sign in to see liked videos
+            سجّل الدخول لرؤية الفيديوهات التي أعجبتك
           </h2>
-          <Button onClick={() => navigate("/auth")}>Sign In</Button>
+          <Button onClick={() => navigate("/auth")}>تسجيل الدخول</Button>
         </div>
       </AppShell>
     );
@@ -106,11 +107,16 @@ const LikedVideos = () => {
             <Heart className="h-6 w-6 text-primary fill-primary/30" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-foreground inline-flex items-center gap-2">Liked Videos <InfoHint {...PAGE_HINTS["liked-videos"]} /></h1>
+            <h1 className="text-xl font-bold text-foreground inline-flex items-center gap-2">فيديوهات أعجبتني <InfoHint {...PAGE_HINTS["liked-videos"]} /></h1>
             <p className="text-sm text-muted-foreground">
               {videos?.length
-                ? `${videos.length} video${videos.length !== 1 ? "s" : ""} liked`
-                : "Videos you've liked"}
+                ? arCount(videos.length, {
+                    one: "فيديو واحد أعجبك",
+                    two: "فيديوهان أعجباك",
+                    few: "فيديوهات أعجبتك",
+                    many: "فيديو أعجبك",
+                  })
+                : "الفيديوهات التي أعجبتك"}
             </p>
           </div>
         </div>
@@ -133,9 +139,9 @@ const LikedVideos = () => {
         ) : (
           <div className="text-center py-12">
             <Heart className="h-12 w-12 text-muted-foreground/30 mx-auto mb-3" />
-            <p className="text-muted-foreground">No liked videos yet</p>
+            <p className="text-muted-foreground">لا فيديوهات بعد</p>
             <p className="text-sm text-muted-foreground/70 mb-4">
-              Tap the ❤️ on any video to save it here
+              المس ❤️ على أي فيديو ليُحفظ هنا
             </p>
             <Button onClick={() => navigate("/discover")}>
               <Play className="h-4 w-4 mr-2" />

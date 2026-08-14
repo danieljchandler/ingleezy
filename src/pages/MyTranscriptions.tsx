@@ -64,7 +64,7 @@ export default function MyTranscriptions() {
       .order("created_at", { ascending: false });
     console.log("[MyTranscriptions] loaded for user", user.id, { count: data?.length, error });
     if (error) {
-      toast.error("Couldn't load transcriptions", { description: error.message });
+      toast.error("تعذّر تحميل التفريغات", { description: error.message });
       setRows([]);
     } else {
       setRows((data ?? []) as SavedRow[]);
@@ -81,11 +81,11 @@ export default function MyTranscriptions() {
   async function handleDelete(id: string) {
     const { error } = await supabase.from("saved_transcriptions").delete().eq("id", id);
     if (error) {
-      toast.error("Failed to delete", { description: error.message });
+      toast.error("تعذّر الحذف", { description: error.message });
       return;
     }
     setRows((prev) => prev?.filter((r) => r.id !== id) ?? null);
-    toast.success("Transcription deleted");
+    toast.success("حُذف التفريغ");
   }
 
   return (
@@ -94,9 +94,9 @@ export default function MyTranscriptions() {
         <HomeButton />
         <div className="flex items-start justify-between gap-3 flex-wrap">
           <div>
-            <h1 className="text-2xl font-bold inline-flex items-center gap-2">My Transcriptions <InfoHint {...PAGE_HINTS["my-transcriptions"]} size="md" /></h1>
+            <h1 className="text-2xl font-bold inline-flex items-center gap-2">نصوصي المفرّغة <InfoHint {...PAGE_HINTS["my-transcriptions"]} size="md" /></h1>
             <p className="text-sm text-muted-foreground">
-              Everything you've saved from the Transcribe tool.
+              كل ما حفظته من أداة التفريغ.
             </p>
           </div>
           <Button
@@ -106,7 +106,7 @@ export default function MyTranscriptions() {
             onClick={() => setShowAll((v) => !v)}
           >
             <Shuffle className="h-3.5 w-3.5" />
-            {showAll ? "All dialects" : activeDialect}
+            {showAll ? "كل اللهجات" : activeDialect}
           </Button>
         </div>
 
@@ -120,11 +120,11 @@ export default function MyTranscriptions() {
               <FileAudio className="h-10 w-10 mx-auto text-muted-foreground" />
               <p className="text-muted-foreground">
                 {rows && rows.length > 0
-                  ? `No saved transcriptions for ${activeDialect}. Toggle to see all.`
-                  : "No saved transcriptions yet."}
+                  ? `لا تفريغات محفوظة لـ${activeDialect}. بدّل لعرض الكل.`
+                  : "لا تفريغات محفوظة بعد."}
               </p>
               {(!rows || rows.length === 0) && (
-                <Button onClick={() => navigate("/transcribe")}>Go to Transcribe</Button>
+                <Button onClick={() => navigate("/transcribe")}>اذهب إلى التفريغ</Button>
               )}
             </CardContent>
           </Card>
@@ -190,13 +190,13 @@ export default function MyTranscriptions() {
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
-                            <AlertDialogTitle>Delete this transcription?</AlertDialogTitle>
+                            <AlertDialogTitle>أتريد حذف هذا التفريغ؟</AlertDialogTitle>
                             <AlertDialogDescription>
-                              This permanently removes "{r.title}". This action cannot be undone.
+                              سيُحذف «{r.title}» نهائياً. لا يمكن التراجع عن هذا.
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogCancel>إلغاء</AlertDialogCancel>
                             <AlertDialogAction onClick={() => handleDelete(r.id)}>
                               Delete
                             </AlertDialogAction>
