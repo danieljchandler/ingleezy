@@ -234,7 +234,7 @@ const Transcribe = () => {
         .maybeSingle();
       if (cancelled) return;
       if (error || !data) {
-        toast.error("Couldn't load saved transcription", { description: error?.message });
+        toast.error("تعذّر تحميل التفريغ المحفوظ", { description: error?.message });
         return;
       }
       setTranscriptResult({
@@ -247,7 +247,7 @@ const Transcribe = () => {
       if (data.audio_url) setAudioUrl(data.audio_url);
       setIsSaved(true);
       setSaveTitle(data.title ?? "");
-      toast.success(`Opened "${data.title}"`);
+      toast.success(`فُتح «${data.title}»`);
     })();
     return () => {
       cancelled = true;
@@ -298,7 +298,7 @@ const Transcribe = () => {
       if (unloadAt && unloadActive === "1") {
         const crashAge = Date.now() - new Date(unloadAt).getTime();
         if (crashAge < 10_000) {
-          toast.error("Page reloaded during upload", {
+          toast.error("أُعيد تحميل الصفحة أثناء الرفع", {
             description: unloadPhase ? `Last phase: ${unloadPhase}` : "An unexpected reload was detected.",
           });
         }
@@ -362,12 +362,12 @@ const Transcribe = () => {
           !validTypes.includes(selectedFile.type) &&
           !selectedFile.name.match(/\.(mp3|wav|m4a|ogg|mp4|webm|mov)$/i)
         ) {
-          toast.error("Unsupported file type", { description: "Please upload an audio or video file" });
+          toast.error("نوع ملف غير مدعوم", { description: "Please upload an audio or video file" });
           return;
         }
 
         if (!isAdmin && isVideoFile(selectedFile)) {
-          toast.error("Video uploads are admin-only", { description: "Please upload an audio file (MP3, WAV, M4A, OGG)" });
+          toast.error("رفع الفيديو للإدارة فقط", { description: "Please upload an audio file (MP3, WAV, M4A, OGG)" });
           if (fileInputRef.current) fileInputRef.current.value = "";
           return;
         }
@@ -382,7 +382,7 @@ const Transcribe = () => {
     } catch (err) {
       console.error("handleFileSelect error:", err);
       setDebugTrace({ phase: "fileSelectError", at: new Date().toISOString(), message: err instanceof Error ? err.message : String(err) });
-      toast.error("Could not select the file");
+      toast.error("تعذّر اختيار الملف");
     }
   };
 
@@ -392,7 +392,7 @@ const Transcribe = () => {
       const droppedFile = e.dataTransfer.files?.[0];
       if (droppedFile) {
         if (!isAdmin && isVideoFile(droppedFile)) {
-          toast.error("Video uploads are admin-only", { description: "Please upload an audio file (MP3, WAV, M4A, OGG)" });
+          toast.error("رفع الفيديو للإدارة فقط", { description: "Please upload an audio file (MP3, WAV, M4A, OGG)" });
           return;
         }
         setFile(droppedFile);
@@ -404,7 +404,7 @@ const Transcribe = () => {
       }
     } catch (err) {
       console.error("handleDrop error:", err);
-      toast.error("Could not load the file");
+      toast.error("تعذّر تحميل الملف");
     }
   };
 
@@ -449,11 +449,11 @@ const Transcribe = () => {
     try {
       const parsed = new URL(trimmed);
       if (!parsed.hostname.includes('.')) {
-        toast.error("Invalid URL", { description: "Please enter a valid URL (e.g. https://youtube.com/watch?v=...)" });
+        toast.error("رابط غير صالح", { description: "Please enter a valid URL (e.g. https://youtube.com/watch?v=...)" });
         return;
       }
     } catch {
-      toast.error("Invalid URL", { description: "Please enter a valid URL" });
+      toast.error("رابط غير صالح", { description: "Please enter a valid URL" });
       return;
     }
 
@@ -484,7 +484,7 @@ const Transcribe = () => {
       
       // Check if we got cached transcription data
       if (data?.cached && data?.transcriptionData) {
-        toast.success("Using cached transcription!", {
+        toast.success("استخدمنا تفريغاً مخزّناً!", {
           description: `Processed ${data.cacheAge ? Math.floor(data.cacheAge) : '?'} days ago • ${data.processingEngines?.length || 0} engines`,
           duration: 5000,
         });
@@ -515,13 +515,13 @@ const Transcribe = () => {
       setAudioUrl(URL.createObjectURL(downloadedFile));
       detectFileDuration(downloadedFile);
 
-      toast.success("File downloaded!", {
+      toast.success("تم تنزيل الملف!", {
         description: `${filename} (${(data.size / 1024 / 1024).toFixed(1)}MB)`,
       });
     } catch (err) {
       console.error("URL processing error:", err);
-      toast.error("Failed to process URL", {
-        description: err instanceof Error ? err.message : "An unexpected error occurred",
+      toast.error("تعذّرت معالجة الرابط", {
+        description: err instanceof Error ? err.message : "حدث خطأ غير متوقع",
       });
     } finally {
       setIsLoadingUrl(false);
@@ -568,12 +568,12 @@ const Transcribe = () => {
         body,
       });
 
-      if (error) throw new Error(error.message || "Analysis failed");
-      if (!data?.success || !data.result) throw new Error(data?.error || "Analysis failed");
+      if (error) throw new Error(error.message || "فشل التحليل");
+      if (!data?.success || !data.result) throw new Error(data?.error || "فشل التحليل");
 
       const normalized = normalizeTranscriptResult(data.result);
 
-      toast.success("Analysis complete!", {
+      toast.success("اكتمل التحليل!", {
         description: `Extracted ${normalized.vocabulary.length} words and ${normalized.lines.length} sentences`,
       });
 
@@ -594,7 +594,7 @@ const Transcribe = () => {
     } catch (error) {
       console.error("Analysis error:", error);
       setDebugTrace({ phase: "error:analyze", at: new Date().toISOString(), message: error instanceof Error ? error.message : String(error) });
-      toast.error("Analysis failed", { description: error instanceof Error ? error.message : "An unexpected error occurred" });
+      toast.error("فشل التحليل", { description: error instanceof Error ? error.message : "حدث خطأ غير متوقع" });
       return null;
     } finally {
       setIsAnalyzing(false);
@@ -911,7 +911,7 @@ const Transcribe = () => {
     } catch (error) {
       console.error("Transcription error:", error);
       setDebugTrace({ phase: "error", at: new Date().toISOString(), message: error instanceof Error ? error.message : String(error) });
-      toast.error("Transcription failed", { description: error instanceof Error ? error.message : "An unexpected error occurred" });
+      toast.error("فشل التفريغ", { description: error instanceof Error ? error.message : "حدث خطأ غير متوقع" });
     } finally {
       if (progressInterval) clearInterval(progressInterval);
       setIsProcessing(false);
@@ -931,12 +931,12 @@ const Transcribe = () => {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    toast.success("Export successful!");
+    toast.success("تم التصدير!");
   };
 
   const handleSaveClick = () => {
     if (!isAuthenticated) {
-      toast.error("Please log in first", { description: "You need an account to save transcriptions" });
+      toast.error("سجّل الدخول أولاً", { description: "You need an account to save transcriptions" });
       return;
     }
     const defaultTitle = file?.name?.replace(/\.[^/.]+$/, "") || `Transcription ${new Date().toLocaleDateString('en-US')}`;
@@ -967,10 +967,10 @@ const Transcribe = () => {
       if (error) throw error;
       setIsSaved(true);
       setShowSaveDialog(false);
-      toast.success("Transcription saved!");
+      toast.success("حُفظ التفريغ!");
     } catch (error) {
       console.error("Save error:", error);
-      toast.error("Save failed", { description: error instanceof Error ? error.message : "An unexpected error occurred" });
+      toast.error("فشل الحفظ", { description: error instanceof Error ? error.message : "حدث خطأ غير متوقع" });
     } finally {
       setIsSaving(false);
     }
@@ -979,7 +979,7 @@ const Transcribe = () => {
   const handleAddToVocabSection = (word: VocabItem) => {
     if (!transcriptResult) return;
     if (vocabSectionWords.has(word.arabic)) {
-      toast.info("Word already in vocab section");
+      toast.info("الكلمة موجودة في قسم المفردات");
       return;
     }
     setTranscriptResult(prev => {
@@ -989,15 +989,15 @@ const Transcribe = () => {
       return { ...prev, vocabulary: [...prev.vocabulary, word] };
     });
     setVocabSectionWords(prev => new Set(prev).add(word.arabic));
-    toast.success("Word added to vocab section");
+    toast.success("أُضيفت الكلمة إلى قسم المفردات");
   };
   
   const handleSaveToMyWords = async (word: VocabItem) => {
     if (!isAuthenticated) {
-      toast.error("Please log in first", { description: "You need an account to save words" });
+      toast.error("سجّل الدخول أولاً", { description: "You need an account to save words" });
       return;
     }
-    if (savedWords.has(word.arabic)) { toast.info("Word already saved"); return; }
+    if (savedWords.has(word.arabic)) { toast.info("الكلمة محفوظة من قبل"); return; }
     try {
       console.log("Save to My Words - VocabItem:", JSON.stringify({ arabic: word.arabic, sentenceText: word.sentenceText, sentenceEnglish: word.sentenceEnglish, startMs: word.startMs, endMs: word.endMs }));
       let sentenceAudioUrl: string | undefined;
@@ -1050,13 +1050,13 @@ const Transcribe = () => {
         sentence_audio_url: sentenceAudioUrl,
       });
       setSavedWords(prev => new Set(prev).add(word.arabic));
-      toast.success("Word saved to My Words");
+      toast.success("حُفظت الكلمة في كلماتي");
     } catch (error: unknown) {
       if (error instanceof Error && error.message?.includes("duplicate")) {
         setSavedWords(prev => new Set(prev).add(word.arabic));
-        toast.info("Word already saved");
+        toast.info("الكلمة محفوظة من قبل");
       } else {
-        toast.error("Failed to save word");
+        toast.error("تعذّر حفظ الكلمة");
       }
     }
   };
@@ -1089,9 +1089,7 @@ const Transcribe = () => {
         <div className="flex items-center gap-4">
           <HomeButton />
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-foreground inline-flex items-center gap-2">
-              Transcribe Audio
-              <InfoHint {...PAGE_HINTS["transcribe"]} size="md" />
+            <h1 className="text-2xl md:text-3xl font-bold text-foreground inline-flex items-center gap-2">تفريغ الصوت<InfoHint {...PAGE_HINTS["transcribe"]} size="md" />
             </h1>
             <p className="text-muted-foreground">
               {isAdmin
@@ -1104,20 +1102,16 @@ const Transcribe = () => {
         {/* Input Area with Tabs */}
         <Card>
           <CardHeader>
-            <CardTitle>Content Source</CardTitle>
+            <CardTitle>مصدر المحتوى</CardTitle>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="upload">
               <TabsList className={cn("grid w-full", isAdmin ? "grid-cols-2" : "grid-cols-1")}>
                 <TabsTrigger value="upload" className="gap-2">
-                  <Upload className="h-4 w-4" />
-                  Upload File
-                </TabsTrigger>
+                  <Upload className="h-4 w-4" />رفع ملف</TabsTrigger>
                 {isAdmin && (
                   <TabsTrigger value="url" className="gap-2">
-                    <Link2 className="h-4 w-4" />
-                    URL
-                  </TabsTrigger>
+                    <Link2 className="h-4 w-4" />رابط</TabsTrigger>
                 )}
               </TabsList>
 
@@ -1158,7 +1152,7 @@ const Transcribe = () => {
                   ) : (
                     <label htmlFor="file-upload" className="cursor-pointer">
                       <Upload className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                      <p className="text-foreground font-medium">Click or drag a file here</p>
+                      <p className="text-foreground font-medium">المس أو اسحب ملفاً هنا</p>
                       <p className="text-sm text-muted-foreground mt-1">
                         {isAdmin ? "MP3, WAV, M4A, OGG, MP4, WebM, MOV" : "MP3, WAV, M4A, OGG"}
                       </p>
@@ -1175,7 +1169,7 @@ const Transcribe = () => {
                       <Input
                         value={urlInput}
                         onChange={(e) => setUrlInput(e.target.value)}
-                        placeholder="Paste a YouTube, TikTok, Instagram, or any video URL..."
+                        placeholder="الصق رابط يوتيوب أو تيك توك أو إنستغرام أو أي فيديو..."
                         dir="ltr"
                         className="font-mono text-sm"
                         disabled={isLoadingUrl || isProcessing}
@@ -1222,14 +1216,14 @@ const Transcribe = () => {
                 onClick={() => {
                   try { void transcribeFile(); } catch (err) {
                     console.error("transcribeFile handler error:", err);
-                    toast.error("An unexpected error occurred");
+                    toast.error("حدث خطأ غير متوقع");
                   }
                 }}
                 disabled={isProcessing}
                 className="w-full mt-4"
               >
                 {isProcessing ? (
-                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Transcribing...</>
+                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" />جارٍ التفريغ...</>
                 ) : "Start Transcription"}
               </Button>
             )}
@@ -1250,16 +1244,16 @@ const Transcribe = () => {
         <Dialog open={showSaveDialog} onOpenChange={setShowSaveDialog}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Save Transcription</DialogTitle>
-              <DialogDescription>Enter a title to save this transcription to your account</DialogDescription>
+              <DialogTitle>احفظ التفريغ</DialogTitle>
+              <DialogDescription>أدخل عنواناً لحفظ هذا التفريغ في حسابك</DialogDescription>
             </DialogHeader>
             <div className="py-4">
-              <Input value={saveTitle} onChange={(e) => setSaveTitle(e.target.value)} placeholder="Transcription title..." />
+              <Input value={saveTitle} onChange={(e) => setSaveTitle(e.target.value)} placeholder="عنوان التفريغ..." />
             </div>
             <DialogFooter className="gap-2 sm:gap-0">
-              <Button variant="outline" onClick={() => setShowSaveDialog(false)}>Cancel</Button>
+              <Button variant="outline" onClick={() => setShowSaveDialog(false)}>إلغاء</Button>
               <Button onClick={saveTranscription} disabled={isSaving}>
-                {isSaving ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" />Saving...</>) : (<><Save className="mr-2 h-4 w-4" />Save</>)}
+                {isSaving ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" />جارٍ الحفظ...</>) : (<><Save className="mr-2 h-4 w-4" />حفظ</>)}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -1269,9 +1263,7 @@ const Transcribe = () => {
         {currentUrlFromParams && lines.length > 0 && (
           <div className="mb-4">
             <Badge variant="secondary" className="bg-accent text-accent-foreground border-border">
-              <Sparkles className="w-3 h-3 mr-1" />
-              Instant result from cache
-            </Badge>
+              <Sparkles className="w-3 h-3 mr-1" />نتيجة فورية من الذاكرة المؤقتة</Badge>
           </div>
         )}
 
@@ -1280,7 +1272,7 @@ const Transcribe = () => {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <div className="space-y-2">
-                <CardTitle>Transcript</CardTitle>
+                <CardTitle>النص</CardTitle>
                 <CardDescription>{lines.length} {lines.length === 1 ? "sentence" : "sentences"}</CardDescription>
                 {(transcriptResult?.dialect || transcriptResult?.difficulty) && (
                   <div className="flex gap-2 flex-wrap">
@@ -1312,11 +1304,10 @@ const Transcribe = () => {
               </div>
               <div className="flex gap-2">
                 <Button onClick={handleSaveClick} variant={isSaved ? "secondary" : "default"} disabled={isSaved}>
-                  {isSaved ? (<><Check className="mr-2 h-4 w-4" />Saved</>) : (<><Save className="mr-2 h-4 w-4" />Save</>)}
+                  {isSaved ? (<><Check className="mr-2 h-4 w-4" />محفوظ</>) : (<><Save className="mr-2 h-4 w-4" />حفظ</>)}
                 </Button>
                 <Button onClick={exportTranscript} variant="outline">
-                  <Download className="mr-2 h-4 w-4" />Export
-                </Button>
+                  <Download className="mr-2 h-4 w-4" />تصدير</Button>
               </div>
             </CardHeader>
             <CardContent>
@@ -1334,16 +1325,15 @@ const Transcribe = () => {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
-                <CardTitle>Transcript</CardTitle>
+                <CardTitle>النص</CardTitle>
                 <CardDescription>{transcript.length} characters</CardDescription>
               </div>
               <div className="flex gap-2">
                 <Button onClick={handleSaveClick} variant={isSaved ? "secondary" : "default"} disabled={isSaved}>
-                  {isSaved ? (<><Check className="mr-2 h-4 w-4" />Saved</>) : (<><Save className="mr-2 h-4 w-4" />Save</>)}
+                  {isSaved ? (<><Check className="mr-2 h-4 w-4" />محفوظ</>) : (<><Save className="mr-2 h-4 w-4" />حفظ</>)}
                 </Button>
                 <Button onClick={exportTranscript} variant="outline">
-                  <Download className="mr-2 h-4 w-4" />Export
-                </Button>
+                  <Download className="mr-2 h-4 w-4" />تصدير</Button>
               </div>
             </CardHeader>
             <CardContent>
@@ -1359,8 +1349,7 @@ const Transcribe = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Type className="h-5 w-5 text-primary" />On-Screen Text
-              </CardTitle>
+                <Type className="h-5 w-5 text-primary" />نص على الشاشة</CardTitle>
               <CardDescription>
                 Text overlays detected in the video — captions, title cards, or contextual graphics that aren't part of the spoken transcript.
               </CardDescription>
@@ -1408,8 +1397,7 @@ const Transcribe = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <BookOpen className="h-5 w-5 text-primary" />Key Vocabulary
-              </CardTitle>
+                <BookOpen className="h-5 w-5 text-primary" />مفردات أساسية</CardTitle>
               <CardDescription>
                 {vocabulary.length} words extracted from the text
                 {isAuthenticated && " — tap + to add a word to your list"}
@@ -1422,7 +1410,7 @@ const Transcribe = () => {
                   const isSavedWord = savedWords.has(wordKey);
                   
                   const handleAddWord = async () => {
-                    if (!isAuthenticated) { toast.error("Please log in first"); return; }
+                    if (!isAuthenticated) { toast.error("سجّل الدخول أولاً"); return; }
                     
                     // Auto-match to a sentence containing this word
                     const matchedLine = lines.find(l => 
@@ -1471,8 +1459,8 @@ const Transcribe = () => {
         {grammarPoints.length > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2"><Languages className="h-5 w-5 text-primary" />Grammar Points</CardTitle>
-              <CardDescription>Arabic grammar patterns found in the text</CardDescription>
+              <CardTitle className="flex items-center gap-2"><Languages className="h-5 w-5 text-primary" />نقاط القواعد</CardTitle>
+              <CardDescription>أنماط القواعد الإنجليزية الموجودة في النص</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -1496,7 +1484,7 @@ const Transcribe = () => {
         {culturalContext && (
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2"><Sparkles className="h-5 w-5 text-primary" />Cultural Context</CardTitle>
+              <CardTitle className="flex items-center gap-2"><Sparkles className="h-5 w-5 text-primary" />السياق الثقافي</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground leading-relaxed">{culturalContext}</p>

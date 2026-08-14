@@ -62,7 +62,7 @@ test.describe("reaching the page", () => {
 
     await page.goto("/transcribe");
 
-    await expect(page.getByRole("heading", { name: /Transcribe Audio/ })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /تفريغ الصوت/ })).toBeVisible();
   });
 });
 
@@ -73,11 +73,11 @@ test.describe("what a learner may upload", () => {
 
   test("offers no URL tab", async ({ page }) => {
     await page.goto("/transcribe");
-    await expect(page.getByRole("tab", { name: "Upload File" })).toBeVisible();
+    await expect(page.getByRole("tab", { name: "رفع ملف" })).toBeVisible();
 
     // Pulling media off YouTube and TikTok is an admin capability: it runs the
     // download-media function, which burns third-party API quota per call.
-    await expect(page.getByRole("tab", { name: "URL" })).toHaveCount(0);
+    await expect(page.getByRole("tab", { name: "رابط" })).toHaveCount(0);
   });
 
   test("takes an audio file and shows what was picked", async ({ page }) => {
@@ -92,7 +92,7 @@ test.describe("what a learner may upload", () => {
     await page.goto("/transcribe");
     await page.setInputFiles("#file-upload", aVideoFile());
 
-    await expect(page.getByText(/Video uploads are admin-only/i)).toBeVisible();
+    await expect(page.getByText(/رفع الفيديو للإدارة فقط/)).toBeVisible();
     await expect(page.getByRole("button", { name: "Start Transcription" })).toHaveCount(0);
   });
 
@@ -104,12 +104,12 @@ test.describe("what a learner may upload", () => {
       buffer: Buffer.from("not media"),
     });
 
-    await expect(page.getByText(/Unsupported file type/i)).toBeVisible();
+    await expect(page.getByText(/نوع ملف غير مدعوم/)).toBeVisible();
   });
 
   test("keeps no transcribe button before a file is chosen", async ({ page }) => {
     await page.goto("/transcribe");
-    await expect(page.getByRole("tab", { name: "Upload File" })).toBeVisible();
+    await expect(page.getByRole("tab", { name: "رفع ملف" })).toBeVisible();
 
     await expect(page.getByRole("button", { name: "Start Transcription" })).toHaveCount(0);
   });
@@ -120,13 +120,13 @@ test.describe("what a learner may upload", () => {
 
     await page.getByText("clip.mp3").locator("xpath=../..").getByRole("button").click();
 
-    await expect(page.getByText("Click or drag a file here")).toBeVisible();
+    await expect(page.getByText("المس أو اسحب ملفاً هنا")).toBeVisible();
     await expect(page.getByRole("button", { name: "Start Transcription" })).toHaveCount(0);
   });
 
   test("accepts a dropped file the picker would have rejected", async ({ page }) => {
     await page.goto("/transcribe");
-    await expect(page.getByText("Click or drag a file here")).toBeVisible();
+    await expect(page.getByText("المس أو اسحب ملفاً هنا")).toBeVisible();
 
     await page.evaluate(() => {
       const transfer = new DataTransfer();
@@ -152,13 +152,13 @@ test.describe("what an admin may upload", () => {
   test("offers the URL tab", async ({ page }) => {
     await page.goto("/transcribe");
 
-    await expect(page.getByRole("tab", { name: "URL" })).toBeVisible();
+    await expect(page.getByRole("tab", { name: "رابط" })).toBeVisible();
   });
 
   test("takes a video file", async ({ page }) => {
     await page.goto("/transcribe");
     // Waiting on the URL tab is waiting on `useAdminAuth` — see the race below.
-    await expect(page.getByRole("tab", { name: "URL" })).toBeVisible();
+    await expect(page.getByRole("tab", { name: "رابط" })).toBeVisible();
 
     await page.setInputFiles("#file-upload", aVideoFile("reel.mp4"));
 
@@ -170,7 +170,7 @@ test.describe("what an admin may upload", () => {
     db.delayRpc("has_role", 1500);
 
     await page.goto("/transcribe");
-    await expect(page.getByText("Click or drag a file here")).toBeVisible();
+    await expect(page.getByText("المس أو اسحب ملفاً هنا")).toBeVisible();
     await page.setInputFiles("#file-upload", aVideoFile("reel.mp4"));
 
     // A race, pinned. `useAdminAuth` resolves over three `has_role` RPCs, and
@@ -180,14 +180,14 @@ test.describe("what an admin may upload", () => {
     // defers the check — an admin who picks a video quickly is told video is
     // admin-only, and the input is cleared underneath them. Reloading fixes it,
     // which is what makes it easy to dismiss as a glitch.
-    await expect(page.getByText(/Video uploads are admin-only/i)).toBeVisible();
+    await expect(page.getByText(/رفع الفيديو للإدارة فقط/)).toBeVisible();
     await expect(page.getByText("reel.mp4")).toHaveCount(0);
   });
 
   test("rejects a URL that is not one", async ({ page }) => {
     await page.goto("/transcribe");
-    await page.getByRole("tab", { name: "URL" }).click();
-    await page.getByPlaceholder(/Paste a YouTube/).fill("not a url at all");
+    await page.getByRole("tab", { name: "رابط" }).click();
+    await page.getByPlaceholder(/الصق رابط يوتيوب/).fill("not a url at all");
     await page.getByRole("button", { name: "Extract" }).click();
 
     await expect(page.getByText(/Please enter a valid URL/i)).toBeVisible();
@@ -202,8 +202,8 @@ test.describe("what an admin may upload", () => {
     });
 
     await page.goto("/transcribe");
-    await page.getByRole("tab", { name: "URL" }).click();
-    await page.getByPlaceholder(/Paste a YouTube/).fill("https://youtube.com/watch?v=abc123");
+    await page.getByRole("tab", { name: "رابط" }).click();
+    await page.getByPlaceholder(/الصق رابط يوتيوب/).fill("https://youtube.com/watch?v=abc123");
     await page.getByRole("button", { name: "Extract" }).click();
 
     // The URL path deliberately converges on the upload path rather than being
@@ -219,8 +219,8 @@ test.describe("what an admin may upload", () => {
     db.seed("content_import_logs", []);
 
     await page.goto("/transcribe");
-    await page.getByRole("tab", { name: "URL" }).click();
-    await page.getByPlaceholder(/Paste a YouTube/).fill("https://www.tiktok.com/@someone/video/1");
+    await page.getByRole("tab", { name: "رابط" }).click();
+    await page.getByPlaceholder(/الصق رابط يوتيوب/).fill("https://www.tiktok.com/@someone/video/1");
     await page.getByRole("button", { name: "Extract" }).click();
 
     await expect
@@ -246,8 +246,8 @@ test.describe("what an admin may upload", () => {
     });
 
     await page.goto("/transcribe");
-    await page.getByRole("tab", { name: "URL" }).click();
-    await page.getByPlaceholder(/Paste a YouTube/).fill("https://youtube.com/watch?v=seen-before");
+    await page.getByRole("tab", { name: "رابط" }).click();
+    await page.getByPlaceholder(/الصق رابط يوتيوب/).fill("https://youtube.com/watch?v=seen-before");
     await page.getByRole("button", { name: "Extract" }).click();
 
     await expect(page.getByText("شلونك اليوم")).toBeVisible();
@@ -264,11 +264,11 @@ test.describe("what an admin may upload", () => {
     backend.stubFunctionFailure("download-media");
 
     await page.goto("/transcribe");
-    await page.getByRole("tab", { name: "URL" }).click();
-    await page.getByPlaceholder(/Paste a YouTube/).fill("https://youtube.com/watch?v=gone");
+    await page.getByRole("tab", { name: "رابط" }).click();
+    await page.getByPlaceholder(/الصق رابط يوتيوب/).fill("https://youtube.com/watch?v=gone");
     await page.getByRole("button", { name: "Extract" }).click();
 
-    await expect(page.getByText(/Failed to process URL/i)).toBeVisible();
+    await expect(page.getByText(/تعذّرت معالجة الرابط/)).toBeVisible();
   });
 });
 
@@ -383,7 +383,7 @@ test.describe("running the engines", () => {
     await chooseFile(page);
     await page.getByRole("button", { name: "Start Transcription" }).click();
 
-    await expect(page.getByText(/Transcription failed/i)).toBeVisible();
+    await expect(page.getByText(/فشل التفريغ/)).toBeVisible();
   });
 
   test("treats a 200 with no text as a failure too", async ({
@@ -404,7 +404,7 @@ test.describe("running the engines", () => {
     await chooseFile(page);
     await page.getByRole("button", { name: "Start Transcription" }).click();
 
-    await expect(page.getByText(/Transcription failed/i)).toBeVisible();
+    await expect(page.getByText(/فشل التفريغ/)).toBeVisible();
   });
 });
 
@@ -525,7 +525,7 @@ test.describe("handing the transcripts to the analyser", () => {
 
     // The expensive part already succeeded. Losing the transcript because the
     // optional second stage failed would waste the ASR spend and the wait.
-    await expect(page.getByText(/Analysis failed/i)).toBeVisible();
+    await expect(page.getByText(/فشل التحليل/)).toBeVisible();
     await expect(page.getByText("نص خام")).toBeVisible();
   });
 
@@ -558,9 +558,9 @@ test.describe("saving what came back", () => {
 
   test("offers the file's name as the default title", async ({ page }) => {
     await transcribe(page);
-    await page.getByRole("button", { name: "Save" }).click();
+    await page.getByRole("button", { name: "حفظ" }).click();
 
-    await expect(page.getByPlaceholder("Transcription title...")).toHaveValue("my-clip");
+    await expect(page.getByPlaceholder("عنوان التفريغ...")).toHaveValue("my-clip");
   });
 
   test("writes the transcript, the dialect and the engines that produced it", async ({
@@ -569,9 +569,9 @@ test.describe("saving what came back", () => {
   }) => {
     db.seed("saved_transcriptions", []);
     await transcribe(page);
-    await page.getByRole("button", { name: "Save" }).click();
-    await page.getByPlaceholder("Transcription title...").fill("Market chat");
-    await page.getByRole("button", { name: "Save", exact: true }).last().click();
+    await page.getByRole("button", { name: "حفظ" }).click();
+    await page.getByPlaceholder("عنوان التفريغ...").fill("Market chat");
+    await page.getByRole("button", { name: "حفظ", exact: true }).last().click();
 
     await expect.poll(() => db.rows("saved_transcriptions").length).toBe(1);
     const saved = db.rows("saved_transcriptions")[0];
@@ -589,17 +589,17 @@ test.describe("saving what came back", () => {
   test("marks the transcript as saved so it cannot be saved twice", async ({ page, db }) => {
     db.seed("saved_transcriptions", []);
     await transcribe(page);
-    await page.getByRole("button", { name: "Save" }).click();
-    await page.getByRole("button", { name: "Save", exact: true }).last().click();
+    await page.getByRole("button", { name: "حفظ" }).click();
+    await page.getByRole("button", { name: "حفظ", exact: true }).last().click();
 
-    await expect(page.getByRole("button", { name: "Saved" })).toBeDisabled();
+    await expect(page.getByRole("button", { name: "محفوظ" })).toBeDisabled();
   });
 
   test("stores an audio URL that will not survive the tab", async ({ page, db }) => {
     db.seed("saved_transcriptions", []);
     await transcribe(page);
-    await page.getByRole("button", { name: "Save" }).click();
-    await page.getByRole("button", { name: "Save", exact: true }).last().click();
+    await page.getByRole("button", { name: "حفظ" }).click();
+    await page.getByRole("button", { name: "حفظ", exact: true }).last().click();
 
     await expect.poll(() => db.rows("saved_transcriptions").length).toBe(1);
 
@@ -622,11 +622,11 @@ test.describe("saving what came back", () => {
     db.seed("saved_transcriptions", []);
     db.failAlways("saved_transcriptions", 500);
     await transcribe(page);
-    await page.getByRole("button", { name: "Save" }).click();
-    await page.getByRole("button", { name: "Save", exact: true }).last().click();
+    await page.getByRole("button", { name: "حفظ" }).click();
+    await page.getByRole("button", { name: "حفظ", exact: true }).last().click();
 
-    await expect(page.getByText(/Save failed/i)).toBeVisible();
-    await expect(page.getByRole("button", { name: "Saved" })).toHaveCount(0);
+    await expect(page.getByText(/فشل الحفظ/)).toBeVisible();
+    await expect(page.getByRole("button", { name: "محفوظ" })).toHaveCount(0);
   });
 });
 
@@ -660,7 +660,7 @@ test.describe("reopening a saved transcription", () => {
     await page.goto(`/transcribe?saved=${SAVED_ID}`);
 
     await expect(page.getByText("How much is this")).toBeVisible();
-    await expect(page.getByText('Opened "Souq haggling"')).toBeVisible();
+    await expect(page.getByText("فُتح «Souq haggling»")).toBeVisible();
   });
 
   test("offers to save a transcription that is already saved", async ({ page }) => {
@@ -673,16 +673,16 @@ test.describe("reopening a saved transcription", () => {
     // transcript in the same batch, so the effect always fires straight after
     // and wins. The guard works on the path it was written for (saving what you
     // just transcribed leaves the transcript unchanged) and not on this one.
-    await expect(page.getByRole("button", { name: "Save", exact: true })).toBeEnabled();
-    await expect(page.getByRole("button", { name: "Saved" })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "حفظ", exact: true })).toBeEnabled();
+    await expect(page.getByRole("button", { name: "محفوظ" })).toHaveCount(0);
   });
 
   test("saves a second copy of a transcription reopened from the library", async ({ page, db }) => {
     await page.goto(`/transcribe?saved=${SAVED_ID}`);
     await expect(page.getByText("How much is this")).toBeVisible();
 
-    await page.getByRole("button", { name: "Save", exact: true }).click();
-    await page.getByRole("button", { name: "Save", exact: true }).last().click();
+    await page.getByRole("button", { name: "حفظ", exact: true }).click();
+    await page.getByRole("button", { name: "حفظ", exact: true }).last().click();
 
     // The consequence of the reset above. Nothing dedupes on the way in, so
     // opening a saved transcription and pressing the button it offers grows the
@@ -706,7 +706,7 @@ test.describe("reopening a saved transcription", () => {
     // The query filters on `user_id` as well as `id`. RLS would stop this in
     // production, but the client-side filter is what makes the page's own
     // behaviour correct rather than incidentally correct.
-    await expect(page.getByText(/Couldn't load saved transcription/i)).toBeVisible();
+    await expect(page.getByText(/تعذّر تحميل التفريغ المحفوظ/)).toBeVisible();
     await expect(page.getByText("A secret")).toHaveCount(0);
   });
 
@@ -736,6 +736,6 @@ test.describe("reopening a saved transcription", () => {
   test("says so when the id does not resolve", async ({ page }) => {
     await page.goto("/transcribe?saved=cccccccc-0000-4000-8000-000000000009");
 
-    await expect(page.getByText(/Couldn't load saved transcription/i)).toBeVisible();
+    await expect(page.getByText(/تعذّر تحميل التفريغ المحفوظ/)).toBeVisible();
   });
 });

@@ -328,10 +328,12 @@ generation conditioning.
       Settings (+ Arabic labels on reasons/topics data), Auth,
       Onboarding, placement CTA.
       Remaining: Me-area pages (MyWords, Profile, analytics…),
-      DiscoverVideo player chrome, the smaller Me-area
-      tools (Transcribe, TutorUpload, LikedVideos, analytics, friends,
-      leaderboard, pricing) — pronunciation pages and scoreBand
-      labels now done
+      the learner-facing pass is now COMPLETE — every
+      hub, practice surface, content page, Me-area tool and the video
+      player speak Arabic. Admin stays English by design. What is left
+      is content-generator prompts (curriculum builder,
+      extract-concepts, extract-grammar-points) and the meme /
+      learn-from-X flip-or-prune decision
       — grammar drills, listening practice, conversation + live voice,
       and the vocab games/battles now done. Backend flips landed with
       them: listening-quiz generates English audio via the Brain's

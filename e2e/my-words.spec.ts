@@ -56,7 +56,7 @@ test.describe("the list", () => {
     db.seed("user_vocabulary", []);
     await page.goto("/my-words");
 
-    await expect(page.getByText(/no words|nothing saved|add from text/i).first()).toBeVisible();
+    await expect(page.getByText(/لا كلمات محفوظة|أضف من نص/).first()).toBeVisible();
   });
 
   test("does not claim an empty deck when the query failed", async ({ page, db }) => {
@@ -204,7 +204,7 @@ test.describe("root families", () => {
 
     await page.goto("/my-words");
 
-    await expect(page.getByText("Roots", { exact: true })).toBeVisible();
+    await expect(page.getByText("الجذور", { exact: true })).toBeVisible();
     // Biggest family first.
     await expect(page.getByRole("button", { name: /ك · ت · ب · 3/ })).toBeVisible();
     await expect(page.getByRole("button", { name: /د · ر · س · 2/ })).toBeVisible();
@@ -236,7 +236,7 @@ test.describe("root families", () => {
     await expect(page.getByText("كتاب")).toBeVisible();
     // Two families of one is not a shelf worth showing. The backfill prompt is
     // also absent, because every word here already has a root.
-    await expect(page.getByText("Roots", { exact: true })).toHaveCount(0);
+    await expect(page.getByText("الجذور", { exact: true })).toHaveCount(0);
   });
 
   test("offers to look up the roots that are missing, and never does it unasked", async ({ page, db, backend }) => {
@@ -254,7 +254,7 @@ test.describe("root families", () => {
     expect(backend.functionCalls.filter((c) => c.name === "enrich-word-roots")).toHaveLength(0);
 
     await page.getByRole("button", { name: /find roots for 2 words/i }).click();
-    await page.getByRole("button", { name: /^find roots$/i }).click();
+    await page.getByRole("button", { name: "ابحث عن الجذور" }).click();
 
     await expect
       .poll(() => backend.functionCalls.filter((c) => c.name === "enrich-word-roots").length)

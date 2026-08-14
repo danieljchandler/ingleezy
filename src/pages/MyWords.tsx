@@ -7,6 +7,7 @@ import { useDialect } from "@/contexts/DialectContext";
 import { Button } from "@/components/ui/button";
 import { BookOpen, Trash2, ChevronLeft, ChevronRight, Loader2, Shuffle, Sparkles, Quote, MessageCircleQuestion, Upload, CheckSquare, X, Languages } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { arCount } from "@/lib/strings";
 import { toast } from "sonner";
 import { AppShell } from "@/components/layout/AppShell";
 import { GenerateImageDialog } from "@/components/mywords/GenerateImageDialog";
@@ -178,7 +179,7 @@ const MyWords = () => {
         queryClient.invalidateQueries({ queryKey: ["root-index"] }),
       ]);
     } catch {
-      toast.error("Couldn't look up roots just now");
+      toast.error("تعذّر البحث عن الجذور الآن");
     } finally {
       setBackfilling(false);
     }
@@ -238,7 +239,14 @@ const MyWords = () => {
         const { error } = await supabase.from("user_vocabulary").delete().in("id", slice);
         if (error) throw error;
       }
-      toast.success(`Deleted ${ids.length} card${ids.length === 1 ? "" : "s"}`);
+      toast.success(
+        arCount(ids.length, {
+          one: "حُذفت بطاقة واحدة",
+          two: "حُذفت بطاقتان",
+          few: "بطاقات محذوفة",
+          many: "بطاقة محذوفة",
+        }),
+      );
       queryClient.invalidateQueries({ queryKey: ["user-vocabulary"] });
       queryClient.invalidateQueries({ queryKey: ["user-vocabulary-due"] });
       exitSelectMode();
@@ -266,11 +274,11 @@ const MyWords = () => {
       <AppShell>
         <div className="flex flex-col items-center justify-center py-24 text-center">
           <BookOpen className="h-12 w-12 text-muted-foreground mb-4" />
-          <h2 className="text-xl font-semibold mb-2">Sign in to view your words</h2>
+          <h2 className="text-xl font-semibold mb-2">سجّل الدخول لعرض كلماتك</h2>
           <p className="text-muted-foreground mb-6">
             Save vocabulary from transcriptions and review them with spaced repetition.
           </p>
-          <Button onClick={() => navigate("/auth")}>Sign In</Button>
+          <Button onClick={() => navigate("/auth")}>تسجيل الدخول</Button>
         </div>
       </AppShell>
     );
@@ -290,7 +298,7 @@ const MyWords = () => {
         </Button>
         <div className="flex items-center gap-2">
           <BookOpen className="h-6 w-6 text-primary" />
-          <h1 className="text-2xl font-bold text-foreground">My Words</h1>
+          <h1 className="text-2xl font-bold text-foreground">كلماتي</h1>
           <InfoHint {...PAGE_HINTS["my-words"]} />
         </div>
         <span className="text-sm text-muted-foreground">
@@ -306,7 +314,7 @@ const MyWords = () => {
           {mixAll ? "All Dialects" : activeDialect}
         </Button>
         <InfoHint
-          title="Mix all dialects"
+          title="اخلط كل اللهجات"
           body="Toggle this to review words from every dialect at once. Leave it off to stay focused on your current dialect only."
         />
       </div>
@@ -318,25 +326,19 @@ const MyWords = () => {
           variant="outline"
           className="w-full gap-2"
         >
-          <Wand2 className="h-4 w-4" />
-          AI suggestions
-        </Button>
+          <Wand2 className="h-4 w-4" />اقتراحات الذكاء الاصطناعي</Button>
         <Button
           onClick={() => navigate("/translate")}
           variant="outline"
           className="w-full gap-2"
         >
-          <Languages className="h-4 w-4" />
-          Add from text
-        </Button>
+          <Languages className="h-4 w-4" />أضف من نص</Button>
         <Button
           onClick={() => setAnkiOpen(true)}
           variant="outline"
           className="w-full gap-2"
         >
-          <Upload className="h-4 w-4" />
-          Import from Anki
-        </Button>
+          <Upload className="h-4 w-4" />استيراد من Anki</Button>
       </div>
 
       {/* Review button */}
@@ -356,7 +358,7 @@ const MyWords = () => {
         <div className="flex items-center justify-between p-4 border-b border-border bg-muted/30">
           <div className="flex items-center gap-2">
             <MessageCircleQuestion className="h-5 w-5 text-primary" />
-            <h2 className="font-semibold text-foreground">My Phrases</h2>
+            <h2 className="font-semibold text-foreground">عباراتي</h2>
             <InfoHint {...PAGE_HINTS["my-phrases"]} />
             <span className="text-xs text-muted-foreground">
               ({phraseStats?.total ?? 0})
@@ -415,9 +417,9 @@ const MyWords = () => {
                     e.stopPropagation();
                     try {
                       await deletePhrase.mutateAsync(p.id);
-                      toast.success("Phrase removed");
+                      toast.success("أُزيلت العبارة");
                     } catch {
-                      toast.error("Failed to remove phrase");
+                      toast.error("تعذّرت إزالة العبارة");
                     }
                   }}
                   disabled={deletePhrase.isPending}
@@ -440,17 +442,13 @@ const MyWords = () => {
       {(!words || words.length === 0) && (
         <div className="flex flex-col items-center justify-center py-16 text-center px-4">
           <BookOpen className="h-12 w-12 text-muted-foreground mb-4" />
-          <h2 className="text-lg font-semibold mb-2">No words saved yet</h2>
+          <h2 className="text-lg font-semibold mb-2">لا كلمات محفوظة بعد</h2>
           <p className="text-muted-foreground mb-6 max-w-sm">
             Start a lesson or watch a clip in Discover — tap any Arabic word to save it here, then review it with flashcards.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 w-full max-w-sm">
-            <Button className="flex-1 h-11" onClick={() => navigate("/learn")}>
-              Start a lesson
-            </Button>
-            <Button variant="outline" className="flex-1 h-11" onClick={() => navigate("/discover")}>
-              Browse Discover
-            </Button>
+            <Button className="flex-1 h-11" onClick={() => navigate("/learn")}>ابدأ درساً</Button>
+            <Button variant="outline" className="flex-1 h-11" onClick={() => navigate("/discover")}>تصفح اكتشف</Button>
           </div>
         </div>
       )}
@@ -461,7 +459,7 @@ const MyWords = () => {
           {/* Source row */}
           {(sourceCounts.anki > 0 && sourceCounts.app > 0) && (
             <div>
-              <p className="text-xs font-medium text-muted-foreground mb-1.5">Source</p>
+              <p className="text-xs font-medium text-muted-foreground mb-1.5">المصدر</p>
               <div className="flex flex-wrap gap-1.5">
                 <button
                   onClick={() => selectSource(null)}
@@ -471,9 +469,7 @@ const MyWords = () => {
                       ? "bg-primary text-primary-foreground border-primary"
                       : "bg-card border-border text-muted-foreground hover:text-foreground",
                   )}
-                >
-                  All
-                </button>
+                >الكل</button>
                 <button
                   onClick={() => selectSource(sourceFilter === "anki" ? null : "anki")}
                   className={cn(
@@ -503,7 +499,7 @@ const MyWords = () => {
           {/* Category row (shown when App selected, or when no source filter & no anki cards) */}
           {sourceFilter !== "anki" && categoryOptions.length > 0 && (
             <div>
-              <p className="text-xs font-medium text-muted-foreground mb-1.5">Category</p>
+              <p className="text-xs font-medium text-muted-foreground mb-1.5">التصنيف</p>
               <div className="flex flex-wrap gap-1.5">
                 <button
                   onClick={() => setCategoryFilter(null)}
@@ -513,9 +509,7 @@ const MyWords = () => {
                       ? "bg-primary text-primary-foreground border-primary"
                       : "bg-card border-border text-muted-foreground hover:text-foreground",
                   )}
-                >
-                  All
-                </button>
+                >الكل</button>
                 {categoryOptions.map(([src, n]) => (
                   <button
                     key={src}
@@ -537,7 +531,7 @@ const MyWords = () => {
           {/* Decks row (Anki only) */}
           {sourceFilter !== "app" && deckOptions.length > 0 && (
             <div>
-              <p className="text-xs font-medium text-muted-foreground mb-1.5">Decks</p>
+              <p className="text-xs font-medium text-muted-foreground mb-1.5">المجموعات</p>
               <div className="flex flex-wrap gap-1.5">
                 <button
                   onClick={() => setDeckFilter(null)}
@@ -547,9 +541,7 @@ const MyWords = () => {
                       ? "bg-primary text-primary-foreground border-primary"
                       : "bg-card border-border text-muted-foreground hover:text-foreground",
                   )}
-                >
-                  All
-                </button>
+                >الكل</button>
                 {deckOptions.map(([name, n]) => (
                   <button
                     key={name}
@@ -570,7 +562,7 @@ const MyWords = () => {
 
           {tagOptions.length > 0 && (
             <div>
-              <p className="text-xs font-medium text-muted-foreground mb-1.5">Tags</p>
+              <p className="text-xs font-medium text-muted-foreground mb-1.5">الوسوم</p>
               <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto">
                 <button
                   onClick={() => setTagFilter(null)}
@@ -580,9 +572,7 @@ const MyWords = () => {
                       ? "bg-primary text-primary-foreground border-primary"
                       : "bg-card border-border text-muted-foreground hover:text-foreground",
                   )}
-                >
-                  All
-                </button>
+                >الكل</button>
                 {tagOptions.slice(0, 40).map(([tag, n]) => (
                   <button
                     key={tag}
@@ -608,7 +598,7 @@ const MyWords = () => {
           */}
           {rootFamiliesEnabled && (rootOptions.length > 0 || rootlessCount > 0) && (
             <div>
-              <p className="text-xs font-medium text-muted-foreground mb-1.5">Roots</p>
+              <p className="text-xs font-medium text-muted-foreground mb-1.5">الجذور</p>
               {/* No chip row at all before any family exists — an "All" chip on
                   its own filters nothing and only asks to be clicked. */}
               {rootOptions.length > 0 && (
@@ -621,9 +611,7 @@ const MyWords = () => {
                       ? "bg-primary text-primary-foreground border-primary"
                       : "bg-card border-border text-muted-foreground hover:text-foreground",
                   )}
-                >
-                  All
-                </button>
+                >الكل</button>
                 {rootOptions.slice(0, 24).map((family) => (
                   <button
                     key={family.key}
@@ -673,9 +661,7 @@ const MyWords = () => {
         <div className="mb-2 flex items-center justify-between gap-2 flex-wrap">
           {!selectMode ? (
             <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground" onClick={() => setSelectMode(true)}>
-              <CheckSquare className="h-4 w-4" />
-              Select
-            </Button>
+              <CheckSquare className="h-4 w-4" />تحديد</Button>
           ) : (
             <>
               <div className="flex items-center gap-2 text-sm">
@@ -684,9 +670,7 @@ const MyWords = () => {
                   Select all ({filteredWords.length})
                 </button>
                 {selectedIds.size > 0 && (
-                  <button className="text-xs text-muted-foreground hover:underline" onClick={() => setSelectedIds(new Set())}>
-                    Clear
-                  </button>
+                  <button className="text-xs text-muted-foreground hover:underline" onClick={() => setSelectedIds(new Set())}>إلغاء التحديد</button>
                 )}
               </div>
               <div className="flex items-center gap-1.5 ml-auto">
@@ -712,20 +696,18 @@ const MyWords = () => {
       <AlertDialog open={confirmBackfill} onOpenChange={setConfirmBackfill}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Find roots for your words?</AlertDialogTitle>
+            <AlertDialogTitle>أتريد البحث عن جذور كلماتك؟</AlertDialogTitle>
             <AlertDialogDescription>
               This asks the AI for the Arabic root of up to 120 words that don't have one yet,
               and uses some of your daily AI allowance. Each word is only ever looked up once.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={backfilling}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={backfilling}>إلغاء</AlertDialogCancel>
             <AlertDialogAction
               onClick={(e) => { e.preventDefault(); setConfirmBackfill(false); findRoots(); }}
               disabled={backfilling}
-            >
-              Find roots
-            </AlertDialogAction>
+            >ابحث عن الجذور</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -739,7 +721,7 @@ const MyWords = () => {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={bulkDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={bulkDeleting}>إلغاء</AlertDialogCancel>
             <AlertDialogAction
               onClick={(e) => { e.preventDefault(); handleBulkDelete(); }}
               disabled={bulkDeleting}
@@ -815,7 +797,7 @@ const MyWords = () => {
                             const key = rootKey(word.root)!;
                             setRootFilter(rootFilter === key ? null : key);
                           }}
-                          title="Show every word you know from this root"
+                          title="أظهر كل كلماتك من هذا الجذر"
                           className="text-xs font-arabic text-muted-foreground bg-muted hover:bg-muted/70 hover:text-foreground px-1.5 py-0.5 rounded transition-colors"
                           dir="rtl"
                         >
@@ -842,7 +824,7 @@ const MyWords = () => {
                         isExpanded ? "text-primary" : "text-muted-foreground"
                       )}
                       onClick={(e) => { e.stopPropagation(); toggleContext(word.id); }}
-                      title="Show original sentence"
+                      title="أظهر الجملة الأصلية"
                     >
                       <Quote className="h-4 w-4" />
                     </Button>
@@ -852,7 +834,7 @@ const MyWords = () => {
                     size="icon"
                     className="h-8 w-8 text-muted-foreground hover:text-primary"
                     onClick={(e) => { e.stopPropagation(); setImageDialogWord(word); }}
-                    title="Generate image"
+                    title="ولّد صورة"
                   >
                     <Sparkles className="h-4 w-4" />
                   </Button>
@@ -872,7 +854,7 @@ const MyWords = () => {
               </div>
               {hasContext && isExpanded && (
                 <div className="mt-3 ml-1 border-l-2 border-primary/30 pl-3 py-1 bg-muted/30 rounded-r">
-                  <p className="text-xs text-muted-foreground mb-1">Original context</p>
+                  <p className="text-xs text-muted-foreground mb-1">السياق الأصلي</p>
                   <p
                     className="text-sm text-foreground/90 font-arabic leading-relaxed"
                     dir="rtl"
@@ -904,7 +886,7 @@ const MyWords = () => {
             .update({ image_url: imageUrl })
             .eq("id", wordId);
           if (error) {
-            toast.error("Failed to save image");
+            toast.error("تعذّر حفظ الصورة");
             return;
           }
           queryClient.invalidateQueries({ queryKey: ["user-vocabulary"] });
