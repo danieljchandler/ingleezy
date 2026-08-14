@@ -103,7 +103,7 @@ const SouqNews = () => {
 
   const saveWord = (word: { english: string; arabic: string; sentenceText?: string; sentenceEnglish?: string }) => {
     if (!user) {
-      toast.error("Sign in to save words");
+      toast.error("سجّل دخولك عشان تحفظ الكلمات");
       return;
     }
     addVocab.mutate(
@@ -115,8 +115,8 @@ const SouqNews = () => {
         sentence_english: word.sentenceEnglish || undefined,
       },
       {
-        onSuccess: () => toast.success("Saved to My Words!"),
-        onError: () => toast.error("Failed to save"),
+        onSuccess: () => toast.success("حفظناها في كلماتي!"),
+        onError: () => toast.error("تعذّر الحفظ"),
       },
     );
   };
@@ -163,13 +163,13 @@ const SouqNews = () => {
         </div>
       ) : error ? (
         <div className="text-center py-12">
-          <p className="text-muted-foreground mb-4">Failed to load news</p>
-          <Button onClick={() => refetch()}>Try Again</Button>
+          <p className="text-muted-foreground mb-4">تعذّر تحميل الأخبار</p>
+          <Button onClick={() => refetch()}>جرّب مرة ثانية</Button>
         </div>
       ) : articles && articles.length === 0 ? (
         <div className="text-center py-12">
           <Newspaper className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
-          <p className="text-muted-foreground">No news found for today. Check back later!</p>
+          <p className="text-muted-foreground">ما فيه أخبار اليوم. ارجع لنا بعدين!</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -218,7 +218,7 @@ const SouqNews = () => {
                   className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-2"
                 >
                   {expanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
-                  {expanded ? "Hide Arabic" : "Show Arabic"}
+                  {expanded ? "أخفِ العربي" : "ورّني العربي"}
                 </button>
 
                 {expanded && (

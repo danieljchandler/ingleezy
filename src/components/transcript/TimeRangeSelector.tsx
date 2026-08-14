@@ -98,7 +98,7 @@ export const TimeRangeSelector = ({
   return (
     <div className="space-y-3" dir="ltr">
       <div className="flex items-center justify-between text-sm text-muted-foreground">
-        <span>Select segment to process</span>
+        <span>اختر المقطع اللي تبي تعالجه</span>
         <span className="font-mono text-xs">
           {/*
             The effective cap, not the configured one. On a forty-five-second

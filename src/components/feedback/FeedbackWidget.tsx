@@ -16,11 +16,11 @@ import { cn } from "@/lib/utils";
 type FeedbackType = "bug" | "idea" | "confusing" | "praise" | "other";
 
 const TYPES: { value: FeedbackType; label: string; icon: typeof Bug; color: string }[] = [
-  { value: "bug", label: "Bug", icon: Bug, color: "bg-red-500/10 text-red-600 border-red-500/30" },
-  { value: "idea", label: "Idea", icon: Lightbulb, color: "bg-amber-500/10 text-amber-600 border-amber-500/30" },
-  { value: "confusing", label: "Confusing", icon: HelpCircle, color: "bg-blue-500/10 text-blue-600 border-blue-500/30" },
-  { value: "praise", label: "Praise", icon: Heart, color: "bg-pink-500/10 text-pink-600 border-pink-500/30" },
-  { value: "other", label: "Other", icon: MoreHorizontal, color: "bg-muted text-muted-foreground border-border" },
+  { value: "bug", label: "خلل", icon: Bug, color: "bg-red-500/10 text-red-600 border-red-500/30" },
+  { value: "idea", label: "فكرة", icon: Lightbulb, color: "bg-amber-500/10 text-amber-600 border-amber-500/30" },
+  { value: "confusing", label: "مربك", icon: HelpCircle, color: "bg-blue-500/10 text-blue-600 border-blue-500/30" },
+  { value: "praise", label: "إطراء", icon: Heart, color: "bg-pink-500/10 text-pink-600 border-pink-500/30" },
+  { value: "other", label: "غير ذلك", icon: MoreHorizontal, color: "bg-muted text-muted-foreground border-border" },
 ];
 
 // Keep a small rolling buffer of recent console errors for context.
@@ -85,7 +85,7 @@ export function FeedbackWidget() {
       setShot(out.toDataURL("image/jpeg", 0.7));
     } catch (e) {
       console.error("Screenshot failed:", e);
-      toast.error("Couldn't capture screenshot.");
+      toast.error("تعذّر التقاط الشاشة.");
     } finally {
       setCapturing(false);
     }
@@ -126,7 +126,7 @@ export function FeedbackWidget() {
   const submit = async () => {
     const trimmed = message.trim();
     if (trimmed.length < 3) {
-      toast.error("Please write a few more words.");
+      toast.error("اكتب شوي زيادة من فضلك.");
       return;
     }
     setSubmitting(true);
@@ -143,7 +143,7 @@ export function FeedbackWidget() {
           screenshotPath = path;
         } catch (e) {
           console.error("Screenshot upload failed:", e);
-          toast.error("Screenshot upload failed — sending without it.");
+          toast.error("ما رُفعت الصورة — نرسل بدونها.");
         }
       }
       const ctx = {
@@ -163,14 +163,14 @@ export function FeedbackWidget() {
         screenshot_url: screenshotPath,
       });
       if (error) throw error;
-      toast.success("Thanks — feedback sent!");
+      toast.success("شكراً — وصلتنا ملاحظتك!");
       setMessage("");
       setType("bug");
       setShot(null);
       setOpen(false);
     } catch (err) {
       console.error("Failed to send feedback:", err);
-      toast.error("Could not send feedback. Please try again.");
+      toast.error("ما وصلت الملاحظة. جرّب مرة ثانية.");
     } finally {
       setSubmitting(false);
     }
@@ -183,7 +183,7 @@ export function FeedbackWidget() {
         type="button"
         data-feedback-ignore="true"
         onClick={openWithCapture}
-        aria-label="Send feedback"
+        aria-label="أرسل ملاحظة"
         className={cn(
           "fixed z-40 left-3 bottom-20 md:bottom-6 md:left-6",
           "h-12 w-12 rounded-full shadow-lg",
@@ -198,7 +198,7 @@ export function FeedbackWidget() {
         <SheetContent data-feedback-ignore="true" side="bottom" className="rounded-t-2xl max-h-[85vh] overflow-y-auto">
 
           <SheetHeader className="text-left">
-            <SheetTitle>Send feedback</SheetTitle>
+            <SheetTitle>أرسل ملاحظة</SheetTitle>
             <SheetDescription>
               Tell us what's broken, confusing, or great. We'll see your current page and dialect automatically.
             </SheetDescription>
@@ -206,7 +206,7 @@ export function FeedbackWidget() {
 
           <div className="mt-4 space-y-4">
             <div>
-              <div className="text-sm font-medium mb-2">Type</div>
+              <div className="text-sm font-medium mb-2">النوع</div>
               <div className="flex flex-wrap gap-2">
                 {TYPES.map((t) => {
                   const Icon = t.icon;
@@ -231,13 +231,13 @@ export function FeedbackWidget() {
 
             <div>
               <label htmlFor="fb-msg" className="text-sm font-medium block mb-2">
-                What happened?
+                وش صار؟
               </label>
               <Textarea
                 id="fb-msg"
                 value={message}
                 onChange={(e) => setMessage(e.target.value.slice(0, 4000))}
-                placeholder="Steps to reproduce, what you expected, what you saw…"
+                placeholder="وش صار، وش توقّعت، وكيف نعيدها…"
                 rows={5}
                 autoFocus
               />
@@ -248,7 +248,7 @@ export function FeedbackWidget() {
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
                   <Camera className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm font-medium">Attach screenshot</span>
+                  <span className="text-sm font-medium">أرفق لقطة شاشة</span>
                 </div>
                 <Switch
                   checked={includeShot}
@@ -264,14 +264,14 @@ export function FeedbackWidget() {
                     <div className="relative">
                       <img
                         src={shot}
-                        alt="Screenshot preview"
+                        alt="معاينة اللقطة"
                         className="w-full max-h-48 object-contain rounded-md border bg-background"
                       />
                       <button
                         type="button"
                         onClick={() => setShot(null)}
                         className="absolute top-1 right-1 h-6 w-6 rounded-full bg-background/90 border flex items-center justify-center hover:bg-background"
-                        aria-label="Remove screenshot"
+                        aria-label="احذف اللقطة"
                       >
                         <X className="h-3.5 w-3.5" />
                       </button>
@@ -299,7 +299,7 @@ export function FeedbackWidget() {
                     ) : (
                       <Camera className="h-3.5 w-3.5 mr-1.5" />
                     )}
-                    {shot ? "Retake screenshot" : "Capture screenshot"}
+                    {shot ? "أعد الالتقاط" : "التقط لقطة"}
                   </Button>
                 </div>
               )}
@@ -315,7 +315,7 @@ export function FeedbackWidget() {
                 Cancel
               </Button>
               <Button onClick={submit} disabled={submitting || message.trim().length < 3}>
-                {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Send feedback"}
+                {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "أرسل الملاحظة"}
               </Button>
             </div>
           </div>

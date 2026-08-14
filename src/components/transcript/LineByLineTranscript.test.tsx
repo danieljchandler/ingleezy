@@ -183,8 +183,8 @@ const isRevealed = (card: HTMLElement) =>
 
 const sentenceOf = (card: HTMLElement) => card.querySelector<HTMLElement>('div[dir="rtl"]')!;
 
-const showAllSwitch = () => screen.getByRole("switch", { name: "Show all translations" });
-const fushaSwitch = () => screen.getByRole("switch", { name: "Show Fusha (MSA) line" });
+const showAllSwitch = () => screen.getByRole("switch", { name: "أظهر كل الترجمات" });
+const fushaSwitch = () => screen.getByRole("switch", { name: "أظهر السطر بالفصحى" });
 
 /** The only button in a card with no label on it is the play button. */
 const playButton = (card: HTMLElement) =>
@@ -383,7 +383,7 @@ describe("the Fusha line", () => {
     fireEvent.click(fushaSwitch());
 
     await waitFor(() =>
-      expect(screen.getByText("Couldn't convert every line to فصحى.")).toBeInTheDocument(),
+      expect(screen.getByText("ما قدرنا نحوّل كل سطر للفصحى.")).toBeInTheDocument(),
     );
     expect(screen.getByRole("button", { name: "Retry" })).toBeInTheDocument();
   });
@@ -559,7 +559,7 @@ describe("looking up one word", () => {
     await waitFor(() =>
       expect(within(wordPopover()).getByText("No definition found")).toBeInTheDocument(),
     );
-    fireEvent.click(within(wordPopover()).getByRole("button", { name: /retry translation/i }));
+    fireEvent.click(within(wordPopover()).getByRole("button", { name: /أعد المحاولة/ }));
 
     // A learner who taps a word and gets nothing has no way to tell a flaky
     // network from a word the model does not know.
@@ -572,7 +572,7 @@ describe("keeping a word", () => {
     const { onSaveToMyWords } = render();
 
     tap("رحت");
-    fireEvent.click(within(wordPopover()).getByRole("button", { name: /save to my words/i }));
+    fireEvent.click(within(wordPopover()).getByRole("button", { name: /احفظ في كلماتي/ }));
 
     // A word saved bare comes back in the review deck with no idea of how it
     // was used, and its audio clip needs the line's timings to exist at all.
@@ -590,7 +590,7 @@ describe("keeping a word", () => {
     const { onAddToVocabSection } = render();
 
     tap("رحت");
-    fireEvent.click(within(wordPopover()).getByRole("button", { name: /add to vocab section/i }));
+    fireEvent.click(within(wordPopover()).getByRole("button", { name: /أضف لقائمة المفردات/ }));
 
     expect(onAddToVocabSection).toHaveBeenCalledWith(expect.objectContaining({ arabic: "رحت" }));
   });
@@ -602,7 +602,7 @@ describe("keeping a word", () => {
 
     // Saving the same word twice creates a duplicate review card, which is how
     // a deck becomes something a learner stops opening.
-    expect(within(wordPopover()).getByRole("button", { name: /saved to my words/i })).toBeDisabled();
+    expect(within(wordPopover()).getByRole("button", { name: /محفوظة في كلماتي/ })).toBeDisabled();
   });
 
   it("says when a word is already in the vocab section", () => {
@@ -610,7 +610,7 @@ describe("keeping a word", () => {
 
     tap("رحت");
 
-    expect(within(wordPopover()).getByRole("button", { name: /in vocab section/i })).toBeDisabled();
+    expect(within(wordPopover()).getByRole("button", { name: /في قائمة المفردات/ })).toBeDisabled();
   });
 
   it("offers nothing to press when the page has nowhere to put it", () => {
@@ -668,7 +668,7 @@ describe("looking up a phrase", () => {
     tap("السوق");
 
     await waitFor(() =>
-      expect(within(compoundPopover()!).getByText("Could not translate")).toBeInTheDocument(),
+      expect(within(compoundPopover()!).getByText("تعذّرت الترجمة")).toBeInTheDocument(),
     );
     // Nothing to save either — an empty card in the deck is worse than none.
     expect(within(compoundPopover()!).queryByRole("button")).toBeNull();
@@ -683,7 +683,7 @@ describe("looking up a phrase", () => {
       expect(within(compoundPopover()!).getByText("I went to the market")).toBeInTheDocument(),
     );
     fireEvent.click(
-      within(compoundPopover()!).getByRole("button", { name: /save to my words/i }),
+      within(compoundPopover()!).getByRole("button", { name: /احفظ في كلماتي/ }),
     );
 
     expect(onSaveToMyWords).toHaveBeenCalledWith(
@@ -723,7 +723,7 @@ describe("looking up a phrase", () => {
     // asks for the gloss of a zero-length span, which is nothing. The phrase
     // the component just found is reported as untranslatable.
     const compound = await awaitCompound();
-    expect(compound.textContent).toContain("Could not translate");
+    expect(compound.textContent).toContain("تعذّرت الترجمة");
     expect(within(compound).queryByRole("button")).toBeNull();
   });
 
@@ -827,7 +827,7 @@ describe("english-video lines", () => {
       dialect: "Gulf",
     });
 
-    fireEvent.click(screen.getByRole("button", { name: /save to my words/i }));
+    fireEvent.click(screen.getByRole("button", { name: /احفظ في كلماتي/ }));
     expect(onSaveToMyWords).toHaveBeenCalledWith(
       expect.objectContaining({ english: "market", arabic: "سوق" }),
     );

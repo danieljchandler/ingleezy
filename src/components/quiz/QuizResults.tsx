@@ -21,7 +21,7 @@ export const QuizResults = ({ topic, quizState, onRestart, onHome }: QuizResults
    *
    * `score / answers.length` is 0/0 for an empty quiz, and every band
    * comparison against NaN is false, so the chain fell through to the worst
-   * one: "Try again!" over "NaN% correct". A topic whose words were all
+   * one: "حاول مرة ثانية!" over "NaN% correct". A topic whose words were all
    * deleted, or a quiz abandoned before the first answer, landed there — and
    * the learner was told they had failed a quiz they never took.
    */
@@ -30,17 +30,17 @@ export const QuizResults = ({ topic, quizState, onRestart, onHome }: QuizResults
   let message = "";
 
   if (total === 0) {
-    message = "No questions to score";
+    message = "ما فيه أسئلة تُحتسب";
   } else if (percentage === 100) {
-    message = "Perfect! ممتاز";
+    message = "ممتاز! كامل الدرجة";
   } else if (percentage >= 80) {
-    message = "Great job! أحسنت";
+    message = "أحسنت! شغل حلو";
   } else if (percentage >= 60) {
-    message = "Good effort! جيد";
+    message = "جيد! مجهود طيب";
   } else if (percentage >= 40) {
-    message = "Keep practicing! استمر";
+    message = "واصل التمرين!";
   } else {
-    message = "Try again! حاول مرة أخرى";
+    message = "حاول مرة ثانية!";
   }
 
   return (

@@ -186,7 +186,7 @@ const InlineToken = ({
               {isLoadingCompound ? (
                 <div className="flex items-center justify-center gap-2 mt-1">
                   <div className="h-3 w-3 rounded-full border-2 border-primary border-t-transparent animate-spin" />
-                  <span className="text-xs text-muted-foreground">Translating…</span>
+                  <span className="text-xs text-muted-foreground">نترجم…</span>
                 </div>
               ) : compoundGloss ? (
                 <>
@@ -206,7 +206,7 @@ const InlineToken = ({
                   )}
                 </>
               ) : (
-                <p className="text-xs text-muted-foreground italic">Could not translate</p>
+                <p className="text-xs text-muted-foreground italic">تعذّرت الترجمة</p>
               )}
             </div>
             <div className="flex flex-col gap-2">
@@ -218,7 +218,7 @@ const InlineToken = ({
                   onClick={() => { onAddCompoundToVocab(); onCompoundOpenChange?.(false); }}
                   disabled={isCompoundInVocabSection}
                 >
-                  {isCompoundInVocabSection ? <><Check className="h-4 w-4 text-primary" />In vocab section</> : <><Plus className="h-4 w-4" />Add to vocab section</>}
+                  {isCompoundInVocabSection ? <><Check className="h-4 w-4 text-primary" />في قائمة المفردات</> : <><Plus className="h-4 w-4" />أضف لقائمة المفردات</>}
                 </Button>
               )}
               {onSaveCompoundToMyWords && !isLoadingCompound && compoundGloss && (
@@ -229,7 +229,7 @@ const InlineToken = ({
                   onClick={() => { onSaveCompoundToMyWords(); onCompoundOpenChange?.(false); }}
                   disabled={isCompoundSavedToMyWords}
                 >
-                  {isCompoundSavedToMyWords ? <><Check className="h-4 w-4" />Saved to My Words</> : <><BookOpen className="h-4 w-4" />Save to My Words</>}
+                  {isCompoundSavedToMyWords ? <><Check className="h-4 w-4" />محفوظة في كلماتي</> : <><BookOpen className="h-4 w-4" />احفظ في كلماتي</>}
                 </Button>
               )}
             </div>
@@ -285,7 +285,7 @@ const InlineToken = ({
             {!displayGloss && isTranslating && (
               <div className="flex items-center justify-center gap-2 mt-1">
                 <div className="h-3 w-3 rounded-full border-2 border-primary border-t-transparent animate-spin" />
-                <span className="text-xs text-muted-foreground">Translating…</span>
+                <span className="text-xs text-muted-foreground">نترجم…</span>
               </div>
             )}
             {!displayGloss && !isTranslating && (
@@ -299,7 +299,7 @@ const InlineToken = ({
                   className="h-6 text-xs px-2"
                   onClick={(e) => { e.stopPropagation(); handleTranslateSingle(); }}
                 >
-                  Retry translation
+                  أعد المحاولة
                 </Button>
               </div>
             )}
@@ -321,12 +321,12 @@ const InlineToken = ({
                 {isInVocabSection ? (
                   <>
                     <Check className="h-4 w-4 text-primary" />
-                    In vocab section
+                    في قائمة المفردات
                   </>
                 ) : (
                   <>
                     <Plus className="h-4 w-4" />
-                    Add to vocab section
+                    أضف لقائمة المفردات
                   </>
                 )}
               </Button>
@@ -346,12 +346,12 @@ const InlineToken = ({
                 {isSavedToMyWords ? (
                   <>
                     <Check className="h-4 w-4" />
-                    Saved to My Words
+                    محفوظة في كلماتي
                   </>
                 ) : (
                   <>
                     <BookOpen className="h-4 w-4" />
-                    Save to My Words
+                    احفظ في كلماتي
                   </>
                 )}
               </Button>
@@ -768,7 +768,7 @@ const EnglishLineCard = ({
               "mt-1 shrink-0 rounded-full p-2 transition-colors",
               isPlaying ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-primary/15",
             )}
-            aria-label={isPlaying ? "Pause line" : "Play line"}
+            aria-label={isPlaying ? "أوقف السطر" : "شغّل السطر"}
           >
             {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
           </button>
@@ -938,7 +938,7 @@ export const LineByLineTranscript = ({
            <Switch
              checked={showFusha}
              onCheckedChange={(on) => updatePrefs({ showFormal: on })}
-             aria-label="Show Fusha (MSA) line"
+             aria-label="أظهر السطر بالفصحى"
            />
            <span className="text-xs text-muted-foreground ml-2">
              {showAllTranslations ? (
@@ -951,7 +951,7 @@ export const LineByLineTranscript = ({
            <Switch
              checked={showAllTranslations}
              onCheckedChange={setShowAllTranslations}
-             aria-label="Show all translations"
+             aria-label="أظهر كل الترجمات"
            />
          </div>
        </div>
@@ -963,7 +963,7 @@ export const LineByLineTranscript = ({
       )}
       {showFusha && fushaStatus === "error" && (
         <div className="flex items-center justify-center gap-2">
-          <p className="text-xs text-muted-foreground">Couldn't convert every line to فصحى.</p>
+          <p className="text-xs text-muted-foreground">ما قدرنا نحوّل كل سطر للفصحى.</p>
           <Button variant="outline" size="sm" className="h-6 text-xs px-2" onClick={retryFusha}>
             Retry
           </Button>

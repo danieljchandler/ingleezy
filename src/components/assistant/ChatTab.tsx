@@ -24,17 +24,17 @@ function firstArabicRun(text: string): string | null {
 }
 
 const SUGGESTED_SEEDED = [
-  "Why is it translated like this?",
-  "Explain the grammar",
-  "Tell me more",
-  "Give me alternatives",
+  "ليش ترجمها كذا؟",
+  "اشرح لي القاعدة",
+  "زدني تفاصيل",
+  "عطني بدائل ثانية",
 ];
 
 const SUGGESTED_PAGE = [
-  "What am I looking at?",
-  "Explain this in simple terms",
-  "Quiz me on this",
-  "What should I learn next?",
+  "وش اللي قدامي؟",
+  "اشرحها لي ببساطة",
+  "اختبرني فيها",
+  "وش أتعلّم بعدها؟",
 ];
 
 interface ChatTabProps {
@@ -68,10 +68,10 @@ export function ChatTab({ onComposerFocus }: ChatTabProps = {}) {
         next.delete(index);
         return next;
       });
-      toast.error("Couldn't send the report — try again in a moment.");
+      toast.error("ما وصل البلاغ — جرّب بعد شوي.");
       return;
     }
-    toast.success("Thanks — a native speaker will take a look.");
+    toast.success("شكراً — بيراجعها متحدث أصلي.");
   }, [activeDialect]);
 
   useEffect(() => {
@@ -121,15 +121,15 @@ export function ChatTab({ onComposerFocus }: ChatTabProps = {}) {
             if (err.status === 429) {
               showCapToast((err.body as Parameters<typeof showCapToast>[0]) ?? {});
             } else if (err.status === 402) {
-              toast.error("AI credits exhausted");
+              toast.error("خلص رصيد الذكاء الاصطناعي");
             } else if (err.status === 401) {
-              toast.error("Please sign in to chat");
+              toast.error("سجّل دخولك عشان تسأل");
             } else {
-              toast.error("Couldn't reach the assistant");
+              toast.error("ما قدرنا نوصل للمساعد");
             }
           } else {
             console.error(err);
-            toast.error("Something went wrong");
+            toast.error("صار خطأ");
           }
           // Drop the empty assistant placeholder, keep the user's message.
           setMessages((prev) =>
@@ -149,10 +149,10 @@ export function ChatTab({ onComposerFocus }: ChatTabProps = {}) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-3 p-6 text-center">
         <p className="text-sm text-muted-foreground">
-          Sign in to ask the AI tutor about anything you see in the app.
+          سجّل دخولك عشان تسأل المدرّب عن أي شي تشوفه في التطبيق.
         </p>
         <Button asChild size="sm">
-          <Link to="/auth">Sign in</Link>
+          <Link to="/auth">سجّل دخول</Link>
         </Button>
       </div>
     );
@@ -168,8 +168,8 @@ export function ChatTab({ onComposerFocus }: ChatTabProps = {}) {
           <div className="space-y-2">
             <p className="text-xs text-muted-foreground">
               {seed
-                ? "Ask anything — translation choices, grammar, vocabulary, culture…"
-                : "Ask about what's on this page, or anything about Arabic."}
+                ? "اسأل عن أي شي — خيارات الترجمة، القواعد، المفردات، الثقافة…"
+                : "اسأل عن اللي في الصفحة، أو عن أي شي في الإنجليزي."}
             </p>
             <div className="flex flex-wrap gap-1.5">
               {suggestions.map((s) => (
@@ -263,7 +263,7 @@ export function ChatTab({ onComposerFocus }: ChatTabProps = {}) {
               send(input);
             }
           }}
-          placeholder="Ask a question…"
+          placeholder="اكتب سؤالك…"
           rows={1}
           className="resize-none min-h-[40px] text-sm"
           disabled={loading}
@@ -272,7 +272,7 @@ export function ChatTab({ onComposerFocus }: ChatTabProps = {}) {
           size="icon"
           onClick={() => send(input)}
           disabled={loading || !input.trim()}
-          aria-label="Send"
+          aria-label="أرسل"
         >
           {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
         </Button>

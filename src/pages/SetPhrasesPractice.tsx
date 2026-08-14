@@ -42,10 +42,10 @@ const SetPhrasesPractice = ({ reviewMode = false }: Props) => {
   useEffect(() => {
     generate.mutate({ occasionId, length: 8 }, {
       onSuccess: (data) => {
-        if (!data.length) toast.error("No phrases available — ask an admin to seed some.");
+        if (!data.length) toast.error("ما فيه عبارات — اطلب من المشرف يضيف.");
         setItems(data);
       },
-      onError: (e: any) => toast.error(e.message || "Failed to load quiz"),
+      onError: (e: any) => toast.error(e.message || "تعذّر تحميل التمرين"),
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [occasionId]);
@@ -88,14 +88,14 @@ const SetPhrasesPractice = ({ reviewMode = false }: Props) => {
               review.mutate({ phraseId: current.phrase_id, quality: res.quality });
               if (!res.accepted && current.expected_audio_url) playAudio(current.expected_audio_url);
             },
-            onError: (e: any) => toast.error(e.message || "Voice scoring failed"),
+            onError: (e: any) => toast.error(e.message || "تعذّر تقييم الصوت"),
           },
         );
       };
       mr.start();
       setRecording(true);
     } catch {
-      toast.error("Microphone access denied");
+      toast.error("ما سمحت بالمايك");
     }
   };
 
@@ -120,7 +120,7 @@ const SetPhrasesPractice = ({ reviewMode = false }: Props) => {
     setAnswered(null);
     setShowChoices(false);
     if (idx + 1 >= items.length) {
-      toast.success("Session complete!");
+      toast.success("خلّصت الجلسة!");
       navigate("/set-phrases");
     } else {
       setIdx(idx + 1);
@@ -137,7 +137,7 @@ const SetPhrasesPractice = ({ reviewMode = false }: Props) => {
   if (!current) {
     return (
       <AppShell compact>
-        <Card className="p-6 text-center text-sm text-muted-foreground">No phrases ready yet.</Card>
+        <Card className="p-6 text-center text-sm text-muted-foreground">ما فيه عبارات جاهزة بعد.</Card>
       </AppShell>
     );
   }
@@ -157,7 +157,7 @@ const SetPhrasesPractice = ({ reviewMode = false }: Props) => {
         <Card className="p-5 space-y-4 bg-gradient-to-br from-emerald-500/5 to-teal-500/5 border-emerald-500/20">
           {current.question_type === "reply" ? (
             <div>
-              <p className="text-xs uppercase text-muted-foreground mb-2">Reply to this:</p>
+              <p className="text-xs uppercase text-muted-foreground mb-2">ردّ على هذا:</p>
               <div className="flex items-center justify-between gap-2">
                 <p className="text-2xl font-semibold leading-relaxed font-english">{current.prompt.english}</p>
                 {current.prompt.audio_url && (
@@ -171,9 +171,9 @@ const SetPhrasesPractice = ({ reviewMode = false }: Props) => {
             <div>
               {/* The situation arrives in the learner's dialect so the setup is
                   fully understood; the production is entirely in English. */}
-              <p className="text-xs uppercase text-muted-foreground mb-2">Scenario:</p>
+              <p className="text-xs uppercase text-muted-foreground mb-2">الموقف:</p>
               <p className="text-base leading-relaxed font-arabic" dir="rtl">{current.prompt.arabic}</p>
-              <p className="text-xs text-muted-foreground mt-2">What do you say in English?</p>
+              <p className="text-xs text-muted-foreground mt-2">وش تقول بالإنجليزي؟</p>
             </div>
           )}
         </Card>
@@ -198,7 +198,7 @@ const SetPhrasesPractice = ({ reviewMode = false }: Props) => {
               )}
             </Button>
             <Button variant="outline" className="w-full" onClick={() => setShowChoices((s) => !s)}>
-              {showChoices ? "Hide choices" : "Show choices instead"}
+              {showChoices ? "أخفِ الخيارات" : "ورّني الخيارات"}
             </Button>
             {showChoices && (
               <div className="space-y-2">
@@ -220,10 +220,10 @@ const SetPhrasesPractice = ({ reviewMode = false }: Props) => {
           <Card className={`p-4 space-y-3 ${answered.correct ? "border-emerald-500/40 bg-emerald-500/5" : "border-destructive/40 bg-destructive/5"}`}>
             <div className="flex items-center gap-2">
               {answered.correct ? <Check className="h-5 w-5 text-emerald-600" /> : <X className="h-5 w-5 text-destructive" />}
-              <span className="font-semibold">{answered.correct ? "Correct!" : "Not quite"}</span>
+              <span className="font-semibold">{answered.correct ? "صح!" : "مو بالضبط"}</span>
             </div>
             <div>
-              <p className="text-xs text-muted-foreground">Correct answer:</p>
+              <p className="text-xs text-muted-foreground">الجواب الصحيح:</p>
               <div className="flex items-center justify-between gap-2 mt-1">
                 <p className="text-xl font-semibold font-english">{current.expected_english}</p>
                 {current.expected_audio_url && (
@@ -241,7 +241,7 @@ const SetPhrasesPractice = ({ reviewMode = false }: Props) => {
             </div>
             {answered.mode === "voice" && answered.transcript !== undefined && (
               <div className="text-xs text-muted-foreground border-t pt-2">
-                <p>You said: <span className="font-english">{answered.transcript || "(nothing detected)"}</span></p>
+                <p>قلت: <span className="font-english">{answered.transcript || "(ما سمعنا شي)"}</span></p>
                 <p>Match: {Math.round((answered.similarity ?? 0) * 100)}%</p>
               </div>
             )}
@@ -250,10 +250,10 @@ const SetPhrasesPractice = ({ reviewMode = false }: Props) => {
             )}
             <div className="flex gap-2">
               <Button variant="outline" onClick={() => save.mutate({ phraseId: current.phrase_id, source: answered.correct ? "reviewed" : "quiz_miss" })}>
-                <Star className="h-4 w-4 mr-1" /> Save
+                <Star className="h-4 w-4 mr-1" /> احفظ
               </Button>
               <Button className="flex-1" onClick={next}>
-                Next <ArrowRight className="h-4 w-4 ml-1" />
+                التالي <ArrowRight className="h-4 w-4 ml-1" />
               </Button>
             </div>
           </Card>

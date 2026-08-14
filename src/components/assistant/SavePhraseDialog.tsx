@@ -41,14 +41,14 @@ export function SavePhraseDialog({
 
   const save = () => {
     if (!arabic.trim() || !english.trim()) {
-      toast.error("Both the Arabic and its meaning are needed.");
+      toast.error("لازم العبارة الإنجليزية ومعناها.");
       return;
     }
     addPhrase.mutate(
       { phrase_arabic: arabic.trim(), phrase_english: english.trim(), source: "ask-ai" },
       {
         onSuccess: () => {
-          toast.success("Saved to My Phrases");
+          toast.success("حفظناها في عباراتي");
           onOpenChange(false);
         },
         onError: (err) =>
@@ -61,14 +61,14 @@ export function SavePhraseDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-base">Save phrase</DialogTitle>
+          <DialogTitle className="text-base">احفظ العبارة</DialogTitle>
           <DialogDescription>
             Keep this sentence in My Phrases for spaced-repetition review.
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
           <div className="space-y-1.5">
-            <Label htmlFor="save-phrase-arabic">Arabic</Label>
+            <Label htmlFor="save-phrase-arabic">الإنجليزي</Label>
             <Input
               id="save-phrase-arabic"
               dir="rtl"
@@ -78,12 +78,12 @@ export function SavePhraseDialog({
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="save-phrase-english">Meaning (English)</Label>
+            <Label htmlFor="save-phrase-english">المعنى بالعربي</Label>
             <Input
               id="save-phrase-english"
               value={english}
               onChange={(e) => setEnglish(e.target.value)}
-              placeholder="What does it mean?"
+              placeholder="وش معناها؟"
             />
           </div>
         </div>

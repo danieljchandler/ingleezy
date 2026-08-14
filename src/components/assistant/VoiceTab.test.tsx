@@ -89,15 +89,15 @@ function render({ signedIn = true, route = "/reading" }: { signedIn?: boolean; r
 describe("gating", () => {
   it("asks a signed-out visitor to sign in", async () => {
     render({ signedIn: false });
-    expect(await screen.findByText(/Sign in to talk/)).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /Start voice call/ })).toBeNull();
+    expect(await screen.findByText(/سجّل دخولك عشان تكلّم/)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "ابدأ مكالمة صوتية" })).toBeNull();
   });
 
   it("shows the upgrade path to a free user instead of a dead button", () => {
     render();
     expect(screen.getByText(/ميزة مدفوعة/)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "شوف الباقات" })).toHaveAttribute("href", "/pricing");
-    expect(screen.queryByRole("button", { name: /Start voice call/ })).toBeNull();
+    expect(screen.queryByRole("button", { name: "ابدأ مكالمة صوتية" })).toBeNull();
   });
 });
 
@@ -113,7 +113,7 @@ describe("the call", () => {
     expect(live.start).not.toHaveBeenCalled();
 
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: /Start voice call/ }));
+      fireEvent.click(screen.getByRole("button", { name: "ابدأ مكالمة صوتية" }));
     });
 
     expect(live.start).toHaveBeenCalledTimes(1);
@@ -132,9 +132,9 @@ describe("the call", () => {
     ];
     render();
 
-    expect(screen.getByText("You")).toBeInTheDocument();
-    expect(screen.getByText("Tutor")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Mute" })).toBeInTheDocument();
+    expect(screen.getByText("أنت")).toBeInTheDocument();
+    expect(screen.getByText("المدرّب")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "اكتم المايك" })).toBeInTheDocument();
   });
 
   it("ends the call on demand and on unmount", async () => {
@@ -142,7 +142,7 @@ describe("the call", () => {
     const harness = render();
 
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: /End call/ }));
+      fireEvent.click(screen.getByRole("button", { name: "أنهِ المكالمة" }));
     });
     expect(live.stop).toHaveBeenCalledTimes(1);
 
@@ -165,13 +165,13 @@ describe("the call", () => {
 
     // The balance doubles as the upgrade prompt: a learner watching it run
     // down knows why the next tier exists.
-    expect(screen.getByText(/12 min left this month/)).toBeInTheDocument();
+    expect(screen.getByText(/باقي لك 12 دقيقة هذا الشهر/)).toBeInTheDocument();
   });
 
   it("says nothing about minutes before a call has been attempted", () => {
     live.remainingSeconds = null;
     render();
 
-    expect(screen.queryByText(/min left this month/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/دقيقة هذا الشهر/)).not.toBeInTheDocument();
   });
 });

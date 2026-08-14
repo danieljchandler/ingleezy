@@ -57,7 +57,7 @@ const SavedChats = () => {
     if (!id || !title) return;
     renameConversation.mutate(
       { id, title },
-      { onError: () => toast.error("Couldn't rename the conversation") },
+      { onError: () => toast.error("تعذّرت إعادة التسمية") },
     );
   };
 
@@ -66,8 +66,8 @@ const SavedChats = () => {
     setPendingDeleteId(null);
     if (!id) return;
     deleteConversation.mutate(id, {
-      onSuccess: () => toast.success("Deleted"),
-      onError: () => toast.error("Couldn't delete the conversation"),
+      onSuccess: () => toast.success("انحذفت"),
+      onError: () => toast.error("تعذّر الحذف"),
     });
   };
 
@@ -91,7 +91,7 @@ const SavedChats = () => {
           <Card>
             <CardContent className="flex flex-col items-center gap-2 py-10 text-center">
               <MessageSquare className="h-6 w-6 text-muted-foreground" />
-              <p className="text-sm font-medium">No saved chats yet</p>
+              <p className="text-sm font-medium">ما فيه محادثات محفوظة</p>
               <p className="max-w-xs text-xs text-muted-foreground">
                 When an Ask AI conversation is worth keeping, tap Save in the chat panel and it
                 will show up here.
@@ -132,10 +132,10 @@ const SavedChats = () => {
                   </button>
                   {renamingId === row.id ? (
                     <>
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={submitRename} aria-label="Confirm rename">
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={submitRename} aria-label="أكّد التسمية">
                         <Check className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setRenamingId(null)} aria-label="Cancel rename">
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setRenamingId(null)} aria-label="ألغِ التسمية">
                         <X className="h-4 w-4" />
                       </Button>
                     </>
@@ -146,7 +146,7 @@ const SavedChats = () => {
                         size="icon"
                         className="h-8 w-8 text-muted-foreground"
                         onClick={() => startRename(row)}
-                        aria-label="Rename conversation"
+                        aria-label="أعد تسمية المحادثة"
                       >
                         <Pencil className="h-4 w-4" />
                       </Button>
@@ -156,7 +156,7 @@ const SavedChats = () => {
                         className="h-8 w-8 text-muted-foreground hover:text-destructive"
                         onClick={() => setPendingDeleteId(row.id)}
                         disabled={deleteConversation.isPending}
-                        aria-label="Delete conversation"
+                        aria-label="احذف المحادثة"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -172,14 +172,14 @@ const SavedChats = () => {
       <AlertDialog open={pendingDeleteId !== null} onOpenChange={(open) => !open && setPendingDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete this conversation?</AlertDialogTitle>
+            <AlertDialogTitle>نحذف هذي المحادثة؟</AlertDialogTitle>
             <AlertDialogDescription>
               It will be gone for good — saved chats aren't recoverable.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete}>Delete</AlertDialogAction>
+            <AlertDialogCancel>إلغاء</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete}>احذف</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

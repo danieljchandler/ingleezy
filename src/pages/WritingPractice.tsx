@@ -104,7 +104,7 @@ const WriteTab = () => {
     setBusy(false);
     if (error || !data?.review) {
       const message = (data as { message?: string } | null)?.message;
-      toast.error(message ?? "Couldn't review that — try again.");
+      toast.error(message ?? "تعذّرت المراجعة — جرّب مرة ثانية.");
       return;
     }
     setReview(data.review as WritingReview);
@@ -133,7 +133,7 @@ const WriteTab = () => {
             className="mt-2 text-xs text-primary underline-offset-2 hover:underline"
             onClick={() => setShowGloss((s) => !s)}
           >
-            {showGloss ? "Hide translation" : "Show translation"}
+            {showGloss ? "أخفِ الترجمة" : "ورّني الترجمة"}
           </button>
         </div>
       ) : (
@@ -331,7 +331,7 @@ const TypingTab = () => {
               <RefreshCw className="mr-1 h-3.5 w-3.5" /> Again
             </Button>
             {stageIndex + 1 < TYPING_STAGES.length && (
-              <Button size="sm" onClick={() => reset(stageIndex + 1)}>Next stage</Button>
+              <Button size="sm" onClick={() => reset(stageIndex + 1)}>المرحلة الجاية</Button>
             )}
           </div>
         </div>
@@ -373,7 +373,7 @@ const TypingTab = () => {
           </p>
         </div>
       ) : (
-        <p className="text-sm text-muted-foreground">No drill for this stage.</p>
+        <p className="text-sm text-muted-foreground">ما فيه تمرين لهذي المرحلة.</p>
       )}
 
       {!done && <ArabicKeyboard highlight={expectedChar} onKey={handleChar} />}
@@ -389,7 +389,7 @@ const WritingPractice = () => {
       <div className="mx-auto max-w-2xl space-y-4 px-4 py-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold">Writing</h1>
+            <h1 className="text-2xl font-bold">الكتابة</h1>
             <p className="text-sm text-muted-foreground">
               Text like a native — and learn the keyboard while you're at it.
             </p>

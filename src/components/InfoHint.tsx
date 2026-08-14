@@ -44,7 +44,7 @@ export const InfoHint = ({ title, body, className, size = "sm", cta }: InfoHintP
         */}
         <button
           type="button"
-          aria-label={`Learn about ${title}`}
+          aria-label={`وش هذا: ${title}`}
           onPointerDown={(e) => e.stopPropagation()}
           onClick={(e) => e.stopPropagation()}
           onKeyDown={(e) => {

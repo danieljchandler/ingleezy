@@ -119,9 +119,9 @@ const withTimeout = <T,>(promise: PromiseLike<T>, ms: number): Promise<T> => {
 };
 
 const DIFFICULTY_CONFIG = {
-  beginner: { label: "Beginner", color: "bg-green-500/20 text-green-700 dark:text-green-400", xp: 10 },
-  intermediate: { label: "Intermediate", color: "bg-yellow-500/20 text-yellow-700 dark:text-yellow-400", xp: 15 },
-  advanced: { label: "Advanced", color: "bg-red-500/20 text-red-700 dark:text-red-400", xp: 20 },
+  beginner: { label: "مبتدئ", color: "bg-green-500/20 text-green-700 dark:text-green-400", xp: 10 },
+  intermediate: { label: "متوسط", color: "bg-yellow-500/20 text-yellow-700 dark:text-yellow-400", xp: 15 },
+  advanced: { label: "متقدّم", color: "bg-red-500/20 text-red-700 dark:text-red-400", xp: 20 },
 };
 
 // ─── English line with tappable words + Arabic scaffold ───
@@ -392,8 +392,8 @@ const ReadingPractice = () => {
       console.error("Failed to load passage:", e);
       toast.error(
         e instanceof PassageTimeoutError
-          ? "The writer took too long. Please try again."
-          : "Couldn't write a passage just now. Please try again.",
+          ? "الكاتب تأخّر. جرّب مرة ثانية."
+          : "ما قدرنا نكتب نصاً الحين. جرّب مرة ثانية.",
       );
       setDifficulty(null);
       setMode("select");
@@ -430,7 +430,7 @@ const ReadingPractice = () => {
     transliteration?: string,
   ) => {
     if (!isAuthenticated) {
-      toast.error("Sign in to save flashcards");
+      toast.error("سجّل دخولك عشان تحفظ البطاقات");
       return;
     }
     addVocab.mutate(
@@ -444,8 +444,8 @@ const ReadingPractice = () => {
         sentence_english: sentence?.english || undefined,
       },
       {
-        onSuccess: () => toast.success("Saved to My Words!"),
-        onError: () => toast.error("Failed to save"),
+        onSuccess: () => toast.success("حفظناها في كلماتي!"),
+        onError: () => toast.error("تعذّر الحفظ"),
       }
     );
   };
@@ -536,7 +536,7 @@ const ReadingPractice = () => {
       }
     } catch (e: any) {
       console.error("Q&A error:", e);
-      const errMsg = e?.message || "Failed to get answer";
+      const errMsg = e?.message || "ما وصلنا جواب";
       toast.error(errMsg);
       // Remove the user message if we failed
       setQaMessages((prev) => prev.slice(0, -1));
@@ -567,8 +567,8 @@ const ReadingPractice = () => {
             <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
               <BookOpen className="h-8 w-8 text-primary" />
             </div>
-            <h1 className="text-2xl font-bold text-foreground inline-flex items-center gap-2 justify-center">Reading Practice <InfoHint {...PAGE_HINTS["reading-practice"]} size="md" /></h1>
-            <p className="text-muted-foreground">Read and learn in Arabic</p>
+            <h1 className="text-2xl font-bold text-foreground inline-flex items-center gap-2 justify-center">تمرين القراءة <InfoHint {...PAGE_HINTS["reading-practice"]} size="md" /></h1>
+            <p className="text-muted-foreground">اقرأ إنجليزي وتعلّم منه</p>
           </div>
 
           {/* Mode cards */}
@@ -583,9 +583,9 @@ const ReadingPractice = () => {
                   <BookOpen className="h-6 w-6 text-primary" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">Read a Passage</h3>
+                  <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">اقرأ نصاً</h3>
                   <p className="text-sm text-muted-foreground mt-0.5">
-                    Read a story or scenario with comprehension quiz
+                    اقرأ قصة أو موقفاً مع أسئلة فهم
                   </p>
                 </div>
                 <ChevronRight className="h-5 w-5 text-muted-foreground mt-1 shrink-0" />
@@ -602,9 +602,9 @@ const ReadingPractice = () => {
                   <MessageCircle className="h-6 w-6 text-primary" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">Ask Anything</h3>
+                  <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">اسأل أي شي</h3>
                   <p className="text-sm text-muted-foreground mt-0.5">
-                    Ask questions on any topic and get answers in {activeDialect === "Egyptian" ? "Egyptian" : activeDialect === "Yemeni" ? "Yemeni" : "Gulf"} Arabic
+                    اسأل عن أي موضوع وخذ الجواب بالإنجليزي مع شرح بلهجتك
                   </p>
                 </div>
                 <ChevronRight className="h-5 w-5 text-muted-foreground mt-1 shrink-0" />
@@ -633,9 +633,9 @@ const ReadingPractice = () => {
                 onChange={(e) => setQaDifficulty(e.target.value as Difficulty)}
                 className="text-xs rounded-lg border border-border bg-card px-2 py-1.5 text-foreground"
               >
-                <option value="beginner">Beginner</option>
-                <option value="intermediate">Intermediate</option>
-                <option value="advanced">Advanced</option>
+                <option value="beginner">مبتدئ</option>
+                <option value="intermediate">متوسط</option>
+                <option value="advanced">متقدّم</option>
               </select>
               {qaMessages.length > 0 && (
                 <Button variant="ghost" size="sm" onClick={resetQA}>
@@ -653,18 +653,18 @@ const ReadingPractice = () => {
                   <MessageCircle className="h-8 w-8 text-primary" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-semibold text-foreground mb-1">Ask Anything</h2>
+                  <h2 className="text-lg font-semibold text-foreground mb-1">اسأل أي شي</h2>
                   <p className="text-sm text-muted-foreground">
-                    Ask about any topic and get a response in {activeDialect === "Egyptian" ? "Egyptian" : activeDialect === "Yemeni" ? "Yemeni" : "Gulf"} Arabic. Tap words for translations!
+                    اسأل عن أي موضوع والجواب يجيك بالإنجليزي. اضغط أي كلمة تشوف معناها!
                   </p>
                 </div>
                 {/* Suggestion chips */}
                 <div className="flex flex-wrap gap-2 justify-center max-w-sm">
                   {[
-                    "What's the weather like in Dubai?",
-                    "Tell me about Arabic coffee",
-                    "How do people greet each other?",
-                    "What do you eat for breakfast?",
+                    "وش جو دبي هالأيام؟",
+                    "كلّمني عن القهوة العربية",
+                    "كيف الناس يسلّمون على بعض؟",
+                    "وش تاكلون بالفطور؟",
                   ].map((suggestion) => (
                     <button
                       key={suggestion}
@@ -688,7 +688,7 @@ const ReadingPractice = () => {
                   <div className="max-w-[95%] space-y-3">
                     {/* Arabic response lines */}
                     <div className="bg-card border border-border rounded-2xl rounded-bl-md p-3 space-y-2">
-                      <p className="text-xs text-muted-foreground mb-1">Tap words for meaning • Eye icon for Arabic</p>
+                      <p className="text-xs text-muted-foreground mb-1">اضغط الكلمة تشوف معناها • أيقونة العين للعربي</p>
                       {msg.lines?.map((line, lineIdx) => {
                         const lineKey = `${msgIdx}-${lineIdx}`;
                         return (
@@ -756,7 +756,7 @@ const ReadingPractice = () => {
               <input
                 value={qaInput}
                 onChange={(e) => setQaInput(e.target.value)}
-                placeholder="Ask anything in English..."
+                placeholder="اسأل أي شي…"
                 className="flex-1 rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 disabled={qaLoading}
               />
@@ -786,12 +786,12 @@ const ReadingPractice = () => {
             <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
               <BookOpen className="h-8 w-8 text-primary" />
             </div>
-            <h1 className="text-2xl font-bold text-foreground">Read a Passage</h1>
-            <p className="text-muted-foreground">Read Arabic passages and test your comprehension</p>
+            <h1 className="text-2xl font-bold text-foreground">اقرأ نصاً</h1>
+            <p className="text-muted-foreground">اقرأ نصوصاً إنجليزية واختبر فهمك</p>
           </div>
           <div className="space-y-2">
             <label htmlFor="custom-topic" className="text-sm font-medium text-muted-foreground">
-              Describe a scenario (optional)
+              اوصف الموقف (اختياري)
             </label>
             <textarea
               id="custom-topic"
@@ -806,7 +806,7 @@ const ReadingPractice = () => {
             )}
           </div>
           <div className="space-y-3">
-            <p className="text-sm font-medium text-muted-foreground text-center">Select difficulty</p>
+            <p className="text-sm font-medium text-muted-foreground text-center">اختر المستوى</p>
             {(["beginner", "intermediate", "advanced"] as Difficulty[]).map((level) => (
               <button
                 key={level}
@@ -863,21 +863,21 @@ const ReadingPractice = () => {
           <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
             <Check className="h-10 w-10 text-primary" />
           </div>
-          <h1 className="text-2xl font-bold text-foreground">Reading Complete!</h1>
+          <h1 className="text-2xl font-bold text-foreground">خلّصت القراءة!</h1>
           <div className="text-4xl font-bold text-primary">{score}/{passage.questions.length}</div>
           <p className="text-muted-foreground">
             {score === passage.questions.length
-              ? "Perfect comprehension! 🎉"
+              ? "فهم كامل! 🎉"
               : score >= passage.questions.length / 2
-              ? "Great reading skills! 👍"
-              : "Keep practicing! 💪"}
+              ? "قراءة ممتازة! 👍"
+              : "واصل التمرين! 💪"}
           </p>
           <div className="flex gap-3 justify-center">
             <Button variant="outline" onClick={resetSession}>
               <RotateCcw className="h-4 w-4 mr-2" />
               New Passage
             </Button>
-            <Button onClick={() => navigate("/")}>Done</Button>
+            <Button onClick={() => navigate("/")}>تمام</Button>
           </div>
         </div>
       </AppShell>
@@ -951,7 +951,7 @@ const ReadingPractice = () => {
           </div>
 
           <Button onClick={() => setQuizStarted(true)} className="w-full" size="lg">
-            Start Comprehension Quiz
+            ابدأ أسئلة الفهم
             <ChevronRight className="h-4 w-4 ml-1" />
           </Button>
         </div>
@@ -1002,7 +1002,7 @@ const ReadingPractice = () => {
             </div>
             {answers[currentQuestion] !== null && (
               <Button onClick={nextQuestion} className="w-full">
-                {currentQuestion < passage.questions.length - 1 ? "Next Question" : "See Results"}
+                {currentQuestion < passage.questions.length - 1 ? "السؤال التالي" : "شوف النتيجة"}
                 <ChevronRight className="h-4 w-4 ml-1" />
               </Button>
             )}

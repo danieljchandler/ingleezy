@@ -43,12 +43,12 @@ const SKILL_ICONS: Record<string, typeof Brain> = {
 };
 
 const CEFR_DESCRIPTIONS: Record<string, { label: string; desc: string }> = {
-  A1: { label: "Beginner", desc: "You can understand and use basic everyday expressions and simple phrases." },
-  A2: { label: "Elementary", desc: "You can communicate in simple, routine tasks and describe your background." },
-  B1: { label: "Intermediate", desc: "You can deal with most situations while traveling and describe experiences." },
-  B2: { label: "Upper Intermediate", desc: "You can interact fluently with native speakers and understand complex texts." },
-  C1: { label: "Advanced", desc: "You can express yourself fluently and use language flexibly for social and academic purposes." },
-  C2: { label: "Mastery", desc: "You can understand virtually everything and express yourself spontaneously with precision." },
+  A1: { label: "مبتدئ", desc: "تفهم وتستخدم عبارات يومية بسيطة وجمل قصيرة." },
+  A2: { label: "أساسي", desc: "تتواصل في المهام اليومية البسيطة وتقدر توصف نفسك." },
+  B1: { label: "متوسط", desc: "تتصرّف في أغلب مواقف السفر وتحكي عن تجاربك." },
+  B2: { label: "فوق المتوسط", desc: "تتكلم بطلاقة مع المتحدثين الأصليين وتفهم نصوصاً معقّدة." },
+  C1: { label: "متقدّم", desc: "تعبّر عن نفسك بطلاقة وتستخدم اللغة بمرونة اجتماعياً وأكاديمياً." },
+  C2: { label: "إتقان", desc: "تفهم كل شي تقريباً وتعبّر بعفوية ودقة." },
 };
 
 const TOTAL_QUESTIONS = 20;
@@ -90,11 +90,11 @@ export default function PlacementQuiz() {
         });
         if (error) throw error;
         if (data?.error) throw new Error(data.error);
-        if (!data?.questions?.length) throw new Error("No questions received");
+        if (!data?.questions?.length) throw new Error("ما وصلتنا أسئلة");
         return data.questions as Question[];
       } catch (e: any) {
         console.error("Failed to fetch questions:", e);
-        toast.error("Failed to load questions", { description: e.message || "Please try again." });
+        toast.error("تعذّر تحميل الأسئلة", { description: e.message || "جرّب مرة ثانية." });
         return null;
       } finally {
         setLoading(false);
@@ -146,7 +146,7 @@ export default function PlacementQuiz() {
           setResults(data);
           setPhase("results");
         } catch (e: any) {
-          toast.error("Failed to calculate results");
+          toast.error("تعذّر حساب النتيجة");
           // Fallback client-side scoring
           setResults({
             cefr_level: "B1",
@@ -204,7 +204,7 @@ export default function PlacementQuiz() {
       navigate("/");
     } catch (e) {
       console.error(e);
-      toast.error("Failed to save results");
+      toast.error("تعذّر حفظ النتيجة");
     } finally {
       setSaving(false);
     }
@@ -224,7 +224,7 @@ export default function PlacementQuiz() {
             <CaravanMedallion className="max-w-[200px] sm:max-w-[240px]" />
             <div>
               <h1 className="text-3xl font-bold font-heading text-foreground mb-3">
-                English Placement
+                اختبار تحديد المستوى
               </h1>
               <p className="text-muted-foreground leading-relaxed max-w-sm">
                 No matter where you are in your English journey, we'll get you to the right test to show you exactly where you stand right now.
@@ -236,16 +236,16 @@ export default function PlacementQuiz() {
             <div className="grid grid-cols-2 gap-3 w-full max-w-xs">
               <div className="bg-card border border-border rounded-xl p-3 text-center">
                 <p className="text-2xl font-bold text-primary">20</p>
-                <p className="text-xs text-muted-foreground">Questions</p>
+                <p className="text-xs text-muted-foreground">أسئلة</p>
               </div>
               <div className="bg-card border border-border rounded-xl p-3 text-center">
                 <p className="text-2xl font-bold text-primary">~5 min</p>
-                <p className="text-xs text-muted-foreground">Duration</p>
+                <p className="text-xs text-muted-foreground">المدة</p>
               </div>
             </div>
             <div className="flex flex-col gap-3 w-full">
               <Button onClick={startQuiz} disabled={loading} className="w-full h-12 text-base">
-                {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Start Quiz"}
+                {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "ابدأ الاختبار"}
               </Button>
               <Button variant="ghost" onClick={() => navigate(-1)} className="text-muted-foreground">
                 Go Back
@@ -260,7 +260,7 @@ export default function PlacementQuiz() {
             {/* Header */}
             <div className="flex items-center justify-between mb-4">
               <p className="text-sm font-medium text-muted-foreground">
-                Question {globalQuestionNum} / {TOTAL_QUESTIONS}
+                سؤال {globalQuestionNum} من {TOTAL_QUESTIONS}
               </p>
               <div className="flex items-center gap-2">
                 <Languages className="h-4 w-4 text-muted-foreground" />
@@ -273,7 +273,7 @@ export default function PlacementQuiz() {
               <div className="flex-1 flex items-center justify-center">
                 <div className="text-center space-y-3">
                   <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
-                  <p className="text-sm text-muted-foreground">Loading next questions…</p>
+                  <p className="text-sm text-muted-foreground">نحمّل الأسئلة الجاية…</p>
                 </div>
               </div>
             ) : currentQuestion ? (
@@ -358,7 +358,7 @@ export default function PlacementQuiz() {
               <CheckCircle2 className="h-12 w-12 text-primary" />
             </div>
             <div>
-              <p className="text-sm text-muted-foreground mb-1">Your level is</p>
+              <p className="text-sm text-muted-foreground mb-1">مستواك</p>
               <h1 className="text-5xl font-bold font-heading text-primary mb-2">
                 {results.cefr_level}
               </h1>
@@ -373,7 +373,7 @@ export default function PlacementQuiz() {
             {/* Score breakdown */}
             <div className="w-full max-w-sm space-y-3">
               <div className="bg-card border border-border rounded-xl p-4">
-                <p className="text-sm text-muted-foreground mb-1">Confidence</p>
+                <p className="text-sm text-muted-foreground mb-1">درجة الثقة</p>
                 <Progress value={results.confidence} className="h-2 mb-1" />
                 <p className="text-xs text-muted-foreground text-right">{results.confidence}%</p>
               </div>
@@ -431,7 +431,7 @@ export default function PlacementQuiz() {
                 }}
                 className="text-muted-foreground"
               >
-                <RotateCcw className="h-4 w-4 mr-1" /> Retake Quiz
+                <RotateCcw className="h-4 w-4 mr-1" /> أعد الاختبار
               </Button>
             </div>
           </div>

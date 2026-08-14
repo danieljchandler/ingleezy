@@ -45,7 +45,7 @@ export const VocabularyCard = ({
   word,
   showAnswer = false,
   showTapHint = false,
-  hintText = "Tap to hear",
+  hintText = "اضغط تسمعها",
   showRepeatButton = false,
   onCardClick,
   className,
@@ -203,7 +203,7 @@ const AnswerReveal = ({ arabic, english, transliteration, onReveal }: { arabic: 
         </>
       ) : (
         <p className="text-sm text-muted-foreground/70 italic mb-2">
-          Try saying it in Arabic, then reveal
+          جرّب تقول معناها، بعدين اكشفها
         </p>
       )}
       <button
@@ -220,11 +220,11 @@ const AnswerReveal = ({ arabic, english, transliteration, onReveal }: { arabic: 
       >
         {showArabic ? (
           <>
-            <EyeOff className="w-4 h-4" /> Hide Arabic
+            <EyeOff className="w-4 h-4" /> أخفِ العربي
           </>
         ) : (
           <>
-            <Eye className="w-4 h-4" /> Show Arabic
+            <Eye className="w-4 h-4" /> ورّني العربي
           </>
         )}
       </button>

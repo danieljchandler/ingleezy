@@ -184,7 +184,7 @@ export const QuizQuestion = ({
               type="text"
               value={typedAnswer}
               onChange={(e) => setTypedAnswer(e.target.value)}
-              placeholder="Type the English word..."
+              placeholder="اكتب الكلمة بالإنجليزي…"
               disabled={showResult}
               autoFocus
               className={cn(
@@ -210,13 +210,13 @@ export const QuizQuestion = ({
               disabled={!typedAnswer.trim()}
               className="w-full py-5 text-lg font-semibold rounded-xl bg-primary text-primary-foreground shadow-button"
             >
-              Check Answer
+              تحقّق
             </Button>
           )}
           
           {showResult && !isCorrect && (
             <div className="text-center p-3 bg-card rounded-xl border border-border">
-              <p className="text-muted-foreground text-sm mb-1">Correct answer:</p>
+              <p className="text-muted-foreground text-sm mb-1">الجواب الصحيح:</p>
               <p className="text-xl font-bold text-success">
                 {currentWord.word_english}
               </p>
@@ -232,7 +232,7 @@ export const QuizQuestion = ({
           "animate-pop",
           isCorrect ? "bg-success/20 text-success-foreground" : "bg-destructive/20 text-destructive-foreground"
         )}>
-          {isCorrect ? "Correct! أحسنت" : "Not quite — keep practicing"}
+          {isCorrect ? "صح! أحسنت" : "مو بالضبط — واصل التمرين"}
         </div>
       )}
     </div>

@@ -59,7 +59,7 @@ const ListenEpisode = () => {
     return <AppShell><div className="flex justify-center pt-20"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div></AppShell>;
   }
   if (!episode) {
-    return <AppShell><div className="text-center pt-20"><p className="text-muted-foreground">Episode not found.</p><Button variant="ghost" onClick={() => navigate("/listen")}>Back</Button></div></AppShell>;
+    return <AppShell><div className="text-center pt-20"><p className="text-muted-foreground">ما لقينا الحلقة.</p><Button variant="ghost" onClick={() => navigate("/listen")}>رجوع</Button></div></AppShell>;
   }
 
   const playLine = async (lineIndex: number) => {
@@ -70,11 +70,11 @@ const ListenEpisode = () => {
       audioRef.current = a;
       setPlayingLine(lineIndex);
       a.onended = () => setPlayingLine(null);
-      a.onerror = () => { setPlayingLine(null); toast.error("Playback failed"); };
+      a.onerror = () => { setPlayingLine(null); toast.error("تعذّر التشغيل"); };
       await a.play();
     } catch (e: any) {
       setPlayingLine(null);
-      toast.error(e?.message ?? "Could not play");
+      toast.error(e?.message ?? "ما قدرنا نشغّلها");
     }
   };
 
@@ -88,7 +88,7 @@ const ListenEpisode = () => {
     const a = new Audio(episode.full_audio_url);
     audioRef.current = a;
     a.onended = () => setIsPlayingFull(false);
-    a.onerror = () => { setIsPlayingFull(false); toast.error("Playback failed"); };
+    a.onerror = () => { setIsPlayingFull(false); toast.error("تعذّر التشغيل"); };
     setIsPlayingFull(true);
     await a.play();
   };
@@ -107,14 +107,14 @@ const ListenEpisode = () => {
       if (String(e?.message).includes("موجودة")) {
         setAddedVocab((s) => new Set(s).add(v.arabic));
       } else {
-        toast.error(e?.message ?? "Could not add");
+        toast.error(e?.message ?? "ما قدرنا نضيفها");
       }
     }
   };
 
   const addAllVocab = async () => {
     for (const v of episode.key_vocabulary) await addOneVocab(v);
-    toast.success("Words added to your deck");
+    toast.success("أضفنا الكلمات لرزمتك");
   };
 
   const confirmDelete = async () => {
@@ -129,7 +129,7 @@ const ListenEpisode = () => {
     <AppShell>
       <div className="space-y-5 pb-24">
         <Button variant="ghost" size="sm" onClick={() => navigate("/listen")} className="-ml-2">
-          <ArrowLeft className="h-4 w-4 mr-1" />Back to library
+          <ArrowLeft className="h-4 w-4 mr-1" />رجوع للمكتبة
         </Button>
 
         <header className="space-y-2">
@@ -144,14 +144,14 @@ const ListenEpisode = () => {
           {episode.audio_mode === "full" && (
             <div className="pt-2">
               {episode.audio_status === "pending" && (
-                <div className="flex items-center text-sm text-muted-foreground"><Loader2 className="h-4 w-4 mr-2 animate-spin" />Recording voices…</div>
+                <div className="flex items-center text-sm text-muted-foreground"><Loader2 className="h-4 w-4 mr-2 animate-spin" />نسجّل الأصوات…</div>
               )}
               {episode.audio_status === "failed" && (
-                <p className="text-sm text-destructive">Audio failed — you can still play each line on tap.</p>
+                <p className="text-sm text-destructive">ما ضبط الصوت — تقدر تشغّل كل سطر بالضغط عليه.</p>
               )}
               {episode.full_audio_url && (
                 <Button onClick={togglePlayFull} size="lg" className="w-full">
-                  {isPlayingFull ? <><Pause className="h-4 w-4 mr-2" />Pause episode</> : <><Play className="h-4 w-4 mr-2" />Play full episode</>}
+                  {isPlayingFull ? <><Pause className="h-4 w-4 mr-2" />أوقف الحلقة</> : <><Play className="h-4 w-4 mr-2" />شغّل الحلقة كاملة</>}
                 </Button>
               )}
             </div>
@@ -173,7 +173,7 @@ const ListenEpisode = () => {
                     className="h-7 w-7"
                     onClick={() => playLine(i)}
                     disabled={lineAudio.isPending && playingLine !== i}
-                    aria-label="Play line"
+                    aria-label="شغّل السطر"
                   >
                     {playingLine === i ? <Loader2 className="h-4 w-4 animate-spin" /> : <Volume2 className="h-4 w-4" />}
                   </Button>
@@ -201,8 +201,8 @@ const ListenEpisode = () => {
         {episode.key_vocabulary.length > 0 && (
           <section className="space-y-2">
             <div className="flex items-center justify-between">
-              <h2 className="text-sm font-semibold">Key vocabulary</h2>
-              <Button size="sm" variant="outline" onClick={addAllVocab}><Plus className="h-3.5 w-3.5 mr-1" />Add all to My Words</Button>
+              <h2 className="text-sm font-semibold">أهم المفردات</h2>
+              <Button size="sm" variant="outline" onClick={addAllVocab}><Plus className="h-3.5 w-3.5 mr-1" />أضفها كلها لكلماتي</Button>
             </div>
             <div className="space-y-1.5">
               {episode.key_vocabulary.map((v) => {
@@ -235,13 +235,13 @@ const ListenEpisode = () => {
       <AlertDialog open={confirmDeleteOpen} onOpenChange={setConfirmDeleteOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete this episode?</AlertDialogTitle>
+            <AlertDialogTitle>نحذف الحلقة؟</AlertDialogTitle>
             <AlertDialogDescription>
               This permanently deletes the episode. This can't be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>إلغاء</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"

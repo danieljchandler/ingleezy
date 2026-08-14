@@ -44,7 +44,7 @@ function stubTranslate(backend: SupabaseBackend, response: unknown = TRANSLATION
 /** Paste text and run the translation. */
 async function translate(page: Page, text = ENGLISH_TEXT) {
   await page.getByRole("textbox").fill(text);
-  await page.getByRole("button", { name: /^translate$/i }).click();
+  await page.getByRole("button", { name: "ترجم", exact: true }).click();
 }
 
 test.describe("translating a passage", () => {
@@ -112,7 +112,7 @@ test.describe("translating a passage", () => {
     await page.goto("/translate");
     await translate(page);
 
-    await expect(page.getByText("Glossed in Gulf")).toBeVisible();
+    await expect(page.getByText("الشرح بلهجة Gulf")).toBeVisible();
   });
 
   test("refuses to call the model with nothing to translate", async ({ page, backend }) => {
@@ -120,22 +120,22 @@ test.describe("translating a passage", () => {
 
     // The button is disabled rather than firing an empty request — each call
     // costs a model invocation and counts against the daily cap.
-    await expect(page.getByRole("button", { name: /^translate$/i })).toBeDisabled();
+    await expect(page.getByRole("button", { name: "ترجم", exact: true })).toBeDisabled();
     expect(backend.callsTo("translate-text")).toHaveLength(0);
   });
 
   test("refuses text past the length the model accepts", async ({ page, backend }) => {
     await page.goto("/translate");
     await page.getByRole("textbox").fill("a".repeat(4100));
-    await page.getByRole("button", { name: /^translate$/i }).click();
+    await page.getByRole("button", { name: "ترجم", exact: true }).click();
 
-    await expect(page.getByText(/too long/i)).toBeVisible();
+    await expect(page.getByText(/النص طويل/)).toBeVisible();
     expect(backend.callsTo("translate-text")).toHaveLength(0);
   });
 
   test("fills the box from an example", async ({ page }) => {
     await page.goto("/translate");
-    await page.getByRole("button", { name: /Email example/i }).click();
+    await page.getByRole("button", { name: /إيميل/ }).click();
 
     await expect(page.getByRole("textbox")).not.toHaveValue("");
   });
@@ -145,7 +145,7 @@ test.describe("translating a passage", () => {
     await translate(page);
     await expect(page.getByText("How are you today?").first()).toBeVisible();
 
-    await page.getByRole("button", { name: /clear/i }).click();
+    await page.getByRole("button", { name: "امسح" }).click();
 
     await expect(page.getByRole("textbox")).toHaveValue("");
     // Leaving the old breakdown on screen next to an empty box reads as a
@@ -204,9 +204,9 @@ test.describe("saving a translation", () => {
   test("stores the source, the detected dialect and every sentence", async ({ page, db }) => {
     await page.goto("/translate");
     await translate(page);
-    await page.getByRole("button", { name: /save translation/i }).click();
+    await page.getByRole("button", { name: "احفظ الترجمة" }).click();
 
-    await expect(page.getByRole("button", { name: /^saved$/i })).toBeVisible();
+    await expect(page.getByRole("button", { name: "محفوظة" })).toBeVisible();
 
     const saved = db.rows("saved_text_translations")[0];
     expect(saved.user_id).toBe(TEST_USER_ID);
@@ -222,8 +222,8 @@ test.describe("saving a translation", () => {
     await page.getByRole("combobox").click();
     await page.getByRole("option", { name: "Yemeni" }).click();
     await translate(page);
-    await page.getByRole("button", { name: /save translation/i }).click();
-    await expect(page.getByRole("button", { name: /^saved$/i })).toBeVisible();
+    await page.getByRole("button", { name: "احفظ الترجمة" }).click();
+    await expect(page.getByRole("button", { name: "محفوظة" })).toBeVisible();
 
     const saved = db.rows("saved_text_translations")[0];
     expect(saved.source_dialect).toBe("Yemeni");
@@ -233,8 +233,8 @@ test.describe("saving a translation", () => {
   test("titles the entry from the text so the list is readable", async ({ page, db }) => {
     await page.goto("/translate");
     await translate(page);
-    await page.getByRole("button", { name: /save translation/i }).click();
-    await expect(page.getByRole("button", { name: /^saved$/i })).toBeVisible();
+    await page.getByRole("button", { name: "احفظ الترجمة" }).click();
+    await expect(page.getByRole("button", { name: "محفوظة" })).toBeVisible();
 
     expect(db.rows("saved_text_translations")[0].title).toBe(ENGLISH_TEXT);
   });
@@ -242,12 +242,12 @@ test.describe("saving a translation", () => {
   test("will not save the same translation twice", async ({ page, db }) => {
     await page.goto("/translate");
     await translate(page);
-    await page.getByRole("button", { name: /save translation/i }).click();
-    await expect(page.getByRole("button", { name: /^saved$/i })).toBeVisible();
+    await page.getByRole("button", { name: "احفظ الترجمة" }).click();
+    await expect(page.getByRole("button", { name: "محفوظة" })).toBeVisible();
 
     // The button becomes an indicator once used; a second press would duplicate
     // the row with no way for the learner to tell them apart.
-    await expect(page.getByRole("button", { name: /^saved$/i })).toBeDisabled();
+    await expect(page.getByRole("button", { name: "محفوظة" })).toBeDisabled();
     expect(db.rows("saved_text_translations")).toHaveLength(1);
   });
 
@@ -267,9 +267,9 @@ test.describe("saving a translation", () => {
     await translate(page);
 
     db.failWrites("saved_text_translations", 500);
-    await page.getByRole("button", { name: /save translation/i }).click();
+    await page.getByRole("button", { name: "احفظ الترجمة" }).click();
 
-    await expect(page.getByText(/failed to save/i)).toBeVisible();
+    await expect(page.getByText("تعذّر الحفظ")).toBeVisible();
   });
 });
 
@@ -315,16 +315,16 @@ test.describe("the saved-translations library", () => {
     db.seed("saved_text_translations", []);
     await page.goto("/translate/saved");
 
-    await expect(page.getByText(/haven't saved any translations/i)).toBeVisible();
-    await expect(page.getByRole("link", { name: /translate something/i })).toBeVisible();
+    await expect(page.getByText(/ما حفظت أي ترجمة/)).toBeVisible();
+    await expect(page.getByRole("link", { name: "ترجم شيئاً" })).toBeVisible();
   });
 
   test("deletes only after the learner confirms", async ({ page, db }) => {
     db.seed("saved_text_translations", [savedRow()]);
     await page.goto("/translate/saved");
 
-    await page.getByRole("button", { name: /delete saved translation/i }).click();
-    await expect(page.getByText(/delete this saved translation/i)).toBeVisible();
+    await page.getByRole("button", { name: "احذف الترجمة المحفوظة" }).click();
+    await expect(page.getByText(/نحذف هذي الترجمة/)).toBeVisible();
     // Still there while the dialog is open — the confirmation is the point.
     expect(db.rows("saved_text_translations")).toHaveLength(1);
 
@@ -382,7 +382,7 @@ test.describe("tapping a word to save it", () => {
 
     await page.getByRole("button", { name: "coffee", exact: true }).click();
     await expect(page.getByText("قهوة", { exact: true })).toBeVisible();
-    await page.getByRole("button", { name: /save to my words/i }).click();
+    await page.getByRole("button", { name: "احفظ في كلماتي" }).click();
 
     await expect.poll(() => db.rows("user_vocabulary").length, { timeout: 10_000 }).toBe(1);
 
@@ -404,7 +404,7 @@ test.describe("tapping a word to save it", () => {
 
     // The gloss is best-effort; losing it must not take the sentence breakdown
     // down with it.
-    await expect(page.getByText(/no translation available/i)).toBeVisible();
+    await expect(page.getByText(/ما فيه ترجمة/)).toBeVisible();
     await expect(page.getByText("How are you today?").first()).toBeVisible();
   });
 });

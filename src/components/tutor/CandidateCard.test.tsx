@@ -109,7 +109,7 @@ describe("reading the candidate", () => {
 
     // The reviewer has dozens of these to get through; the warning is what
     // tells them which ones deserve a listen.
-    expect(screen.getByText(/Low confidence — please verify/)).toBeInTheDocument();
+    expect(screen.getByText(/ثقة منخفضة/)).toBeInTheDocument();
   });
 
   it("drops the warning once the word has been decided", () => {
@@ -238,7 +238,7 @@ describe("correcting it", () => {
   it("drops the sentence and its timings together", () => {
     const { onUpdate } = render();
 
-    fireEvent.click(screen.getByTitle("Remove sentence"));
+    fireEvent.click(screen.getByTitle("احذف الجملة"));
 
     // A sentence the pipeline mis-segmented is worse than none: it becomes the
     // example on the learner's card.
@@ -262,13 +262,13 @@ describe("correcting it", () => {
     render({ classification: "ABSTRACT", image_enabled: true });
 
     // An illustration of "however" costs money and teaches nothing.
-    expect(screen.getByText(/image may not be helpful/i)).toBeInTheDocument();
+    expect(screen.getByText(/الصورة قد ما تفيد/)).toBeInTheDocument();
   });
 
   it("says nothing about pictures for a word that has one turned off", () => {
     render({ classification: "ABSTRACT", image_enabled: false });
 
-    expect(screen.queryByText(/image may not be helpful/i)).toBeNull();
+    expect(screen.queryByText(/الصورة قد ما تفيد/)).toBeNull();
   });
 });
 
@@ -302,7 +302,7 @@ describe("deciding", () => {
   it("shows the decision instead of the buttons", () => {
     render({ status: "approved" });
 
-    expect(screen.getByText("Approved")).toBeInTheDocument();
+    expect(screen.getByText("مقبولة")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /approve/i })).toBeNull();
   });
 
@@ -311,7 +311,7 @@ describe("deciding", () => {
 
     // Still readable, so a reviewer can see what they turned down without
     // re-running the pipeline.
-    expect(screen.getByText("Rejected")).toBeInTheDocument();
+    expect(screen.getByText("مرفوضة")).toBeInTheDocument();
     expect(screen.getByDisplayValue("سوق")).toBeInTheDocument();
   });
 

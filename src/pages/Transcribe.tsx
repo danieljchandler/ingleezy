@@ -299,7 +299,7 @@ const Transcribe = () => {
         const crashAge = Date.now() - new Date(unloadAt).getTime();
         if (crashAge < 10_000) {
           toast.error("أُعيد تحميل الصفحة أثناء الرفع", {
-            description: unloadPhase ? `Last phase: ${unloadPhase}` : "An unexpected reload was detected.",
+            description: unloadPhase ? `آخر مرحلة: ${unloadPhase}` : "صار تحديث غير متوقّع للصفحة.",
           });
         }
       }
@@ -362,12 +362,12 @@ const Transcribe = () => {
           !validTypes.includes(selectedFile.type) &&
           !selectedFile.name.match(/\.(mp3|wav|m4a|ogg|mp4|webm|mov)$/i)
         ) {
-          toast.error("نوع ملف غير مدعوم", { description: "Please upload an audio or video file" });
+          toast.error("نوع ملف غير مدعوم", { description: "ارفع ملف صوت أو فيديو" });
           return;
         }
 
         if (!isAdmin && isVideoFile(selectedFile)) {
-          toast.error("رفع الفيديو للإدارة فقط", { description: "Please upload an audio file (MP3, WAV, M4A, OGG)" });
+          toast.error("رفع الفيديو للإدارة فقط", { description: "ارفع ملف صوت (MP3، WAV، M4A، OGG)" });
           if (fileInputRef.current) fileInputRef.current.value = "";
           return;
         }
@@ -392,7 +392,7 @@ const Transcribe = () => {
       const droppedFile = e.dataTransfer.files?.[0];
       if (droppedFile) {
         if (!isAdmin && isVideoFile(droppedFile)) {
-          toast.error("رفع الفيديو للإدارة فقط", { description: "Please upload an audio file (MP3, WAV, M4A, OGG)" });
+          toast.error("رفع الفيديو للإدارة فقط", { description: "ارفع ملف صوت (MP3، WAV، M4A، OGG)" });
           return;
         }
         setFile(droppedFile);
@@ -449,11 +449,11 @@ const Transcribe = () => {
     try {
       const parsed = new URL(trimmed);
       if (!parsed.hostname.includes('.')) {
-        toast.error("رابط غير صالح", { description: "Please enter a valid URL (e.g. https://youtube.com/watch?v=...)" });
+        toast.error("رابط غير صالح", { description: "أدخل رابطاً صحيحاً (مثل https://youtube.com/watch?v=...)" });
         return;
       }
     } catch {
-      toast.error("رابط غير صالح", { description: "Please enter a valid URL" });
+      toast.error("رابط غير صالح", { description: "أدخل رابطاً صحيحاً" });
       return;
     }
 
@@ -496,7 +496,7 @@ const Transcribe = () => {
         return;
       }
       
-      if (!data?.audioBase64) throw new Error("No audio file found");
+      if (!data?.audioBase64) throw new Error("ما لقينا ملف صوت");
 
       // Convert base64 to File
       const binaryStr = atob(data.audioBase64);
@@ -669,7 +669,7 @@ const Transcribe = () => {
         } catch (e) {
           clearTimeout(timeout);
           if (e instanceof DOMException && e.name === "AbortError") {
-            throw new Error("Deepgram timed out – try a shorter clip.");
+            throw new Error("Deepgram تأخّر — جرّب مقطعاً أقصر.");
           }
           throw e;
         }
@@ -701,7 +701,7 @@ const Transcribe = () => {
         } catch (e) {
           clearTimeout(timeout);
           if (e instanceof DOMException && e.name === "AbortError") {
-            throw new Error("Munsit timed out – try a shorter clip.");
+            throw new Error("Munsit تأخّر — جرّب مقطعاً أقصر.");
           }
           throw e;
         }
@@ -730,7 +730,7 @@ const Transcribe = () => {
         } catch (e) {
           clearTimeout(timeout);
           if (e instanceof DOMException && e.name === "AbortError") {
-            throw new Error("Fanar timed out.");
+            throw new Error("Fanar تأخّر.");
           }
           throw e;
         }
@@ -759,7 +759,7 @@ const Transcribe = () => {
         } catch (e) {
           clearTimeout(timeout);
           if (e instanceof DOMException && e.name === "AbortError") {
-            throw new Error("Soniox timed out.");
+            throw new Error("Soniox تأخّر.");
           }
           throw e;
         }
@@ -889,7 +889,7 @@ const Transcribe = () => {
       setTranscriptResult(initialResult);
 
       const engineCount = enginesUsed.length;
-      const engineMsg = engineCount >= 4 ? "Quad transcription complete!" : engineCount >= 3 ? "Triple transcription complete!" : engineCount === 2 ? "Dual transcription complete!" : "Transcription complete!";
+      const engineMsg = engineCount >= 4 ? "خلص التفريغ بأربعة محرّكات!" : engineCount >= 3 ? "خلص التفريغ بثلاثة محرّكات!" : engineCount === 2 ? "خلص التفريغ بمحرّكين!" : "خلص التفريغ!";
       const onScreenMsg = onScreenText.length > 0 ? ` Detected ${onScreenText.length} on-screen text overlay${onScreenText.length === 1 ? '' : 's'}.` : '';
       toast.success(engineMsg, { description: `Analyzing with multi-LLM ensemble...${onScreenMsg}` });
 
@@ -936,7 +936,7 @@ const Transcribe = () => {
 
   const handleSaveClick = () => {
     if (!isAuthenticated) {
-      toast.error("سجّل الدخول أولاً", { description: "You need an account to save transcriptions" });
+      toast.error("سجّل الدخول أولاً", { description: "تحتاج حساباً عشان تحفظ التفريغات" });
       return;
     }
     const defaultTitle = file?.name?.replace(/\.[^/.]+$/, "") || `Transcription ${new Date().toLocaleDateString('en-US')}`;
@@ -994,7 +994,7 @@ const Transcribe = () => {
   
   const handleSaveToMyWords = async (word: VocabItem) => {
     if (!isAuthenticated) {
-      toast.error("سجّل الدخول أولاً", { description: "You need an account to save words" });
+      toast.error("سجّل الدخول أولاً", { description: "تحتاج حساباً عشان تحفظ الكلمات" });
       return;
     }
     if (savedWords.has(word.arabic)) { toast.info("الكلمة محفوظة من قبل"); return; }
@@ -1093,8 +1093,8 @@ const Transcribe = () => {
             </h1>
             <p className="text-muted-foreground">
               {isAdmin
-                ? "Upload an audio/video file or paste a link from YouTube or social media"
-                : "Upload an audio file to transcribe"}
+                ? "ارفع ملف صوت أو فيديو، أو الصق رابطاً من يوتيوب أو السوشال ميديا"
+                : "ارفع ملف صوت عشان نفرّغه"}
             </p>
           </div>
         </div>
@@ -1179,7 +1179,7 @@ const Transcribe = () => {
                         disabled={!urlInput.trim() || isLoadingUrl || isProcessing}
                         variant="secondary"
                       >
-                        {isLoadingUrl ? <Loader2 className="h-4 w-4 animate-spin" /> : "Extract"}
+                        {isLoadingUrl ? <Loader2 className="h-4 w-4 animate-spin" /> : "استخرج"}
                       </Button>
                     </div>
                     
@@ -1224,7 +1224,7 @@ const Transcribe = () => {
               >
                 {isProcessing ? (
                   <><Loader2 className="mr-2 h-4 w-4 animate-spin" />جارٍ التفريغ...</>
-                ) : "Start Transcription"}
+                ) : "ابدأ التفريغ"}
               </Button>
             )}
 
@@ -1429,7 +1429,7 @@ const Transcribe = () => {
                     try {
                       await handleSaveToMyWords(enrichedVocab);
                     } catch (error) {
-                      toast.error(error instanceof Error ? error.message : "Failed to add word");
+                      toast.error(error instanceof Error ? error.message : "تعذّرت إضافة الكلمة");
                     }
                   };
                   
@@ -1495,8 +1495,8 @@ const Transcribe = () => {
         {debugEnabled && (
           <Card>
             <CardHeader>
-              <CardTitle>Debug</CardTitle>
-              <CardDescription>Page state (add <span className="font-mono">?debug</span> to URL)</CardDescription>
+              <CardTitle>تشخيص</CardTitle>
+              <CardDescription>حالة الصفحة (أضف <span className="font-mono">?debug</span> للرابط)</CardDescription>
             </CardHeader>
             <CardContent>
               <pre className="text-xs whitespace-pre-wrap rounded-md bg-muted p-3 border">

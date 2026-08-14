@@ -214,7 +214,7 @@ describe("multiple choice", () => {
     fireEvent.click(screen.getByRole("button", { name: "market" }));
 
     expect(onAnswer).toHaveBeenCalledWith(true, "market");
-    expect(screen.getByText("Correct! أحسنت")).toBeInTheDocument();
+    expect(screen.getByText("صح! أحسنت")).toBeInTheDocument();
   });
 
   it("reports a wrong answer with what was chosen", () => {
@@ -227,7 +227,7 @@ describe("multiple choice", () => {
     // The chosen answer is recorded, not just the verdict — which word a
     // learner confused it with is the useful half.
     expect(onAnswer).toHaveBeenCalledWith(false, chosen);
-    expect(screen.getByText("Not quite — keep practicing")).toBeInTheDocument();
+    expect(screen.getByText("مو بالضبط — واصل التمرين")).toBeInTheDocument();
   });
 
   it("stops accepting answers once one is given", () => {
@@ -277,17 +277,17 @@ describe("multiple choice", () => {
 
     // The result banner from the previous word carrying over would tell the
     // learner they had answered a question they have not seen.
-    expect(screen.queryByText("Correct! أحسنت")).not.toBeInTheDocument();
+    expect(screen.queryByText("صح! أحسنت")).not.toBeInTheDocument();
     expect(screen.getByText("مطعم")).toBeInTheDocument();
   });
 });
 
 describe("typing the answer", () => {
   const typeAndSubmit = (text: string) => {
-    fireEvent.change(screen.getByPlaceholderText("Type the English word..."), {
+    fireEvent.change(screen.getByPlaceholderText("اكتب الكلمة بالإنجليزي…"), {
       target: { value: text },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Check Answer" }));
+    fireEvent.click(screen.getByRole("button", { name: "تحقّق" }));
   };
 
   it("accepts the right word", () => {
@@ -296,7 +296,7 @@ describe("typing the answer", () => {
     typeAndSubmit("market");
 
     expect(onAnswer).toHaveBeenCalledWith(true, "market");
-    expect(screen.getByText("Correct! أحسنت")).toBeInTheDocument();
+    expect(screen.getByText("صح! أحسنت")).toBeInTheDocument();
   });
 
   it("ignores case and surrounding space", () => {
@@ -317,7 +317,7 @@ describe("typing the answer", () => {
     // Being told you are wrong without being told what was right is the one
     // thing a quiz must not do.
     expect(onAnswer).toHaveBeenCalledWith(false, "shop");
-    expect(screen.getByText("Correct answer:")).toBeInTheDocument();
+    expect(screen.getByText("الجواب الصحيح:")).toBeInTheDocument();
     expect(screen.getByText("market")).toBeInTheDocument();
   });
 
@@ -326,14 +326,14 @@ describe("typing the answer", () => {
 
     typeAndSubmit("market");
 
-    expect(screen.queryByText("Correct answer:")).not.toBeInTheDocument();
+    expect(screen.queryByText("الجواب الصحيح:")).not.toBeInTheDocument();
   });
 
   it("will not submit an empty answer", () => {
     const { onAnswer } = render({ mode: "typing" });
 
     // Nothing typed is not a wrong answer; scoring it would punish a mis-tap.
-    expect(screen.getByRole("button", { name: "Check Answer" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "تحقّق" })).toBeDisabled();
     expect(onAnswer).not.toHaveBeenCalled();
   });
 
@@ -349,14 +349,14 @@ describe("typing the answer", () => {
     const { onAnswer } = render({ mode: "typing" });
 
     typeAndSubmit("shop");
-    fireEvent.change(screen.getByPlaceholderText("Type the English word..."), {
+    fireEvent.change(screen.getByPlaceholderText("اكتب الكلمة بالإنجليزي…"), {
       target: { value: "market" },
     });
 
     // The correct answer is on screen by now; letting them retype it would make
     // the score a measure of reading.
-    expect(screen.getByPlaceholderText("Type the English word...")).toBeDisabled();
-    expect(screen.queryByRole("button", { name: "Check Answer" })).not.toBeInTheDocument();
+    expect(screen.getByPlaceholderText("اكتب الكلمة بالإنجليزي…")).toBeDisabled();
+    expect(screen.queryByRole("button", { name: "تحقّق" })).not.toBeInTheDocument();
     expect(onAnswer).toHaveBeenCalledTimes(1);
   });
 
@@ -384,7 +384,7 @@ describe("typing the answer", () => {
 
     // A field still holding the previous answer would submit it for the new
     // word on the first keypress.
-    expect(screen.getByPlaceholderText("Type the English word...")).toHaveValue("");
-    expect(screen.queryByText("Correct! أحسنت")).not.toBeInTheDocument();
+    expect(screen.getByPlaceholderText("اكتب الكلمة بالإنجليزي…")).toHaveValue("");
+    expect(screen.queryByText("صح! أحسنت")).not.toBeInTheDocument();
   });
 });

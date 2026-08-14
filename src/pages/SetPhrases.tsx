@@ -36,7 +36,7 @@ const SetPhrases = () => {
           </div>
           <div className="grid grid-cols-2 gap-2 mt-4">
             <Button onClick={() => navigate("/set-phrases/practice")} className="w-full">
-              <Sparkles className="h-4 w-4 mr-1" /> Mixed practice
+              <Sparkles className="h-4 w-4 mr-1" /> تمرين منوّع
             </Button>
             <Button
               onClick={() => navigate("/set-phrases/review")}
@@ -44,7 +44,7 @@ const SetPhrases = () => {
               className="w-full"
               disabled={dueCount === 0}
             >
-              Review ({dueCount})
+              راجع ({dueCount})
             </Button>
           </div>
         </Card>

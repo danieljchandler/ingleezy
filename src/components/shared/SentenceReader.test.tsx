@@ -148,31 +148,31 @@ describe("SentenceReader — splitting the article up", () => {
 describe("SentenceReader — revealing the Arabic", () => {
   it("starts with every translation hidden", () => {
     renderArticle({ sentences: authored });
-    expect(screen.getAllByText("Reveal translation")).toHaveLength(2);
+    expect(screen.getAllByText("ورّني الترجمة")).toHaveLength(2);
   });
 
   it("reveals one line without revealing the rest", () => {
     // The whole point is reading line by line; revealing all of them would be
     // the article with a translation under it, which is not practice.
     renderArticle({ sentences: authored });
-    fireEvent.click(screen.getAllByText("Reveal translation")[0]);
+    fireEvent.click(screen.getAllByText("ورّني الترجمة")[0]);
 
-    expect(screen.getByText("Hide translation")).toBeInTheDocument();
-    expect(screen.getAllByText("Reveal translation")).toHaveLength(1);
+    expect(screen.getByText("أخفِ الترجمة")).toBeInTheDocument();
+    expect(screen.getAllByText("ورّني الترجمة")).toHaveLength(1);
   });
 
   it("hides it again on a second tap", () => {
     renderArticle({ sentences: authored });
-    fireEvent.click(screen.getAllByText("Reveal translation")[0]);
-    fireEvent.click(screen.getByText("Hide translation"));
-    expect(screen.getAllByText("Reveal translation")).toHaveLength(2);
+    fireEvent.click(screen.getAllByText("ورّني الترجمة")[0]);
+    fireEvent.click(screen.getByText("أخفِ الترجمة"));
+    expect(screen.getAllByText("ورّني الترجمة")).toHaveLength(2);
   });
 
   it("offers no reveal on a line the generator could not translate", () => {
     // The fallback splitter produces lines with no Arabic at all, and a
     // control that reveals nothing is worse than no control.
     renderArticle();
-    expect(screen.queryByText("Reveal translation")).not.toBeInTheDocument();
+    expect(screen.queryByText("ورّني الترجمة")).not.toBeInTheDocument();
   });
 
   it("offers the reveal on a line that has only a literal gloss", () => {
@@ -180,7 +180,7 @@ describe("SentenceReader — revealing the Arabic", () => {
     // gating on the Arabic alone would hide it behind a control that never
     // appeared.
     renderArticle({ sentences: [{ english: "A sentence.", literal: "جملة" }] });
-    expect(screen.getByText("Reveal translation")).toBeInTheDocument();
+    expect(screen.getByText("ورّني الترجمة")).toBeInTheDocument();
   });
 
   it("shows the line's Arabic and its literal gloss when revealed", () => {
@@ -195,14 +195,14 @@ describe("SentenceReader — revealing the Arabic", () => {
     // The display preference is "show me the Arabic"; making them tap each
     // line to get back to the setting they already chose is the wrong default.
     renderArticle({ sentences: authored, revealByDefault: true });
-    expect(screen.getAllByText("Hide translation")).toHaveLength(2);
+    expect(screen.getAllByText("أخفِ الترجمة")).toHaveLength(2);
   });
 
   it("still lets a line be closed when the scaffold is on by default", () => {
     renderArticle({ sentences: authored, revealByDefault: true });
-    fireEvent.click(screen.getAllByText("Hide translation")[0]);
-    expect(screen.getByText("Reveal translation")).toBeInTheDocument();
-    expect(screen.getAllByText("Hide translation")).toHaveLength(1);
+    fireEvent.click(screen.getAllByText("أخفِ الترجمة")[0]);
+    expect(screen.getByText("ورّني الترجمة")).toBeInTheDocument();
+    expect(screen.getAllByText("أخفِ الترجمة")).toHaveLength(1);
   });
 
   it("closes line two when the article changes underneath it", () => {
@@ -211,8 +211,8 @@ describe("SentenceReader — revealing the Arabic", () => {
     // opened the next with line 2 already translated — the exact thing a
     // sentence-by-sentence exercise exists to prevent.
     const { rerender } = renderArticle({ sentences: authored });
-    fireEvent.click(screen.getAllByText("Reveal translation")[1]);
-    expect(screen.getByText("Hide translation")).toBeInTheDocument();
+    fireEvent.click(screen.getAllByText("ورّني الترجمة")[1]);
+    expect(screen.getByText("أخفِ الترجمة")).toBeInTheDocument();
 
     rerender(
       <SentenceReader
@@ -224,14 +224,14 @@ describe("SentenceReader — revealing the Arabic", () => {
         ]}
       />,
     );
-    expect(screen.queryByText("Hide translation")).not.toBeInTheDocument();
+    expect(screen.queryByText("أخفِ الترجمة")).not.toBeInTheDocument();
   });
 
   it("leaves a revealed line alone when the parent merely re-renders", () => {
     // The parent rebuilds the sentence array on every render, so identity is
     // not a usable signal — closing on that would undo the reader's own tap.
     const { rerender } = renderArticle({ sentences: authored });
-    fireEvent.click(screen.getAllByText("Reveal translation")[1]);
+    fireEvent.click(screen.getAllByText("ورّني الترجمة")[1]);
 
     rerender(
       <SentenceReader
@@ -240,7 +240,7 @@ describe("SentenceReader — revealing the Arabic", () => {
         sentences={authored.map((s) => ({ ...s }))}
       />,
     );
-    expect(screen.getByText("Hide translation")).toBeInTheDocument();
+    expect(screen.getByText("أخفِ الترجمة")).toBeInTheDocument();
   });
 });
 

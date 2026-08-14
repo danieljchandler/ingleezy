@@ -117,7 +117,7 @@ export const SentenceReader = ({
                   ) : (
                     <ChevronDown className="h-3 w-3" />
                   )}
-                  {isOpen ? "Hide translation" : "Reveal translation"}
+                  {isOpen ? "أخفِ الترجمة" : "ورّني الترجمة"}
                 </button>
               ) : <span />}
               {/*

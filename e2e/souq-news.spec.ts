@@ -72,7 +72,7 @@ test.describe("reading the news", () => {
 
     // The scaffold is behind a tap so the eye cannot cheat while reading.
     await expect(page.getByText("أسعار الخضار نزلت اليوم في السوق.")).not.toBeVisible();
-    await page.getByRole("button", { name: /reveal translation/i }).click();
+    await page.getByRole("button", { name: "ورّني الترجمة" }).click();
 
     await expect(page.getByText("أسعار الخضار نزلت اليوم في السوق.").first()).toBeVisible();
   });
@@ -84,17 +84,17 @@ test.describe("reading the news", () => {
     // The per-sentence scaffold has its own reveal inside SentenceReader; this
     // is the article-level headline and summary, which start collapsed.
     await expect(page.getByText("السوق اليوم", { exact: true })).toHaveCount(0);
-    await page.getByRole("button", { name: /show arabic/i }).click();
+    await page.getByRole("button", { name: "ورّني العربي" }).click();
 
     await expect(page.getByText("السوق اليوم", { exact: true })).toBeVisible();
   });
 
   test("hides the summary again", async ({ page }) => {
     await page.goto("/souq-news");
-    await page.getByRole("button", { name: /show arabic/i }).click();
+    await page.getByRole("button", { name: "ورّني العربي" }).click();
     await expect(page.getByText("السوق اليوم", { exact: true })).toBeVisible();
 
-    await page.getByRole("button", { name: /hide arabic/i }).click();
+    await page.getByRole("button", { name: "أخفِ العربي" }).click();
     await expect(page.getByText("السوق اليوم", { exact: true })).toHaveCount(0);
   });
 
@@ -130,7 +130,7 @@ test.describe("reading the news", () => {
     await page.goto("/souq-news");
     expect(await completedToday(page)).not.toContain("souq");
 
-    await page.getByRole("button", { name: /show arabic/i }).click();
+    await page.getByRole("button", { name: "ورّني العربي" }).click();
 
     // Reaching for the summary is the only signal the page has that the
     // learner actually engaged with the article. Marking it on load would let
@@ -159,7 +159,7 @@ test.describe("when there is no news", () => {
     stubNews(backend, []);
     await page.goto("/souq-news");
 
-    await expect(page.getByText(/no news found for today/i)).toBeVisible();
+    await expect(page.getByText(/ما فيه أخبار اليوم/)).toBeVisible();
   });
 
   test("offers a retry rather than claiming the day was quiet", async ({
@@ -174,8 +174,8 @@ test.describe("when there is no news", () => {
 
     // The distinction that matters: nothing generated is not the same as
     // nothing happening in the world, and only one of them is worth retrying.
-    await expect(page.getByText(/failed to load news/i)).toBeVisible();
-    await expect(page.getByRole("button", { name: /try again/i })).toBeVisible();
+    await expect(page.getByText(/تعذّر تحميل الأخبار/)).toBeVisible();
+    await expect(page.getByRole("button", { name: "جرّب مرة ثانية" })).toBeVisible();
     await expect(page.getByText(/no news found/i)).toHaveCount(0);
   });
 
@@ -184,10 +184,10 @@ test.describe("when there is no news", () => {
     backend.stubFunctionFailure("souq-news");
 
     await page.goto("/souq-news");
-    await expect(page.getByRole("button", { name: /try again/i })).toBeVisible();
+    await expect(page.getByRole("button", { name: "جرّب مرة ثانية" })).toBeVisible();
 
     stubNews(backend);
-    await page.getByRole("button", { name: /try again/i }).click();
+    await page.getByRole("button", { name: "جرّب مرة ثانية" }).click();
 
     await expect(page.getByRole("heading", { name: "The market today" })).toBeVisible();
   });
@@ -328,7 +328,7 @@ test.describe("saving a word met in an article", () => {
     // dialect gloss and the save.
     await page.getByRole("button", { name: "prices", exact: true }).click();
     await expect(page.getByText("أسعار").last()).toBeVisible();
-    await page.getByRole("button", { name: /save to my words/i }).click();
+    await page.getByRole("button", { name: "احفظ في كلماتي" }).click();
 
     await expect.poll(() => db.rows("user_vocabulary").length, { timeout: 10_000 }).toBe(1);
     const saved = db.rows("user_vocabulary")[0];
@@ -342,7 +342,7 @@ test.describe("saving a word met in an article", () => {
     await expect(page.getByRole("heading", { name: "The market today" })).toBeVisible();
 
     await page.getByRole("button", { name: "prices", exact: true }).click();
-    await page.getByRole("button", { name: /save to my words/i }).click();
+    await page.getByRole("button", { name: "احفظ في كلماتي" }).click();
 
     // The sentence is most of the value of saving from a reading surface: the
     // card comes back with the context the word was actually met in.

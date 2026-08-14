@@ -206,8 +206,8 @@ const ReadingLibraryStory = () => {
     return (
       <AppShell>
         <div className="text-center py-16">
-          <p>Story not found</p>
-          <Button variant="link" onClick={() => navigate('/reading-library')}>Back to Library</Button>
+          <p>ما لقينا القصة</p>
+          <Button variant="link" onClick={() => navigate('/reading-library')}>رجوع للمكتبة</Button>
         </div>
       </AppShell>
     );
@@ -328,12 +328,12 @@ const ReadingLibraryStory = () => {
               {story.body_dialect && (
                 <div className="flex items-center gap-2">
                   <Switch checked={showDialect} onCheckedChange={setShowDialect} id="dialect-toggle" />
-                  <Label htmlFor="dialect-toggle" className="text-sm">Dialect</Label>
+                  <Label htmlFor="dialect-toggle" className="text-sm">العامية</Label>
                 </div>
               )}
               <div className="flex items-center gap-2">
                 <Switch checked={showEnglish} onCheckedChange={setShowEnglish} id="english-toggle" />
-                <Label htmlFor="english-toggle" className="text-sm">English</Label>
+                <Label htmlFor="english-toggle" className="text-sm">الإنجليزي</Label>
               </div>
             </div>
           </Card>

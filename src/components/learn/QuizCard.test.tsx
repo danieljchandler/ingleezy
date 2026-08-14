@@ -95,7 +95,7 @@ describe("asking the question", () => {
     render();
 
     expect(screen.getByText("سوق")).toHaveAttribute("dir", "rtl");
-    expect(screen.getByText("What does this mean in English?")).toBeInTheDocument();
+    expect(screen.getByText("وش معناها بالإنجليزي؟")).toBeInTheDocument();
   });
 
   it("names the topic the word came from", () => {
@@ -183,7 +183,7 @@ describe("hearing the word", () => {
     render();
     audio.play.mockClear();
 
-    fireEvent.click(screen.getByRole("button", { name: /play pronunciation/i }));
+    fireEvent.click(screen.getByRole("button", { name: "شغّل النطق" }));
 
     expect(audio.play).toHaveBeenCalledWith("https://audio.test/souq.mp3");
   });
@@ -206,7 +206,7 @@ describe("hearing the word", () => {
     tts.isLoading = true;
     render({ word: aWord({ audio_url: null }) });
 
-    expect(screen.getByRole("button", { name: /play pronunciation/i })).toHaveAttribute(
+    expect(screen.getByRole("button", { name: "شغّل النطق" })).toHaveAttribute(
       "aria-busy",
       "true",
     );
@@ -231,7 +231,7 @@ describe("hearing the word", () => {
   it("leaves the play button dead when there is nothing to play", () => {
     render({ word: aWord({ audio_url: null }) });
 
-    expect(screen.getByRole("button", { name: /play pronunciation/i })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "شغّل النطق" })).toBeDisabled();
   });
 });
 

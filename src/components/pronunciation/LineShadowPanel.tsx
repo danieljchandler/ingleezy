@@ -90,7 +90,7 @@ export function LineShadowPanel({ clip, nativeClipWav, externalYouTubeController
     <div className="mt-3 rounded-xl border-2 border-primary/30 bg-primary/[0.03] p-4 space-y-3">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <span className="text-xs font-semibold text-primary uppercase tracking-wide">Shadow this line</span>
+        <span className="text-xs font-semibold text-primary uppercase tracking-wide">ردّد هذا السطر</span>
         <button onClick={onClose} className="text-muted-foreground hover:text-foreground" aria-label="إغلاق">
           <X className="h-4 w-4" />
         </button>
@@ -175,7 +175,7 @@ export function LineShadowPanel({ clip, nativeClipWav, externalYouTubeController
                 <Mic className="h-5 w-5" />
               </button>
             </CountdownRing>
-            <p className="text-xs text-muted-foreground">Repeat now</p>
+            <p className="text-xs text-muted-foreground">ردّد الحين</p>
             <div className="w-full max-w-xs">
               <LevelMeter level={recorder.level} />
             </div>
@@ -185,7 +185,7 @@ export function LineShadowPanel({ clip, nativeClipWav, externalYouTubeController
         {(state === "scoring" || isLoading) && (
           <div className="flex flex-col items-center gap-2 py-2">
             <Loader2 className="h-6 w-6 animate-spin text-primary" />
-            <p className="text-xs text-muted-foreground">Comparing to the clip…</p>
+            <p className="text-xs text-muted-foreground">نقارن مع المقطع…</p>
           </div>
         )}
 

@@ -1515,7 +1515,7 @@ const DiscoverVideo = () => {
   if (!video) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <p className="text-muted-foreground">Video not found</p>
+        <p className="text-muted-foreground">ما لقينا الفيديو</p>
       </div>
     );
   }

@@ -67,7 +67,7 @@ const NativeFeedback = () => {
       const { data } = await supabase.functions.invoke("native-feedback", {
         body: { action: "confirm", sessionId },
       });
-      if (data?.ok) toast.success("Credits added!");
+      if (data?.ok) toast.success("أُضيفت الأرصدة!");
       setSearchParams({}, { replace: true });
       void load();
     })();
@@ -80,10 +80,10 @@ const NativeFeedback = () => {
         body: { action: "submit", dialect: activeDialect, text },
       });
       if (error || data?.error) {
-        toast.error((data as { message?: string } | null)?.message ?? "Couldn't submit — try again.");
+        toast.error((data as { message?: string } | null)?.message ?? "ما وصل الطلب — جرّب مرة ثانية.");
         return;
       }
-      toast.success("Sent! A native speaker will answer within about 48 hours.");
+      toast.success("أُرسل! بيرد عليك متحدث أصلي خلال ٤٨ ساعة تقريباً.");
       setText("");
       void load();
     } finally {
@@ -98,7 +98,7 @@ const NativeFeedback = () => {
         body: { action: "purchase" },
       });
       if (error || !data?.url) {
-        toast.error("Couldn't start the purchase — try again.");
+        toast.error("ما بدأت عملية الشراء — جرّب مرة ثانية.");
         return;
       }
       window.open(data.url as string, "_blank");
@@ -110,7 +110,7 @@ const NativeFeedback = () => {
   return (
     <AppShell>
       <HomeButton />
-      <h1 className="mb-2 text-2xl font-bold text-foreground">Native feedback</h1>
+      <h1 className="mb-2 text-2xl font-bold text-foreground">ملاحظات متحدث أصلي</h1>
       <p className="mb-6 text-sm text-muted-foreground">
         Write something in {activeDialect} Arabic — a real native speaker corrects it, usually
         within 48 hours. One credit per submission; a request we can't answer is refunded.
@@ -118,7 +118,7 @@ const NativeFeedback = () => {
 
       <div className="mb-6 flex items-center justify-between rounded-xl border border-border bg-card p-4">
         <div>
-          <p className="text-sm font-medium">Credits</p>
+          <p className="text-sm font-medium">الأرصدة</p>
           <p className="text-2xl font-bold">{status?.balance ?? "—"}</p>
         </div>
         {status?.purchase_enabled && (
@@ -136,7 +136,7 @@ const NativeFeedback = () => {
           placeholder={`Write a few sentences in ${activeDialect} Arabic…`}
           dir="auto"
           rows={4}
-          aria-label="Your writing"
+          aria-label="نصّك"
         />
         <div className="flex items-center justify-between">
           <span className="text-xs text-muted-foreground">{text.trim().length}/2000</span>
@@ -152,8 +152,8 @@ const NativeFeedback = () => {
         {status !== null && status.balance < 1 && (
           <p className="text-xs text-muted-foreground">
             {status.purchase_enabled
-              ? "You're out of credits — grab a pack above to keep going."
-              : "Feedback credits aren't on sale yet — check back soon."}
+              ? "خلص رصيدك — خذ باقة فوق عشان تكمل."
+              : "أرصدة الملاحظات ما بعد نزلت للبيع — ارجع قريباً."}
           </p>
         )}
       </div>
@@ -166,11 +166,11 @@ const NativeFeedback = () => {
           <div key={request.id} className="rounded-xl border border-border bg-card p-4">
             <div className="mb-2 flex items-center gap-2">
               {request.status === "answered" ? (
-                <Badge className="gap-1 bg-emerald-600 text-white"><CheckCircle2 className="h-3 w-3" />Answered</Badge>
+                <Badge className="gap-1 bg-emerald-600 text-white"><CheckCircle2 className="h-3 w-3" />مُجاب</Badge>
               ) : request.status === "declined" ? (
-                <Badge variant="outline" className="gap-1"><Undo2 className="h-3 w-3" />Refunded</Badge>
+                <Badge variant="outline" className="gap-1"><Undo2 className="h-3 w-3" />مُسترد</Badge>
               ) : (
-                <Badge variant="outline" className="gap-1"><Clock className="h-3 w-3" />Waiting</Badge>
+                <Badge variant="outline" className="gap-1"><Clock className="h-3 w-3" />بانتظار الرد</Badge>
               )}
               <span className="text-xs text-muted-foreground">
                 {new Date(request.created_at).toLocaleDateString()}

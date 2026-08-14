@@ -54,7 +54,7 @@ async function render({
   return harness;
 }
 
-const trigger = () => screen.getByRole("button", { name: "Learn about Leeches" });
+const trigger = () => screen.getByRole("button", { name: "وش هذا: Leeches" });
 
 describe("InfoHint — whether it appears at all", () => {
   it("offers an explanation", async () => {
@@ -63,10 +63,10 @@ describe("InfoHint — whether it appears at all", () => {
   });
 
   it("names what it will explain", async () => {
-    // "Learn about Leeches" rather than "info": a screen reader lists these out
+    // "وش هذا: Leeches" rather than "info": a screen reader lists these out
     // of context, and a page can carry a dozen.
     await render({ title: "Bridge mode" });
-    expect(screen.getByRole("button", { name: "Learn about Bridge mode" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "وش هذا: Bridge mode" })).toBeInTheDocument();
   });
 
   it("disappears entirely when the learner has turned hints off", async () => {

@@ -221,7 +221,7 @@ const LearningAnalytics = () => {
           <h2 className="font-semibold text-foreground flex items-center gap-2">
             📅 Review Forecast (7 days)
           </h2>
-          <p className="text-xs text-muted-foreground">Combined across curriculum and your saved words</p>
+          <p className="text-xs text-muted-foreground">مجموع المنهج مع كلماتك المحفوظة</p>
           <div className="rounded-xl bg-primary/5 border border-primary/20 p-3">
             <p className="text-xs text-muted-foreground">مستحقة اليوم</p>
             <p className="text-2xl font-bold text-primary">{srsStats?.forecast[0]?.count ?? 0}</p>

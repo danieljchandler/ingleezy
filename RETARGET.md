@@ -385,9 +385,24 @@ generation conditioning.
       hub, practice surface, content page, Me-area tool and the video
       player speak Arabic. Admin stays English by design. What is left
       is Souq news (still Arabic) and the Transcribe/tutor-upload
-      pipelines. **Correction**: "complete" was overstated — the
-      subscription paywall (RequireSubscription, featureLabel, the Ask-AI
-      live-voice gate) was still English and has since been migrated.
+      pipelines. **Correction**: "complete" was overstated twice over.
+      The first pass covered pages and missed the shared components
+      underneath them; an audit found ~125 English strings still live in
+      learner-facing code. A second sweep migrated them: the subscription
+      paywall (RequireSubscription, featureLabel, the Ask-AI live-voice
+      gate), the transcript reader and its word/phrase popovers,
+      TappableArabicText / TappableEnglishText, the shadowing panels, the
+      Ask-AI chat and voice tabs, the quiz cards and results, the
+      set-phrases request card, the Anki importer, the tutor candidate
+      cards, the feedback widget, and the Listen / Stories / DailyStory /
+      DailyChallenge / SavedChats / SavedTranslations / SetPhrases /
+      NativeFeedback / Quiz / PlacementQuiz / ReadingPractice /
+      ReadingLibraryStory / WritingPractice / Translate / Transcribe /
+      TutorUpload / SouqNews pages. Deliberately left English: the
+      /alphabet routes (slated for an all-new English Sounds rebuild, so
+      translating Arabic-alphabet copy is wasted work) and the Privacy /
+      Terms pages (legal text, translated with the lawyer not the
+      linter).
       — grammar drills, listening practice, conversation + live voice,
       and the vocab games/battles now done. Backend flips landed with
       them: listening-quiz generates English audio via the Brain's

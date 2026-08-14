@@ -110,7 +110,7 @@ const StoryPlayer = () => {
           ? {
               kind: "story" as const,
               title: storyTitle,
-              summary: "Reading an interactive branching story.",
+              summary: "يقرأ قصة تفاعلية متفرّعة.",
               content: `Current scene: ${currentScene.narrative_english}${currentScene.narrative_arabic ? ` — ${currentScene.narrative_arabic}` : ""}`,
             }
           : null,
@@ -129,7 +129,7 @@ const StoryPlayer = () => {
       kind: 'story',
       route: `/stories/${storyId}`,
       title: storyTitle,
-      subtitle: `Scene ${pathTaken.length} of ${scenes.length}`,
+      subtitle: `المشهد ${pathTaken.length} من ${scenes.length}`,
       dialect: activeDialect,
     });
   }, [storyId, storyTitle, scenes, currentScene?.is_ending, pathTaken.length, activeDialect]);
@@ -183,9 +183,9 @@ const StoryPlayer = () => {
         <div className="mb-6"><HomeButton /></div>
         <div className="text-center py-16">
           <BookOpen className="h-16 w-16 text-muted-foreground/20 mx-auto mb-4" />
-          <p className="text-muted-foreground">This story has no scenes yet.</p>
+          <p className="text-muted-foreground">هذي القصة ما فيها مشاهد بعد.</p>
           <Button variant="outline" className="mt-4" onClick={() => navigate('/stories')}>
-            Back to Stories
+            رجوع للقصص
           </Button>
         </div>
       </AppShell>
@@ -207,7 +207,7 @@ const StoryPlayer = () => {
         <div className="text-center mb-6">
           <h1 className="text-xl font-bold font-heading">{storyTitle}</h1>
           <p className="text-xs text-muted-foreground mt-1">
-            Scene {pathTaken.length} · {scenes.length} total scenes
+            المشهد {pathTaken.length} · {scenes.length} مشاهد بالكل
           </p>
         </div>
 
@@ -254,14 +254,14 @@ const StoryPlayer = () => {
                   onClick={() => setLineByLine(v => !v)}
                   className="text-xs text-primary hover:underline"
                 >
-                  {lineByLine ? 'Paragraph view' : 'Line-by-line'}
+                  {lineByLine ? 'عرض الفقرة' : 'سطراً سطراً'}
                 </button>
                 {!lineByLine && (
                   <button
                     onClick={() => setShowTranslation(!showTranslation)}
                     className="text-xs text-primary hover:underline"
                   >
-                    {showTranslation ? 'Hide translation' : 'Show translation'}
+                    {showTranslation ? 'أخفِ الترجمة' : 'ورّني الترجمة'}
                   </button>
                 )}
               </div>
@@ -295,7 +295,7 @@ const StoryPlayer = () => {
                           disabled={isSaved || !user}
                           onClick={() => {
                             if (!user) {
-                              toast.error('Sign in to save words');
+                              toast.error('سجّل دخولك عشان تحفظ الكلمات');
                               return;
                             }
                             const { sentence_text, sentence_english } = extractSentenceForWord(
@@ -314,14 +314,14 @@ const StoryPlayer = () => {
                               {
                                 onSuccess: () => {
                                   setSavedWords(prev => new Set(prev).add(key));
-                                  toast.success('Saved to My Words');
+                                  toast.success('حفظناها في كلماتي');
                                 },
                                 onError: (err: any) => {
                                   if (err.message?.includes('موجودة')) {
                                     setSavedWords(prev => new Set(prev).add(key));
-                                    toast.info('Already in My Words');
+                                    toast.info('موجودة عندك أصلاً');
                                   } else {
-                                    toast.error('Failed to save');
+                                    toast.error('تعذّر الحفظ');
                                   }
                                 },
                               }
@@ -355,7 +355,7 @@ const StoryPlayer = () => {
                 <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary/10 mb-4">
                   <Trophy className="h-10 w-10 text-primary" />
                 </div>
-                <h2 className="text-xl font-bold mb-2">Story Complete!</h2>
+                <h2 className="text-xl font-bold mb-2">خلصت القصة!</h2>
                 {currentScene.ending_message && (
                   <p className="text-muted-foreground mb-1">{currentScene.ending_message}</p>
                 )}
@@ -365,7 +365,7 @@ const StoryPlayer = () => {
                 <div className="flex gap-3 justify-center mt-6">
                   <Button variant="outline" onClick={handleRestart} className="gap-2">
                     <RotateCcw className="h-4 w-4" />
-                    Play Again
+                    العب مرة ثانية
                   </Button>
                   <Button onClick={() => navigate('/stories')}>
                     More Stories
@@ -399,10 +399,10 @@ const StoryPlayer = () => {
           </div>
         ) : (
           <div className="text-center py-8">
-            <p className="text-muted-foreground">Scene not found. The story may have a broken link.</p>
+            <p className="text-muted-foreground">ما لقينا المشهد. يمكن في رابط مكسور بالقصة.</p>
             <Button variant="outline" className="mt-4" onClick={handleRestart}>
               <RotateCcw className="h-4 w-4 mr-2" />
-              Restart Story
+              ابدأ القصة من جديد
             </Button>
           </div>
         )}

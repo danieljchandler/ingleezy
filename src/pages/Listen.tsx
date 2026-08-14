@@ -22,20 +22,20 @@ import { toast } from "sonner";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 const FORMAT_META: Record<ListenFormat, { label: string; icon: any; blurb: string }> = {
-  podcast: { label: "Podcast", icon: Headphones, blurb: "Two-host conversation" },
-  ted: { label: "TED-style talk", icon: Mic, blurb: "Solo speaker, one big idea" },
-  interview: { label: "Interview", icon: Users, blurb: "Host & guest expert" },
-  story: { label: "Story", icon: BookOpen, blurb: "Narrative with dialogue" },
+  podcast: { label: "بودكاست", icon: Headphones, blurb: "حوار بين مقدّمين" },
+  ted: { label: "محاضرة تِد", icon: Mic, blurb: "متحدث واحد وفكرة واحدة" },
+  interview: { label: "مقابلة", icon: Users, blurb: "مقدّم وضيف خبير" },
+  story: { label: "قصة", icon: BookOpen, blurb: "سرد فيه حوار" },
 };
 
 const LENGTH_META: Record<ListenLength, { label: string; sub: string }> = {
-  short: { label: "Short", sub: "1–2 min" },
-  medium: { label: "Medium", sub: "3–5 min" },
-  long: { label: "Long", sub: "6–10 min" },
+  short: { label: "قصيرة", sub: "١–٢ دقيقة" },
+  medium: { label: "متوسطة", sub: "٣–٥ دقائق" },
+  long: { label: "طويلة", sub: "٦–١٠ دقائق" },
 };
 
 const Listen = () => {
-  useDocumentTitle("Listen — Ingleezy");
+  useDocumentTitle("استمع — إنجليزي");
   const navigate = useNavigate();
   const { activeDialect } = useDialect();
   const { data: episodes, isLoading } = useListenEpisodes();
@@ -51,7 +51,7 @@ const Listen = () => {
   const handleGenerate = async (t?: string, category?: string | null) => {
     const finalTopic = (t ?? topic).trim();
     if (!finalTopic) {
-      toast.error("Pick or type a topic first");
+      toast.error("اختر موضوع أو اكتبه أول");
       return;
     }
     try {
@@ -62,10 +62,10 @@ const Listen = () => {
         length,
         audioMode,
       });
-      toast.success("Episode ready");
+      toast.success("الحلقة جاهزة");
       navigate(`/listen/${ep.id}`);
     } catch (e: any) {
-      toast.error(e?.message ?? "Generation failed");
+      toast.error(e?.message ?? "فشل التوليد");
     }
   };
 
@@ -76,16 +76,16 @@ const Listen = () => {
       <div className="space-y-6 pb-20">
         <header className="space-y-2">
           <HomeButton />
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">Listen</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">استمع</h1>
           <p className="text-sm text-muted-foreground">
-            AI-generated podcasts, talks, interviews & stories in {activeDialect} dialect.
+            بودكاست ومحاضرات ومقابلات وقصص إنجليزية مولّدة، بشرح بلهجة {activeDialect}.
           </p>
         </header>
 
         <Tabs defaultValue="library">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="library"><Library className="h-4 w-4 mr-2" />Library</TabsTrigger>
-            <TabsTrigger value="create"><Plus className="h-4 w-4 mr-2" />Create</TabsTrigger>
+            <TabsTrigger value="library"><Library className="h-4 w-4 mr-2" />المكتبة</TabsTrigger>
+            <TabsTrigger value="create"><Plus className="h-4 w-4 mr-2" />أنشئ</TabsTrigger>
           </TabsList>
 
           <TabsContent value="library" className="space-y-3 pt-4">
@@ -94,8 +94,8 @@ const Listen = () => {
             )}
             {!isLoading && (!episodes || episodes.length === 0) && (
               <Card className="p-6 text-center space-y-2">
-                <p className="text-sm text-muted-foreground">No episodes yet in {activeDialect}.</p>
-                <p className="text-xs text-muted-foreground">Be the first — open the Create tab.</p>
+                <p className="text-sm text-muted-foreground">ما فيه حلقات بعد لـ{activeDialect}.</p>
+                <p className="text-xs text-muted-foreground">كن أول واحد — افتح تبويب «أنشئ».</p>
               </Card>
             )}
             <div className="space-y-2">
@@ -114,10 +114,10 @@ const Listen = () => {
                           <Badge variant="secondary" className="text-[10px]">{FORMAT_META[ep.format].label}</Badge>
                           <Badge variant="outline" className="text-[10px]">{LENGTH_META[ep.length_bucket].label}</Badge>
                           {ep.full_audio_url && (
-                            <Badge variant="outline" className="text-[10px]"><Play className="h-3 w-3 mr-0.5" />Audio</Badge>
+                            <Badge variant="outline" className="text-[10px]"><Play className="h-3 w-3 mr-0.5" />صوت</Badge>
                           )}
                           {ep.audio_status === "pending" && (
-                            <Badge variant="outline" className="text-[10px]"><Loader2 className="h-3 w-3 mr-0.5 animate-spin" />Recording</Badge>
+                            <Badge variant="outline" className="text-[10px]"><Loader2 className="h-3 w-3 mr-0.5 animate-spin" />نسجّل</Badge>
                           )}
                           {ep.play_count > 0 && (
                             <span className="text-[10px] text-muted-foreground self-center">▶ {ep.play_count}</span>
@@ -133,7 +133,7 @@ const Listen = () => {
 
           <TabsContent value="create" className="space-y-5 pt-4">
             <div>
-              <h3 className="text-sm font-semibold mb-2">Format</h3>
+              <h3 className="text-sm font-semibold mb-2">الصيغة</h3>
               <div className="grid grid-cols-2 gap-2">
                 {(Object.keys(FORMAT_META) as ListenFormat[]).map((f) => {
                   const Icon = FORMAT_META[f].icon;
@@ -157,7 +157,7 @@ const Listen = () => {
             </div>
 
             <div>
-              <h3 className="text-sm font-semibold mb-2">Length</h3>
+              <h3 className="text-sm font-semibold mb-2">الطول</h3>
               <div className="grid grid-cols-3 gap-2">
                 {(Object.keys(LENGTH_META) as ListenLength[]).map((l) => (
                   <button
@@ -176,7 +176,7 @@ const Listen = () => {
             </div>
 
             <div>
-              <h3 className="text-sm font-semibold mb-2">Audio</h3>
+              <h3 className="text-sm font-semibold mb-2">الصوت</h3>
               <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
@@ -185,8 +185,8 @@ const Listen = () => {
                     audioMode === "on_demand" ? "border-primary bg-primary/5" : "border-border hover:bg-accent/40"
                   }`}
                 >
-                  <div className="text-sm font-medium">Tap-to-hear</div>
-                  <div className="text-[11px] text-muted-foreground">Fast. Play any line on demand.</div>
+                  <div className="text-sm font-medium">اضغط لتسمع</div>
+                  <div className="text-[11px] text-muted-foreground">سريع. شغّل أي سطر وقت ما تبي.</div>
                 </button>
                 <button
                   type="button"
@@ -195,18 +195,18 @@ const Listen = () => {
                     audioMode === "full" ? "border-primary bg-primary/5" : "border-border hover:bg-accent/40"
                   }`}
                 >
-                  <div className="text-sm font-medium">Full TTS</div>
-                  <div className="text-[11px] text-muted-foreground">Narrated end-to-end. Takes a minute.</div>
+                  <div className="text-sm font-medium">سرد كامل</div>
+                  <div className="text-[11px] text-muted-foreground">مسرودة من البداية للنهاية. تاخذ دقيقة.</div>
                 </button>
               </div>
             </div>
 
             <div>
-              <h3 className="text-sm font-semibold mb-2">Topic</h3>
+              <h3 className="text-sm font-semibold mb-2">الموضوع</h3>
               <Input
                 value={topic}
                 onChange={(e) => setTopic(e.target.value)}
-                placeholder="Type any topic, or pick a suggestion below…"
+                placeholder="اكتب أي موضوع، أو اختر اقتراحاً تحت…"
                 className="mb-3"
               />
               <div className="flex flex-wrap gap-1.5 mb-3">
@@ -246,9 +246,9 @@ const Listen = () => {
               onClick={() => handleGenerate(undefined, currentCategory.id)}
             >
               {generate.isPending ? (
-                <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Writing your episode…</>
+                <><Loader2 className="h-4 w-4 mr-2 animate-spin" />نكتب حلقتك…</>
               ) : (
-                <><Sparkles className="h-4 w-4 mr-2" />Generate episode</>
+                <><Sparkles className="h-4 w-4 mr-2" />ولّد الحلقة</>
               )}
             </Button>
           </TabsContent>

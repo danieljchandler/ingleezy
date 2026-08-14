@@ -120,7 +120,7 @@ export const QuizCard = ({ word, otherWords, onAnswer, topicLabel }: QuizCardPro
 
       {/* Question prompt */}
       <div className="text-center mb-4">
-        <p className="text-sm text-muted-foreground">What does this mean in English?</p>
+        <p className="text-sm text-muted-foreground">وش معناها بالإنجليزي؟</p>
       </div>
 
       {/* Arabic word + audio button */}
@@ -131,7 +131,7 @@ export const QuizCard = ({ word, otherWords, onAnswer, topicLabel }: QuizCardPro
           </p>
           <button
             onClick={() => effectiveAudioUrl && playAudio(effectiveAudioUrl)}
-            aria-label="Play pronunciation"
+            aria-label="شغّل النطق"
             aria-disabled={!effectiveAudioUrl}
             aria-busy={isGeneratingAudio}
             className={cn(
@@ -157,7 +157,7 @@ export const QuizCard = ({ word, otherWords, onAnswer, topicLabel }: QuizCardPro
       </div>
 
       {/* Multiple Choice Options */}
-      <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Choose the correct English translation">
+      <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="اختر الترجمة الإنجليزية الصحيحة">
         {options.map((option, index) => {
           const isSelected = selectedAnswer === option;
           const isCorrectAnswer = option === word.word_english;

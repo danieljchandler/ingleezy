@@ -82,15 +82,15 @@ test.describe("the landing screen", () => {
   test("explains what the challenge is for", async ({ page }) => {
     await page.goto("/daily-challenge");
 
-    await expect(page.getByRole("heading", { name: /Daily Challenge/ })).toBeVisible();
-    await expect(page.getByText("Complete today's challenge to keep your streak!")).toBeVisible();
+    await expect(page.getByRole("heading", { name: /تحدي اليوم/ })).toBeVisible();
+    await expect(page.getByText("خلّص تحدي اليوم عشان تحافظ على سلسلتك!")).toBeVisible();
     await expect(startButton(page)).toBeVisible();
   });
 
   test("starts a signed-in learner at a zero streak", async ({ page }) => {
     await page.goto("/daily-challenge");
 
-    await expect(page.getByText("Day Streak")).toBeVisible();
+    await expect(page.getByText("يوم متتالي")).toBeVisible();
     await expect(page.getByText("0", { exact: true })).toBeVisible();
   });
 
@@ -116,7 +116,7 @@ test.describe("the landing screen", () => {
     // exactly when the number is meant to be motivating them to play. It only
     // reads correctly *after* today's challenge is done, which is the one
     // moment the landing screen is replaced by "come back tomorrow".
-    await expect(page.getByText("Day Streak")).toBeVisible();
+    await expect(page.getByText("يوم متتالي")).toBeVisible();
     await expect(page.getByText("0", { exact: true })).toBeVisible();
   });
 
@@ -167,7 +167,7 @@ test.describe("the landing screen", () => {
     // But the streak passed to that formula is the same one counted from today,
     // and today's challenge is by definition unfinished at the moment it is
     // read. So the multiplier is 1 + 0 * 0.1 = 1.0 on every single run, the
-    // "streak bonus applied" line never renders, and the advertised bonus is
+    // "مكافأة السلسلة" line never renders, and the advertised bonus is
     // unreachable no matter how long the streak.
     db.seed("daily_challenge_completions", [
       aChallengeCompletion({ id: challengeCompletionId(0), challenge_date: isoDate(1) }),
@@ -180,13 +180,13 @@ test.describe("the landing screen", () => {
     await startButton(page).click();
 
     await page.getByRole("button", { name: "باب" }).click();
-    await page.getByRole("button", { name: "Next" }).click();
+    await page.getByRole("button", { name: "التالي" }).click();
     await page.getByRole("button", { name: "كتاب" }).click();
-    await page.getByRole("button", { name: "See Results" }).click();
+    await page.getByRole("button", { name: "شوف النتيجة" }).click();
 
     // Two correct at the base 15 XP, with no multiplier applied.
-    await expect(page.getByText("+30 XP earned")).toBeVisible();
-    await expect(page.getByText(/streak bonus applied/)).toHaveCount(0);
+    await expect(page.getByText("حصّلت 30 نقطة خبرة")).toBeVisible();
+    await expect(page.getByText(/مكافأة السلسلة/)).toHaveCount(0);
   });
 
   test("says the day is done and offers no second run", async ({ page, db }) => {
@@ -210,7 +210,7 @@ test.describe("the landing screen", () => {
     // an account.
     await expect(page.getByRole("button", { name: "Sign in to track your streak" })).toBeVisible();
     await expect(startButton(page)).toBeVisible();
-    await expect(page.getByText("Day Streak")).toHaveCount(0);
+    await expect(page.getByText("يوم متتالي")).toHaveCount(0);
   });
 });
 
@@ -292,7 +292,7 @@ test.describe("where the challenge comes from", () => {
     await page.goto("/daily-challenge");
     await startButton(page).click();
 
-    await expect(page.getByText("Failed to load today's challenge")).toBeVisible();
+    await expect(page.getByText("تعذّر تحميل تحدي اليوم")).toBeVisible();
     // Back on the landing screen, so it can be retried.
     await expect(startButton(page)).toBeVisible();
   });
@@ -318,8 +318,8 @@ test.describe("answering", () => {
     await startButton(page).click();
     await page.getByRole("button", { name: "باب" }).click();
 
-    await expect(page.getByText("Correct!")).toBeVisible();
-    await expect(page.getByText("Score: 1")).toBeVisible();
+    await expect(page.getByText("صح!")).toBeVisible();
+    await expect(page.getByText("النتيجة: 1")).toBeVisible();
   });
 
   test("shows the right answer after a wrong one", async ({ page }) => {
@@ -329,30 +329,30 @@ test.describe("answering", () => {
 
     // Being told what it should have been is the only teaching this screen
     // does — a bare "wrong" leaves nothing learned.
-    await expect(page.getByText("Answer: باب")).toBeVisible();
-    await expect(page.getByText("Score: 0")).toBeVisible();
+    await expect(page.getByText("الجواب: باب")).toBeVisible();
+    await expect(page.getByText("النتيجة: 0")).toBeVisible();
   });
 
   test("takes no second answer once one is given", async ({ page }) => {
     await page.goto("/daily-challenge");
     await startButton(page).click();
     await page.getByRole("button", { name: "كرسي" }).click();
-    await expect(page.getByText("Answer: باب")).toBeVisible();
+    await expect(page.getByText("الجواب: باب")).toBeVisible();
 
     await expect(page.getByRole("button", { name: "باب" })).toBeDisabled();
-    await expect(page.getByText("Score: 0")).toBeVisible();
+    await expect(page.getByText("النتيجة: 0")).toBeVisible();
   });
 
   test("moves on and finishes on the last question", async ({ page }) => {
     await page.goto("/daily-challenge");
     await startButton(page).click();
     await page.getByRole("button", { name: "باب" }).click();
-    await page.getByRole("button", { name: "Next" }).click();
+    await page.getByRole("button", { name: "التالي" }).click();
 
     await expect(page.getByText("What is 'book'?")).toBeVisible();
     await page.getByRole("button", { name: "كتاب" }).click();
     // The last question offers results rather than another Next.
-    await expect(page.getByRole("button", { name: "See Results" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "شوف النتيجة" })).toBeVisible();
   });
 
   test("hides the English until it is asked for", async ({ page, db }) => {
@@ -406,15 +406,15 @@ test.describe("finishing", () => {
     await page.goto("/daily-challenge");
     await startButton(page).click();
     await page.getByRole("button", { name: correct ? "باب" : "كرسي" }).click();
-    await page.getByRole("button", { name: "Next" }).click();
+    await page.getByRole("button", { name: "التالي" }).click();
     await page.getByRole("button", { name: correct ? "كتاب" : "باب" }).click();
-    await page.getByRole("button", { name: "See Results" }).click();
+    await page.getByRole("button", { name: "شوف النتيجة" }).click();
   }
 
   test("reports the score out of the total", async ({ page }) => {
     await playThrough(page, true);
 
-    await expect(page.getByRole("heading", { name: "Challenge Complete!" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "خلّصت التحدي!" })).toBeVisible();
     await expect(page.getByText("2/2")).toBeVisible();
   });
 
@@ -423,7 +423,7 @@ test.describe("finishing", () => {
 
     // Nothing right, nothing earned — the streak is the participation reward.
     await expect(page.getByText("0/2")).toBeVisible();
-    await expect(page.getByText("+0 XP earned")).toBeVisible();
+    await expect(page.getByText("حصّلت 0 نقطة خبرة")).toBeVisible();
   });
 
   test("records the completion so the streak continues", async ({ page, db }) => {
@@ -444,7 +444,7 @@ test.describe("finishing", () => {
 
   test("awards the XP it reported", async ({ page, db }) => {
     await playThrough(page, true);
-    await expect(page.getByText("+30 XP earned")).toBeVisible();
+    await expect(page.getByText("حصّلت 30 نقطة خبرة")).toBeVisible();
 
     // The completion row and the XP ledger have to agree, or the profile total
     // and the challenge history tell different stories.

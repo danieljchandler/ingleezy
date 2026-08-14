@@ -22,7 +22,7 @@ export const IntroCard = ({ word, onContinue, topicLabel }: IntroCardProps) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // Reset reveal state on new word. Do NOT auto-play audio — the learner should
-  // try to produce the Arabic themselves first, then tap "Show Arabic" to hear it.
+  // try to produce the meaning themselves first, then tap "ورّني العربي" to see it.
   useEffect(() => {
     setShowArabic(false);
   }, [word.id]);
@@ -49,7 +49,7 @@ export const IntroCard = ({ word, onContinue, topicLabel }: IntroCardProps) => {
       <div className="mb-6">
         {/*
           The tap plays. Its only action used to be setting a `hasPlayed` flag
-          that nothing read — so "Tap the card to hear again" was untrue even
+          that nothing read — so the "hear again" hint was untrue even
           for a word that had a recording.
         */}
         <VocabularyCard
@@ -75,7 +75,7 @@ export const IntroCard = ({ word, onContinue, topicLabel }: IntroCardProps) => {
           </div>
         ) : (
           <p className="text-sm text-muted-foreground/70 italic">
-            Try saying it in Arabic, then reveal
+            جرّب تقول معناها، بعدين اكشفها
           </p>
         )}
         <button
@@ -90,9 +90,9 @@ export const IntroCard = ({ word, onContinue, topicLabel }: IntroCardProps) => {
           className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline focus:outline-none"
         >
           {showArabic ? (
-            <><EyeOff className="w-4 h-4" /> Hide Arabic</>
+            <><EyeOff className="w-4 h-4" /> أخفِ العربي</>
           ) : (
-            <><Eye className="w-4 h-4" /> Show Arabic</>
+            <><Eye className="w-4 h-4" /> ورّني العربي</>
           )}
         </button>
       </div>
@@ -113,12 +113,12 @@ export const IntroCard = ({ word, onContinue, topicLabel }: IntroCardProps) => {
         — promised audio on every word and the tap did nothing at all.
       */}
       <p className="text-sm text-muted-foreground mb-6">
-        {word.audio_url ? "Tap the card to hear again" : "\u00A0"}
+        {word.audio_url ? "اضغط البطاقة تسمعها مرة ثانية" : "\u00A0"}
       </p>
 
       {/* Continue Button */}
       <Button onClick={onContinue} className="w-full">
-        Continue to Quiz
+        كمّل للاختبار
       </Button>
 
       {/* Hidden Audio Element */}

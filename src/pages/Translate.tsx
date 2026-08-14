@@ -29,17 +29,17 @@ type DialectOpt = "auto" | "Gulf" | "Egyptian" | "Yemeni";
 
 const EXAMPLES: { label: string; text: string }[] = [
   {
-    label: "Message",
+    label: "رسالة",
     text: "Hey, long time no see! Wanna grab a coffee tomorrow morning? My treat.",
   },
   {
-    label: "Email",
+    label: "إيميل",
     text: "Thanks for reaching out. I'll get back to you by the end of the week once I've had a chance to look into it.",
   },
 ];
 
 const PAGE_HINT = {
-  title: "Translate & Save",
+  title: "ترجم واحفظ",
   body: "Paste any English text — a message, an email, a post — and get a sentence-by-sentence breakdown in your dialect, with a word-order gloss and notes when an idiom would mislead. Tap any word to save it to My Words.",
 };
 
@@ -52,7 +52,7 @@ const Translate = () => {
 
   const saveWord = (word: { english: string; arabic: string; sentenceText?: string; sentenceEnglish?: string }) => {
     if (!isAuthenticated) {
-      toast.error("Sign in to save words");
+      toast.error("سجّل دخولك عشان تحفظ الكلمات");
       return;
     }
     addVocab.mutate(
@@ -64,8 +64,8 @@ const Translate = () => {
         sentence_english: word.sentenceEnglish || undefined,
       },
       {
-        onSuccess: () => toast.success("Saved to My Words!"),
-        onError: () => toast.error("Failed to save"),
+        onSuccess: () => toast.success("حفظناها في كلماتي!"),
+        onError: () => toast.error("تعذّر الحفظ"),
       },
     );
   };
@@ -87,10 +87,10 @@ const Translate = () => {
       });
       if (row) {
         setSavedId(row.id);
-        toast.success("Saved — open it any time from Saved Translations");
+        toast.success("حفظناها — تلقاها في «الترجمات المحفوظة»");
       }
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed to save");
+      toast.error(e instanceof Error ? e.message : "تعذّر الحفظ");
     } finally {
       setSaving(false);
     }
@@ -99,11 +99,11 @@ const Translate = () => {
   const onSubmit = async () => {
     const trimmed = text.trim();
     if (!trimmed) {
-      toast.error("Paste some English text first");
+      toast.error("الصق نصاً إنجليزياً أول");
       return;
     }
     if (trimmed.length > 4000) {
-      toast.error("Text is too long (max ~4000 characters)");
+      toast.error("النص طويل (الحد ٤٠٠٠ حرف تقريباً)");
       return;
     }
     try {
@@ -112,7 +112,7 @@ const Translate = () => {
       // about pasted English.
       await translate(trimmed, dialectOpt === "auto" ? (activeDialect as DialectOpt) : dialectOpt);
     } catch (e) {
-      const msg = e instanceof Error ? e.message : "Translation failed";
+      const msg = e instanceof Error ? e.message : "فشلت الترجمة";
       toast.error(msg);
     }
   };
@@ -135,11 +135,11 @@ const Translate = () => {
           <HomeButton />
           <h1 className="text-xl font-bold flex items-center gap-2">
             <Languages className="h-5 w-5 text-primary" />
-            Translate & Save
+            ترجم واحفظ
             <InfoHint title={PAGE_HINT.title} body={PAGE_HINT.body} />
           </h1>
           {isAuthenticated ? (
-            <Button asChild variant="ghost" size="icon" aria-label="Saved translations">
+            <Button asChild variant="ghost" size="icon" aria-label="الترجمات المحفوظة">
               <Link to="/translate/saved"><BookOpen className="h-5 w-5" /></Link>
             </Button>
           ) : (
@@ -152,19 +152,19 @@ const Translate = () => {
             <Textarea
               value={text}
               onChange={(e) => setText(e.target.value)}
-              placeholder="Paste English text here…"
+              placeholder="الصق النص الإنجليزي هنا…"
               className="min-h-[140px] text-base leading-relaxed font-english"
               maxLength={4200}
             />
             <div className="flex items-center justify-between gap-3 flex-wrap">
               <div className="flex items-center gap-2">
-                <span className="text-xs text-muted-foreground">Gloss dialect</span>
+                <span className="text-xs text-muted-foreground">لهجة الشرح</span>
                 <Select value={dialectOpt} onValueChange={(v) => setDialectOpt(v as DialectOpt)}>
                   <SelectTrigger className="h-8 w-[140px] text-xs">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="auto">My dialect</SelectItem>
+                    <SelectItem value="auto">لهجتي</SelectItem>
                     <SelectItem value="Gulf">Gulf</SelectItem>
                     <SelectItem value="Egyptian">Egyptian</SelectItem>
                     <SelectItem value="Yemeni">Yemeni</SelectItem>
@@ -178,17 +178,17 @@ const Translate = () => {
                 {(result || text) && (
                   <Button variant="ghost" size="sm" onClick={onReset} disabled={loading}>
                     <RotateCcw className="h-4 w-4 mr-1" />
-                    Clear
+                    امسح
                   </Button>
                 )}
                 <Button onClick={onSubmit} disabled={loading || !text.trim()}>
                   {loading ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Translating…
+                      نترجم…
                     </>
                   ) : (
-                    "Translate"
+                    "ترجم"
                   )}
                 </Button>
               </div>
@@ -196,7 +196,7 @@ const Translate = () => {
 
             {!result && !loading && (
               <div className="pt-1">
-                <p className="text-xs text-muted-foreground mb-2">Try an example:</p>
+                <p className="text-xs text-muted-foreground mb-2">جرّب مثالاً:</p>
                 <div className="flex flex-wrap gap-2">
                   {EXAMPLES.map((ex) => (
                     <button
@@ -224,7 +224,7 @@ const Translate = () => {
           <div className="space-y-3">
             <div className="flex items-center justify-between gap-3 flex-wrap">
               <Badge variant="secondary" className="text-xs">
-                Glossed in {detectedDialect}
+                الشرح بلهجة {detectedDialect}
               </Badge>
               <p className="text-xs text-muted-foreground flex items-center gap-1">
                 <BookmarkPlus className="h-3.5 w-3.5" />
@@ -273,18 +273,18 @@ const Translate = () => {
                   {saving ? (
                     <><Loader2 className="h-4 w-4 mr-1 animate-spin" /> Saving…</>
                   ) : savedId ? (
-                    <><Check className="h-4 w-4 mr-1" /> Saved</>
+                    <><Check className="h-4 w-4 mr-1" /> محفوظة</>
                   ) : (
-                    <><Save className="h-4 w-4 mr-1" /> Save translation</>
+                    <><Save className="h-4 w-4 mr-1" /> احفظ الترجمة</>
                   )}
                 </Button>
                 <Button asChild variant="outline" size="sm">
                   <Link to="/translate/saved">
-                    <BookOpen className="h-4 w-4 mr-1" /> Saved translations
+                    <BookOpen className="h-4 w-4 mr-1" /> الترجمات المحفوظة
                   </Link>
                 </Button>
                 <Button asChild variant="outline" size="sm">
-                  <Link to="/my-words">Go to My Words</Link>
+                  <Link to="/my-words">روح لكلماتي</Link>
                 </Button>
               </div>
             )}

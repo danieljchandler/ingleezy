@@ -36,8 +36,8 @@ const SavedTranslations = () => {
         sentence_english: word.sentenceEnglish || undefined,
       },
       {
-        onSuccess: () => toast.success("Saved to My Words!"),
-        onError: () => toast.error("Failed to save"),
+        onSuccess: () => toast.success("حفظناها في كلماتي!"),
+        onError: () => toast.error("تعذّر الحفظ"),
       },
     );
   };
@@ -53,9 +53,9 @@ const SavedTranslations = () => {
     try {
       await remove(id);
       if (active?.id === id) setActive(null);
-      toast.success("Deleted");
+      toast.success("انحذفت");
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed to delete");
+      toast.error(e instanceof Error ? e.message : "تعذّر الحذف");
     } finally {
       setDeletingId(null);
     }
@@ -89,10 +89,10 @@ const SavedTranslations = () => {
               <Card>
                 <CardContent className="p-6 text-center space-y-3">
                   <p className="text-sm text-muted-foreground">
-                    You haven't saved any translations yet.
+                    ما حفظت أي ترجمة بعد.
                   </p>
                   <Button asChild size="sm">
-                    <Link to="/translate">Translate something</Link>
+                    <Link to="/translate">ترجم شيئاً</Link>
                   </Button>
                 </CardContent>
               </Card>
@@ -125,7 +125,7 @@ const SavedTranslations = () => {
                         className="h-8 w-8 text-muted-foreground hover:text-destructive"
                         onClick={() => setPendingDeleteId(it.id)}
                         disabled={deletingId === it.id}
-                        aria-label="Delete saved translation"
+                        aria-label="احذف الترجمة المحفوظة"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -188,13 +188,13 @@ const SavedTranslations = () => {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete this saved translation?</AlertDialogTitle>
+            <AlertDialogTitle>نحذف هذي الترجمة؟</AlertDialogTitle>
             <AlertDialogDescription>
               This can't be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>إلغاء</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"

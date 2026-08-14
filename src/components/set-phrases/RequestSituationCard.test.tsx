@@ -92,13 +92,13 @@ async function render({ persona = "free", dialect = "Gulf", seed }: Options = {}
 }
 
 const describeSituation = (text: string) =>
-  fireEvent.change(screen.getByPlaceholderText(/Asking your manager/), {
+  fireEvent.change(screen.getByPlaceholderText(/تطلب من مديرك/), {
     target: { value: text },
   });
 
 const generate = async () => {
   await act(async () => {
-    fireEvent.click(screen.getByRole("button", { name: /generate phrases/i }));
+    fireEvent.click(screen.getByRole("button", { name: "ولّد عبارات" }));
   });
 };
 
@@ -119,12 +119,12 @@ describe("asking for phrases", () => {
   it("offers situations to start from", async () => {
     await render();
 
-    fireEvent.click(screen.getByRole("button", { name: "A job interview in English" }));
+    fireEvent.click(screen.getByRole("button", { name: "مقابلة وظيفية بالإنجليزي" }));
 
     // A blank box is the hardest thing to answer; the suggestions are there to
     // show the shape of a useful answer rather than to be used as-is.
-    expect(screen.getByPlaceholderText(/Asking your manager/)).toHaveValue(
-      "A job interview in English",
+    expect(screen.getByPlaceholderText(/تطلب من مديرك/)).toHaveValue(
+      "مقابلة وظيفية بالإنجليزي",
     );
   });
 
@@ -134,7 +134,7 @@ describe("asking for phrases", () => {
 
     await generate();
 
-    expect(toasts.error).toHaveBeenCalledWith("Describe the situation in a sentence or two.");
+    expect(toasts.error).toHaveBeenCalledWith("اوصف الموقف بجملة أو جملتين.");
     expect(backend.callsTo("request-situation-phrases")).toEqual([]);
   });
 
@@ -186,7 +186,7 @@ describe("asking for phrases", () => {
 
     // Rephrasing is the fix, and a learner will not guess that from an empty
     // card.
-    expect(toasts.error).toHaveBeenCalledWith("No phrases returned, try rephrasing.");
+    expect(toasts.error).toHaveBeenCalledWith("ما رجعت عبارات، جرّب صياغة ثانية.");
   });
 
   it("reports a refusal the function returned with a 200", async () => {
@@ -267,7 +267,7 @@ describe("keeping a phrase", () => {
     await waitFor(() =>
       expect(screen.getByRole("button", { name: /saved/i })).toBeInTheDocument(),
     );
-    expect(toasts.success).toHaveBeenCalledWith("Saved to My Phrases");
+    expect(toasts.success).toHaveBeenCalledWith("حفظناها في عباراتي");
     expect(saveButtons()).toHaveLength(1);
   });
 
@@ -325,7 +325,7 @@ describe("keeping a phrase", () => {
     // the rest, then reports success unconditionally. When every insert fails —
     // signed out, offline, RLS — the learner is told the set was saved and finds
     // an empty deck later.
-    await waitFor(() => expect(toasts.success).toHaveBeenCalledWith("Saved all phrases"));
+    await waitFor(() => expect(toasts.success).toHaveBeenCalledWith("حفظنا كل العبارات"));
     expect(toasts.error).not.toHaveBeenCalled();
     for (const button of saveButtons()) expect(button).toBeInTheDocument();
   });

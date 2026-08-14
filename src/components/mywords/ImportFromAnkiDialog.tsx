@@ -104,7 +104,7 @@ export function ImportFromAnkiDialog({ open, onOpenChange }: Props) {
       qc.invalidateQueries({ queryKey: ["user-vocabulary-due"] });
     } catch (err: any) {
       console.error("[anki] delete previous error", err);
-      toast.error(err?.message || "Could not delete previous import");
+      toast.error(err?.message || "تعذّر حذف الاستيراد السابق");
     } finally {
       setWiping(false);
       setConfirmWipe(false);
@@ -135,12 +135,12 @@ export function ImportFromAnkiDialog({ open, onOpenChange }: Props) {
       return;
     }
     setFilename(file.name);
-    setProgress({ phase: "parsing", message: "Reading your Anki deck…" });
+    setProgress({ phase: "parsing", message: "نقرأ رزمة Anki…" });
     try {
       const isApkg = /\.(apkg|colpkg)$/i.test(file.name);
       const parsed = isApkg ? await parseApkg(file) : await parseAnkiText(file);
       if (parsed.cards.length === 0) {
-        toast.error("No importable cards found in this file.");
+        toast.error("ما لقينا بطاقات قابلة للاستيراد في الملف.");
         setProgress(null);
         return;
       }
@@ -149,7 +149,7 @@ export function ImportFromAnkiDialog({ open, onOpenChange }: Props) {
       setProgress(null);
     } catch (err: any) {
       console.error("[anki] parse error", err);
-      toast.error(err?.message || "Could not read this Anki file.");
+      toast.error(err?.message || "ما قدرنا نقرأ ملف Anki.");
       setProgress(null);
     }
   };
@@ -327,7 +327,7 @@ export function ImportFromAnkiDialog({ open, onOpenChange }: Props) {
       toast.success(`Imported ${inserted} cards from Anki`);
     } catch (err: any) {
       console.error("[anki] import error", err);
-      toast.error(err?.message || "Import failed");
+      toast.error(err?.message || "فشل الاستيراد");
       setStep("preview");
       setProgress(null);
     }
@@ -337,7 +337,7 @@ export function ImportFromAnkiDialog({ open, onOpenChange }: Props) {
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Import from Anki</DialogTitle>
+          <DialogTitle>استيراد من Anki</DialogTitle>
           <DialogDescription>
             Import .apkg / .colpkg or text exports. We keep tags, audio, images,
             and learning progress — saved into the {activeDialect} dialect.
@@ -352,7 +352,7 @@ export function ImportFromAnkiDialog({ open, onOpenChange }: Props) {
               className="w-full border-2 border-dashed border-border rounded-xl p-8 hover:border-primary hover:bg-muted/30 transition-colors flex flex-col items-center gap-2"
             >
               <Upload className="h-8 w-8 text-muted-foreground" />
-              <p className="font-medium">Drop your Anki file here or click to choose</p>
+              <p className="font-medium">أفلت ملف Anki هنا أو اضغط للاختيار</p>
               <p className="text-xs text-muted-foreground">
                 .apkg, .colpkg, .txt, .csv · up to 2 GB · {ANKI_IMPORT_LIMIT.toLocaleString()} cards max
                 <br />
@@ -379,11 +379,11 @@ export function ImportFromAnkiDialog({ open, onOpenChange }: Props) {
               </div>
             )}
             <div className="rounded-lg border border-amber-500/30 bg-amber-50/50 dark:bg-amber-950/20 p-3 text-xs text-muted-foreground leading-relaxed space-y-1">
-              <p className="font-medium text-foreground">In Anki: File → Export</p>
+              <p className="font-medium text-foreground">في Anki: File ← Export</p>
               <ul className="list-disc list-inside space-y-0.5">
-                <li>Format: <span className="font-medium">Anki Deck Package (.apkg)</span></li>
+                <li>الصيغة: <span className="font-medium">Anki Deck Package (.apkg)</span></li>
                 <li>✅ Support older Anki versions</li>
-                <li>✅ <span className="font-medium text-amber-700 dark:text-amber-500">Include scheduling information</span> — required to keep your review progress</li>
+                <li>✅ <span className="font-medium text-amber-700 dark:text-amber-500">Include scheduling information</span> — لازم عشان يبقى تقدّمك في المراجعة</li>
                 <li>✅ Include media</li>
               </ul>
             </div>
@@ -410,7 +410,7 @@ export function ImportFromAnkiDialog({ open, onOpenChange }: Props) {
                   ) : (
                     <Trash2 className="h-3.5 w-3.5" />
                   )}
-                  <span className="ml-1.5">Delete previous</span>
+                  <span className="ml-1.5">احذف السابق</span>
                 </Button>
               </div>
             )}
@@ -420,13 +420,13 @@ export function ImportFromAnkiDialog({ open, onOpenChange }: Props) {
         <AlertDialog open={confirmWipe} onOpenChange={setConfirmWipe}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Delete previous Anki import?</AlertDialogTitle>
+              <AlertDialogTitle>نحذف استيراد Anki السابق؟</AlertDialogTitle>
               <AlertDialogDescription>
                 This will permanently remove {priorCount?.toLocaleString() ?? "all"} card{priorCount === 1 ? "" : "s"} previously imported from Anki for the <span className="font-medium">{activeDialect}</span> dialect, along with any review progress you've made on them here. Cards added other ways are not affected.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel disabled={wiping}>Cancel</AlertDialogCancel>
+              <AlertDialogCancel disabled={wiping}>إلغاء</AlertDialogCancel>
               <AlertDialogAction
                 onClick={(e) => {
                   e.preventDefault();
@@ -435,7 +435,7 @@ export function ImportFromAnkiDialog({ open, onOpenChange }: Props) {
                 disabled={wiping}
                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               >
-                {wiping ? "Deleting…" : "Delete"}
+                {wiping ? "نحذف…" : "احذف"}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
@@ -515,10 +515,13 @@ export function ImportFromAnkiDialog({ open, onOpenChange }: Props) {
               <table className="w-full text-sm">
                 <thead className="bg-muted/40 text-xs text-muted-foreground">
                   <tr>
-                    <th className="text-right p-2">Arabic</th>
-                    <th className="text-left p-2">English</th>
-                    <th className="text-left p-2">Sentence</th>
-                    <th className="text-left p-2">Media</th>
+                    {/* Column order follows the cells below: the Arabic side of
+                        the imported card, then its English side. Which one is
+                        the learner's target depends on the deck they built. */}
+                    <th className="text-right p-2">العربي</th>
+                    <th className="text-left p-2">الإنجليزي</th>
+                    <th className="text-left p-2">الجملة</th>
+                    <th className="text-left p-2">الوسائط</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -556,7 +559,7 @@ export function ImportFromAnkiDialog({ open, onOpenChange }: Props) {
           <div className="space-y-4 py-4">
             <div className="flex items-center gap-2 text-sm">
               <Loader2 className="h-4 w-4 animate-spin text-primary" />
-              <span>{progress.message || "Working…"}</span>
+              <span>{progress.message || "نشتغل…"}</span>
             </div>
             {typeof progress.current === "number" && typeof progress.total === "number" && progress.total > 0 && (
               <>
@@ -576,7 +579,7 @@ export function ImportFromAnkiDialog({ open, onOpenChange }: Props) {
           <div className="space-y-4 py-2">
             <div className="flex flex-col items-center gap-3 py-4">
               <CheckCircle2 className="h-12 w-12 text-green-500" />
-              <p className="font-semibold text-lg">Import complete</p>
+              <p className="font-semibold text-lg">خلص الاستيراد</p>
               <div className="text-sm text-muted-foreground text-center space-y-1">
                 <p>{result.inserted.toLocaleString()} new cards added</p>
                 {result.skipped > 0 && <p>{result.skipped.toLocaleString()} duplicates skipped</p>}
@@ -584,7 +587,7 @@ export function ImportFromAnkiDialog({ open, onOpenChange }: Props) {
               </div>
             </div>
             <DialogFooter>
-              <Button onClick={() => handleClose(false)}>Done</Button>
+              <Button onClick={() => handleClose(false)}>تمام</Button>
             </DialogFooter>
           </div>
         )}

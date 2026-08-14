@@ -176,7 +176,7 @@ export function ShadowPlayer({ clip, threshold, autoAdvance, showEnglish, onResu
                 <Mic className="h-6 w-6" />
               </button>
             </CountdownRing>
-            <p className="text-xs text-muted-foreground">Repeat now</p>
+            <p className="text-xs text-muted-foreground">ردّد الحين</p>
             <div className="w-full max-w-xs">
               <LevelMeter level={recorder.level} />
             </div>
@@ -186,7 +186,7 @@ export function ShadowPlayer({ clip, threshold, autoAdvance, showEnglish, onResu
         {(state === "scoring" || isLoading) && (
           <div className="flex flex-col items-center gap-2 py-4">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <p className="text-sm text-muted-foreground">Scoring…</p>
+            <p className="text-sm text-muted-foreground">نحسب الدرجة…</p>
           </div>
         )}
 

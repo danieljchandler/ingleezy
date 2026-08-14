@@ -52,7 +52,7 @@ test.describe("Ask AI panel", () => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/reading");
 
-    const heading = page.getByRole("heading", { name: /reading practice/i });
+    const heading = page.getByRole("heading", { name: /تمرين القراءة/ });
     await expect(heading).toBeVisible();
 
     await openPanel(page);
@@ -69,12 +69,12 @@ test.describe("Ask AI panel", () => {
   test("does not close when the page behind it is clicked", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/reading");
-    await expect(page.getByRole("heading", { name: /reading practice/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /تمرين القراءة/ })).toBeVisible();
     await openPanel(page);
 
     // Tapping the page is how you'd pause a video or pick another line. It must
     // not dismiss the panel.
-    await page.getByRole("heading", { name: /reading practice/i }).click();
+    await page.getByRole("heading", { name: /تمرين القراءة/ }).click();
 
     await expect(page.getByRole("dialog")).toBeVisible();
   });
@@ -82,7 +82,7 @@ test.describe("Ask AI panel", () => {
   test("expands and collapses between the two heights", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/reading");
-    await expect(page.getByRole("heading", { name: /reading practice/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /تمرين القراءة/ })).toBeVisible();
     await openPanel(page);
 
     const dialog = page.getByRole("dialog");
@@ -104,8 +104,8 @@ test.describe("Ask AI panel", () => {
   }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/reading");
-    await page.getByText("Read a Passage").click();
-    await page.getByRole("button", { name: /beginner/i }).click();
+    await page.getByText("اقرأ نصاً").click();
+    await page.getByRole("button", { name: /مبتدئ/ }).click();
 
     // The flipped passage renders one tappable ENGLISH word per span; the
     // Arabic scaffold sits behind each line's reveal.
@@ -129,14 +129,14 @@ test.describe("Ask AI panel", () => {
   test("does not dim the page on desktop", async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto("/reading");
-    await expect(page.getByRole("heading", { name: /reading practice/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /تمرين القراءة/ })).toBeVisible();
     await openPanel(page);
 
     // The old panel painted a bg-black/80 scrim over everything.
     const dialog = page.getByRole("dialog");
     const panel = (await dialog.boundingBox())!;
     expect(panel.width).toBeLessThan(1440 * 0.5);
-    await expect(page.getByRole("heading", { name: /reading practice/i })).toBeInViewport();
+    await expect(page.getByRole("heading", { name: /تمرين القراءة/ })).toBeInViewport();
 
     await page.screenshot({ path: "/tmp/ask-ai-desktop.png" });
   });

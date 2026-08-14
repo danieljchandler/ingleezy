@@ -107,11 +107,11 @@ function render({
   return harness;
 }
 
-const widgetButton = () => screen.queryByRole("button", { name: /send feedback/i });
+const widgetButton = () => screen.queryByRole("button", { name: "أرسل ملاحظة" });
 
 /** Open the sheet the way a tester does — the capture happens on the way in. */
 const openSheet = async () => {
-  fireEvent.click(screen.getByRole("button", { name: /send feedback/i }));
+  fireEvent.click(screen.getByRole("button", { name: "أرسل ملاحظة" }));
   await screen.findByRole("dialog");
 };
 
@@ -120,11 +120,11 @@ const reportIn = (backend: SupabaseBackend) =>
   backend.db.lastWriteTo("beta_feedback")?.payload[0] as Record<string, unknown> | undefined;
 
 const write = (text: string) =>
-  fireEvent.change(screen.getByLabelText("What happened?"), { target: { value: text } });
+  fireEvent.change(screen.getByLabelText("وش صار؟"), { target: { value: text } });
 
 const send = async () => {
   await act(async () => {
-    fireEvent.click(screen.getByRole("button", { name: "Send feedback" }));
+    fireEvent.click(screen.getByRole("button", { name: "أرسل الملاحظة" }));
   });
 };
 
@@ -171,7 +171,7 @@ describe("opening it", () => {
     // The tester is reporting the page, not the form. Capturing after the sheet
     // opened would send a picture of the sheet.
     expect(capture.toJpeg).toHaveBeenCalledTimes(1);
-    expect(screen.getByAltText("Screenshot preview")).toBeInTheDocument();
+    expect(screen.getByAltText("معاينة اللقطة")).toBeInTheDocument();
   });
 
   it("leaves itself out of its own picture", async () => {
@@ -214,7 +214,7 @@ describe("opening it", () => {
     await openSheet();
 
     // A screenshot that will not render must not cost the tester their report.
-    expect(toasts.error).toHaveBeenCalledWith("Couldn't capture screenshot.");
+    expect(toasts.error).toHaveBeenCalledWith("تعذّر التقاط الشاشة.");
     expect(screen.getByText(/No screenshot captured/)).toBeInTheDocument();
   });
 });
@@ -225,7 +225,7 @@ describe("writing the report", () => {
     await waitFor(() => expect(widgetButton()).toBeInTheDocument());
     await openSheet();
 
-    fireEvent.click(screen.getByRole("button", { name: "Idea" }));
+    fireEvent.click(screen.getByRole("button", { name: "فكرة" }));
     write("the review screen could shuffle the deck");
     await send();
 
@@ -241,7 +241,7 @@ describe("writing the report", () => {
 
     write("hm");
 
-    expect(screen.getByRole("button", { name: "Send feedback" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "أرسل الملاحظة" })).toBeDisabled();
   });
 
   it("counts what is left of the limit", async () => {
@@ -271,12 +271,12 @@ describe("the screenshot", () => {
     await waitFor(() => expect(widgetButton()).toBeInTheDocument());
     await openSheet();
 
-    fireEvent.click(screen.getByRole("button", { name: /remove screenshot/i }));
+    fireEvent.click(screen.getByRole("button", { name: "احذف اللقطة" }));
 
     // A tester who caught something private on screen needs to be able to take
     // it out without abandoning the report.
-    expect(screen.queryByAltText("Screenshot preview")).toBeNull();
-    expect(screen.getByRole("button", { name: /capture screenshot/i })).toBeInTheDocument();
+    expect(screen.queryByAltText("معاينة اللقطة")).toBeNull();
+    expect(screen.getByRole("button", { name: "التقط لقطة" })).toBeInTheDocument();
   });
 
   it("drops the picture when the tester turns the whole thing off", async () => {
@@ -286,7 +286,7 @@ describe("the screenshot", () => {
 
     fireEvent.click(screen.getByRole("switch"));
 
-    expect(screen.queryByAltText("Screenshot preview")).toBeNull();
+    expect(screen.queryByAltText("معاينة اللقطة")).toBeNull();
   });
 });
 
@@ -350,7 +350,7 @@ describe("sending it", () => {
     // trade — the words are the part that matters.
     await waitFor(() => expect(reportIn(backend)).toBeTruthy());
     expect(reportIn(backend)!.screenshot_url).toBeNull();
-    expect(toasts.error).toHaveBeenCalledWith("Screenshot upload failed — sending without it.");
+    expect(toasts.error).toHaveBeenCalledWith("ما رُفعت الصورة — نرسل بدونها.");
   });
 
   it("thanks the tester and clears the form", async () => {
@@ -359,7 +359,7 @@ describe("sending it", () => {
     write("the review deck froze after the third card");
     await send();
 
-    await waitFor(() => expect(toasts.success).toHaveBeenCalledWith("Thanks — feedback sent!"));
+    await waitFor(() => expect(toasts.success).toHaveBeenCalledWith("شكراً — وصلتنا ملاحظتك!"));
     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
   });
 
@@ -371,9 +371,9 @@ describe("sending it", () => {
 
     // Retyping a bug report is how a tester stops reporting bugs.
     await waitFor(() =>
-      expect(toasts.error).toHaveBeenCalledWith("Could not send feedback. Please try again."),
+      expect(toasts.error).toHaveBeenCalledWith("ما وصلت الملاحظة. جرّب مرة ثانية."),
     );
-    expect(screen.getByLabelText("What happened?")).toHaveValue(
+    expect(screen.getByLabelText("وش صار؟")).toHaveValue(
       "the review deck froze after the third card",
     );
   });

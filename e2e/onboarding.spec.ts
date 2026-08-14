@@ -263,7 +263,7 @@ test.describe("the placement quiz", () => {
     stubQuiz(backend);
     await page.goto("/placement");
 
-    await expect(page.getByRole("heading", { name: /English Placement/ })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /اختبار تحديد المستوى/ })).toBeVisible();
     await expect(page.getByText("20", { exact: true })).toBeVisible();
     // Nothing generated until the learner opts in — the quiz costs an AI call.
     expect(backend.callsTo("placement-quiz")).toHaveLength(0);
@@ -272,7 +272,7 @@ test.describe("the placement quiz", () => {
   test("asks the generator for questions in the learner's dialect", async ({ page, backend }) => {
     stubQuiz(backend);
     await page.goto("/placement");
-    await page.getByRole("button", { name: /start quiz/i }).click();
+    await page.getByRole("button", { name: "ابدأ الاختبار" }).click();
 
     await expect(page.getByText("question 1", { exact: true })).toBeVisible();
 
@@ -287,17 +287,17 @@ test.describe("the placement quiz", () => {
   test("counts questions across batches, not within one", async ({ page, backend }) => {
     stubQuiz(backend);
     await page.goto("/placement");
-    await page.getByRole("button", { name: /start quiz/i }).click();
+    await page.getByRole("button", { name: "ابدأ الاختبار" }).click();
 
-    await expect(page.getByText("Question 1 / 20")).toBeVisible();
+    await expect(page.getByText("سؤال 1 من 20")).toBeVisible();
     await page.getByRole("button", { name: /right 1/ }).click();
-    await expect(page.getByText("Question 2 / 20")).toBeVisible();
+    await expect(page.getByText("سؤال 2 من 20")).toBeVisible();
   });
 
   test("marks the answer right or wrong before moving on", async ({ page, backend }) => {
     stubQuiz(backend);
     await page.goto("/placement");
-    await page.getByRole("button", { name: /start quiz/i }).click();
+    await page.getByRole("button", { name: "ابدأ الاختبار" }).click();
 
     await page.getByRole("button", { name: /wrong 1/ }).click();
 
@@ -310,7 +310,7 @@ test.describe("the placement quiz", () => {
   test("ignores a second click on the same question", async ({ page, backend }) => {
     stubQuiz(backend);
     await page.goto("/placement");
-    await page.getByRole("button", { name: /start quiz/i }).click();
+    await page.getByRole("button", { name: "ابدأ الاختبار" }).click();
 
     await page.getByRole("button", { name: /right 1/ }).click();
     // Both choices are disabled during feedback, so a double-tap cannot record
@@ -321,7 +321,7 @@ test.describe("the placement quiz", () => {
   test("shows the Arabic support only when asked", async ({ page, backend }) => {
     stubQuiz(backend);
     await page.goto("/placement");
-    await page.getByRole("button", { name: /start quiz/i }).click();
+    await page.getByRole("button", { name: "ابدأ الاختبار" }).click();
 
     // The English is the test; the dialect support is there for a learner who
     // cannot yet parse the question, not shown by default.
@@ -333,7 +333,7 @@ test.describe("the placement quiz", () => {
   test("fetches a fresh batch every fifth question", async ({ page, backend }) => {
     stubQuiz(backend);
     await page.goto("/placement");
-    await page.getByRole("button", { name: /start quiz/i }).click();
+    await page.getByRole("button", { name: "ابدأ الاختبار" }).click();
 
     for (let index = 1; index <= 5; index++) {
       await page.getByRole("button", { name: new RegExp(`right ${index}$`) }).click();
@@ -358,10 +358,10 @@ test.describe("the placement quiz", () => {
     backend.stubFunctionFailure("placement-quiz");
 
     await page.goto("/placement");
-    await page.getByRole("button", { name: /start quiz/i }).click();
+    await page.getByRole("button", { name: "ابدأ الاختبار" }).click();
 
-    await expect(page.getByText(/failed to load questions/i)).toBeVisible();
-    await expect(page.getByRole("button", { name: /start quiz/i })).toBeVisible();
+    await expect(page.getByText(/تعذّر تحميل الأسئلة/)).toBeVisible();
+    await expect(page.getByRole("button", { name: "ابدأ الاختبار" })).toBeVisible();
   });
 
   test.describe("finishing", () => {
@@ -371,7 +371,7 @@ test.describe("the placement quiz", () => {
 
     /** Answer every question correctly until the results screen appears. */
     async function completeQuiz(page: Page) {
-      await page.getByRole("button", { name: /start quiz/i }).click();
+      await page.getByRole("button", { name: "ابدأ الاختبار" }).click();
       for (let index = 1; index <= 20; index++) {
         await page.getByRole("button", { name: new RegExp(`right ${index}$`) }).click();
       }
@@ -383,7 +383,7 @@ test.describe("the placement quiz", () => {
       await page.goto("/placement");
       await completeQuiz(page);
 
-      await expect(page.getByText(/Upper Intermediate/)).toBeVisible();
+      await expect(page.getByText(/فوق المتوسط/)).toBeVisible();
       await expect(page.getByText(/listening comprehension/)).toBeVisible();
       await expect(page.getByText(/verb conjugation/)).toBeVisible();
 
@@ -417,9 +417,9 @@ test.describe("the placement quiz", () => {
       await page.goto("/placement");
       await completeQuiz(page);
 
-      await page.getByRole("button", { name: /retake quiz/i }).click();
+      await page.getByRole("button", { name: "أعد الاختبار" }).click();
 
-      await expect(page.getByRole("button", { name: /start quiz/i })).toBeVisible();
+      await expect(page.getByRole("button", { name: "ابدأ الاختبار" })).toBeVisible();
       await expect(page.getByRole("heading", { name: "B2" })).toHaveCount(0);
     });
 
@@ -439,7 +439,7 @@ test.describe("the placement quiz", () => {
       });
 
       await page.goto("/placement");
-      await page.getByRole("button", { name: /start quiz/i }).click();
+      await page.getByRole("button", { name: "ابدأ الاختبار" }).click();
       for (let index = 1; index <= 20; index++) {
         await page.getByRole("button", { name: new RegExp(`right ${index}$`) }).click();
       }
@@ -447,7 +447,7 @@ test.describe("the placement quiz", () => {
       // Twenty questions answered and no level to show for it would be the worst
       // possible outcome, so the page guesses B1 rather than dropping the run.
       await expect(page.getByRole("heading", { name: "B1" })).toBeVisible({ timeout: 20_000 });
-      await expect(page.getByText(/failed to calculate results/i)).toBeVisible();
+      await expect(page.getByText(/تعذّر حساب النتيجة/)).toBeVisible();
     });
   });
 });

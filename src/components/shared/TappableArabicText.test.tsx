@@ -80,7 +80,7 @@ async function render({ text = TEXT, vocabulary, persona = "free", seed, marking
   return harness;
 }
 
-const wordButton = (word: string) => screen.getByRole("button", { name: `Look up “${word}”` });
+const wordButton = (word: string) => screen.getByRole("button", { name: `ابحث عن «${word}»` });
 
 describe("rendering the passage", () => {
   it("makes every word its own target", async () => {
@@ -105,7 +105,7 @@ describe("rendering the passage", () => {
 
     // The learner sees the sentence as written; the dictionary is asked about
     // the word, and "السوق،" is not a word.
-    expect(screen.getByRole("button", { name: "Look up “السوق”" })).toHaveTextContent("السوق،");
+    expect(screen.getByRole("button", { name: "ابحث عن «السوق»" })).toHaveTextContent("السوق،");
   });
 
   it("strips the vowels when the learner has turned them off", async () => {
@@ -118,7 +118,7 @@ describe("rendering the passage", () => {
 
     // Reading unvocalised text is the skill; leaving the vowels on for someone
     // who asked for them off removes the exercise.
-    expect(screen.getByRole("button", { name: "Look up “رحت”" })).toHaveTextContent("رحت");
+    expect(screen.getByRole("button", { name: "ابحث عن «رحت»" })).toHaveTextContent("رحت");
   });
 });
 
@@ -165,7 +165,7 @@ describe("looking a word up", () => {
   it("ignores a tap on punctuation alone", async () => {
     const { backend } = await render({ text: "رحت ، السوق" });
 
-    fireEvent.click(screen.getByRole("button", { name: "Look up “”" }));
+    fireEvent.click(screen.getByRole("button", { name: "ابحث عن «»" }));
 
     await act(async () => {});
     expect(backend.callsTo("word-enrichment")).toEqual([]);
@@ -210,16 +210,16 @@ describe("selecting a phrase", () => {
 
     // The whole passage becomes selectable, because the learner does not know
     // where the phrase ends until they have read to the end of it.
-    expect(screen.getByRole("button", { name: "Extend phrase selection to “السوق”" }))
+    expect(screen.getByRole("button", { name: "مدّد التحديد إلى «السوق»" }))
       .toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Look up “السوق”" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "ابحث عن «السوق»" })).not.toBeInTheDocument();
   });
 
   it("takes the whole span between the two ends", async () => {
     await render();
     longPress("رحت");
 
-    fireEvent.click(screen.getByRole("button", { name: "Extend phrase selection to “أمس”" }));
+    fireEvent.click(screen.getByRole("button", { name: "مدّد التحديد إلى «أمس»" }));
 
     // Contiguous by construction: a phrase with a hole in it is not a phrase,
     // and picking two ends is fewer taps than picking every word between them.
@@ -229,7 +229,7 @@ describe("selecting a phrase", () => {
   it("translates the selection as one unit", async () => {
     const { backend } = await render();
     longPress("رحت");
-    fireEvent.click(screen.getByRole("button", { name: "Extend phrase selection to “السوق”" }));
+    fireEvent.click(screen.getByRole("button", { name: "مدّد التحديد إلى «السوق»" }));
 
     fireEvent.click(screen.getByRole("button", { name: /translate/i }));
 
@@ -278,9 +278,9 @@ describe("selecting a phrase", () => {
     await render();
     longPress("رحت");
 
-    fireEvent.click(screen.getByRole("button", { name: /cancel|close|×/i }));
+    fireEvent.click(screen.getByRole("button", { name: /ألغِ العبارة|×/ }));
 
-    expect(screen.getByRole("button", { name: "Look up “السوق”" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "ابحث عن «السوق»" })).toBeInTheDocument();
   });
 
   it("does not look the word up on the way into phrase mode", async () => {

@@ -98,7 +98,7 @@ const TutorUpload = () => {
             )}
           >
             <Upload className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <p className="font-medium text-foreground mb-1">Drop audio or video file here</p>
+            <p className="font-medium text-foreground mb-1">أفلت ملف صوت أو فيديو هنا</p>
             <p className="text-sm text-muted-foreground">or click to browse · MP3, WAV, M4A, MP4, WebM</p>
           </div>
 
@@ -188,7 +188,7 @@ const TutorUpload = () => {
           </div>
           <div className="flex items-center justify-center gap-2 text-muted-foreground">
             <Loader2 className="h-4 w-4 animate-spin" />
-            <span className="text-sm">Creating flashcards…</span>
+            <span className="text-sm">نسوّي البطاقات…</span>
           </div>
         </div>
       )}
@@ -200,7 +200,7 @@ const TutorUpload = () => {
             <Check className="h-8 w-8 text-primary" />
           </div>
           <div>
-            <h2 className="text-xl font-heading font-bold mb-2">Flashcards Created!</h2>
+            <h2 className="text-xl font-heading font-bold mb-2">جهزت البطاقات!</h2>
             <p className="text-muted-foreground">
               {approvedCount} new word{approvedCount !== 1 ? "s" : ""} added to your vocabulary
             </p>

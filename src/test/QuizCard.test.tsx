@@ -65,7 +65,7 @@ describe("QuizCard audio", () => {
     // would leave that queue pending and starve every later test's TTS call.
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("Network error")));
     render(<QuizCard word={makeWord()} otherWords={otherWords} onAnswer={vi.fn()} />);
-    expect(screen.getByRole("button", { name: /play pronunciation/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "شغّل النطق" })).toBeInTheDocument();
 
     // The rejected TTS fetch flips the hook out of loading a tick later; let it
     // land inside the test.
@@ -106,7 +106,7 @@ describe("QuizCard audio", () => {
       />
     );
 
-    const btn = screen.getByRole("button", { name: /play pronunciation/i });
+    const btn = screen.getByRole("button", { name: "شغّل النطق" });
     fireEvent.click(btn);
 
     expect(vi.mocked(Audio)).toHaveBeenCalledWith("https://example.com/dog.mp3");
@@ -150,7 +150,7 @@ describe("QuizCard audio", () => {
       await new Promise((r) => setTimeout(r, 50));
     });
 
-    const btn = screen.getByRole("button", { name: /play pronunciation/i });
+    const btn = screen.getByRole("button", { name: "شغّل النطق" });
     expect(btn).toBeDisabled();
   });
 

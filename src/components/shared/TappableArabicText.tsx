@@ -171,7 +171,7 @@ export const TappableArabicText = ({
 
   const saveAsFlashcard = (arabic: string, english: string, root?: string, transliteration?: string) => {
     if (!user) {
-      toast.error("Sign in to save flashcards");
+      toast.error("سجّل دخولك عشان تحفظ البطاقات");
       return;
     }
     addVocab.mutate(
@@ -185,12 +185,12 @@ export const TappableArabicText = ({
         sentence_english: sentenceContext?.english || undefined,
       },
       {
-        onSuccess: () => toast.success("Saved to My Words!"),
+        onSuccess: () => toast.success("حفظناها في كلماتي!"),
         onError: (err: any) => {
           if (err?.message?.includes("duplicate")) {
-            toast.info("Already in your words");
+            toast.info("موجودة عندك أصلاً");
           } else {
-            toast.error("Failed to save");
+            toast.error("تعذّر الحفظ");
           }
         },
       }
@@ -244,7 +244,7 @@ export const TappableArabicText = ({
     if (!phraseText) return;
     const english = phraseData?.translation;
     if (!english) {
-      toast.info("Translate first, then save");
+      toast.info("ترجمها أول، بعدين احفظها");
       return;
     }
     saveAsFlashcard(phraseText, english, phraseData?.enrichment?.root, phraseData?.enrichment?.transliteration);
@@ -299,7 +299,7 @@ export const TappableArabicText = ({
                 role="button"
                 tabIndex={0}
                 aria-pressed={marked}
-                aria-label={`${marked ? "Unmark" : "Mark"} “${cleanWord}” as unknown`}
+                aria-label={`${marked ? "شيل علامة" : "علّم"} «${cleanWord}» كغير معروفة`}
                 onClick={toggleMark}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
@@ -328,7 +328,7 @@ export const TappableArabicText = ({
                 key={wIdx}
                 role="button"
                 tabIndex={0}
-                aria-label={`Extend phrase selection to “${clean(word)}”`}
+                aria-label={`مدّد التحديد إلى «${clean(word)}»`}
                 onClick={(e) => {
                   e.stopPropagation();
                   extendPhrase(wIdx);
@@ -359,7 +359,7 @@ export const TappableArabicText = ({
                 <span
                   role="button"
                   tabIndex={0}
-                  aria-label={`Look up “${clean(word)}”`}
+                  aria-label={`ابحث عن «${clean(word)}»`}
                   onPointerDown={() => onPointerDown(wIdx)}
                   onPointerUp={onPointerUp}
                   onPointerLeave={onPointerUp}
@@ -397,17 +397,17 @@ export const TappableArabicText = ({
                       {cleanWord}
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      {wordData.translation || "Tap to enrich…"}
+                      {wordData.translation || "اضغط للتفاصيل…"}
                     </p>
 
                     {wordData.enriching ? (
                       <div className="flex items-center gap-2 pt-1">
                         <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
-                        <span className="text-xs text-muted-foreground">Loading root & uses…</span>
+                        <span className="text-xs text-muted-foreground">نجيب الجذر والاستعمالات…</span>
                       </div>
                     ) : wordData.enrichment?.root ? (
                       <div className="pt-1 border-t border-border">
-                        <p className="text-xs font-medium text-muted-foreground">Root</p>
+                        <p className="text-xs font-medium text-muted-foreground">الجذر</p>
                         <p className="font-arabic text-sm text-foreground" dir="rtl">
                           {wordData.enrichment.root}
                         </p>
@@ -438,7 +438,7 @@ export const TappableArabicText = ({
 
                     {wordData.enrichment?.otherUses && wordData.enrichment.otherUses.length > 0 && (
                       <div className="pt-1 border-t border-border">
-                        <p className="text-xs font-medium text-muted-foreground mb-1">Other forms</p>
+                        <p className="text-xs font-medium text-muted-foreground mb-1">صيغ أخرى</p>
                         <div className="space-y-0.5">
                           {wordData.enrichment.otherUses.map((u, i) => (
                             <p key={i} className="text-xs">
@@ -494,14 +494,14 @@ export const TappableArabicText = ({
                           <Sparkles className="h-3 w-3 mr-1" />
                         )}
                         {wordData.samples && wordData.samples.length > 0
-                          ? "Regenerate sentences"
-                          : "Generate sample sentences"}
+                          ? "ولّد جمل جديدة"
+                          : "ولّد جمل أمثلة"}
                       </Button>
                     </div>
 
                     {wordData.samples && wordData.samples.length > 0 && (
                       <div className="pt-1 border-t border-border">
-                        <p className="text-xs font-medium text-muted-foreground mb-1">Examples</p>
+                        <p className="text-xs font-medium text-muted-foreground mb-1">أمثلة</p>
                         <div className="space-y-1.5">
                           {wordData.samples.map((s, i) => (
                             <div key={i} className="text-xs">
@@ -577,7 +577,7 @@ export const TappableArabicText = ({
                 variant="ghost"
                 className="h-7 w-7 shrink-0"
                 onClick={cancelPhrase}
-                aria-label="Cancel phrase"
+                aria-label="ألغِ العبارة"
               >
                 <X className="h-4 w-4" />
               </Button>

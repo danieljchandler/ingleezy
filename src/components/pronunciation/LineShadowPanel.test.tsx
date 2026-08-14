@@ -251,7 +251,7 @@ describe("hearing it and repeating it", () => {
 
     await listenThrough();
 
-    expect(screen.getByText("Repeat now")).toBeInTheDocument();
+    expect(screen.getByText("ردّد الحين")).toBeInTheDocument();
     // Two seconds of clip plus a breath and a half.
     expect(recorder.start).toHaveBeenCalledWith(
       expect.objectContaining({ maxDurationMs: 3500, trailingSilenceMs: 600 }),
@@ -342,9 +342,9 @@ describe("scoring against the clip", () => {
       options.onComplete(aTake());
     });
 
-    // "Comparing to the clip" rather than "Scoring": the learner is told what
+    // "نقارن مع المقطع" rather than "نحسب الدرجة": the learner is told what
     // they are being measured against.
-    expect(screen.getByText("Comparing to the clip…")).toBeInTheDocument();
+    expect(screen.getByText("نقارن مع المقطع…")).toBeInTheDocument();
   });
 
   it("shows the score with both halves of it", async () => {

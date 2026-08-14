@@ -222,7 +222,7 @@ const DailyChallenge = () => {
       setSessionComplete(false);
     } catch (e) {
       console.error("Failed to load challenge:", e);
-      toast.error("Failed to load today's challenge");
+      toast.error("تعذّر تحميل تحدي اليوم");
     } finally {
       setLoading(false);
     }
@@ -281,8 +281,8 @@ const DailyChallenge = () => {
             <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
               <Flame className="h-8 w-8 text-primary" />
             </div>
-            <h1 className="text-2xl font-bold text-foreground inline-flex items-center gap-2 justify-center">Daily Challenge <InfoHint {...PAGE_HINTS["daily-challenge"]} size="md" /></h1>
-            <p className="text-muted-foreground">Complete today's challenge to keep your streak!</p>
+            <h1 className="text-2xl font-bold text-foreground inline-flex items-center gap-2 justify-center">تحدي اليوم <InfoHint {...PAGE_HINTS["daily-challenge"]} size="md" /></h1>
+            <p className="text-muted-foreground">خلّص تحدي اليوم عشان تحافظ على سلسلتك!</p>
           </div>
 
           {/* Streak display */}
@@ -292,7 +292,7 @@ const DailyChallenge = () => {
                 <Flame className="h-6 w-6 text-orange-500" />
                 <span className="text-3xl font-bold text-foreground">{streakData || 0}</span>
               </div>
-              <p className="text-sm text-muted-foreground">Day Streak</p>
+              <p className="text-sm text-muted-foreground">يوم متتالي</p>
               {(streakData || 0) >= 3 && (
                 <Badge className="mt-2 bg-orange-500/20 text-orange-700 dark:text-orange-400">
                   {(streakData || 0) >= 7 ? "2x XP Bonus! 🔥" : "1.5x XP Bonus! ⚡"}
@@ -304,11 +304,11 @@ const DailyChallenge = () => {
           {alreadyCompleted ? (
             <div className="bg-card border border-border rounded-2xl p-6 text-center space-y-3">
               <Check className="h-12 w-12 text-primary mx-auto" />
-              <p className="font-bold text-foreground">Challenge Complete!</p>
+              <p className="font-bold text-foreground">خلّصت التحدي!</p>
               <p className="text-sm text-muted-foreground">
                 You earned {(todayCompletion as any)?.xp_earned} XP today. Come back tomorrow!
               </p>
-              <Button variant="outline" onClick={() => navigate("/")}>Back to Home</Button>
+              <Button variant="outline" onClick={() => navigate("/")}>رجوع للرئيسية</Button>
             </div>
           ) : (
             <Button onClick={startChallenge} className="w-full" size="lg" disabled={loading}>
@@ -337,7 +337,7 @@ const DailyChallenge = () => {
       <AppShell>
         <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-muted-foreground">Generating today's challenge...</p>
+          <p className="text-muted-foreground">نجهّز تحدي اليوم…</p>
         </div>
       </AppShell>
     );
@@ -353,20 +353,20 @@ const DailyChallenge = () => {
           <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
             <Star className="h-10 w-10 text-primary" />
           </div>
-          <h1 className="text-2xl font-bold text-foreground">Challenge Complete!</h1>
+          <h1 className="text-2xl font-bold text-foreground">خلّصت التحدي!</h1>
           <div className="text-4xl font-bold text-primary">
             {score}/{challenge.questions.length}
           </div>
           <div className="space-y-1">
-            <p className="text-lg font-semibold text-foreground">+{totalXP} XP earned</p>
+            <p className="text-lg font-semibold text-foreground">حصّلت {totalXP} نقطة خبرة</p>
             {streakMultiplier > 1 && (
               <p className="text-sm text-orange-600 dark:text-orange-400">
-                {streakMultiplier}x streak bonus applied! 🔥
+                مكافأة السلسلة ×{streakMultiplier} 🔥
               </p>
             )}
           </div>
           <Button onClick={() => navigate("/")} className="w-full">
-            Back to Home
+            رجوع للرئيسية
           </Button>
         </div>
       </AppShell>
@@ -424,7 +424,7 @@ const DailyChallenge = () => {
         {/* Match type */}
         {challenge.type === 'match' && (
           <div className="space-y-3">
-            <p className="text-center text-sm text-muted-foreground mb-2">Tap an Arabic word, then tap its English match</p>
+            <p className="text-center text-sm text-muted-foreground mb-2">اضغط كلمة إنجليزية، بعدين اضغط معناها</p>
             <div className="grid grid-cols-2 gap-2">
               <div className="space-y-2">
                 {challenge.questions.map((q, i) => {
@@ -459,7 +459,7 @@ const DailyChallenge = () => {
                             }
                           } else {
                             setMatchSelected(null);
-                            toast.error("Not a match, try again");
+                            toast.error("مو مطابقة، جرّب مرة ثانية");
                           }
                         } else {
                           setMatchSelected({ side: 'arabic', index: i });
@@ -508,7 +508,7 @@ const DailyChallenge = () => {
                             }
                           } else {
                             setMatchSelected(null);
-                            toast.error("Not a match, try again");
+                            toast.error("مو مطابقة، جرّب مرة ثانية");
                           }
                         } else {
                           setMatchSelected({ side: 'english', index: i });
@@ -573,12 +573,12 @@ const DailyChallenge = () => {
                   <X className="h-5 w-5 text-red-600" />
                 )}
                 <span className={isCorrect ? "text-green-600 font-medium" : "text-red-600 font-medium"}>
-                  {isCorrect ? "Correct!" : `Answer: ${currentQuestion.answer}`}
+                  {isCorrect ? "صح!" : `الجواب: ${currentQuestion.answer}`}
                 </span>
               </div>
             </div>
             <Button onClick={nextQuestion} className="w-full">
-              {currentIndex < challenge.questions.length - 1 ? "Next" : "See Results"}
+              {currentIndex < challenge.questions.length - 1 ? "التالي" : "شوف النتيجة"}
               <ChevronRight className="h-4 w-4 ml-1" />
             </Button>
           </div>
@@ -586,7 +586,7 @@ const DailyChallenge = () => {
       </div>
 
       <div className="text-center mt-4">
-        <p className="text-sm text-muted-foreground">Score: {score}</p>
+        <p className="text-sm text-muted-foreground">النتيجة: {score}</p>
       </div>
     </AppShell>
   );

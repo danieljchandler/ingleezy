@@ -63,13 +63,13 @@ function renderCard(word = aWord(), topicLabel?: string) {
   return { ...result, onContinue };
 }
 
-const revealButton = () => screen.getByRole("button", { name: /Arabic$/ });
+const revealButton = () => screen.getByRole("button", { name: /العربي$/ });
 const audio = (container: HTMLElement) => container.querySelector("audio");
 
 describe("IntroCard — before the Arabic is revealed", () => {
   it("asks the learner to try it themselves first", () => {
     render(<IntroCard word={aWord()} onContinue={vi.fn()} />);
-    expect(screen.getByText("Try saying it in Arabic, then reveal")).toBeInTheDocument();
+    expect(screen.getByText("جرّب تقول معناها، بعدين اكشفها")).toBeInTheDocument();
   });
 
   it("keeps the Arabic off the screen", () => {
@@ -85,7 +85,7 @@ describe("IntroCard — before the Arabic is revealed", () => {
 
   it("offers to show the Arabic", () => {
     renderCard();
-    expect(revealButton()).toHaveTextContent("Show Arabic");
+    expect(revealButton()).toHaveTextContent("ورّني العربي");
   });
 
   it("names the topic when the caller supplies one", () => {
@@ -138,7 +138,7 @@ describe("IntroCard — revealing", () => {
   it("offers to hide it again", () => {
     renderCard();
     fireEvent.click(revealButton());
-    expect(revealButton()).toHaveTextContent("Hide Arabic");
+    expect(revealButton()).toHaveTextContent("أخفِ العربي");
   });
 
   it("hides it on a second tap", () => {
@@ -146,7 +146,7 @@ describe("IntroCard — revealing", () => {
     fireEvent.click(revealButton());
     fireEvent.click(revealButton());
     expect(screen.queryByText("خبز")).not.toBeInTheDocument();
-    expect(screen.getByText("Try saying it in Arabic, then reveal")).toBeInTheDocument();
+    expect(screen.getByText("جرّب تقول معناها، بعدين اكشفها")).toBeInTheDocument();
   });
 
   it("plays nothing when hiding", () => {
@@ -187,7 +187,7 @@ describe("IntroCard — moving to the next word", () => {
       />,
     );
     expect(screen.queryByText("ماء")).not.toBeInTheDocument();
-    expect(screen.getByText("Try saying it in Arabic, then reveal")).toBeInTheDocument();
+    expect(screen.getByText("جرّب تقول معناها، بعدين اكشفها")).toBeInTheDocument();
   });
 
   it("keeps the reveal when only the word's other fields change", () => {
@@ -203,7 +203,7 @@ describe("IntroCard — moving to the next word", () => {
 
   it("hands the learner on to the quiz", () => {
     const { onContinue } = renderCard();
-    fireEvent.click(screen.getByRole("button", { name: "Continue to Quiz" }));
+    fireEvent.click(screen.getByRole("button", { name: "كمّل للاختبار" }));
     expect(onContinue).toHaveBeenCalledTimes(1);
   });
 });
@@ -225,12 +225,12 @@ describe("IntroCard — a word with no recording", () => {
     // A lesson imported without recordings — the normal state of a freshly
     // authored one — showed this line on every word, and the tap did nothing.
     renderCard(aWord({ audio_url: null }));
-    expect(screen.queryByText("Tap the card to hear again")).not.toBeInTheDocument();
+    expect(screen.queryByText("اضغط البطاقة تسمعها مرة ثانية")).not.toBeInTheDocument();
   });
 
   it("still offers the hint for a word that does have one", () => {
     renderCard();
-    expect(screen.getByText("Tap the card to hear again")).toBeInTheDocument();
+    expect(screen.getByText("اضغط البطاقة تسمعها مرة ثانية")).toBeInTheDocument();
   });
 });
 
@@ -245,7 +245,7 @@ describe("IntroCard — a word with no recording", () => {
 describe("IntroCard — hearing the word is not required", () => {
   it("lets the learner continue without hearing the word", () => {
     const { onContinue } = renderCard();
-    fireEvent.click(screen.getByRole("button", { name: "Continue to Quiz" }));
+    fireEvent.click(screen.getByRole("button", { name: "كمّل للاختبار" }));
     expect(play).not.toHaveBeenCalled();
     expect(onContinue).toHaveBeenCalledTimes(1);
   });

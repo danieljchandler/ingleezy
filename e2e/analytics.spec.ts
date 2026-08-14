@@ -320,7 +320,7 @@ test.describe("the review forecast", () => {
     await expect(page.getByText("Review Forecast (7 days)")).toBeVisible();
     // Named as combined, because the two decks have separate review pages and
     // a learner otherwise has to add the two numbers themselves.
-    await expect(page.getByText(/Combined across curriculum and your saved words/)).toBeVisible();
+    await expect(page.getByText(/مجموع المنهج مع كلماتك المحفوظة/)).toBeVisible();
     await expect(page.getByText("مستحقة اليوم")).toBeVisible();
   });
 

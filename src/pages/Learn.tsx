@@ -261,9 +261,9 @@ const Learn = () => {
         <div className="flex items-center justify-center py-24">
           <div className="text-center">
             <p className="text-lg text-muted-foreground mb-4">
-              {isMixedMode ? "Error loading words" : "Topic not found"}
+              {isMixedMode ? "تعذّر تحميل الكلمات" : "ما لقينا الموضوع"}
             </p>
-            <Button onClick={() => navigate("/")}>Go Home</Button>
+            <Button onClick={() => navigate("/")}>رجوع للرئيسية</Button>
           </div>
         </div>
       </AppShell>
@@ -279,12 +279,12 @@ const Learn = () => {
         <div className="flex items-center justify-center py-16">
           <div className="text-center">
             <p className="text-lg text-muted-foreground mb-2">
-              {isMixedMode ? "No new words" : "No words yet"}
+              {isMixedMode ? "ما فيه كلمات جديدة" : "ما فيه كلمات بعد"}
             </p>
             <p className="text-sm text-muted-foreground mb-6">
-              {isMixedMode ? "You've seen all available words. Try reviewing!" : "Add vocabulary in the admin panel."}
+              {isMixedMode ? "شفت كل الكلمات المتاحة. جرّب المراجعة!" : "أضف مفردات من لوحة الإدارة."}
             </p>
-            <Button onClick={() => navigate("/")}>Go Home</Button>
+            <Button onClick={() => navigate("/")}>رجوع للرئيسية</Button>
           </div>
         </div>
       </AppShell>
@@ -309,10 +309,10 @@ const Learn = () => {
           )} />
 
           <h1 className="text-2xl font-bold text-foreground mb-2">
-            {isGreatScore ? "Excellent work!" : "Good effort"}
+            {isGreatScore ? "ممتاز!" : "مجهود طيب"}
           </h1>
           <p className="text-muted-foreground mb-8">
-            {isGreatScore ? "أحسنت — You're making great progress" : "Keep practicing to improve"}
+            {isGreatScore ? "أحسنت — تقدّمك حلو" : "واصل التمرين وبتتحسّن"}
           </p>
 
           <div className="p-6 rounded-xl mb-8 bg-card border border-border">
@@ -327,11 +327,11 @@ const Learn = () => {
           {!isMixedMode && (topic?.realWorldPrompts?.length ?? 0) > 0 && (
             <div className="mb-8 text-left">
               <LessonPlanSection
-                title="Try this today"
+                title="جرّبها اليوم"
                 icon={Sparkles}
                 rows={topic!.realWorldPrompts}
                 defaultOpen
-                blurb="Use what you just learned somewhere real."
+                blurb="استخدم اللي تعلّمته في موقف حقيقي."
               />
             </div>
           )}
@@ -339,7 +339,7 @@ const Learn = () => {
           <div className="space-y-3">
             <Button onClick={handleRestartSession} className="w-full">
               <RotateCcw className="h-4 w-4 mr-2" />
-              {isMixedMode ? "Learn More Words" : "Practice Again"}
+              {isMixedMode ? "تعلّم كلمات أكثر" : "تمرّن مرة ثانية"}
             </Button>
             {!isMixedMode && (
               <Button variant="outline" onClick={() => navigate("/curriculum")} className="w-full">
@@ -407,7 +407,7 @@ const Learn = () => {
         <div className="mb-4 space-y-3">
           <SoundSpotlight entries={topic?.soundSpotlight ?? []} />
           <LessonPlanSection
-            title="What's in this lesson"
+            title="وش في هذا الدرس"
             icon={ListChecks}
             rows={topic?.lessonSequence ?? []}
           />

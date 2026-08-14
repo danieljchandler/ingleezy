@@ -108,7 +108,7 @@ export function SentencePracticeSheet({ open, onOpenChange, targetEnglish, targe
       onComplete: (blob, reason) => {
         if (!activeRef.current) return;
         if (!blob || reason === "no-audio") {
-          setError("We didn't catch any speech — try again a little louder.");
+          setError("ما سمعنا شي — جرّب مرة ثانية بصوت أعلى.");
           return;
         }
         submitAudio(blob);
@@ -150,7 +150,7 @@ export function SentencePracticeSheet({ open, onOpenChange, targetEnglish, targe
                 {!isRecording && !loading && (
                   <Button onClick={beginRecord} size="lg" className="gap-2">
                     <Mic className="h-5 w-5" />
-                    {feedback || error ? "Try again" : "Start recording"}
+                    {feedback || error ? "جرّب مرة ثانية" : "ابدأ التسجيل"}
                   </Button>
                 )}
                 {isRecording && (
@@ -162,13 +162,13 @@ export function SentencePracticeSheet({ open, onOpenChange, targetEnglish, targe
                 {loading && (
                   <div className="flex items-center justify-center gap-2 text-muted-foreground">
                     <Loader2 className="h-5 w-5 animate-spin" />
-                    <span className="text-sm">Listening and coaching…</span>
+                    <span className="text-sm">نسمعك ونجهّز الملاحظات…</span>
                   </div>
                 )}
                 <p className="mt-3 text-xs text-muted-foreground">
                   {isRecording
-                    ? "Recording — will auto-stop after a short pause."
-                    : "Records up to 15 seconds."}
+                    ? "نسجّل — يوقف تلقائياً بعد سكتة قصيرة."
+                    : "يسجّل لين ١٥ ثانية."}
                 </p>
               </>
             )}

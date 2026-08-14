@@ -103,12 +103,12 @@ export function TappableEnglishText({
               <p className="font-english font-semibold">{word}</p>
               {state?.loading ? (
                 <div className="flex items-center gap-2 text-muted-foreground text-sm">
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" /> Translating…
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" /> نترجم…
                 </div>
               ) : state?.translation ? (
                 <p dir="rtl" className="font-arabic text-base">{state.translation}</p>
               ) : (
-                <p className="text-xs text-muted-foreground">No translation available.</p>
+                <p className="text-xs text-muted-foreground">ما فيه ترجمة.</p>
               )}
               {onSaveWord && (
                 <Button
@@ -128,7 +128,7 @@ export function TappableEnglishText({
                   }}
                 >
                   {isSaved ? <Check className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
-                  {isSaved ? "Saved" : "Save to My Words"}
+                  {isSaved ? "محفوظة" : "احفظ في كلماتي"}
                 </Button>
               )}
             </PopoverContent>

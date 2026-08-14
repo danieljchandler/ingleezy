@@ -39,9 +39,9 @@ export function VoiceTab() {
   if (!user && !authLoading) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-3 p-6 text-center">
-        <p className="text-sm text-muted-foreground">Sign in to talk to the AI tutor.</p>
+        <p className="text-sm text-muted-foreground">سجّل دخولك عشان تكلّم المدرّب.</p>
         <Button asChild size="sm">
-          <Link to="/auth">Sign in</Link>
+          <Link to="/auth">سجّل دخول</Link>
         </Button>
       </div>
     );
@@ -87,10 +87,10 @@ export function VoiceTab() {
         {turns.length === 0 ? (
           <p className="py-10 text-center text-xs text-muted-foreground">
             {live
-              ? "Just start speaking…"
+              ? "ابدأ تكلّم…"
               : connecting
-              ? "Setting up the call…"
-              : "Start a call and ask about anything on this page."}
+              ? "نجهّز المكالمة…"
+              : "ابدأ مكالمة واسأل عن أي شي في الصفحة."}
           </p>
         ) : (
           turns.map((t, i) => (
@@ -105,7 +105,7 @@ export function VoiceTab() {
               )}
             >
               <div className="mb-0.5 text-[10px] uppercase tracking-wide text-muted-foreground">
-                {t.role === "user" ? "You" : "Tutor"}
+                {t.role === "user" ? "أنت" : "المدرّب"}
               </div>
               {t.role === "assistant" ? (
                 <TappableArabicText text={t.text} source="ask-ai-voice" />
@@ -126,13 +126,13 @@ export function VoiceTab() {
                 size="icon"
                 onClick={() => setMuted(!muted)}
                 disabled={!live}
-                aria-label={muted ? "Unmute" : "Mute"}
+                aria-label={muted ? "شغّل المايك" : "اكتم المايك"}
               >
                 {muted ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
               </Button>
               <Button variant="destructive" onClick={() => stop()} className="gap-2">
                 <PhoneOff className="h-4 w-4" />
-                End call
+                أنهِ المكالمة
               </Button>
             </>
           ) : (
@@ -148,7 +148,7 @@ export function VoiceTab() {
               className="gap-2"
             >
               <Phone className="h-4 w-4" />
-              Start voice call
+              ابدأ مكالمة صوتية
             </Button>
           )}
           {connecting && <Loader2 className="h-4 w-4 animate-spin text-primary" />}
@@ -160,12 +160,12 @@ export function VoiceTab() {
           {typeof remainingSeconds === "number" && (
             <>
               <span className={cn(remainingSeconds < 300 && "font-medium text-amber-600 dark:text-amber-500")}>
-                {Math.floor(remainingSeconds / 60)} min left this month
+                باقي لك {Math.floor(remainingSeconds / 60)} دقيقة هذا الشهر
               </span>
               {" · "}
             </>
           )}
-          The tutor knows what's on your screen. Voice powered by ChatGPT Realtime.
+          المدرّب يشوف اللي على شاشتك. الصوت عبر ChatGPT Realtime.
         </p>
       </div>
     </>

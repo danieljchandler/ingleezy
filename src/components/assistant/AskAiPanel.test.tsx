@@ -81,11 +81,11 @@ const open = async () => {
 };
 
 const ask = async (text: string) => {
-  fireEvent.change(screen.getByPlaceholderText("Ask a question…"), {
+  fireEvent.change(screen.getByPlaceholderText("اكتب سؤالك…"), {
     target: { value: text },
   });
   await act(async () => {
-    fireEvent.click(screen.getByRole("button", { name: "Send" }));
+    fireEvent.click(screen.getByRole("button", { name: "أرسل" }));
   });
 };
 
@@ -135,7 +135,7 @@ describe("AskAiPanel", () => {
   it("offers suggested prompts before the first message", async () => {
     render();
     await open();
-    expect(screen.getByText("What am I looking at?")).toBeInTheDocument();
+    expect(screen.getByText("وش اللي قدامي؟")).toBeInTheDocument();
   });
 
   it("clears the conversation via New chat", async () => {
@@ -151,7 +151,7 @@ describe("AskAiPanel", () => {
     });
 
     expect(screen.queryByText(/Because it is idiomatic\./)).toBeNull();
-    expect(screen.getByText("What am I looking at?")).toBeInTheDocument();
+    expect(screen.getByText("وش اللي قدامي؟")).toBeInTheDocument();
   });
 
   /**

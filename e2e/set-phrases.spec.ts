@@ -127,7 +127,7 @@ test.describe("the hub", () => {
 
     // Zero due is the normal state; an enabled button leading to an empty
     // session is worse than a disabled one that says why.
-    await expect(page.getByRole("button", { name: "Review (0)" })).toBeDisabled();
+    await expect(page.getByRole("button", { name: "راجع (0)" })).toBeDisabled();
   });
 
   test("counts what is due for review", async ({ page, db }) => {
@@ -167,14 +167,14 @@ test.describe("the hub", () => {
 
     await page.goto("/set-phrases");
 
-    await expect(page.getByRole("button", { name: "Review (1)" })).toBeEnabled();
+    await expect(page.getByRole("button", { name: "راجع (1)" })).toBeEnabled();
   });
 
   test("starts a mixed session", async ({ page, db }) => {
     seedSetPhrases(db);
 
     await page.goto("/set-phrases");
-    await page.getByRole("button", { name: /Mixed practice/ }).click();
+    await page.getByRole("button", { name: /تمرين منوّع/ }).click();
 
     await expect(page).toHaveURL(/\/set-phrases\/practice$/);
   });
@@ -202,7 +202,7 @@ test.describe("a practice session", () => {
     await page.goto("/set-phrases/practice");
 
     await expect(page.getByText("وصلت عرس صديقك")).toBeVisible();
-    await expect(page.getByText("What do you say in English?")).toBeVisible();
+    await expect(page.getByText("وش تقول بالإنجليزي؟")).toBeVisible();
     await expect(page.getByText("1 / 1")).toBeVisible();
     expect(backend.lastCallTo("generate-set-phrase-quiz")?.body).toMatchObject({ length: 8 });
   });
@@ -221,8 +221,8 @@ test.describe("a practice session", () => {
 
     await page.goto("/set-phrases/practice");
 
-    await expect(page.getByText("No phrases ready yet.")).toBeVisible();
-    await expect(page.getByText(/ask an admin to seed some/i)).toBeVisible();
+    await expect(page.getByText("ما فيه عبارات جاهزة بعد.")).toBeVisible();
+    await expect(page.getByText(/اطلب من المشرف يضيف/)).toBeVisible();
   });
 
   test("reports a quiz that could not be built", async ({
@@ -235,7 +235,7 @@ test.describe("a practice session", () => {
 
     await page.goto("/set-phrases/practice");
 
-    await expect(page.getByText("No phrases ready yet.")).toBeVisible();
+    await expect(page.getByText("ما فيه عبارات جاهزة بعد.")).toBeVisible();
   });
 
   test("keeps the choices hidden until the learner asks for them", async ({ page }) => {
@@ -246,25 +246,25 @@ test.describe("a practice session", () => {
     // showing four options up front turns it into a different, easier task.
     await expect(page.getByRole("button", { name: "Congratulations!" })).toHaveCount(0);
 
-    await page.getByRole("button", { name: /choices/i }).click();
+    await page.getByRole("button", { name: /الخيارات/ }).click();
     await expect(page.getByRole("button", { name: "Congratulations!" })).toBeVisible();
   });
 
   test("marks a right answer and shows what was expected", async ({ page }) => {
     await page.goto("/set-phrases/practice");
-    await page.getByRole("button", { name: /choices/i }).click();
+    await page.getByRole("button", { name: /الخيارات/ }).click();
     await page.getByRole("button", { name: "Congratulations!" }).click();
 
     // The answer card leads with the English and carries its phonetic_ar and
     // dialect gloss beneath.
-    await expect(page.getByText("Correct answer:")).toBeVisible();
+    await expect(page.getByText("الجواب الصحيح:")).toBeVisible();
     await expect(page.getByText("كونقراتشوليشنز")).toBeVisible();
     await expect(page.getByText("مبروك", { exact: true })).toBeVisible();
   });
 
   test("schedules the phrase further out for a right answer", async ({ page, db }) => {
     await page.goto("/set-phrases/practice");
-    await page.getByRole("button", { name: /choices/i }).click();
+    await page.getByRole("button", { name: /الخيارات/ }).click();
     await page.getByRole("button", { name: "Congratulations!" }).click();
 
     await expect.poll(() => db.rows("user_set_phrases").length).toBe(1);
@@ -278,7 +278,7 @@ test.describe("a practice session", () => {
 
   test("brings the phrase back sooner after a wrong answer", async ({ page, db }) => {
     await page.goto("/set-phrases/practice");
-    await page.getByRole("button", { name: /choices/i }).click();
+    await page.getByRole("button", { name: /الخيارات/ }).click();
     await page.getByRole("button", { name: "My condolences." }).click();
 
     await expect.poll(() => db.rows("user_set_phrases").length).toBe(1);
@@ -288,7 +288,7 @@ test.describe("a practice session", () => {
 
   test("logs the attempt separately from the schedule", async ({ page, db }) => {
     await page.goto("/set-phrases/practice");
-    await page.getByRole("button", { name: /choices/i }).click();
+    await page.getByRole("button", { name: /الخيارات/ }).click();
     await page.getByRole("button", { name: "Congratulations!" }).click();
 
     // Two different records with two different jobs: the schedule decides when
@@ -305,7 +305,7 @@ test.describe("a practice session", () => {
 
   test("records a wrong answer as an attempt too", async ({ page, db }) => {
     await page.goto("/set-phrases/practice");
-    await page.getByRole("button", { name: /choices/i }).click();
+    await page.getByRole("button", { name: /الخيارات/ }).click();
     await page.getByRole("button", { name: "My condolences." }).click();
 
     await expect.poll(() => db.rows("set_phrase_quiz_attempts").length).toBe(1);
@@ -317,10 +317,10 @@ test.describe("a practice session", () => {
 
   test("saves a phrase from the session", async ({ page, db }) => {
     await page.goto("/set-phrases/practice");
-    await page.getByRole("button", { name: /choices/i }).click();
+    await page.getByRole("button", { name: /الخيارات/ }).click();
     await page.getByRole("button", { name: "Congratulations!" }).click();
 
-    await page.getByRole("button", { name: /Save/i }).click();
+    await page.getByRole("button", { name: "احفظ" }).click();
 
     // Upserted onto the same row the review just wrote, so saving a phrase you
     // have been quizzed on must not reset its schedule.
@@ -329,11 +329,11 @@ test.describe("a practice session", () => {
 
   test("ends the session after the last question", async ({ page }) => {
     await page.goto("/set-phrases/practice");
-    await page.getByRole("button", { name: /choices/i }).click();
+    await page.getByRole("button", { name: /الخيارات/ }).click();
     await page.getByRole("button", { name: "Congratulations!" }).click();
-    await page.getByRole("button", { name: /Next|Finish|Done/i }).click();
+    await page.getByRole("button", { name: "التالي" }).click();
 
-    await expect(page.getByText("Session complete!")).toBeVisible();
+    await expect(page.getByText("خلّصت الجلسة!")).toBeVisible();
     await expect(page).toHaveURL(/\/set-phrases$/);
   });
 
@@ -350,9 +350,9 @@ test.describe("a practice session", () => {
 
     await page.goto("/set-phrases/practice");
     await expect(page.getByText("1 / 2")).toBeVisible();
-    await page.getByRole("button", { name: /choices/i }).click();
+    await page.getByRole("button", { name: /الخيارات/ }).click();
     await page.getByRole("button", { name: "Congratulations!" }).first().click();
-    await page.getByRole("button", { name: /Next|Finish|Done/i }).click();
+    await page.getByRole("button", { name: "التالي" }).click();
 
     await expect(page.getByText("2 / 2")).toBeVisible();
     await expect(page.getByText("الموقف الثاني")).toBeVisible();
@@ -370,9 +370,9 @@ test.describe("a practice session", () => {
     });
 
     await page.goto("/set-phrases/practice");
-    await page.getByRole("button", { name: /choices/i }).click();
+    await page.getByRole("button", { name: /الخيارات/ }).click();
     await page.getByRole("button", { name: "Congratulations!" }).first().click();
-    await page.getByRole("button", { name: /Next|Finish|Done/i }).click();
+    await page.getByRole("button", { name: "التالي" }).click();
     await expect(page.getByText("الموقف الثاني")).toBeVisible();
 
     // Carried over, the next question would open already answered-for.
@@ -393,7 +393,7 @@ test.describe("a practice session", () => {
 
     // Two question types share one screen: "here is a situation, what do you
     // say" and "someone said this to you in English, what do you say back".
-    await expect(page.getByText("Reply to this:")).toBeVisible();
+    await expect(page.getByText("ردّ على هذا:")).toBeVisible();
     await expect(page.getByText("Thank you so much for your help")).toBeVisible();
   });
 });

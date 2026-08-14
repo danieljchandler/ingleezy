@@ -17,11 +17,11 @@ interface GeneratedPhrase {
 }
 
 const SUGGESTIONS = [
-  "Ordering coffee at a café",
-  "A job interview in English",
-  "Checking in at the airport",
-  "Calling customer service",
-  "Meeting new colleagues",
+  "تطلب قهوة في كافيه",
+  "مقابلة وظيفية بالإنجليزي",
+  "تسجّل وصولك في المطار",
+  "تكلّم خدمة العملاء",
+  "تتعرّف على زملاء جدد",
 ];
 
 export const RequestSituationCard = () => {
@@ -35,7 +35,7 @@ export const RequestSituationCard = () => {
   const generate = async () => {
     const s = situation.trim();
     if (s.length < 3) {
-      toast.error("Describe the situation in a sentence or two.");
+      toast.error("اوصف الموقف بجملة أو جملتين.");
       return;
     }
     setLoading(true);
@@ -48,9 +48,9 @@ export const RequestSituationCard = () => {
       if (error) throw error;
       if ((data as any)?.error) throw new Error((data as any).message || (data as any).error);
       setPhrases(((data as any)?.phrases ?? []) as GeneratedPhrase[]);
-      if (!((data as any)?.phrases ?? []).length) toast.error("No phrases returned, try rephrasing.");
+      if (!((data as any)?.phrases ?? []).length) toast.error("ما رجعت عبارات، جرّب صياغة ثانية.");
     } catch (e: any) {
-      toast.error(e?.message ?? "Could not generate phrases");
+      toast.error(e?.message ?? "تعذّر توليد العبارات");
     } finally {
       setLoading(false);
     }
@@ -68,9 +68,9 @@ export const RequestSituationCard = () => {
         dialect: activeDialect,
       });
       setSaved((prev) => new Set(prev).add(idx));
-      toast.success("Saved to My Phrases");
+      toast.success("حفظناها في عباراتي");
     } catch (e: any) {
-      toast.error(e?.message ?? "Could not save");
+      toast.error(e?.message ?? "تعذّر الحفظ");
     }
   };
 
@@ -91,7 +91,7 @@ export const RequestSituationCard = () => {
         // ignore individual failures (likely duplicates)
       }
     }
-    toast.success("Saved all phrases");
+    toast.success("حفظنا كل العبارات");
   };
 
   return (
@@ -101,7 +101,7 @@ export const RequestSituationCard = () => {
           <Wand2 className="h-5 w-5 text-amber-700 dark:text-amber-300" />
         </div>
         <div className="flex-1">
-          <h2 className="font-semibold">Need phrases for a specific situation?</h2>
+          <h2 className="font-semibold">تبي عبارات لموقف معيّن؟</h2>
           <p className="text-xs text-muted-foreground mt-1">
             Describe the situation — in Arabic or English — and AI will generate
             natural English phrases, glossed in {activeDialect} Arabic, you can save.
@@ -112,7 +112,7 @@ export const RequestSituationCard = () => {
       <Textarea
         value={situation}
         onChange={(e) => setSituation(e.target.value)}
-        placeholder="e.g. Asking your manager for a day off"
+        placeholder="مثلاً: تطلب من مديرك إجازة يوم"
         className="mt-3 min-h-[64px]"
         disabled={loading}
       />
@@ -133,7 +133,7 @@ export const RequestSituationCard = () => {
 
       <Button onClick={generate} disabled={loading} className="w-full mt-3">
         {loading ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Sparkles className="h-4 w-4 mr-1" />}
-        {loading ? "Generating…" : "Generate phrases"}
+        {loading ? "نولّد…" : "ولّد عبارات"}
       </Button>
 
       {phrases.length > 0 && (

@@ -66,7 +66,7 @@ const atCard = (page: Page, index: number, total: number) =>
  * unrelated actions.
  */
 async function answer(page: Page, english: string) {
-  await page.getByRole("button", { name: /continue to quiz/i }).click();
+  await page.getByRole("button", { name: "كمّل للاختبار" }).click();
   await page.getByRole("radio", { name: english, exact: true }).click();
 }
 
@@ -116,12 +116,12 @@ test.describe("working through a lesson", () => {
 
   test("keeps the Arabic hidden until the learner asks for it", async ({ page }) => {
     await page.goto(`/learn/${LESSON}`);
-    await expect(page.getByText(/try saying it in Arabic/i)).toBeVisible();
+    await expect(page.getByText(/جرّب تقول معناها/)).toBeVisible();
 
     // Production-first: showing the Arabic straight away turns a recall attempt
     // into a reading exercise.
     await expect(page.getByText("كلمة1")).toHaveCount(0);
-    await page.getByRole("button", { name: /show arabic/i }).click();
+    await page.getByRole("button", { name: "ورّني العربي" }).click();
     await expect(page.getByText("كلمة1")).toBeVisible();
   });
 
@@ -145,7 +145,7 @@ test.describe("working through a lesson", () => {
     // to produce the word from the picture.
     await expect(page.getByText("ك · ت · ب")).toHaveCount(0);
 
-    await page.getByRole("button", { name: /show arabic/i }).click();
+    await page.getByRole("button", { name: "ورّني العربي" }).click();
 
     await expect(page.getByText("ك · ت · ب")).toBeVisible();
   });
@@ -164,7 +164,7 @@ test.describe("working through a lesson", () => {
     ]);
 
     await page.goto(`/learn/${LESSON}`);
-    await page.getByRole("button", { name: /show arabic/i }).click();
+    await page.getByRole("button", { name: "ورّني العربي" }).click();
 
     // Most curriculum words have no root until an admin backfills them, so an
     // empty chip would be the normal case rather than the exception.
@@ -173,9 +173,9 @@ test.describe("working through a lesson", () => {
 
   test("asks for the English once the quiz starts", async ({ page }) => {
     await page.goto(`/learn/${LESSON}`);
-    await page.getByRole("button", { name: /continue to quiz/i }).click();
+    await page.getByRole("button", { name: "كمّل للاختبار" }).click();
 
-    await expect(page.getByText(/what does this mean in English/i)).toBeVisible();
+    await expect(page.getByText(/وش معناها بالإنجليزي/)).toBeVisible();
     await expect(page.getByRole("radiogroup")).toBeVisible();
     // The Arabic is the prompt now, so it is shown whether or not it was
     // revealed on the intro card.
@@ -208,7 +208,7 @@ test.describe("working through a lesson", () => {
     await page.goto(`/learn/${LESSON}`);
     for (let index = 0; index < 4; index++) await answerCorrectly(page, index);
 
-    await expect(page.getByRole("heading", { name: /excellent work/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /ممتاز!/ })).toBeVisible();
     await expect(page.getByText("100%")).toBeVisible();
     await expect(page.getByText("4 / 4 correct")).toBeVisible();
   });
@@ -222,7 +222,7 @@ test.describe("working through a lesson", () => {
     for (let index = 1; index < 4; index++) await answerCorrectly(page, index);
 
     await expect(page.getByText("75%")).toBeVisible();
-    await expect(page.getByRole("heading", { name: /good effort/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /مجهود طيب/ })).toBeVisible();
   });
 
   test("restarting clears the score rather than adding to it", async ({ page, expectConsoleErrors }) => {
@@ -232,7 +232,7 @@ test.describe("working through a lesson", () => {
     for (let index = 0; index < 4; index++) await answerCorrectly(page, index);
     await expect(page.getByText("100%")).toBeVisible();
 
-    await page.getByRole("button", { name: /practice again/i }).click();
+    await page.getByRole("button", { name: /تمرّن مرة ثانية|تعلّم كلمات أكثر/ }).click();
 
     await expect(page.getByText("word 1", { exact: true })).toBeVisible();
     await atCard(page, 0, 4);
@@ -483,14 +483,14 @@ test.describe("when the lesson cannot be shown", () => {
     db.seed("vocabulary_words", []);
 
     await page.goto(`/learn/${lessonId(9)}`);
-    await expect(page.getByText(/topic not found/i)).toBeVisible();
+    await expect(page.getByText(/ما لقينا الموضوع/)).toBeVisible();
   });
 
   test("says so for a lesson with no words yet", async ({ page, db }) => {
     seedLesson(db, 0);
 
     await page.goto(`/learn/${LESSON}`);
-    await expect(page.getByText(/no words yet/i)).toBeVisible();
+    await expect(page.getByText(/ما فيه كلمات بعد/)).toBeVisible();
   });
 
   test("does not render an empty lesson when the query failed", async ({
@@ -506,7 +506,7 @@ test.describe("when the lesson cannot be shown", () => {
 
     // "No words yet" after a failed request tells the learner the lesson is
     // empty when it is not.
-    await expect(page.getByText(/no words yet/i)).toHaveCount(0);
+    await expect(page.getByText(/ما فيه كلمات بعد/)).toHaveCount(0);
   });
 });
 
@@ -541,8 +541,8 @@ test.describe("the standalone quiz", () => {
 
     // Four options are needed for a multiple choice; three words would make the
     // right answer guessable by elimination.
-    await expect(page.getByText(/need more words/i)).toBeVisible();
-    await expect(page.getByText(/at least 4 words/i)).toBeVisible();
+    await expect(page.getByText(/محتاج كلمات أكثر/)).toBeVisible();
+    await expect(page.getByText(/٤ كلمات على الأقل/)).toBeVisible();
   });
 
   test("says so for an id that matches nothing", async ({ page, db }) => {
@@ -550,7 +550,7 @@ test.describe("the standalone quiz", () => {
     db.seed("topics", []);
     await page.goto(`/quiz/${lessonId(9)}`);
 
-    await expect(page.getByText(/topic not found/i)).toBeVisible();
+    await expect(page.getByText(/ما لقينا الموضوع/)).toBeVisible();
   });
 });
 

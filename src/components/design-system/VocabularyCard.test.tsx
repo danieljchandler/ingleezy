@@ -107,7 +107,7 @@ describe("showing the word", () => {
   it("invites the tap when the screen wants one", () => {
     render({ showTapHint: true });
 
-    expect(screen.getByText("Tap to hear")).toBeInTheDocument();
+    expect(screen.getByText("اضغط تسمعها")).toBeInTheDocument();
   });
 
   it("uses whatever prompt the screen supplies", () => {
@@ -120,7 +120,7 @@ describe("showing the word", () => {
     audio.isPlaying = true;
     render({ showTapHint: true });
 
-    expect(screen.queryByText("Tap to hear")).toBeNull();
+    expect(screen.queryByText("اضغط تسمعها")).toBeNull();
   });
 });
 
@@ -203,13 +203,13 @@ describe("revealing the answer", () => {
     // and showing it immediately would only ever test the first.
     expect(screen.getByText("market")).toBeInTheDocument();
     expect(screen.queryByText("سوق")).toBeNull();
-    expect(screen.getByText(/Try saying it in Arabic, then reveal/)).toBeInTheDocument();
+    expect(screen.getByText(/جرّب تقول معناها، بعدين اكشفها/)).toBeInTheDocument();
   });
 
   it("shows the script when the learner asks", () => {
     render({ showAnswer: true });
 
-    fireEvent.click(screen.getByRole("button", { name: /show arabic/i }));
+    fireEvent.click(screen.getByRole("button", { name: /ورّني العربي/ }));
 
     expect(screen.getByText("سوق")).toHaveAttribute("dir", "rtl");
   });
@@ -218,7 +218,7 @@ describe("revealing the answer", () => {
     render({ showAnswer: true, word: aWord() });
     audio.play.mockClear();
 
-    fireEvent.click(screen.getByRole("button", { name: /show arabic/i }));
+    fireEvent.click(screen.getByRole("button", { name: /ورّني العربي/ }));
 
     // Seeing the script and hearing it together is what attaches one to the
     // other.
@@ -228,17 +228,17 @@ describe("revealing the answer", () => {
   it("shows the reading alongside the script", () => {
     render({ showAnswer: true, word: aWord({ transliteration: "souq" }) });
 
-    fireEvent.click(screen.getByRole("button", { name: /show arabic/i }));
+    fireEvent.click(screen.getByRole("button", { name: /ورّني العربي/ }));
 
     expect(screen.getByText("souq")).toBeInTheDocument();
   });
 
   it("hides it again without replaying", () => {
     render({ showAnswer: true });
-    fireEvent.click(screen.getByRole("button", { name: /show arabic/i }));
+    fireEvent.click(screen.getByRole("button", { name: /ورّني العربي/ }));
     audio.play.mockClear();
 
-    fireEvent.click(screen.getByRole("button", { name: /hide arabic/i }));
+    fireEvent.click(screen.getByRole("button", { name: /أخفِ العربي/ }));
 
     expect(screen.queryByText("سوق")).toBeNull();
     expect(audio.play).not.toHaveBeenCalled();
@@ -246,7 +246,7 @@ describe("revealing the answer", () => {
 
   it("hides the script again for the next word", () => {
     const { rerender } = render({ showAnswer: true });
-    fireEvent.click(screen.getByRole("button", { name: /show arabic/i }));
+    fireEvent.click(screen.getByRole("button", { name: /ورّني العربي/ }));
 
     rerender(
       <VocabularyCard
@@ -257,6 +257,6 @@ describe("revealing the answer", () => {
 
     // A new word arriving already revealed would skip the exercise entirely.
     expect(screen.queryByText("بيت")).toBeNull();
-    expect(screen.getByRole("button", { name: /show arabic/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /ورّني العربي/ })).toBeInTheDocument();
   });
 });

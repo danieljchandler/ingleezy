@@ -27,8 +27,8 @@ const Stories = () => {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mb-4">
             <BookOpen className="h-8 w-8 text-primary" />
           </div>
-          <h1 className="text-2xl font-bold font-heading mb-1 inline-flex items-center gap-2 justify-center">Interactive Stories <InfoHint {...PAGE_HINTS["stories"]} size="md" /></h1>
-          <p className="text-muted-foreground">Choose your adventure and learn English through immersive scenarios</p>
+          <h1 className="text-2xl font-bold font-heading mb-1 inline-flex items-center gap-2 justify-center">قصص تفاعلية <InfoHint {...PAGE_HINTS["stories"]} size="md" /></h1>
+          <p className="text-muted-foreground">اختر مغامرتك وتعلّم الإنجليزي داخل القصة</p>
         </div>
 
         {isLoading ? (
@@ -77,7 +77,7 @@ const Stories = () => {
         ) : (
           <div className="text-center py-16">
             <BookOpen className="h-16 w-16 text-muted-foreground/20 mx-auto mb-4" />
-            <p className="text-muted-foreground">No stories available yet. Check back soon!</p>
+            <p className="text-muted-foreground">ما فيه قصص بعد. ارجع لنا قريباً!</p>
           </div>
         )}
       </div>

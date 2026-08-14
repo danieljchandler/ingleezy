@@ -73,8 +73,8 @@ const DailyStoryPage = () => {
     return (
       <AppShell>
         <div className="text-center pt-20 space-y-3">
-          <p className="text-muted-foreground">Sign in to read your daily story.</p>
-          <Button onClick={() => navigate("/auth")}>Sign in</Button>
+          <p className="text-muted-foreground">سجّل دخولك عشان تقرأ قصة اليوم.</p>
+          <Button onClick={() => navigate("/auth")}>سجّل دخول</Button>
         </div>
       </AppShell>
     );
@@ -95,7 +95,7 @@ const DailyStoryPage = () => {
 
         <div className="flex items-center gap-2">
           <Sparkles className="h-5 w-5 text-primary" />
-          <h1 className="text-2xl font-bold">Today's Story</h1>
+          <h1 className="text-2xl font-bold">قصة اليوم</h1>
         </div>
         <p className="text-sm text-muted-foreground">
           A fresh ~200-word story built from words you already know plus a few new ones.
@@ -109,7 +109,7 @@ const DailyStoryPage = () => {
             ) : (
               <>
                 <Loader2 className="h-8 w-8 mx-auto animate-spin text-primary" />
-                <p className="text-sm text-muted-foreground">Loading…</p>
+                <p className="text-sm text-muted-foreground">نحمّل…</p>
               </>
             )}
           </div>
@@ -119,12 +119,12 @@ const DailyStoryPage = () => {
           <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-6 text-center space-y-3">
             <p className="text-sm">
               {notEnough
-                ? "Add a few more words to your deck (My Words) to unlock today's story."
+                ? "أضف كم كلمة لرزمتك (كلماتي) عشان تفتح قصة اليوم."
                 : `Could not generate today's story. ${errMessage}`}
             </p>
             <div className="flex justify-center gap-2">
               {notEnough ? (
-                <Button onClick={() => navigate("/my-words")}>Go to My Words</Button>
+                <Button onClick={() => navigate("/my-words")}>روح لكلماتي</Button>
               ) : (
                 <Button onClick={() => generate.mutate(undefined)} variant="outline" className="gap-2">
                   <RefreshCw className="h-4 w-4" /> Try again
@@ -193,7 +193,7 @@ const DailyStoryPage = () => {
 
             {story.new_words?.length > 0 && (
               <div className="border-t border-border pt-3">
-                <p className="text-xs font-semibold uppercase text-muted-foreground mb-2">New words introduced</p>
+                <p className="text-xs font-semibold uppercase text-muted-foreground mb-2">كلمات جديدة</p>
                 <div className="flex flex-wrap gap-2">
                   {story.new_words.map((w, i) => (
                     <Badge key={i} variant="outline" className="text-base font-english">{w}</Badge>
@@ -209,8 +209,8 @@ const DailyStoryPage = () => {
                 className="gap-2"
                 onClick={() =>
                   generate.mutate({ force: true }, {
-                    onSuccess: () => toast.success("Fresh story generated"),
-                    onError: (e) => toast.error(e instanceof Error ? e.message : "Failed"),
+                    onSuccess: () => toast.success("ولّدنا قصة جديدة"),
+                    onError: (e) => toast.error(e instanceof Error ? e.message : "فشل"),
                   })
                 }
                 disabled={generate.isPending}

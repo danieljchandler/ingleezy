@@ -75,7 +75,7 @@ const Quiz = () => {
         <div className="flex items-center justify-center py-24">
           <div className="text-center">
             <Loader2 className="h-10 w-10 animate-spin text-primary mx-auto mb-4" />
-            <p className="text-muted-foreground">Loading quiz...</p>
+            <p className="text-muted-foreground">نحمّل التمرين…</p>
           </div>
         </div>
       </AppShell>
@@ -87,8 +87,8 @@ const Quiz = () => {
       <AppShell compact>
         <div className="flex items-center justify-center py-24">
           <div className="text-center">
-            <p className="text-lg text-muted-foreground mb-4">Topic not found</p>
-            <Button onClick={() => navigate("/")}>Go Home</Button>
+            <p className="text-lg text-muted-foreground mb-4">ما لقينا الموضوع</p>
+            <Button onClick={() => navigate("/")}>رجوع للرئيسية</Button>
           </div>
         </div>
       </AppShell>
@@ -102,11 +102,11 @@ const Quiz = () => {
           <HomeButton />
         </div>
         <div className="text-center py-12">
-          <p className="text-lg text-muted-foreground mb-2">Need more words</p>
+          <p className="text-lg text-muted-foreground mb-2">محتاج كلمات أكثر</p>
           <p className="text-sm text-muted-foreground mb-6">
-            Quiz requires at least 4 words.
+            الاختبار يحتاج ٤ كلمات على الأقل.
           </p>
-          <Button onClick={() => navigate("/")}>Go Home</Button>
+          <Button onClick={() => navigate("/")}>رجوع للرئيسية</Button>
         </div>
       </AppShell>
     );

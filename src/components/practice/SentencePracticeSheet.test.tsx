@@ -112,7 +112,7 @@ function render(seed: (backend: SupabaseBackend) => void = () => {}, open = true
   return harness;
 }
 
-const record = () => fireEvent.click(screen.getByRole("button", { name: /start recording/i }));
+const record = () => fireEvent.click(screen.getByRole("button", { name: /ابدأ التسجيل|جرّب مرة ثانية/ }));
 
 describe("setting the exercise", () => {
   it("names the word the sentence has to use", () => {
@@ -135,7 +135,7 @@ describe("setting the exercise", () => {
   it("says how long they have", () => {
     render();
 
-    expect(screen.getByText("Records up to 15 seconds.")).toBeInTheDocument();
+    expect(screen.getByText("يسجّل لين ١٥ ثانية.")).toBeInTheDocument();
   });
 });
 
@@ -169,7 +169,7 @@ describe("recording", () => {
     // A record button that silently does nothing reads as the app being broken
     // rather than as a permission the learner can grant.
     expect(screen.getByText(/microphone access denied/i)).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /start recording/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /ابدأ التسجيل|جرّب مرة ثانية/ })).not.toBeInTheDocument();
   });
 
   it("asks the learner to speak up when nothing was heard", async () => {
@@ -180,7 +180,7 @@ describe("recording", () => {
 
     // Sending silence to the coach would come back as "you did not use the
     // word", which blames the learner for a microphone problem.
-    expect(screen.getByText(/didn't catch any speech/i)).toBeInTheDocument();
+    expect(screen.getByText(/ما سمعنا شي/)).toBeInTheDocument();
     expect(backend.callsTo("practice-sentence-coach")).toEqual([]);
   });
 });
@@ -320,7 +320,7 @@ describe("going again", () => {
 
     // Two ways back to the microphone, because the button at the top has moved
     // off screen by the time the learner has read the coaching.
-    expect(screen.getByRole("button", { name: /try again/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "جرّب مرة ثانية" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /try another sentence/i })).toBeInTheDocument();
   });
 
@@ -348,7 +348,7 @@ describe("when the coach fails", () => {
     // They have already spoken; a spinner that stops with nothing on screen
     // reads as the app having lost their sentence.
     await waitFor(() =>
-      expect(screen.getByRole("button", { name: /try again/i })).toBeInTheDocument(),
+      expect(screen.getByRole("button", { name: "جرّب مرة ثانية" })).toBeInTheDocument(),
     );
   });
 

@@ -246,7 +246,7 @@ describe("the echo window", () => {
     // The gap between hearing and speaking is the exercise. A button to press
     // first would put a decision in the middle of it.
     expect(recorder.start).toHaveBeenCalled();
-    expect(screen.getByText("Repeat now")).toBeInTheDocument();
+    expect(screen.getByText("ردّد الحين")).toBeInTheDocument();
   });
 
   it("allows the clip's length plus a breath, and stops on the silence after", async () => {

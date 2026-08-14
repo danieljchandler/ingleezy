@@ -107,12 +107,12 @@ describe("QuizResults — the score", () => {
   });
 
   it.each([
-    [4, 4, "Perfect! ممتاز"],
-    [5, 4, "Great job! أحسنت"],
-    [5, 3, "Good effort! جيد"],
-    [5, 2, "Keep practicing! استمر"],
-    [5, 1, "Try again! حاول مرة أخرى"],
-    [5, 0, "Try again! حاول مرة أخرى"],
+    [4, 4, "ممتاز! كامل الدرجة"],
+    [5, 4, "أحسنت! شغل حلو"],
+    [5, 3, "جيد! مجهود طيب"],
+    [5, 2, "واصل التمرين!"],
+    [5, 1, "حاول مرة ثانية!"],
+    [5, 0, "حاول مرة ثانية!"],
   ])("praises %i of %i as expected", (total, correct, message) => {
     render(answers(total, correct));
     expect(screen.getByRole("heading", { name: message })).toBeInTheDocument();
@@ -120,12 +120,12 @@ describe("QuizResults — the score", () => {
 
   it("counts exactly 80% as the higher band", () => {
     render(answers(5, 4));
-    expect(screen.getByRole("heading", { name: "Great job! أحسنت" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "أحسنت! شغل حلو" })).toBeInTheDocument();
   });
 
   it("counts exactly 60% as the higher band", () => {
     render(answers(5, 3));
-    expect(screen.getByRole("heading", { name: "Good effort! جيد" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "جيد! مجهود طيب" })).toBeInTheDocument();
   });
 
   it("gives the trophy its colour only from 80% up", () => {
@@ -146,7 +146,7 @@ describe("QuizResults — the score", () => {
     // first answer, told the learner they failed a quiz they never took.
     render([], 0);
     expect(screen.queryByText(/NaN/)).not.toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "No questions to score" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "ما فيه أسئلة تُحتسب" })).toBeInTheDocument();
     expect(screen.getByText("0 / 0")).toBeInTheDocument();
   });
 
@@ -159,7 +159,7 @@ describe("QuizResults — the score", () => {
 
   it("still calls a genuine zero a failure", () => {
     render(answers(4, 0));
-    expect(screen.getByRole("heading", { name: "Try again! حاول مرة أخرى" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "حاول مرة ثانية!" })).toBeInTheDocument();
     expect(screen.getByText("0% correct")).toBeInTheDocument();
   });
 });

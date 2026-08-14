@@ -100,8 +100,8 @@ function stubPassage(backend: SupabaseBackend, passage: unknown = PASSAGE) {
 }
 
 /** Walk from the hub to a generated passage at the given level. */
-async function readAt(page: Page, level: RegExp = /beginner/i) {
-  await page.getByText("Read a Passage").click();
+async function readAt(page: Page, level: RegExp = /مبتدئ/) {
+  await page.getByText("اقرأ نصاً").click();
   await page.getByRole("button", { name: level }).click();
 }
 
@@ -117,15 +117,15 @@ test.describe("choosing what to read", () => {
   test("offers a passage or a question", async ({ page }) => {
     await page.goto("/reading");
 
-    await expect(page.getByRole("heading", { name: /reading practice/i })).toBeVisible();
-    await expect(page.getByText("Read a Passage")).toBeVisible();
+    await expect(page.getByRole("heading", { name: /تمرين القراءة/ })).toBeVisible();
+    await expect(page.getByText("اقرأ نصاً")).toBeVisible();
   });
 
   test("asks for a difficulty before generating anything", async ({ page, backend }) => {
     await page.goto("/reading");
-    await page.getByText("Read a Passage").click();
+    await page.getByText("اقرأ نصاً").click();
 
-    await expect(page.getByRole("heading", { name: /read a passage/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /اقرأ نصاً/ })).toBeVisible();
     // Generation is the longest and most expensive call in the app; firing it
     // before the learner has chosen would waste one on every visit.
     expect(backend.callsTo("reading-passage")).toHaveLength(0);
@@ -133,7 +133,7 @@ test.describe("choosing what to read", () => {
 
   test("generates at the difficulty chosen, in the active dialect", async ({ page, backend }) => {
     await page.goto("/reading");
-    await readAt(page, /advanced/i);
+    await readAt(page, /متقدّم/);
 
     await expect(page.getByRole("heading", { name: "At the cafe" })).toBeVisible();
     expect(backend.lastCallTo("reading-passage")?.body).toMatchObject({
@@ -144,9 +144,9 @@ test.describe("choosing what to read", () => {
 
   test("passes a scenario the learner described", async ({ page, backend }) => {
     await page.goto("/reading");
-    await page.getByText("Read a Passage").click();
-    await page.getByLabel(/describe a scenario/i).fill("ordering coffee at a café");
-    await page.getByRole("button", { name: /beginner/i }).click();
+    await page.getByText("اقرأ نصاً").click();
+    await page.getByLabel(/اوصف الموقف/).fill("ordering coffee at a café");
+    await page.getByRole("button", { name: /مبتدئ/ }).click();
 
     await expect(page.getByRole("heading", { name: "At the cafe" })).toBeVisible();
     // The scenario is the one lever a learner has over what they read.
@@ -157,9 +157,9 @@ test.describe("choosing what to read", () => {
 
   test("omits an empty scenario rather than sending a blank string", async ({ page, backend }) => {
     await page.goto("/reading");
-    await page.getByText("Read a Passage").click();
-    await page.getByLabel(/describe a scenario/i).fill("   ");
-    await page.getByRole("button", { name: /beginner/i }).click();
+    await page.getByText("اقرأ نصاً").click();
+    await page.getByLabel(/اوصف الموقف/).fill("   ");
+    await page.getByRole("button", { name: /مبتدئ/ }).click();
 
     await expect(page.getByRole("heading", { name: "At the cafe" })).toBeVisible();
     // An empty topic string reaches the prompt as an instruction to write about
@@ -263,7 +263,7 @@ test.describe("preferring the editorial library", () => {
     db.seed("reading_passages", [aPublishedPassage({ difficulty: "advanced" })]);
 
     await page.goto("/reading");
-    await readAt(page, /beginner/i);
+    await readAt(page, /مبتدئ/);
 
     await expect(page.getByRole("heading", { name: "At the cafe" })).toBeVisible();
     expect(backend.callsTo("reading-passage")).toHaveLength(1);
@@ -364,7 +364,7 @@ test.describe("the comprehension quiz", () => {
     await page.goto("/reading");
     await readAt(page);
     await expect(page.getByRole("heading", { name: "At the cafe" })).toBeVisible();
-    await page.getByRole("button", { name: /start comprehension quiz/i }).click();
+    await page.getByRole("button", { name: /ابدأ أسئلة الفهم/ }).click();
   };
 
   test("asks one question at a time", async ({ page }) => {
@@ -378,7 +378,7 @@ test.describe("the comprehension quiz", () => {
     await startQuiz(page);
 
     await page.getByRole("button", { name: /to the cafe/i }).click();
-    await page.getByRole("button", { name: /next/i }).click();
+    await page.getByRole("button", { name: /السؤال التالي|شوف النتيجة/ }).click();
 
     await expect(page.getByText("What did they order?")).toBeVisible();
   });
@@ -408,9 +408,9 @@ test.describe("the comprehension quiz", () => {
     expect(await completedToday(page)).not.toContain("reading");
 
     await page.getByRole("button", { name: /to the cafe/i }).click();
-    await page.getByRole("button", { name: /next/i }).click();
+    await page.getByRole("button", { name: /السؤال التالي|شوف النتيجة/ }).click();
     await page.getByRole("button", { name: /^coffee$/i }).click();
-    await page.getByRole("button", { name: /next|finish|see/i }).click();
+    await page.getByRole("button", { name: /السؤال التالي|شوف النتيجة/ }).click();
 
     // Opening the quiz is not reading the passage; finishing it is the only
     // signal the page has that the work was actually done.
@@ -456,7 +456,7 @@ test.describe("when the passage cannot be generated", () => {
     // Two failures is a real outage; leaving the spinner up forever is the one
     // outcome worse than an error.
     await expect(page.getByRole("heading", { name: "في المقهى" })).toHaveCount(0);
-    await expect(page.getByText(/failed|try again|couldn't/i).first()).toBeVisible({
+    await expect(page.getByText(/فشل|جرّب مرة ثانية|تعذّر/).first()).toBeVisible({
       timeout: 20_000,
     });
   });

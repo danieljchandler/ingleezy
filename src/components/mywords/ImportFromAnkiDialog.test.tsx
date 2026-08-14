@@ -327,7 +327,7 @@ describe("importing", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /^import/i }));
 
-    await waitFor(() => expect(screen.getByText("Import complete")).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText("خلص الاستيراد")).toBeInTheDocument());
     expect(screen.getByText("1 new cards added")).toBeInTheDocument();
   });
 

@@ -66,8 +66,8 @@ test.describe("reaching Listen", () => {
 
     await page.goto("/listen");
 
-    await expect(page.getByRole("heading", { name: "Listen" })).toBeVisible();
-    await expect(page.getByRole("tab", { name: "Library" })).toHaveAttribute(
+    await expect(page.getByRole("heading", { name: "استمع" })).toBeVisible();
+    await expect(page.getByRole("tab", { name: "المكتبة" })).toHaveAttribute(
       "data-state",
       "active",
     );
@@ -89,8 +89,8 @@ test.describe("the library", () => {
     const card = page.locator("a[href$='/listen/" + EPISODE + "']");
     await expect(card.getByRole("heading", { name: "Morning Coffee" })).toBeVisible();
     await expect(card.getByText("صديقان يسولفان عن قهوة الصباح")).toBeVisible();
-    await expect(card.getByText("Podcast")).toBeVisible();
-    await expect(card.getByText("Short")).toBeVisible();
+    await expect(card.getByText("بودكاست")).toBeVisible();
+    await expect(card.getByText("قصيرة")).toBeVisible();
   });
 
   test("marks an episode that already has a full recording", async ({ page, db }) => {
@@ -100,7 +100,7 @@ test.describe("the library", () => {
 
     await page.goto("/listen");
 
-    await expect(page.getByText("Audio")).toBeVisible();
+    await expect(page.getByText("صوت")).toBeVisible();
   });
 
   test("marks one that is still being recorded", async ({ page, db }) => {
@@ -110,7 +110,7 @@ test.describe("the library", () => {
 
     // The only sign that a background job exists at all. Without it a `full`
     // episode with no audio is indistinguishable from a broken one.
-    await expect(page.getByText("Recording")).toBeVisible();
+    await expect(page.getByText("نسجّل")).toBeVisible();
   });
 
   test("shows how often an episode has been played", async ({ page, db }) => {
@@ -153,8 +153,8 @@ test.describe("the library", () => {
 
     await page.goto("/listen");
 
-    await expect(page.getByText("No episodes yet in Gulf.")).toBeVisible();
-    await expect(page.getByText("Be the first — open the Create tab.")).toBeVisible();
+    await expect(page.getByText("ما فيه حلقات بعد لـGulf.")).toBeVisible();
+    await expect(page.getByText("كن أول واحد — افتح تبويب «أنشئ».")).toBeVisible();
   });
 
   test("opens an episode", async ({ page, db }) => {
@@ -175,35 +175,35 @@ test.describe("creating an episode", () => {
 
   test("will not generate without a topic", async ({ page }) => {
     await page.goto("/listen");
-    await page.getByRole("tab", { name: "Create" }).click();
+    await page.getByRole("tab", { name: "أنشئ" }).click();
 
     // Generation is a model call per episode; an empty topic would spend it on
     // nothing. The button is disabled rather than validating on click.
-    await expect(page.getByRole("button", { name: /Generate/i })).toBeDisabled();
+    await expect(page.getByRole("button", { name: /ولّد الحلقة|نكتب حلقتك/ })).toBeDisabled();
   });
 
   test("never shows the message it has for a missing topic", async ({ page }) => {
     await page.goto("/listen");
-    await page.getByRole("tab", { name: "Create" }).click();
-    await expect(page.getByRole("button", { name: /Generate/i })).toBeDisabled();
+    await page.getByRole("tab", { name: "أنشئ" }).click();
+    await expect(page.getByRole("button", { name: /ولّد الحلقة|نكتب حلقتك/ })).toBeDisabled();
 
     // A dead branch, pinned. `handleGenerate` opens with
     // `if (!finalTopic) toast.error("Pick or type a topic first")`, but the only
     // caller is a button disabled on exactly that condition — so the message is
     // unreachable and a learner staring at a greyed-out button is told nothing
     // about what it wants.
-    await expect(page.getByText("Pick or type a topic first")).toHaveCount(0);
+    await expect(page.getByText("اختر موضوع أو اكتبه أول")).toHaveCount(0);
   });
 
   test("sends the format, length and audio mode the learner picked", async ({ page, backend }) => {
     backend.stubFunction("generate-listen-script", { episode: anEpisode() });
 
     await page.goto("/listen");
-    await page.getByRole("tab", { name: "Create" }).click();
-    await page.getByRole("button", { name: /TED-style talk/ }).click();
-    await page.getByRole("button", { name: /Long/ }).click();
-    await page.getByPlaceholder(/Type any topic/).fill("desert farming");
-    await page.getByRole("button", { name: /Generate/i }).click();
+    await page.getByRole("tab", { name: "أنشئ" }).click();
+    await page.getByRole("button", { name: /محاضرة تِد/ }).click();
+    await page.getByRole("button", { name: /طويلة/ }).click();
+    await page.getByPlaceholder(/اكتب أي موضوع/).fill("desert farming");
+    await page.getByRole("button", { name: /ولّد الحلقة|نكتب حلقتك/ }).click();
 
     await expect
       .poll(() => backend.lastCallTo("generate-listen-script")?.body)
@@ -219,9 +219,9 @@ test.describe("creating an episode", () => {
     backend.stubFunction("generate-listen-script", { episode: anEpisode() });
 
     await page.goto("/listen");
-    await page.getByRole("tab", { name: "Create" }).click();
-    await page.getByPlaceholder(/Type any topic/).fill("coffee");
-    await page.getByRole("button", { name: /Generate/i }).click();
+    await page.getByRole("tab", { name: "أنشئ" }).click();
+    await page.getByPlaceholder(/اكتب أي موضوع/).fill("coffee");
+    await page.getByRole("button", { name: /ولّد الحلقة|نكتب حلقتك/ }).click();
 
     // The cheaper of the two: a line is rendered when the learner taps it, so
     // an episode nobody finishes costs nothing to synthesise beyond what was
@@ -233,7 +233,7 @@ test.describe("creating an episode", () => {
 
   test("takes a suggested topic as the topic", async ({ page }) => {
     await page.goto("/listen");
-    await page.getByRole("tab", { name: "Create" }).click();
+    await page.getByRole("tab", { name: "أنشئ" }).click();
 
     const suggestion = page.locator("button.block.w-full.text-left").first();
     const label = (await suggestion.textContent())?.trim() ?? "";
@@ -242,19 +242,19 @@ test.describe("creating an episode", () => {
     // Tapping a suggestion fills the box rather than generating immediately —
     // it is a starting point the learner can edit, and it is what turns the
     // disabled Generate button on.
-    await expect(page.getByPlaceholder(/Type any topic/)).toHaveValue(label);
-    await expect(page.getByRole("button", { name: /Generate/i })).toBeEnabled();
+    await expect(page.getByPlaceholder(/اكتب أي موضوع/)).toHaveValue(label);
+    await expect(page.getByRole("button", { name: /ولّد الحلقة|نكتب حلقتك/ })).toBeEnabled();
   });
 
   test("opens the episode it just made", async ({ page, backend }) => {
     backend.stubFunction("generate-listen-script", { episode: anEpisode() });
 
     await page.goto("/listen");
-    await page.getByRole("tab", { name: "Create" }).click();
-    await page.getByPlaceholder(/Type any topic/).fill("coffee");
-    await page.getByRole("button", { name: /Generate/i }).click();
+    await page.getByRole("tab", { name: "أنشئ" }).click();
+    await page.getByPlaceholder(/اكتب أي موضوع/).fill("coffee");
+    await page.getByRole("button", { name: /ولّد الحلقة|نكتب حلقتك/ }).click();
 
-    await expect(page.getByText("Episode ready")).toBeVisible();
+    await expect(page.getByText("الحلقة جاهزة")).toBeVisible();
     await expect(page).toHaveURL(new RegExp(`/listen/${EPISODE}$`));
   });
 
@@ -267,9 +267,9 @@ test.describe("creating an episode", () => {
     backend.stubFunctionFailure("generate-listen-script");
 
     await page.goto("/listen");
-    await page.getByRole("tab", { name: "Create" }).click();
-    await page.getByPlaceholder(/Type any topic/).fill("coffee");
-    await page.getByRole("button", { name: /Generate/i }).click();
+    await page.getByRole("tab", { name: "أنشئ" }).click();
+    await page.getByPlaceholder(/اكتب أي موضوع/).fill("coffee");
+    await page.getByRole("button", { name: /ولّد الحلقة|نكتب حلقتك/ }).click();
 
     // Navigating to `/listen/undefined` is the failure mode the mutation's
     // own guard exists to prevent.
@@ -299,16 +299,16 @@ test.describe("an episode", () => {
 
     await page.goto(`/listen/${EPISODE}`);
 
-    await expect(page.getByRole("heading", { name: "Key vocabulary" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "أهم المفردات" })).toBeVisible();
     await expect(page.getByText("morning", { exact: true })).toBeVisible();
-    await expect(page.getByRole("button", { name: /Add all to My Words/ })).toBeVisible();
+    await expect(page.getByRole("button", { name: /أضفها كلها لكلماتي/ })).toBeVisible();
   });
 
   test("saves the whole vocabulary list in one go", async ({ page, db }) => {
     seedListen(db);
 
     await page.goto(`/listen/${EPISODE}`);
-    await page.getByRole("button", { name: /Add all to My Words/ }).click();
+    await page.getByRole("button", { name: /أضفها كلها لكلماتي/ }).click();
 
     await expect.poll(() => db.rows("user_vocabulary").length).toBeGreaterThan(0);
     expect(db.rows("user_vocabulary")[0]).toMatchObject({
@@ -328,7 +328,7 @@ test.describe("an episode", () => {
 
     await page.goto(`/listen/${EPISODE}`);
 
-    await expect(page.getByRole("button", { name: /Play/i }).first()).toBeVisible();
+    await expect(page.getByRole("button", { name: /شغّل|أوقف/ }).first()).toBeVisible();
   });
 
   test("says the recording is still being made", async ({ page, db }) => {
@@ -336,7 +336,7 @@ test.describe("an episode", () => {
 
     await page.goto(`/listen/${EPISODE}`);
 
-    await expect(page.getByText(/recording|Generating|being/i).first()).toBeVisible();
+    await expect(page.getByText(/نسجّل الأصوات/).first()).toBeVisible();
   });
 
   test("keeps the episode usable when the recording failed", async ({ page, db }) => {
@@ -347,7 +347,7 @@ test.describe("an episode", () => {
     // The script is the product and per-line synthesis still works, so a failed
     // background job costs a convenience rather than the episode.
     await expect(
-      page.getByText("Audio failed — you can still play each line on tap."),
+      page.getByText("ما ضبط الصوت — تقدر تشغّل كل سطر بالضغط عليه."),
     ).toBeVisible();
     await expect(page.getByRole("button", { name: "morning," })).toBeVisible();
   });
@@ -393,14 +393,14 @@ test.describe("an episode", () => {
 
     await page.goto("/listen/bbbbbbbb-1111-4000-8000-00000000000f");
 
-    await expect(page.getByText("Episode not found.")).toBeVisible();
+    await expect(page.getByText("ما لقينا الحلقة.")).toBeVisible();
   });
 
   test("goes back to the library", async ({ page, db }) => {
     seedListen(db);
 
     await page.goto(`/listen/${EPISODE}`);
-    await page.getByRole("button", { name: /Back|Listen/ }).first().click();
+    await page.getByRole("button", { name: /رجوع للمكتبة|رجوع/ }).first().click();
 
     await expect(page).toHaveURL(/\/listen$/);
   });

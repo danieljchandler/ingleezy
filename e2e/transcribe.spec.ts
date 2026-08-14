@@ -42,7 +42,7 @@ const aVideoFile = (name = "clip.mp4") => ({
 /** Attach a file to the hidden picker and wait for the page to take it. */
 async function chooseFile(page: Page, file = anAudioFile()) {
   await page.setInputFiles("#file-upload", file);
-  await expect(page.getByRole("button", { name: "Start Transcription" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "ابدأ التفريغ" })).toBeVisible();
 }
 
 /** The shape deepgram-transcribe returns on success. */
@@ -85,7 +85,7 @@ test.describe("what a learner may upload", () => {
     await page.setInputFiles("#file-upload", anAudioFile("interview.mp3"));
 
     await expect(page.getByText("interview.mp3")).toBeVisible();
-    await expect(page.getByRole("button", { name: "Start Transcription" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "ابدأ التفريغ" })).toBeVisible();
   });
 
   test("refuses a video file", async ({ page }) => {
@@ -93,7 +93,7 @@ test.describe("what a learner may upload", () => {
     await page.setInputFiles("#file-upload", aVideoFile());
 
     await expect(page.getByText(/رفع الفيديو للإدارة فقط/)).toBeVisible();
-    await expect(page.getByRole("button", { name: "Start Transcription" })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "ابدأ التفريغ" })).toHaveCount(0);
   });
 
   test("refuses a file that is neither audio nor video", async ({ page }) => {
@@ -111,7 +111,7 @@ test.describe("what a learner may upload", () => {
     await page.goto("/transcribe");
     await expect(page.getByRole("tab", { name: "رفع ملف" })).toBeVisible();
 
-    await expect(page.getByRole("button", { name: "Start Transcription" })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "ابدأ التفريغ" })).toHaveCount(0);
   });
 
   test("drops the file again on clear", async ({ page }) => {
@@ -121,7 +121,7 @@ test.describe("what a learner may upload", () => {
     await page.getByText("clip.mp3").locator("xpath=../..").getByRole("button").click();
 
     await expect(page.getByText("المس أو اسحب ملفاً هنا")).toBeVisible();
-    await expect(page.getByRole("button", { name: "Start Transcription" })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "ابدأ التفريغ" })).toHaveCount(0);
   });
 
   test("accepts a dropped file the picker would have rejected", async ({ page }) => {
@@ -140,7 +140,7 @@ test.describe("what a learner may upload", () => {
     // refused through the button and accepted through the drop zone. It reaches
     // the engines and fails there instead, with a worse message.
     await expect(page.getByText("notes.txt")).toBeVisible();
-    await expect(page.getByRole("button", { name: "Start Transcription" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "ابدأ التفريغ" })).toBeVisible();
   });
 });
 
@@ -188,9 +188,9 @@ test.describe("what an admin may upload", () => {
     await page.goto("/transcribe");
     await page.getByRole("tab", { name: "رابط" }).click();
     await page.getByPlaceholder(/الصق رابط يوتيوب/).fill("not a url at all");
-    await page.getByRole("button", { name: "Extract" }).click();
+    await page.getByRole("button", { name: "استخرج" }).click();
 
-    await expect(page.getByText(/Please enter a valid URL/i)).toBeVisible();
+    await expect(page.getByText(/أدخل رابطاً صحيحاً/)).toBeVisible();
   });
 
   test("pulls media down from a link and turns it into the upload", async ({ page, backend }) => {
@@ -204,7 +204,7 @@ test.describe("what an admin may upload", () => {
     await page.goto("/transcribe");
     await page.getByRole("tab", { name: "رابط" }).click();
     await page.getByPlaceholder(/الصق رابط يوتيوب/).fill("https://youtube.com/watch?v=abc123");
-    await page.getByRole("button", { name: "Extract" }).click();
+    await page.getByRole("button", { name: "استخرج" }).click();
 
     // The URL path deliberately converges on the upload path rather than being
     // a second pipeline: the download becomes a File and everything downstream
@@ -221,7 +221,7 @@ test.describe("what an admin may upload", () => {
     await page.goto("/transcribe");
     await page.getByRole("tab", { name: "رابط" }).click();
     await page.getByPlaceholder(/الصق رابط يوتيوب/).fill("https://www.tiktok.com/@someone/video/1");
-    await page.getByRole("button", { name: "Extract" }).click();
+    await page.getByRole("button", { name: "استخرج" }).click();
 
     await expect
       .poll(() => db.rows("content_import_logs").length, { timeout: 10_000 })
@@ -248,7 +248,7 @@ test.describe("what an admin may upload", () => {
     await page.goto("/transcribe");
     await page.getByRole("tab", { name: "رابط" }).click();
     await page.getByPlaceholder(/الصق رابط يوتيوب/).fill("https://youtube.com/watch?v=seen-before");
-    await page.getByRole("button", { name: "Extract" }).click();
+    await page.getByRole("button", { name: "استخرج" }).click();
 
     await expect(page.getByText("شلونك اليوم")).toBeVisible();
     // The whole point of the cache is skipping the expensive part.
@@ -266,7 +266,7 @@ test.describe("what an admin may upload", () => {
     await page.goto("/transcribe");
     await page.getByRole("tab", { name: "رابط" }).click();
     await page.getByPlaceholder(/الصق رابط يوتيوب/).fill("https://youtube.com/watch?v=gone");
-    await page.getByRole("button", { name: "Extract" }).click();
+    await page.getByRole("button", { name: "استخرج" }).click();
 
     await expect(page.getByText(/تعذّرت معالجة الرابط/)).toBeVisible();
   });
@@ -282,7 +282,7 @@ test.describe("running the engines", () => {
 
     await page.goto("/transcribe");
     await chooseFile(page);
-    await page.getByRole("button", { name: "Start Transcription" }).click();
+    await page.getByRole("button", { name: "ابدأ التفريغ" }).click();
 
     await expect(page.getByText("مرحبا")).toBeVisible();
     // Not a redundancy: they disagree, and the analyser is given all four so it
@@ -298,7 +298,7 @@ test.describe("running the engines", () => {
 
     await page.goto("/transcribe");
     await chooseFile(page, anAudioFile("lesson.mp3"));
-    await page.getByRole("button", { name: "Start Transcription" }).click();
+    await page.getByRole("button", { name: "ابدأ التفريغ" }).click();
     await expect(page.getByText("مرحبا")).toBeVisible();
 
     // Munsit is the odd one out — it reads the part named `file`, and dispatches
@@ -318,7 +318,7 @@ test.describe("running the engines", () => {
 
     await page.goto("/transcribe");
     await chooseFile(page);
-    await page.getByRole("button", { name: "Start Transcription" }).click();
+    await page.getByRole("button", { name: "ابدأ التفريغ" }).click();
     await expect(page.getByText("مرحبا")).toBeVisible();
 
     // Soniox takes context biasing terms per dialect; sending the wrong one is
@@ -333,7 +333,7 @@ test.describe("running the engines", () => {
 
     await page.goto("/transcribe");
     await chooseFile(page);
-    await page.getByRole("button", { name: "Start Transcription" }).click();
+    await page.getByRole("button", { name: "ابدأ التفريغ" }).click();
 
     await expect(page.getByText("من ديبجرام")).toBeVisible();
   });
@@ -348,7 +348,7 @@ test.describe("running the engines", () => {
 
     await page.goto("/transcribe");
     await chooseFile(page);
-    await page.getByRole("button", { name: "Start Transcription" }).click();
+    await page.getByRole("button", { name: "ابدأ التفريغ" }).click();
 
     // Order matters and is not alphabetical: Soniox sits above Munsit in the
     // fallback chain.
@@ -361,7 +361,7 @@ test.describe("running the engines", () => {
 
     await page.goto("/transcribe");
     await chooseFile(page);
-    await page.getByRole("button", { name: "Start Transcription" }).click();
+    await page.getByRole("button", { name: "ابدأ التفريغ" }).click();
 
     // `Promise.allSettled`, not `Promise.all`. One dead engine must not take the
     // other three down with it.
@@ -381,7 +381,7 @@ test.describe("running the engines", () => {
 
     await page.goto("/transcribe");
     await chooseFile(page);
-    await page.getByRole("button", { name: "Start Transcription" }).click();
+    await page.getByRole("button", { name: "ابدأ التفريغ" }).click();
 
     await expect(page.getByText(/فشل التفريغ/)).toBeVisible();
   });
@@ -402,7 +402,7 @@ test.describe("running the engines", () => {
 
     await page.goto("/transcribe");
     await chooseFile(page);
-    await page.getByRole("button", { name: "Start Transcription" }).click();
+    await page.getByRole("button", { name: "ابدأ التفريغ" }).click();
 
     await expect(page.getByText(/فشل التفريغ/)).toBeVisible();
   });
@@ -437,7 +437,7 @@ test.describe("handing the transcripts to the analyser", () => {
 
     await page.goto("/transcribe");
     await chooseFile(page);
-    await page.getByRole("button", { name: "Start Transcription" }).click();
+    await page.getByRole("button", { name: "ابدأ التفريغ" }).click();
     await expect(page.getByText("من ديبجرام")).toBeVisible();
 
     // The disagreement between engines is the signal the analyser arbitrates
@@ -465,7 +465,7 @@ test.describe("handing the transcripts to the analyser", () => {
 
     await page.goto("/transcribe");
     await chooseFile(page);
-    await page.getByRole("button", { name: "Start Transcription" }).click();
+    await page.getByRole("button", { name: "ابدأ التفريغ" }).click();
     await expect(page.getByText("من ديبجرام")).toBeVisible();
 
     expect(await analyserBody(backend)).not.toHaveProperty("fanarTranscript");
@@ -481,7 +481,7 @@ test.describe("handing the transcripts to the analyser", () => {
 
     await page.goto("/transcribe");
     await chooseFile(page);
-    await page.getByRole("button", { name: "Start Transcription" }).click();
+    await page.getByRole("button", { name: "ابدأ التفريغ" }).click();
     await expect(page.getByText("من ديبجرام")).toBeVisible();
 
     expect(await analyserBody(backend)).not.toHaveProperty("sonioxTranscript");
@@ -503,7 +503,7 @@ test.describe("handing the transcripts to the analyser", () => {
 
     await page.goto("/transcribe");
     await chooseFile(page);
-    await page.getByRole("button", { name: "Start Transcription" }).click();
+    await page.getByRole("button", { name: "ابدأ التفريغ" }).click();
 
     await expect(page.getByText("How are you")).toBeVisible();
     await expect(page.getByText("Kuwaiti Arabic")).toBeVisible();
@@ -521,7 +521,7 @@ test.describe("handing the transcripts to the analyser", () => {
 
     await page.goto("/transcribe");
     await chooseFile(page);
-    await page.getByRole("button", { name: "Start Transcription" }).click();
+    await page.getByRole("button", { name: "ابدأ التفريغ" }).click();
 
     // The expensive part already succeeded. Losing the transcript because the
     // optional second stage failed would waste the ASR spend and the wait.
@@ -534,7 +534,7 @@ test.describe("handing the transcripts to the analyser", () => {
 
     await page.goto("/transcribe");
     await chooseFile(page, anAudioFile());
-    await page.getByRole("button", { name: "Start Transcription" }).click();
+    await page.getByRole("button", { name: "ابدأ التفريغ" }).click();
     await expect(page.getByText("مرحبا")).toBeVisible();
 
     // Frame extraction on an audio file has nothing to look at, and the call
@@ -552,7 +552,7 @@ test.describe("saving what came back", () => {
   async function transcribe(page: Page) {
     await page.goto("/transcribe");
     await chooseFile(page, anAudioFile("my-clip.mp3"));
-    await page.getByRole("button", { name: "Start Transcription" }).click();
+    await page.getByRole("button", { name: "ابدأ التفريغ" }).click();
     await expect(page.getByText("نص محفوظ")).toBeVisible();
   }
 

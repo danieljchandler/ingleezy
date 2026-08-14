@@ -42,7 +42,7 @@ export function XPDisplay({ compact = false, className }: XPDisplayProps) {
           </div>
         </div>
         <div className="text-right">
-          <p className="text-xs text-muted-foreground">Next level</p>
+          <p className="text-xs text-muted-foreground">المستوى الجاي</p>
           <p className="text-sm font-semibold text-primary">{progress.current}/{progress.needed}</p>
         </div>
       </div>

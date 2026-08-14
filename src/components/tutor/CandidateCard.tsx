@@ -93,7 +93,7 @@ export function CandidateCard({ candidate, audioUrl, onUpdate, onApprove, onReje
       {isLowConfidence && candidate.status === "pending" && (
         <div className="flex items-center gap-2 mb-3 px-2 py-1.5 rounded-lg bg-accent/10 border border-accent/30">
           <AlertTriangle className="h-4 w-4 text-accent shrink-0" />
-          <span className="text-xs text-accent">Low confidence — please verify</span>
+          <span className="text-xs text-accent">ثقة منخفضة — راجعها</span>
         </div>
       )}
 
@@ -120,7 +120,7 @@ export function CandidateCard({ candidate, audioUrl, onUpdate, onApprove, onReje
             value={candidate.word_english}
             onChange={(e) => onUpdate(candidate.id, { word_english: e.target.value })}
             className="text-sm text-muted-foreground"
-            placeholder="English meaning"
+            placeholder="المعنى بالعربي"
             disabled={isDecided}
           />
         </div>
@@ -163,7 +163,7 @@ export function CandidateCard({ candidate, audioUrl, onUpdate, onApprove, onReje
               size="icon"
               className="shrink-0 text-muted-foreground hover:text-destructive"
               onClick={() => onUpdate(candidate.id, { sentence_text: undefined, sentence_english: undefined, sentence_start_ms: undefined, sentence_end_ms: undefined })}
-              title="Remove sentence"
+              title="احذف الجملة"
             >
               <X className="h-3 w-3" />
             </Button>
@@ -175,14 +175,14 @@ export function CandidateCard({ candidate, audioUrl, onUpdate, onApprove, onReje
       <div className="flex items-center justify-between mt-3 pt-3 border-t border-border/50">
         <div className="flex items-center gap-2">
           <ImageIcon className="h-4 w-4 text-muted-foreground" />
-          <span className="text-xs text-muted-foreground">Add image</span>
+          <span className="text-xs text-muted-foreground">أضف صورة</span>
           <Switch
             checked={candidate.image_enabled}
             onCheckedChange={(checked) => onUpdate(candidate.id, { image_enabled: checked })}
             disabled={isDecided}
           />
           {!suggestImage && candidate.image_enabled && (
-            <span className="text-xs text-accent">Abstract word — image may not be helpful</span>
+            <span className="text-xs text-accent">كلمة مجرّدة — الصورة قد ما تفيد</span>
           )}
         </div>
 
@@ -208,10 +208,10 @@ export function CandidateCard({ candidate, audioUrl, onUpdate, onApprove, onReje
         )}
 
         {candidate.status === "approved" && (
-          <Badge className="bg-primary/10 text-primary border-0">Approved</Badge>
+          <Badge className="bg-primary/10 text-primary border-0">مقبولة</Badge>
         )}
         {candidate.status === "rejected" && (
-          <Badge variant="destructive" className="opacity-70">Rejected</Badge>
+          <Badge variant="destructive" className="opacity-70">مرفوضة</Badge>
         )}
       </div>
     </div>
