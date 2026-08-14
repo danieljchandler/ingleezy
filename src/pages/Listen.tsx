@@ -219,7 +219,7 @@ const Listen = () => {
                       activeCategory === c.id ? "border-primary bg-primary/10 text-primary" : "border-border hover:bg-accent/40"
                     }`}
                   >
-                    <span className="mr-1">{c.emoji}</span>{c.label}
+                    <span className="mr-1">{c.emoji}</span>{c.labelAr}
                   </button>
                 ))}
               </div>

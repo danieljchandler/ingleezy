@@ -21,30 +21,33 @@ import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { getTopicCategories } from '@/data/listenTopics';
 import { LEARNING_REASONS, reasonLabel, reasonIdFromLabel } from '@/data/learningReasons';
 
+// The learner's OWN dialect (their L1) — it shapes the Arabic scaffold, not
+// what they study. IDs are stored values; labels are what they see.
 const DIALECTS = [
-  { id: 'Gulf', label: 'Gulf Arabic', labelAr: 'خليجي', flag: '🌊' },
-  { id: 'Egyptian', label: 'Egyptian Arabic', labelAr: 'مصري', flag: '🇪🇬' },
-  { id: 'Saudi', label: 'Saudi', labelAr: 'سعودي', flag: '🇸🇦' },
-  { id: 'Kuwaiti', label: 'Kuwaiti', labelAr: 'كويتي', flag: '🇰🇼' },
-  { id: 'Emirati', label: 'Emirati', labelAr: 'إماراتي', flag: '🇦🇪' },
-  { id: 'Qatari', label: 'Qatari', labelAr: 'قطري', flag: '🇶🇦' },
-  { id: 'Bahraini', label: 'Bahraini', labelAr: 'بحريني', flag: '🇧🇭' },
-  { id: 'Omani', label: 'Omani', labelAr: 'عماني', flag: '🇴🇲' },
+  { id: 'Gulf', labelAr: 'خليجي', flag: '🌊' },
+  { id: 'Egyptian', labelAr: 'مصري', flag: '🇪🇬' },
+  { id: 'Saudi', labelAr: 'سعودي', flag: '🇸🇦' },
+  { id: 'Kuwaiti', labelAr: 'كويتي', flag: '🇰🇼' },
+  { id: 'Emirati', labelAr: 'إماراتي', flag: '🇦🇪' },
+  { id: 'Qatari', labelAr: 'قطري', flag: '🇶🇦' },
+  { id: 'Bahraini', labelAr: 'بحريني', flag: '🇧🇭' },
+  { id: 'Omani', labelAr: 'عماني', flag: '🇴🇲' },
 ];
 
+// English proficiency. IDs are stored values.
 const LEVELS = [
-  { id: 'beginner', label: 'Complete Beginner', cefr: 'Pre-A1', icon: '🌱' },
-  { id: 'basic', label: 'Basic', cefr: 'A1', icon: '📖' },
-  { id: 'elementary', label: 'Elementary', cefr: 'A2', icon: '🗣️' },
-  { id: 'intermediate', label: 'Intermediate', cefr: 'B1', icon: '💬' },
-  { id: 'advanced', label: 'Advanced', cefr: 'B2+', icon: '🎯' },
+  { id: 'beginner', label: 'مبتدئ تماماً', cefr: 'Pre-A1', icon: '🌱' },
+  { id: 'basic', label: 'أساسي', cefr: 'A1', icon: '📖' },
+  { id: 'elementary', label: 'ابتدائي', cefr: 'A2', icon: '🗣️' },
+  { id: 'intermediate', label: 'متوسط', cefr: 'B1', icon: '💬' },
+  { id: 'advanced', label: 'متقدم', cefr: 'B2+', icon: '🎯' },
 ];
 
 const GOALS = [
-  { id: 'casual', label: 'Casual', desc: '5 min/day', icon: '☕', reviewTarget: 20, xpTarget: 100 },
-  { id: 'regular', label: 'Regular', desc: '10 min/day', icon: '📚', reviewTarget: 50, xpTarget: 300 },
-  { id: 'serious', label: 'Serious', desc: '20 min/day', icon: '🔥', reviewTarget: 100, xpTarget: 500 },
-  { id: 'intensive', label: 'Intensive', desc: '30+ min/day', icon: '🚀', reviewTarget: 150, xpTarget: 750 },
+  { id: 'casual', label: 'خفيف', desc: '5 دقائق يومياً', icon: '☕', reviewTarget: 20, xpTarget: 100 },
+  { id: 'regular', label: 'منتظم', desc: '10 دقائق يومياً', icon: '📚', reviewTarget: 50, xpTarget: 300 },
+  { id: 'serious', label: 'جاد', desc: '20 دقيقة يومياً', icon: '🔥', reviewTarget: 100, xpTarget: 500 },
+  { id: 'intensive', label: 'مكثّف', desc: '+30 دقيقة يومياً', icon: '🚀', reviewTarget: 150, xpTarget: 750 },
 ];
 
 const Settings = () => {
@@ -63,8 +66,8 @@ const Settings = () => {
     try {
       await openCustomerPortal();
     } catch (e) {
-      toast.error('Unable to open subscription portal', {
-        description: e instanceof Error ? e.message : 'Please try again.',
+      toast.error('تعذّر فتح بوابة الاشتراك', {
+        description: e instanceof Error ? e.message : 'حاول من جديد.',
       });
     } finally {
       setOpeningPortal(false);
@@ -83,9 +86,9 @@ const Settings = () => {
           .update({ is_leech: false, lapses: 0 })
           .eq('user_id', user.id),
       ]);
-      toast.success('Cleared all leech flags.');
+      toast.success('أزيلت كل علامات التعثر.');
     } catch {
-      toast.error('Failed to clear leech flags');
+      toast.error('تعذّرت إزالة علامات التعثر');
     } finally {
       setClearingLeeches(false);
     }
@@ -158,11 +161,11 @@ const Settings = () => {
     if (!file || !user) return;
 
     if (!file.type.startsWith('image/')) {
-      toast.error('Please select an image file');
+      toast.error('اختر ملف صورة');
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
-      toast.error('Image must be smaller than 5MB');
+      toast.error('يجب أن تكون الصورة أصغر من 5MB');
       return;
     }
 
@@ -186,10 +189,10 @@ const Settings = () => {
       if (updErr) throw updErr;
 
       setAvatarUrl(newUrl);
-      toast.success('Profile picture updated!');
+      toast.success('تم تحديث صورة الملف الشخصي!');
     } catch (err: any) {
       console.error(err);
-      toast.error(err.message || 'Failed to upload picture');
+      toast.error(err.message || 'تعذّر رفع الصورة');
     } finally {
       setUploadingAvatar(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -232,10 +235,10 @@ const Settings = () => {
         } as any, { onConflict: 'user_id,week_start_date' });
       }
 
-      toast.success('Settings saved!');
+      toast.success('تم حفظ الإعدادات!');
     } catch (e) {
       console.error(e);
-      toast.error('Failed to save settings');
+      toast.error('تعذّر حفظ الإعدادات');
     } finally {
       setSaving(false);
     }
@@ -264,7 +267,7 @@ const Settings = () => {
           <Button variant="ghost" size="icon" onClick={() => navigate('/')}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="text-2xl font-bold font-heading text-foreground">Settings</h1>
+          <h1 className="text-2xl font-bold font-heading text-foreground">الإعدادات</h1>
         </div>
 
         <div className="space-y-8">
@@ -272,13 +275,13 @@ const Settings = () => {
           <section className="space-y-3">
             <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
               <User className="h-4 w-4" />
-              Profile
+              الملف الشخصي
             </div>
 
             <div className="flex items-center gap-4">
               <div className="relative">
                 <Avatar className="h-20 w-20 border-2 border-border">
-                  <AvatarImage src={avatarUrl || undefined} alt="Profile picture" />
+                  <AvatarImage src={avatarUrl || undefined} alt="صورة الملف الشخصي" />
                   <AvatarFallback className="text-lg font-semibold">
                     {(displayName || user?.email || '?').charAt(0).toUpperCase()}
                   </AvatarFallback>
@@ -305,19 +308,19 @@ const Settings = () => {
                   disabled={uploadingAvatar}
                 >
                   <Camera className="h-4 w-4 mr-2" />
-                  {avatarUrl ? 'Change picture' : 'Upload picture'}
+                  {avatarUrl ? 'غيّر الصورة' : 'ارفع صورة'}
                 </Button>
-                <p className="text-xs text-muted-foreground">JPG or PNG, up to 5MB</p>
+                <p className="text-xs text-muted-foreground">JPG أو PNG، حتى 5MB</p>
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="displayName" className="text-foreground">Display Name</Label>
+              <Label htmlFor="displayName" className="text-foreground">الاسم الظاهر</Label>
               <Input
                 id="displayName"
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
-                placeholder="Your display name"
+                placeholder="اسمك الظاهر"
                 maxLength={50}
               />
               <p className="text-xs text-muted-foreground">
@@ -330,7 +333,7 @@ const Settings = () => {
           <section className="space-y-3">
             <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
               <Globe2 className="h-4 w-4" />
-              Preferred Dialect
+              لهجتك
             </div>
             <div className="grid grid-cols-2 gap-2">
               {DIALECTS.map((d) => (
@@ -345,10 +348,7 @@ const Settings = () => {
                   )}
                 >
                   <span className="text-lg">{d.flag}</span>
-                  <div className="min-w-0">
-                    <span className="font-medium text-foreground text-sm block">{d.label}</span>
-                    <span className="text-xs text-muted-foreground" dir="rtl">{d.labelAr}</span>
-                  </div>
+                  <span className="font-medium text-foreground text-sm min-w-0">{d.labelAr}</span>
                   {dialect === d.id && <Check className="h-4 w-4 text-primary ml-auto shrink-0" />}
                 </button>
               ))}
@@ -359,7 +359,7 @@ const Settings = () => {
           <section className="space-y-3">
             <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
               <Target className="h-4 w-4" />
-              Proficiency Level
+              مستواك في الإنجليزية
             </div>
             <div className="space-y-2">
               {LEVELS.map((l) => (
@@ -386,7 +386,7 @@ const Settings = () => {
           <section className="space-y-3">
             <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
               <Target className="h-4 w-4" />
-              Weekly Goal
+              الهدف الأسبوعي
             </div>
             <div className="grid grid-cols-2 gap-2">
               {GOALS.map((g) => (
@@ -408,14 +408,14 @@ const Settings = () => {
             </div>
           </section>
 
-          {/* What you want Arabic for — feeds generated content */}
+          {/* What you want English for — feeds generated content */}
           <section className="space-y-3">
             <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
               <Compass className="h-4 w-4" />
-              What you're learning for
+              لماذا تتعلم الإنجليزية؟
             </div>
             <p className="text-xs text-muted-foreground">
-              Shapes the situations and topics in your stories, listening and drills.
+              يحدد المواقف والمواضيع في قصصك وتمارين الاستماع والتدريبات.
             </p>
             <div className="grid grid-cols-2 gap-2">
               {LEARNING_REASONS.map((r) => (
@@ -431,7 +431,7 @@ const Settings = () => {
                   )}
                 >
                   <span className="text-2xl">{r.icon}</span>
-                  <span className="font-semibold text-foreground text-sm">{r.label}</span>
+                  <span className="font-semibold text-foreground text-sm">{r.labelAr}</span>
                 </button>
               ))}
             </div>
@@ -452,7 +452,7 @@ const Settings = () => {
                     )}
                   >
                     <span>{c.emoji}</span>
-                    <span>{c.label}</span>
+                    <span>{c.labelAr}</span>
                   </button>
                 );
               })}
@@ -463,7 +463,7 @@ const Settings = () => {
           <section className="space-y-3">
             <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
               <Heart className="h-4 w-4" />
-              My Library
+              مكتبتي
             </div>
             <button
               onClick={() => navigate('/liked-videos')}
@@ -472,8 +472,8 @@ const Settings = () => {
               <div className="flex items-center gap-3">
                 <Heart className="h-5 w-5 text-primary fill-primary/30" />
                 <div className="text-left">
-                  <p className="font-medium text-foreground text-sm">Liked Videos</p>
-                  <p className="text-xs text-muted-foreground">Videos you've saved</p>
+                  <p className="font-medium text-foreground text-sm">فيديوهات أعجبتني</p>
+                  <p className="text-xs text-muted-foreground">الفيديوهات التي حفظتها</p>
                 </div>
               </div>
               <ChevronRight className="h-4 w-4 text-muted-foreground" />
@@ -490,13 +490,13 @@ const Settings = () => {
           <section className="space-y-3">
             <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
               <Info className="h-4 w-4" />
-              Feature Hints
+              تلميحات الميزات
             </div>
             <div className="flex items-center justify-between p-3 rounded-xl bg-card border border-border">
               <div className="min-w-0 pr-3">
-                <p className="font-medium text-foreground text-sm">Show feature hints</p>
+                <p className="font-medium text-foreground text-sm">أظهر تلميحات الميزات</p>
                 <p className="text-xs text-muted-foreground">
-                  Small (i) icons across the app explain what each feature does. Turn off once you know your way around.
+                  أيقونات (i) صغيرة في أنحاء التطبيق تشرح كل ميزة. أطفئها متى ألفت المكان.
                 </p>
               </div>
               <Switch checked={hintsEnabled} onCheckedChange={setHintsEnabled} />
@@ -507,38 +507,38 @@ const Settings = () => {
           <section className="space-y-3">
             <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
               <AlertTriangle className="h-4 w-4" />
-              Review Preferences
+              تفضيلات المراجعة
             </div>
             <div className="flex items-center justify-between p-3 rounded-xl bg-card border border-border">
               <div className="min-w-0 pr-3">
-                <p className="font-medium text-foreground text-sm">Flag difficult cards as "leeches"</p>
+                <p className="font-medium text-foreground text-sm">علّم البطاقات الصعبة كبطاقات متعثرة</p>
                 <p className="text-xs text-muted-foreground">
-                  After several misses, show an AI mnemonic and memory jingle to help you remember.
+                  بعد عدة أخطاء، تظهر وسيلة تذكّر وأنشودة من الذكاء الاصطناعي لتساعدك على الحفظ.
                 </p>
               </div>
               <Switch checked={leechEnabled} onCheckedChange={setLeechEnabled} />
             </div>
             <div className="flex items-center justify-between p-3 rounded-xl bg-card border border-border">
               <div className="min-w-0 pr-3">
-                <p className="font-medium text-foreground text-sm">Show related words from the same root</p>
+                <p className="font-medium text-foreground text-sm">أظهر الكلمات المرتبطة بالجذر نفسه</p>
                 <p className="text-xs text-muted-foreground">
-                  Under a card you've answered, quietly list the other words you know that are built
-                  from its Arabic root — كتب, كتاب, مكتب.
+                  تحت البطاقة التي أجبت عنها، تظهر بهدوء كلماتك الأخرى المبنية من الجذر
+                  العربي نفسه — كتب، كتاب، مكتب.
                 </p>
               </div>
               <Switch checked={rootFamiliesEnabled} onCheckedChange={setRootFamiliesEnabled} />
             </div>
             <div className="p-3 rounded-xl bg-card border border-border">
-              <p className="font-medium text-foreground text-sm">Review intensity</p>
+              <p className="font-medium text-foreground text-sm">كثافة المراجعة</p>
               <p className="text-xs text-muted-foreground mb-2">
-                How reliably you want to remember cards at review time. Lighter means fewer,
-                longer-spaced reviews and a little more forgetting; intense means the reverse.
+                إلى أي درجة تريد أن تتذكر البطاقات وقت المراجعة. الأخف يعني مراجعات أقل
+                وأبعد ونسياناً أكثر قليلاً؛ والمكثف عكس ذلك.
               </p>
-              <div className="flex gap-2" role="radiogroup" aria-label="Review intensity">
+              <div className="flex gap-2" role="radiogroup" aria-label="كثافة المراجعة">
                 {[
-                  { value: 0.85, label: 'Lighter' },
-                  { value: 0.9, label: 'Standard' },
-                  { value: 0.95, label: 'Intense' },
+                  { value: 0.85, label: 'أخف' },
+                  { value: 0.9, label: 'قياسي' },
+                  { value: 0.95, label: 'مكثف' },
                 ].map(({ value, label }) => (
                   <Button
                     key={value}
@@ -556,11 +556,11 @@ const Settings = () => {
             </div>
             <div className="flex items-center justify-between p-3 rounded-xl bg-card border border-border">
               <div className="min-w-0 pr-3">
-                <p className="font-medium text-foreground text-sm">Contribute my practice recordings</p>
+                <p className="font-medium text-foreground text-sm">ساهم بتسجيلات تدريبي</p>
                 <p className="text-xs text-muted-foreground">
-                  Keep my pronunciation clips (with the phrase I was saying and my score) to help
-                  improve Arabic speech recognition. Off by default; stored privately, never
-                  published, and you can turn this off anytime — see the Terms for details.
+                  احتفظ بمقاطع نطقي (مع العبارة التي كنت أقولها ونتيجتي) للمساعدة في تحسين
+                  التعرف على الكلام. مطفأ افتراضياً؛ يُخزَّن بخصوصية ولا يُنشر أبداً، ويمكنك
+                  إيقافه متى شئت — راجع الشروط للتفاصيل.
                 </p>
               </div>
               <Switch checked={contributeAudio} onCheckedChange={setContributeAudio} />
@@ -572,7 +572,7 @@ const Settings = () => {
               onClick={clearAllLeeches}
               disabled={clearingLeeches}
             >
-              {clearingLeeches ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Clear all leech flags'}
+              {clearingLeeches ? <Loader2 className="h-4 w-4 animate-spin" /> : 'أزل كل علامات التعثر'}
             </Button>
           </section>
 
@@ -582,15 +582,15 @@ const Settings = () => {
             <section className="space-y-3">
               <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
                 <Bell className="h-4 w-4" />
-                Reminders
+                التذكيرات
               </div>
               <div className="flex items-center justify-between gap-3 p-3 rounded-xl bg-card border border-border">
                 <div className="min-w-0">
-                  <p className="font-medium text-foreground text-sm">Review reminders</p>
+                  <p className="font-medium text-foreground text-sm">تذكيرات المراجعة</p>
                   <p className="text-xs text-muted-foreground">
                     {push.permission === 'denied'
-                      ? 'Blocked in your browser settings — allow notifications for this site to enable.'
-                      : 'One evening nudge when you have cards waiting.'}
+                      ? 'محظورة في إعدادات المتصفح — اسمح بالإشعارات لهذا الموقع لتفعيلها.'
+                      : 'تنبيه مسائي واحد عندما تكون لديك بطاقات بانتظارك.'}
                   </p>
                 </div>
                 <Switch
@@ -609,12 +609,12 @@ const Settings = () => {
           <section className="space-y-3">
             <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
               <Eye className="h-4 w-4" />
-              Privacy
+              الخصوصية
             </div>
             <div className="flex items-center justify-between p-3 rounded-xl bg-card border border-border">
               <div>
-                <p className="font-medium text-foreground text-sm">Show on Leaderboard</p>
-                <p className="text-xs text-muted-foreground">Others can see your name and XP</p>
+                <p className="font-medium text-foreground text-sm">أظهرني في لوحة الصدارة</p>
+                <p className="text-xs text-muted-foreground">يمكن للآخرين رؤية اسمك ونقاطك</p>
               </div>
               <Switch checked={showOnLeaderboard} onCheckedChange={setShowOnLeaderboard} />
             </div>
@@ -624,16 +624,16 @@ const Settings = () => {
           <section className="space-y-3">
             <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
               <Heart className="h-4 w-4" />
-              Subscription
+              الاشتراك
             </div>
             <div className="p-3 rounded-xl bg-card border border-border space-y-2">
               <p className="text-sm font-medium text-foreground">
-                {subscribed ? `Active plan: ${tier === 'allin' ? 'All-In' : 'Standard'}` : 'Free plan'}
+                {subscribed ? `الباقة الفعّالة: ${tier === 'allin' ? 'الشاملة' : 'القياسية'}` : 'الباقة المجانية'}
               </p>
               <p className="text-xs text-muted-foreground">
                 {subscribed
-                  ? 'Manage billing, update payment method, or cancel anytime.'
-                  : 'Upgrade to remove daily limits and unlock everything.'}
+                  ? 'أدر الفواتير أو حدّث طريقة الدفع أو ألغِ متى شئت.'
+                  : 'رقِّ اشتراكك لإزالة الحدود اليومية وفتح كل شيء.'}
               </p>
               {subscribed ? (
                 <Button
@@ -643,11 +643,11 @@ const Settings = () => {
                   onClick={handleManageSubscription}
                   disabled={openingPortal}
                 >
-                  {openingPortal ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Manage subscription'}
+                  {openingPortal ? <Loader2 className="h-4 w-4 animate-spin" /> : 'إدارة الاشتراك'}
                 </Button>
               ) : (
                 <Button variant="outline" size="sm" className="w-full" onClick={() => navigate('/pricing')}>
-                  View plans
+                  عرض الباقات
                 </Button>
               )}
             </div>
@@ -656,10 +656,10 @@ const Settings = () => {
           {/* Save + Sign Out */}
           <div className="space-y-3 pb-8">
             <Button onClick={save} disabled={saving} className="w-full h-11">
-              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save Changes'}
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : 'حفظ التغييرات'}
             </Button>
             <Button variant="outline" onClick={handleSignOut} className="w-full h-11 text-destructive hover:text-destructive">
-              Sign Out
+              تسجيل الخروج
             </Button>
           </div>
         </div>

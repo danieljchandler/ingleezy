@@ -8,6 +8,7 @@
 export interface TopicCategory {
   id: string;
   label: string;
+  labelAr: string;
   emoji: string;
   topics: string[];
 }
@@ -111,9 +112,10 @@ const SPORTS_TOPICS: Record<ListenDialect, string[]> = {
 };
 
 // Dialect-neutral — shared across all three.
-const SHARED_TOPICS: Record<string, { label: string; emoji: string; topics: string[] }> = {
+const SHARED_TOPICS: Record<string, { label: string; labelAr: string; emoji: string; topics: string[] }> = {
   tech: {
     label: "Tech & Future",
+    labelAr: "التقنية والمستقبل",
     emoji: "🚀",
     topics: [
       "How AI is changing the way we learn languages",
@@ -125,6 +127,7 @@ const SHARED_TOPICS: Record<string, { label: string; emoji: string; topics: stri
   },
   psychology: {
     label: "Mind & Psychology",
+    labelAr: "العقل وعلم النفس",
     emoji: "🧠",
     topics: [
       "Why we procrastinate even when it hurts us",
@@ -136,6 +139,7 @@ const SHARED_TOPICS: Record<string, { label: string; emoji: string; topics: stri
   },
   science: {
     label: "Science",
+    labelAr: "العلوم",
     emoji: "🔬",
     topics: [
       "Why the desert holds the secret to better farming",
@@ -147,6 +151,7 @@ const SHARED_TOPICS: Record<string, { label: string; emoji: string; topics: stri
   },
   business: {
     label: "Business & Money",
+    labelAr: "الأعمال والمال",
     emoji: "💼",
     topics: [
       "How a tea stall became a global brand",
@@ -158,6 +163,7 @@ const SHARED_TOPICS: Record<string, { label: string; emoji: string; topics: stri
   },
   ideas: {
     label: "Big Ideas",
+    labelAr: "أفكار كبيرة",
     emoji: "💡",
     topics: [
       "Does free will really exist?",
@@ -171,14 +177,14 @@ const SHARED_TOPICS: Record<string, { label: string; emoji: string; topics: stri
 
 function categoriesFor(dialect: ListenDialect): TopicCategory[] {
   return [
-    { id: "culture", label: "Culture & Identity", emoji: "🕌", topics: CULTURE_TOPICS[dialect] },
-    { id: "history", label: "History", emoji: "📜", topics: HISTORY_TOPICS[dialect] },
+    { id: "culture", label: "Culture & Identity", labelAr: "الثقافة والهوية", emoji: "🕌", topics: CULTURE_TOPICS[dialect] },
+    { id: "history", label: "History", labelAr: "التاريخ", emoji: "📜", topics: HISTORY_TOPICS[dialect] },
     { id: "tech", ...SHARED_TOPICS.tech },
     { id: "psychology", ...SHARED_TOPICS.psychology },
     { id: "science", ...SHARED_TOPICS.science },
     { id: "business", ...SHARED_TOPICS.business },
-    { id: "sports", label: "Sports", emoji: "⚽", topics: SPORTS_TOPICS[dialect] },
-    { id: "food", label: "Food & Travel", emoji: "🍽️", topics: FOOD_TOPICS[dialect] },
+    { id: "sports", label: "Sports", labelAr: "الرياضة", emoji: "⚽", topics: SPORTS_TOPICS[dialect] },
+    { id: "food", label: "Food & Travel", labelAr: "الطعام والسفر", emoji: "🍽️", topics: FOOD_TOPICS[dialect] },
     { id: "ideas", ...SHARED_TOPICS.ideas },
   ];
 }

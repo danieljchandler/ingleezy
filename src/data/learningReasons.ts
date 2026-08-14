@@ -11,19 +11,22 @@
 
 export interface LearningReason {
   id: string;
-  /** Stored on the profile and shown to the model, so keep it self-describing. */
+  /** Stored on the profile and shown to the model, so keep it self-describing
+   *  ENGLISH — the generators read it. labelAr/descAr are what the learner sees. */
   label: string;
   desc: string;
+  labelAr: string;
+  descAr: string;
   icon: string;
 }
 
 export const LEARNING_REASONS: LearningReason[] = [
-  { id: 'work', label: 'Work', desc: 'Colleagues, meetings, the office', icon: '💼' },
-  { id: 'family', label: 'Family & partner', desc: 'In-laws, relatives, home life', icon: '🏡' },
-  { id: 'living', label: 'Living there', desc: 'Shops, taxis, neighbours, admin', icon: '🧭' },
-  { id: 'travel', label: 'Travel', desc: 'Getting around and being polite', icon: '✈️' },
-  { id: 'faith', label: 'Faith & study', desc: 'Religious and scholarly contexts', icon: '📖' },
-  { id: 'media', label: 'Media & culture', desc: 'Shows, music, social media', icon: '🎬' },
+  { id: 'work', label: 'Work', desc: 'Colleagues, meetings, the office', labelAr: 'العمل', descAr: 'زملاء واجتماعات ومكتب', icon: '💼' },
+  { id: 'family', label: 'Family & partner', desc: 'In-laws, relatives, home life', labelAr: 'العائلة والشريك', descAr: 'أقارب وحياة البيت', icon: '🏡' },
+  { id: 'living', label: 'Living abroad', desc: 'Shops, transport, neighbours, admin', labelAr: 'العيش في الخارج', descAr: 'متاجر ومواصلات وجيران ومعاملات', icon: '🧭' },
+  { id: 'travel', label: 'Travel', desc: 'Getting around and being polite', labelAr: 'السفر', descAr: 'التنقل والمجاملات', icon: '✈️' },
+  { id: 'faith', label: 'Study & scholarship', desc: 'Academic and scholarly contexts', labelAr: 'الدراسة والعلم', descAr: 'سياقات أكاديمية وعلمية', icon: '📖' },
+  { id: 'media', label: 'Media & culture', desc: 'Shows, music, social media', labelAr: 'الإعلام والثقافة', descAr: 'مسلسلات وموسيقى وسوشيال ميديا', icon: '🎬' },
 ];
 
 /** The label stored on the profile, or null when nothing is selected. */

@@ -44,17 +44,17 @@ test.describe("loading the form", () => {
 
     await page.goto("/settings");
 
-    await expect(page.getByLabel(/display name/i)).toHaveValue("Sami");
-    await expect(page.getByRole("button", { name: /Egyptian Arabic/ })).toHaveClass(
+    await expect(page.getByLabel("الاسم الظاهر")).toHaveValue("Sami");
+    await expect(page.getByRole("button", { name: /مصري/ })).toHaveClass(
       /border-primary/,
     );
     // Stored as a label, selected by id — the round trip through
     // reasonIdFromLabel is what makes an edit possible rather than a re-pick.
-    await expect(page.getByRole("button", { name: "✈️ Travel" })).toHaveAttribute(
+    await expect(page.getByRole("button", { name: "✈️ السفر" })).toHaveAttribute(
       "aria-pressed",
       "true",
     );
-    await expect(page.getByRole("button", { name: /Food & Travel/ })).toHaveAttribute(
+    await expect(page.getByRole("button", { name: /الطعام والسفر/ })).toHaveAttribute(
       "aria-pressed",
       "true",
     );
@@ -79,8 +79,8 @@ test.describe("loading the form", () => {
 
     await page.goto("/settings");
 
-    await expect(page.getByLabel(/display name/i)).toHaveValue("");
-    await expect(page.getByRole("button", { name: /Gulf Arabic/ })).toHaveClass(/border-primary/);
+    await expect(page.getByLabel("الاسم الظاهر")).toHaveValue("");
+    await expect(page.getByRole("button", { name: /خليجي/ })).toHaveClass(/border-primary/);
   });
 
   test("sends a signed-out visitor to sign in", async ({ page, signInAs }) => {
@@ -100,14 +100,14 @@ test.describe("saving", () => {
   test("writes every edited field", async ({ page, db }) => {
     await page.goto("/settings");
 
-    await page.getByLabel(/display name/i).fill("Layla");
-    await page.getByRole("button", { name: /Egyptian Arabic/ }).click();
-    await page.getByRole("button", { name: /Elementary/ }).click();
-    await page.getByRole("button", { name: /Intensive/ }).click();
-    await page.getByRole("button", { name: /Work/ }).click();
-    await page.getByRole("button", { name: /^save changes$/i }).click();
+    await page.getByLabel("الاسم الظاهر").fill("Layla");
+    await page.getByRole("button", { name: /مصري/ }).click();
+    await page.getByRole("button", { name: /ابتدائي/ }).click();
+    await page.getByRole("button", { name: /مكثّف/ }).click();
+    await page.getByRole("button", { name: /العمل/ }).click();
+    await page.getByRole("button", { name: "حفظ التغييرات" }).click();
 
-    await expect(page.getByText(/settings saved/i)).toBeVisible();
+    await expect(page.getByText(/تم حفظ الإعدادات/)).toBeVisible();
 
     const profile = db.rows("profiles")[0];
     expect(profile.display_name).toBe("Layla");
@@ -121,9 +121,9 @@ test.describe("saving", () => {
     db.seed("profiles", [aProfile({ display_name: "Sami" })]);
     await page.goto("/settings");
 
-    await page.getByLabel(/display name/i).fill("   ");
-    await page.getByRole("button", { name: /^save changes$/i }).click();
-    await expect(page.getByText(/settings saved/i)).toBeVisible();
+    await page.getByLabel("الاسم الظاهر").fill("   ");
+    await page.getByRole("button", { name: "حفظ التغييرات" }).click();
+    await expect(page.getByText(/تم حفظ الإعدادات/)).toBeVisible();
 
     // The leaderboard falls back to the email prefix on null; an empty string
     // would render a nameless row instead.
@@ -133,9 +133,9 @@ test.describe("saving", () => {
   test("keeps the weekly targets in step with the goal", async ({ page, db }) => {
     await page.goto("/settings");
 
-    await page.getByRole("button", { name: /Intensive/ }).click();
-    await page.getByRole("button", { name: /^save changes$/i }).click();
-    await expect(page.getByText(/settings saved/i)).toBeVisible();
+    await page.getByRole("button", { name: /مكثّف/ }).click();
+    await page.getByRole("button", { name: "حفظ التغييرات" }).click();
+    await expect(page.getByText(/تم حفظ الإعدادات/)).toBeVisible();
 
     // Changing the goal here has to move the numbers the home ring measures
     // against, or the label and the progress bar disagree.
@@ -150,11 +150,11 @@ test.describe("saving", () => {
 
     await page
       .locator("section")
-      .filter({ hasText: "Show on Leaderboard" })
+      .filter({ hasText: "أظهرني في لوحة الصدارة" })
       .getByRole("switch")
       .click();
-    await page.getByRole("button", { name: /^save changes$/i }).click();
-    await expect(page.getByText(/settings saved/i)).toBeVisible();
+    await page.getByRole("button", { name: "حفظ التغييرات" }).click();
+    await expect(page.getByText(/تم حفظ الإعدادات/)).toBeVisible();
 
     // This one is a privacy setting: failing to persist it publishes a name the
     // learner asked to hide.
@@ -169,12 +169,12 @@ test.describe("saving", () => {
     expectConsoleErrors([/.*/]);
     await page.goto("/settings");
 
-    await page.getByLabel(/display name/i).fill("Layla");
+    await page.getByLabel("الاسم الظاهر").fill("Layla");
     db.failWrites("profiles", 500);
-    await page.getByRole("button", { name: /^save changes$/i }).click();
+    await page.getByRole("button", { name: "حفظ التغييرات" }).click();
 
-    await expect(page.getByText(/failed to save settings/i)).toBeVisible();
-    await expect(page.getByText(/settings saved/i)).toHaveCount(0);
+    await expect(page.getByText(/تعذّر حفظ الإعدادات/)).toBeVisible();
+    await expect(page.getByText(/تم حفظ الإعدادات/)).toHaveCount(0);
   });
 
   test("offers dialects the app cannot actually switch to", async ({ page, db }) => {
@@ -186,12 +186,12 @@ test.describe("saving", () => {
     // "Kuwaiti" saves, and every dialect-scoped query then falls back to Gulf
     // with nothing on screen to say so. Onboarding was fixed for exactly this;
     // Settings was not. This test fails when it is.
-    await expect(page.getByRole("button", { name: /Kuwaiti/ })).toBeVisible();
-    await expect(page.getByRole("button", { name: /Yemeni/ })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /كويتي/ })).toBeVisible();
+    await expect(page.getByRole("button", { name: /يمني/ })).toHaveCount(0);
 
-    await page.getByRole("button", { name: /Kuwaiti/ }).click();
-    await page.getByRole("button", { name: /^save changes$/i }).click();
-    await expect(page.getByText(/settings saved/i)).toBeVisible();
+    await page.getByRole("button", { name: /كويتي/ }).click();
+    await page.getByRole("button", { name: "حفظ التغييرات" }).click();
+    await expect(page.getByText(/تم حفظ الإعدادات/)).toBeVisible();
 
     expect(db.rows("profiles")[0].preferred_dialect).toBe("Kuwaiti");
   });
@@ -210,8 +210,8 @@ test.describe("review preferences", () => {
     db.seed("user_phrases", [aUserPhrase({ id: phraseId(0), is_leech: true, lapses: 8 })]);
 
     await page.goto("/settings");
-    await page.getByRole("button", { name: /clear all leech flags/i }).click();
-    await expect(page.getByText(/cleared all leech flags/i)).toBeVisible();
+    await page.getByRole("button", { name: "أزل كل علامات التعثر" }).click();
+    await expect(page.getByText(/أزيلت كل علامات التعثر/)).toBeVisible();
 
     // Both decks, and the lapse counters too — clearing the flag but leaving
     // lapses at 9 re-flags the card on the very next miss.
@@ -229,7 +229,7 @@ test.describe("review preferences", () => {
     // Row-scoped, not section-scoped: the Review Preferences section now also
     // carries the recording-contribution switch.
     const leechRow = () =>
-      page.locator("div.rounded-xl").filter({ hasText: /flag difficult cards/i });
+      page.locator("div.rounded-xl").filter({ hasText: /البطاقات الصعبة/ });
     const toggle = leechRow().getByRole("switch");
     await expect(toggle).toBeChecked();
     await toggle.click();
@@ -242,7 +242,7 @@ test.describe("review preferences", () => {
     await page.goto("/settings");
 
     const rootRow = () =>
-      page.locator("div.rounded-xl").filter({ hasText: /related words from the same root/i });
+      page.locator("div.rounded-xl").filter({ hasText: /الكلمات المرتبطة بالجذر/ });
     const toggle = rootRow().getByRole("switch");
     // On by default: the footnote only appears when a family actually exists,
     // so it is quiet until it has something to say.
@@ -260,9 +260,9 @@ test.describe("the subscription panel in settings", () => {
     db.seed("profiles", [aProfile()]);
 
     await page.goto("/settings");
-    await expect(page.getByText("Free plan")).toBeVisible();
+    await expect(page.getByText("الباقة المجانية")).toBeVisible();
 
-    await page.getByRole("button", { name: /view plans/i }).click();
+    await page.getByRole("button", { name: "عرض الباقات" }).click();
     await expect(page).toHaveURL(/\/pricing$/);
   });
 
@@ -272,9 +272,9 @@ test.describe("the subscription panel in settings", () => {
     backend.stubFunction("customer-portal", { url: "https://billing.stripe.com/session/abc" });
 
     await page.goto("/settings");
-    await expect(page.getByText(/Active plan: Standard/)).toBeVisible();
+    await expect(page.getByText(/الباقة الفعّالة: القياسية/)).toBeVisible();
 
-    await page.getByRole("button", { name: /manage subscription/i }).click();
+    await page.getByRole("button", { name: "إدارة الاشتراك" }).click();
 
     await expect
       .poll(() => openedUrls(page))
@@ -294,11 +294,11 @@ test.describe("the subscription panel in settings", () => {
     backend.stubFunctionFailure("customer-portal");
 
     await page.goto("/settings");
-    await page.getByRole("button", { name: /manage subscription/i }).click();
+    await page.getByRole("button", { name: "إدارة الاشتراك" }).click();
 
     // Silently doing nothing here reads as a broken button on the one screen
     // where a learner is trying to stop being charged.
-    await expect(page.getByText(/unable to open subscription portal/i)).toBeVisible();
+    await expect(page.getByText(/تعذّر فتح بوابة الاشتراك/)).toBeVisible();
   });
 });
 
