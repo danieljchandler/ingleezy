@@ -50,16 +50,19 @@ interface ClientSecretResponse {
   voice_remaining_seconds?: number | null;
 }
 
-const CLIENT_MSA_TOKENS: Record<string, string[]> = {
-  Gulf: ['الآن', 'لماذا', 'أين', 'ماذا', 'سوف', 'ليس', 'يريد', 'أريد', 'كيف', 'إزيك', 'دلوقتي', 'عايز'],
-  Egyptian: ['الآن', 'لماذا', 'أين', 'ماذا', 'سوف', 'ليس', 'يريد', 'أريد', 'كيف', 'شلونك', 'هالحين', 'يبي'],
-  Yemeni: ['الآن', 'لماذا', 'أين', 'ماذا', 'سوف', 'ليس', 'يريد', 'أريد', 'إزيك', 'دلوقتي', 'هالحين', 'يبي'],
-};
+const ARABIC_RE = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]+/g;
 
-function detectLiveLeaks(text: string, dialect: string): string[] {
+/**
+ * Drift, post-flip: the immersion partner slipping out of English.
+ *
+ * The practice call is the learner's English immersion — a tutor that answers
+ * in Arabic has stopped being practice. (Assistant mode is exempt: explaining
+ * in the learner's dialect is that persona's whole job, so the caller only
+ * runs this for practice calls.)
+ */
+function detectLiveLeaks(text: string): string[] {
   if (!text) return [];
-  const tokens = CLIENT_MSA_TOKENS[dialect] ?? CLIENT_MSA_TOKENS.Gulf;
-  return tokens.filter((t) => text.includes(t));
+  return (text.match(ARABIC_RE) ?? []).map((m) => m.trim()).filter(Boolean).slice(0, 5);
 }
 
 function extractClientSecret(payload: ClientSecretResponse): string {
@@ -84,7 +87,6 @@ export function useOpenAIRealtime(opts: Options = {}) {
   const localStreamRef = useRef<MediaStream | null>(null);
   const audioElRef = useRef<HTMLAudioElement | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
-  const dialectRef = useRef<string>("Gulf");
   const endingRef = useRef(false);
   const modeRef = useRef<"practice" | "assistant">("practice");
   // Set when the data channel opens; consumed (and cleared) by reportUsage so
@@ -116,8 +118,10 @@ export function useOpenAIRealtime(opts: Options = {}) {
 
   const finalizeTurn = useCallback((role: "user" | "assistant", id: string, finalText: string) => {
     let drift = false;
-    if (role === "assistant" && finalText) {
-      const leaks = detectLiveLeaks(finalText, dialectRef.current);
+    // Only the immersion partner is held to English; the assistant persona is
+    // meant to explain in dialect.
+    if (role === "assistant" && finalText && modeRef.current === "practice") {
+      const leaks = detectLiveLeaks(finalText);
       if (leaks.length > 0) {
         drift = true;
         opts.onDialectDrift?.(leaks);
@@ -261,7 +265,6 @@ export function useOpenAIRealtime(opts: Options = {}) {
 
   const start = useCallback(async ({ dialect, difficulty, topicHint, mode, context }: StartArgs) => {
     if (status === "connecting" || status === "live") return;
-    dialectRef.current = dialect || "Gulf";
     modeRef.current = mode === "assistant" ? "assistant" : "practice";
     setError(null);
     setStatus("connecting");

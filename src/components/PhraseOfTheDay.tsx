@@ -180,7 +180,7 @@ export const PhraseOfTheDay = () => {
             <Sparkles className="h-4 w-4 text-accent-foreground" />
           </div>
           <div>
-            <p className="font-bold text-foreground text-sm">Phrase of the Day</p>
+            <p className="font-bold text-foreground text-sm">عبارة اليوم</p>
             <p className="text-xs text-muted-foreground">English · glossed in {activeDialect}</p>
           </div>
         </div>

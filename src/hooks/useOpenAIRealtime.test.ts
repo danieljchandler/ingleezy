@@ -602,65 +602,67 @@ describe("the transcript", () => {
   });
 });
 
-describe("watching for dialect drift", () => {
-  it("flags MSA in the model's Gulf reply", async () => {
+describe("watching for the tutor leaving English", () => {
+  it("flags Arabic in the practice partner's reply", async () => {
     const onDialectDrift = vi.fn();
     const { result } = renderHook(() => useOpenAIRealtime({ onDialectDrift }));
     const pc = await startSession(result);
     goLive(pc);
 
     act(() => {
-      pc.deliver({ type: "response.output_audio_transcript.delta", item_id: "a1", delta: "ماذا" });
+      pc.deliver({ type: "response.output_audio_transcript.delta", item_id: "a1", delta: "شلونك" });
       pc.deliver({
         type: "response.output_audio_transcript.done",
         item_id: "a1",
-        transcript: "ماذا تريد الآن؟",
+        transcript: "شلونك اليوم?",
       });
     });
 
-    // The learner is here to practise Gulf. A model that slips into fusha is
-    // teaching the wrong thing convincingly, and they cannot tell.
-    expect(onDialectDrift).toHaveBeenCalledWith(expect.arrayContaining(["ماذا", "الآن"]));
+    // The practice call IS the learner's English immersion. A partner that
+    // answers in Arabic has quietly stopped being practice, and the learner —
+    // relieved to understand it — is the last person who will object.
+    expect(onDialectDrift).toHaveBeenCalledWith(
+      expect.arrayContaining([expect.stringContaining("شلونك")]),
+    );
     expect(result.current.turns[0].hasDialectDrift).toBe(true);
   });
 
-  it("flags another dialect's words, not just fusha", async () => {
+  it("lets an all-English reply through", async () => {
     const onDialectDrift = vi.fn();
     const { result } = renderHook(() => useOpenAIRealtime({ onDialectDrift }));
-    const pc = await startSession(result, { ...START, dialect: "Gulf" });
+    const pc = await startSession(result);
     goLive(pc);
 
     act(() => {
-      pc.deliver({ type: "response.output_audio_transcript.delta", item_id: "a1", delta: "إزيك" });
+      pc.deliver({ type: "response.output_audio_transcript.delta", item_id: "a1", delta: "How" });
       pc.deliver({
         type: "response.output_audio_transcript.done",
         item_id: "a1",
-        transcript: "إزيك دلوقتي",
+        transcript: "How was your weekend?",
       });
     });
 
-    // Egyptian in a Gulf session is as wrong as MSA, and harder for a learner
-    // to notice because it still sounds colloquial.
-    expect(onDialectDrift).toHaveBeenCalledWith(expect.arrayContaining(["إزيك", "دلوقتي"]));
+    expect(onDialectDrift).not.toHaveBeenCalled();
+    expect(result.current.turns[0].hasDialectDrift).toBe(false);
   });
 
-  it("allows the dialect's own words through", async () => {
+  it("leaves the bilingual assistant alone", async () => {
     const onDialectDrift = vi.fn();
     const { result } = renderHook(() => useOpenAIRealtime({ onDialectDrift }));
-    const pc = await startSession(result, { ...START, dialect: "Egyptian" });
+    const pc = await startSession(result, { ...START, mode: "assistant" });
     goLive(pc);
 
     act(() => {
-      pc.deliver({ type: "response.output_audio_transcript.delta", item_id: "a1", delta: "إزيك" });
+      pc.deliver({ type: "response.output_audio_transcript.delta", item_id: "a1", delta: "يعني" });
       pc.deliver({
         type: "response.output_audio_transcript.done",
         item_id: "a1",
-        transcript: "إزيك دلوقتي",
+        transcript: "يعني معناها كذا",
       });
     });
 
-    // The same two words are correct Egyptian; the list is per dialect for
-    // exactly this reason.
+    // Explaining in the learner's dialect is the assistant persona's whole
+    // job — flagging it would be flagging the feature.
     expect(onDialectDrift).not.toHaveBeenCalled();
     expect(result.current.turns[0].hasDialectDrift).toBe(false);
   });
@@ -679,8 +681,8 @@ describe("watching for dialect drift", () => {
       });
     });
 
-    // A learner reaching for the fusha they already know is the normal way in;
-    // flagging it would be correcting them for trying.
+    // A learner falling back on the Arabic they already have is the normal way
+    // in; flagging it would be correcting them for trying.
     expect(onDialectDrift).not.toHaveBeenCalled();
   });
 });

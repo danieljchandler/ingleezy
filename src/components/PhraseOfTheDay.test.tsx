@@ -351,7 +351,7 @@ describe("when there is no phrase", () => {
     // It is the first thing on the home screen. A failure here must not be the
     // first thing a learner sees, and the rest of the page is unaffected.
     await waitFor(() => expect(backend.callsTo("phrase-of-the-day").length).toBeGreaterThan(0));
-    expect(screen.getByText("Phrase of the Day")).toBeInTheDocument();
+    expect(screen.getByText("عبارة اليوم")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /save as flashcard/i })).not.toBeInTheDocument();
   });
 

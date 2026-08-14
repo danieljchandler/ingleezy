@@ -76,16 +76,16 @@ async function exitLive(page: Page) {
   // rather than waiting, so checking it on a page that has not finished
   // hydrating reports zero and silently skips the click — leaving the live
   // panel mounted over everything the test then looks for.
-  const toggle = page.getByRole("button", { name: /Exit live|Live voice/ });
+  const toggle = page.getByRole("button", { name: /إغلاق المباشر|مكالمة صوتية/ });
   await expect(toggle).toBeVisible();
-  if ((await toggle.textContent())?.includes("Exit live")) await toggle.click();
+  if ((await toggle.textContent())?.includes("إغلاق المباشر")) await toggle.click();
   // Assert on the panel unmounting rather than on the topic picker, which is
   // only there when the conversation is empty — this helper is also used on the
   // reload path, where a stored thread is what comes back.
-  await expect(page.getByRole("button", { name: /Exit live/ })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /إغلاق المباشر/ })).toHaveCount(0);
 }
 
-async function startTopic(page: Page, label = "Free Talk") {
+async function startTopic(page: Page, label = "حديث حر") {
   await page.getByRole("button", { name: label }).click();
 }
 
@@ -108,7 +108,7 @@ test.describe("starting a conversation", () => {
 
     // A blank chat box in a language the learner cannot yet write is a dead
     // start; the tutor opens the conversation instead.
-    for (const topic of ["Free Talk", "Coffee ☕", "Family 👨‍👩‍👧", "Work 💼", "Travel ✈️", "Food 🍽️"]) {
+    for (const topic of ["حديث حر", "قهوة ☕", "العائلة 👨‍👩‍👧", "العمل 💼", "السفر ✈️", "الطعام 🍽️"]) {
       await expect(page.getByRole("button", { name: topic })).toBeVisible();
     }
   });
@@ -142,7 +142,7 @@ test.describe("starting a conversation", () => {
   test("passes the chosen topic as a hint", async ({ page, backend }) => {
     await page.goto("/conversation");
     await exitLive(page);
-    await startTopic(page, "Coffee ☕");
+    await startTopic(page, "قهوة ☕");
 
     await expectSaid(page, OPENER);
     expect(backend.lastCallTo("free-chat")?.body).toMatchObject({
@@ -153,11 +153,11 @@ test.describe("starting a conversation", () => {
   test("sends no hint for free talk", async ({ page, backend }) => {
     await page.goto("/conversation");
     await exitLive(page);
-    await startTopic(page, "Free Talk");
+    await startTopic(page, "حديث حر");
 
     await expectSaid(page, OPENER);
     const body = backend.lastCallTo("free-chat")?.body as { topicHint?: string };
-    // "Free Talk" is the absence of a topic, not a topic called free talk.
+    // "حديث حر" is the absence of a topic, not a topic called free talk.
     expect(body.topicHint).toBeUndefined();
   });
 
@@ -346,7 +346,7 @@ test.describe("when the chat fails", () => {
     // failure it has to come back out, or the chat shows a spinner that never
     // resolves and the topic picker never returns.
     await expect(page.getByText("Tutor unavailable")).toBeVisible();
-    await expect(page.getByText("Pick a topic to start")).toBeVisible();
+    await expect(page.getByText("اختر موضوعاً للبدء")).toBeVisible();
   });
 
   test("names rate limiting as its own thing", async ({
@@ -376,7 +376,7 @@ test.describe("when the chat fails", () => {
 
     // 402 is an operator problem, not a learner one, and the message says so
     // rather than blaming the learner's connection.
-    await expect(page.getByText(/AI credits exhausted/)).toBeVisible();
+    await expect(page.getByText(/نفد رصيد الذكاء الاصطناعي/)).toBeVisible();
   });
 });
 
@@ -394,7 +394,7 @@ test.describe("what a learner can keep", () => {
     await startTopic(page);
     await expectSaid(page, OPENER);
 
-    await page.getByRole("button", { name: /Save phrase/ }).click();
+    await page.getByRole("button", { name: /احفظ العبارة/ }).click();
 
     await expect.poll(() => db.rows("user_phrases").length).toBe(1);
     // Saved with an empty English on purpose — the tutor's reply has no
@@ -418,11 +418,11 @@ test.describe("what a learner can keep", () => {
     await expectSaid(page, OPENER);
 
     db.failWrites("user_phrases", 400, { message: "هذه العبارة موجودة بالفعل" });
-    await page.getByRole("button", { name: /Save phrase/ }).click();
+    await page.getByRole("button", { name: /احفظ العبارة/ }).click();
 
     // The duplicate is detected server-side and reported in Arabic; the page
     // matches on that Arabic substring to tell "already there" from "failed".
-    await expect(page.getByText("Already saved")).toBeVisible();
+    await expect(page.getByText("محفوظة من قبل")).toBeVisible();
   });
 
   test("offers no save controls while the reply is still streaming", async ({
@@ -438,9 +438,9 @@ test.describe("what a learner can keep", () => {
 
     // Saving half a sentence would store half a sentence. The action row is
     // gated on `!streaming`.
-    await expect(page.getByRole("button", { name: /Save phrase/ })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /احفظ العبارة/ })).toHaveCount(0);
     await expectSaid(page, OPENER);
-    await expect(page.getByRole("button", { name: /Save phrase/ })).toBeVisible();
+    await expect(page.getByRole("button", { name: /احفظ العبارة/ })).toBeVisible();
   });
 
   test("plays replies through the multilingual English voice", async ({ page, backend }) => {
@@ -449,7 +449,7 @@ test.describe("what a learner can keep", () => {
     await startTopic(page);
     await expectSaid(page, OPENER);
 
-    await page.getByRole("button", { name: /Play/ }).click();
+    await page.getByRole("button", { name: /تشغيل/ }).click();
 
     // Replies are English now, so the dialect-routed Arabic voices are gone:
     // one multilingual provider covers the reply and any Arabic aside in a
@@ -473,7 +473,7 @@ test.describe("what a learner can keep", () => {
     await startTopic(page);
     await expectSaid(page, OPENER);
 
-    await page.getByRole("button", { name: /Play/ }).click();
+    await page.getByRole("button", { name: /تشغيل/ }).click();
 
     await expect.poll(() => backend.callsTo("elevenlabs-tts").length).toBe(1);
     expect(backend.callsTo("azure-tts")).toHaveLength(0);
@@ -494,7 +494,7 @@ test.describe("what a learner can keep", () => {
     await startTopic(page);
     await expectSaid(page, OPENER);
 
-    await page.getByRole("button", { name: /Play/ }).click();
+    await page.getByRole("button", { name: /تشغيل/ }).click();
 
     await expect.poll(() => backend.callsTo("elevenlabs-tts").length).toBe(1);
   });
@@ -529,12 +529,12 @@ test.describe("the conversation between visits", () => {
     await expectSaid(page, OPENER);
 
     await page.goto("/settings");
-    await page.getByRole("button", { name: /Egyptian Arabic/ }).click();
+    await page.getByRole("button", { name: /مصري/ }).click();
     // Settings stages the picker in form state; nothing is persisted until Save
     // Changes. Navigating away on the click alone leaves the app still in Gulf,
     // the thread is then correctly restored, and that looks exactly like the
     // drop failing.
-    await page.getByRole("button", { name: /^save changes$/i }).click();
+    await page.getByRole("button", { name: "حفظ التغييرات" }).click();
     await expect
       .poll(() => db.rows("profiles")[0]?.preferred_dialect)
       .toBe("Egyptian");
@@ -545,7 +545,7 @@ test.describe("the conversation between visits", () => {
     // The stored thread carries the dialect it was held in. Restoring a Gulf
     // conversation into an Egyptian session would have the tutor answer its own
     // earlier turns in the wrong dialect.
-    await expect(page.getByText("Pick a topic to start")).toBeVisible();
+    await expect(page.getByText("اختر موضوعاً للبدء")).toBeVisible();
   });
 
   test("is cleared by New", async ({ page }) => {
@@ -554,9 +554,9 @@ test.describe("the conversation between visits", () => {
     await startTopic(page);
     await expectSaid(page, OPENER);
 
-    await page.getByRole("button", { name: /New/ }).click();
+    await page.getByRole("button", { name: /جديد/ }).click();
 
-    await expect(page.getByText("Pick a topic to start")).toBeVisible();
+    await expect(page.getByText("اختر موضوعاً للبدء")).toBeVisible();
     await page.reload();
     // New clears the stored copy too, otherwise the next visit resurrects it.
     await expect(page.getByText("حالك", { exact: true })).toHaveCount(0);
@@ -598,8 +598,8 @@ test.describe("live voice", () => {
     // blocks as a foreign host — the same shape as a real network failure or a
     // rejected ephemeral key. What matters is that the panel leaves
     // "Connecting…" and says so.
-    await expect(page.getByText("Disconnected")).toBeVisible({ timeout: 15_000 });
-    await expect(page.getByText("Tap End to leave.")).toBeVisible();
+    await expect(page.getByText("انقطع الاتصال")).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText("اضغط «إنهاء المكالمة» للخروج.")).toBeVisible();
   });
 
   test("says why the token was refused", async ({ page, backend }) => {
@@ -619,12 +619,12 @@ test.describe("live voice", () => {
   test("hands the page back when live is exited", async ({ page }) => {
 
     await page.goto("/conversation");
-    await expect(page.getByText(/Disconnected|Connecting/)).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText(/انقطع الاتصال|جارٍ الاتصال/)).toBeVisible({ timeout: 15_000 });
 
-    await page.getByRole("button", { name: /Exit live/ }).click();
+    await page.getByRole("button", { name: /إغلاق المباشر/ }).click();
 
-    await expect(page.getByText("Pick a topic to start")).toBeVisible();
-    await expect(page.getByRole("button", { name: /Live voice/ })).toBeVisible();
+    await expect(page.getByText("اختر موضوعاً للبدء")).toBeVisible();
+    await expect(page.getByRole("button", { name: /مكالمة صوتية/ })).toBeVisible();
   });
 
   test("does not dial again once exited", async ({ page, backend }) => {

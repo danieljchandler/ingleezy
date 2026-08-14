@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2, Mic, MicOff, PhoneOff, Radio, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useOpenAIRealtime } from "@/hooks/useOpenAIRealtime";
-import { TappableArabicText } from "@/components/shared/TappableArabicText";
+import { TappableEnglishText } from "@/components/shared/TappableEnglishText";
 
 interface Props {
   dialect: string;
@@ -38,11 +38,11 @@ export function LiveVoicePanel({
 
   const statusLabel = useMemo(() => {
     switch (status) {
-      case "connecting": return "Connecting…";
-      case "live": return muted ? "Muted" : "Listening";
-      case "ending": return "Ending…";
-      case "error": return "Disconnected";
-      default: return "Idle";
+      case "connecting": return "جارٍ الاتصال…";
+      case "live": return muted ? "الميكروفون مكتوم" : "أستمع إليك";
+      case "ending": return "جارٍ الإنهاء…";
+      case "error": return "انقطع الاتصال";
+      default: return "في الانتظار";
     }
   }, [status, muted]);
 
@@ -65,7 +65,7 @@ export function LiveVoicePanel({
           ) : null}
           <span className="text-sm font-medium">{statusLabel}</span>
         </div>
-        <span className="text-xs text-muted-foreground">Live voice • {dialect}</span>
+        <span className="text-xs text-muted-foreground">مكالمة مباشرة • {dialect}</span>
       </div>
 
       {error && (
@@ -79,10 +79,10 @@ export function LiveVoicePanel({
         {turns.length === 0 ? (
           <p className="text-center text-xs text-muted-foreground py-8">
             {status === "live"
-              ? "Just start speaking…"
+              ? "ابدأ الكلام بالإنجليزية…"
               : status === "connecting"
-              ? "Setting up the call…"
-              : "Tap End to leave."}
+              ? "جارٍ تجهيز المكالمة…"
+              : "اضغط «إنهاء المكالمة» للخروج."}
           </p>
         ) : (
           turns.map((t, i) => (
@@ -97,17 +97,17 @@ export function LiveVoicePanel({
               )}
             >
               <div className="text-[10px] uppercase tracking-wide text-muted-foreground mb-0.5 flex items-center gap-1.5">
-                <span>{t.role === "user" ? "You" : "Tutor"}</span>
+                <span>{t.role === "user" ? "أنت" : "المعلّم"}</span>
                 {t.role === "assistant" && t.hasDialectDrift && (
                   <span className="rounded bg-amber-500/15 px-1.5 py-0.5 text-[9px] font-semibold text-amber-700 normal-case tracking-normal">
-                    used MSA
+                    تحدث بالعربية
                   </span>
                 )}
               </div>
               {t.role === "assistant" ? (
-                <TappableArabicText text={t.text} source="conversation-live" />
+                <TappableEnglishText text={t.text} source="conversation-live" />
               ) : (
-                <div dir="auto" className="leading-snug">{t.text}</div>
+                <div dir="auto" className="font-english leading-snug">{t.text}</div>
               )}
             </div>
           ))
@@ -121,7 +121,7 @@ export function LiveVoicePanel({
           size="icon"
           onClick={() => setMuted(!muted)}
           disabled={status !== "live"}
-          aria-label={muted ? "Unmute" : "Mute"}
+          aria-label={muted ? "إلغاء الكتم" : "كتم الميكروفون"}
         >
           {muted ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
         </Button>
@@ -131,12 +131,12 @@ export function LiveVoicePanel({
           className="gap-2"
         >
           <PhoneOff className="h-4 w-4" />
-          End call
+          إنهاء المكالمة
         </Button>
       </div>
 
       <p className="text-[11px] text-center text-muted-foreground">
-        Voice powered by ChatGPT Realtime. Best on Chrome or Edge.
+        الصوت عبر ChatGPT Realtime. الأفضل على Chrome أو Edge.
       </p>
     </div>
   );

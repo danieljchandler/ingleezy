@@ -3,13 +3,10 @@ import { useDialect } from "@/contexts/DialectContext";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserLevel } from "@/hooks/useUserLevel";
 import { useAddUserPhrase } from "@/hooks/useUserPhrases";
-import { useDisplayPrefs } from "@/hooks/useDisplayPrefs";
 import { AppShell } from "@/components/layout/AppShell";
 import { HomeButton } from "@/components/HomeButton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { TappableEnglishText } from "@/components/shared/TappableEnglishText";
 import { AskAISentence } from "@/components/shared/AskAISentence";
@@ -46,13 +43,15 @@ interface ChatMsg {
 const STORAGE_KEY = "ingleezy_freechat_v1";
 const STORAGE_TTL_MS = 4 * 60 * 60 * 1000;
 
+// Labels are what the learner reads; hints are the English prompt sent to the
+// tutor, so they stay English.
 const TOPIC_SEEDS = [
-  { key: "free", label: "Free Talk", hint: undefined },
-  { key: "coffee", label: "Coffee ☕", hint: "ordering at a café" },
-  { key: "family", label: "Family 👨‍👩‍👧", hint: "talking about family" },
-  { key: "work", label: "Work 💼", hint: "talking about work and daily routine" },
-  { key: "travel", label: "Travel ✈️", hint: "planning a trip" },
-  { key: "food", label: "Food 🍽️", hint: "favourite foods and dishes" },
+  { key: "free", label: "حديث حر", hint: undefined },
+  { key: "coffee", label: "قهوة ☕", hint: "ordering at a café" },
+  { key: "family", label: "العائلة 👨‍👩‍👧", hint: "talking about family" },
+  { key: "work", label: "العمل 💼", hint: "talking about work and daily routine" },
+  { key: "travel", label: "السفر ✈️", hint: "planning a trip" },
+  { key: "food", label: "الطعام 🍽️", hint: "favourite foods and dishes" },
 ] as const;
 
 /** Strip a leading [[CORRECTION]] line, returning {correction, body}. */
@@ -66,7 +65,6 @@ export default function ConversationSimulator() {
   const { activeDialect } = useDialect();
   const { user } = useAuth();
   const { placementLevel } = useUserLevel();
-  const { prefs, update: updatePrefs } = useDisplayPrefs();
   const addPhrase = useAddUserPhrase();
   const { toast } = useToast();
 
@@ -157,13 +155,13 @@ export default function ConversationSimulator() {
       } catch (err: any) {
         if (err?.name !== "AbortError") {
           console.error("free-chat stream error:", err);
-          let errMsg = err?.message ?? "Failed to reach AI";
+          let errMsg = err?.message ?? "تعذّر الوصول إلى الذكاء الاصطناعي";
           if (err instanceof SseChatError) {
             if (err.status === 429) errMsg = "Slow down — too many requests. Try again in a moment.";
-            else if (err.status === 402) errMsg = "AI credits exhausted. Add funds in workspace settings.";
-            else if (err.status === 401) errMsg = "Please sign in to chat.";
+            else if (err.status === 402) errMsg = "نفد رصيد الذكاء الاصطناعي.";
+            else if (err.status === 401) errMsg = "سجّل الدخول للدردشة.";
           }
-          toast({ title: "Chat error", description: errMsg, variant: "destructive" });
+          toast({ title: "خطأ في المحادثة", description: errMsg, variant: "destructive" });
         }
         setMessages((prev) => prev.filter((_, i) => !(i === prev.length - 1 && prev[i].streaming)));
       } finally {
@@ -220,13 +218,13 @@ export default function ConversationSimulator() {
           if (error) throw error;
           const text = (data as any)?.text?.trim();
           if (!text) {
-            toast({ title: "Couldn't hear that", description: "Try recording again.", variant: "destructive" });
+            toast({ title: "لم نسمع ذلك", description: "أعد التسجيل.", variant: "destructive" });
             return;
           }
           handleSend(text);
         } catch (err: any) {
           console.error("transcribe error:", err);
-          toast({ title: "Transcription failed", description: err?.message ?? "Try again", variant: "destructive" });
+          toast({ title: "تعذّر التفريغ", description: err?.message ?? "حاول من جديد", variant: "destructive" });
         } finally {
           setTranscribing(false);
         }
@@ -236,8 +234,8 @@ export default function ConversationSimulator() {
       setRecording(true);
     } catch (err: any) {
       toast({
-        title: "Microphone blocked",
-        description: "Allow mic access in your browser to use voice chat.",
+        title: "الميكروفون محجوب",
+        description: "اسمح بالوصول إلى الميكروفون في متصفحك لاستخدام المحادثة الصوتية.",
         variant: "destructive",
       });
       console.error(err);
@@ -308,7 +306,7 @@ export default function ConversationSimulator() {
   const savePhrase = useCallback(
     (arabic: string) => {
       if (!user) {
-        toast({ title: "Sign in to save phrases", variant: "destructive" });
+        toast({ title: "سجّل الدخول لحفظ العبارات", variant: "destructive" });
         return;
       }
       addPhrase.mutate(
@@ -318,10 +316,10 @@ export default function ConversationSimulator() {
           source: "free-chat",
         },
         {
-          onSuccess: () => toast({ title: "Saved as phrase", description: "Find it under My Phrases." }),
+          onSuccess: () => toast({ title: "حُفظت كعبارة", description: "تجدها في عباراتي." }),
           onError: (err: any) => {
             if (err?.message?.includes("موجودة")) {
-              toast({ title: "Already saved" });
+              toast({ title: "محفوظة من قبل" });
             } else {
               toast({ title: "Couldn't save phrase", variant: "destructive" });
             }
@@ -343,17 +341,17 @@ export default function ConversationSimulator() {
       </div>
 
       <div className="flex items-center justify-between mb-3">
-        <h1 className="text-lg font-semibold inline-flex items-center gap-2">Free Chat <InfoHint {...PAGE_HINTS["conversation"]} /></h1>
+        <h1 className="text-lg font-semibold inline-flex items-center gap-2">حديث حر <InfoHint {...PAGE_HINTS["conversation"]} /></h1>
         <div className="flex items-center gap-2">
           <Button
             variant={liveMode ? "default" : "outline"}
             size="sm"
             onClick={() => setLiveMode((v) => !v)}
             disabled={sending}
-            title="Real-time voice call with the tutor"
+            title="مكالمة صوتية مباشرة مع المعلّم"
           >
             <Mic className="h-4 w-4 mr-1" />
-            {liveMode ? "Exit live" : "🎙️ Live voice"}
+            {liveMode ? "إغلاق المباشر" : "🎙️ مكالمة صوتية"}
           </Button>
           <Button
             variant="ghost"
@@ -365,7 +363,7 @@ export default function ConversationSimulator() {
             }}
             disabled={messages.length === 0 || sending}
           >
-            <RotateCcw className="h-4 w-4 mr-1" /> New
+            <RotateCcw className="h-4 w-4 mr-1" /> جديد
           </Button>
         </div>
       </div>
@@ -384,30 +382,16 @@ export default function ConversationSimulator() {
         </div>
       )}
 
-      <div className="flex items-center gap-4 mb-3 text-xs text-muted-foreground">
-        <div className="flex items-center gap-1.5">
-          <Switch
-            id="show-en"
-            checked={prefs.showEnglish}
-            onCheckedChange={(v) => updatePrefs({ showEnglish: v })}
-          />
-          <Label htmlFor="show-en" className="cursor-pointer">English</Label>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <Switch
-            id="show-tash"
-            checked={prefs.showTashkil}
-            onCheckedChange={(v) => updatePrefs({ showTashkil: v })}
-          />
-          <Label htmlFor="show-tash" className="cursor-pointer">Tashkil</Label>
-        </div>
-      </div>
+      {/* The English / Tashkil switches lived here. Nothing on this page ever
+          read them — the chat renders English unconditionally — and post-flip
+          there is no Arabic in the conversation to vocalise. The same global
+          preferences are still editable in Settings → تفضيلات العرض. */}
 
       {/* Topic seeds — only show when chat is empty */}
       {messages.length === 0 && (
         <div className="rounded-xl border border-border bg-card/50 p-4 mb-4">
           <p className="text-sm font-medium mb-2 flex items-center gap-1.5">
-            <Sparkles className="h-4 w-4" /> Pick a topic to start
+            <Sparkles className="h-4 w-4" /> اختر موضوعاً للبدء
           </p>
           <div className="flex flex-wrap gap-2">
             {TOPIC_SEEDS.map((t) => (
@@ -423,8 +407,8 @@ export default function ConversationSimulator() {
             ))}
           </div>
           <p className="text-xs text-muted-foreground mt-3">
-            Your partner replies in English at your level ({cefr}); corrections come in {activeDialect}.
-            Tap any word to save it, or save the whole reply as a phrase.
+            يرد عليك شريكك بالإنجليزية على مستواك ({cefr})، وتأتيك التصحيحات بلهجتك.
+            المس أي كلمة لحفظها، أو احفظ الرد كاملاً كعبارة.
           </p>
         </div>
       )}
@@ -479,7 +463,7 @@ export default function ConversationSimulator() {
                       ) : (
                         <Volume2 className="h-3 w-3 mr-1" />
                       )}
-                      Play
+                      تشغيل
                     </Button>
                     <Button
                       variant="ghost"
@@ -487,7 +471,7 @@ export default function ConversationSimulator() {
                       className="h-7 px-2 text-xs"
                       onClick={() => savePhrase(m.content)}
                     >
-                      <BookmarkPlus className="h-3 w-3 mr-1" /> Save phrase
+                      <BookmarkPlus className="h-3 w-3 mr-1" /> احفظ العبارة
                     </Button>
                     <AskAISentence arabic={m.content} variant="chip" />
                   </div>
@@ -523,7 +507,7 @@ export default function ConversationSimulator() {
             onPointerUp={stopRecording}
             onPointerLeave={stopRecording}
             disabled={sending || transcribing}
-            title="Hold to speak"
+            title="اضغط مطولاً للتحدث"
           >
             {transcribing ? (
               <Loader2 className="h-4 w-4 animate-spin" />

@@ -22,9 +22,9 @@ export interface HomeSectionMeta {
 
 /** Default order — matches the historical layout. */
 export const HOME_SECTIONS: HomeSectionMeta[] = [
-  { id: "placement-banner", label: "Placement Quiz Prompt", description: "Shown until quiz completed", alwaysOn: true },
-  { id: "daily-queue", label: "Today's Queue", description: "Your daily tasks, goal ring, streak and stats", alwaysOn: true },
-  { id: "phrase-of-the-day", label: "Phrase of the Day", description: "Daily dialect phrase" },
+  { id: "placement-banner", label: "تنبيه اختبار المستوى", description: "يظهر حتى تكمل الاختبار", alwaysOn: true },
+  { id: "daily-queue", label: "مهام اليوم", description: "مهامك اليومية وحلقة الهدف والسلسلة والإحصاءات", alwaysOn: true },
+  { id: "phrase-of-the-day", label: "عبارة اليوم", description: "عبارة إنجليزية جديدة كل يوم" },
 ];
 
 const STORAGE_KEY = "ingleezy:home-layout:v1";

@@ -93,7 +93,7 @@ function render({ dialect = "Gulf", difficulty = "beginner", topicHint }: Option
 }
 
 /**
- * The tutor's turns render through TappableArabicText, which settles its own
+ * The tutor's turns render through TappableEnglishText, which settles its own
  * display preferences a tick after mounting. Without this the update lands in a
  * tree the test has finished with and React reports it as outside act().
  */
@@ -102,8 +102,8 @@ const settleTurns = () =>
     await new Promise((resolve) => setTimeout(resolve, 0));
   });
 
-const micButton = () => screen.getByRole("button", { name: /^(Mute|Unmute)$/ });
-const endButton = () => screen.getByRole("button", { name: /end call/i });
+const micButton = () => screen.getByRole("button", { name: /^(كتم الميكروفون|إلغاء الكتم)$/ });
+const endButton = () => screen.getByRole("button", { name: "إنهاء المكالمة" });
 
 describe("opening the call", () => {
   it("dials out as soon as the panel appears", () => {
@@ -151,17 +151,17 @@ describe("opening the call", () => {
   it("names the dialect being spoken", () => {
     render({ dialect: "Yemeni" });
 
-    expect(screen.getByText("Live voice • Yemeni")).toBeInTheDocument();
+    expect(screen.getByText("مكالمة مباشرة • Yemeni")).toBeInTheDocument();
   });
 });
 
 describe("saying what the mic is doing", () => {
   it.each([
-    ["connecting", "Connecting…"],
-    ["live", "Listening"],
-    ["ending", "Ending…"],
-    ["error", "Disconnected"],
-    ["idle", "Idle"],
+    ["connecting", "جارٍ الاتصال…"],
+    ["live", "أستمع إليك"],
+    ["ending", "جارٍ الإنهاء…"],
+    ["error", "انقطع الاتصال"],
+    ["idle", "في الانتظار"],
   ] as const)("reads %s as %s", (status, label) => {
     live.status = status;
     render();
@@ -169,14 +169,14 @@ describe("saying what the mic is doing", () => {
     expect(screen.getByText(label)).toBeInTheDocument();
   });
 
-  it("says Muted rather than Listening once the mic is off", () => {
+  it("says the mic is muted rather than listening once it is off", () => {
     live.muted = true;
     render();
 
     // The single most important word on the panel: it is the learner's only
     // evidence about whether the room is being heard.
-    expect(screen.getByText("Muted")).toBeInTheDocument();
-    expect(screen.queryByText("Listening")).toBeNull();
+    expect(screen.getByText("الميكروفون مكتوم")).toBeInTheDocument();
+    expect(screen.queryByText("أستمع إليك")).toBeNull();
   });
 
   it("pulses while it is actually listening", () => {
@@ -191,7 +191,7 @@ describe("saying what the mic is doing", () => {
     live.muted = true;
     render();
 
-    // A pulsing indicator over the word "Muted" is worse than no indicator.
+    // A pulsing indicator over "الميكروفون مكتوم" is worse than no indicator.
     const radio = document.querySelector(".lucide-radio")!.getAttribute("class")!;
     expect(radio).not.toContain("animate-pulse");
     expect(radio).toContain("text-muted-foreground");
@@ -215,7 +215,7 @@ describe("saying what the mic is doing", () => {
     live.error = "Microphone permission denied";
     render();
 
-    // "Disconnected" alone leaves the learner retrying a call that will fail the
+    // "انقطع الاتصال" alone leaves the learner retrying a call that will fail the
     // same way every time.
     expect(screen.getByText("Microphone permission denied")).toBeInTheDocument();
   });
@@ -225,7 +225,7 @@ describe("saying what the mic is doing", () => {
 
     // WebRTC support is uneven and a silent failure on an unsupported browser
     // reads as the feature being broken.
-    expect(screen.getByText(/Best on Chrome or Edge/)).toBeInTheDocument();
+    expect(screen.getByText(/الأفضل على Chrome أو Edge/)).toBeInTheDocument();
   });
 });
 
@@ -233,14 +233,14 @@ describe("the empty transcript", () => {
   it("invites the learner to speak once the call is up", () => {
     render();
 
-    expect(screen.getByText("Just start speaking…")).toBeInTheDocument();
+    expect(screen.getByText("ابدأ الكلام بالإنجليزية…")).toBeInTheDocument();
   });
 
   it("says it is still dialling", () => {
     live.status = "connecting";
     render();
 
-    expect(screen.getByText("Setting up the call…")).toBeInTheDocument();
+    expect(screen.getByText("جارٍ تجهيز المكالمة…")).toBeInTheDocument();
   });
 
   it("offers the way out when the call is not going to happen", () => {
@@ -249,7 +249,7 @@ describe("the empty transcript", () => {
 
     // Silence with no instruction is where a learner sits and waits for a call
     // that already failed.
-    expect(screen.getByText("Tap End to leave.")).toBeInTheDocument();
+    expect(screen.getByText("اضغط «إنهاء المكالمة» للخروج.")).toBeInTheDocument();
   });
 });
 
@@ -261,9 +261,9 @@ describe("the transcript", () => {
     ];
     render();
 
-    expect(screen.getByText("You")).toBeInTheDocument();
-    expect(screen.getByText("Tutor")).toBeInTheDocument();
-    expect(screen.queryByText("Just start speaking…")).toBeNull();
+    expect(screen.getByText("أنت")).toBeInTheDocument();
+    expect(screen.getByText("المعلّم")).toBeInTheDocument();
+    expect(screen.queryByText("ابدأ الكلام بالإنجليزية…")).toBeNull();
     await settleTurns();
   });
 
@@ -278,13 +278,13 @@ describe("the transcript", () => {
     );
   });
 
-  it("marks the tutor's turn when it slipped into MSA", async () => {
+  it("marks the tutor's turn when it slipped out of English", async () => {
     live.turns = [{ role: "assistant", text: "ماذا تريد", hasDialectDrift: true }];
     render();
 
     // The whole product is dialect. A tutor answering in MSA without saying so
     // teaches the learner the wrong register and they cannot tell.
-    expect(screen.getByText("used MSA")).toBeInTheDocument();
+    expect(screen.getByText("تحدث بالعربية")).toBeInTheDocument();
     await settleTurns();
   });
 
@@ -293,20 +293,20 @@ describe("the transcript", () => {
     render();
 
     // Drift is a fault in the tutor's output, not in the learner's speech.
-    expect(screen.queryByText("used MSA")).toBeNull();
+    expect(screen.queryByText("تحدث بالعربية")).toBeNull();
   });
 
-  it("makes the tutor's Arabic tappable but leaves the learner's alone", async () => {
+  it("makes the tutor's English tappable but leaves the learner's alone", async () => {
     live.turns = [
-      { role: "assistant", text: "أهلا" },
-      { role: "user", text: "مرحبا" },
+      { role: "assistant", text: "hello" },
+      { role: "user", text: "hi there" },
     ];
     render();
 
     // Looking a word up is what turns a call into a lesson — and it is only
-    // useful on words the learner did not already know how to say.
-    expect(screen.getByRole("button", { name: /Look up .*أهلا/ })).toBeInTheDocument();
-    expect(screen.getByText("مرحبا").getAttribute("dir")).toBe("auto");
+    // useful on the English being taught, not on what the learner already said.
+    expect(screen.getByRole("button", { name: /hello/ })).toBeInTheDocument();
+    expect(screen.getByText("hi there").getAttribute("dir")).toBe("auto");
     await settleTurns();
   });
 });
@@ -331,7 +331,7 @@ describe("the controls", () => {
     render();
 
     expect(document.querySelector(".lucide-mic-off")).not.toBeNull();
-    expect(micButton()).toHaveAccessibleName("Unmute");
+    expect(micButton()).toHaveAccessibleName("إلغاء الكتم");
   });
 
   it("will not let the mic be toggled before the call is up", () => {
@@ -339,7 +339,7 @@ describe("the controls", () => {
     render();
 
     // Muting a connection that has not opened yet would leave the panel saying
-    // "Muted" over a call that then starts unmuted.
+    // "الميكروفون مكتوم" over a call that then starts unmuted.
     expect(micButton()).toBeDisabled();
   });
 

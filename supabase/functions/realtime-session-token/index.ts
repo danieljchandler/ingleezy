@@ -5,7 +5,7 @@
 // The long-lived OPENAI_API_KEY never leaves the server.
 //
 // Per-dialect system prompt + voice is baked into the session config.
-import { getDialectIdentity, getDialectVocabRules, primeDialectPrompt, type Dialect } from "../_shared/dialectHelpers.ts";
+import { getDialectIdentity, getDialectLabel, getDialectVocabRules, primeDialectPrompt, type Dialect } from "../_shared/dialectHelpers.ts";
 import {
   enforceDailyCap,
   getSubscriptionTier,
@@ -25,11 +25,13 @@ import { getMonthUsedSeconds, recordVoiceUsage } from "../_shared/voiceBudget.ts
 const REALTIME_MODEL = "gpt-realtime-2";
 
 // OpenAI Realtime voices: alloy, ash, ballad, coral, echo, sage, shimmer, verse.
-// Mapping chosen to roughly match each dialect persona.
+// The tutor speaks ENGLISH now, so the voice is not a dialect persona — it is
+// kept keyed by dialect only so a learner hears a consistent partner rather
+// than a different one each session.
 const DIALECT_VOICE: Record<string, string> = {
-  Gulf: "ballad",     // warm, grounded — Khaliji vibe
-  Egyptian: "shimmer",// bright, expressive — Cairo storyteller
-  Yemeni: "verse",    // measured — Sana'ani host
+  Gulf: "ballad",     // warm, grounded
+  Egyptian: "shimmer",// bright, expressive
+  Yemeni: "verse",    // measured
 };
 
 function difficultyExtras(difficulty: string): string {
@@ -47,25 +49,22 @@ const MAX_TOPIC_CHARS = 200;
 const MAX_CONTEXT_CHARS = 1500;
 
 function buildSystemInstruction(dialect: Dialect, difficulty: string, topicHint?: string): string {
-  const identity = getDialectIdentity(dialect);
-  const vocab = getDialectVocabRules(dialect);
+  // No dialect identity/vocab block here: the immersion partner speaks only
+  // English. The dialect names the learner's L1 and shapes what transfer
+  // errors to expect, nothing the tutor says.
   const topic = topicHint?.trim()
     ? `Today's topic: ${topicHint.trim().slice(0, MAX_TOPIC_CHARS)}. Open by inviting them to talk about it in one short sentence.`
     : "Greet the student warmly and ask what they'd like to talk about — keep it to one short sentence.";
 
-  return `${identity}
-
-${vocab}
-
-You are a friendly conversation partner on a voice call. This is spoken dialogue — keep every turn short (1-2 sentences), natural, and back-and-forth. NEVER read long monologues. Wait for the student to respond.
+  return `You are a friendly ENGLISH conversation partner on a voice call with a native ${getDialectLabel(dialect)} speaker who is learning English. This is spoken dialogue — keep every turn short (1-2 sentences), natural, and back-and-forth. NEVER read long monologues. Wait for the student to respond.
 
 ${difficultyExtras(difficulty)}
 
 Strict rules:
-- Speak ONLY in your assigned dialect — no Modern Standard Arabic (فصحى).
-- Never switch to another Arabic dialect.
-- If the student speaks English, briefly answer in dialect and gently guide them back.
-- No transliteration, no Latin-letter pronunciation guides.
+- Speak ONLY English. This call is the student's immersion practice.
+- If the student speaks Arabic, answer in simple English and gently invite them back into English. Never hold the conversation in Arabic.
+- Expect the transfer errors ${getDialectLabel(dialect)} speakers make in English (dropped articles, missing copula, /p/ as /b/, epenthetic vowels in clusters, preposition transfer). Recast them naturally in your reply instead of stopping to correct.
+- No phonetic respellings — this is a voice call.
 - Use natural spoken intonation, not reading-aloud style.
 
 ${topic}`;
@@ -73,9 +72,10 @@ ${topic}`;
 
 /**
  * The Ask AI assistant persona: a bilingual tutor on a voice call rather than
- * an immersion partner. The dialect identity and vocab rulebook still apply to
- * every Arabic word it speaks, but explaining in English is allowed — that is
- * the whole point of an assistant the learner can ask "what does this mean?".
+ * an immersion partner. It explains in the learner's own dialect — that is the
+ * whole point of an assistant you can ask "what does this mean?" — while every
+ * English phrase it models is the thing being taught. The dialect identity and
+ * vocab rulebook govern the Arabic half of that.
  */
 function buildAssistantInstruction(
   dialect: Dialect,
@@ -95,16 +95,16 @@ ${context.slice(0, MAX_CONTEXT_CHARS)}
 
 ${vocab}
 
-You are Ingleezy's AI tutor on a live voice call. The learner may ask about anything they see in the app — a video, a story, a grammar point, a word — or about Arabic in general.
+You are Ingleezy's AI tutor on a live voice call, helping a native ${getDialectLabel(dialect)} speaker learn English. The learner may ask about anything they see in the app — a video, a story, a grammar point, a word — or about English in general.
 ${contextBlock}${learnerBlock ? `\n${learnerBlock}\n` : ""}
 Strict rules:
 - This is spoken dialogue — keep every turn short (1-2 sentences) and wait for the learner.
-- Explain in English when the learner asks in English or seems lost; model phrases in your assigned dialect.
+- EXPLAIN in your assigned dialect — that is the learner's language. Say the English phrase itself in English, then explain it in dialect.
 - Any Arabic you speak is ONLY your assigned dialect — no Modern Standard Arabic (فصحى), no other dialects.
-- No transliteration, no Latin-letter pronunciation guides — this is a voice call.
+- No phonetic respellings — this is a voice call.
 - Ground answers in what the learner is looking at when it's relevant.
 
-Open by asking, in one short sentence, what they'd like help with.`;
+Open by asking, in one short sentence and in dialect, what they'd like help with.`;
 }
 
 async function safetyIdentifier(userId: string): Promise<string> {
@@ -218,11 +218,21 @@ Deno.serve(async (req) => {
       instructions,
       audio: {
         input: {
-          transcription: {
-            model: "gpt-4o-transcribe",
-            language: "ar",
-            prompt: `Arabic speech. The learner may use ${dialect} dialect or English. Preserve Arabic dialect wording in the transcript.`,
-          },
+          // On a practice call the learner is speaking ENGLISH — that is the
+          // point of the call — so pinning the transcriber to Arabic would
+          // show their halting English back at them as garbled Arabic. The
+          // assistant persona is bilingual by design, so it is left to
+          // auto-detect rather than forced either way.
+          transcription: mode === "assistant"
+            ? {
+                model: "gpt-4o-transcribe",
+                prompt: `A learner of English whose first language is ${getDialectLabel(dialect)} Arabic. They may speak either language, or mix them.`,
+              }
+            : {
+                model: "gpt-4o-transcribe",
+                language: "en",
+                prompt: `English spoken by a native ${getDialectLabel(dialect)} Arabic speaker learning English. Transcribe what they actually said, including non-native pronunciation, rather than correcting it.`,
+              },
           turn_detection: {
             type: "semantic_vad",
           },

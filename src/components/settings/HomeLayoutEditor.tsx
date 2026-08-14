@@ -17,7 +17,7 @@ export const HomeLayoutEditor = () => {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
           <LayoutDashboard className="h-4 w-4" />
-          Home Layout
+          تخطيط الرئيسية
         </div>
         <Button
           variant="ghost"
@@ -26,11 +26,11 @@ export const HomeLayoutEditor = () => {
           className="text-xs text-muted-foreground"
         >
           <RotateCcw className="h-3 w-3 mr-1" />
-          Reset
+          إعادة الضبط
         </Button>
       </div>
       <p className="text-xs text-muted-foreground">
-        Toggle features on or off and reorder them on your home page.
+        شغّل الأقسام أو أطفئها، وأعد ترتيبها في صفحتك الرئيسية.
       </p>
 
       <div className="space-y-2">
@@ -56,7 +56,7 @@ export const HomeLayoutEditor = () => {
                     "hover:bg-muted hover:text-foreground transition-colors",
                     "disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-muted-foreground",
                   )}
-                  aria-label={`Move ${section.label} up`}
+                  aria-label={`حرّك ${section.label} للأعلى`}
                 >
                   <ChevronUp className="h-3.5 w-3.5" />
                 </button>
@@ -68,7 +68,7 @@ export const HomeLayoutEditor = () => {
                     "hover:bg-muted hover:text-foreground transition-colors",
                     "disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-muted-foreground",
                   )}
-                  aria-label={`Move ${section.label} down`}
+                  aria-label={`حرّك ${section.label} للأسفل`}
                 >
                   <ChevronDown className="h-3.5 w-3.5" />
                 </button>
@@ -80,7 +80,7 @@ export const HomeLayoutEditor = () => {
                 </p>
                 <p className="text-xs text-muted-foreground truncate">
                   {section.description}
-                  {section.alwaysOn && " · Always shown"}
+                  {section.alwaysOn && " · يظهر دائماً"}
                 </p>
               </div>
 
@@ -88,7 +88,7 @@ export const HomeLayoutEditor = () => {
                 checked={visible}
                 disabled={section.alwaysOn}
                 onCheckedChange={() => toggleSection(section.id)}
-                aria-label={`Toggle ${section.label}`}
+                aria-label={`أظهر أو أخفِ ${section.label}`}
               />
             </div>
           );

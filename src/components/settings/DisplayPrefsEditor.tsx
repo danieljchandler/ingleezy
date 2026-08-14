@@ -7,10 +7,10 @@ const ROWS: Array<{
   label: string;
   desc: string;
 }> = [
-  { key: "showArabic", label: "Dialect Arabic", desc: "Main text in your chosen dialect" },
-  { key: "showTashkil", label: "Tashkil (diacritics)", desc: "Show vowel marks on Arabic letters" },
-  { key: "showFormal", label: "Formal Arabic (MSA)", desc: "Standard Arabic version, when available" },
-  { key: "showEnglish", label: "English translation", desc: "English text, when available" },
+  { key: "showArabic", label: "شرح بلهجتك", desc: "المعنى بلهجتك التي اخترتها" },
+  { key: "showTashkil", label: "التشكيل", desc: "إظهار الحركات على الحروف العربية" },
+  { key: "showFormal", label: "الفصحى", desc: "نسخة بالعربية الفصحى، عند توفرها" },
+  { key: "showEnglish", label: "النص الإنجليزي", desc: "النص بالإنجليزية، عند توفره" },
 ];
 
 /**
@@ -25,11 +25,11 @@ export function DisplayPrefsEditor() {
     <section className="space-y-3">
       <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
         <Eye className="h-4 w-4" />
-        Display Preferences
+        تفضيلات العرض
       </div>
       <p className="text-xs text-muted-foreground">
-        Choose what to show by default across the app — lessons, transcripts, stories, and reading.
-        Turn things off to focus your memory.
+        اختر ما يظهر افتراضياً في التطبيق — الدروس والتفريغات والقصص والقراءة.
+        أطفئ ما لا تحتاجه لتجهد ذاكرتك أكثر.
       </p>
       <div className="space-y-2">
         {ROWS.map((row) => (

@@ -290,7 +290,7 @@ Deno.test("realtime-session-token opens on the topic when given one", async () =
   assertStringIncludes(bodies[mint] ?? "", "ordering coffee");
 });
 
-Deno.test("realtime-session-token asks for Arabic transcription of the learner", async () => {
+Deno.test("realtime-session-token transcribes the practice learner as English", async () => {
   const { bodies, calls } = await call(
     "realtime-session-token",
     { dialect: "Egyptian" },
@@ -299,11 +299,55 @@ Deno.test("realtime-session-token asks for Arabic transcription of the learner",
 
   const mint = calls.findIndex((url) => url.includes("client_secrets"));
   const sent = bodies[mint] ?? "";
-  // Without `language: "ar"` the transcriber guesses, and a learner's halting
-  // Arabic is routinely guessed as something else — the on-screen transcript
-  // then shows the wrong language back at them.
-  assertStringIncludes(sent, '"language":"ar"');
+  // The practice call IS the learner's English immersion, so they are speaking
+  // English. Left on Arabic (as it was pre-flip) their halting English comes
+  // back as garbled Arabic in the on-screen transcript.
+  assertStringIncludes(sent, '"language":"en"');
   assertStringIncludes(sent, "Egyptian");
+});
+
+Deno.test("realtime-session-token lets the bilingual assistant auto-detect", async () => {
+  const { bodies, calls } = await call(
+    "realtime-session-token",
+    { dialect: "Gulf", mode: "assistant" },
+    subscriber({ "api.openai.com": openai(), ...profileTables() }),
+  );
+
+  const mint = calls.findIndex((url) => url.includes("client_secrets"));
+  const sent = bodies[mint] ?? "";
+  // The assistant is explicitly bilingual — the learner may ask in dialect or
+  // in English — so forcing either language would mis-transcribe half of what
+  // they say.
+  assert(!sent.includes('"language"'));
+});
+
+Deno.test("realtime-session-token makes the practice partner speak English", async () => {
+  const { bodies, calls } = await call(
+    "realtime-session-token",
+    { dialect: "Gulf" },
+    subscriber({ "api.openai.com": openai() }),
+  );
+
+  const mint = calls.findIndex((url) => url.includes("client_secrets"));
+  const sent = bodies[mint] ?? "";
+  // Post-flip the immersion partner is an English speaker: it must not hold
+  // the conversation in the learner's dialect, and it should recast transfer
+  // errors rather than stopping to correct them.
+  assertStringIncludes(sent, "Speak ONLY English");
+  assertStringIncludes(sent, "Never hold the conversation in Arabic");
+});
+
+Deno.test("realtime-session-token makes the assistant explain in dialect", async () => {
+  const { bodies, calls } = await call(
+    "realtime-session-token",
+    { dialect: "Gulf", mode: "assistant" },
+    subscriber({ "api.openai.com": openai(), ...profileTables() }),
+  );
+
+  const mint = calls.findIndex((url) => url.includes("client_secrets"));
+  // The opposite persona: the point of an assistant is that it answers in the
+  // language the learner already has.
+  assertStringIncludes(bodies[mint] ?? "", "EXPLAIN in your assigned dialect");
 });
 
 Deno.test("realtime-session-token says so when its key is missing", async () => {
