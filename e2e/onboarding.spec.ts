@@ -14,22 +14,22 @@ import { aProfile, TEST_USER_ID } from "../src/test/support/factories";
  */
 
 const STEP_HEADINGS = {
-  welcome: /Welcome to Ingleezy/,
-  dialect: /Which dialect interests you\?/,
-  level: /What's your Arabic level\?/,
-  purpose: /What do you want to use Arabic for\?/,
-  goal: /Set your weekly goal/,
+  welcome: /مرحباً بك في إنجليزي/,
+  dialect: /ما لهجتك؟/,
+  level: /ما مستواك في الإنجليزية؟/,
+  purpose: /لماذا تريد تعلم الإنجليزية؟/,
+  goal: /حدد هدفك الأسبوعي/,
 } as const;
 
 /** Walk from the welcome screen to a named step, taking the defaults. */
 async function advanceTo(page: Page, target: keyof typeof STEP_HEADINGS) {
   const order = ["welcome", "dialect", "level", "purpose", "goal"] as const;
-  await page.getByRole("button", { name: /let's get started/i }).click();
+  await page.getByRole("button", { name: "لنبدأ" }).click();
 
   for (const step of order.slice(1, order.indexOf(target) + 1)) {
     await expect(page.getByRole("heading", { name: STEP_HEADINGS[step] })).toBeVisible();
     if (step === target) return;
-    await page.getByRole("button", { name: /^continue$/i }).click();
+    await page.getByRole("button", { name: "متابعة", exact: true }).click();
   }
 }
 
@@ -46,22 +46,22 @@ test.describe("onboarding", () => {
     await page.goto("/onboarding");
 
     await expect(page.getByRole("heading", { name: STEP_HEADINGS.welcome })).toBeVisible();
-    await expect(page.getByText("Step 1 of 5")).toBeVisible();
+    await expect(page.getByText("الخطوة 1 من 5")).toBeVisible();
   });
 
   test("walks forward through all five steps", async ({ page }) => {
     await page.goto("/onboarding");
 
     await advanceTo(page, "goal");
-    await expect(page.getByText("Step 5 of 5")).toBeVisible();
+    await expect(page.getByText("الخطوة 5 من 5")).toBeVisible();
   });
 
   test("goes back without losing the choice already made", async ({ page }) => {
     await page.goto("/onboarding");
     await advanceTo(page, "dialect");
 
-    await page.getByRole("button", { name: /Egyptian Arabic/ }).click();
-    await page.getByRole("button", { name: /^continue$/i }).click();
+    await page.getByRole("button", { name: /مصري/ }).click();
+    await page.getByRole("button", { name: "متابعة", exact: true }).click();
     await expect(page.getByRole("heading", { name: STEP_HEADINGS.level })).toBeVisible();
 
     // The back control is icon-only, so it is addressed by position rather than
@@ -71,7 +71,7 @@ test.describe("onboarding", () => {
     await expect(page.getByRole("heading", { name: STEP_HEADINGS.dialect })).toBeVisible();
     // Still selected — a wizard that resets on back makes the whole flow
     // impossible to correct.
-    await expect(page.getByRole("button", { name: /Egyptian Arabic/ })).toHaveClass(
+    await expect(page.getByRole("button", { name: /مصري/ })).toHaveClass(
       /border-primary/,
     );
   });
@@ -83,26 +83,26 @@ test.describe("onboarding", () => {
     // DialectContext recognises Gulf, Egyptian and Yemeni and silently falls
     // back to Gulf for anything else — an extra option here would be a picker
     // that appears to work and does nothing.
-    await expect(page.getByRole("button", { name: /Gulf Arabic/ })).toBeVisible();
-    await expect(page.getByRole("button", { name: /Egyptian Arabic/ })).toBeVisible();
-    await expect(page.getByRole("button", { name: /Yemeni Arabic/ })).toBeVisible();
+    await expect(page.getByRole("button", { name: /خليجي/ })).toBeVisible();
+    await expect(page.getByRole("button", { name: /مصري/ })).toBeVisible();
+    await expect(page.getByRole("button", { name: /يمني/ })).toBeVisible();
   });
 
   test("saves every answer to the profile and lands on the home page", async ({ page, db }) => {
     await page.goto("/onboarding");
 
     await advanceTo(page, "dialect");
-    await page.getByRole("button", { name: /Yemeni Arabic/ }).click();
-    await page.getByRole("button", { name: /^continue$/i }).click();
+    await page.getByRole("button", { name: /يمني/ }).click();
+    await page.getByRole("button", { name: "متابعة", exact: true }).click();
 
-    await page.getByRole("button", { name: /Intermediate/ }).first().click();
-    await page.getByRole("button", { name: /^continue$/i }).click();
+    await page.getByRole("button", { name: /متوسط/ }).first().click();
+    await page.getByRole("button", { name: "متابعة", exact: true }).click();
 
-    await page.getByRole("button", { name: /Family & partner/ }).click();
-    await page.getByRole("button", { name: /^continue$/i }).click();
+    await page.getByRole("button", { name: /العائلة والشريك/ }).click();
+    await page.getByRole("button", { name: "متابعة", exact: true }).click();
 
-    await page.getByRole("button", { name: /Serious/ }).click();
-    await page.getByRole("button", { name: /start learning/i }).click();
+    await page.getByRole("button", { name: /جاد/ }).click();
+    await page.getByRole("button", { name: /ابدأ التعلم/ }).click();
 
     await expect(page).toHaveURL(/\/$/);
 
@@ -120,8 +120,8 @@ test.describe("onboarding", () => {
     await page.goto("/onboarding");
     await advanceTo(page, "goal");
 
-    await page.getByRole("button", { name: /Casual/ }).click();
-    await page.getByRole("button", { name: /start learning/i }).click();
+    await page.getByRole("button", { name: /خفيف/ }).click();
+    await page.getByRole("button", { name: /ابدأ التعلم/ }).click();
     await expect(page).toHaveURL(/\/$/);
 
     // The labels are prose; these numbers are what the goal ring on the home
@@ -136,7 +136,7 @@ test.describe("onboarding", () => {
   test("dates the weekly goal from the start of this week", async ({ page, db }) => {
     await page.goto("/onboarding");
     await advanceTo(page, "goal");
-    await page.getByRole("button", { name: /start learning/i }).click();
+    await page.getByRole("button", { name: /ابدأ التعلم/ }).click();
     await expect(page).toHaveURL(/\/$/);
 
     // Upserted on (user_id, week_start_date), so a wrong date silently creates a
@@ -152,11 +152,11 @@ test.describe("onboarding", () => {
     await page.goto("/onboarding");
     await advanceTo(page, "purpose");
 
-    await page.getByRole("button", { name: /Food & Travel/ }).click();
-    await page.getByRole("button", { name: /Sports/ }).click();
+    await page.getByRole("button", { name: /الطعام والسفر/ }).click();
+    await page.getByRole("button", { name: /الرياضة/ }).click();
 
-    await page.getByRole("button", { name: /^continue$/i }).click();
-    await page.getByRole("button", { name: /start learning/i }).click();
+    await page.getByRole("button", { name: "متابعة", exact: true }).click();
+    await page.getByRole("button", { name: /ابدأ التعلم/ }).click();
     await expect(page).toHaveURL(/\/$/);
 
     // The ids, not the display labels — the Listen catalogue and the story
@@ -168,14 +168,14 @@ test.describe("onboarding", () => {
     await page.goto("/onboarding");
     await advanceTo(page, "purpose");
 
-    const sports = page.getByRole("button", { name: /Sports/ });
+    const sports = page.getByRole("button", { name: /الرياضة/ });
     await sports.click();
     await expect(sports).toHaveAttribute("aria-pressed", "true");
     await sports.click();
     await expect(sports).toHaveAttribute("aria-pressed", "false");
 
-    await page.getByRole("button", { name: /^continue$/i }).click();
-    await page.getByRole("button", { name: /start learning/i }).click();
+    await page.getByRole("button", { name: "متابعة", exact: true }).click();
+    await page.getByRole("button", { name: /ابدأ التعلم/ }).click();
     await expect(page).toHaveURL(/\/$/);
 
     expect(db.rows("profiles")[0].interests).toEqual([]);
@@ -184,7 +184,7 @@ test.describe("onboarding", () => {
   test("purpose and topics are both optional", async ({ page, db }) => {
     await page.goto("/onboarding");
     await advanceTo(page, "goal");
-    await page.getByRole("button", { name: /start learning/i }).click();
+    await page.getByRole("button", { name: /ابدأ التعلم/ }).click();
 
     await expect(page).toHaveURL(/\/$/);
     expect(db.rows("profiles")[0].learning_reason).toBeNull();
@@ -202,11 +202,11 @@ test.describe("onboarding", () => {
     await advanceTo(page, "goal");
 
     db.failWrites("profiles", 500);
-    await page.getByRole("button", { name: /start learning/i }).click();
+    await page.getByRole("button", { name: /ابدأ التعلم/ }).click();
 
     // Navigating away on a failed save would strand the learner with an
     // unfinished profile and no way back to the form.
-    await expect(page.getByText(/failed to save preferences/i)).toBeVisible();
+    await expect(page.getByText(/تعذّر حفظ التفضيلات/)).toBeVisible();
     await expect(page).toHaveURL(/\/onboarding$/);
   });
 
@@ -400,7 +400,7 @@ test.describe("the placement quiz", () => {
       await page.goto("/placement");
       await completeQuiz(page);
 
-      await page.getByRole("button", { name: /start learning/i }).click();
+      await page.getByRole("button", { name: /ابدأ التعلم/ }).click();
       await expect(page).toHaveURL(/\/$/);
 
       const profile = db.rows("profiles")[0];

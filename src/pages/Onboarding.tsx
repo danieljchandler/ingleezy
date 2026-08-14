@@ -31,24 +31,24 @@ const STEPS: Step[] = ['welcome', 'dialect', 'level', 'purpose', 'goal'];
 // Gulf, which previously happened for every Saudi/Kuwaiti/Emirati/etc. pick,
 // while Egyptian and Yemeni (real, supported dialects) weren't offered at all.
 const DIALECTS = [
-  { id: 'Gulf', label: 'Gulf Arabic', labelAr: 'خليجي', desc: 'Shared across all GCC countries', flag: '🌊' },
-  { id: 'Egyptian', label: 'Egyptian Arabic', labelAr: 'مصري', desc: 'The most widely understood dialect', flag: '🇪🇬' },
-  { id: 'Yemeni', label: 'Yemeni Arabic', labelAr: 'يمني', desc: 'Yemeni expressions', flag: '🇾🇪' },
+  { id: 'Gulf', labelAr: 'خليجي', desc: 'لهجة أهل الخليج', flag: '🌊' },
+  { id: 'Egyptian', labelAr: 'مصري', desc: 'اللهجة المصرية', flag: '🇪🇬' },
+  { id: 'Yemeni', labelAr: 'يمني', desc: 'اللهجة اليمنية', flag: '🇾🇪' },
 ];
 
 const LEVELS = [
-  { id: 'beginner', label: 'Complete Beginner', desc: "I don't know any Arabic", icon: '🌱', cefr: 'Pre-A1' },
-  { id: 'basic', label: 'Basic', desc: 'I know some words & greetings', icon: '📖', cefr: 'A1' },
-  { id: 'elementary', label: 'Elementary', desc: 'I can make basic sentences', icon: '🗣️', cefr: 'A2' },
-  { id: 'intermediate', label: 'Intermediate', desc: 'I can hold simple conversations', icon: '💬', cefr: 'B1' },
-  { id: 'advanced', label: 'Advanced', desc: 'I understand most spoken Arabic', icon: '🎯', cefr: 'B2+' },
+  { id: 'beginner', label: 'مبتدئ تماماً', desc: 'لا أعرف أي إنجليزية', icon: '🌱', cefr: 'Pre-A1' },
+  { id: 'basic', label: 'أساسي', desc: 'أعرف بعض الكلمات والتحيات', icon: '📖', cefr: 'A1' },
+  { id: 'elementary', label: 'ابتدائي', desc: 'أستطيع تكوين جمل بسيطة', icon: '🗣️', cefr: 'A2' },
+  { id: 'intermediate', label: 'متوسط', desc: 'أستطيع إجراء محادثات بسيطة', icon: '💬', cefr: 'B1' },
+  { id: 'advanced', label: 'متقدم', desc: 'أفهم معظم الإنجليزية المحكية', icon: '🎯', cefr: 'B2+' },
 ];
 
 const GOALS = [
-  { id: 'casual', label: 'Casual', desc: '5 min/day · 2-3 days/week', icon: '☕', reviewTarget: 20, xpTarget: 100 },
-  { id: 'regular', label: 'Regular', desc: '10 min/day · 4-5 days/week', icon: '📚', reviewTarget: 50, xpTarget: 300 },
-  { id: 'serious', label: 'Serious', desc: '20 min/day · every day', icon: '🔥', reviewTarget: 100, xpTarget: 500 },
-  { id: 'intensive', label: 'Intensive', desc: '30+ min/day · every day', icon: '🚀', reviewTarget: 150, xpTarget: 750 },
+  { id: 'casual', label: 'خفيف', desc: '5 دقائق يومياً · 2-3 أيام أسبوعياً', icon: '☕', reviewTarget: 20, xpTarget: 100 },
+  { id: 'regular', label: 'منتظم', desc: '10 دقائق يومياً · 4-5 أيام أسبوعياً', icon: '📚', reviewTarget: 50, xpTarget: 300 },
+  { id: 'serious', label: 'جاد', desc: '20 دقيقة يومياً · كل يوم', icon: '🔥', reviewTarget: 100, xpTarget: 500 },
+  { id: 'intensive', label: 'مكثّف', desc: '+30 دقيقة يومياً · كل يوم', icon: '🚀', reviewTarget: 150, xpTarget: 750 },
 ];
 
 
@@ -133,11 +133,11 @@ const Onboarding = () => {
       }
 
       markTourPending();
-      toast.success('Welcome to Ingleezy! 🎉');
+      toast.success('أهلاً بك في إنجليزي! 🎉');
       navigate('/');
     } catch (e) {
       console.error(e);
-      toast.error('Failed to save preferences');
+      toast.error('تعذّر حفظ التفضيلات');
     } finally {
       setSaving(false);
     }
@@ -165,7 +165,7 @@ const Onboarding = () => {
             />
           </div>
           <p className="text-xs text-muted-foreground mt-2 text-center">
-            Step {currentStepIndex + 1} of {STEPS.length}
+            الخطوة {currentStepIndex + 1} من {STEPS.length}
           </p>
         </div>
 
@@ -174,33 +174,33 @@ const Onboarding = () => {
           <div className="text-center space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
             <img src={lahjaIcon} alt="Ingleezy" className="h-20 w-20 mx-auto" />
             <div>
-              <h1 className="text-3xl font-bold font-heading text-foreground mb-3" dir="rtl">
-                !أهلاً وسهلاً
+              <h1 className="text-3xl font-bold font-heading text-foreground mb-3">
+                أهلاً وسهلاً!
               </h1>
               <h2 className="text-xl font-semibold text-foreground mb-2">
-                Welcome to Ingleezy
+                مرحباً بك في إنجليزي
               </h2>
               <p className="text-muted-foreground leading-relaxed">
-                Learn Arabic dialects through real conversations, videos, and interactive lessons.
-                Let's personalize your learning experience.
+                تعلّم الإنجليزية من محادثات حقيقية وفيديوهات ودروس تفاعلية.
+                لنخصص تجربة تعلمك.
               </p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-4">
               <div className="bg-card border border-border rounded-xl p-3 text-center">
                 <Globe2 className="h-6 w-6 text-primary mx-auto mb-1" />
-                <p className="text-xs text-muted-foreground">Multiple dialects</p>
+                <p className="text-xs text-muted-foreground">شرح بلهجتك</p>
               </div>
               <div className="bg-card border border-border rounded-xl p-3 text-center">
                 <GraduationCap className="h-6 w-6 text-primary mx-auto mb-1" />
-                <p className="text-xs text-muted-foreground">6 learning stages</p>
+                <p className="text-xs text-muted-foreground">6 مراحل تعلم</p>
               </div>
               <div className="bg-card border border-border rounded-xl p-3 text-center">
                 <Sparkles className="h-6 w-6 text-primary mx-auto mb-1" />
-                <p className="text-xs text-muted-foreground">AI-powered</p>
+                <p className="text-xs text-muted-foreground">مدعوم بالذكاء الاصطناعي</p>
               </div>
             </div>
             <Button onClick={next} className="w-full h-12 text-base">
-              Let's Get Started <ChevronRight className="h-5 w-5 ml-1" />
+              لنبدأ <ChevronRight className="h-5 w-5 ml-1" />
             </Button>
           </div>
         )}
@@ -210,10 +210,10 @@ const Onboarding = () => {
           <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-300">
             <div className="text-center">
               <h2 className="text-2xl font-bold font-heading text-foreground mb-2">
-                Which dialect interests you?
+                ما لهجتك؟
               </h2>
               <p className="text-muted-foreground text-sm">
-                You can always explore other dialects later
+                سنشرح الإنجليزية بلهجتك — ويمكنك تغييرها لاحقاً
               </p>
             </div>
 
@@ -231,10 +231,7 @@ const Onboarding = () => {
                 >
                   <span className="text-2xl">{d.flag}</span>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-foreground">{d.label}</span>
-                      <span className="text-sm text-muted-foreground" dir="rtl">{d.labelAr}</span>
-                    </div>
+                    <span className="font-semibold text-foreground block">{d.labelAr}</span>
                     <p className="text-xs text-muted-foreground">{d.desc}</p>
                   </div>
                   {dialect === d.id && (
@@ -249,7 +246,7 @@ const Onboarding = () => {
                 <ChevronLeft className="h-4 w-4" />
               </Button>
               <Button onClick={next} className="flex-1 h-11">
-                Continue <ChevronRight className="h-4 w-4 ml-1" />
+                متابعة <ChevronRight className="h-4 w-4 ml-1" />
               </Button>
             </div>
           </div>
@@ -260,10 +257,10 @@ const Onboarding = () => {
           <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-300">
             <div className="text-center">
               <h2 className="text-2xl font-bold font-heading text-foreground mb-2">
-                What's your Arabic level?
+                ما مستواك في الإنجليزية؟
               </h2>
               <p className="text-muted-foreground text-sm">
-                We'll tailor content to match your skills
+                سنكيّف المحتوى ليناسب مهاراتك
               </p>
             </div>
 
@@ -274,8 +271,8 @@ const Onboarding = () => {
             >
               <span className="text-2xl">🧠</span>
               <div className="flex-1">
-                <span className="font-semibold text-foreground">Not sure? Take the Placement Quiz</span>
-                <p className="text-xs text-muted-foreground">20 adaptive questions to find your CEFR level</p>
+                <span className="font-semibold text-foreground">غير متأكد؟ خذ اختبار تحديد المستوى</span>
+                <p className="text-xs text-muted-foreground">20 سؤالاً متكيّفاً لتحديد مستواك</p>
               </div>
               <ChevronRight className="h-5 w-5 text-primary shrink-0" />
             </button>
@@ -312,7 +309,7 @@ const Onboarding = () => {
                 <ChevronLeft className="h-4 w-4" />
               </Button>
               <Button onClick={next} className="flex-1 h-11">
-                Continue <ChevronRight className="h-4 w-4 ml-1" />
+                متابعة <ChevronRight className="h-4 w-4 ml-1" />
               </Button>
             </div>
           </div>
@@ -323,10 +320,10 @@ const Onboarding = () => {
           <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-300">
             <div className="text-center">
               <h2 className="text-2xl font-bold font-heading text-foreground mb-2">
-                What do you want to use Arabic for?
+                لماذا تريد تعلم الإنجليزية؟
               </h2>
               <p className="text-muted-foreground text-sm">
-                This shapes the situations and topics we write about. Both are optional.
+                يحدد هذا المواقف والمواضيع التي نكتب عنها. الاختياران غير إلزاميين.
               </p>
             </div>
 
@@ -345,8 +342,8 @@ const Onboarding = () => {
                 >
                   <span className="text-2xl">{r.icon}</span>
                   <div className="flex-1 min-w-0">
-                    <span className="font-semibold text-foreground block">{r.label}</span>
-                    <p className="text-xs text-muted-foreground">{r.desc}</p>
+                    <span className="font-semibold text-foreground block">{r.labelAr}</span>
+                    <p className="text-xs text-muted-foreground">{r.descAr}</p>
                   </div>
                   {reason === r.id && <Check className="h-5 w-5 text-primary shrink-0" />}
                 </button>
@@ -355,10 +352,10 @@ const Onboarding = () => {
 
             <div>
               <p className="text-sm font-semibold text-foreground mb-1">
-                Topics you'd enjoy
+                مواضيع تستمتع بها
               </p>
               <p className="text-xs text-muted-foreground mb-3">
-                Pick any that appeal — we'll lean on them for stories and listening.
+                اختر ما يعجبك — سنعتمد عليها في القصص والاستماع.
               </p>
               <div className="flex flex-wrap gap-2">
                 {topicCategories.map((c) => {
@@ -376,7 +373,7 @@ const Onboarding = () => {
                       )}
                     >
                       <span>{c.emoji}</span>
-                      <span>{c.label}</span>
+                      <span>{c.labelAr}</span>
                     </button>
                   );
                 })}
@@ -388,7 +385,7 @@ const Onboarding = () => {
                 <ChevronLeft className="h-4 w-4" />
               </Button>
               <Button onClick={next} className="flex-1 h-11">
-                Continue <ChevronRight className="h-4 w-4 ml-1" />
+                متابعة <ChevronRight className="h-4 w-4 ml-1" />
               </Button>
             </div>
           </div>
@@ -399,10 +396,10 @@ const Onboarding = () => {
           <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-300">
             <div className="text-center">
               <h2 className="text-2xl font-bold font-heading text-foreground mb-2">
-                Set your weekly goal
+                حدد هدفك الأسبوعي
               </h2>
               <p className="text-muted-foreground text-sm">
-                How much time can you dedicate to learning?
+                كم من الوقت يمكنك تخصيصه للتعلم؟
               </p>
             </div>
 
@@ -440,7 +437,7 @@ const Onboarding = () => {
                 ) : (
                   <>
                     <Target className="h-4 w-4 mr-1" />
-                    Start Learning!
+                    ابدأ التعلم!
                   </>
                 )}
               </Button>

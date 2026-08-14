@@ -417,7 +417,7 @@ export default function PlacementQuiz() {
                   <Loader2 className="h-5 w-5 animate-spin" />
                 ) : (
                   <>
-                    Start Learning <ArrowRight className="h-5 w-5 ml-1" />
+                    ابدأ التعلم <ArrowRight className="h-5 w-5 ml-1" />
                   </>
                 )}
               </Button>
