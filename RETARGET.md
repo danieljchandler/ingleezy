@@ -325,9 +325,12 @@ generation conditioning.
       Settings (+ Arabic labels on reasons/topics data), Auth,
       Onboarding, placement CTA.
       Remaining: Me-area pages (MyWords, Profile, analytics…),
-      individual practice/content pages (grammar, listening practice,
-      conversation, vocab games/battles…), DiscoverVideo player
-      chrome, scoreBand labels
+      individual practice/content pages (conversation, vocab
+      games/battles…), DiscoverVideo player chrome, scoreBand labels
+      — grammar drills and listening practice now done (listening-quiz
+      flipped backend-side to English audio via the Brain's
+      english-target mode, dialect glosses + phonetic_ar riding in the
+      Arabic-era columns)
       — mistakes/profile/how-do-i-say/culture-guide now done
       (culture-guide's backend prompt flipped with it: Anglosphere
       etiquette answered in the learner's dialect, exact English
