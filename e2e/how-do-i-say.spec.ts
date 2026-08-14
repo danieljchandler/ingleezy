@@ -50,8 +50,8 @@ test.describe("asking", () => {
     backend.stubFunction("how-do-i-say", { success: true, result: aResult() });
 
     await page.goto("/how-do-i-say");
-    await page.getByPlaceholder(/Type a phrase/).fill("how are you");
-    await page.getByRole("button", { name: "Ask", exact: true }).click();
+    await page.getByPlaceholder(/اكتب عبارة/).fill("how are you");
+    await page.getByRole("button", { name: "اسأل", exact: true }).click();
 
     // The dialect is the point of the feature — "how are you" has a different
     // answer in Gulf and Egyptian, and neither is a translation of the other.
@@ -63,12 +63,12 @@ test.describe("asking", () => {
   test("offers no Ask button for an empty box", async ({ page }) => {
     await page.goto("/how-do-i-say");
 
-    await expect(page.getByRole("button", { name: "Ask", exact: true })).toBeDisabled();
+    await expect(page.getByRole("button", { name: "اسأل", exact: true })).toBeDisabled();
   });
 
   test("asks nothing when Enter is pressed on an empty box", async ({ page, backend }) => {
     await page.goto("/how-do-i-say");
-    await page.getByPlaceholder(/Type a phrase/).press("Enter");
+    await page.getByPlaceholder(/اكتب عبارة/).press("Enter");
 
     // Enter submits too, and it bypasses the disabled button entirely — which
     // is what makes `handleSearch`'s own empty check live rather than dead.
@@ -77,8 +77,8 @@ test.describe("asking", () => {
 
   test("asks nothing for a box of spaces", async ({ page, backend }) => {
     await page.goto("/how-do-i-say");
-    await page.getByPlaceholder(/Type a phrase/).fill("     ");
-    await page.getByPlaceholder(/Type a phrase/).press("Enter");
+    await page.getByPlaceholder(/اكتب عبارة/).fill("     ");
+    await page.getByPlaceholder(/اكتب عبارة/).press("Enter");
 
     expect(backend.callsTo("how-do-i-say")).toHaveLength(0);
   });
@@ -87,8 +87,8 @@ test.describe("asking", () => {
     backend.stubFunction("how-do-i-say", { success: true, result: aResult() });
 
     await page.goto("/how-do-i-say");
-    await page.getByPlaceholder(/Type a phrase/).fill("  how are you  ");
-    await page.getByRole("button", { name: "Ask", exact: true }).click();
+    await page.getByPlaceholder(/اكتب عبارة/).fill("  how are you  ");
+    await page.getByRole("button", { name: "اسأل", exact: true }).click();
 
     await expect
       .poll(() => backend.lastCallTo("how-do-i-say")?.body)
@@ -104,8 +104,8 @@ test.describe("the answer", () => {
 
   async function ask(page: import("@playwright/test").Page, phrase = "how are you") {
     await page.goto("/how-do-i-say");
-    await page.getByPlaceholder(/Type a phrase/).fill(phrase);
-    await page.getByRole("button", { name: "Ask", exact: true }).click();
+    await page.getByPlaceholder(/اكتب عبارة/).fill(phrase);
+    await page.getByRole("button", { name: "اسأل", exact: true }).click();
   }
 
   test("shows each way of saying it", async ({ page, backend }) => {
@@ -140,7 +140,7 @@ test.describe("the answer", () => {
 
     // Several correct answers is the normal case; without a recommendation the
     // learner has to guess which one a native speaker would actually use.
-    await expect(page.getByText("Best option")).toHaveCount(1);
+    await expect(page.getByText("الخيار الأفضل")).toHaveCount(1);
   });
 
   test("says when and to whom each option fits", async ({ page, backend }) => {
@@ -201,14 +201,14 @@ test.describe("the three things the box accepts", () => {
   async function askWith(page: import("@playwright/test").Page, result: unknown, backend: { stubFunction: (n: string, r: unknown) => unknown }) {
     backend.stubFunction("how-do-i-say", { success: true, result });
     await page.goto("/how-do-i-say");
-    await page.getByPlaceholder(/Type a phrase/).fill("anything");
-    await page.getByRole("button", { name: "Ask", exact: true }).click();
+    await page.getByPlaceholder(/اكتب عبارة/).fill("anything");
+    await page.getByRole("button", { name: "اسأل", exact: true }).click();
   }
 
   test("counts ways to say it for a straight translation", async ({ page, backend }) => {
     await askWith(page, aResult({ inputMode: "translation" }), backend);
 
-    await expect(page.getByText("1 way to say it")).toBeVisible();
+    await expect(page.getByText("طريقة واحدة لقولها")).toBeVisible();
   });
 
   test("counts things to say for a described situation", async ({ page, backend }) => {
@@ -224,7 +224,7 @@ test.describe("the three things the box accepts", () => {
 
     // Different question, different wording: a scenario has no single correct
     // translation, it has options.
-    await expect(page.getByText("2 things to say")).toBeVisible();
+    await expect(page.getByText("اقتراحان لما تقوله")).toBeVisible();
     await expect(page.getByText("Arriving late to a friend's wedding")).toBeVisible();
   });
 
@@ -235,7 +235,7 @@ test.describe("the three things the box accepts", () => {
       backend,
     );
 
-    await expect(page.getByText("1 suggested response")).toBeVisible();
+    await expect(page.getByText("رد مقترح واحد")).toBeVisible();
     await expect(page.getByText("A WhatsApp exchange with a colleague")).toBeVisible();
   });
 });
@@ -249,14 +249,14 @@ test.describe("saving what came back", () => {
 
   async function ask(page: import("@playwright/test").Page) {
     await page.goto("/how-do-i-say");
-    await page.getByPlaceholder(/Type a phrase/).fill("how are you");
-    await page.getByRole("button", { name: "Ask", exact: true }).click();
+    await page.getByPlaceholder(/اكتب عبارة/).fill("how are you");
+    await page.getByRole("button", { name: "اسأل", exact: true }).click();
     await expect(page.getByText("شلونك")).toBeVisible();
   }
 
   test("saves a word to My Words with its root", async ({ page, db }) => {
     await ask(page);
-    await page.getByRole("button", { name: /Save word|Add/i }).first().click();
+    await page.getByRole("button", { name: /احفظ الكلمة/ }).first().click();
 
     await expect.poll(() => db.rows("user_vocabulary").length).toBe(1);
     expect(db.rows("user_vocabulary")[0]).toMatchObject({
@@ -269,7 +269,7 @@ test.describe("saving what came back", () => {
 
   test("saves a phrase to My Phrases with what was asked for", async ({ page, db }) => {
     await ask(page);
-    await page.locator("button[title='Save phrase']").first().click();
+    await page.locator("button[title='احفظ العبارة']").first().click();
 
     await expect.poll(() => db.rows("user_phrases").length).toBe(1);
     // The ENGLISH phrase is the thing being learned; the dialect gloss and
@@ -284,12 +284,12 @@ test.describe("saving what came back", () => {
 
   test("marks a saved phrase rather than saving it twice", async ({ page, db }) => {
     await ask(page);
-    await page.locator("button[title='Save phrase']").first().click();
+    await page.locator("button[title='احفظ العبارة']").first().click();
     await expect.poll(() => db.rows("user_phrases").length).toBe(1);
 
     // Disabled once saved, rather than silently ignoring the second click —
     // the bookmark also changes to a filled one, so the state is visible.
-    await expect(page.locator("button[title='Saved']").first()).toBeDisabled();
+    await expect(page.locator("button[title='محفوظة']").first()).toBeDisabled();
     expect(db.rows("user_phrases")).toHaveLength(1);
   });
 
@@ -307,12 +307,12 @@ test.describe("saving what came back", () => {
 
     // The route has no guard, so a signed-out visitor gets the whole answer —
     // and then the save buttons simply are not rendered. `handleSavePhrase`
-    // opens with `toast.error("Sign in to save phrases")`, but it is only
+    // opens with `toast.error("سجّل الدخول لحفظ العبارات")`, but it is only
     // reachable from a button behind `isAuthenticated`, so that message never
     // appears. The visitor is shown something worth keeping with no indication
     // that keeping it is possible at all.
-    await expect(page.locator("button[title='Save phrase']")).toHaveCount(0);
-    await expect(page.getByText("Sign in to save phrases")).toHaveCount(0);
+    await expect(page.locator("button[title='احفظ العبارة']")).toHaveCount(0);
+    await expect(page.getByText("سجّل الدخول لحفظ العبارات")).toHaveCount(0);
     expect(db.rows("user_phrases")).toHaveLength(0);
   });
 });
@@ -328,10 +328,10 @@ test.describe("when it cannot answer", () => {
     backend.stubFunctionFailure("how-do-i-say");
 
     await page.goto("/how-do-i-say");
-    await page.getByPlaceholder(/Type a phrase/).fill("how are you");
-    await page.getByRole("button", { name: "Ask", exact: true }).click();
+    await page.getByPlaceholder(/اكتب عبارة/).fill("how are you");
+    await page.getByRole("button", { name: "اسأل", exact: true }).click();
 
-    await expect(page.getByText("Translation failed")).toBeVisible();
+    await expect(page.getByText("تعذّرت الترجمة")).toBeVisible();
   });
 
   test("reports an in-band failure as one", async ({ page, backend, expectConsoleErrors }) => {
@@ -339,8 +339,8 @@ test.describe("when it cannot answer", () => {
     backend.stubFunction("how-do-i-say", { success: false, error: "Could not classify input" });
 
     await page.goto("/how-do-i-say");
-    await page.getByPlaceholder(/Type a phrase/).fill("how are you");
-    await page.getByRole("button", { name: "Ask", exact: true }).click();
+    await page.getByPlaceholder(/اكتب عبارة/).fill("how are you");
+    await page.getByRole("button", { name: "اسأل", exact: true }).click();
 
     // The function answers 200 with `success: false`, so the status alone
     // would look like a result with no translations in it.
@@ -356,11 +356,11 @@ test.describe("when it cannot answer", () => {
     backend.stubFunctionCapped("how-do-i-say");
 
     await page.goto("/how-do-i-say");
-    await page.getByPlaceholder(/Type a phrase/).fill("how are you");
-    await page.getByRole("button", { name: "Ask", exact: true }).click();
+    await page.getByPlaceholder(/اكتب عبارة/).fill("how are you");
+    await page.getByRole("button", { name: "اسأل", exact: true }).click();
 
     // A 429 carrying `daily_limit_reached` is a different situation from an
     // outage, and the learner can act on it.
-    await expect(page.getByText("Translation failed")).toBeVisible();
+    await expect(page.getByText("تعذّرت الترجمة")).toBeVisible();
   });
 });

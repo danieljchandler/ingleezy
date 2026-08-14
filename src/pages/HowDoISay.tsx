@@ -118,17 +118,20 @@ const HowDoISay = () => {
       const r = data.result as HowDoISayResult;
       setResult(r);
       const count = r.translations.length;
+      // Arabic number agreement: 1 singular, 2 dual, 3-10 plural, 11+ singular.
+      const arCounted = (one: string, two: string, few: string, many: string) =>
+        count === 1 ? one : count === 2 ? two : count <= 10 ? `${count} ${few}` : `${count} ${many}`;
       const modeLabel =
         r.inputMode === "scenario"
-          ? `${count} thing${count !== 1 ? "s" : ""} to say`
+          ? arCounted("اقتراح واحد لما تقوله", "اقتراحان لما تقوله", "اقتراحات لما تقوله", "اقتراحاً لما تقوله")
           : r.inputMode === "conversation"
-          ? `${count} suggested response${count !== 1 ? "s" : ""}`
-          : `${count} way${count !== 1 ? "s" : ""} to say it`;
-      toast.success("Got it!", { description: modeLabel });
+          ? arCounted("رد مقترح واحد", "ردان مقترحان", "ردود مقترحة", "رداً مقترحاً")
+          : arCounted("طريقة واحدة لقولها", "طريقتان لقولها", "طرق لقولها", "طريقة لقولها");
+      toast.success("تم!", { description: modeLabel });
     } catch (err) {
       console.error("how-do-i-say error:", err);
-      toast.error("Translation failed", {
-        description: err instanceof Error ? err.message : "An unexpected error occurred",
+      toast.error("تعذّرت الترجمة", {
+        description: err instanceof Error ? err.message : "حدث خطأ غير متوقع",
       });
     } finally {
       setIsLoading(false);
@@ -138,7 +141,7 @@ const HowDoISay = () => {
   const handleSaveWord = useCallback(
     async (word: VocabItem) => {
       if (!isAuthenticated) {
-        toast.error("Sign in to save words");
+        toast.error("سجّل الدخول لحفظ الكلمات");
         return;
       }
       if (savedWords.has(word.english)) return;
@@ -151,9 +154,9 @@ const HowDoISay = () => {
           source: "how-do-i-say",
         });
         setSavedWords((prev) => new Set(prev).add(word.english));
-        toast.success("Saved to My Words!", { description: word.english });
+        toast.success("حُفظت في كلماتي!", { description: word.english });
       } catch {
-        toast.error("Failed to save word");
+        toast.error("تعذّر حفظ الكلمة");
       }
     },
     [isAuthenticated, addUserVocabulary, savedWords],
@@ -162,7 +165,7 @@ const HowDoISay = () => {
   const handleSavePhrase = useCallback(
     async (translation: PhraseTranslation) => {
       if (!isAuthenticated) {
-        toast.error("Sign in to save phrases");
+        toast.error("سجّل الدخول لحفظ العبارات");
         return;
       }
       if (savedPhrases.has(translation.english)) return;
@@ -179,9 +182,9 @@ const HowDoISay = () => {
           source: "how-do-i-say",
         });
         setSavedPhrases((prev) => new Set(prev).add(translation.english));
-        toast.success("Phrase saved!", { description: translation.english });
+        toast.success("حُفظت العبارة!", { description: translation.english });
       } catch {
-        toast.error("Failed to save phrase");
+        toast.error("تعذّر حفظ العبارة");
       }
     },
     [isAuthenticated, addUserPhrase, savedPhrases],
@@ -197,11 +200,11 @@ const HowDoISay = () => {
           style={{ fontFamily: "'Montserrat', sans-serif" }}
         >
           <MessageCircleQuestion className="h-7 w-7 text-primary" />
-          How do I say…?
+          كيف أقول…؟
           <InfoHint {...PAGE_HINTS["how-do-i-say"]} size="md" />
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Translate a phrase, ask what to say in a situation, or get a reply suggestion for a conversation.
+          ترجم عبارة، أو اسأل ماذا تقول في موقف، أو احصل على اقتراح رد في محادثة.
         </p>
       </div>
 
@@ -215,7 +218,7 @@ const HowDoISay = () => {
         >
           <span className="text-sm font-semibold text-primary flex items-center gap-2">
             <Info className="h-4 w-4" />
-            How to use this page
+            كيف تستخدم هذه الصفحة
           </span>
           {showInstructions ? (
             <ChevronUp className="h-4 w-4 text-primary/70" />
@@ -230,12 +233,12 @@ const HowDoISay = () => {
                 <Languages className="h-3.5 w-3.5 text-primary" />
               </div>
               <div>
-                <p className="text-sm font-medium text-foreground">Translate a phrase</p>
+                <p className="text-sm font-medium text-foreground">ترجم عبارة</p>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Type any word or phrase in English.
+                  اكتب أي كلمة أو عبارة بالعربية — وسنعطيك أفضل طريقة لقولها بالإنجليزية.
                 </p>
                 <p className="text-xs text-muted-foreground/60 italic mt-0.5">
-                  e.g. "I'm exhausted" · "can we leave now?" · "thank you so much"
+                  مثلاً: «تعبان مرة» · «نقدر نمشي الحين؟» · «شكراً جزيلاً»
                 </p>
               </div>
             </div>
@@ -244,12 +247,12 @@ const HowDoISay = () => {
                 <MapPin className="h-3.5 w-3.5 text-primary" />
               </div>
               <div>
-                <p className="text-sm font-medium text-foreground">Describe a situation</p>
+                <p className="text-sm font-medium text-foreground">صف موقفاً</p>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Explain the context and ask what you should say.
+                  اشرح السياق واسأل ماذا يجب أن تقول.
                 </p>
                 <p className="text-xs text-muted-foreground/60 italic mt-0.5">
-                  e.g. "I'm at a restaurant and want to ask for more water" · "I need to politely refuse an invitation from a colleague"
+                  مثلاً: «أنا في مطعم وأبغى أطلب موية زيادة» · «أحتاج أعتذر بأدب عن دعوة زميل»
                 </p>
               </div>
             </div>
@@ -258,12 +261,12 @@ const HowDoISay = () => {
                 <MessageSquare className="h-3.5 w-3.5 text-primary" />
               </div>
               <div>
-                <p className="text-sm font-medium text-foreground">Paste a conversation</p>
+                <p className="text-sm font-medium text-foreground">الصق محادثة</p>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Paste a chat exchange and get a suggested {activeDialect === 'Egyptian' ? 'Egyptian' : 'Gulf'} Arabic reply.
+                  الصق محادثة واحصل على اقتراح رد بالإنجليزية.
                 </p>
                 <p className="text-xs text-muted-foreground/60 italic mt-0.5">
-                  e.g. Paste a WhatsApp chat or text messages — the AI will read the conversation and suggest what to say back.
+                  مثلاً: الصق محادثة واتساب أو رسائل نصية — سيقرأ الذكاء الاصطناعي الحوار ويقترح ردك.
                 </p>
               </div>
             </div>
@@ -282,7 +285,7 @@ const HowDoISay = () => {
               handleSearch();
             }
           }}
-          placeholder={"Type a phrase, describe a situation, or paste a conversation…\n(Shift + Enter for a new line)"}
+          placeholder={"اكتب عبارة، أو صف موقفاً، أو الصق محادثة…\n(Shift + Enter لسطر جديد)"}
           className="flex-1 resize-none min-h-[80px]"
           rows={3}
           disabled={isLoading}
@@ -295,12 +298,12 @@ const HowDoISay = () => {
           {isLoading ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin" />
-              Asking…
+              جارٍ السؤال…
             </>
           ) : (
             <>
               <Search className="h-4 w-4" />
-              Ask
+              اسأل
             </>
           )}
         </Button>
@@ -315,10 +318,10 @@ const HowDoISay = () => {
             <div className="flex items-center gap-2.5 p-3 rounded-lg bg-muted/40 border border-border/50">
               <Badge variant="outline" className="shrink-0 capitalize text-xs">
                 {result.inputMode === "translation"
-                  ? "Translation"
+                  ? "ترجمة"
                   : result.inputMode === "scenario"
-                  ? "Situation"
-                  : "Conversation"}
+                  ? "موقف"
+                  : "محادثة"}
               </Badge>
               <p className="text-sm text-muted-foreground leading-snug">{result.detectedContext}</p>
             </div>
@@ -335,10 +338,10 @@ const HowDoISay = () => {
           <div>
             <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
               {result.inputMode === "scenario"
-                ? "What to say in this situation"
+                ? "ماذا تقول في هذا الموقف"
                 : result.inputMode === "conversation"
-                ? "How to respond"
-                : `Ways to say it in ${activeDialect === 'Egyptian' ? 'Egyptian' : 'Gulf'} Arabic`}
+                ? "كيف ترد"
+                : "طرق قولها بالإنجليزية"}
             </h2>
             <div className="space-y-3">
               {result.translations.map((t, idx) => (
@@ -360,7 +363,7 @@ const HowDoISay = () => {
                             className="mb-2 text-xs gap-1 bg-primary/90"
                           >
                             <Star className="h-3 w-3 fill-current" />
-                            Best option
+                            الخيار الأفضل
                           </Badge>
                         )}
                         {/* The English — the thing being learned */}
@@ -396,7 +399,7 @@ const HowDoISay = () => {
                               ? "text-primary bg-primary/10"
                               : "text-muted-foreground hover:text-primary hover:bg-primary/10",
                           )}
-                          title={savedPhrases.has(t.english) ? "Saved" : "Save phrase"}
+                          title={savedPhrases.has(t.english) ? "محفوظة" : "احفظ العبارة"}
                         >
                           {savedPhrases.has(t.english) ? (
                             <BookmarkCheck className="h-5 w-5" />
@@ -418,7 +421,7 @@ const HowDoISay = () => {
               <CardHeader className="pb-2">
                 <CardTitle className="text-base flex items-center gap-2">
                   <Info className="h-4 w-4 text-primary" />
-                  Usage Notes
+                  ملاحظات الاستخدام
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -435,7 +438,7 @@ const HowDoISay = () => {
               <CardHeader className="pb-2">
                 <CardTitle className="text-base flex items-center gap-2">
                   <BookOpen className="h-4 w-4 text-primary" />
-                  Vocabulary Breakdown
+                  تفكيك المفردات
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -463,7 +466,7 @@ const HowDoISay = () => {
                               ? "text-primary"
                               : "text-muted-foreground hover:text-primary hover:bg-primary/10",
                           )}
-                          title={savedWords.has(word.english) ? "Saved" : "Save word"}
+                          title={savedWords.has(word.english) ? "محفوظة" : "احفظ الكلمة"}
                         >
                           {savedWords.has(word.english) ? (
                             <Check className="h-4 w-4" />
@@ -491,7 +494,7 @@ const HowDoISay = () => {
             }}
           >
             <Search className="h-4 w-4" />
-            Try another phrase
+            جرّب عبارة أخرى
           </Button>
         </div>
       )}
