@@ -194,7 +194,7 @@ const InlineToken = ({
                   {compoundLiteral && (
                     <p className="text-xs italic text-muted-foreground/80">
                       <span className="not-italic uppercase tracking-wide text-[9px] mr-1 text-muted-foreground/60">
-                        Literal
+                        حرفي
                       </span>
                       {compoundLiteral}
                     </p>
@@ -291,7 +291,7 @@ const InlineToken = ({
             {!displayGloss && !isTranslating && (
               <div className="space-y-1">
                 <p className="text-xs text-muted-foreground italic">
-                  No definition found
+                  ما لقينا تعريف
                 </p>
                 <Button
                   variant="outline"
@@ -562,7 +562,7 @@ interface TranscriptLineCardProps {
          <div className="flex items-center gap-1.5 mb-2">
            <MonitorPlay className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
            <span className="text-xs font-medium text-amber-600 dark:text-amber-400 uppercase tracking-wide">
-             On screen
+             على الشاشة
            </span>
          </div>
        )}
@@ -727,7 +727,7 @@ interface TranscriptLineCardProps {
        {/* Selection hint */}
        {selectedIndices.length > 0 && (
          <p className="text-xs text-secondary/70 text-center mt-2 animate-pulse italic">
-           Tap an adjacent word to see combined translation
+           دوس على كلمة جارة تشوف الترجمة مجتمعة
          </p>
        )}
      </div>
@@ -931,10 +931,10 @@ export const LineByLineTranscript = ({
            className="text-lg font-semibold text-foreground"
            style={{ fontFamily: "'Montserrat', sans-serif" }}
           >
-            Sentences
+            الجمل
          </h3>
          <div className="flex items-center gap-2">
-           <span className="text-xs text-muted-foreground">Fusha</span>
+           <span className="text-xs text-muted-foreground">فصحى</span>
            <Switch
              checked={showFusha}
              onCheckedChange={(on) => updatePrefs({ showFormal: on })}
@@ -946,7 +946,7 @@ export const LineByLineTranscript = ({
              ) : (
                <EyeOff className="h-4 w-4 inline mr-1" />
              )}
-             Show all translations
+             أظهر كل الترجمات
            </span>
            <Switch
              checked={showAllTranslations}
@@ -958,14 +958,14 @@ export const LineByLineTranscript = ({
 
       {showFusha && fushaStatus === "loading" && (
         <p className="text-xs text-muted-foreground text-center">
-          Converting to فصحى…
+          نحوّل للفصحى…
         </p>
       )}
       {showFusha && fushaStatus === "error" && (
         <div className="flex items-center justify-center gap-2">
           <p className="text-xs text-muted-foreground">ما قدرنا نحوّل كل سطر للفصحى.</p>
           <Button variant="outline" size="sm" className="h-6 text-xs px-2" onClick={retryFusha}>
-            Retry
+            أعد المحاولة
           </Button>
         </div>
       )}

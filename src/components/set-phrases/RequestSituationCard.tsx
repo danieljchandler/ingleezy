@@ -143,7 +143,7 @@ export const RequestSituationCard = () => {
               {phrases.length} phrases
             </p>
             <Button size="sm" variant="outline" onClick={saveAll} disabled={addPhrase.isPending}>
-              Save all
+              احفظ الكل
             </Button>
           </div>
           {phrases.map((p, i) => (
@@ -163,7 +163,7 @@ export const RequestSituationCard = () => {
               {p.literal && (
                 <p className="text-xs text-muted-foreground/80 mt-0.5 font-arabic" dir="rtl">
                   <span className="uppercase tracking-wide text-[9px] ml-1 text-muted-foreground/60">
-                    Literal
+                    حرفي
                   </span>
                   {p.literal}
                 </p>
@@ -172,7 +172,7 @@ export const RequestSituationCard = () => {
               <div className="flex justify-end mt-2">
                 {saved.has(i) ? (
                   <Button size="sm" variant="ghost" disabled className="text-emerald-600">
-                    <Check className="h-3.5 w-3.5 mr-1" /> Saved
+                    <Check className="h-3.5 w-3.5 mr-1" /> محفوظة
                   </Button>
                 ) : (
                   <Button size="sm" variant="outline" onClick={() => save(i)} disabled={addPhrase.isPending}>

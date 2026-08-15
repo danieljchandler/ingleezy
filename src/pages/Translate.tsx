@@ -166,8 +166,8 @@ const Translate = () => {
                   <SelectContent>
                     <SelectItem value="auto">لهجتي</SelectItem>
                     <SelectItem value="Gulf">Gulf</SelectItem>
-                    <SelectItem value="Egyptian">Egyptian</SelectItem>
-                    <SelectItem value="Yemeni">Yemeni</SelectItem>
+                    <SelectItem value="Egyptian">مصري</SelectItem>
+                    <SelectItem value="Yemeni">يمني</SelectItem>
                   </SelectContent>
                 </Select>
                 <span className={cn("text-xs", charCount > 4000 ? "text-destructive" : "text-muted-foreground")}>
@@ -228,7 +228,7 @@ const Translate = () => {
               </Badge>
               <p className="text-xs text-muted-foreground flex items-center gap-1">
                 <BookmarkPlus className="h-3.5 w-3.5" />
-                Tap any English word to save it
+                دوس على أي كلمة إنجليزية عشان تحفظها
               </p>
             </div>
 
@@ -271,7 +271,7 @@ const Translate = () => {
                   variant={savedId ? "secondary" : "default"}
                 >
                   {saving ? (
-                    <><Loader2 className="h-4 w-4 mr-1 animate-spin" /> Saving…</>
+                    <><Loader2 className="h-4 w-4 mr-1 animate-spin" /> نحفظ…</>
                   ) : savedId ? (
                     <><Check className="h-4 w-4 mr-1" /> محفوظة</>
                   ) : (

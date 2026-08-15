@@ -195,14 +195,14 @@ export function CandidateCard({ candidate, audioUrl, onUpdate, onApprove, onReje
               onClick={() => onReject(candidate.id)}
             >
               <X className="h-4 w-4 mr-1" />
-              Reject
+              ارفض
             </Button>
             <Button
               size="sm"
               onClick={() => onApprove(candidate.id)}
             >
               <Check className="h-4 w-4 mr-1" />
-              Approve
+              اقبل
             </Button>
           </div>
         )}

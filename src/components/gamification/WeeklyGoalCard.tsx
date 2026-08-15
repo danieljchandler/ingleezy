@@ -43,7 +43,7 @@ export function WeeklyGoalCard({ className }: WeeklyGoalCardProps) {
         {/* Reviews Goal */}
         <div>
           <div className="flex items-center justify-between mb-1.5">
-            <span className="text-sm text-muted-foreground">Reviews</span>
+            <span className="text-sm text-muted-foreground">مراجعات</span>
             <span className={cn(
               "text-sm font-medium",
               reviewComplete ? "text-green-600 dark:text-green-400" : "text-foreground"
@@ -63,7 +63,7 @@ export function WeeklyGoalCard({ className }: WeeklyGoalCardProps) {
           <div className="flex items-center justify-between mb-1.5">
             <div className="flex items-center gap-1">
               <Zap className="h-3.5 w-3.5 text-amber-500" />
-              <span className="text-sm text-muted-foreground">XP Earned</span>
+              <span className="text-sm text-muted-foreground">نقاط مكتسبة</span>
             </div>
             <span className={cn(
               "text-sm font-medium",

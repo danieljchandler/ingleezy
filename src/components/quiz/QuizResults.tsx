@@ -78,7 +78,7 @@ export const QuizResults = ({ topic, quizState, onRestart, onHome }: QuizResults
         {/* Answer review */}
         <div className="mb-8">
           <h3 className="text-sm font-medium text-muted-foreground mb-3 text-center">
-            Review Answers
+            راجع إجاباتك
           </h3>
           <div className="space-y-2">
             {quizState.answers.map((answer, index) => (
@@ -123,11 +123,11 @@ export const QuizResults = ({ topic, quizState, onRestart, onHome }: QuizResults
         <div className="space-y-3">
           <Button onClick={onRestart} variant="outline" className="w-full">
             <RotateCcw className="h-4 w-4 mr-2" />
-            Try Again
+            جرّب مرة ثانية
           </Button>
           <Button onClick={onHome} className="w-full">
             <Home className="h-4 w-4 mr-2" />
-            Back to Topics
+            رجوع للمواضيع
           </Button>
         </div>
       </div>

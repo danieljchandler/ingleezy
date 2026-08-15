@@ -198,7 +198,7 @@ const StoryPlayer = () => {
         <HomeButton />
         <Button variant="ghost" size="sm" onClick={() => navigate('/stories')}>
           <ArrowLeft className="h-4 w-4 mr-1" />
-          All Stories
+          كل القصص
         </Button>
       </div>
 
@@ -368,7 +368,7 @@ const StoryPlayer = () => {
                     العب مرة ثانية
                   </Button>
                   <Button onClick={() => navigate('/stories')}>
-                    More Stories
+                    قصص أكثر
                   </Button>
                 </div>
               </div>
@@ -376,7 +376,7 @@ const StoryPlayer = () => {
               /* Choices */
               <div className="space-y-3">
                 <p className="text-sm font-medium text-muted-foreground text-center mb-4">
-                  What do you do?
+                  وش تسوي؟
                 </p>
                 {currentScene.choices.map((choice, idx) => (
                   <button

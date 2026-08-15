@@ -22,12 +22,12 @@ const FAILURE_SIGNALS = [
   // The global window.error / unhandledrejection handlers in App.tsx. These
   // make the sweep a crash detector for free: any unhandled rejection anywhere
   // on the page raises one of these toasts.
-  /A page error occurred/i,
-  /The app crashed recently/i,
-  /An unexpected error occurred/i,
+  /صار خطأ في الصفحة/,
+  /التطبيق وقف فجأة قبل شوي/,
+  /صار خطأ ما توقعناه/,
 ];
 
-const NOT_FOUND = /We couldn't find that page/i;
+const NOT_FOUND = /ما لقينا هذي الصفحة/;
 
 /**
  * Wait for the lazily-loaded chunk to mount.

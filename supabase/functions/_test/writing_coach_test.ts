@@ -3,46 +3,46 @@ import { jsonRequest, loadFunction, optionsRequest } from "./harness.ts";
 import { chatCompletion, json, type UpstreamHandler } from "./upstreams.ts";
 
 /**
- * `writing-coach` — written production (C3).
+ * `writing-coach` — written production (C3), post-flip.
  *
- * Two contracts worth pinning. The review is a correction of what the LEARNER
- * wrote — so the function must refuse input it cannot coach (no Arabic, or an
- * essay-sized wall) before spending a model call, and every correction the
- * model returns must land in `learner_errors` with source "writing" so
- * written mistakes drill back like spoken ones. And the cap: this is an AI
- * feature with a free tier, so the ladder is part of the contract.
+ * The learner now writes ENGLISH and is corrected in English, with every
+ * explanation in their dialect. Two contracts worth pinning. The review is a
+ * correction of what the LEARNER wrote — so the function must refuse input it
+ * cannot coach (no English in it, or an essay-sized wall) before spending a
+ * model call, and every correction the model returns must land in
+ * `learner_errors` with source "writing" so written mistakes drill back like
+ * spoken ones. And the cap: this is an AI feature with a free tier, so the
+ * ladder is part of the contract.
  */
 
 const USER = "00000000-0000-4000-8000-000000000001";
 
 const review = {
   understandable: true,
-  verdict: "Solid — two small fixes.",
-  corrected_arabic: "وش رايك نروح السوق بكرة",
-  corrected_transliteration: "wish rayik nrooh as-souq bukra",
-  corrected_english: "What do you think about going to the market tomorrow?",
+  verdict_arabic: "حلو — بس تصحيحين صغار.",
+  corrected_english: "I went to the market yesterday.",
+  corrected_arabic: "رحت السوق أمس.",
   corrections: [
     {
-      original: "ماذا رأيك",
-      corrected: "وش رايك",
-      kind: "msa_leak",
-      explanation: "ماذا is MSA — Gulf speakers text وش.",
+      original: "I go to market",
+      corrected: "I went to the market",
+      kind: "verb_tense",
+      explanation: "أمس معناها ماضي، فالفعل لازم يكون went.",
     },
     {
-      original: "غدا",
-      corrected: "بكرة",
-      kind: "wrong_word",
-      explanation: "بكرة is the everyday word for tomorrow.",
+      original: "market",
+      corrected: "the market",
+      kind: "article",
+      explanation: "الإنجليزي يبي أداة تعريف هنا، والعربي ما يبيها.",
     },
   ],
-  tips: ["Keep it short like a real text message."],
+  tips: ["خلّها قصيرة مثل رسالة حقيقية."],
 };
 
 const prompt = {
-  scenario_english: "Your friend is planning the weekend.",
-  message_arabic: "وش رايك نروح البر بكرة؟",
-  message_transliteration: "wish rayik nrooh al-barr bukra?",
-  message_english: "What do you think about going out to the desert tomorrow?",
+  scenario_arabic: "صاحبك يرتب لنهاية الأسبوع.",
+  message_english: "hey, what do you think about heading to the beach tomorrow?",
+  message_arabic: "هلا، وش رايك نروح البحر بكرة؟",
 };
 
 const emitting = (payload: unknown): Record<string, UpstreamHandler> => ({
@@ -115,7 +115,7 @@ function recordedErrors(result: {
   return Array.isArray(parsed) ? (parsed as Array<Record<string, unknown>>) : [parsed as Record<string, unknown>];
 }
 
-const arabicReply = { action: "review", dialect: "Gulf", text: "ماذا رأيك نذهب غدا" };
+const englishReply = { action: "review", dialect: "Gulf", text: "I go to market yesterday" };
 
 Deno.test("writing-coach answers the preflight", async () => {
   const fn = await loadFunction("writing-coach", { upstreams: upstreams() });
@@ -129,7 +129,7 @@ Deno.test("writing-coach answers the preflight", async () => {
 });
 
 Deno.test("writing-coach asks an anonymous caller to sign in", async () => {
-  const result = await call(arabicReply, upstreams(), { jwt: null });
+  const result = await call(englishReply, upstreams(), { jwt: null });
 
   assertEquals(result.status, 401);
   assertEquals(result.body.error, "auth_required");
@@ -137,7 +137,7 @@ Deno.test("writing-coach asks an anonymous caller to sign in", async () => {
 
 Deno.test("writing-coach counts against the free-tier daily cap", async () => {
   const result = await call(
-    arabicReply,
+    englishReply,
     upstreams({
       "/rest/v1/subscribers": () => json({ subscribed: false, subscription_end: null }),
       "/rest/v1/rpc/increment_usage_counter": () => json(11),
@@ -150,21 +150,24 @@ Deno.test("writing-coach counts against the free-tier daily cap", async () => {
 
 // ── Input gates ─────────────────────────────────────────────────────────────
 
-Deno.test("writing-coach refuses a reply with no Arabic in it", async () => {
+Deno.test("writing-coach refuses a reply with no English in it", async () => {
+  // The point of the exercise is producing English. A reply typed entirely in
+  // Arabic has nothing to correct, and coaching it would quietly turn the
+  // feature back into the Arabic-writing trainer it used to be.
   const result = await call(
-    { action: "review", dialect: "Gulf", text: "hello how are you" },
+    { action: "review", dialect: "Gulf", text: "ماذا رأيك نذهب غدا" },
     upstreams(),
   );
 
   assertEquals(result.status, 400);
-  assertEquals(result.body.error, "not_arabic");
+  assertEquals(result.body.error, "not_english");
   // Refused before the model was asked.
   assertEquals(result.calls.some((url) => url.includes("gateway")), false);
 });
 
 Deno.test("writing-coach refuses an essay-sized submission", async () => {
   const result = await call(
-    { action: "review", dialect: "Gulf", text: "بيت ".repeat(200) },
+    { action: "review", dialect: "Gulf", text: "house ".repeat(200) },
     upstreams(),
   );
 
@@ -183,16 +186,17 @@ Deno.test("writing-coach refuses an unknown action", async () => {
 // ── Review ──────────────────────────────────────────────────────────────────
 
 Deno.test("writing-coach returns the structured review", async () => {
-  const result = await call(arabicReply, upstreams());
+  const result = await call(englishReply, upstreams());
 
   assertEquals(result.status, 200);
   const returned = result.body.review as Record<string, unknown>;
+  assertEquals(returned.corrected_english, review.corrected_english);
   assertEquals(returned.corrected_arabic, review.corrected_arabic);
   assertEquals((returned.corrections as unknown[]).length, 2);
 });
 
 Deno.test("writing-coach records each correction as a writing error", async () => {
-  const result = await call(arabicReply, upstreams());
+  const result = await call(englishReply, upstreams());
 
   assertEquals(result.status, 200);
   const rows = recordedErrors(result);
@@ -201,15 +205,15 @@ Deno.test("writing-coach records each correction as a writing error", async () =
   assertEquals(rows[0].user_id, USER);
   assertEquals(rows[0].dialect, "Gulf");
   // target is what it should be; produced is what the learner typed.
-  assertEquals(rows[0].target_arabic, "وش رايك");
-  assertEquals(rows[0].produced_arabic, "ماذا رأيك");
-  assertEquals(rows[0].error_kind, "msa_leak");
-  assertEquals(rows[1].error_kind, "wrong_word");
+  assertEquals(rows[0].target_arabic, "I went to the market");
+  assertEquals(rows[0].produced_arabic, "I go to market");
+  assertEquals(rows[0].error_kind, "verb_tense");
+  assertEquals(rows[1].error_kind, "article");
 });
 
 Deno.test("writing-coach records nothing for a clean reply", async () => {
   const result = await call(
-    arabicReply,
+    englishReply,
     upstreams(emitting({ ...review, corrections: [] })),
   );
 
@@ -219,11 +223,11 @@ Deno.test("writing-coach records nothing for a clean reply", async () => {
 
 Deno.test("writing-coach folds an off-list correction kind to other", async () => {
   const result = await call(
-    arabicReply,
+    englishReply,
     upstreams(
       emitting({
         ...review,
-        corrections: [{ original: "غدا", corrected: "بكرة", kind: "vibes", explanation: "x" }],
+        corrections: [{ original: "go", corrected: "went", kind: "vibes", explanation: "x" }],
       }),
     ),
   );
@@ -233,19 +237,19 @@ Deno.test("writing-coach folds an off-list correction kind to other", async () =
 
 Deno.test("writing-coach passes the learner's text and the prompt to the model", async () => {
   const result = await call(
-    { ...arabicReply, promptArabic: "وش رايك نروح البر؟" },
+    { ...englishReply, promptEnglish: "wanna head to the beach?" },
     upstreams(),
   );
 
   const gateway = result.calls.findIndex((u) => u.includes("gateway") || u.includes("openrouter"));
   const sent = result.bodies[gateway] ?? "";
-  assertStringIncludes(sent, "ماذا رأيك نذهب غدا");
-  assertStringIncludes(sent, "وش رايك نروح البر؟");
+  assertStringIncludes(sent, "I go to market yesterday");
+  assertStringIncludes(sent, "wanna head to the beach?");
 });
 
 Deno.test("writing-coach reports a model failure without leaking a 500", async () => {
   const result = await call(
-    arabicReply,
+    englishReply,
     upstreams({
       "ai.gateway.lovable.dev": () => json({ error: "down" }, 503),
       "openrouter.ai": () => json({ error: "down" }, 503),
@@ -266,8 +270,9 @@ Deno.test("writing-coach hands back a message to reply to", async () => {
 
   assertEquals(result.status, 200);
   const returned = result.body.prompt as Record<string, unknown>;
+  assertEquals(returned.message_english, prompt.message_english);
   assertEquals(returned.message_arabic, prompt.message_arabic);
-  assert(String(returned.scenario_english).length > 0);
+  assert(String(returned.scenario_arabic).length > 0);
 });
 
 Deno.test("writing-coach asks for a text message, not an essay", async () => {

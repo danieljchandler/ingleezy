@@ -136,7 +136,7 @@ const SouqNews = () => {
             <InfoHint {...PAGE_HINTS["souq-news"]} size="md" />
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Today's news from your region, told in easy English
+            أخبار منطقتك اليوم، بإنجليزي سهل
           </p>
         </div>
         <div className="flex items-center gap-2 shrink-0">

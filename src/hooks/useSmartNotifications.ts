@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { parseLocalDate } from "@/lib/localDate";
+import { arCount } from "@/lib/strings";
 
 export interface SmartNotification {
   id: string;
@@ -44,8 +45,13 @@ export function useSmartNotifications() {
         notifications.push({
           id: "review-due",
           type: "review_due",
-          title: `${totalDue} words due for review`,
-          body: totalDue >= 10 ? "Don't let them slip! Review now to keep your memory strong." : "A quick review session will keep your progress on track.",
+          title: arCount(totalDue, {
+            one: "كلمة وحدة مستحقة للمراجعة",
+            two: "كلمتان مستحقتان للمراجعة",
+            few: "كلمات مستحقة للمراجعة",
+            many: "كلمة مستحقة للمراجعة",
+          }),
+          body: totalDue >= 10 ? "لا تخلّها تفوتك! راجع الآن عشان تثبت." : "جلسة مراجعة سريعة تخلّي تقدّمك على السكة.",
           icon: "🧠",
           actionUrl: "/review",
           priority: totalDue >= 20 ? "high" : "medium",
@@ -70,8 +76,8 @@ export function useSmartNotifications() {
           notifications.push({
             id: "streak-risk",
             type: "streak_risk",
-            title: `${streak.current_streak}-day streak at risk!`,
-            body: "Review before midnight to keep your streak alive 🔥",
+            title: `سلسلة ${streak.current_streak} يوم في خطر!`,
+            body: "راجع قبل منتصف الليل عشان تبقى سلسلتك 🔥",
             icon: "🔥",
             actionUrl: "/review",
             priority: "high",
@@ -92,8 +98,13 @@ export function useSmartNotifications() {
         notifications.push({
           id: "battle-invite",
           type: "battle_invite",
-          title: `${pendingBattles.length} vocab battle${pendingBattles.length > 1 ? "s" : ""} waiting`,
-          body: "Someone challenged you! Show them what you've got.",
+          title: arCount(pendingBattles.length, {
+            one: "تحدي كلمات ينتظرك",
+            two: "تحديا كلمات ينتظرانك",
+            few: "تحديات كلمات تنتظرك",
+            many: "تحدي كلمات ينتظرك",
+          }),
+          body: "أحدهم تحدّاك! ورّهم وش عندك.",
           icon: "⚔️",
           actionUrl: "/battles",
           priority: "medium",
@@ -114,8 +125,8 @@ export function useSmartNotifications() {
         notifications.push({
           id: "coach-advice",
           type: "coach_advice",
-          title: "New weekly coaching ready",
-          body: latestRec.motivation_message || "Your AI coach has personalized advice for you.",
+          title: "نصائح الأسبوع جاهزة",
+          body: latestRec.motivation_message || "مدرّبك الذكي عنده نصائح مخصّصة لك.",
           icon: "🎯",
           actionUrl: "/analytics",
           priority: "low",
@@ -135,10 +146,10 @@ export function useSmartNotifications() {
           notifications.push({
             id: "weekly-summary",
             type: "weekly_summary",
-            title: "New week, new goals!",
+            title: "أسبوع جديد، أهداف جديدة!",
             body: xpData.xp_this_week > 0
-              ? `You earned ${xpData.xp_this_week} XP last week. Let's beat that!`
-              : "Start strong this week — set a learning goal!",
+              ? `جمعت ${xpData.xp_this_week} نقطة الأسبوع الماضي. خلّنا نكسرها!`
+              : "ابدأ الأسبوع بقوة — حدّد هدفاً!",
             icon: "📊",
             actionUrl: "/analytics",
             priority: "low",

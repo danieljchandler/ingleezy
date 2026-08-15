@@ -248,7 +248,7 @@ export default function PlacementQuiz() {
                 {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "ابدأ الاختبار"}
               </Button>
               <Button variant="ghost" onClick={() => navigate(-1)} className="text-muted-foreground">
-                Go Back
+                رجوع
               </Button>
             </div>
           </div>

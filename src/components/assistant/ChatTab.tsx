@@ -220,7 +220,7 @@ export function ChatTab({ onComposerFocus }: ChatTabProps = {}) {
                             className="inline-flex items-center gap-1 text-[11px] text-muted-foreground transition-colors hover:text-primary"
                           >
                             <Bookmark className="h-3 w-3" />
-                            Save phrase
+                            احفظ العبارة
                           </button>
                         )}
                         <button

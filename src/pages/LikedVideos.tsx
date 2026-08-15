@@ -145,7 +145,7 @@ const LikedVideos = () => {
             </p>
             <Button onClick={() => navigate("/discover")}>
               <Play className="h-4 w-4 mr-2" />
-              Browse Videos
+              تصفّح المقاطع
             </Button>
           </div>
         )}

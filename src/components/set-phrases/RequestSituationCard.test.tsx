@@ -265,7 +265,7 @@ describe("keeping a phrase", () => {
     });
 
     await waitFor(() =>
-      expect(screen.getByRole("button", { name: /saved/i })).toBeInTheDocument(),
+      expect(screen.getByRole("button", { name: /محفوظة/ })).toBeInTheDocument(),
     );
     expect(toasts.success).toHaveBeenCalledWith("حفظناها في عباراتي");
     expect(saveButtons()).toHaveLength(1);
@@ -288,7 +288,7 @@ describe("keeping a phrase", () => {
     const { backend } = await generated();
 
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: /save all/i }));
+      fireEvent.click(screen.getByRole("button", { name: /احفظ الكل/ }));
     });
 
     // Six phrases for one situation are a set; saving them one at a time is six
@@ -308,7 +308,7 @@ describe("keeping a phrase", () => {
     await waitFor(() => expect(phrasesWrittenTo(backend)).toHaveLength(1));
 
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: /save all/i }));
+      fireEvent.click(screen.getByRole("button", { name: /احفظ الكل/ }));
     });
 
     await waitFor(() => expect(phrasesWrittenTo(backend)).toHaveLength(2));
@@ -318,7 +318,7 @@ describe("keeping a phrase", () => {
     await generated({ seed: (b) => b.db.failInserts("user_phrases") });
 
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: /save all/i }));
+      fireEvent.click(screen.getByRole("button", { name: /احفظ الكل/ }));
     });
 
     // Pinned: Save all swallows each failure so that one duplicate cannot stop

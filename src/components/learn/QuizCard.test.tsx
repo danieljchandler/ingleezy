@@ -263,7 +263,7 @@ describe("answering", () => {
     // The correction is the only teaching this card does; letting it flash past
     // would waste the one moment the learner is paying attention.
     expect(onAnswer).not.toHaveBeenCalled();
-    expect(screen.getByRole("button", { name: "Continue" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "كمّل" })).toBeInTheDocument();
   });
 
   it("says what the word actually meant", () => {
@@ -280,7 +280,7 @@ describe("answering", () => {
     const { onAnswer } = render();
     choose("house");
 
-    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+    fireEvent.click(screen.getByRole("button", { name: "كمّل" }));
 
     expect(onAnswer).toHaveBeenCalledWith(false);
   });

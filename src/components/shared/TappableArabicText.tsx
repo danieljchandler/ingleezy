@@ -159,13 +159,13 @@ export const TappableArabicText = ({
         ...prev,
         [cleanWord]: { ...(prev[cleanWord] ?? { translation: "" }), samples: sentences, generatingSamples: false },
       }));
-      if (sentences.length === 0) toast.error("Couldn't generate sentences");
+      if (sentences.length === 0) toast.error("تعذّر توليد الجمل");
     } catch {
       setWordTranslations((prev) => ({
         ...prev,
         [cleanWord]: { ...(prev[cleanWord] ?? { translation: "" }), generatingSamples: false },
       }));
-      toast.error("Couldn't generate sentences");
+      toast.error("تعذّر توليد الجمل");
     }
   };
 
@@ -464,7 +464,7 @@ export const TappableArabicText = ({
                         }}
                       >
                         <MessageCircleQuestion className="h-3 w-3 mr-1" />
-                        Ask AI about this word
+                        اسأل الذكاء عن الكلمة
                       </Button>
                       <Button
                         variant="outline"
@@ -476,7 +476,7 @@ export const TappableArabicText = ({
                         }}
                       >
                         <Link2 className="h-3 w-3 mr-1" />
-                        Combine with neighbour
+                        اضمّها للكلمة الجارة
                       </Button>
                       <Button
                         variant="outline"
@@ -510,7 +510,7 @@ export const TappableArabicText = ({
                               {s.literal && (
                                 <p className="italic text-muted-foreground/70">
                                   <span className="not-italic uppercase tracking-wide text-[9px] mr-1 text-muted-foreground/50">
-                                    Literal
+                                    حرفي
                                   </span>
                                   {s.literal}
                                 </p>
@@ -532,7 +532,7 @@ export const TappableArabicText = ({
                         }}
                       >
                         <BookmarkPlus className="h-3 w-3 mr-1" />
-                        Save to My Words
+                        احفظ في كلماتي
                       </Button>
                     )}
                   </div>
@@ -557,7 +557,7 @@ export const TappableArabicText = ({
                 </p>
                 {phraseData?.enriching && (
                   <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                    <Loader2 className="h-3 w-3 animate-spin" /> Translating phrase…
+                    <Loader2 className="h-3 w-3 animate-spin" /> نترجم العبارة…
                   </p>
                 )}
                 {phraseData && !phraseData.enriching && phraseData.translation && (
@@ -566,7 +566,7 @@ export const TappableArabicText = ({
                 {phraseData && !phraseData.enriching && phraseData.enrichment?.literal && (
                   <p className="text-xs italic text-muted-foreground/80 mt-0.5">
                     <span className="not-italic uppercase tracking-wide text-[9px] mr-1 text-muted-foreground/60">
-                      Literal
+                      حرفي
                     </span>
                     {phraseData.enrichment.literal}
                   </p>
@@ -591,7 +591,7 @@ export const TappableArabicText = ({
                 disabled={!phraseText || phraseData?.enriching}
               >
                 <Sparkles className="h-3 w-3 mr-1" />
-                Translate phrase
+                ترجم العبارة
               </Button>
               <Button
                 size="sm"
@@ -600,7 +600,7 @@ export const TappableArabicText = ({
                 disabled={!phraseText || !phraseData?.translation}
               >
                 <BookmarkPlus className="h-3 w-3 mr-1" />
-                Save phrase
+                احفظ العبارة
               </Button>
             </div>
           </div>

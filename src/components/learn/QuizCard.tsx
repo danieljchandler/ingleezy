@@ -219,7 +219,7 @@ export const QuizCard = ({ word, otherWords, onAnswer, topicLabel }: QuizCardPro
           onClick={handleContinue}
           className="mt-3 w-full py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity animate-in fade-in duration-300"
         >
-          Continue
+          كمّل
         </button>
       )}
     </div>

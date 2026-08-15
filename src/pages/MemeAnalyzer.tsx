@@ -329,7 +329,7 @@ const MemeAnalyzer = () => {
             ) : (
               <img
                 src={mediaPreviewUrl!}
-                alt="Meme preview"
+                alt="معاينة الميم"
                 className="w-full max-h-80 object-contain bg-black"
               />
             )}
@@ -381,7 +381,7 @@ const MemeAnalyzer = () => {
             ) : (
               <img
                 src={mediaPreviewUrl!}
-                alt="Analyzed meme"
+                alt="الميم بعد التحليل"
                 className="w-full max-h-80 object-contain bg-black"
               />
             )}

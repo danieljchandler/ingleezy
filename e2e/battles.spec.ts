@@ -424,6 +424,6 @@ test.describe("finishing a battle", () => {
     // page offers no retry, so a failed submit costs the learner the battle
     // with nothing but a toast to say why.
     await expect(page.getByText(/row-level security/)).toBeVisible();
-    await expect(page.getByRole("button", { name: /Try Again|Retry/ })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /جرّب مرة ثانية|أعد المحاولة/ })).toHaveCount(0);
   });
 });

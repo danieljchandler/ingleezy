@@ -159,7 +159,7 @@ const NativeFeedback = () => {
       </div>
 
       <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-        Your requests
+        طلباتك
       </h2>
       <div className="space-y-3">
         {(status?.requests ?? []).map((request) => (
@@ -180,7 +180,7 @@ const NativeFeedback = () => {
             {request.response_text && (
               <div className="mt-3 rounded-lg bg-emerald-500/10 p-3">
                 <p className="mb-1 text-xs font-medium text-emerald-700 dark:text-emerald-400">
-                  Native speaker's version
+                  صيغة الناطق الأصلي
                 </p>
                 <p dir="auto" className="text-sm">{request.response_text}</p>
                 {request.reviewer_notes && (

@@ -9,13 +9,15 @@ const ingleezyLogo = ingleezyLogoAsset.url;
  * Logged-out landing hero shown on `/` when the visitor isn't authenticated.
  * Goal: explain Ingleezy in one screen and push to /auth or /placement.
  *
- * The framing is the name. Ingleezy is حكاية — a story — so the page opens on
- * people telling one round a fire, and the three value cards run as a story
- * arc: who tells it, how it stays with you, what you get to hear next.
+ * The framing is the name. إنجليزي is what an Arabic speaker already calls the
+ * language — not "English as a Foreign Language", just the thing everyone is
+ * trying to speak. So the promise is spoken English rather than exam English,
+ * and it is made in the visitor's own language: this page is Arabic end to
+ * end, and the only Latin script on it is the product's own logo.
  *
- * The journey/caravan metaphor is not gone, just moved to where it earns its
- * keep: the placement quiz ("wherever you are in your journey") and the
- * Alphabet Journey's 28-stop caravan.
+ * The campfire stays. Inherited from Hakiya it meant "a story told round a
+ * fire"; here it carries the same weight for the opposite direction — real
+ * people talking, which is the English this app teaches.
  */
 export function LandingHero() {
   const navigate = useNavigate();
@@ -24,17 +26,14 @@ export function LandingHero() {
     <section className="py-6">
       {/* Logo */}
       <div className="flex justify-center mb-5">
-        <img src={ingleezyLogo} alt="Ingleezy" className="h-16 sm:h-20" />
+        <img src={ingleezyLogo} alt="إنجليزي" className="h-16 sm:h-20" />
       </div>
 
       {/* The fire: campfire clip + its one-line beat */}
       <div className="flex flex-col items-center mb-6">
         <CampfireMedallion className="max-w-[360px] sm:max-w-[480px]" />
         <p className="mt-3 text-caption text-muted-foreground text-center">
-          <span className="font-arabic" dir="rtl">
-            حكاية
-          </span>{" "}
-          — a story. Yours starts with one word.
+          إنجليزي — اللي الناس تتكلمه فعلاً. يبدأ بكلمة وحدة.
         </p>
       </div>
 
@@ -42,25 +41,20 @@ export function LandingHero() {
       <div className="text-center max-w-xl mx-auto mb-8">
         {/*
           The line breaks are deliberate: left to wrap on its own the headline
-          splits after "one", and the dialect line strands "Yemeni." on a line
-          of its own at 375px. The dialect names step down a size — they qualify
-          the promise above rather than share its weight.
+          strands the last word alone at 375px. The dialect names step down a
+          size — they qualify the promise above rather than share its weight.
         */}
         <h1 className="text-t-headline sm:text-t-display text-desert-red mb-3 text-balance">
-          Real spoken Arabic,
+          إنجليزي محكي حقيقي،
           <br />
-          one story at a time.
+          كلمة كلمة.
           <span className="block mt-1 text-t-subtitle sm:text-t-title text-desert-red/70">
-            Gulf · Egyptian · Yemeni.
+            نشرح لك بلهجتك: خليجي · مصري · يمني.
           </span>
         </h1>
         <p className="text-base text-muted-foreground leading-relaxed">
-          Ingleezy means{" "}
-          <span className="font-arabic" dir="rtl">
-            حكاية
-          </span>{" "}
-          — a story. Dialect-first lessons, native audio, and spaced-repetition
-          flashcards built from the stories people actually tell.
+          كل شي هنا إنجليزي، وكل شرح له بلهجتك إنت. دروس، صوت ناطقين أصليين،
+          وبطاقات مراجعة متباعدة مبنية من كلام الناس الحقيقي — مو من كتاب.
         </p>
       </div>
 
@@ -70,34 +64,34 @@ export function LandingHero() {
           className="flex-1 h-12 text-base"
           onClick={() => navigate("/auth")}
         >
-          Join the beta — it's free
-          <ArrowRight className="h-4 w-4 ml-2" />
+          انضم للتجربة — مجاناً
+          <ArrowRight className="h-4 w-4 mr-2" />
         </Button>
         <Button
           variant="outline"
           className="flex-1 h-12 text-base"
           onClick={() => navigate("/placement")}
         >
-          Try the placement quiz
+          جرّب اختبار المستوى
         </Button>
       </div>
 
-      {/* Value props — who tells the story, how it sticks, what you hear next */}
+      {/* Value props — who says it, how it sticks, what you hear next */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-3xl mx-auto mb-6">
         <ValueCard
           icon={<Headphones className="h-5 w-5" />}
-          title="Told by native voices"
-          body="Every word and sentence recorded by native speakers from the Gulf, Egypt and Yemen — so what you learn is what you'll actually hear."
+          title="بأصوات ناطقين أصليين"
+          body="كل كلمة وجملة مسجّلة بصوت ناطقين بالإنجليزي — فاللي تتعلمه هو نفسه اللي بتسمعه برّا."
         />
         <ValueCard
           icon={<Brain className="h-5 w-5" />}
-          title="Every story stays with you"
-          body="Words come back exactly when you're about to forget them. Built on FSRS, the modern successor to SM-2."
+          title="كل كلمة تثبت معك"
+          body="الكلمات ترجع لك بالضبط قبل ما تنساها. مبني على FSRS، وريث SM-2 الحديث."
         />
         <ValueCard
           icon={<PlayCircle className="h-5 w-5" />}
-          title="Stories you'd actually watch"
-          body="TikToks, news clips, stories and conversations — tap any word to learn and save it."
+          title="محتوى تتفرّج عليه أصلاً"
+          body="تيك توك، مقاطع أخبار، قصص ومحادثات — دوس على أي كلمة تتعلمها وتحفظها."
         />
       </div>
 
@@ -106,11 +100,7 @@ export function LandingHero() {
         <p className="text-xs text-muted-foreground flex items-center justify-center gap-2">
           <Globe2 className="h-3.5 w-3.5 shrink-0" />
           <span>
-            Coming from MSA? We bridge{" "}
-            <span className="font-arabic" dir="rtl">
-              فصحى
-            </span>{" "}
-            into spoken dialect for you.
+            درست إنجليزي بالمدرسة؟ نوصّلك من إنجليزي الكتاب إلى الإنجليزي المحكي.
           </span>
         </p>
       </div>

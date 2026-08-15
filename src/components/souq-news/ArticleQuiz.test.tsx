@@ -307,7 +307,7 @@ describe("the result", () => {
   it("goes back to the article when closed", async () => {
     await finishWith("Prices rose");
 
-    fireEvent.click(screen.getByRole("button", { name: /close quiz/i }));
+    fireEvent.click(screen.getByRole("button", { name: /أغلق الاختبار/ }));
 
     expect(screen.getByRole("button", { name: /test comprehension/i })).toBeInTheDocument();
   });

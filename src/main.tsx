@@ -17,7 +17,7 @@ const boot = async () => {
   } catch (err) {
     console.error("[boot] FATAL render error:", err);
     if (root) {
-      root.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;flex-direction:column;gap:12px"><p style="font-size:18px;color:#8C4135">⚠️ App failed to load</p><pre style="font-size:12px;color:#666;max-width:90vw;overflow:auto">${String(err)}</pre><button onclick="location.reload()" style="padding:8px 16px;border-radius:8px;background:#8C4135;color:white;border:none;cursor:pointer">Reload</button></div>`;
+      root.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;flex-direction:column;gap:12px"><p style="font-size:18px;color:#8C4135">⚠️ التطبيق ما قدر يشتغل</p><pre style="font-size:12px;color:#666;max-width:90vw;overflow:auto">${String(err)}</pre><button onclick="location.reload()" style="padding:8px 16px;border-radius:8px;background:#8C4135;color:white;border:none;cursor:pointer">أعد التحميل</button></div>`;
     }
   }
 };

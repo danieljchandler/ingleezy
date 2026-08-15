@@ -274,7 +274,7 @@ describe("saving it", () => {
 
     // And stops being pressable, so a second tap cannot add the same phrase
     // to the deck twice.
-    await waitFor(() => expect(screen.getByRole("button", { name: /saved/i })).toBeDisabled());
+    await waitFor(() => expect(screen.getByRole("button", { name: /محفوظة/ })).toBeDisabled());
   });
 
   it("refuses for a signed-out visitor", async () => {

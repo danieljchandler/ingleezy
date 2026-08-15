@@ -41,7 +41,7 @@ describe("LoadingPanel", () => {
   it("announces once, statically, rather than on every rotation", () => {
     render(<LoadingPanel task="passage" showAfterMs={0} />);
     const status = screen.getByRole("status");
-    expect(status).toHaveTextContent("Loading, please wait");
+    expect(status).toHaveTextContent("جاري التحميل، لحظة");
     expect(status).not.toHaveAttribute("aria-live", "assertive");
   });
 

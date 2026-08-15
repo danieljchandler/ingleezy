@@ -78,7 +78,7 @@ const SavedChats = () => {
           <HomeButton />
           <h1 className="flex items-center gap-2 text-xl font-bold">
             <Sparkles className="h-5 w-5 text-primary" />
-            Saved Chats
+            المحادثات المحفوظة
           </h1>
           <div className="w-9" />
         </div>

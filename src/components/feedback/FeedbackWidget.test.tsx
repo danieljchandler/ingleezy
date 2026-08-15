@@ -215,7 +215,7 @@ describe("opening it", () => {
 
     // A screenshot that will not render must not cost the tester their report.
     expect(toasts.error).toHaveBeenCalledWith("تعذّر التقاط الشاشة.");
-    expect(screen.getByText(/No screenshot captured/)).toBeInTheDocument();
+    expect(screen.getByText(/ما التقطنا صورة/)).toBeInTheDocument();
   });
 });
 

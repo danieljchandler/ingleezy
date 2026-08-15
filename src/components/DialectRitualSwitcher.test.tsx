@@ -111,7 +111,7 @@ describe("opening the picker", () => {
 
     // Nobody expects a language toggle to change their review queue.
     expect(
-      screen.getByText(/re-tunes prompts, audio voices, and your review queue/),
+      screen.getByText(/يعيد ضبط الشروحات وأصوات النطق/),
     ).toBeInTheDocument();
   });
 

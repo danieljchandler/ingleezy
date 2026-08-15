@@ -20,24 +20,24 @@ describe("TranslationPair — the compact form", () => {
   it("adds the literal gloss underneath, labelled", () => {
     render(<TranslationPair natural="I went to the market" literal="went-I the-market" />);
     expect(screen.getByText("went-I the-market")).toBeInTheDocument();
-    expect(screen.getByText("Literal")).toBeInTheDocument();
+    expect(screen.getByText("حرفي")).toBeInTheDocument();
   });
 
   it("shows only the natural line for content that predates the field", () => {
     render(<TranslationPair natural="I went to the market" />);
-    expect(screen.queryByText("Literal")).not.toBeInTheDocument();
+    expect(screen.queryByText("حرفي")).not.toBeInTheDocument();
   });
 
   it("treats an explicit null the same as absent", () => {
     render(<TranslationPair natural="I went to the market" literal={null} />);
-    expect(screen.queryByText("Literal")).not.toBeInTheDocument();
+    expect(screen.queryByText("حرفي")).not.toBeInTheDocument();
   });
 
   it("treats a whitespace-only gloss as absent", () => {
     // The generator emits "" or " " rather than omitting the key, so a trim is
     // what stands between a label and an empty line.
     render(<TranslationPair natural="I went to the market" literal="   " />);
-    expect(screen.queryByText("Literal")).not.toBeInTheDocument();
+    expect(screen.queryByText("حرفي")).not.toBeInTheDocument();
   });
 
   it("stays left-to-right inside an Arabic page", () => {
@@ -56,8 +56,8 @@ describe("TranslationPair — the grid form", () => {
     render(
       <TranslationPair variant="grid" natural="I went to the market" literal="went-I the-market" />,
     );
-    expect(screen.getByText("Literal")).toBeInTheDocument();
-    expect(screen.getByText("Natural")).toBeInTheDocument();
+    expect(screen.getByText("حرفي")).toBeInTheDocument();
+    expect(screen.getByText("طبيعي")).toBeInTheDocument();
     expect(screen.getByText("went-I the-market")).toBeInTheDocument();
     expect(screen.getByText("I went to the market")).toBeInTheDocument();
   });
@@ -72,13 +72,13 @@ describe("TranslationPair — the grid form", () => {
     // grid rendered its heading and paragraph unconditionally — a heading over
     // an empty half of the Translate page, which is most of the older content.
     render(<TranslationPair variant="grid" natural="I went to the market" />);
-    expect(screen.queryByText("Literal")).not.toBeInTheDocument();
-    expect(screen.getByText("Natural")).toBeInTheDocument();
+    expect(screen.queryByText("حرفي")).not.toBeInTheDocument();
+    expect(screen.getByText("طبيعي")).toBeInTheDocument();
   });
 
   it("drops it for a whitespace-only gloss too", () => {
     render(<TranslationPair variant="grid" natural="I went to the market" literal="  " />);
-    expect(screen.queryByText("Literal")).not.toBeInTheDocument();
+    expect(screen.queryByText("حرفي")).not.toBeInTheDocument();
   });
 
   it("collapses to one column rather than leaving a gap", () => {

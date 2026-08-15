@@ -27,7 +27,7 @@ const NotFound = () => {
             className="text-2xl font-semibold mb-3 text-foreground"
             style={{ fontFamily: "'Montserrat', sans-serif" }}
           >
-            We couldn't find that page
+            ما لقينا هذي الصفحة
           </h1>
           <p className="text-muted-foreground mb-6">
             The link may be broken, or the page may have moved. Try heading back
@@ -36,7 +36,7 @@ const NotFound = () => {
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Button onClick={() => navigate(-1)} variant="outline" className="h-11">
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Go back
+              رجوع
             </Button>
             <Button onClick={() => navigate("/")} className="h-11">
               <Home className="h-4 w-4 mr-2" />

@@ -106,7 +106,7 @@ export function ReferralCard() {
     return (
       <Button variant="outline" className="w-full gap-2" onClick={load}>
         <Gift className="h-4 w-4" />
-        Invite friends
+        عزّم أصحابك
       </Button>
     );
   }

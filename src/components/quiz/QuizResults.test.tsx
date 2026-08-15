@@ -223,20 +223,20 @@ describe("QuizResults — the answer review", () => {
 
   it("still shows the review heading for an empty quiz", () => {
     render([], 0);
-    expect(screen.getByText("Review Answers")).toBeInTheDocument();
+    expect(screen.getByText("راجع إجاباتك")).toBeInTheDocument();
   });
 });
 
 describe("QuizResults — what happens next", () => {
   it("offers another go at the same topic", () => {
     const { onRestart } = render(answers(3, 1));
-    fireEvent.click(screen.getByRole("button", { name: /Try Again/ }));
+    fireEvent.click(screen.getByRole("button", { name: /جرّب مرة ثانية/ }));
     expect(onRestart).toHaveBeenCalledTimes(1);
   });
 
   it("offers the way back to the topic list", () => {
     const { onHome } = render(answers(3, 1));
-    fireEvent.click(screen.getByRole("button", { name: /Back to Topics/ }));
+    fireEvent.click(screen.getByRole("button", { name: /رجوع للمواضيع/ }));
     expect(onHome).toHaveBeenCalledTimes(1);
   });
 
@@ -244,13 +244,13 @@ describe("QuizResults — what happens next", () => {
     // Retrying is the thing a learner who just scored badly should find first.
     const { onRestart, onHome, ...rest } = render(answers(5, 1));
     const buttons = rest.container.querySelectorAll(".space-y-3 > button");
-    expect(buttons[0]).toHaveTextContent("Try Again");
-    expect(buttons[1]).toHaveTextContent("Back to Topics");
+    expect(buttons[0]).toHaveTextContent("جرّب مرة ثانية");
+    expect(buttons[1]).toHaveTextContent("رجوع للمواضيع");
   });
 
   it("offers both even on a perfect score", () => {
     render(answers(4, 4));
-    expect(screen.getByRole("button", { name: /Try Again/ })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Back to Topics/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /جرّب مرة ثانية/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /رجوع للمواضيع/ })).toBeInTheDocument();
   });
 });

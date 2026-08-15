@@ -31,12 +31,12 @@ export const MarkUnknownsToggle = ({ className }: Props) => {
       {enabled ? (
         <>
           <Check className="h-3.5 w-3.5" />
-          Marking
+          نعلّم
         </>
       ) : (
         <>
           <BookmarkPlus className="h-3.5 w-3.5" />
-          Mark unknowns
+          علّم اللي ما تعرفه
         </>
       )}
     </Button>

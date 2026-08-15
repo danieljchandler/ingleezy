@@ -84,8 +84,8 @@ describe("WeeklyGoalCard — the two goals", () => {
 
   it("labels which is which", () => {
     renderCard();
-    expect(screen.getByText("Reviews")).toBeInTheDocument();
-    expect(screen.getByText("XP Earned")).toBeInTheDocument();
+    expect(screen.getByText("مراجعات")).toBeInTheDocument();
+    expect(screen.getByText("نقاط مكتسبة")).toBeInTheDocument();
   });
 
   it("fills each bar to its own percentage", () => {

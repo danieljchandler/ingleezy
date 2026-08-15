@@ -37,7 +37,7 @@ export function NotificationBell() {
           open && "bg-muted/50 text-foreground"
         )}
         title="Notifications"
-        aria-label="Notifications"
+        aria-label="الإشعارات"
       >
         <Bell className="h-4 w-4" />
         {count > 0 && (
@@ -59,7 +59,7 @@ export function NotificationBell() {
           "animate-in fade-in slide-in-from-top-2 duration-200"
         )}>
           <div className="p-3 border-b border-border">
-            <h3 className="font-semibold text-foreground text-sm">Notifications</h3>
+            <h3 className="font-semibold text-foreground text-sm">الإشعارات</h3>
           </div>
 
           {count === 0 ? (
@@ -90,7 +90,7 @@ export function NotificationBell() {
                       <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{n.body}</p>
                     </div>
                     {n.priority === "high" && (
-                      <span className="text-[10px] font-bold text-destructive uppercase shrink-0">Urgent</span>
+                      <span className="text-[10px] font-bold text-destructive uppercase shrink-0">عاجل</span>
                     )}
                   </div>
                 </button>

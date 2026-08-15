@@ -1714,7 +1714,7 @@ const DiscoverVideo = () => {
               size="sm"
               onClick={() => { setTimerPlaying(false); setTimerMs(0); setManualLineIndex(0); setLineControlIndex(0); }}
             >
-              Reset
+              صفّر
             </Button>
             <span className="text-xs text-muted-foreground tabular-nums">
               {Math.floor(timerMs / 1000)}s
@@ -1794,7 +1794,7 @@ const DiscoverVideo = () => {
                       style={{ fontFamily: "'Open Sans', sans-serif" }}
                     >
                       <span className="not-italic uppercase tracking-wide text-[9px] mr-1.5 text-muted-foreground/60">
-                        Literal
+                        حرفي
                       </span>
                       {displayLine.literal}
                     </p>

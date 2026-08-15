@@ -208,12 +208,12 @@ const TutorUpload = () => {
           <div className="flex flex-col gap-3 max-w-xs mx-auto">
             <Button onClick={() => navigate("/my-words")}>
               <BookOpen className="h-4 w-4 mr-2" />
-              View My Words
+              افتح كلماتي
             </Button>
             <Button variant="outline" onClick={() => {
               setStep("upload");
             }}>
-              Upload Another
+              ارفع مقطعاً ثانياً
             </Button>
           </div>
         </div>

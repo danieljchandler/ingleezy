@@ -31,7 +31,7 @@ beforeEach(() => {
 async function open() {
   render(<ReferralCard />);
   await act(async () => {
-    fireEvent.click(screen.getByRole("button", { name: /Invite friends/ }));
+    fireEvent.click(screen.getByRole("button", { name: /عزّم أصحابك/ }));
   });
 }
 
@@ -111,7 +111,7 @@ describe("failure", () => {
   it("collapses back to the button when the code cannot load", async () => {
     invoke.mockResolvedValue({ data: null, error: { message: "boom" } });
     await open();
-    expect(screen.getByRole("button", { name: /Invite friends/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /عزّم أصحابك/ })).toBeInTheDocument();
     expect(screen.queryByText("GVQX7RPM")).not.toBeInTheDocument();
   });
 });

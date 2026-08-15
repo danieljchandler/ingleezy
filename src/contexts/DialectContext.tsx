@@ -118,7 +118,7 @@ export const DialectProvider = ({ children }: { children: ReactNode }) => {
           .then(({ error }) => {
             if (error) {
               console.error('Failed to persist dialect preference:', error);
-              toast.error('Could not save dialect preference');
+              toast.error('تعذّر حفظ اللهجة');
             }
           });
       }

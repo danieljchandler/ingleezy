@@ -105,7 +105,7 @@ describe("asking the question", () => {
   it("asks for the English", () => {
     render();
 
-    expect(screen.getByText("What is this in English?")).toBeInTheDocument();
+    expect(screen.getByText("وش هذي بالإنجليزي؟")).toBeInTheDocument();
   });
 
   it("shows the picture when the word has one", () => {

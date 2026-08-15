@@ -41,7 +41,7 @@ export function showCapToastIfLimited(error: unknown, data: unknown): boolean {
         const body = (await (ctx as Response).clone().json()) as CapBody;
         showCapToast(body);
       } catch {
-        showCapToast({ message: "Daily free limit reached." });
+        showCapToast({ message: "وصلت حدّك المجاني اليوم." });
       }
     })();
     return true;
@@ -54,14 +54,14 @@ export function showCapToastIfLimited(error: unknown, data: unknown): boolean {
 }
 
 export function showCapToast(body: CapBody) {
-  toast.error("Daily free limit reached", {
+  toast.error("وصلت حدّك المجاني اليوم", {
     description:
       body.message ||
       (body.limit
-        ? `You've used your ${body.limit} free uses for today. Upgrade for unlimited.`
-        : "Upgrade for unlimited access."),
+        ? `استخدمت ${body.limit} مرات مجانية اليوم. رقّي اشتراكك وخلّها بلا حدود.`
+        : "رقّي اشتراكك وخلّها بلا حدود."),
     action: {
-      label: "Upgrade",
+      label: "رقّي اشتراكك",
       onClick: navigateToPricing,
     },
     duration: 8000,

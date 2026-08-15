@@ -20,7 +20,7 @@ export function AchievementsGrid() {
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Trophy className="h-5 w-5 text-amber-500" />
-          <h3 className="font-semibold text-foreground">Achievements</h3>
+          <h3 className="font-semibold text-foreground">الإنجازات</h3>
         </div>
         <span className="text-sm text-muted-foreground">
           {earnedCount}/{totalCount}

@@ -178,7 +178,7 @@ const Auth = () => {
         <div className="text-center mb-10">
           <img 
             src={lahjaIcon} 
-            alt="Ingleezy" 
+            alt="إنجليزي" 
             className="h-14 w-14 mx-auto mb-5"
           />
           <h1 className="text-2xl font-bold text-foreground mb-2 font-heading">
@@ -286,7 +286,7 @@ const Auth = () => {
                   type="text"
                   value={inviteCode}
                   onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
-                  placeholder="e.g. INGLEEZY-XXXX"
+                  placeholder="مثلاً: INGLEEZY-XXXX"
                   className="h-11 rounded-lg font-mono tracking-wider"
                   autoComplete="off"
                   autoCapitalize="characters"

@@ -70,9 +70,9 @@ const ReadingLibrary = () => {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">كل المستويات</SelectItem>
-              <SelectItem value="beginner">Beginner</SelectItem>
-              <SelectItem value="intermediate">Intermediate</SelectItem>
-              <SelectItem value="advanced">Advanced</SelectItem>
+              <SelectItem value="beginner">مبتدئ</SelectItem>
+              <SelectItem value="intermediate">متوسط</SelectItem>
+              <SelectItem value="advanced">متقدّم</SelectItem>
             </SelectContent>
           </Select>
 
@@ -83,9 +83,9 @@ const ReadingLibrary = () => {
             <SelectContent>
               <SelectItem value="all">كل اللهجات</SelectItem>
               <SelectItem value="Gulf">Gulf</SelectItem>
-              <SelectItem value="Egyptian">Egyptian</SelectItem>
-              <SelectItem value="Yemeni">Yemeni</SelectItem>
-              <SelectItem value="Levantine">Levantine</SelectItem>
+              <SelectItem value="Egyptian">مصري</SelectItem>
+              <SelectItem value="Yemeni">يمني</SelectItem>
+              <SelectItem value="Levantine">شامي</SelectItem>
               <SelectItem value="MSA">MSA</SelectItem>
             </SelectContent>
           </Select>

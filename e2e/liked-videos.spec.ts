@@ -173,7 +173,7 @@ test.describe("the shelf", () => {
     await page.goto("/liked-videos");
 
     await expect(page.getByText("لا فيديوهات بعد")).toBeVisible();
-    await page.getByRole("button", { name: /Browse Videos/ }).click();
+    await page.getByRole("button", { name: /تصفّح المقاطع/ }).click();
     await expect(page).toHaveURL(/\/discover$/);
   });
 

@@ -99,10 +99,10 @@ export const IntroCard = ({ word, onContinue, topicLabel }: IntroCardProps) => {
 
       {/* English Translation */}
       <div className="mb-6 py-3 px-5 rounded-xl bg-card border border-border">
-        <p className="text-xs text-muted-foreground/70 mb-1 uppercase tracking-wide">
-          English
+        <p className="text-xs text-muted-foreground/70 mb-1 tracking-wide">
+          بالإنجليزي
         </p>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-muted-foreground font-english">
           {word.word_english}
         </p>
       </div>

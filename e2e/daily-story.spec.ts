@@ -174,7 +174,7 @@ test.describe("when there is no story yet", () => {
 
     await page.goto("/today/story");
 
-    await expect(page.getByRole("button", { name: /try again/i })).toBeVisible();
+    await expect(page.getByRole("button", { name: /جرّب مرة ثانية/ })).toBeVisible();
     await expect(page.getByText(ENGLISH[0])).toHaveCount(0);
   });
 });

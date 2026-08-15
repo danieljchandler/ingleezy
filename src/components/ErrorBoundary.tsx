@@ -152,7 +152,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
                     variant="outline"
                     onClick={() => window.location.reload()}
                   >
-                    Reload page
+                    أعد تحميل الصفحة
                   </Button>
                 )}
               </div>

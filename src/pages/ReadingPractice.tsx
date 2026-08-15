@@ -797,7 +797,7 @@ const ReadingPractice = () => {
               id="custom-topic"
               value={customTopic}
               onChange={(e) => setCustomTopic(e.target.value)}
-              placeholder="e.g. ordering coffee at a café, visiting the doctor, shopping at the gold souk..."
+              placeholder="مثلاً: تطلب قهوة في كافيه، تزور الدكتور، تتسوّق…"
               className="flex w-full rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring resize-none min-h-[72px]"
               maxLength={200}
             />
@@ -875,7 +875,7 @@ const ReadingPractice = () => {
           <div className="flex gap-3 justify-center">
             <Button variant="outline" onClick={resetSession}>
               <RotateCcw className="h-4 w-4 mr-2" />
-              New Passage
+              نص جديد
             </Button>
             <Button onClick={() => navigate("/")}>تمام</Button>
           </div>
@@ -933,7 +933,7 @@ const ReadingPractice = () => {
           <div className="space-y-2">
             <p className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
               <Sparkles className="h-4 w-4" />
-              Key Vocabulary
+              كلمات مهمة
             </p>
             <div className="flex flex-wrap gap-2">
               {passage.vocabulary.map((v, i) => (

@@ -103,7 +103,7 @@ export function LoadingPanel({
         110s wait would otherwise fire ~27 announcements at a screen reader.
       */}
       <span role="status" className="sr-only">
-        Loading, please wait
+        جاري التحميل، لحظة
       </span>
 
       {children}

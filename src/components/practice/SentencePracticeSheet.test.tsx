@@ -168,7 +168,7 @@ describe("recording", () => {
 
     // A record button that silently does nothing reads as the app being broken
     // rather than as a permission the learner can grant.
-    expect(screen.getByText(/microphone access denied/i)).toBeInTheDocument();
+    expect(screen.getByText(/المايك مرفوض/)).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /ابدأ التسجيل|جرّب مرة ثانية/ })).not.toBeInTheDocument();
   });
 
@@ -210,7 +210,7 @@ describe("the coaching", () => {
 
     // The transcript is the first thing to check: half of "that is not what I
     // said" is the recogniser, and the learner can only tell by reading it.
-    await waitFor(() => expect(screen.getByText("You said")).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText("اللي قلته")).toBeInTheDocument());
   });
 
   it("answers the two questions the exercise asks", async () => {
@@ -231,7 +231,7 @@ describe("the coaching", () => {
 
     await finishRecording({ blob: aTake() });
 
-    await waitFor(() => expect(screen.getByText("More natural")).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText("أطبع منها")).toBeInTheDocument());
     expect(screen.getByText("I went to the market yesterday")).toBeInTheDocument();
     expect(screen.getByText("رحت السوق أمس")).toBeInTheDocument();
   });
@@ -244,7 +244,7 @@ describe("the coaching", () => {
 
     // The L1-aware part of the coaching: the pattern is named, and the
     // explanation is in the learner's language, not the one they are learning.
-    await waitFor(() => expect(screen.getByText("From Arabic to English")).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText("من العربي للإنجليزي")).toBeInTheDocument());
     expect(screen.getByText("article")).toBeInTheDocument();
     expect(screen.getByText("لا تنسَ the قبل market")).toBeInTheDocument();
   });
@@ -256,7 +256,7 @@ describe("the coaching", () => {
     await waitFor(() => expect(start).toHaveBeenCalled());
     await finishRecording({ blob: aTake() });
 
-    await waitFor(() => expect(screen.getByText("Other ways to say it")).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText("طرق ثانية تقولها فيها")).toBeInTheDocument());
     expect(screen.getByText("I headed to the market")).toBeInTheDocument();
   });
 
@@ -286,10 +286,10 @@ describe("the coaching", () => {
     // their Arabic is always wrong. An empty section is the honest answer when
     // the sentence was simply fine.
     await waitFor(() => expect(screen.getByText("Used target word")).toBeInTheDocument());
-    expect(screen.queryByText("More natural")).not.toBeInTheDocument();
-    expect(screen.queryByText("Other ways to say it")).not.toBeInTheDocument();
+    expect(screen.queryByText("أطبع منها")).not.toBeInTheDocument();
+    expect(screen.queryByText("طرق ثانية تقولها فيها")).not.toBeInTheDocument();
     expect(screen.queryByText("Tips")).not.toBeInTheDocument();
-    expect(screen.queryByText("From Arabic to English")).not.toBeInTheDocument();
+    expect(screen.queryByText("من العربي للإنجليزي")).not.toBeInTheDocument();
   });
 
   it("passes on the coach's own explanation when it had nothing to say", async () => {
@@ -321,7 +321,7 @@ describe("going again", () => {
     // Two ways back to the microphone, because the button at the top has moved
     // off screen by the time the learner has read the coaching.
     expect(screen.getByRole("button", { name: "جرّب مرة ثانية" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /try another sentence/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /جرّب جملة ثانية/ })).toBeInTheDocument();
   });
 
   it("clears the previous coaching before the new take", async () => {
@@ -330,7 +330,7 @@ describe("going again", () => {
     await finishRecording({ blob: aTake() });
     await waitFor(() => expect(screen.getByText("Used target word")).toBeInTheDocument());
 
-    fireEvent.click(screen.getByRole("button", { name: /try another sentence/i }));
+    fireEvent.click(screen.getByRole("button", { name: /جرّب جملة ثانية/ }));
 
     // Coaching for the sentence before, sitting under a recording in progress,
     // reads as feedback on what is being said right now.

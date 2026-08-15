@@ -65,6 +65,12 @@ const KIND_LABEL: Record<string, string> = {
   insertion: "أضفت كلمة",
   wrong_word: "كلمة خاطئة",
   word_order: "ترتيب الكلمات",
+  // The three areas Arabic pulls a writer off course in English: it has no
+  // indefinite article, maps prepositions differently, and marks time with
+  // fewer forms. `msa_leak` stays for rows the Arabic era already wrote.
+  article: "أدوات التعريف",
+  preposition: "حروف الجر",
+  verb_tense: "زمن الفعل",
   msa_leak: "تسرب فصحى",
   spelling: "الإملاء",
   grammar: "القواعد",

@@ -78,7 +78,7 @@ const MyWords = () => {
     "tutor-upload": "🎯 Tutor Upload",
     
     "free-chat": "💬 Chat",
-    "how-do-i-say": "❓ How do I say",
+    "how-do-i-say": "❓ كيف أقول",
   };
   const categoryLabel = (src: string) => CATEGORY_LABELS[src] || `· ${src}`;
 
@@ -383,7 +383,7 @@ const MyWords = () => {
               className="text-primary underline underline-offset-2"
               onClick={() => navigate("/how-do-i-say")}
             >
-              How do I say…?
+              كيف أقول…؟
             </button>{" "}
             to start practicing them here.
           </div>
@@ -717,7 +717,7 @@ const MyWords = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete {selectedIds.size} card{selectedIds.size === 1 ? "" : "s"}?</AlertDialogTitle>
             <AlertDialogDescription>
-              This permanently removes the selected words and their review progress. This can't be undone.
+              هذا يحذف الكلمات المختارة وتقدّم مراجعتها نهائياً. ما فيه تراجع.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

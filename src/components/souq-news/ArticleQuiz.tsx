@@ -127,7 +127,7 @@ export const ArticleQuiz = ({ article }: ArticleQuizProps) => {
           </p>
         </div>
         <Button variant="outline" size="sm" onClick={reset} className="w-full text-xs">
-          Close Quiz
+          أغلق الاختبار
         </Button>
       </div>
     );

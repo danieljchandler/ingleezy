@@ -22,19 +22,19 @@ import { toast } from "sonner";
 /**
  * Written production (C3) — the fourth skill.
  *
- * Two halves. "Write": reply to an incoming dialect text message and get the
- * reply corrected against the same Rulebook that governs generation, with
- * each mistake explained (and quietly fed into the weak-set loop the rest of
- * the app drills from). "Typing": progressive Arabic keyboard drills in the
- * Alphabet Journey's letter order, so the mechanical skill of producing the
- * script keeps pace with recognising it.
+ * Two halves. "Write": reply in ENGLISH to an incoming English text message
+ * and get the reply corrected, with each mistake explained in the learner's
+ * dialect (and quietly fed into the weak-set loop the rest of the app drills
+ * from). "Typing": progressive Arabic keyboard drills — a Hakiya leftover
+ * that still teaches the Arabic script to Arabic speakers, kept running only
+ * until the English Sounds rebuild decides whether it becomes a Latin
+ * keyboard drill or goes.
  */
 
 interface WritingPrompt {
-  scenario_english: string;
-  message_arabic: string;
-  message_transliteration: string;
+  scenario_arabic: string;
   message_english: string;
+  message_arabic: string;
 }
 
 interface Correction {
@@ -46,10 +46,9 @@ interface Correction {
 
 interface WritingReview {
   understandable: boolean;
-  verdict: string;
-  corrected_arabic: string;
-  corrected_transliteration: string;
+  verdict_arabic: string;
   corrected_english: string;
+  corrected_arabic: string;
   corrections: Correction[];
   tips?: string[];
 }
@@ -75,7 +74,7 @@ const WriteTab = () => {
     const { data, error } = await supabase.functions.invoke("writing-coach", {
       body: { action: "prompt", dialect: activeDialect },
     });
-    if (!error && data?.prompt?.message_arabic) {
+    if (!error && data?.prompt?.message_english) {
       setPrompt(data.prompt as WritingPrompt);
     } else {
       setPrompt(null);
@@ -98,7 +97,7 @@ const WriteTab = () => {
         action: "review",
         dialect: activeDialect,
         text: trimmed,
-        promptArabic: prompt?.message_arabic ?? "",
+        promptEnglish: prompt?.message_english ?? "",
       },
     });
     setBusy(false);
@@ -114,18 +113,15 @@ const WriteTab = () => {
     <div className="space-y-4">
       {promptLoading ? (
         <div className="flex items-center gap-2 rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground">
-          <Loader2 className="h-4 w-4 animate-spin" /> Getting you something to reply to…
+          <Loader2 className="h-4 w-4 animate-spin" /> نجيب لك شي ترد عليه…
         </div>
       ) : prompt ? (
         <div className="rounded-xl border border-border bg-card p-4">
-          <p className="text-xs text-muted-foreground">{prompt.scenario_english}</p>
-          <div className="mt-2 max-w-[85%] rounded-2xl rounded-tr-sm bg-primary/10 px-4 py-3">
-            <p dir="rtl" className="font-arabic text-lg leading-relaxed">{prompt.message_arabic}</p>
+          <p className="text-xs text-muted-foreground">{prompt.scenario_arabic}</p>
+          <div className="mt-2 max-w-[85%] rounded-2xl rounded-tl-sm bg-primary/10 px-4 py-3">
+            <p className="font-english text-lg leading-relaxed">{prompt.message_english}</p>
             {showGloss && (
-              <div className="mt-2 space-y-0.5 text-sm text-muted-foreground">
-                <p>{prompt.message_transliteration}</p>
-                <p>{prompt.message_english}</p>
-              </div>
+              <p className="mt-2 text-sm text-muted-foreground">{prompt.message_arabic}</p>
             )}
           </div>
           <button
@@ -138,29 +134,29 @@ const WriteTab = () => {
         </div>
       ) : (
         <div className="rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground">
-          Couldn't load a prompt. Write anything in Arabic below and get it corrected anyway.
+          ما قدرنا نجيب رسالة. اكتب أي شي بالإنجليزي تحت وبنصحّحه لك برضه.
         </div>
       )}
 
       <div className="space-y-2">
         <Textarea
-          dir="rtl"
-          lang="ar"
+          dir="ltr"
+          lang="en"
           value={text}
           onChange={(e) => setText(e.target.value.slice(0, MAX_CHARS))}
-          placeholder="اكتب ردك هنا…"
-          className="min-h-28 font-arabic text-lg"
+          placeholder="اكتب ردك بالإنجليزي هنا…"
+          className="min-h-28 font-english text-lg"
           disabled={busy}
         />
         <div className="flex items-center justify-between">
           <span className="text-xs text-muted-foreground">{text.length}/{MAX_CHARS}</span>
           <div className="flex gap-2">
             <Button variant="outline" size="sm" onClick={() => void loadPrompt()} disabled={busy}>
-              <RefreshCw className="mr-1 h-3.5 w-3.5" /> New prompt
+              <RefreshCw className="mr-1 h-3.5 w-3.5" /> سؤال جديد
             </Button>
             <Button size="sm" onClick={() => void submit()} disabled={busy || !text.trim()}>
               {busy ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : <Sparkles className="mr-1 h-3.5 w-3.5" />}
-              Get corrections
+              صحّح لي
             </Button>
           </div>
         </div>
@@ -168,23 +164,22 @@ const WriteTab = () => {
 
       {review && (
         <div className="space-y-3 rounded-xl border border-border bg-card p-4">
-          <p className="text-sm font-medium">{review.verdict}</p>
+          <p className="text-sm font-medium">{review.verdict_arabic}</p>
 
           <div className="rounded-lg bg-emerald-500/10 px-4 py-3">
-            <p dir="rtl" className="font-arabic text-lg leading-relaxed">{review.corrected_arabic}</p>
-            <p className="mt-1 text-sm text-muted-foreground">{review.corrected_transliteration}</p>
-            <p className="text-sm text-muted-foreground">{review.corrected_english}</p>
+            <p className="font-english text-lg leading-relaxed">{review.corrected_english}</p>
+            <p className="mt-1 text-sm text-muted-foreground">{review.corrected_arabic}</p>
           </div>
 
           {review.corrections.length === 0 ? (
             <p className="flex items-center gap-1.5 text-sm text-emerald-600">
-              <CheckCircle2 className="h-4 w-4" /> Nothing to fix — that reads naturally.
+              <CheckCircle2 className="h-4 w-4" /> ما فيه شي نصلحه — كتابتك طبيعية.
             </p>
           ) : (
             <ul className="space-y-2">
               {review.corrections.map((c, i) => (
                 <li key={i} className="rounded-lg border border-border/60 p-3 text-sm">
-                  <div dir="rtl" className="font-arabic">
+                  <div className="font-english">
                     <span className="text-red-600 line-through decoration-red-400/60">{c.original}</span>
                     <span className="mx-2 text-muted-foreground">←</span>
                     <span className="text-emerald-700 dark:text-emerald-400">{c.corrected}</span>
@@ -340,7 +335,7 @@ const TypingTab = () => {
           ref={focusRef}
           tabIndex={0}
           role="application"
-          aria-label="typing drill"
+          aria-label="تمرين الكتابة"
           onKeyDown={onKeyDown}
           className={`rounded-xl border bg-card p-6 text-center outline-none transition-colors focus:ring-2 focus:ring-primary/40 ${flash ? "border-red-400" : "border-border"}`}
           onClick={() => focusRef.current?.focus()}
@@ -369,7 +364,7 @@ const TypingTab = () => {
             {item.english ? ` — ${item.english}` : ""}
           </p>
           <p className="mt-1 text-[11px] text-muted-foreground">
-            Tap the glowing key, or type on your keyboard.
+            دوس على الحرف المضيء، أو اكتب من لوحة مفاتيحك.
           </p>
         </div>
       ) : (

@@ -114,7 +114,7 @@ describe("LoadingPanel — the copy", () => {
     // copy would fire dozens of announcements.
     shown();
     const status = screen.getByRole("status");
-    expect(status).toHaveTextContent("Loading, please wait");
+    expect(status).toHaveTextContent("جاري التحميل، لحظة");
     expect(status.className).toContain("sr-only");
   });
 

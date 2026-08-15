@@ -76,7 +76,7 @@ export function LevelJourneyCard() {
             the line below has somewhere to go.
           </p>
           <Button size="sm" onClick={() => navigate("/placement")}>
-            Find my level
+            حدّد مستواي
           </Button>
         </>
       ) : (
@@ -102,10 +102,10 @@ export function LevelJourneyCard() {
           {stale ? (
             <>
               <p className="mb-2 text-xs text-muted-foreground">
-                Last checked {daysSince} days ago. Levels move — see where you are now.
+                آخر فحص قبل {daysSince} يوم. المستويات تتغيّر — شوف وينك الحين.
               </p>
               <Button size="sm" onClick={() => navigate("/placement")}>
-                Re-check my level
+                أعد تحديد مستواي
               </Button>
             </>
           ) : (

@@ -93,7 +93,7 @@ const generate = async () => {
   });
 };
 
-const instructionsBox = () => screen.getByPlaceholderText(/a red apple on a wooden table/);
+const instructionsBox = () => screen.getByPlaceholderText(/تفاحة حمراء على طاولة خشب/);
 
 describe("setting up the picture", () => {
   it("shows the word the picture is for", () => {

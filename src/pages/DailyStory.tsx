@@ -127,7 +127,7 @@ const DailyStoryPage = () => {
                 <Button onClick={() => navigate("/my-words")}>روح لكلماتي</Button>
               ) : (
                 <Button onClick={() => generate.mutate(undefined)} variant="outline" className="gap-2">
-                  <RefreshCw className="h-4 w-4" /> Try again
+                  <RefreshCw className="h-4 w-4" /> جرّب مرة ثانية
                 </Button>
               )}
             </div>
@@ -149,7 +149,7 @@ const DailyStoryPage = () => {
                 )}
                 {isTaskCompletedToday("daily-story") && (
                   <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 gap-1">
-                    <Check className="h-3 w-3" /> Done for today
+                    <Check className="h-3 w-3" /> خلّصنا اليوم
                   </Badge>
                 )}
               </div>

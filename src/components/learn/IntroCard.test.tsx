@@ -80,7 +80,7 @@ describe("IntroCard — before the Arabic is revealed", () => {
   it("shows the English, which is the prompt", () => {
     renderCard();
     expect(screen.getByText("bread")).toBeInTheDocument();
-    expect(screen.getByText("English")).toBeInTheDocument();
+    expect(screen.getByText("بالإنجليزي")).toBeInTheDocument();
   });
 
   it("offers to show the Arabic", () => {

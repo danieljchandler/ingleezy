@@ -63,7 +63,7 @@ export function SavePhraseDialog({
         <DialogHeader>
           <DialogTitle className="text-base">احفظ العبارة</DialogTitle>
           <DialogDescription>
-            Keep this sentence in My Phrases for spaced-repetition review.
+            احفظ الجملة في «عباراتي» للمراجعة المتباعدة.
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-3">

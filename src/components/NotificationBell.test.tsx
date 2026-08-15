@@ -71,7 +71,7 @@ function render(data: SmartNotification[] = []) {
   return view;
 }
 
-const bell = () => screen.getByRole("button", { name: "Notifications" });
+const bell = () => screen.getByRole("button", { name: "الإشعارات" });
 const badge = (container: HTMLElement) => container.querySelector(".rounded-full.text-\\[10px\\]");
 const item = (title: string) => screen.getByRole("button", { name: `إشعار: ${title}` });
 
@@ -110,7 +110,7 @@ describe("the badge", () => {
 
     // The count is inside the button, so it becomes the accessible name unless
     // an explicit label is set — "2" is not a useful thing to hear.
-    expect(bell()).toHaveAccessibleName("Notifications");
+    expect(bell()).toHaveAccessibleName("الإشعارات");
   });
 });
 
@@ -118,7 +118,7 @@ describe("opening the list", () => {
   it("stays shut until the bell is tapped", () => {
     render([aNotification()]);
 
-    expect(screen.queryByText("Notifications", { selector: "h3" })).toBeNull();
+    expect(screen.queryByText("الإشعارات", { selector: "h3" })).toBeNull();
   });
 
   it("opens on the bell", () => {
@@ -126,7 +126,7 @@ describe("opening the list", () => {
 
     fireEvent.click(bell());
 
-    expect(screen.getByRole("heading", { name: "Notifications" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "الإشعارات" })).toBeInTheDocument();
     expect(item("12 reviews are due")).toBeInTheDocument();
   });
 
@@ -136,7 +136,7 @@ describe("opening the list", () => {
 
     fireEvent.click(bell());
 
-    expect(screen.queryByRole("heading", { name: "Notifications" })).toBeNull();
+    expect(screen.queryByRole("heading", { name: "الإشعارات" })).toBeNull();
   });
 
   it("closes when something else on the page is pressed", () => {
@@ -147,7 +147,7 @@ describe("opening the list", () => {
 
     // It is a dropdown over the header; leaving it open while the learner works
     // underneath it covers the page.
-    expect(screen.queryByRole("heading", { name: "Notifications" })).toBeNull();
+    expect(screen.queryByRole("heading", { name: "الإشعارات" })).toBeNull();
   });
 
   it("stays open when the press lands inside it", () => {
@@ -156,7 +156,7 @@ describe("opening the list", () => {
 
     fireEvent.mouseDown(item("12 reviews are due"));
 
-    expect(screen.getByRole("heading", { name: "Notifications" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "الإشعارات" })).toBeInTheDocument();
   });
 
   it("stops listening once it is gone", () => {
@@ -199,7 +199,7 @@ describe("reading the notifications", () => {
 
     // Two identical rows would need reading to triage; the badge and the tint
     // do it at a glance.
-    expect(screen.getByText("Urgent")).toBeInTheDocument();
+    expect(screen.getByText("عاجل")).toBeInTheDocument();
     expect(item("Your streak ends in 3 hours").className).toContain("bg-destructive/5");
     expect(item("12 reviews are due").className).not.toContain("bg-destructive/5");
   });
@@ -208,7 +208,7 @@ describe("reading the notifications", () => {
     render([aNotification()]);
     fireEvent.click(bell());
 
-    expect(screen.queryByText("Urgent")).toBeNull();
+    expect(screen.queryByText("عاجل")).toBeNull();
   });
 
   it("keeps them in the order the hook gave them", () => {
@@ -247,7 +247,7 @@ describe("acting on one", () => {
 
     // Landing on the review page with the dropdown still over it would cover
     // the first card.
-    expect(screen.queryByRole("heading", { name: "Notifications" })).toBeNull();
+    expect(screen.queryByRole("heading", { name: "الإشعارات" })).toBeNull();
   });
 
   it("just closes when there is nowhere to go", () => {
@@ -258,7 +258,7 @@ describe("acting on one", () => {
 
     // An achievement is an announcement, not an errand.
     expect(nav.navigate).not.toHaveBeenCalled();
-    expect(screen.queryByRole("heading", { name: "Notifications" })).toBeNull();
+    expect(screen.queryByRole("heading", { name: "الإشعارات" })).toBeNull();
   });
 });
 

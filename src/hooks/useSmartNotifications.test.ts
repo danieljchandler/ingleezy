@@ -116,7 +116,7 @@ describe("reviews falling due", () => {
     // A learner thinks in one number, not "two curriculum plus one saved".
     expect(result.current.data?.[0]).toMatchObject({
       id: "review-due",
-      title: "3 words due for review",
+      title: "3 كلمات مستحقة للمراجعة",
       actionUrl: "/review",
     });
   });
@@ -160,13 +160,13 @@ describe("reviews falling due", () => {
   it("changes what it says once the pile is worth worrying about", async () => {
     const small = render(dueCards(3));
     await waitFor(() => expect(small.result.current.isSuccess).toBe(true));
-    expect(small.result.current.data?.[0].body).toContain("quick review session");
+    expect(small.result.current.data?.[0].body).toContain("جلسة مراجعة سريعة");
     small.cleanup();
 
     const large = render(dueCards(12));
     cleanup = large.cleanup;
     await waitFor(() => expect(large.result.current.isSuccess).toBe(true));
-    expect(large.result.current.data?.[0].body).toContain("Don't let them slip");
+    expect(large.result.current.data?.[0].body).toContain("لا تخلّها تفوتك");
   });
 });
 
@@ -189,7 +189,7 @@ describe("a streak about to break", () => {
     // midnight whether or not anybody read it.
     expect(result.current.data?.[0]).toMatchObject({
       id: "streak-risk",
-      title: "12-day streak at risk!",
+      title: "سلسلة 12 يوم في خطر!",
       priority: "high",
     });
   });
@@ -273,7 +273,7 @@ describe("a battle waiting", () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(result.current.data?.[0]).toMatchObject({
       id: "battle-invite",
-      title: "1 vocab battle waiting",
+      title: "تحدي كلمات ينتظرك",
       actionUrl: "/battles",
     });
   });
@@ -282,7 +282,7 @@ describe("a battle waiting", () => {
     const { result } = render(withBattles(3));
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(result.current.data?.[0].title).toBe("3 vocab battles waiting");
+    expect(result.current.data?.[0].title).toBe("3 تحديات كلمات تنتظرك");
   });
 
   it("ignores battles the learner already played", async () => {
@@ -377,7 +377,7 @@ describe("unread coaching", () => {
     );
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(result.current.data?.[0].body).toContain("personalized advice");
+    expect(result.current.data?.[0].body).toContain("نصائح مخصّصة");
   });
 });
 
@@ -427,7 +427,7 @@ describe("ordering what it has to say", () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     // A weekly summary on a Wednesday is about a week that is half over.
     expect(result.current.data?.[0]).toMatchObject({ id: "weekly-summary", priority: "low" });
-    expect(result.current.data?.[0].body).toContain("340 XP");
+    expect(result.current.data?.[0].body).toContain("340 نقطة");
   });
 
   it("encourages a learner who earned nothing last week", async () => {
@@ -440,8 +440,8 @@ describe("ordering what it has to say", () => {
     );
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    // "You earned 0 XP last week" is a true sentence that makes people quit.
-    expect(result.current.data?.[0].body).toContain("Start strong");
+    // "جمعت 0 نقطة الأسبوع الماضي" is a true sentence that makes people quit.
+    expect(result.current.data?.[0].body).toContain("ابدأ الأسبوع بقوة");
   });
 
   it("says nothing on any other day", async () => {

@@ -208,7 +208,7 @@ const Pricing = () => {
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                   <Badge className="bg-accent text-accent-foreground">
                     <Sparkles className="h-3 w-3 mr-1" />
-                    Best Value
+                    الأفضل قيمة
                   </Badge>
                 </div>
                 <CardHeader>

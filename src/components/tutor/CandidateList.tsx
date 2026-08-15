@@ -40,7 +40,7 @@ export function CandidateList({ candidates, audioUrl, onUpdate, onApprove, onRej
 
       {/* Approved */}
       {approved.length > 0 && pending.length > 0 && (
-        <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider pt-2">Approved</div>
+        <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider pt-2">مقبولة</div>
       )}
       {approved.map(c => (
         <CandidateCard
@@ -55,7 +55,7 @@ export function CandidateList({ candidates, audioUrl, onUpdate, onApprove, onRej
 
       {/* Rejected */}
       {rejected.length > 0 && (
-        <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider pt-2">Rejected</div>
+        <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider pt-2">مرفوضة</div>
       )}
       {rejected.map(c => (
         <CandidateCard

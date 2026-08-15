@@ -150,19 +150,17 @@ export const defaultFunctions: Record<string, FunctionHandler> = {
     (ctx.body as { action?: string } | null)?.action === "prompt"
       ? ok({
           prompt: {
-            scenario_english: "Your friend is planning the weekend.",
-            message_arabic: "وش رايك نروح البر بكرة؟",
-            message_transliteration: "wish rayik nrooh al-barr bukra?",
-            message_english: "What do you think about going to the desert tomorrow?",
+            scenario_arabic: "صاحبك يرتب لنهاية الأسبوع.",
+            message_english: "hey, what do you think about heading to the beach tomorrow?",
+            message_arabic: "هلا، وش رايك نروح البحر بكرة؟",
           },
         })
       : ok({
           review: {
             understandable: true,
-            verdict: "Nice work — one small fix.",
-            corrected_arabic: "ايه، يلا نروح",
-            corrected_transliteration: "eh, yalla nrooh",
+            verdict_arabic: "حلو — بس تصحيح صغير.",
             corrected_english: "Yes, let's go",
+            corrected_arabic: "ايه، يلا نروح",
             corrections: [],
             tips: [],
           },

@@ -96,7 +96,7 @@ async function render({ dialect = "Gulf", owned = [], seed }: Options = {}) {
   return { ...harness, onOpenChange };
 }
 
-const topicBox = () => screen.getByPlaceholderText(/ordering food at a restaurant/);
+const topicBox = () => screen.getByPlaceholderText(/تطلب أكل في مطعم/);
 const generateButton = () => screen.getByRole("button", { name: /ولّد اقتراحات/ });
 
 const generate = async (topic = "ordering food") => {

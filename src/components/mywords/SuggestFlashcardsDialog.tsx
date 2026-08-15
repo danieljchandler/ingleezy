@@ -113,7 +113,7 @@ export const SuggestFlashcardsDialog = ({ open, onOpenChange }: Props) => {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Wand2 className="h-5 w-5 text-primary" />
-            AI Flashcard Suggestions
+            بطاقات يقترحها الذكاء
           </DialogTitle>
           <DialogDescription>
             Enter a topic and the AI will suggest 10 {activeDialect} Arabic words you don't already have.
@@ -122,7 +122,7 @@ export const SuggestFlashcardsDialog = ({ open, onOpenChange }: Props) => {
 
         <div className="space-y-3">
           <Textarea
-            placeholder="e.g. ordering food at a restaurant, family members, weather, business meeting phrases…"
+            placeholder="مثلاً: تطلب أكل في مطعم، أفراد العائلة، الطقس، عبارات اجتماعات العمل…"
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
             rows={2}

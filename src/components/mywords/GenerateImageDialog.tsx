@@ -104,7 +104,7 @@ export const GenerateImageDialog = ({ word, open, onOpenChange, onImageSaved }: 
               Describe the picture you want (optional)
             </label>
             <Textarea
-              placeholder="e.g. a red apple on a wooden table, close-up..."
+              placeholder="مثلاً: تفاحة حمراء على طاولة خشب، لقطة قريبة…"
               value={customInstructions}
               onChange={(e) => setCustomInstructions(e.target.value)}
               rows={3}

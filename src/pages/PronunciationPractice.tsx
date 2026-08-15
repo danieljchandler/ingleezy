@@ -370,7 +370,7 @@ const PronunciationPractice = () => {
             {result.words.length > 0 && (
               <div className="mb-5">
                 <p className="text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider">
-                  Word Breakdown
+                  تفكيك الكلمة
                 </p>
                 <div className="flex flex-wrap justify-center gap-2">
                   {result.words.map((w: WordResult, i: number) => {
@@ -506,7 +506,7 @@ const ShadowMode = ({ showEnglish, onScore }: ShadowModeProps) => {
       <div className="flex items-center justify-between text-xs">
         <span className="text-muted-foreground">Clip {index + 1} / {clips.length}</span>
         <label className="flex items-center gap-2">
-          <span className="text-muted-foreground">Auto-advance</span>
+          <span className="text-muted-foreground">تقدّم تلقائي</span>
           <Switch checked={autoAdvance} onCheckedChange={setAutoAdvance} className="h-5 w-9 data-[state=checked]:bg-primary data-[state=unchecked]:bg-input [&>span]:h-4 [&>span]:w-4 [&>span]:data-[state=checked]:translate-x-4" />
         </label>
       </div>

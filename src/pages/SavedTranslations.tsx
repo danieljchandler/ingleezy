@@ -74,7 +74,7 @@ const SavedTranslations = () => {
           )}
           <h1 className="text-xl font-bold flex items-center gap-2">
             <BookOpen className="h-5 w-5 text-primary" />
-            Saved Translations
+            الترجمات المحفوظة
           </h1>
           <div className="w-9" />
         </div>
@@ -190,7 +190,7 @@ const SavedTranslations = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>نحذف هذي الترجمة؟</AlertDialogTitle>
             <AlertDialogDescription>
-              This can't be undone.
+              ما فيه تراجع.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

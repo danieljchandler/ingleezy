@@ -326,6 +326,30 @@ generation conditioning.
       DailyLetterGoalRing) since teaching the Arabic alphabet to Arabic
       speakers is absurd post-flip; the /alphabet routes and components
       remain in place as the skeleton for the English Sounds rebuild.
+- [~] **Written production (WritingPractice + `writing-coach`) →
+      FLIPPED**. Found during the fourth sweep, and it was the last whole
+      feature still pointing the old way: the "Write" tab asked the model
+      for a casual incoming message *in the learner's dialect* and then
+      corrected the learner's *Arabic* against the dialect Rulebook — one
+      of its correction kinds was literally `msa_leak`. Now the message
+      arrives in English, the learner replies in English, and the review
+      corrects the English while writing every explanation, verdict and
+      tip in their dialect: the correction is the moment the explanation
+      has to land, so it is given in the language they think in. The
+      correction kinds are redrawn as `article` / `preposition` /
+      `verb_tense` — where Arabic actually pulls a writer off course,
+      since it has no indefinite article, maps prepositions differently
+      and marks time with fewer forms. `learner_errors.error_kind` is
+      free text with a label fallback, so no migration was needed, only
+      new labels in `src/lib/mistakes.ts` (`msa_leak` keeps its label for
+      rows the Arabic era already wrote). The input gate flipped with it:
+      a reply typed entirely in Arabic is now refused (`not_english`)
+      rather than coached, which is what stops the feature quietly
+      becoming the Arabic-writing trainer it used to be.
+      Remaining: the **"Typing" tab is still an Arabic-keyboard drill**
+      in the Alphabet Journey's letter order. It belongs with the English
+      Sounds rebuild — either a Latin/QWERTY drill or pruned outright —
+      and is deliberately left running until that call is made.
 - [x] MSA Bridge → PRUNED (only stale generated-types references remain
       until types regeneration)
 - [x] Dialect Compare → PRUNED (revisit later as "how do Brits vs
@@ -433,6 +457,31 @@ generation conditioning.
       rendered the same Arabic word twice once both its label fields were
       translated (the second field now carries a Latin transliteration,
       so the chip still shows two scripts).
+      A **fourth sweep** widened the audit itself, which is why there was
+      a fourth: the earlier passes matched plain quoted strings, so every
+      label built from a template literal or wrapped around an
+      interpolation was invisible to them, as was everything in the
+      learner-facing `.ts` modules. Roughly 190 strings surfaced. The
+      biggest was the whole logged-out **LandingHero** — untouched since
+      the fork, still promising "Real spoken Arabic, one story at a time"
+      and telling visitors "Ingleezy means حكاية". It is rewritten:
+      Arabic throughout, English as the thing being learned and the
+      dialect as what it is explained in, and the only Latin script left
+      on the page is the logo. Also flipped: the free-daily-cap toast
+      (every capped feature reaches for it), the notification bell's five
+      messages — with `arCount` for the two that count things, since
+      Arabic does not pluralise on one-vs-many — the crash and
+      page-error toasts, the error boundary, the loading panel, the
+      footer, the transcript reader's Literal / Fusha / On-screen /
+      Sentences chrome, the tappable-text popovers, the practice sheet,
+      the quiz cards, the tutor review controls, and the difficulty and
+      dialect options in the reading library and translator.
+      One more direction bug: the live-voice **drift badge** read
+      "تحدث بالعربية" — Hakiya's meaning, where drift meant the partner
+      spoke English. `detectLiveLeaks` was flipped long ago to flag the
+      partner slipping OUT of English, so the badge had been telling the
+      learner the exact opposite of what it detected. It now reads
+      "خرج عن الإنجليزي".
       — grammar drills, listening practice, conversation + live voice,
       and the vocab games/battles now done. Backend flips landed with
       them: listening-quiz generates English audio via the Brain's

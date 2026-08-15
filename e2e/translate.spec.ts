@@ -72,11 +72,11 @@ test.describe("translating a passage", () => {
   test("passes an explicit dialect when one is picked", async ({ page, backend }) => {
     await page.goto("/translate");
     await page.getByRole("combobox").click();
-    await page.getByRole("option", { name: "Egyptian" }).click();
+    await page.getByRole("option", { name: "مصري" }).click();
     // Wait for the pick to land before translating. The select closes with an
     // animation that briefly keeps an overlay over the page, and a Translate
     // click inside that window is swallowed — the request never goes out.
-    await expect(page.getByRole("combobox")).toContainText("Egyptian");
+    await expect(page.getByRole("combobox")).toContainText("مصري");
     await translate(page);
 
     // Note: not asserting on the passage text here. ENGLISH_TEXT contains
@@ -220,7 +220,7 @@ test.describe("saving a translation", () => {
   test("records the dialect as chosen, not as detected", async ({ page, db }) => {
     await page.goto("/translate");
     await page.getByRole("combobox").click();
-    await page.getByRole("option", { name: "Yemeni" }).click();
+    await page.getByRole("option", { name: "يمني" }).click();
     await translate(page);
     await page.getByRole("button", { name: "احفظ الترجمة" }).click();
     await expect(page.getByRole("button", { name: "محفوظة" })).toBeVisible();

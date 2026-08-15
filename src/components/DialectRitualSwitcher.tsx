@@ -241,7 +241,7 @@ export const DialectRitualSwitcher = ({ className }: Props) => {
             </div>
 
             <p className="mt-4 text-center text-[11px] text-muted-foreground">
-              Switching dialect re-tunes prompts, audio voices, and your review queue.
+              تغيير اللهجة يعيد ضبط الشروحات وأصوات النطق وطابور مراجعتك.
             </p>
           </div>
         </div>,

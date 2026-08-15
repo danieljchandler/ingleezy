@@ -39,7 +39,7 @@ const withMarked = (...words: string[]) => {
 describe("MarkUnknownsToggle — turning marking on", () => {
   it("invites the reader in", () => {
     render(<MarkUnknownsToggle />);
-    expect(button()).toHaveTextContent("Mark unknowns");
+    expect(button()).toHaveTextContent("علّم اللي ما تعرفه");
   });
 
   it("turns marking on when tapped", () => {
@@ -67,7 +67,7 @@ describe("MarkUnknownsToggle — while marking", () => {
 
   it("says the mode is active", () => {
     render(<MarkUnknownsToggle />);
-    expect(button()).toHaveTextContent("Marking");
+    expect(button()).toHaveTextContent("نعلّم");
   });
 
   it("stands out while active", () => {

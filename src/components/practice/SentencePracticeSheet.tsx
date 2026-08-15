@@ -91,7 +91,7 @@ export function SentencePracticeSheet({ open, onOpenChange, targetEnglish, targe
         const msg = err instanceof Error ? err.message : String(err);
         console.error("[SentencePractice] failed:", err);
         setError(msg);
-        toast.error("Couldn't get feedback — try again");
+        toast.error("تعذّر جلب الملاحظات — جرّب مرة ثانية");
       } finally {
         setLoading(false);
       }
@@ -122,7 +122,7 @@ export function SentencePracticeSheet({ open, onOpenChange, targetEnglish, targe
         <SheetHeader className="text-left">
           <SheetTitle className="flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-primary" />
-            Practice a sentence
+            تمرّن على جملة
           </SheetTitle>
           <SheetDescription>
             Say an English sentence using{" "}
@@ -142,7 +142,7 @@ export function SentencePracticeSheet({ open, onOpenChange, targetEnglish, targe
           <div className="rounded-2xl border border-border bg-card p-6 text-center">
             {permissionDenied ? (
               <p className="text-sm text-destructive">
-                Microphone access denied. Enable it in your browser settings.
+                المايك مرفوض. فعّله من إعدادات المتصفح.
               </p>
             ) : (
               <>
@@ -190,7 +190,7 @@ export function SentencePracticeSheet({ open, onOpenChange, targetEnglish, targe
                   {feedback.transcript && (
                     <div>
                       <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground mb-1">
-                        You said
+                        اللي قلته
                       </p>
                       <p className="font-english text-lg leading-relaxed">{feedback.transcript}</p>
                     </div>
@@ -224,7 +224,7 @@ export function SentencePracticeSheet({ open, onOpenChange, targetEnglish, targe
                   {feedback.natural_rewrite && (
                     <div className="rounded-lg bg-muted/40 border border-border p-3">
                       <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground mb-1">
-                        More natural
+                        أطبع منها
                       </p>
                       <p className="font-english text-lg leading-relaxed">
                         {feedback.natural_rewrite}
@@ -241,7 +241,7 @@ export function SentencePracticeSheet({ open, onOpenChange, targetEnglish, targe
                     <div className="rounded-lg border border-accent/40 bg-accent/5 p-3">
                       <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground mb-1.5 flex items-center gap-1">
                         <Lightbulb className="h-3.5 w-3.5 text-accent" />
-                        From Arabic to English
+                        من العربي للإنجليزي
                       </p>
                       <ul className="space-y-1.5 text-sm">
                         {feedback.interference_notes.map((note, i) => (
@@ -261,7 +261,7 @@ export function SentencePracticeSheet({ open, onOpenChange, targetEnglish, targe
                   {feedback.alternatives && feedback.alternatives.length > 0 && (
                     <div>
                       <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground mb-1.5">
-                        Other ways to say it
+                        طرق ثانية تقولها فيها
                       </p>
                       <div className="space-y-2">
                         {feedback.alternatives.map((alt, i) => (
@@ -300,7 +300,7 @@ export function SentencePracticeSheet({ open, onOpenChange, targetEnglish, targe
                   <div className="pt-2">
                     <Button variant="ghost" size="sm" onClick={beginRecord} className="gap-1.5">
                       <RefreshCw className="h-4 w-4" />
-                      Try another sentence
+                      جرّب جملة ثانية
                     </Button>
                   </div>
                 </>

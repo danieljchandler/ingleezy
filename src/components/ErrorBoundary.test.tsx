@@ -236,13 +236,13 @@ describe("ErrorBoundary — recovery actions", () => {
   it("offers both a retry and a reload on a generic failure", () => {
     render(new Error("kaboom"));
     expect(screen.getByRole("button", { name: "Try again" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Reload page" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "أعد تحميل الصفحة" })).toBeInTheDocument();
   });
 
   it("labels the retry as a retry on a connection failure", () => {
     render(new Error("Failed to fetch"));
     expect(screen.getByRole("button", { name: "Try again" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Reload page" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "أعد تحميل الصفحة" })).toBeInTheDocument();
   });
 
   it("offers only sign-in on a session failure", () => {
@@ -250,7 +250,7 @@ describe("ErrorBoundary — recovery actions", () => {
     expect(screen.getByRole("button", { name: "Sign in" })).toBeInTheDocument();
     // Reloading an expired session just lands on the same panel, so it is
     // deliberately not offered.
-    expect(screen.queryByRole("button", { name: "Reload page" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "أعد تحميل الصفحة" })).not.toBeInTheDocument();
   });
 
   it("re-renders the children when the retry succeeds", () => {
@@ -299,7 +299,7 @@ describe("ErrorBoundary — recovery actions", () => {
 
   it("reloads the document from the reload button", () => {
     render(new Error("kaboom"));
-    fireEvent.click(screen.getByRole("button", { name: "Reload page" }));
+    fireEvent.click(screen.getByRole("button", { name: "أعد تحميل الصفحة" }));
     expect(reload).toHaveBeenCalledTimes(1);
     expect(window.location.href).toBe("/current");
   });

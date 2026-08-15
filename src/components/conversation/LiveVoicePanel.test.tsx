@@ -284,7 +284,7 @@ describe("the transcript", () => {
 
     // The whole product is dialect. A tutor answering in MSA without saying so
     // teaches the learner the wrong register and they cannot tell.
-    expect(screen.getByText("تحدث بالعربية")).toBeInTheDocument();
+    expect(screen.getByText("خرج عن الإنجليزي")).toBeInTheDocument();
     await settleTurns();
   });
 
@@ -293,7 +293,7 @@ describe("the transcript", () => {
     render();
 
     // Drift is a fault in the tutor's output, not in the learner's speech.
-    expect(screen.queryByText("تحدث بالعربية")).toBeNull();
+    expect(screen.queryByText("خرج عن الإنجليزي")).toBeNull();
   });
 
   it("makes the tutor's English tappable but leaves the learner's alone", async () => {

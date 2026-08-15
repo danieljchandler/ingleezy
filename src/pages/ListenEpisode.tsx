@@ -226,7 +226,7 @@ const ListenEpisode = () => {
         {isOwner && (
           <div className="pt-4">
             <Button variant="ghost" size="sm" className="text-destructive" onClick={() => setConfirmDeleteOpen(true)}>
-              <Trash2 className="h-3.5 w-3.5 mr-1" />Delete episode
+              <Trash2 className="h-3.5 w-3.5 mr-1" />احذف الحلقة
             </Button>
           </div>
         )}
@@ -237,7 +237,7 @@ const ListenEpisode = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>نحذف الحلقة؟</AlertDialogTitle>
             <AlertDialogDescription>
-              This permanently deletes the episode. This can't be undone.
+              هذا يحذف الحلقة نهائياً. ما فيه تراجع.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

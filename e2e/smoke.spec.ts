@@ -6,8 +6,8 @@ test.describe("signed out", () => {
     await stubSupabase(page);
     await page.goto("/");
 
-    await expect(page.getByRole("heading", { name: /real spoken arabic/i })).toBeVisible();
-    await expect(page.getByRole("button", { name: /join the beta/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /إنجليزي محكي حقيقي/ })).toBeVisible();
+    await expect(page.getByRole("button", { name: /انضم للتجربة/ })).toBeVisible();
   });
 
   test("protected routes redirect to /auth", async ({ page }) => {
@@ -207,7 +207,7 @@ test.describe("signed in — curriculum", () => {
     await page.goto("/curriculum");
 
     // One obvious next action, not a wall of equally-weighted rows.
-    await expect(page.getByText("Next up")).toHaveCount(1);
+    await expect(page.getByText("التالي")).toHaveCount(1);
   });
 
   test("shows a completed lesson with its best score, and moves next up along", async ({ page }) => {
@@ -230,7 +230,7 @@ test.describe("signed in — curriculum", () => {
 
     await expect(page.getByText(/Completed · best 90%/)).toBeVisible();
     const nextUp = page.getByRole("link", { name: /At the Market/ });
-    await expect(nextUp).toContainText("Next up");
+    await expect(nextUp).toContainText("التالي");
   });
 
   test("a lesson row links into the lesson", async ({ page }) => {

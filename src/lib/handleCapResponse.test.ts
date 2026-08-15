@@ -98,7 +98,7 @@ describe("recognising a cap hit", () => {
     expect(showCapToastIfLimited(error, null)).toBe(true);
     await vi.waitFor(() => expect(toastError).toHaveBeenCalled());
     expect(toastError.mock.calls[0][1]).toMatchObject({
-      description: expect.stringMatching(/daily free limit/i),
+      description: expect.stringMatching(/وصلت حدّك المجاني اليوم/),
     });
   });
 });
@@ -108,7 +108,7 @@ describe("the toast", () => {
     showCapToast(capBody({ message: "You've used today's 20 free drills." }));
 
     expect(toastError).toHaveBeenCalledWith(
-      "Daily free limit reached",
+      "وصلت حدّك المجاني اليوم",
       expect.objectContaining({ description: "You've used today's 20 free drills." }),
     );
   });
@@ -125,20 +125,20 @@ describe("the toast", () => {
     showCapToast({});
 
     expect(toastError.mock.calls[0][1]).toMatchObject({
-      description: expect.stringMatching(/upgrade/i),
+      description: expect.stringMatching(/رقّي اشتراكك/),
     });
   });
 
-  it("offers an Upgrade action", () => {
+  it("offers an upgrade action", () => {
     // Without it the learner is told they are capped and given nowhere to go.
     showCapToast(capBody());
 
     expect(toastError.mock.calls[0][1]).toMatchObject({
-      action: expect.objectContaining({ label: "Upgrade" }),
+      action: expect.objectContaining({ label: "رقّي اشتراكك" }),
     });
   });
 
-  it("sends the Upgrade action to the pricing page", () => {
+  it("sends the upgrade action to the pricing page", () => {
     const assign = vi.fn();
     Object.defineProperty(window, "location", {
       configurable: true,

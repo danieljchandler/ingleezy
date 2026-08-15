@@ -57,7 +57,7 @@ function renderSpotlight(list: SoundSpotlightEntry[] = entries, dialect = "Gulf"
   return harness;
 }
 
-const toggle = () => screen.getByRole("button", { name: /Sounds in this lesson/ });
+const toggle = () => screen.getByRole("button", { name: /أصوات هذا الدرس/ });
 
 describe("SoundSpotlight — deciding whether to appear", () => {
   it("renders nothing when the lesson has no notes", () => {

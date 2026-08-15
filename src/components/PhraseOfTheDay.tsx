@@ -248,7 +248,7 @@ export const PhraseOfTheDay = () => {
               {saved ? (
                 <>
                   <Check className="h-4 w-4 mr-1.5" />
-                  Saved
+                  محفوظة
                 </>
               ) : (
                 <>

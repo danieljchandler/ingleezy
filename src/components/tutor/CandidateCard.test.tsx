@@ -276,7 +276,7 @@ describe("deciding", () => {
   it("approves the candidate", () => {
     const { onApprove } = render();
 
-    fireEvent.click(screen.getByRole("button", { name: /approve/i }));
+    fireEvent.click(screen.getByRole("button", { name: /اقبل/ }));
 
     expect(onApprove).toHaveBeenCalledWith("cand-1");
   });
@@ -284,7 +284,7 @@ describe("deciding", () => {
   it("rejects the candidate", () => {
     const { onReject } = render();
 
-    fireEvent.click(screen.getByRole("button", { name: /reject/i }));
+    fireEvent.click(screen.getByRole("button", { name: /ارفض/ }));
 
     expect(onReject).toHaveBeenCalledWith("cand-1");
   });
@@ -303,7 +303,7 @@ describe("deciding", () => {
     render({ status: "approved" });
 
     expect(screen.getByText("مقبولة")).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /approve/i })).toBeNull();
+    expect(screen.queryByRole("button", { name: /اقبل/ })).toBeNull();
   });
 
   it("marks a rejected candidate without hiding it", () => {
@@ -321,7 +321,7 @@ describe("deciding", () => {
     // Pinned: neither Approve nor Reject survives the decision and there is no
     // undo on the card, so a mis-tap on a fifty-word list is only recoverable
     // from wherever the parent page keeps the list.
-    expect(screen.queryByRole("button", { name: /approve/i })).toBeNull();
-    expect(screen.queryByRole("button", { name: /reject/i })).toBeNull();
+    expect(screen.queryByRole("button", { name: /اقبل/ })).toBeNull();
+    expect(screen.queryByRole("button", { name: /ارفض/ })).toBeNull();
   });
 });

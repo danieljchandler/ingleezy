@@ -212,7 +212,7 @@ describe("QuizCard audio", () => {
     });
     expect(onAnswer).not.toHaveBeenCalled();
 
-    fireEvent.click(screen.getByText("Continue"));
+    fireEvent.click(screen.getByText("كمّل"));
 
     expect(onAnswer).toHaveBeenCalledWith(false);
   });

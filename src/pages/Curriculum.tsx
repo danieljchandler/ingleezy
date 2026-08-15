@@ -92,21 +92,17 @@ const Curriculum = () => {
       {!isAuthenticated && (
         <p className="mb-6 text-sm text-muted-foreground">
           <Link to="/auth" className="text-primary hover:underline">
-            Sign in
+            سجّل دخولك
           </Link>{" "}
-          to track which lessons you've finished.
+          عشان نتابع الدروس اللي خلّصتها.
         </p>
       )}
 
       {!hasLessons && (
         <div className="rounded-2xl border border-border bg-card p-8 text-center">
-          <p className="text-foreground font-medium mb-1">No lessons yet for {activeDialect}</p>
+          <p className="text-foreground font-medium mb-1">ما فيه دروس بعد لـ{activeDialect}</p>
           <p className="text-sm text-muted-foreground">
-            Try another dialect from the switcher on Home, or start with the{" "}
-            <Link to="/alphabet" className="text-primary hover:underline">
-              Alphabet Journey
-            </Link>
-            .
+            جرّب لهجة ثانية من مبدّل اللهجات في الرئيسية.
           </p>
         </div>
       )}
@@ -194,7 +190,7 @@ const Curriculum = () => {
                           <span className="font-semibold text-foreground">{lesson.name}</span>
                           {state.isNextUp && (
                             <span className="text-[10px] font-bold uppercase tracking-wider text-primary bg-primary/10 px-1.5 py-0.5 rounded">
-                              Next up
+                              التالي
                             </span>
                           )}
                         </div>

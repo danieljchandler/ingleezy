@@ -290,7 +290,7 @@ test.describe("the comprehension quiz", () => {
     await page.getByRole("button", { name: /see results/i }).click();
     await expect(page.getByText("2/2")).toBeVisible();
 
-    await page.getByRole("button", { name: /close quiz/i }).click();
+    await page.getByRole("button", { name: /أغلق الاختبار/ }).click();
 
     await expect(page.getByRole("button", { name: /test comprehension/i })).toBeVisible();
   });

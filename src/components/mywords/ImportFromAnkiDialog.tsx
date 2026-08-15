@@ -546,7 +546,7 @@ export function ImportFromAnkiDialog({ open, onOpenChange }: Props) {
 
             <DialogFooter>
               <Button variant="outline" onClick={reset}>
-                Choose different file
+                اختر ملفاً ثانياً
               </Button>
               <Button onClick={handleImport}>
                 Import {deck.cards.length.toLocaleString()} cards
@@ -570,7 +570,7 @@ export function ImportFromAnkiDialog({ open, onOpenChange }: Props) {
               </>
             )}
             <p className="text-xs text-muted-foreground text-center">
-              Please keep this dialog open until the import finishes.
+              خلّ هذي النافذة مفتوحة لين يخلص الاستيراد.
             </p>
           </div>
         )}

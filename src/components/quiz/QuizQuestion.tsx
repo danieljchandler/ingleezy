@@ -128,7 +128,7 @@ export const QuizQuestion = ({
             strong clue to its meaning, which is exactly what is being asked. */}
         {showResult && <RootChip root={currentWord.root} className="mb-2" />}
         <p className="text-muted-foreground text-sm font-sans">
-          What is this in English?
+          وش هذي بالإنجليزي؟
         </p>
       </div>
 

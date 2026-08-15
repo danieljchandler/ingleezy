@@ -45,7 +45,7 @@ describe("LevelJourneyCard", () => {
   it("invites a never-placed learner to find their level", async () => {
     invoke.mockResolvedValue({ data: { history: [] }, error: null });
     mount();
-    expect(await screen.findByRole("button", { name: "Find my level" })).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "حدّد مستواي" })).toBeInTheDocument();
   });
 
   it("shows the latest level and stays quiet while fresh", async () => {
@@ -63,7 +63,7 @@ describe("LevelJourneyCard", () => {
       error: null,
     });
     mount();
-    expect(await screen.findByRole("button", { name: "Re-check my level" })).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "أعد تحديد مستواي" })).toBeInTheDocument();
   });
 
   it("celebrates a measured move up", async () => {

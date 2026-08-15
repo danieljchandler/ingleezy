@@ -153,8 +153,8 @@ const App = () => {
               ? parsed.payload
               : "";
 
-        toast.error("The app crashed recently", {
-          description: msg || "Details logged to the console. Please try again.",
+        toast.error("التطبيق وقف فجأة قبل شوي", {
+          description: msg || "سجّلنا التفاصيل في الكونسول. جرّب مرة ثانية.",
         });
         console.error("Recovered last crash:", parsed);
       }
@@ -170,8 +170,8 @@ const App = () => {
         stack: event.reason instanceof Error ? event.reason.stack ?? null : null,
         meta: { kind: "unhandledrejection" },
       });
-      toast.error("An unexpected error occurred", {
-        description: "Please try again. If the problem persists, let me know what you did.",
+      toast.error("صار خطأ ما توقعناه", {
+        description: "جرّب مرة ثانية. لو تكرّر، خبّرنا وش كنت تسوي.",
       });
       // Prevent browser/dev overlay from treating it as fatal.
       event.preventDefault();
@@ -195,8 +195,8 @@ const App = () => {
         meta: { kind: "window.error", filename: event.filename, lineno: event.lineno },
       });
       // Don't spam toasts for every error; but make crashes visible.
-      toast.error("A page error occurred", {
-        description: "The error was logged to the console. Please try again.",
+      toast.error("صار خطأ في الصفحة", {
+        description: "سجّلنا الخطأ في الكونسول. جرّب مرة ثانية.",
       });
 
       event.preventDefault();

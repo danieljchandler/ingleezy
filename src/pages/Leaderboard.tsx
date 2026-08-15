@@ -133,7 +133,7 @@ const LeaderboardRow = ({
 
       <div className="text-right shrink-0">
         <p className="font-bold text-primary">{entry.xp_this_week.toLocaleString()}</p>
-        <p className="text-xs text-muted-foreground">XP this week</p>
+        <p className="text-xs text-muted-foreground">نقاط هذا الأسبوع</p>
       </div>
     </div>
   );
@@ -234,7 +234,7 @@ const ProfileEditDialog = () => {
                 id="customInstitution"
                 value={customInstitution}
                 onChange={(e) => setCustomInstitution(e.target.value)}
-                placeholder="e.g. King Saud University"
+                placeholder="مثلاً: جامعة الملك سعود"
               />
             </div>
           )}

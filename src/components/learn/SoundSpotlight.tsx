@@ -112,7 +112,7 @@ export const SoundSpotlight = ({ entries }: Props) => {
         className="w-full flex items-center justify-between gap-2 px-4 py-3 text-left"
       >
         <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-          Sounds in this lesson
+          أصوات هذا الدرس
         </span>
         <ChevronDown
           className={cn(

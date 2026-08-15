@@ -323,7 +323,7 @@ const DailyChallenge = () => {
 
           {!isAuthenticated && (
             <Button variant="outline" onClick={() => navigate("/auth")} className="w-full">
-              Sign in to track your streak
+              سجّل دخولك عشان نتابع سلسلتك
             </Button>
           )}
         </div>

@@ -89,7 +89,7 @@ export function WatchTodayCard({ done = false, className }: WatchTodayCardProps)
         onClick={() => navigate("/discover")}
         className="mt-2 text-xs text-primary font-semibold flex items-center gap-0.5 mx-auto"
       >
-        See all videos <ChevronRight className="h-3 w-3" />
+        كل المقاطع <ChevronRight className="h-3 w-3" />
       </button>
     </div>
   );

@@ -248,7 +248,7 @@ const Learn = () => {
         <div className="flex items-center justify-center py-24">
           <div className="text-center">
             <Loader2 className="h-10 w-10 animate-spin text-primary mx-auto mb-4" />
-            <p className="text-muted-foreground">Loading...</p>
+            <p className="text-muted-foreground">جاري التحميل…</p>
           </div>
         </div>
       </AppShell>
@@ -343,17 +343,17 @@ const Learn = () => {
             </Button>
             {!isMixedMode && (
               <Button variant="outline" onClick={() => navigate("/curriculum")} className="w-full">
-                Back to Curriculum
+                رجوع للمنهج
               </Button>
             )}
             <Button variant="outline" onClick={() => navigate("/")} className="w-full">
-              Back Home
+              رجوع للرئيسية
             </Button>
           </div>
 
           {!isAuthenticated && (
             <p className="mt-6 text-sm text-muted-foreground">
-              <Link to="/auth" className="text-primary hover:underline">Login</Link> to save your progress
+              <Link to="/auth" className="text-primary hover:underline">سجّل دخولك</Link> عشان نحفظ تقدّمك
             </p>
           )}
         </div>

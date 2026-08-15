@@ -191,7 +191,7 @@ test.describe("the all-time board", () => {
     await expect(page.getByText("Omar")).toBeVisible();
 
     // A bug, pinned. `LeaderboardRow` renders `entry.xp_this_week` under the
-    // fixed label "XP this week" on both tabs, so the all-time board is sorted
+    // fixed label "نقاط هذا الأسبوع" on both tabs, so the all-time board is sorted
     // by a number it never shows. Omar leads on 8,000 lifetime XP and is
     // displayed with 10 beside Layla's 900 — a board that reads as though the
     // sort is broken. The data is right and only the column is wrong, which is
@@ -199,7 +199,7 @@ test.describe("the all-time board", () => {
     await expect(page.getByText("10", { exact: true })).toBeVisible();
     await expect(page.getByText("900")).toBeVisible();
     await expect(page.getByText("8,000")).toHaveCount(0);
-    await expect(page.getByText("XP this week").first()).toBeVisible();
+    await expect(page.getByText("نقاط هذا الأسبوع").first()).toBeVisible();
   });
 
   test("goes back to the weekly ordering", async ({ page }) => {

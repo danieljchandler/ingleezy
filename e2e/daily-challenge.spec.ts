@@ -208,7 +208,7 @@ test.describe("the landing screen", () => {
 
     // Not a gate: the challenge is playable signed out, only the streak needs
     // an account.
-    await expect(page.getByRole("button", { name: "Sign in to track your streak" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "سجّل دخولك عشان نتابع سلسلتك" })).toBeVisible();
     await expect(startButton(page)).toBeVisible();
     await expect(page.getByText("يوم متتالي")).toHaveCount(0);
   });

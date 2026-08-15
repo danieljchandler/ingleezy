@@ -576,7 +576,7 @@ test.describe("shadow mode", () => {
     // setter, so auto-advance fires at a score the learner cannot adjust and is
     // never shown. Auto-advance itself *is* adjustable, which makes the missing
     // half look deliberate rather than dropped.
-    await expect(page.getByText("Auto-advance")).toBeVisible();
+    await expect(page.getByText("تقدّم تلقائي")).toBeVisible();
     await expect(page.getByText(/threshold/i)).toHaveCount(0);
   });
 });

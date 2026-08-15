@@ -98,7 +98,7 @@ const NEW_CARD_RPC_BUG = [
 /** Miss the current card, then acknowledge the correction. */
 async function answerWrongly(page: Page, wrongEnglish: string) {
   await answer(page, wrongEnglish);
-  await page.getByRole("button", { name: /^continue$/i }).click();
+  await page.getByRole("button", { name: /^كمّل$/ }).click();
 }
 
 test.describe("working through a lesson", () => {
@@ -198,7 +198,7 @@ test.describe("working through a lesson", () => {
 
     // A wrong answer does not auto-advance; it holds until Continue is tapped,
     // so the correct option is actually read rather than flashing past.
-    await expect(page.getByRole("button", { name: /^continue$/i })).toBeVisible();
+    await expect(page.getByRole("button", { name: /^كمّل$/ })).toBeVisible();
     await atCard(page, 0, 4);
   });
 
@@ -351,7 +351,7 @@ test.describe("what a lesson answer records", () => {
     await page.goto(`/learn/${LESSON}`);
     for (let index = 0; index < 4; index++) await answerCorrectly(page, index);
 
-    await expect(page.getByRole("link", { name: /login/i })).toBeVisible();
+    await expect(page.getByRole("link", { name: /سجّل دخولك/ })).toBeVisible();
   });
 });
 

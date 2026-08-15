@@ -85,7 +85,7 @@ const ResetPassword = () => {
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold font-heading mb-2">عيّن كلمة مرور جديدة</h1>
           <p className="text-muted-foreground text-sm">
-            Choose a new password for your Ingleezy account.
+            اختر كلمة مرور جديدة لحسابك في إنجليزي.
           </p>
         </div>
         <div className="bg-card rounded-xl p-6 border border-border">
@@ -98,7 +98,7 @@ const ResetPassword = () => {
             <div className="space-y-4">
               <p className="text-destructive text-sm">{error}</p>
               <Button onClick={() => navigate("/auth")} className="w-full">
-                Back to sign in
+                رجوع لتسجيل الدخول
               </Button>
             </div>
           )}
@@ -107,7 +107,7 @@ const ResetPassword = () => {
               <div className="space-y-2">
                 <Label htmlFor="password" className="text-sm font-medium flex items-center gap-2">
                   <Lock className="h-4 w-4 text-muted-foreground" />
-                  New password
+                  كلمة المرور الجديدة
                 </Label>
                 <Input
                   id="password"
@@ -124,7 +124,7 @@ const ResetPassword = () => {
               <div className="space-y-2">
                 <Label htmlFor="confirm" className="text-sm font-medium flex items-center gap-2">
                   <Lock className="h-4 w-4 text-muted-foreground" />
-                  Confirm password
+                  أكّد كلمة المرور
                 </Label>
                 <Input
                   id="confirm"

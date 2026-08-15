@@ -219,7 +219,7 @@ test.describe("playing through a story", () => {
     await expect(page.getByText("خلصت القصة!")).toBeVisible();
     await expect(page.getByText("You found the hotel")).toBeVisible();
     await expect(page.getByText("وصلت الفندق")).toBeVisible();
-    await expect(page.getByText("What do you do?")).toHaveCount(0);
+    await expect(page.getByText("وش تسوي؟")).toHaveCount(0);
   });
 
   test("starts over from the ending", async ({ page, db }) => {

@@ -519,7 +519,7 @@ const CreateChallengeDialog = ({
           <div className="bg-muted rounded-xl p-4 text-sm text-muted-foreground">
             <strong className="text-foreground">10 questions</strong> · <strong className="text-foreground">60 seconds</strong>
             <br />
-            Answer vocabulary questions as fast as you can. Highest score wins!
+            جاوب على أسئلة الكلمات بأسرع ما تقدر. أعلى نتيجة تكسب!
           </div>
         )}
 

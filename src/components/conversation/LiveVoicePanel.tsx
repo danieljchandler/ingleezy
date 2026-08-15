@@ -100,7 +100,7 @@ export function LiveVoicePanel({
                 <span>{t.role === "user" ? "أنت" : "المعلّم"}</span>
                 {t.role === "assistant" && t.hasDialectDrift && (
                   <span className="rounded bg-amber-500/15 px-1.5 py-0.5 text-[9px] font-semibold text-amber-700 normal-case tracking-normal">
-                    تحدث بالعربية
+                    خرج عن الإنجليزي
                   </span>
                 )}
               </div>

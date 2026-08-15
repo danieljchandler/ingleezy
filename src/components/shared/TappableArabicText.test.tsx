@@ -231,7 +231,7 @@ describe("selecting a phrase", () => {
     longPress("رحت");
     fireEvent.click(screen.getByRole("button", { name: "مدّد التحديد إلى «السوق»" }));
 
-    fireEvent.click(screen.getByRole("button", { name: /translate/i }));
+    fireEvent.click(screen.getByRole("button", { name: /ترجم العبارة/ }));
 
     // `isPhrase` is what tells the model to read it as an expression rather
     // than gloss two words — which is the entire reason phrase mode exists.
@@ -247,7 +247,7 @@ describe("selecting a phrase", () => {
     const { backend } = await render();
     longPress("رحت");
 
-    fireEvent.click(screen.getByRole("button", { name: /save/i }));
+    fireEvent.click(screen.getByRole("button", { name: /احفظ العبارة/ }));
 
     // A flashcard with an Arabic front and a blank back is unreviewable, and
     // the learner would not find out until it came up in a session.
@@ -258,10 +258,10 @@ describe("selecting a phrase", () => {
   it("saves the phrase once it has a meaning", async () => {
     const { backend } = await render();
     longPress("رحت");
-    fireEvent.click(screen.getByRole("button", { name: /translate/i }));
+    fireEvent.click(screen.getByRole("button", { name: /ترجم العبارة/ }));
     await waitFor(() => expect(backend.callsTo("word-enrichment")).toHaveLength(1));
 
-    fireEvent.click(screen.getByRole("button", { name: /save/i }));
+    fireEvent.click(screen.getByRole("button", { name: /احفظ العبارة/ }));
 
     await waitFor(() =>
       expect(backend.db.lastWriteTo("user_vocabulary")?.payload[0]).toMatchObject({

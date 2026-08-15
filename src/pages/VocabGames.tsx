@@ -535,7 +535,7 @@ const VocabGames = () => {
               <div>
                 <h1 className="text-xl font-bold text-foreground inline-flex items-center gap-2">ألعاب المفردات <InfoHint {...PAGE_HINTS["vocab-games"]} /></h1>
                 <p className="text-sm text-muted-foreground">
-                  Practice words through fun games
+                  تمرّن على الكلمات بألعاب ممتعة
                 </p>
               </div>
             </div>
@@ -545,7 +545,7 @@ const VocabGames = () => {
                 <Gamepad2 className="h-12 w-12 text-muted-foreground/30 mx-auto" />
                 <p className="text-muted-foreground">تحتاج 6 كلمات على الأقل للعب</p>
                 <p className="text-sm text-muted-foreground/70">
-                  Learn some vocabulary first, then come back!
+                  تعلّم شوية كلمات أول، وبعدين ارجع!
                 </p>
                 <Button variant="outline" onClick={() => navigate("/learn")}>
                   ابدأ التعلم

@@ -270,7 +270,7 @@ describe("showing the transcript", () => {
 
     // A burned-in caption is not speech: it has no pronunciation to imitate and
     // it is frequently in MSA even when the speaker is not.
-    expect(screen.getByText("On screen")).toBeInTheDocument();
+    expect(screen.getByText("على الشاشة")).toBeInTheDocument();
   });
 });
 
@@ -385,7 +385,7 @@ describe("the Fusha line", () => {
     await waitFor(() =>
       expect(screen.getByText("ما قدرنا نحوّل كل سطر للفصحى.")).toBeInTheDocument(),
     );
-    expect(screen.getByRole("button", { name: "Retry" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "أعد المحاولة" })).toBeInTheDocument();
   });
 });
 
@@ -490,7 +490,7 @@ describe("looking up one word", () => {
     // defeated, and both states are live at once: the definition is showing
     // while the hint underneath still invites a second word.
     expect(within(wordPopover()).getByText("I went")).toBeInTheDocument();
-    expect(screen.getByText(/Tap an adjacent word/)).toBeInTheDocument();
+    expect(screen.getByText(/دوس على كلمة جارة/)).toBeInTheDocument();
   });
 
   it("keeps the definition open once the selection lapses", () => {
@@ -505,7 +505,7 @@ describe("looking up one word", () => {
     // The timer's real remaining effect: it drops the selection so the phrase
     // gesture is no longer half-started.
     expect(within(wordPopover()).getByText("I went")).toBeInTheDocument();
-    expect(screen.queryByText(/Tap an adjacent word/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/دوس على كلمة جارة/)).not.toBeInTheDocument();
   });
 
   it("shows the standard spelling when the dialect form differs", () => {
@@ -524,7 +524,7 @@ describe("looking up one word", () => {
 
     tap("رحت");
 
-    expect(screen.queryByText(/Tap an adjacent word/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/دوس على كلمة جارة/)).not.toBeInTheDocument();
   });
 
   it("translates a word the transcript had no gloss for", async () => {
@@ -557,7 +557,7 @@ describe("looking up one word", () => {
     tap("أمس");
 
     await waitFor(() =>
-      expect(within(wordPopover()).getByText("No definition found")).toBeInTheDocument(),
+      expect(within(wordPopover()).getByText("ما لقينا تعريف")).toBeInTheDocument(),
     );
     fireEvent.click(within(wordPopover()).getByRole("button", { name: /أعد المحاولة/ }));
 
@@ -736,7 +736,7 @@ describe("looking up a phrase", () => {
     // Two words with a word between them are not a phrase, and joining them
     // would send the model something nobody said.
     expect(backend.callsTo("translate-phrase")).toEqual([]);
-    expect(screen.getByText(/Tap an adjacent word/)).toBeInTheDocument();
+    expect(screen.getByText(/دوس على كلمة جارة/)).toBeInTheDocument();
   });
 
   it("cannot be extended to a third word", async () => {

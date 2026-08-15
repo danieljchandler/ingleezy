@@ -278,7 +278,7 @@ export function FeedbackWidget() {
                     </div>
                   ) : (
                     <div className="text-xs text-muted-foreground">
-                      No screenshot captured. The widget is hidden from the capture.
+                      ما التقطنا صورة. الأداة نفسها مخفية من اللقطة.
                     </div>
                   )}
                   <Button
