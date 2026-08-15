@@ -178,7 +178,7 @@ export function AskAiPanel() {
             type="button"
             aria-label="أغلق اسأل الذكاء"
             onClick={close}
-            className="ml-auto rounded-full p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            className="ms-auto rounded-full p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >
             <X className="h-4 w-4" />
           </button>
@@ -188,7 +188,7 @@ export function AskAiPanel() {
           {/* Title and its actions share a row — the context card below is the
               part worth the vertical space at the peek height. */}
           <div className="flex items-center gap-1.5">
-            <SheetTitle className="mr-auto flex items-center gap-2 text-base">
+            <SheetTitle className="me-auto flex items-center gap-2 text-base">
               <Sparkles className="h-4 w-4 text-primary" />
               اسأل الذكاء
             </SheetTitle>

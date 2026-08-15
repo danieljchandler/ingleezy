@@ -177,14 +177,14 @@ const Translate = () => {
               <div className="flex items-center gap-2">
                 {(result || text) && (
                   <Button variant="ghost" size="sm" onClick={onReset} disabled={loading}>
-                    <RotateCcw className="h-4 w-4 mr-1" />
+                    <RotateCcw className="h-4 w-4 me-1" />
                     امسح
                   </Button>
                 )}
                 <Button onClick={onSubmit} disabled={loading || !text.trim()}>
                   {loading ? (
                     <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      <Loader2 className="h-4 w-4 me-2 animate-spin" />
                       نترجم…
                     </>
                   ) : (
@@ -271,16 +271,16 @@ const Translate = () => {
                   variant={savedId ? "secondary" : "default"}
                 >
                   {saving ? (
-                    <><Loader2 className="h-4 w-4 mr-1 animate-spin" /> نحفظ…</>
+                    <><Loader2 className="h-4 w-4 me-1 animate-spin" /> نحفظ…</>
                   ) : savedId ? (
-                    <><Check className="h-4 w-4 mr-1" /> محفوظة</>
+                    <><Check className="h-4 w-4 me-1" /> محفوظة</>
                   ) : (
-                    <><Save className="h-4 w-4 mr-1" /> احفظ الترجمة</>
+                    <><Save className="h-4 w-4 me-1" /> احفظ الترجمة</>
                   )}
                 </Button>
                 <Button asChild variant="outline" size="sm">
                   <Link to="/translate/saved">
-                    <BookOpen className="h-4 w-4 mr-1" /> الترجمات المحفوظة
+                    <BookOpen className="h-4 w-4 me-1" /> الترجمات المحفوظة
                   </Link>
                 </Button>
                 <Button asChild variant="outline" size="sm">

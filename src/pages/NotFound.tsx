@@ -2,7 +2,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/design-system";
-import { Home, ArrowLeft } from "lucide-react";
+import { Home } from "lucide-react";
+import { IconBack } from "@/components/shared/DirectionalIcon";
 
 const NotFound = () => {
   const location = useLocation();
@@ -35,11 +36,11 @@ const NotFound = () => {
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Button onClick={() => navigate(-1)} variant="outline" className="h-11">
-              <ArrowLeft className="h-4 w-4 mr-2" />
+              <IconBack className="h-4 w-4 me-2" />
               رجوع
             </Button>
             <Button onClick={() => navigate("/")} className="h-11">
-              <Home className="h-4 w-4 mr-2" />
+              <Home className="h-4 w-4 me-2" />
               Home
             </Button>
           </div>

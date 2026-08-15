@@ -168,7 +168,7 @@ const TutorUpload = () => {
                 onClick={createFlashcards}
                 className="shadow-lg"
               >
-                <Check className="h-5 w-5 mr-2" />
+                <Check className="h-5 w-5 me-2" />
                 Create {approvedCount} Flashcard{approvedCount !== 1 ? "s" : ""}
               </Button>
             </div>
@@ -207,7 +207,7 @@ const TutorUpload = () => {
           </div>
           <div className="flex flex-col gap-3 max-w-xs mx-auto">
             <Button onClick={() => navigate("/my-words")}>
-              <BookOpen className="h-4 w-4 mr-2" />
+              <BookOpen className="h-4 w-4 me-2" />
               افتح كلماتي
             </Button>
             <Button variant="outline" onClick={() => {

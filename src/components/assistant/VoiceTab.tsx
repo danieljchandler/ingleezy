@@ -99,7 +99,7 @@ export function VoiceTab() {
               className={cn(
                 "rounded-lg px-3 py-2",
                 t.role === "user"
-                  ? "ml-auto max-w-[85%] bg-primary/10"
+                  ? "ms-auto max-w-[85%] bg-primary/10"
                   : "max-w-[85%] border border-border bg-background",
                 t.partial && "opacity-70",
               )}

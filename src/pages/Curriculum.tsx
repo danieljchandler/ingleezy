@@ -16,7 +16,8 @@ import {
   type PathLesson,
 } from "@/lib/lessonPath";
 import { cn } from "@/lib/utils";
-import { CheckCircle2, ChevronRight, Loader2, PlayCircle, Circle } from "lucide-react";
+import { CheckCircle2, Loader2, PlayCircle, Circle } from "lucide-react";
+import { ChevronOpen } from "@/components/shared/DirectionalIcon";
 
 /**
  * The curriculum path.
@@ -220,7 +221,7 @@ const Curriculum = () => {
                         )}
                       </div>
 
-                      <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+                      <ChevronOpen className="h-4 w-4 text-muted-foreground shrink-0" />
                     </Link>
                   );
                 })}

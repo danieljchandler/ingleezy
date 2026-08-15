@@ -192,9 +192,9 @@ const SetPhrasesPractice = ({ reviewMode = false }: Props) => {
               {scoreVoice.isPending ? (
                 <Loader2 className="h-5 w-5 animate-spin" />
               ) : recording ? (
-                <><MicOff className="h-5 w-5 mr-2" /> ارفع إصبعك للإرسال</>
+                <><MicOff className="h-5 w-5 me-2" /> ارفع إصبعك للإرسال</>
               ) : (
-                <><Mic className="h-5 w-5 mr-2" /> اضغط مطوّلاً وتكلّم</>
+                <><Mic className="h-5 w-5 me-2" /> اضغط مطوّلاً وتكلّم</>
               )}
             </Button>
             <Button variant="outline" className="w-full" onClick={() => setShowChoices((s) => !s)}>
@@ -250,10 +250,10 @@ const SetPhrasesPractice = ({ reviewMode = false }: Props) => {
             )}
             <div className="flex gap-2">
               <Button variant="outline" onClick={() => save.mutate({ phraseId: current.phrase_id, source: answered.correct ? "reviewed" : "quiz_miss" })}>
-                <Star className="h-4 w-4 mr-1" /> احفظ
+                <Star className="h-4 w-4 me-1" /> احفظ
               </Button>
               <Button className="flex-1" onClick={next}>
-                التالي <ArrowRight className="h-4 w-4 ml-1" />
+                التالي <ArrowRight className="h-4 w-4 ms-1" />
               </Button>
             </div>
           </Card>

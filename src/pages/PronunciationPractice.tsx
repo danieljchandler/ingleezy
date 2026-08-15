@@ -9,7 +9,7 @@ import { HomeButton } from "@/components/HomeButton";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Mic, MicOff, RotateCcw, Loader2, ChevronRight, ChevronLeft, Trophy, Target, ArrowRight, Languages, Headphones } from "lucide-react";
+import { Mic, MicOff, RotateCcw, Loader2, Trophy, Target, ArrowRight, Languages, Headphones } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
@@ -19,6 +19,7 @@ import { useRef } from "react";
 import { ShadowPlayer } from "@/components/pronunciation/ShadowPlayer";
 import { useShadowQueue } from "@/hooks/useShadowQueue";
 import { useDialect } from "@/contexts/DialectContext";
+import { ChevronBack, ChevronOpen } from "@/components/shared/DirectionalIcon";
 
 const MAX_DURATION_MS = 5000;
 
@@ -326,8 +327,8 @@ const PronunciationPractice = () => {
           {error && (
             <div className="text-sm text-destructive text-center">
               {error}
-              <Button variant="ghost" size="sm" onClick={reset} className="ml-2">
-                <RotateCcw className="h-3.5 w-3.5 mr-1" />
+              <Button variant="ghost" size="sm" onClick={reset} className="ms-2">
+                <RotateCcw className="h-3.5 w-3.5 me-1" />
                 أعد المحاولة
               </Button>
             </div>
@@ -384,9 +385,9 @@ const PronunciationPractice = () => {
                         )}
                       >
                         <span>{w.word}</span>
-                        <span className="text-xs ml-1 opacity-70">{Math.round(w.accuracy)}</span>
+                        <span className="text-xs ms-1 opacity-70">{Math.round(w.accuracy)}</span>
                         {w.errorType !== "None" && (
-                          <Badge variant="destructive" className="ml-1 text-[10px] px-1 py-0">
+                          <Badge variant="destructive" className="ms-1 text-[10px] px-1 py-0">
                             {w.errorType}
                           </Badge>
                         )}
@@ -422,7 +423,7 @@ const PronunciationPractice = () => {
               onClick={goToPrev}
               disabled={currentIndex === 0}
             >
-              <ChevronLeft className="h-4 w-4 mr-1" />
+              <ChevronBack className="h-4 w-4 me-1" />
               السابق
             </Button>
             <Button
@@ -432,7 +433,7 @@ const PronunciationPractice = () => {
               disabled={currentIndex === words.length - 1}
             >
               التالي
-              <ChevronRight className="h-4 w-4 ml-1" />
+              <ChevronOpen className="h-4 w-4 ms-1" />
             </Button>
           </div>
         )}
@@ -467,7 +468,7 @@ const ShadowMode = ({ showEnglish, onScore }: ShadowModeProps) => {
     return (
       <div className="text-center py-8 text-destructive">
         {error}
-        <Button variant="outline" size="sm" onClick={refresh} className="ml-2">أعد المحاولة</Button>
+        <Button variant="outline" size="sm" onClick={refresh} className="ms-2">أعد المحاولة</Button>
       </div>
     );
   }

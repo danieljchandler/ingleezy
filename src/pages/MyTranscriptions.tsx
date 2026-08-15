@@ -166,7 +166,7 @@ export default function MyTranscriptions() {
                         ))}
                         {r.engines_used.translation && r.engines_used.translation.length > 0 && (
                           <>
-                            <span className="ml-2 font-medium">Translation:</span>
+                            <span className="ms-2 font-medium">Translation:</span>
                             {r.engines_used.translation.map((e) => (
                               <Badge key={e} variant="outline" className="text-[10px] px-1.5 py-0">{e}</Badge>
                             ))}
@@ -180,7 +180,7 @@ export default function MyTranscriptions() {
                         variant="default"
                         onClick={() => navigate(`/transcribe?saved=${r.id}`)}
                       >
-                        <Eye className="h-4 w-4 mr-1" /> Open
+                        <Eye className="h-4 w-4 me-1" /> Open
                       </Button>
                       <AlertDialog>
                         <AlertDialogTrigger asChild>

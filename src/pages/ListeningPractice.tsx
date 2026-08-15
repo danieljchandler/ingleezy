@@ -32,9 +32,9 @@ import {
   BookOpen,
   PenLine,
   Loader2,
-  ChevronRight,
-  Languages,
+  Languages
 } from "lucide-react";
+import { ChevronOpen } from "@/components/shared/DirectionalIcon";
 
 type Mode = "dictation" | "comprehension" | "speed";
 
@@ -314,7 +314,7 @@ const ListeningPractice = () => {
                 <p className="font-bold text-foreground">الإملاء</p>
                 <p className="text-sm text-muted-foreground">استمع واكتب ما تسمعه</p>
               </div>
-              <ChevronRight className="h-5 w-5 text-muted-foreground" />
+              <ChevronOpen className="h-5 w-5 text-muted-foreground" />
             </button>
 
             {/* Comprehension Mode */}
@@ -337,7 +337,7 @@ const ListeningPractice = () => {
                 <p className="font-bold text-foreground">الفهم</p>
                 <p className="text-sm text-muted-foreground">أجب عن أسئلة حول ما تسمعه</p>
               </div>
-              <ChevronRight className="h-5 w-5 text-muted-foreground" />
+              <ChevronOpen className="h-5 w-5 text-muted-foreground" />
             </button>
 
             {/* Speed Mode */}
@@ -360,7 +360,7 @@ const ListeningPractice = () => {
                 <p className="font-bold text-foreground">تمرين السرعة</p>
                 <p className="text-sm text-muted-foreground">استماع سريع بسرعات متغيرة</p>
               </div>
-              <ChevronRight className="h-5 w-5 text-muted-foreground" />
+              <ChevronOpen className="h-5 w-5 text-muted-foreground" />
             </button>
           </div>
 
@@ -406,7 +406,7 @@ const ListeningPractice = () => {
           </p>
           <div className="flex gap-3 justify-center">
             <Button variant="outline" onClick={resetSession}>
-              <RotateCcw className="h-4 w-4 mr-2" />
+              <RotateCcw className="h-4 w-4 me-2" />
               حاول من جديد
             </Button>
             <Button onClick={() => navigate("/")}>تم</Button>
@@ -421,7 +421,7 @@ const ListeningPractice = () => {
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <Button variant="ghost" size="sm" onClick={resetSession}>
-          <X className="h-4 w-4 mr-1" />
+          <X className="h-4 w-4 me-1" />
           خروج
         </Button>
         <Badge variant="secondary">
@@ -480,7 +480,7 @@ const ListeningPractice = () => {
             {audioPlaying ? (
               <Volume2 className="h-10 w-10 text-primary animate-pulse" />
             ) : (
-              <Play className="h-10 w-10 text-primary-foreground ml-1" />
+              <Play className="h-10 w-10 text-primary-foreground ms-1" />
             )}
           </button>
         </div>
@@ -555,7 +555,7 @@ const ListeningPractice = () => {
 
                 <Button onClick={nextQuestion} className="w-full">
                   {currentIndex < questions.length - 1 ? "التالي" : "إنهاء"}
-                  <ChevronRight className="h-4 w-4 ml-1" />
+                  <ChevronOpen className="h-4 w-4 ms-1" />
                 </Button>
               </div>
             )}
@@ -596,7 +596,7 @@ const ListeningPractice = () => {
                 )}
                 <Button onClick={nextQuestion} className="w-full">
                   {currentIndex < questions.length - 1 ? "التالي" : "إنهاء"}
-                  <ChevronRight className="h-4 w-4 ml-1" />
+                  <ChevronOpen className="h-4 w-4 ms-1" />
                 </Button>
               </div>
             )}

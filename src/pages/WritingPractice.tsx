@@ -152,10 +152,10 @@ const WriteTab = () => {
           <span className="text-xs text-muted-foreground">{text.length}/{MAX_CHARS}</span>
           <div className="flex gap-2">
             <Button variant="outline" size="sm" onClick={() => void loadPrompt()} disabled={busy}>
-              <RefreshCw className="mr-1 h-3.5 w-3.5" /> سؤال جديد
+              <RefreshCw className="me-1 h-3.5 w-3.5" /> سؤال جديد
             </Button>
             <Button size="sm" onClick={() => void submit()} disabled={busy || !text.trim()}>
-              {busy ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : <Sparkles className="mr-1 h-3.5 w-3.5" />}
+              {busy ? <Loader2 className="me-1 h-3.5 w-3.5 animate-spin" /> : <Sparkles className="me-1 h-3.5 w-3.5" />}
               صحّح لي
             </Button>
           </div>
@@ -194,7 +194,7 @@ const WriteTab = () => {
           )}
 
           {(review.tips?.length ?? 0) > 0 && (
-            <ul className="list-disc space-y-1 pl-5 text-sm text-muted-foreground">
+            <ul className="list-disc space-y-1 ps-5 text-sm text-muted-foreground">
               {review.tips!.map((tip, i) => <li key={i}>{tip}</li>)}
             </ul>
           )}
@@ -308,7 +308,7 @@ const TypingTab = () => {
           >
             Stage {stage.index + 1} · {stage.title}
             {best[String(stage.index)] !== undefined && (
-              <span className="ml-1 text-[10px]">best {best[String(stage.index)]}%</span>
+              <span className="ms-1 text-[10px]">best {best[String(stage.index)]}%</span>
             )}
           </button>
         ))}
@@ -323,7 +323,7 @@ const TypingTab = () => {
           </p>
           <div className="mt-4 flex justify-center gap-2">
             <Button variant="outline" size="sm" onClick={() => reset(stageIndex)}>
-              <RefreshCw className="mr-1 h-3.5 w-3.5" /> Again
+              <RefreshCw className="me-1 h-3.5 w-3.5" /> Again
             </Button>
             {stageIndex + 1 < TYPING_STAGES.length && (
               <Button size="sm" onClick={() => reset(stageIndex + 1)}>المرحلة الجاية</Button>
@@ -395,10 +395,10 @@ const WritingPractice = () => {
         <Tabs defaultValue="write">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="write">
-              <PenLine className="mr-1.5 h-4 w-4" /> Write
+              <PenLine className="me-1.5 h-4 w-4" /> Write
             </TabsTrigger>
             <TabsTrigger value="typing">
-              <Keyboard className="mr-1.5 h-4 w-4" /> Typing
+              <Keyboard className="me-1.5 h-4 w-4" /> Typing
             </TabsTrigger>
           </TabsList>
           <TabsContent value="write" className="mt-4">

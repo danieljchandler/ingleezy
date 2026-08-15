@@ -107,7 +107,7 @@ const ReadingLibrary = () => {
                 <div className="space-y-2">
                   <div className="flex items-start justify-between">
                     <h3 className="font-semibold text-base">{story.title}</h3>
-                    <Badge variant="outline" className="text-xs shrink-0 ml-2">
+                    <Badge variant="outline" className="text-xs shrink-0 ms-2">
                       {story.difficulty}
                     </Badge>
                   </div>

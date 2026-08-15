@@ -20,7 +20,9 @@ import { AskAISentence } from "@/components/shared/AskAISentence";
 import { useSavedTranslations, type SavedTranslation } from "@/hooks/useSavedTranslations";
 import { useAddUserVocabulary } from "@/hooks/useUserVocabulary";
 import { toast } from "sonner";
-import { ArrowLeft, BookOpen, ChevronRight, Info, Loader2, Trash2 } from "lucide-react";
+import { BookOpen, Info, Loader2, Trash2 } from "lucide-react";
+import { IconBack } from "@/components/shared/DirectionalIcon";
+import { ChevronOpen } from "@/components/shared/DirectionalIcon";
 
 const SavedTranslations = () => {
   const { items, loading, remove } = useSavedTranslations();
@@ -67,7 +69,7 @@ const SavedTranslations = () => {
         <div className="flex items-center justify-between gap-3">
           {active ? (
             <Button variant="ghost" size="sm" onClick={() => setActive(null)}>
-              <ArrowLeft className="h-4 w-4 mr-1" /> Back
+              <IconBack className="h-4 w-4 me-1" /> رجوع
             </Button>
           ) : (
             <HomeButton />
@@ -117,7 +119,7 @@ const SavedTranslations = () => {
                             {it.detected_dialect ? ` · ${it.detected_dialect}` : ""}
                           </p>
                         </div>
-                        <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+                        <ChevronOpen className="h-4 w-4 text-muted-foreground shrink-0" />
                       </button>
                       <Button
                         variant="ghost"

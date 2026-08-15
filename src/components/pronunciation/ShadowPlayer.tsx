@@ -239,10 +239,10 @@ export function ShadowPlayer({ clip, threshold, autoAdvance, showEnglish, onResu
       {state === "error" && !result && (
         <div className="flex gap-2">
           <Button variant="outline" className="flex-1" onClick={handleLoop}>
-            <RotateCcw className="h-4 w-4 mr-1.5" /> حاول من جديد
+            <RotateCcw className="h-4 w-4 me-1.5" /> حاول من جديد
           </Button>
           <Button variant="ghost" className="flex-1" onClick={onNext}>
-            تخطَّ <ArrowRight className="h-4 w-4 ml-1.5" />
+            تخطَّ <ArrowRight className="h-4 w-4 ms-1.5" />
           </Button>
         </div>
       )}

@@ -1,7 +1,8 @@
 import { useEffect, useLayoutEffect, useState, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
-import { X, ChevronRight } from "lucide-react";
+import {X} from "lucide-react";
+import { ChevronOpen } from "@/components/shared/DirectionalIcon";
 
 const TOUR_KEY = "ingleezy:tourCompleted";
 const TRIGGER_KEY = "ingleezy:showTour";
@@ -155,7 +156,7 @@ export function OnboardingTour() {
           </h3>
           <button
             onClick={finish}
-            className="text-muted-foreground hover:text-foreground -mt-1 -mr-1 p-1"
+            className="text-muted-foreground hover:text-foreground -mt-1 -me-1 p-1"
             aria-label="تخطّى الجولة"
           >
             <X className="h-4 w-4" />
@@ -179,7 +180,7 @@ export function OnboardingTour() {
             </button>
             <Button size="sm" onClick={next} className="h-8">
               {stepIdx === STEPS.length - 1 ? "Done" : "Next"}
-              {stepIdx < STEPS.length - 1 && <ChevronRight className="h-3.5 w-3.5 ml-0.5" />}
+              {stepIdx < STEPS.length - 1 && <ChevronOpen className="h-3.5 w-3.5 ms-0.5" />}
             </Button>
           </div>
         </div>

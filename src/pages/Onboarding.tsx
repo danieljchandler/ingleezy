@@ -9,17 +9,16 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import {
   Loader2,
-  ChevronRight,
-  ChevronLeft,
   Sparkles,
   Globe2,
   GraduationCap,
   Target,
-  Check,
+  Check
 } from 'lucide-react';
 import { getTopicCategories } from '@/data/listenTopics';
 import { LEARNING_REASONS, reasonLabel } from '@/data/learningReasons';
 import ingleezyIconAsset from '@/assets/ingleezy-icon.png.asset.json';
+import { ChevronBack, ChevronOpen } from '@/components/shared/DirectionalIcon';
 const lahjaIcon = ingleezyIconAsset.url;
 
 type Step = 'welcome' | 'dialect' | 'level' | 'purpose' | 'goal';
@@ -200,7 +199,7 @@ const Onboarding = () => {
               </div>
             </div>
             <Button onClick={next} className="w-full h-12 text-base">
-              لنبدأ <ChevronRight className="h-5 w-5 ml-1" />
+              لنبدأ <ChevronOpen className="h-5 w-5 ms-1" />
             </Button>
           </div>
         )}
@@ -243,10 +242,10 @@ const Onboarding = () => {
 
             <div className="flex gap-3">
               <Button variant="outline" onClick={prev} className="h-11">
-                <ChevronLeft className="h-4 w-4" />
+                <ChevronBack className="h-4 w-4" />
               </Button>
               <Button onClick={next} className="flex-1 h-11">
-                متابعة <ChevronRight className="h-4 w-4 ml-1" />
+                متابعة <ChevronOpen className="h-4 w-4 ms-1" />
               </Button>
             </div>
           </div>
@@ -274,7 +273,7 @@ const Onboarding = () => {
                 <span className="font-semibold text-foreground">غير متأكد؟ خذ اختبار تحديد المستوى</span>
                 <p className="text-xs text-muted-foreground">20 سؤالاً متكيّفاً لتحديد مستواك</p>
               </div>
-              <ChevronRight className="h-5 w-5 text-primary shrink-0" />
+              <ChevronOpen className="h-5 w-5 text-primary shrink-0" />
             </button>
 
             <div className="space-y-2">
@@ -306,10 +305,10 @@ const Onboarding = () => {
 
             <div className="flex gap-3">
               <Button variant="outline" onClick={prev} className="h-11">
-                <ChevronLeft className="h-4 w-4" />
+                <ChevronBack className="h-4 w-4" />
               </Button>
               <Button onClick={next} className="flex-1 h-11">
-                متابعة <ChevronRight className="h-4 w-4 ml-1" />
+                متابعة <ChevronOpen className="h-4 w-4 ms-1" />
               </Button>
             </div>
           </div>
@@ -382,10 +381,10 @@ const Onboarding = () => {
 
             <div className="flex gap-3">
               <Button variant="outline" onClick={prev} className="h-11">
-                <ChevronLeft className="h-4 w-4" />
+                <ChevronBack className="h-4 w-4" />
               </Button>
               <Button onClick={next} className="flex-1 h-11">
-                متابعة <ChevronRight className="h-4 w-4 ml-1" />
+                متابعة <ChevronOpen className="h-4 w-4 ms-1" />
               </Button>
             </div>
           </div>
@@ -429,14 +428,14 @@ const Onboarding = () => {
 
             <div className="flex gap-3">
               <Button variant="outline" onClick={prev} className="h-11">
-                <ChevronLeft className="h-4 w-4" />
+                <ChevronBack className="h-4 w-4" />
               </Button>
               <Button onClick={finish} disabled={saving} className="flex-1 h-11">
                 {saving ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
                   <>
-                    <Target className="h-4 w-4 mr-1" />
+                    <Target className="h-4 w-4 me-1" />
                     ابدأ التعلم!
                   </>
                 )}

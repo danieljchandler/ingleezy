@@ -125,7 +125,13 @@ describe("the learner's library", () => {
     await waitFor(() => expect(harness.result.current.isSuccess).toBe(true));
     // The array form is what pairs with `difficultyWindow`; without it the
     // level filter would have to be three separate queries.
-    expect(harness.result.current.data?.map((video) => video.title)).toEqual(["Easy", "Mid"]);
+    //
+    // Sorted before comparing because this is a test about *which* videos come
+    // back, not what order they arrive in. The factory stamps `created_at` from
+    // `Date.now()`, so fixtures built in the same millisecond tie, and the
+    // query's `order(created_at, desc)` then resolves them in whatever order it
+    // likes — which made this assertion fail roughly once a suite under load.
+    expect(harness.result.current.data?.map((video) => video.title).sort()).toEqual(["Easy", "Mid"]);
   });
 
   it("narrows to a single difficulty when given one", async () => {

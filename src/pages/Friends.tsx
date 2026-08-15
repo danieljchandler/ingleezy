@@ -181,10 +181,10 @@ const FriendCard = ({
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : friend.is_following ? (
             <>
-              <UserMinus className="h-4 w-4 mr-1.5" />إلغاء المتابعة</>
+              <UserMinus className="h-4 w-4 me-1.5" />إلغاء المتابعة</>
           ) : (
             <>
-              <UserPlus className="h-4 w-4 mr-1.5" />متابعة</>
+              <UserPlus className="h-4 w-4 me-1.5" />متابعة</>
           )}
         </Button>
         {friend.is_following && (
@@ -373,7 +373,7 @@ const ChallengeCard = ({
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
               <>
-                <Check className="h-4 w-4 mr-1.5" />قبول</>
+                <Check className="h-4 w-4 me-1.5" />قبول</>
             )}
           </Button>
           <Button
@@ -529,9 +529,9 @@ const CreateChallengeDialog = ({
           disabled={isPending}
         >
           {isPending ? (
-            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            <Loader2 className="h-4 w-4 me-2 animate-spin" />
           ) : (
-            <Swords className="h-4 w-4 mr-2" />
+            <Swords className="h-4 w-4 me-2" />
           )}
           {challengeType === 'vocab' ? 'ابدأ معركة المفردات' : 'أرسل تحدي النقاط'}
         </Button>
@@ -641,7 +641,7 @@ const Friends = () => {
             placeholder="ابحث عن مستخدمين بالاسم..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
+            className="ps-10"
           />
         </div>
 

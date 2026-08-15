@@ -65,7 +65,7 @@ export function LandingHero() {
           onClick={() => navigate("/auth")}
         >
           انضم للتجربة — مجاناً
-          <ArrowRight className="h-4 w-4 mr-2" />
+          <ArrowRight className="h-4 w-4 me-2" />
         </Button>
         <Button
           variant="outline"

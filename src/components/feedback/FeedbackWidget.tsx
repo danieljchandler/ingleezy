@@ -295,9 +295,9 @@ export function FeedbackWidget() {
                     disabled={capturing}
                   >
                     {capturing ? (
-                      <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />
+                      <Loader2 className="h-3.5 w-3.5 animate-spin me-1.5" />
                     ) : (
-                      <Camera className="h-3.5 w-3.5 mr-1.5" />
+                      <Camera className="h-3.5 w-3.5 me-1.5" />
                     )}
                     {shot ? "أعد الالتقاط" : "التقط لقطة"}
                   </Button>

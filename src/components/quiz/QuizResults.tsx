@@ -122,11 +122,11 @@ export const QuizResults = ({ topic, quizState, onRestart, onHome }: QuizResults
         {/* Action buttons */}
         <div className="space-y-3">
           <Button onClick={onRestart} variant="outline" className="w-full">
-            <RotateCcw className="h-4 w-4 mr-2" />
+            <RotateCcw className="h-4 w-4 me-2" />
             جرّب مرة ثانية
           </Button>
           <Button onClick={onHome} className="w-full">
-            <Home className="h-4 w-4 mr-2" />
+            <Home className="h-4 w-4 me-2" />
             رجوع للمواضيع
           </Button>
         </div>

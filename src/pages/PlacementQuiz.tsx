@@ -417,7 +417,7 @@ export default function PlacementQuiz() {
                   <Loader2 className="h-5 w-5 animate-spin" />
                 ) : (
                   <>
-                    ابدأ التعلم <ArrowRight className="h-5 w-5 ml-1" />
+                    ابدأ التعلم <ArrowRight className="h-5 w-5 ms-1" />
                   </>
                 )}
               </Button>
@@ -431,7 +431,7 @@ export default function PlacementQuiz() {
                 }}
                 className="text-muted-foreground"
               >
-                <RotateCcw className="h-4 w-4 mr-1" /> أعد الاختبار
+                <RotateCcw className="h-4 w-4 me-1" /> أعد الاختبار
               </Button>
             </div>
           </div>

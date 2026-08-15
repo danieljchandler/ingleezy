@@ -8,7 +8,7 @@ import { useSRSStats } from "@/hooks/useSRSStats";
 import { useUserXP } from "@/hooks/useGamification";
 import { useTodayQueue } from "@/hooks/useTodayQueue";
 import { Button } from "@/components/design-system";
-import { Settings, Brain, LogIn, LogOut, Mic, BookOpen, Sparkles, GraduationCap, Laugh, Play, ChevronRight, Twitter, MessageCircleQuestion, MessageSquare, MessageCircle, Globe2, Headphones, Trophy, FileText, Flame, BarChart3, PenTool, Gamepad2, Users, Swords, Newspaper, Image as ImageIcon, Languages, Settings2 } from "lucide-react";
+import { Settings, Brain, LogIn, LogOut, Mic, BookOpen, Sparkles, GraduationCap, Laugh, Play, Twitter, MessageCircleQuestion, MessageSquare, MessageCircle, Globe2, Headphones, Trophy, FileText, Flame, BarChart3, PenTool, Gamepad2, Users, Swords, Newspaper, Image as ImageIcon, Languages, Settings2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AppShell } from "@/components/layout/AppShell";
 import { Badge } from "@/components/ui/badge";
@@ -35,6 +35,7 @@ import { ContinueCard } from "@/components/ContinueCard";
 import { LandingHero } from "@/components/LandingHero";
 import { Footer } from "@/components/Footer";
 import { AR } from "@/lib/strings";
+import { ChevronOpen } from "@/components/shared/DirectionalIcon";
 
 
 // Daily-queue task hints, keyed by useTodayQueue's TodayTaskId — the hint
@@ -154,7 +155,7 @@ const Index = () => {
             </div>
           ) : (
             <Button variant="ghost" size="sm" onClick={() => navigate("/auth")} className="text-muted-foreground hover:text-foreground">
-              <LogIn className="h-4 w-4 mr-1.5" />
+              <LogIn className="h-4 w-4 me-1.5" />
               {AR.common.login}
             </Button>
           ))}
@@ -224,7 +225,7 @@ const Index = () => {
                     <Badge className="bg-primary/10 text-primary border-primary/20 text-xs">CEFR A1–C2</Badge>
                   </div>
                 </div>
-                <ChevronRight className="h-5 w-5 text-primary shrink-0 mt-1" />
+                <ChevronOpen className="h-5 w-5 text-primary shrink-0 mt-1" />
               </button>
             ) : null,
 
@@ -251,8 +252,8 @@ const Index = () => {
                   </p>
                   <Popover>
                     <PopoverTrigger asChild>
-                      <Button variant="ghost" size="sm" className="mt-1 -ml-2 h-7 text-xs">
-                        <Settings2 className="h-3.5 w-3.5 mr-1" />
+                      <Button variant="ghost" size="sm" className="mt-1 -ms-2 h-7 text-xs">
+                        <Settings2 className="h-3.5 w-3.5 me-1" />
                         {AR.home.dailyGoal}
                       </Button>
                     </PopoverTrigger>

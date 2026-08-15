@@ -131,7 +131,7 @@ export function CandidateCard({ candidate, audioUrl, onUpdate, onApprove, onReje
 
       {/* Sentence section */}
       {candidate.sentence_text && (
-        <div className="flex items-start gap-3 mb-3 ml-8">
+        <div className="flex items-start gap-3 mb-3 ms-8">
           <Button
             variant="ghost"
             size="icon"
@@ -194,14 +194,14 @@ export function CandidateCard({ candidate, audioUrl, onUpdate, onApprove, onReje
               className="text-destructive hover:text-destructive"
               onClick={() => onReject(candidate.id)}
             >
-              <X className="h-4 w-4 mr-1" />
+              <X className="h-4 w-4 me-1" />
               ارفض
             </Button>
             <Button
               size="sm"
               onClick={() => onApprove(candidate.id)}
             >
-              <Check className="h-4 w-4 mr-1" />
+              <Check className="h-4 w-4 me-1" />
               اقبل
             </Button>
           </div>

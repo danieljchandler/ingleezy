@@ -2,10 +2,11 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUserVocabulary, useUserVocabularyDueCount, useDeleteUserVocabulary } from "@/hooks/useUserVocabulary";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Trash2, ChevronRight, Loader2, Shuffle } from "lucide-react";
+import { BookOpen, Trash2, Loader2, Shuffle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useDialect } from "@/contexts/DialectContext";
+import { ChevronOpen } from "@/components/shared/DirectionalIcon";
 
 export const MyWordsSection = () => {
   const navigate = useNavigate();
@@ -74,7 +75,7 @@ export const MyWordsSection = () => {
             className="gap-1.5"
           >
             Review {stats.dueCount} due
-            <ChevronRight className="h-4 w-4" />
+            <ChevronOpen className="h-4 w-4" />
           </Button>
         )}
       </div>

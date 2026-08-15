@@ -132,7 +132,7 @@ export const RequestSituationCard = () => {
       </div>
 
       <Button onClick={generate} disabled={loading} className="w-full mt-3">
-        {loading ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Sparkles className="h-4 w-4 mr-1" />}
+        {loading ? <Loader2 className="h-4 w-4 me-1 animate-spin" /> : <Sparkles className="h-4 w-4 me-1" />}
         {loading ? "نولّد…" : "ولّد عبارات"}
       </Button>
 
@@ -162,7 +162,7 @@ export const RequestSituationCard = () => {
               </p>
               {p.literal && (
                 <p className="text-xs text-muted-foreground/80 mt-0.5 font-arabic" dir="rtl">
-                  <span className="uppercase tracking-wide text-[9px] ml-1 text-muted-foreground/60">
+                  <span className="uppercase tracking-wide text-[9px] ms-1 text-muted-foreground/60">
                     حرفي
                   </span>
                   {p.literal}
@@ -172,11 +172,11 @@ export const RequestSituationCard = () => {
               <div className="flex justify-end mt-2">
                 {saved.has(i) ? (
                   <Button size="sm" variant="ghost" disabled className="text-emerald-600">
-                    <Check className="h-3.5 w-3.5 mr-1" /> محفوظة
+                    <Check className="h-3.5 w-3.5 me-1" /> محفوظة
                   </Button>
                 ) : (
                   <Button size="sm" variant="outline" onClick={() => save(i)} disabled={addPhrase.isPending}>
-                    <Plus className="h-3.5 w-3.5 mr-1" /> Save
+                    <Plus className="h-3.5 w-3.5 me-1" /> Save
                   </Button>
                 )}
               </div>

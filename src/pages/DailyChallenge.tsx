@@ -24,12 +24,12 @@ import {
   X,
   RotateCcw,
   Loader2,
-  ChevronRight,
   Zap,
   Star,
   Calendar,
-  Languages,
+  Languages
 } from "lucide-react";
+import { ChevronOpen } from "@/components/shared/DirectionalIcon";
 
 interface ChallengeQuestion {
   prompt?: string;
@@ -313,9 +313,9 @@ const DailyChallenge = () => {
           ) : (
             <Button onClick={startChallenge} className="w-full" size="lg" disabled={loading}>
               {loading ? (
-                <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                <Loader2 className="h-5 w-5 animate-spin me-2" />
               ) : (
-                <Zap className="h-5 w-5 mr-2" />
+                <Zap className="h-5 w-5 me-2" />
               )}
               Start Today's Challenge
             </Button>
@@ -378,7 +378,7 @@ const DailyChallenge = () => {
     <AppShell>
       <div className="flex items-center justify-between mb-4">
         <Button variant="ghost" size="sm" onClick={() => navigate("/")}>
-          <X className="h-4 w-4 mr-1" /> Exit
+          <X className="h-4 w-4 me-1" /> Exit
         </Button>
         <div className="text-center">
           <p className="text-xs text-muted-foreground">{challenge.title}</p>
@@ -579,7 +579,7 @@ const DailyChallenge = () => {
             </div>
             <Button onClick={nextQuestion} className="w-full">
               {currentIndex < challenge.questions.length - 1 ? "التالي" : "شوف النتيجة"}
-              <ChevronRight className="h-4 w-4 ml-1" />
+              <ChevronOpen className="h-4 w-4 ms-1" />
             </Button>
           </div>
         )}

@@ -637,7 +637,7 @@ const MyWordsReview = () => {
           <h1 className="text-xl font-bold text-foreground mb-3">تسجيل الدخول مطلوب</h1>
           <p className="text-muted-foreground mb-8">سجّل الدخول لمراجعة كلماتك.</p>
           <Button onClick={() => navigate("/auth")}>
-            <LogIn className="h-4 w-4 mr-2" /> تسجيل الدخول
+            <LogIn className="h-4 w-4 me-2" /> تسجيل الدخول
           </Button>
         </div>
       </AppShell>

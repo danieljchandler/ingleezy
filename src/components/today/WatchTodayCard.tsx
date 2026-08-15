@@ -1,11 +1,12 @@
 import { useNavigate } from "react-router-dom";
 import { AR } from "@/lib/strings";
-import { Check, ChevronRight, Play } from "lucide-react";
+import { Check, Play } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { InfoHint } from "@/components/InfoHint";
 import { DiscoverPreviewCard } from "@/components/discover/DiscoverPreviewCard";
 import { useTodaysVideo } from "@/hooks/useTodaysVideo";
 import { markTaskCompletedToday } from "@/lib/todayCompletion";
+import { ChevronOpen } from "@/components/shared/DirectionalIcon";
 
 /**
  * The home page's lead: today's video.
@@ -68,7 +69,7 @@ export function WatchTodayCard({ done = false, className }: WatchTodayCardProps)
           />
         </h2>
         {done && (
-          <span className="ml-auto inline-flex items-center gap-1 px-2 py-1 rounded-full bg-primary/10 text-primary text-[11px] font-semibold">
+          <span className="ms-auto inline-flex items-center gap-1 px-2 py-1 rounded-full bg-primary/10 text-primary text-[11px] font-semibold">
             <Check className="h-3 w-3" aria-hidden />
             {AR.queue.watched}
           </span>
@@ -89,7 +90,7 @@ export function WatchTodayCard({ done = false, className }: WatchTodayCardProps)
         onClick={() => navigate("/discover")}
         className="mt-2 text-xs text-primary font-semibold flex items-center gap-0.5 mx-auto"
       >
-        كل المقاطع <ChevronRight className="h-3 w-3" />
+        كل المقاطع <ChevronOpen className="h-3 w-3" />
       </button>
     </div>
   );

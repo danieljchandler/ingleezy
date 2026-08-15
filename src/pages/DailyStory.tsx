@@ -1,6 +1,7 @@
 import { useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Loader2, Sparkles, RefreshCw, ArrowLeft, Check } from "lucide-react";
+import { Loader2, Sparkles, RefreshCw, Check } from "lucide-react";
+import { IconBack } from "@/components/shared/DirectionalIcon";
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -90,7 +91,7 @@ const DailyStoryPage = () => {
           onClick={() => navigate(-1)}
           className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
         >
-          <ArrowLeft className="h-4 w-4" /> Back
+          <IconBack className="h-4 w-4" /> رجوع
         </button>
 
         <div className="flex items-center gap-2">

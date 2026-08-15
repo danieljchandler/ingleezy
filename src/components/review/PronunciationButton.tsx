@@ -170,8 +170,8 @@ export const PronunciationButton = ({
       {error && (
         <div className="text-sm text-destructive text-center">
           {error}
-          <Button variant="ghost" size="sm" onClick={handleTryAgain} className="ml-2">
-            <RotateCcw className="h-3.5 w-3.5 mr-1" />
+          <Button variant="ghost" size="sm" onClick={handleTryAgain} className="ms-2">
+            <RotateCcw className="h-3.5 w-3.5 me-1" />
             أعد المحاولة
           </Button>
         </div>
@@ -184,7 +184,7 @@ export const PronunciationButton = ({
             <span className={`text-3xl font-bold ${band.color}`}>
               {displayScore}
             </span>
-            <span className="text-sm text-muted-foreground ml-1">/ 100</span>
+            <span className="text-sm text-muted-foreground ms-1">/ 100</span>
           </div>
           <p className={`text-sm font-medium mb-3 ${band.color}`}>{band.label}</p>
 

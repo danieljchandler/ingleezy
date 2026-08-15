@@ -68,7 +68,17 @@ const AdminLayout = () => {
   const otherDialects = allDialects.filter(d => d !== activeDialect);
 
   return (
-    <>
+    /*
+     * Admin opts back out of the page's RTL.
+     *
+     * `<html dir="rtl">` is right for the learner app, whose chrome is Arabic —
+     * but admin is English by design, and English prose in an RTL container is
+     * right-aligned, with every icon gap and every chevron on the wrong side.
+     * One attribute here is the whole fix, and it is why the mirroring sweep
+     * left `src/pages/admin` and the shadcn primitives alone: inside this
+     * subtree the physical `mr-`/`ml-` classes they use are correct again.
+     */
+    <div dir="ltr">
       {/* Dialect indicator bar */}
       <div className={`${meta.color} text-white px-4 py-2 flex items-center justify-between text-sm`}>
         <div className="flex items-center gap-2 font-medium">
@@ -96,7 +106,7 @@ const AdminLayout = () => {
         <TranscriptionStatusBanner />
         {isAdmin && <AlertsBell />}
       </TranscriptionJobProvider>
-    </>
+    </div>
   );
 };
 

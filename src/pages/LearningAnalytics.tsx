@@ -148,11 +148,11 @@ const LearningAnalytics = () => {
           <div className="flex items-center gap-6 text-sm">
             <div>
               <span className="text-2xl font-bold text-primary">{analytics.wordsLearnedThisWeek}</span>
-              <span className="text-muted-foreground ml-1">new words</span>
+              <span className="text-muted-foreground ms-1">new words</span>
             </div>
             <div>
               <span className="text-2xl font-bold text-foreground">{analytics.challengesCompleted}</span>
-              <span className="text-muted-foreground ml-1">تحديات</span>
+              <span className="text-muted-foreground ms-1">تحديات</span>
             </div>
           </div>
         </div>

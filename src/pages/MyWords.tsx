@@ -5,7 +5,7 @@ import { useUserPhrases, useUserPhrasesDueCount, useDeleteUserPhrase } from "@/h
 import { useAuth } from "@/hooks/useAuth";
 import { useDialect } from "@/contexts/DialectContext";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Trash2, ChevronLeft, ChevronRight, Loader2, Shuffle, Sparkles, Quote, MessageCircleQuestion, Upload, CheckSquare, X, Languages } from "lucide-react";
+import { BookOpen, Trash2, Loader2, Shuffle, Sparkles, Quote, MessageCircleQuestion, Upload, CheckSquare, X, Languages } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { arCount } from "@/lib/strings";
 import { toast } from "sonner";
@@ -36,6 +36,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { ChevronBack, ChevronOpen } from "@/components/shared/DirectionalIcon";
 
 const MyWords = () => {
   const navigate = useNavigate();
@@ -301,7 +302,7 @@ const MyWords = () => {
           onClick={() => navigate("/")}
           className="text-muted-foreground"
         >
-          <ChevronLeft className="h-5 w-5" />
+          <ChevronBack className="h-5 w-5" />
         </Button>
         <div className="flex items-center gap-2">
           <BookOpen className="h-6 w-6 text-primary" />
@@ -314,7 +315,7 @@ const MyWords = () => {
         <Button
           variant={mixAll ? "default" : "outline"}
           size="sm"
-          className="ml-auto gap-1.5"
+          className="ms-auto gap-1.5"
           onClick={() => setMixAll(!mixAll)}
         >
           <Shuffle className="h-4 w-4" />
@@ -356,7 +357,7 @@ const MyWords = () => {
           size="lg"
         >
           Review {stats.dueCount} due words
-          <ChevronRight className="h-4 w-4" />
+          <ChevronOpen className="h-4 w-4" />
         </Button>
       )}
 
@@ -378,7 +379,7 @@ const MyWords = () => {
               className="gap-1.5"
             >
               Review {phraseStats.dueCount}
-              <ChevronRight className="h-4 w-4" />
+              <ChevronOpen className="h-4 w-4" />
             </Button>
           )}
         </div>
@@ -680,7 +681,7 @@ const MyWords = () => {
                   <button className="text-xs text-muted-foreground hover:underline" onClick={() => setSelectedIds(new Set())}>إلغاء التحديد</button>
                 )}
               </div>
-              <div className="flex items-center gap-1.5 ml-auto">
+              <div className="flex items-center gap-1.5 ms-auto">
                 <Button
                   variant="destructive"
                   size="sm"
@@ -861,7 +862,7 @@ const MyWords = () => {
                 </div>
               </div>
               {hasContext && isExpanded && (
-                <div className="mt-3 ml-1 border-l-2 border-primary/30 pl-3 py-1 bg-muted/30 rounded-r">
+                <div className="mt-3 ms-1 border-l-2 border-primary/30 ps-3 py-1 bg-muted/30 rounded-r">
                   <p className="text-xs text-muted-foreground mb-1">السياق الأصلي</p>
                   <p
                     className="text-sm text-foreground/90 font-arabic leading-relaxed"

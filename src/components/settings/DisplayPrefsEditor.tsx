@@ -37,7 +37,7 @@ export function DisplayPrefsEditor() {
             key={row.key}
             className="flex items-center justify-between p-3 rounded-xl bg-card border border-border"
           >
-            <div className="min-w-0 pr-3">
+            <div className="min-w-0 pe-3">
               <p className="font-medium text-foreground text-sm">{row.label}</p>
               <p className="text-xs text-muted-foreground">{row.desc}</p>
             </div>

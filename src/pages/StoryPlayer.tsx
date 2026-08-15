@@ -14,7 +14,8 @@ import { AppShell } from '@/components/layout/AppShell';
 import { HomeButton } from '@/components/HomeButton';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, RotateCcw, BookOpen, Trophy, ArrowLeft, Sparkles, Plus, Check } from 'lucide-react';
+import { Loader2, RotateCcw, BookOpen, Trophy, Sparkles, Plus, Check } from 'lucide-react';
+import { IconBack } from '@/components/shared/DirectionalIcon';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { recordContinue, clearContinue } from '@/lib/continueProgress';
@@ -197,7 +198,7 @@ const StoryPlayer = () => {
       <div className="mb-6 flex items-center justify-between">
         <HomeButton />
         <Button variant="ghost" size="sm" onClick={() => navigate('/stories')}>
-          <ArrowLeft className="h-4 w-4 mr-1" />
+          <IconBack className="h-4 w-4 me-1" />
           كل القصص
         </Button>
       </div>
@@ -401,7 +402,7 @@ const StoryPlayer = () => {
           <div className="text-center py-8">
             <p className="text-muted-foreground">ما لقينا المشهد. يمكن في رابط مكسور بالقصة.</p>
             <Button variant="outline" className="mt-4" onClick={handleRestart}>
-              <RotateCcw className="h-4 w-4 mr-2" />
+              <RotateCcw className="h-4 w-4 me-2" />
               ابدأ القصة من جديد
             </Button>
           </div>

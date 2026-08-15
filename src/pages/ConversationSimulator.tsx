@@ -350,7 +350,7 @@ export default function ConversationSimulator() {
             disabled={sending}
             title="مكالمة صوتية مباشرة مع المعلّم"
           >
-            <Mic className="h-4 w-4 mr-1" />
+            <Mic className="h-4 w-4 me-1" />
             {liveMode ? "إغلاق المباشر" : "🎙️ مكالمة صوتية"}
           </Button>
           <Button
@@ -363,7 +363,7 @@ export default function ConversationSimulator() {
             }}
             disabled={messages.length === 0 || sending}
           >
-            <RotateCcw className="h-4 w-4 mr-1" /> جديد
+            <RotateCcw className="h-4 w-4 me-1" /> جديد
           </Button>
         </div>
       </div>
@@ -416,7 +416,7 @@ export default function ConversationSimulator() {
       {/* Messages */}
       <div
         ref={scrollRef}
-        className="space-y-3 mb-4 max-h-[55vh] overflow-y-auto pr-1"
+        className="space-y-3 mb-4 max-h-[55vh] overflow-y-auto pe-1"
       >
         {messages.map((m, i) => {
           if (m.role === "user") {
@@ -459,9 +459,9 @@ export default function ConversationSimulator() {
                       disabled={playingIdx === i}
                     >
                       {playingIdx === i ? (
-                        <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                        <Loader2 className="h-3 w-3 me-1 animate-spin" />
                       ) : (
-                        <Volume2 className="h-3 w-3 mr-1" />
+                        <Volume2 className="h-3 w-3 me-1" />
                       )}
                       تشغيل
                     </Button>
@@ -471,7 +471,7 @@ export default function ConversationSimulator() {
                       className="h-7 px-2 text-xs"
                       onClick={() => savePhrase(m.content)}
                     >
-                      <BookmarkPlus className="h-3 w-3 mr-1" /> احفظ العبارة
+                      <BookmarkPlus className="h-3 w-3 me-1" /> احفظ العبارة
                     </Button>
                     <AskAISentence arabic={m.content} variant="chip" />
                   </div>

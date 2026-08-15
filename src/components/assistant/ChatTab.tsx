@@ -193,8 +193,8 @@ export function ChatTab({ onComposerFocus }: ChatTabProps = {}) {
               className={cn(
                 "rounded-lg px-3 py-2 text-sm",
                 m.role === "user"
-                  ? "bg-primary/10 ml-6"
-                  : "bg-muted/50 mr-6 prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-ol:my-1",
+                  ? "bg-primary/10 ms-6"
+                  : "bg-muted/50 me-6 prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-ol:my-1",
               )}
             >
               {m.role === "assistant" ? (

@@ -16,14 +16,14 @@ import {
   Grid3X3,
   PenLine,
   Trophy,
-  ChevronRight,
   Loader2,
   RotateCcw,
   Check,
   X,
   Sparkles,
-  Timer,
+  Timer
 } from "lucide-react";
+import { ChevronOpen } from "@/components/shared/DirectionalIcon";
 
 type GameMode = "menu" | "matching" | "memory" | "fill-blank";
 
@@ -362,7 +362,7 @@ const FillBlankGame = ({ words, onComplete }: { words: WordPair[]; onComplete: (
             </div>
             <Button onClick={handleNext} className="w-full">
               {current + 1 >= gameWords.length ? "النتائج" : "التالي"}
-              <ChevronRight className="h-4 w-4 ml-1" />
+              <ChevronOpen className="h-4 w-4 ms-1" />
             </Button>
           </div>
         )}
@@ -410,10 +410,10 @@ const ResultsScreen = ({
       </div>
       <div className="flex gap-3 justify-center">
         <Button variant="outline" onClick={onMenu}>
-          <RotateCcw className="h-4 w-4 mr-1.5" /> القائمة
+          <RotateCcw className="h-4 w-4 me-1.5" /> القائمة
         </Button>
         <Button onClick={onPlayAgain}>
-          <Sparkles className="h-4 w-4 mr-1.5" /> العب مرة أخرى
+          <Sparkles className="h-4 w-4 me-1.5" /> العب مرة أخرى
         </Button>
       </div>
     </div>
@@ -573,7 +573,7 @@ const VocabGames = () => {
                       وصّل الكلمات الإنجليزية بمعانيها
                     </p>
                   </div>
-                  <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                  <ChevronOpen className="h-5 w-5 text-muted-foreground" />
                 </button>
 
                 {/* Memory Cards */}
@@ -596,7 +596,7 @@ const VocabGames = () => {
                       اقلب البطاقات واعثر على الأزواج المتطابقة
                     </p>
                   </div>
-                  <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                  <ChevronOpen className="h-5 w-5 text-muted-foreground" />
                 </button>
 
                 {/* Fill in the Blank */}
@@ -619,7 +619,7 @@ const VocabGames = () => {
                       اكتب الكلمة بالإنجليزية من معناها العربي
                     </p>
                   </div>
-                  <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                  <ChevronOpen className="h-5 w-5 text-muted-foreground" />
                 </button>
               </div>
             )}

@@ -12,7 +12,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Loader2, ArrowLeft, BookOpen, Check, Eye, EyeOff, ChevronDown, ChevronLeft, ChevronRight, List, Pause, Play, SkipBack, SkipForward, Gauge, Heart } from "lucide-react";
+import { IconBack } from "@/components/shared/DirectionalIcon";
+import { Loader2, BookOpen, Check, Eye, EyeOff, ChevronDown, ChevronLeft, ChevronRight, List, Pause, Play, SkipBack, SkipForward, Gauge, Heart } from "lucide-react";
 import { useVideoLikeCount, useIsVideoLiked, useLikeVideo, useUnlikeVideo } from "@/hooks/useVideoLikes";
 import { useRecordVideoView } from "@/hooks/useDiscoverFeed";
 import {
@@ -580,9 +581,9 @@ const GrammarNotesSection = ({
           className="w-full mt-2"
         >
           {generating ? (
-            <Loader2 className="h-3.5 w-3.5 mr-2 animate-spin" />
+            <Loader2 className="h-3.5 w-3.5 me-2 animate-spin" />
           ) : (
-            <Sparkles className="h-3.5 w-3.5 mr-2" />
+            <Sparkles className="h-3.5 w-3.5 me-2" />
           )}
           ولّد المزيد على مستواي ({userLevel})
         </Button>
@@ -1532,7 +1533,7 @@ const DiscoverVideo = () => {
             onClick={() => navigate("/discover")}
             className="gap-1.5 text-muted-foreground"
           >
-            <ArrowLeft className="h-4 w-4" />
+            <IconBack className="h-4 w-4" />
             Back
           </Button>
           <div className="flex-1" />
@@ -1793,7 +1794,7 @@ const DiscoverVideo = () => {
                       className="text-xs italic text-muted-foreground/80 leading-relaxed"
                       style={{ fontFamily: "'Open Sans', sans-serif" }}
                     >
-                      <span className="not-italic uppercase tracking-wide text-[9px] mr-1.5 text-muted-foreground/60">
+                      <span className="not-italic uppercase tracking-wide text-[9px] me-1.5 text-muted-foreground/60">
                         حرفي
                       </span>
                       {displayLine.literal}
@@ -1919,12 +1920,12 @@ const DiscoverVideo = () => {
             checked={showTranslations}
             onCheckedChange={setShowTranslations}
           />
-          <span className="text-xs text-muted-foreground ml-2">حرفي</span>
+          <span className="text-xs text-muted-foreground ms-2">حرفي</span>
           <Switch
             checked={showLiteral}
             onCheckedChange={setShowLiteral}
           />
-          <span className="text-xs text-muted-foreground ml-2">فصحى</span>
+          <span className="text-xs text-muted-foreground ms-2">فصحى</span>
           <Switch
             checked={showFusha}
             onCheckedChange={setShowFusha}

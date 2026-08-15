@@ -35,7 +35,7 @@ export function AppShell({ children, className, compact = false }: AppShellProps
         "transition-[padding] duration-300 ease-lahja motion-reduce:transition-none",
         // Only from lg: below that there isn't room to inset without squeezing
         // the text column, so the rail simply overlaps (still readable — no scrim).
-        aiOpen && "lg:pr-[28rem]",
+        aiOpen && "lg:pe-[28rem]",
         className,
       )}
       style={{

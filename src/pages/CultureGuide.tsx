@@ -235,7 +235,7 @@ const CultureGuide = () => {
             سجّل الدخول لتحصل على نصائح ثقافية لمواقفك في البلدان الناطقة بالإنجليزية.
           </p>
           <Button onClick={() => navigate("/auth")}>
-            <LogIn className="h-4 w-4 mr-2" />
+            <LogIn className="h-4 w-4 me-2" />
             تسجيل الدخول
           </Button>
         </div>

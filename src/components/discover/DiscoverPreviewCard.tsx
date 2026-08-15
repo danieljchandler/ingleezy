@@ -1,8 +1,9 @@
 import { memo } from "react";
-import { Play, ChevronRight } from "lucide-react";
+import { Play } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { formatDuration } from "@/lib/videoEmbed";
+import { ChevronOpen } from "@/components/shared/DirectionalIcon";
 
 export interface DiscoverVideo {
   id: string;
@@ -72,7 +73,7 @@ export const DiscoverPreviewCard = memo(function DiscoverPreviewCard({ video, on
         {/* Play indicator */}
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="w-16 h-16 rounded-full bg-primary/90 flex items-center justify-center backdrop-blur-sm shadow-2xl">
-            <Play className="h-7 w-7 text-primary-foreground fill-primary-foreground ml-1" aria-hidden="true" />
+            <Play className="h-7 w-7 text-primary-foreground fill-primary-foreground ms-1" aria-hidden="true" />
           </div>
         </div>
 
@@ -121,7 +122,7 @@ export const DiscoverPreviewCard = memo(function DiscoverPreviewCard({ video, on
           <Play className="h-4 w-4 text-primary" aria-hidden="true" />
           <span className="text-sm font-semibold text-primary">ابدأ المشاهدة</span>
         </div>
-        <ChevronRight className="h-4 w-4 text-primary" aria-hidden="true" />
+        <ChevronOpen className="h-4 w-4 text-primary" aria-hidden="true" />
       </div>
     </button>
   );

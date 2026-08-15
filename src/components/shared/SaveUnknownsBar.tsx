@@ -133,9 +133,9 @@ export const SaveUnknownsBar = ({ source }: Props) => {
         </div>
         <Button size="sm" onClick={handleSave} disabled={saving} className="shrink-0">
           {saving ? (
-            <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+            <Loader2 className="h-3.5 w-3.5 me-1.5 animate-spin" />
           ) : (
-            <BookmarkPlus className="h-3.5 w-3.5 mr-1.5" />
+            <BookmarkPlus className="h-3.5 w-3.5 me-1.5" />
           )}
           Save {count}
         </Button>

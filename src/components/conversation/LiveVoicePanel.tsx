@@ -91,7 +91,7 @@ export function LiveVoicePanel({
               className={cn(
                 "rounded-lg px-3 py-2",
                 t.role === "user"
-                  ? "bg-primary/10 ml-auto max-w-[85%]"
+                  ? "bg-primary/10 ms-auto max-w-[85%]"
                   : "bg-background border border-border max-w-[85%]",
                 t.partial && "opacity-70",
               )}

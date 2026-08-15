@@ -204,7 +204,7 @@ const SouqNews = () => {
                     {article.vocabulary.map((v, vi) => (
                       <Badge key={vi} variant="outline" className="font-english text-xs">
                         {v.english}
-                        <span dir="rtl" className="font-arabic mr-1 ml-1 text-muted-foreground">
+                        <span dir="rtl" className="font-arabic me-1 ms-1 text-muted-foreground">
                           {v.arabic}
                         </span>
                       </Badge>

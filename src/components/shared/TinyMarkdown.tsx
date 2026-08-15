@@ -92,7 +92,7 @@ export function TinyMarkdown({
         i++;
       }
       blocks.push(
-        <ul key={key++} className="list-disc pl-5 my-1 space-y-0.5">
+        <ul key={key++} className="list-disc ps-5 my-1 space-y-0.5">
           {items.map((it, idx) => (
             <li key={idx}>{renderInline(it, renderArabicRun)}</li>
           ))}

@@ -53,7 +53,7 @@ export const SRSStageBar = ({ stages, total, className }: SRSStageBarProps) => {
             <span className="text-muted-foreground">
               {stage.label}
             </span>
-            <span className="ml-auto font-medium text-foreground">{stages[stage.key]}</span>
+            <span className="ms-auto font-medium text-foreground">{stages[stage.key]}</span>
           </div>
         ))}
       </div>

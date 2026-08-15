@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { Loader2, ArrowLeft, Play, Pause, Volume2, Plus, Check, Trash2 } from "lucide-react";
+import { Loader2, Play, Pause, Volume2, Plus, Check, Trash2 } from "lucide-react";
+import { IconBack } from "@/components/shared/DirectionalIcon";
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
 import {
@@ -128,8 +129,8 @@ const ListenEpisode = () => {
   return (
     <AppShell>
       <div className="space-y-5 pb-24">
-        <Button variant="ghost" size="sm" onClick={() => navigate("/listen")} className="-ml-2">
-          <ArrowLeft className="h-4 w-4 mr-1" />رجوع للمكتبة
+        <Button variant="ghost" size="sm" onClick={() => navigate("/listen")} className="-ms-2">
+          <IconBack className="h-4 w-4 me-1" />رجوع للمكتبة
         </Button>
 
         <header className="space-y-2">
@@ -144,14 +145,14 @@ const ListenEpisode = () => {
           {episode.audio_mode === "full" && (
             <div className="pt-2">
               {episode.audio_status === "pending" && (
-                <div className="flex items-center text-sm text-muted-foreground"><Loader2 className="h-4 w-4 mr-2 animate-spin" />نسجّل الأصوات…</div>
+                <div className="flex items-center text-sm text-muted-foreground"><Loader2 className="h-4 w-4 me-2 animate-spin" />نسجّل الأصوات…</div>
               )}
               {episode.audio_status === "failed" && (
                 <p className="text-sm text-destructive">ما ضبط الصوت — تقدر تشغّل كل سطر بالضغط عليه.</p>
               )}
               {episode.full_audio_url && (
                 <Button onClick={togglePlayFull} size="lg" className="w-full">
-                  {isPlayingFull ? <><Pause className="h-4 w-4 mr-2" />أوقف الحلقة</> : <><Play className="h-4 w-4 mr-2" />شغّل الحلقة كاملة</>}
+                  {isPlayingFull ? <><Pause className="h-4 w-4 me-2" />أوقف الحلقة</> : <><Play className="h-4 w-4 me-2" />شغّل الحلقة كاملة</>}
                 </Button>
               )}
             </div>
@@ -202,7 +203,7 @@ const ListenEpisode = () => {
           <section className="space-y-2">
             <div className="flex items-center justify-between">
               <h2 className="text-sm font-semibold">أهم المفردات</h2>
-              <Button size="sm" variant="outline" onClick={addAllVocab}><Plus className="h-3.5 w-3.5 mr-1" />أضفها كلها لكلماتي</Button>
+              <Button size="sm" variant="outline" onClick={addAllVocab}><Plus className="h-3.5 w-3.5 me-1" />أضفها كلها لكلماتي</Button>
             </div>
             <div className="space-y-1.5">
               {episode.key_vocabulary.map((v) => {
@@ -226,7 +227,7 @@ const ListenEpisode = () => {
         {isOwner && (
           <div className="pt-4">
             <Button variant="ghost" size="sm" className="text-destructive" onClick={() => setConfirmDeleteOpen(true)}>
-              <Trash2 className="h-3.5 w-3.5 mr-1" />احذف الحلقة
+              <Trash2 className="h-3.5 w-3.5 me-1" />احذف الحلقة
             </Button>
           </div>
         )}

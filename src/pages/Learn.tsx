@@ -338,7 +338,7 @@ const Learn = () => {
 
           <div className="space-y-3">
             <Button onClick={handleRestartSession} className="w-full">
-              <RotateCcw className="h-4 w-4 mr-2" />
+              <RotateCcw className="h-4 w-4 me-2" />
               {isMixedMode ? "تعلّم كلمات أكثر" : "تمرّن مرة ثانية"}
             </Button>
             {!isMixedMode && (

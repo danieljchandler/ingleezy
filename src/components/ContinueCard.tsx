@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { BookOpen, Play, GraduationCap, ChevronRight, X } from "lucide-react";
+import { BookOpen, Play, GraduationCap, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   ContinueEntry,
@@ -10,6 +10,7 @@ import {
 } from "@/lib/continueProgress";
 import { useDialect } from "@/contexts/DialectContext";
 import { useResumableLesson } from "@/hooks/useLessonProgress";
+import { ChevronOpen } from "@/components/shared/DirectionalIcon";
 
 /**
  * How stale the server-side lesson row may be before the card stops offering it.
@@ -123,7 +124,7 @@ export const ContinueCard = () => {
             </p>
           )}
         </div>
-        <ChevronRight className="h-5 w-5 text-primary shrink-0" />
+        <ChevronOpen className="h-5 w-5 text-primary shrink-0" />
       </button>
       <button
         onClick={(e) => {

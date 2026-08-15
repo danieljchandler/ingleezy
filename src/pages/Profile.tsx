@@ -7,7 +7,8 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useUserXP, useUserAchievements, calculateLevel, xpProgressInLevel } from "@/hooks/useGamification";
-import { ArrowLeft, Flame, Sparkles, BookOpen, Trophy, Settings as SettingsIcon } from "lucide-react";
+import { Flame, Sparkles, BookOpen, Trophy, Settings as SettingsIcon } from "lucide-react";
+import { IconBack } from "@/components/shared/DirectionalIcon";
 import { cn } from "@/lib/utils";
 import { ReferralCard } from "@/components/social/ReferralCard";
 import { LevelJourneyCard } from "@/components/social/LevelJourneyCard";
@@ -107,8 +108,8 @@ const Profile = () => {
       <div className="px-4 pt-4 pb-24">
         {/* Top bar */}
         <div className="flex items-center justify-between mb-4">
-          <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="gap-1.5 -ml-2">
-            <ArrowLeft className="h-4 w-4" /> رجوع
+          <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="gap-1.5 -ms-2">
+            <IconBack className="h-4 w-4" /> رجوع
           </Button>
           <Button variant="ghost" size="sm" onClick={() => navigate("/settings")} className="gap-1.5">
             <SettingsIcon className="h-4 w-4" /> الإعدادات

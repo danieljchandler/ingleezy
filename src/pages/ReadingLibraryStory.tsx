@@ -13,7 +13,8 @@ import { AskAISentence } from '@/components/shared/AskAISentence';
 import { TranslationPair } from '@/components/shared/TranslationPair';
 import { MarkUnknownsProvider } from '@/contexts/MarkUnknownsContext';
 import { SaveUnknownsBar } from '@/components/shared/SaveUnknownsBar';
-import { ArrowLeft, Loader2, Play, Pause, SkipForward, SkipBack, BookOpen, Eye, EyeOff } from 'lucide-react';
+import { Loader2, Play, Pause, SkipForward, SkipBack, BookOpen, Eye, EyeOff } from 'lucide-react';
+import { IconBack } from '@/components/shared/DirectionalIcon';
 import { toast } from 'sonner';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { cn } from '@/lib/utils';
@@ -220,7 +221,7 @@ const ReadingLibraryStory = () => {
           {/* Header */}
           <div className="flex items-center gap-2 mb-4">
             <Button variant="ghost" size="icon" onClick={() => navigate('/reading-library')}>
-              <ArrowLeft className="h-5 w-5" />
+              <IconBack className="h-5 w-5" />
             </Button>
             <div className="flex-1">
               <h1 className="text-lg font-bold">{story.title}</h1>

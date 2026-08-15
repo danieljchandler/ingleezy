@@ -1,7 +1,8 @@
 import { ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronRight, LucideIcon } from "lucide-react";
+import { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ChevronOpen } from "@/components/shared/DirectionalIcon";
 
 export interface HubTile {
   id: string;
@@ -75,7 +76,7 @@ export function HubSection({ title, subtitle, tiles }: HubSectionProps) {
                   <p className="text-xs text-muted-foreground mt-1 leading-snug">{t.description}</p>
                 )}
               </div>
-              <ChevronRight className="h-4 w-4 text-[#5C3A46]/40 shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:text-[#5C3A46]/70" />
+              <ChevronOpen className="h-4 w-4 text-[#5C3A46]/40 shrink-0 transition-transform group-hover:-translate-x-0.5 group-hover:text-[#5C3A46]/70" />
             </button>
           );
         })}

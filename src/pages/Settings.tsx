@@ -10,7 +10,8 @@ import { Switch } from '@/components/ui/switch';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-import { Loader2, Check, ArrowLeft, User, Globe2, Target, Eye, Heart, ChevronRight, Camera, AlertTriangle, Info, Compass, Bell } from 'lucide-react';
+import { IconBack } from '@/components/shared/DirectionalIcon';
+import { Loader2, Check, User, Globe2, Target, Eye, Heart, Camera, AlertTriangle, Info, Compass, Bell } from 'lucide-react';
 import { HomeLayoutEditor } from '@/components/settings/HomeLayoutEditor';
 import { DisplayPrefsEditor } from '@/components/settings/DisplayPrefsEditor';
 import { useLeechPrefs } from '@/hooks/useLeechPrefs';
@@ -20,6 +21,7 @@ import { useSubscription } from '@/hooks/useSubscription';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { getTopicCategories } from '@/data/listenTopics';
 import { LEARNING_REASONS, reasonLabel, reasonIdFromLabel } from '@/data/learningReasons';
+import { ChevronOpen } from '@/components/shared/DirectionalIcon';
 
 // The learner's OWN dialect (their L1) — it shapes the Arabic scaffold, not
 // what they study. IDs are stored values; labels are what they see.
@@ -265,7 +267,7 @@ const Settings = () => {
         {/* Header */}
         <div className="flex items-center gap-3 mb-6">
           <Button variant="ghost" size="icon" onClick={() => navigate('/')}>
-            <ArrowLeft className="h-5 w-5" />
+            <IconBack className="h-5 w-5" />
           </Button>
           <h1 className="text-2xl font-bold font-heading text-foreground">الإعدادات</h1>
         </div>
@@ -307,7 +309,7 @@ const Settings = () => {
                   onClick={() => fileInputRef.current?.click()}
                   disabled={uploadingAvatar}
                 >
-                  <Camera className="h-4 w-4 mr-2" />
+                  <Camera className="h-4 w-4 me-2" />
                   {avatarUrl ? 'غيّر الصورة' : 'ارفع صورة'}
                 </Button>
                 <p className="text-xs text-muted-foreground">JPG أو PNG، حتى 5MB</p>
@@ -349,7 +351,7 @@ const Settings = () => {
                 >
                   <span className="text-lg">{d.flag}</span>
                   <span className="font-medium text-foreground text-sm min-w-0">{d.labelAr}</span>
-                  {dialect === d.id && <Check className="h-4 w-4 text-primary ml-auto shrink-0" />}
+                  {dialect === d.id && <Check className="h-4 w-4 text-primary ms-auto shrink-0" />}
                 </button>
               ))}
             </div>
@@ -476,7 +478,7 @@ const Settings = () => {
                   <p className="text-xs text-muted-foreground">الفيديوهات التي حفظتها</p>
                 </div>
               </div>
-              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+              <ChevronOpen className="h-4 w-4 text-muted-foreground" />
             </button>
           </section>
 
@@ -493,7 +495,7 @@ const Settings = () => {
               تلميحات الميزات
             </div>
             <div className="flex items-center justify-between p-3 rounded-xl bg-card border border-border">
-              <div className="min-w-0 pr-3">
+              <div className="min-w-0 pe-3">
                 <p className="font-medium text-foreground text-sm">أظهر تلميحات الميزات</p>
                 <p className="text-xs text-muted-foreground">
                   أيقونات (i) صغيرة في أنحاء التطبيق تشرح كل ميزة. أطفئها متى ألفت المكان.
@@ -510,7 +512,7 @@ const Settings = () => {
               تفضيلات المراجعة
             </div>
             <div className="flex items-center justify-between p-3 rounded-xl bg-card border border-border">
-              <div className="min-w-0 pr-3">
+              <div className="min-w-0 pe-3">
                 <p className="font-medium text-foreground text-sm">علّم البطاقات الصعبة كبطاقات متعثرة</p>
                 <p className="text-xs text-muted-foreground">
                   بعد عدة أخطاء، تظهر وسيلة تذكّر وأنشودة من الذكاء الاصطناعي لتساعدك على الحفظ.
@@ -519,7 +521,7 @@ const Settings = () => {
               <Switch checked={leechEnabled} onCheckedChange={setLeechEnabled} />
             </div>
             <div className="flex items-center justify-between p-3 rounded-xl bg-card border border-border">
-              <div className="min-w-0 pr-3">
+              <div className="min-w-0 pe-3">
                 <p className="font-medium text-foreground text-sm">أظهر كلمات من نفس العائلة</p>
                 <p className="text-xs text-muted-foreground">
                   تحت البطاقة التي أجبت عنها، تظهر بهدوء كلماتك الأخرى من نفس عائلة
@@ -555,7 +557,7 @@ const Settings = () => {
               </div>
             </div>
             <div className="flex items-center justify-between p-3 rounded-xl bg-card border border-border">
-              <div className="min-w-0 pr-3">
+              <div className="min-w-0 pe-3">
                 <p className="font-medium text-foreground text-sm">ساهم بتسجيلات تدريبي</p>
                 <p className="text-xs text-muted-foreground">
                   احتفظ بمقاطع نطقي (مع العبارة التي كنت أقولها ونتيجتي) للمساعدة في تحسين

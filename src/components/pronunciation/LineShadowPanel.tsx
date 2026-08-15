@@ -256,7 +256,7 @@ export function LineShadowPanel({ clip, nativeClipWav, externalYouTubeController
       {state === "error" && !result && (
         <div className="flex gap-2">
           <Button variant="outline" size="sm" className="flex-1" onClick={handleLoop}>
-            <RotateCcw className="h-3.5 w-3.5 mr-1.5" /> حاول من جديد
+            <RotateCcw className="h-3.5 w-3.5 me-1.5" /> حاول من جديد
           </Button>
           <Button variant="ghost" size="sm" className="flex-1" onClick={onClose}>
             إغلاق

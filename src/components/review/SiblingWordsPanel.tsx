@@ -91,7 +91,7 @@ export const SiblingWordsPanel = ({
             : `${total} كلمات تعرفها من نفس العائلة`}
         </span>
         <ChevronDown
-          className={cn("ml-auto h-3.5 w-3.5 shrink-0 transition-transform", open && "rotate-180")}
+          className={cn("ms-auto h-3.5 w-3.5 shrink-0 transition-transform", open && "rotate-180")}
         />
       </button>
 

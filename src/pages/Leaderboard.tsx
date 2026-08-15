@@ -111,7 +111,7 @@ const LeaderboardRow = ({
         <p className="font-semibold text-foreground truncate">
           {entry.display_name || "مجهول"}
           {isCurrentUser && (
-            <span className="text-primary text-xs ml-1.5">(أنت)</span>
+            <span className="text-primary text-xs ms-1.5">(أنت)</span>
           )}
         </p>
         <div className="flex items-center gap-1.5">
@@ -265,7 +265,7 @@ const ProfileEditDialog = () => {
             disabled={updateProfile.isPending}
           >
             {updateProfile.isPending && (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              <Loader2 className="h-4 w-4 me-2 animate-spin" />
             )}
             Save Changes
           </Button>
@@ -341,7 +341,7 @@ const Leaderboard = () => {
                 : "text-muted-foreground hover:text-foreground"
             )}
           >
-            <Flame className="h-4 w-4 inline mr-1.5" />
+            <Flame className="h-4 w-4 inline me-1.5" />
             هذا الأسبوع
           </button>
           <button
@@ -353,7 +353,7 @@ const Leaderboard = () => {
                 : "text-muted-foreground hover:text-foreground"
             )}
           >
-            <Star className="h-4 w-4 inline mr-1.5" />
+            <Star className="h-4 w-4 inline me-1.5" />
             كل الأوقات
           </button>
         </div>

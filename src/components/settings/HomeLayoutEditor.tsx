@@ -25,7 +25,7 @@ export const HomeLayoutEditor = () => {
           onClick={reset}
           className="text-xs text-muted-foreground"
         >
-          <RotateCcw className="h-3 w-3 mr-1" />
+          <RotateCcw className="h-3 w-3 me-1" />
           إعادة الضبط
         </Button>
       </div>

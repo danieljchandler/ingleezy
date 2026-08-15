@@ -36,16 +36,16 @@ import {
   X,
   RotateCcw,
   Loader2,
-  ChevronRight,
   Sparkles,
   BookmarkPlus,
   Eye,
   EyeOff,
   MessageCircle,
   Send,
-  ArrowLeft,
-  Languages,
+  Languages
 } from "lucide-react";
+import { IconBack } from "@/components/shared/DirectionalIcon";
+import { ChevronOpen } from "@/components/shared/DirectionalIcon";
 
 type Difficulty = "beginner" | "intermediate" | "advanced";
 type Mode = "select" | "passage" | "qa";
@@ -588,7 +588,7 @@ const ReadingPractice = () => {
                     اقرأ قصة أو موقفاً مع أسئلة فهم
                   </p>
                 </div>
-                <ChevronRight className="h-5 w-5 text-muted-foreground mt-1 shrink-0" />
+                <ChevronOpen className="h-5 w-5 text-muted-foreground mt-1 shrink-0" />
               </div>
             </button>
 
@@ -607,7 +607,7 @@ const ReadingPractice = () => {
                     اسأل عن أي موضوع وخذ الجواب بالإنجليزي مع شرح بلهجتك
                   </p>
                 </div>
-                <ChevronRight className="h-5 w-5 text-muted-foreground mt-1 shrink-0" />
+                <ChevronOpen className="h-5 w-5 text-muted-foreground mt-1 shrink-0" />
               </div>
             </button>
           </div>
@@ -624,7 +624,7 @@ const ReadingPractice = () => {
           {/* Header */}
           <div className="flex items-center justify-between py-3 shrink-0">
             <Button variant="ghost" size="sm" onClick={() => { resetQA(); setMode("select"); }}>
-              <ArrowLeft className="h-4 w-4 mr-1" />
+              <IconBack className="h-4 w-4 me-1" />
               Back
             </Button>
             <div className="flex items-center gap-2">
@@ -715,7 +715,7 @@ const ReadingPractice = () => {
                             onClick={() => saveAsFlashcard(v.arabic, v.english)}
                           >
                             {v.english}{showEnglish ? ` — ${v.arabic}` : ""}
-                            {isAuthenticated && <BookmarkPlus className="h-2.5 w-2.5 ml-1 inline" />}
+                            {isAuthenticated && <BookmarkPlus className="h-2.5 w-2.5 ms-1 inline" />}
                           </Badge>
                         ))}
                       </div>
@@ -777,7 +777,7 @@ const ReadingPractice = () => {
         <div className="py-8 space-y-6">
           <div className="flex items-center gap-2 mb-2">
             <Button variant="ghost" size="sm" onClick={() => setMode("select")}>
-              <ArrowLeft className="h-4 w-4 mr-1" />
+              <IconBack className="h-4 w-4 me-1" />
               Back
             </Button>
           </div>
@@ -822,7 +822,7 @@ const ReadingPractice = () => {
                   <Badge className={DIFFICULTY_CONFIG[level].color}>{DIFFICULTY_CONFIG[level].label}</Badge>
                   <span className="text-sm text-muted-foreground">+{DIFFICULTY_CONFIG[level].xp} XP per question</span>
                 </div>
-                <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                <ChevronOpen className="h-5 w-5 text-muted-foreground" />
               </button>
             ))}
           </div>
@@ -847,7 +847,7 @@ const ReadingPractice = () => {
         */}
         <LoadingPanel task="passage" variant="page" size="lg" intervalMs={6000}>
           <Button variant="ghost" size="sm" onClick={resetSession}>
-            <X className="h-4 w-4 mr-1" />
+            <X className="h-4 w-4 me-1" />
             Cancel
           </Button>
         </LoadingPanel>
@@ -874,7 +874,7 @@ const ReadingPractice = () => {
           </p>
           <div className="flex gap-3 justify-center">
             <Button variant="outline" onClick={resetSession}>
-              <RotateCcw className="h-4 w-4 mr-2" />
+              <RotateCcw className="h-4 w-4 me-2" />
               نص جديد
             </Button>
             <Button onClick={() => navigate("/")}>تمام</Button>
@@ -890,7 +890,7 @@ const ReadingPractice = () => {
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <Button variant="ghost" size="sm" onClick={resetSession}>
-          <X className="h-4 w-4 mr-1" />
+          <X className="h-4 w-4 me-1" />
           Exit
         </Button>
         <Badge className={DIFFICULTY_CONFIG[difficulty].color}>{DIFFICULTY_CONFIG[difficulty].label}</Badge>
@@ -944,7 +944,7 @@ const ReadingPractice = () => {
                   onClick={() => saveAsFlashcard(v.arabic, v.english)}
                 >
                   {v.english}{showEnglish ? ` — ${v.arabic}` : ""}
-                  {isAuthenticated && <BookmarkPlus className="h-3 w-3 ml-1.5 inline" />}
+                  {isAuthenticated && <BookmarkPlus className="h-3 w-3 ms-1.5 inline" />}
                 </Badge>
               ))}
             </div>
@@ -952,7 +952,7 @@ const ReadingPractice = () => {
 
           <Button onClick={() => setQuizStarted(true)} className="w-full" size="lg">
             ابدأ أسئلة الفهم
-            <ChevronRight className="h-4 w-4 ml-1" />
+            <ChevronOpen className="h-4 w-4 ms-1" />
           </Button>
         </div>
       )}
@@ -1003,7 +1003,7 @@ const ReadingPractice = () => {
             {answers[currentQuestion] !== null && (
               <Button onClick={nextQuestion} className="w-full">
                 {currentQuestion < passage.questions.length - 1 ? "السؤال التالي" : "شوف النتيجة"}
-                <ChevronRight className="h-4 w-4 ml-1" />
+                <ChevronOpen className="h-4 w-4 ms-1" />
               </Button>
             )}
           </div>

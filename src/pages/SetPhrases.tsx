@@ -36,7 +36,7 @@ const SetPhrases = () => {
           </div>
           <div className="grid grid-cols-2 gap-2 mt-4">
             <Button onClick={() => navigate("/set-phrases/practice")} className="w-full">
-              <Sparkles className="h-4 w-4 mr-1" /> تمرين منوّع
+              <Sparkles className="h-4 w-4 me-1" /> تمرين منوّع
             </Button>
             <Button
               onClick={() => navigate("/set-phrases/review")}
@@ -76,7 +76,7 @@ const SetPhrases = () => {
                     <p className="text-xs text-muted-foreground mt-1" dir="rtl">{o.name_arabic}</p>
                   )}
                   <div className="flex items-center justify-end mt-2 text-xs text-emerald-600">
-                    Practice <ArrowRight className="h-3 w-3 ml-1" />
+                    Practice <ArrowRight className="h-3 w-3 ms-1" />
                   </div>
                 </button>
               ))}

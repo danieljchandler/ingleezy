@@ -155,7 +155,7 @@ export const ReviewClozeCard = ({
             "disabled:opacity-50 disabled:cursor-not-allowed"
           )}
         >
-          {ttsLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : <Play className="h-6 w-6 ml-0.5" />}
+          {ttsLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : <Play className="h-6 w-6 ms-0.5" />}
         </button>
         <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
           {selected == null ? "الكلمة محجوبة" : "الجملة كاملة"}

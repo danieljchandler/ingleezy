@@ -563,8 +563,35 @@ generation conditioning.
       transfer traps called out)
       with the pronunciation pages — no hardcoded learner-facing
       English; admin exempt
-- [ ] Mirror-aware components (icons, arrows, progress) — Tailwind logical
-      properties where needed
+- [x] **Mirror-aware components — DONE.** Two problems, one cause: the root
+      flip to `dir="rtl"` was never followed through the chrome.
+      *Icons.* Every back button still rendered `ArrowLeft`, which in an RTL
+      page points at where the learner is *going*, and every "next" rendered
+      `ChevronRight`, pointing back at what they just finished. Row-disclosure
+      chevrons pointed at the start of the row rather than the end. Fixed
+      through `components/shared/DirectionalIcon.tsx`, which names the intent
+      (`IconBack`, `IconNext`, `ChevronOpen`) and keeps the one mapping in one
+      place — call sites never name a compass direction, so the next button
+      added cannot get it wrong by copying a neighbour. Fixed to RTL rather
+      than read at runtime: there is exactly one UI language, and a
+      `useDirection()` hook would be machinery serving a case that cannot
+      occur. It carries a test, because `IconBack = ArrowRight` reads like a
+      bug and someone will eventually "fix" it — and nothing else in the suite
+      asserts on which way a glyph points. The media transport (`SkipBack` /
+      `SkipForward`) is deliberately excluded: those mean earlier and later in
+      *time*, which does not mirror.
+      *Spacing.* 177 physical `mr-`/`ml-`/`pr-`/`pl-` classes across 70
+      learner files put every icon gap on the wrong side. Swept to the logical
+      `me-`/`ms-`/`pe-`/`ps-` (Tailwind 3.4), and verified by grepping the
+      built CSS for the `margin-inline-*` declarations rather than trusting
+      the class names.
+      *And the reason admin was left alone.* Admin inherited `dir="rtl"` from
+      `<html>` — English prose right-aligned, with the same wrong-side gaps.
+      Since admin is English by design, `AdminLayout` now opts back out with
+      `dir="ltr"`, which fixes the whole subtree in one attribute and makes
+      the physical classes there correct again. The shadcn primitives under
+      `components/ui` are shared with admin and were left untouched for the
+      same reason.
 
 ---
 

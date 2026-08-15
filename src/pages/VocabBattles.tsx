@@ -5,11 +5,12 @@ import { AppShell } from '@/components/layout/AppShell';
 import { HomeButton } from '@/components/HomeButton';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Swords, Trophy, Clock, ChevronRight, Users } from 'lucide-react';
+import { Loader2, Swords, Trophy, Clock, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { InfoHint } from '@/components/InfoHint';
 import { PAGE_HINTS } from '@/lib/pageHints';
 import { formatDistanceToNow } from 'date-fns';
+import { ChevronOpen } from '@/components/shared/DirectionalIcon';
 
 const statusColors: Record<string, string> = {
   pending: 'bg-yellow-500/10 text-yellow-700 border-yellow-500/20',
@@ -187,7 +188,7 @@ const VocabBattles = () => {
                     </div>
 
                     {playable && (
-                      <ChevronRight className="h-5 w-5 text-primary shrink-0" />
+                      <ChevronOpen className="h-5 w-5 text-primary shrink-0" />
                     )}
                     {battle.status === 'completed' && battle.winner_id === user.id && (
                       <Trophy className="h-5 w-5 text-yellow-500 shrink-0" />
@@ -202,7 +203,7 @@ const VocabBattles = () => {
             <Swords className="h-16 w-16 text-muted-foreground/20 mx-auto mb-4" />
             <p className="text-muted-foreground mb-4">لا معارك بعد</p>
             <Button onClick={() => navigate('/friends')}>
-              <Users className="h-4 w-4 mr-2" />
+              <Users className="h-4 w-4 me-2" />
               ابحث عن أصدقاء للمنافسة
             </Button>
           </div>

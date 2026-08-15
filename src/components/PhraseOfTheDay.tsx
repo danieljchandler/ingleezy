@@ -233,7 +233,7 @@ export const PhraseOfTheDay = () => {
           )}
 
           {phrase.notes && (
-            <p dir="rtl" className="text-xs text-muted-foreground leading-relaxed border-r-2 border-accent/40 pr-3 font-arabic">
+            <p dir="rtl" className="text-xs text-muted-foreground leading-relaxed border-r-2 border-accent/40 pe-3 font-arabic">
               {phrase.notes}
             </p>
           )}
@@ -247,12 +247,12 @@ export const PhraseOfTheDay = () => {
             >
               {saved ? (
                 <>
-                  <Check className="h-4 w-4 mr-1.5" />
+                  <Check className="h-4 w-4 me-1.5" />
                   محفوظة
                 </>
               ) : (
                 <>
-                  <BookmarkPlus className="h-4 w-4 mr-1.5" />
+                  <BookmarkPlus className="h-4 w-4 me-1.5" />
                   احفظها كبطاقة
                 </>
               )}

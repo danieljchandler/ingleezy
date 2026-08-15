@@ -94,7 +94,7 @@ const Pricing = () => {
                   </span>
                 </div>
                 <Button variant="outline" size="sm" onClick={handleManageSubscription}>
-                  <Settings className="h-4 w-4 mr-2" />
+                  <Settings className="h-4 w-4 me-2" />
                   إدارة
                 </Button>
               </div>
@@ -108,7 +108,7 @@ const Pricing = () => {
                   onClick={() => setCadence('annual')}
                 >
                   سنوي
-                  <Badge variant="secondary" className="ml-2">شهران مجاناً</Badge>
+                  <Badge variant="secondary" className="ms-2">شهران مجاناً</Badge>
                 </Button>
                 <Button
                   variant={cadence === 'monthly' ? 'default' : 'outline'}
@@ -207,7 +207,7 @@ const Pricing = () => {
               <Card className={`border-2 ${tier === 'allin' ? 'border-primary' : 'border-accent'} relative`}>
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                   <Badge className="bg-accent text-accent-foreground">
-                    <Sparkles className="h-3 w-3 mr-1" />
+                    <Sparkles className="h-3 w-3 me-1" />
                     الأفضل قيمة
                   </Badge>
                 </div>

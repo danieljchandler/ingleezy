@@ -1,8 +1,9 @@
-import { ChevronRight, Check, type LucideIcon } from "lucide-react";
+import { Check, type LucideIcon } from "lucide-react";
 import { AR } from "@/lib/strings";
 import { cn } from "@/lib/utils";
 import { InfoHint } from "@/components/InfoHint";
 import { useDialect } from "@/contexts/DialectContext";
+import { ChevronOpen } from "@/components/shared/DirectionalIcon";
 
 interface TaskRowProps {
   title: string;
@@ -52,7 +53,7 @@ export const TaskRow = ({
     <div
       onClick={onClick}
       className={cn(
-        "group relative w-full flex cursor-pointer items-stretch gap-3 pr-4 pl-0 py-3.5 rounded-2xl text-left overflow-hidden",
+        "group relative w-full flex cursor-pointer items-stretch gap-3 pe-4 ps-0 py-3.5 rounded-2xl text-left overflow-hidden",
         "bg-card-cream border-2 transition-all duration-300",
         "shadow-[0_1px_0_rgba(92,58,70,0.04),0_4px_12px_-6px_rgba(92,58,70,0.12)]",
         "hover:shadow-[0_2px_0_rgba(92,58,70,0.06),0_10px_20px_-8px_rgba(92,58,70,0.2)] hover:-translate-y-px active:translate-y-0",
@@ -79,7 +80,7 @@ export const TaskRow = ({
       />
 
       {/* Micro-icon tile */}
-      <div className="relative z-[1] pl-1 flex items-center">
+      <div className="relative z-[1] ps-1 flex items-center">
         <div
           className={cn(
             "h-11 w-11 rounded-xl flex items-center justify-center shrink-0 transition-colors",
@@ -139,7 +140,7 @@ export const TaskRow = ({
         </div>
       </div>
 
-      <ChevronRight
+      <ChevronOpen
         className={cn(
           "relative z-[1] h-5 w-5 shrink-0 self-center transition-transform",
           done ? "text-desert-red/30" : "text-desert-red/40 group-hover:translate-x-0.5 group-hover:text-desert-red/70"

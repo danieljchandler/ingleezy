@@ -84,8 +84,8 @@ const Listen = () => {
 
         <Tabs defaultValue="library">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="library"><Library className="h-4 w-4 mr-2" />المكتبة</TabsTrigger>
-            <TabsTrigger value="create"><Plus className="h-4 w-4 mr-2" />أنشئ</TabsTrigger>
+            <TabsTrigger value="library"><Library className="h-4 w-4 me-2" />المكتبة</TabsTrigger>
+            <TabsTrigger value="create"><Plus className="h-4 w-4 me-2" />أنشئ</TabsTrigger>
           </TabsList>
 
           <TabsContent value="library" className="space-y-3 pt-4">
@@ -114,10 +114,10 @@ const Listen = () => {
                           <Badge variant="secondary" className="text-[10px]">{FORMAT_META[ep.format].label}</Badge>
                           <Badge variant="outline" className="text-[10px]">{LENGTH_META[ep.length_bucket].label}</Badge>
                           {ep.full_audio_url && (
-                            <Badge variant="outline" className="text-[10px]"><Play className="h-3 w-3 mr-0.5" />صوت</Badge>
+                            <Badge variant="outline" className="text-[10px]"><Play className="h-3 w-3 me-0.5" />صوت</Badge>
                           )}
                           {ep.audio_status === "pending" && (
-                            <Badge variant="outline" className="text-[10px]"><Loader2 className="h-3 w-3 mr-0.5 animate-spin" />نسجّل</Badge>
+                            <Badge variant="outline" className="text-[10px]"><Loader2 className="h-3 w-3 me-0.5 animate-spin" />نسجّل</Badge>
                           )}
                           {ep.play_count > 0 && (
                             <span className="text-[10px] text-muted-foreground self-center">▶ {ep.play_count}</span>
@@ -219,7 +219,7 @@ const Listen = () => {
                       activeCategory === c.id ? "border-primary bg-primary/10 text-primary" : "border-border hover:bg-accent/40"
                     }`}
                   >
-                    <span className="mr-1">{c.emoji}</span>{c.labelAr}
+                    <span className="me-1">{c.emoji}</span>{c.labelAr}
                   </button>
                 ))}
               </div>
@@ -246,9 +246,9 @@ const Listen = () => {
               onClick={() => handleGenerate(undefined, currentCategory.id)}
             >
               {generate.isPending ? (
-                <><Loader2 className="h-4 w-4 mr-2 animate-spin" />نكتب حلقتك…</>
+                <><Loader2 className="h-4 w-4 me-2 animate-spin" />نكتب حلقتك…</>
               ) : (
-                <><Sparkles className="h-4 w-4 mr-2" />ولّد الحلقة</>
+                <><Sparkles className="h-4 w-4 me-2" />ولّد الحلقة</>
               )}
             </Button>
           </TabsContent>

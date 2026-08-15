@@ -20,13 +20,13 @@ import { Switch } from "@/components/ui/switch";
 import {
   BookOpen,
   Check,
-  ChevronRight,
   Languages,
   RotateCcw,
   Sparkles,
   X,
-  Zap,
+  Zap
 } from "lucide-react";
+import { ChevronOpen } from "@/components/shared/DirectionalIcon";
 
 interface Choice {
   /** The English answer option. */
@@ -283,10 +283,10 @@ const GrammarDrills = () => {
           )}
           <div className="flex gap-3 justify-center pt-4">
             <Button variant="outline" onClick={resetDrill}>
-              <RotateCcw className="h-4 w-4 mr-2" /> تمرين جديد
+              <RotateCcw className="h-4 w-4 me-2" /> تمرين جديد
             </Button>
             <Button onClick={() => fetchDrill(category!)}>
-              <Sparkles className="h-4 w-4 mr-2" /> إعادة
+              <Sparkles className="h-4 w-4 me-2" /> إعادة
             </Button>
           </div>
         </div>
@@ -386,7 +386,7 @@ const GrammarDrills = () => {
               </div>
               <Button onClick={nextQuestion} className="w-full">
                 {currentIndex < questions.length - 1 ? (
-                  <>التالي <ChevronRight className="h-4 w-4 ml-1" /></>
+                  <>التالي <ChevronOpen className="h-4 w-4 ms-1" /></>
                 ) : (
                   "النتائج"
                 )}

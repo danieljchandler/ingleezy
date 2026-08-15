@@ -461,7 +461,7 @@ const HowDoISay = () => {
                           onClick={() => handleSaveWord(word)}
                           disabled={savedWords.has(word.english)}
                           className={cn(
-                            "shrink-0 p-1.5 rounded-lg transition-all ml-2",
+                            "shrink-0 p-1.5 rounded-lg transition-all ms-2",
                             savedWords.has(word.english)
                               ? "text-primary"
                               : "text-muted-foreground hover:text-primary hover:bg-primary/10",

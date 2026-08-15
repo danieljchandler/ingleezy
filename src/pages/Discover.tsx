@@ -217,7 +217,7 @@ const Discover = () => {
       <Tabs value={tab} onValueChange={setTab} className="w-full">
         <TabsList className="mb-4">
           <TabsTrigger value="feed" disabled={!user}>
-            <Sparkles className="h-4 w-4 mr-1.5" />
+            <Sparkles className="h-4 w-4 me-1.5" />
             لك
           </TabsTrigger>
           <TabsTrigger value="browse">تصفح</TabsTrigger>
@@ -236,7 +236,7 @@ const Discover = () => {
               onClick={() => setSeed((s) => s + 1)}
               disabled={isFeedFetching}
             >
-              <Shuffle className={cn("h-4 w-4 mr-1.5", isFeedFetching && "animate-spin")} />
+              <Shuffle className={cn("h-4 w-4 me-1.5", isFeedFetching && "animate-spin")} />
               خلط
             </Button>
           </div>
@@ -275,7 +275,7 @@ const Discover = () => {
                 placeholder="ابحث عن فيديوهات..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-9"
+                className="ps-9"
                 aria-label="ابحث عن فيديوهات"
               />
             </div>

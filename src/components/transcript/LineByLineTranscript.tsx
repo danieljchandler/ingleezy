@@ -193,7 +193,7 @@ const InlineToken = ({
                   <p className="text-sm text-muted-foreground">{compoundGloss}</p>
                   {compoundLiteral && (
                     <p className="text-xs italic text-muted-foreground/80">
-                      <span className="not-italic uppercase tracking-wide text-[9px] mr-1 text-muted-foreground/60">
+                      <span className="not-italic uppercase tracking-wide text-[9px] me-1 text-muted-foreground/60">
                         حرفي
                       </span>
                       {compoundLiteral}
@@ -588,7 +588,7 @@ interface TranscriptLineCardProps {
              {isActive && isPlaying ? (
                <Pause className="h-4 w-4" />
              ) : (
-               <Play className="h-4 w-4 ml-0.5" />
+               <Play className="h-4 w-4 ms-0.5" />
              )}
            </Button>
          )}
@@ -800,7 +800,7 @@ const EnglishLineCard = ({
           {fusha && <FushaLine dialect={line.arabic} fusha={fusha} />}
           {line.literal && (
             <p dir="rtl" className="font-arabic text-sm text-muted-foreground">
-              <span className="text-[10px] uppercase tracking-wide ml-1" dir="ltr">word by word</span>{" "}
+              <span className="text-[10px] uppercase tracking-wide ms-1" dir="ltr">word by word</span>{" "}
               {line.literal}
             </p>
           )}
@@ -940,11 +940,11 @@ export const LineByLineTranscript = ({
              onCheckedChange={(on) => updatePrefs({ showFormal: on })}
              aria-label="أظهر السطر بالفصحى"
            />
-           <span className="text-xs text-muted-foreground ml-2">
+           <span className="text-xs text-muted-foreground ms-2">
              {showAllTranslations ? (
-               <Eye className="h-4 w-4 inline mr-1" />
+               <Eye className="h-4 w-4 inline me-1" />
              ) : (
-               <EyeOff className="h-4 w-4 inline mr-1" />
+               <EyeOff className="h-4 w-4 inline me-1" />
              )}
              أظهر كل الترجمات
            </span>

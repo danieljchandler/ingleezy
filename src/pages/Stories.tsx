@@ -3,10 +3,11 @@ import { usePublishedStories } from '@/hooks/useInteractiveStories';
 import { AppShell } from '@/components/layout/AppShell';
 import { HomeButton } from '@/components/HomeButton';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, BookOpen, ChevronRight } from 'lucide-react';
+import { Loader2, BookOpen } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { InfoHint } from '@/components/InfoHint';
 import { PAGE_HINTS } from '@/lib/pageHints';
+import { ChevronOpen } from '@/components/shared/DirectionalIcon';
 
 const DIFFICULTY_COLORS: Record<string, string> = {
   Beginner: 'bg-green-500/10 text-green-700 border-green-500/20',
@@ -69,7 +70,7 @@ const Stories = () => {
                       </Badge>
                     </div>
                   </div>
-                  <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors mt-1 shrink-0" />
+                  <ChevronOpen className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors mt-1 shrink-0" />
                 </div>
               </button>
             ))}

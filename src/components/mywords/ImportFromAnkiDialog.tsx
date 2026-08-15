@@ -410,7 +410,7 @@ export function ImportFromAnkiDialog({ open, onOpenChange }: Props) {
                   ) : (
                     <Trash2 className="h-3.5 w-3.5" />
                   )}
-                  <span className="ml-1.5">احذف السابق</span>
+                  <span className="ms-1.5">احذف السابق</span>
                 </Button>
               </div>
             )}

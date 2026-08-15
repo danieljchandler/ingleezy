@@ -1223,7 +1223,7 @@ const Transcribe = () => {
                 className="w-full mt-4"
               >
                 {isProcessing ? (
-                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" />جارٍ التفريغ...</>
+                  <><Loader2 className="me-2 h-4 w-4 animate-spin" />جارٍ التفريغ...</>
                 ) : "ابدأ التفريغ"}
               </Button>
             )}
@@ -1253,7 +1253,7 @@ const Transcribe = () => {
             <DialogFooter className="gap-2 sm:gap-0">
               <Button variant="outline" onClick={() => setShowSaveDialog(false)}>إلغاء</Button>
               <Button onClick={saveTranscription} disabled={isSaving}>
-                {isSaving ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" />جارٍ الحفظ...</>) : (<><Save className="mr-2 h-4 w-4" />حفظ</>)}
+                {isSaving ? (<><Loader2 className="me-2 h-4 w-4 animate-spin" />جارٍ الحفظ...</>) : (<><Save className="me-2 h-4 w-4" />حفظ</>)}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -1263,7 +1263,7 @@ const Transcribe = () => {
         {currentUrlFromParams && lines.length > 0 && (
           <div className="mb-4">
             <Badge variant="secondary" className="bg-accent text-accent-foreground border-border">
-              <Sparkles className="w-3 h-3 mr-1" />نتيجة فورية من الذاكرة المؤقتة</Badge>
+              <Sparkles className="w-3 h-3 me-1" />نتيجة فورية من الذاكرة المؤقتة</Badge>
           </div>
         )}
 
@@ -1304,10 +1304,10 @@ const Transcribe = () => {
               </div>
               <div className="flex gap-2">
                 <Button onClick={handleSaveClick} variant={isSaved ? "secondary" : "default"} disabled={isSaved}>
-                  {isSaved ? (<><Check className="mr-2 h-4 w-4" />محفوظ</>) : (<><Save className="mr-2 h-4 w-4" />حفظ</>)}
+                  {isSaved ? (<><Check className="me-2 h-4 w-4" />محفوظ</>) : (<><Save className="me-2 h-4 w-4" />حفظ</>)}
                 </Button>
                 <Button onClick={exportTranscript} variant="outline">
-                  <Download className="mr-2 h-4 w-4" />تصدير</Button>
+                  <Download className="me-2 h-4 w-4" />تصدير</Button>
               </div>
             </CardHeader>
             <CardContent>
@@ -1330,10 +1330,10 @@ const Transcribe = () => {
               </div>
               <div className="flex gap-2">
                 <Button onClick={handleSaveClick} variant={isSaved ? "secondary" : "default"} disabled={isSaved}>
-                  {isSaved ? (<><Check className="mr-2 h-4 w-4" />محفوظ</>) : (<><Save className="mr-2 h-4 w-4" />حفظ</>)}
+                  {isSaved ? (<><Check className="me-2 h-4 w-4" />محفوظ</>) : (<><Save className="me-2 h-4 w-4" />حفظ</>)}
                 </Button>
                 <Button onClick={exportTranscript} variant="outline">
-                  <Download className="mr-2 h-4 w-4" />تصدير</Button>
+                  <Download className="me-2 h-4 w-4" />تصدير</Button>
               </div>
             </CardHeader>
             <CardContent>
