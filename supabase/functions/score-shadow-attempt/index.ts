@@ -4,20 +4,30 @@
  * Scores a learner's shadowing take against the ACTUAL words a native speaker
  * said in a specific clip — not a generic pronunciation model.
  *
- * It transcribes the learner's recording with Munsit ASR and compares the
- * recognised Arabic against the clip's reference transcript using normalised
- * Arabic edit-distance similarity. It also returns a per-word alignment diff
- * (matched / substituted / missing / extra vs the clip's words) that the
- * caller feeds to `pronunciation-feedback` for coaching tips.
+ * **The clip picks the recogniser.** Ingleezy shadows two kinds of clip: native
+ * English videos, which are the point of the app, and Hakiya-bridged Arabic
+ * ones kept as secondary immersion. `useShadowQueue` already decides which
+ * language a line is spoken in and hands over a BCP-47 locale; this function
+ * routes on it — Deepgram nova-3 for English, Munsit for Arabic.
  *
- * Body: { audioBase64: string, mimeType?: string, referenceText: string, dialect?: string }
+ * Getting that wrong is invisible rather than loud. Transcribing an English
+ * take with an Arabic recogniser does not error: it returns Arabic-script
+ * noise, the edit-distance similarity comes out near zero, and the learner is
+ * told they mispronounced everything. That is exactly what happened on every
+ * English clip before the locale was plumbed through.
+ *
+ * It returns a per-word alignment diff (matched / substituted / missing /
+ * extra vs the clip's words) that the caller feeds to
+ * `pronunciation-feedback` for coaching tips.
+ *
+ * Body: { audioBase64, mimeType?, referenceText, dialect?, locale? }
  * Response: {
  *   recognizedText: string,
  *   transcriptSimilarity: number,   // 0..1 — how close to the clip's words
  *   wordDiffs: Array<{ ref?: string, said?: string, status: 'match'|'sub'|'missing'|'extra' }>
  * }
  *
- * Required env: MUNSIT_API_KEY (already used by score-set-phrase-voice).
+ * Required env: MUNSIT_API_KEY (Arabic clips), DEEPGRAM_API_KEY (English ones).
  */
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
@@ -188,6 +198,53 @@ async function munsitCall(audioBase64: string, mimeType: string, apiKey: string,
  * upstream (a few characters back for any payload), so the default is now
  * `munsit-en-ar` — the retry covers the reverse happening later.
  */
+const DEEPGRAM_URL = "https://api.deepgram.com/v1/listen";
+
+/**
+ * Transcribe an English shadowing take.
+ *
+ * Nova-3 handles accented English well, which matters here more than usual —
+ * the speaker is an Arabic native by definition, and a recogniser that fails
+ * on their accent would score a correct take as a miss. The clip's own words
+ * are passed as keyterms so the model leans toward the line being shadowed
+ * rather than a plausible-sounding neighbour.
+ */
+async function deepgramTranscribe(
+  audioBase64: string,
+  mimeType: string,
+  apiKey: string,
+  referenceText: string,
+): Promise<string> {
+  const bin = atob(audioBase64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+
+  const params = new URLSearchParams({
+    model: "nova-3",
+    language: "en",
+    punctuate: "true",
+    smart_format: "true",
+  });
+  // Deepgram caps how much boosting is useful; the first handful of content
+  // words carry the line.
+  for (const term of referenceText.split(/\s+/).filter((w) => w.length > 3).slice(0, 8)) {
+    params.append("keyterm", `${term}:1`);
+  }
+
+  const resp = await fetch(`${DEEPGRAM_URL}?${params}`, {
+    method: "POST",
+    headers: { Authorization: `Token ${apiKey}`, "Content-Type": mimeType || "audio/wav" },
+    body: bytes,
+    signal: AbortSignal.timeout(30_000),
+  });
+  if (!resp.ok) {
+    const t = await resp.text();
+    throw new Error(`Deepgram ${resp.status}: ${t.slice(0, 200)}`);
+  }
+  const data = await resp.json();
+  return (data?.results?.channels?.[0]?.alternatives?.[0]?.transcript ?? "").trim();
+}
+
 async function munsitTranscribe(audioBase64: string, mimeType: string, apiKey: string): Promise<string> {
   const primary = munsitModel();
   const first = await munsitCall(audioBase64, mimeType, apiKey, primary);
@@ -202,7 +259,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
-    const { audioBase64, mimeType, referenceText, dialect } = await req.json();
+    const { audioBase64, mimeType, referenceText, dialect, locale } = await req.json();
     if (!audioBase64 || !referenceText) {
       return new Response(JSON.stringify({ error: "audioBase64 and referenceText are required" }), {
         status: 400,
@@ -210,10 +267,21 @@ serve(async (req) => {
       });
     }
 
-    const apiKey = Deno.env.get("MUNSIT_API_KEY");
-    if (!apiKey) throw new Error("MUNSIT_API_KEY not configured");
+    // Default to English when the caller says nothing. An unlabelled clip is
+    // far more likely to be one of ours than a bridged Arabic one, and the
+    // failure is silent either way — better to fail toward the common case.
+    const isEnglish = !String(locale ?? "en-US").toLowerCase().startsWith("ar");
 
-    const recognizedText = await munsitTranscribe(audioBase64, mimeType || "audio/wav", apiKey);
+    let recognizedText: string;
+    if (isEnglish) {
+      const deepgramKey = Deno.env.get("DEEPGRAM_API_KEY");
+      if (!deepgramKey) throw new Error("DEEPGRAM_API_KEY not configured");
+      recognizedText = await deepgramTranscribe(audioBase64, mimeType || "audio/wav", deepgramKey, referenceText);
+    } else {
+      const apiKey = Deno.env.get("MUNSIT_API_KEY");
+      if (!apiKey) throw new Error("MUNSIT_API_KEY not configured");
+      recognizedText = await munsitTranscribe(audioBase64, mimeType || "audio/wav", apiKey);
+    }
     const transcriptSimilarity = similarity(recognizedText, referenceText);
     const wordDiffs = alignWords(referenceText, recognizedText);
 

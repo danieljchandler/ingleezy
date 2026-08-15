@@ -317,6 +317,31 @@ generation conditioning.
       Still open: a seeded minimal-pairs drill set — goes with the
       English Sounds journey.
 - [~] Shadowing, sentence coach, set phrases: KEEP loops, English targets.
+      **Shadowing DONE, and it was broken rather than merely unflipped.**
+      `useShadowQueue` had always worked out the right language per line —
+      `en-US` for a native English clip, `ar-*` for a Hakiya-bridged one —
+      but nothing carried that locale to the server. So
+      `score-shadow-attempt` transcribed every take with Munsit, an Arabic
+      ASR, and `pronunciation-feedback` opened every tip with "You are a
+      friendly Arabic pronunciation coach… reference the specific Arabic
+      words/sounds they missed".
+      On English clips — the primary content — that meant the learner's
+      English was run through an Arabic recogniser, which does not error:
+      it returns Arabic-script noise, the edit-distance similarity lands
+      near zero, and a learner who said the line perfectly is told they
+      mispronounced all of it. Then the coach, handed English text, was
+      instructed to talk about Arabic sounds.
+      The locale is now plumbed clip → `useShadowScore` → both functions.
+      The scorer routes to Deepgram nova-3 for English (keyterm-boosted
+      with the clip's own words, and nova-3 handles accented English,
+      which matters when the speaker is an Arabic native by definition)
+      and keeps Munsit for bridged Arabic. The coach branches the same
+      way, and the English branch names the interference sounds the way
+      the Azure-scores path already did. Unlabelled requests default to
+      English — the common case — so a stale client degrades to rare
+      rather than universal.
+      Pinned in a new `shadow_test.ts` on both sides, because every part
+      of this failure is silent: nothing in the response looks wrong.
       **Set phrases DONE**: English phrases with dialect glosses, phonetic_ar
       in the transliteration columns, Arabic-in-English-order literals, and
       the scenario in the learner's dialect (scenario_english column name

@@ -61,7 +61,7 @@ export function LineShadowPanel({ clip, nativeClipWav, externalYouTubeController
           return;
         }
         setState("scoring");
-        const res = await score(blob, { referenceText: clip.text, nativeClipWav });
+        const res = await score(blob, { referenceText: clip.text, nativeClipWav, locale: clip.locale });
         setState(res ? "result" : "error");
       },
     });

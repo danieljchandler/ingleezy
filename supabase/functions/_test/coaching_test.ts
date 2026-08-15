@@ -12,6 +12,11 @@ import { chatCompletion, json, type UpstreamHandler } from "./upstreams.ts";
  * scores. They take different bodies, validate different fields, and the only
  * thing they share is the tool call at the end.
  *
+ * The shadow cases below all carry `locale: "ar-SA"` because they all use an
+ * Arabic reference line: post-flip the clip's language is part of the request,
+ * and it chooses between an English coach and a dialect one. That choice has
+ * its own file — see `shadow_test.ts`, which pins the routing on both sides.
+ *
  * What makes this worth testing is that everything interesting happens in the
  * *prompt*. There is no logic to check afterwards — the tips are whatever the
  * model returns — so the tests assert on what was asked, because a prompt that
@@ -88,6 +93,7 @@ Deno.test("pronunciation-feedback returns the tips it was given", async () => {
   const { status, body } = await call(
     {
       mode: "shadow",
+      locale: "ar-SA",
       referenceText: "الجو حلو اليوم",
       recognizedText: "الجو بارد اليوم",
       closeness: 68,
@@ -104,6 +110,7 @@ Deno.test("pronunciation-feedback names the words the learner got wrong", async 
   const { bodies, calls } = await call(
     {
       mode: "shadow",
+      locale: "ar-SA",
       referenceText: "الجو حلو اليوم",
       recognizedText: "الجو اليوم واجد",
       closeness: 55,
@@ -130,6 +137,7 @@ Deno.test("pronunciation-feedback leaves matched words out of the summary", asyn
   const { bodies, calls } = await call(
     {
       mode: "shadow",
+      locale: "ar-SA",
       referenceText: "الجو حلو",
       recognizedText: "الجو حلو",
       closeness: 100,
@@ -153,6 +161,7 @@ Deno.test("pronunciation-feedback says so when nothing was recognised", async ()
   const { bodies, calls } = await call(
     {
       mode: "shadow",
+      locale: "ar-SA",
       referenceText: "الجو حلو",
       recognizedText: "",
       closeness: 0,
@@ -172,6 +181,7 @@ Deno.test("pronunciation-feedback rounds the closeness it quotes", async () => {
   const { bodies, calls } = await call(
     {
       mode: "shadow",
+      locale: "ar-SA",
       referenceText: "الجو حلو",
       recognizedText: "الجو حلو",
       closeness: 67.83333,
@@ -185,7 +195,8 @@ Deno.test("pronunciation-feedback rounds the closeness it quotes", async () => {
 
 Deno.test("pronunciation-feedback treats a missing closeness as zero", async () => {
   const { status, bodies, calls } = await call(
-    { mode: "shadow", referenceText: "الجو حلو", recognizedText: "الجو" },
+    { mode: "shadow",
+      locale: "ar-SA", referenceText: "الجو حلو", recognizedText: "الجو" },
     caller({ "ai.gateway.lovable.dev": tips("A tip.") }),
   );
 
@@ -197,7 +208,8 @@ Deno.test("pronunciation-feedback treats a missing closeness as zero", async () 
 
 Deno.test("pronunciation-feedback refuses a shadow request with no reference", async () => {
   const { status, body, calls } = await call(
-    { mode: "shadow", recognizedText: "الجو" },
+    { mode: "shadow",
+      locale: "ar-SA", recognizedText: "الجو" },
     caller({ "ai.gateway.lovable.dev": tips("A tip.") }),
   );
 

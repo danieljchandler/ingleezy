@@ -75,6 +75,38 @@ const withBothScorers = (backend: SupabaseBackend) => {
   backend.stubFunction("pronunciation-feedback", { tips: ["Lengthen the final vowel"] });
 };
 
+describe("the language of the clip", () => {
+  it("tells both calls which language the take is in", async () => {
+    // Load-bearing, and silent when wrong. The locale picks the recogniser
+    // server-side: an English take sent to the Arabic ASR comes back as script
+    // noise, scores near zero, and tells a learner who said the line perfectly
+    // that they got every word wrong. Nothing about the response looks broken.
+    const { result, backend } = render(withBothScorers);
+
+    await act(async () => {
+      await result.current.score(aTake(), { referenceText: "I went to the market", locale: "en-US" });
+    });
+
+    expect(backend.lastCallTo("score-shadow-attempt")?.body).toMatchObject({ locale: "en-US" });
+    // The tips call needs it too, and the dialect alongside it — the target is
+    // English but which sounds to watch for depends on the learner's L1.
+    expect(backend.lastCallTo("pronunciation-feedback")?.body).toMatchObject({
+      locale: "en-US",
+      dialect: "Gulf",
+    });
+  });
+
+  it("passes a bridged Arabic clip's locale through unchanged", async () => {
+    const { result, backend } = render(withBothScorers);
+
+    await act(async () => {
+      await result.current.score(aTake(), { referenceText: REFERENCE, locale: "ar-SA" });
+    });
+
+    expect(backend.lastCallTo("score-shadow-attempt")?.body).toMatchObject({ locale: "ar-SA" });
+  });
+});
+
 describe("scoring a take", () => {
   it("combines the transcript and acoustic signals", async () => {
     const { result } = render(withBothScorers);

@@ -4,6 +4,18 @@ import { logEdgeError } from "../_shared/logError.ts";
 import { enforceDailyCap } from "../_shared/usageCap.ts";
 import { MODEL_IDS } from "../_shared/modelRegistry.ts";
 
+/**
+ * The learner's L1, from either an Azure locale code or the canonical dialect
+ * key. Either way it names the language they speak natively, never the one
+ * they are studying.
+ */
+function l1Label(dialect: unknown): string {
+  const d = String(dialect ?? "");
+  if (d === "ar-EG" || d === "Egyptian") return "Egyptian Arabic";
+  if (d === "ar-YE" || d === "Yemeni") return "Yemeni Arabic";
+  return "Gulf Arabic";
+}
+
 serve(async (req) => {
   const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") {
@@ -27,7 +39,7 @@ serve(async (req) => {
     //    exact words the native speaker said in this clip. ──────────────────
     let prompt: string;
     if (mode === "shadow") {
-      const { referenceText, recognizedText, closeness, wordDiffs } = payload;
+      const { referenceText, recognizedText, closeness, wordDiffs, locale, dialect: shadowDialect } = payload;
       if (!referenceText) {
         return new Response(JSON.stringify({ error: "referenceText is required" }), {
           status: 400,
@@ -46,7 +58,24 @@ serve(async (req) => {
         .filter(Boolean)
         .join("; ");
 
-      prompt = `You are a friendly Arabic pronunciation coach. A learner is SHADOWING (repeating after) a native speaker clip.
+      // Which language was actually spoken decides the coaching, and the clip
+      // knows: `useShadowQueue` sends "en-US" for a native English line and an
+      // Arabic locale for a Hakiya-bridged one. Coaching an English take on
+      // "the Arabic sounds you missed" is not a wording slip — it sends the
+      // learner after a problem that is not in the recording.
+      const shadowingEnglish = !String(locale ?? "en-US").toLowerCase().startsWith("ar");
+      const l1 = l1Label(shadowDialect);
+
+      prompt = shadowingEnglish
+        ? `You are a friendly ENGLISH pronunciation coach for a native ${l1} speaker. A learner is SHADOWING (repeating after) a native English clip.
+
+The native speaker said: "${referenceText}"
+The learner said (as heard by speech recognition): "${recognizedText || "(nothing recognised)"}"
+Closeness to the native clip: ${Math.round(closeness ?? 0)}/100.
+${diffSummary ? `Differences from the clip: ${diffSummary}.` : "The words matched the clip closely."}
+
+Give exactly 2-3 short, actionable tips (one sentence each) to help them match the native clip more closely. Reference the specific ENGLISH words and sounds they missed or changed. Watch for the ones that trip Arabic speakers — /p/ said as /b/, /v/ said as /f/, collapsed vowel pairs (ship/sheep, pen/pan), vowels inserted into consonant clusters ("isport" for "sport"), and dropped final consonants — and name the fix when the diff points at one. Be encouraging but specific. If they matched well, give tips on rhythm, linking and stress. Do not repeat the score.`
+        : `You are a friendly ${l1} pronunciation coach. A learner is SHADOWING (repeating after) a native speaker clip in that dialect.
 
 The native speaker said: "${referenceText}"
 The learner said (as heard by speech recognition): "${recognizedText || "(nothing recognised)"}"
@@ -78,17 +107,7 @@ Give exactly 2-3 short, actionable tips (one sentence each) to help them match t
       })
       .join("\n");
 
-    // Accept both Azure locale codes and the canonical dialect keys used
-    // elsewhere; either way it names the learner's L1, not the studied
-    // language.
-    const d = String(dialect ?? "");
-    const l1Label = (d === "ar-EG" || d === "Egyptian")
-      ? "Egyptian Arabic"
-      : (d === "ar-YE" || d === "Yemeni")
-        ? "Yemeni Arabic"
-        : "Gulf Arabic";
-
-    prompt = `You are a friendly ENGLISH pronunciation coach for a native ${l1Label} speaker.
+    prompt = `You are a friendly ENGLISH pronunciation coach for a native ${l1Label(dialect)} speaker.
 
 A learner just attempted to pronounce: "${word_english || word_arabic}"${word_arabic && word_english ? ` (meaning: "${word_arabic}")` : ""}.
 

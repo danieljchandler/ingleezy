@@ -40,6 +40,14 @@ interface ScoreOptions {
   referenceText: string;
   /** Native clip audio as a WAV Blob — enables the acoustic component. */
   nativeClipWav?: Blob | null;
+  /**
+   * BCP-47 locale of the clip's speech, from `useShadowQueue`.
+   *
+   * Load-bearing, not metadata: it picks the recogniser server-side. An
+   * English take sent to the Arabic ASR comes back as script noise, scores
+   * near zero, and tells the learner they got every word wrong.
+   */
+  locale?: string;
 }
 
 /** Weight of the transcript vs acoustic signal when both are present. */
@@ -66,7 +74,7 @@ export function useShadowScore() {
   const requestIdRef = useRef(0);
 
   const score = useCallback(
-    async (audioBlob: Blob, { referenceText, nativeClipWav }: ScoreOptions): Promise<ShadowScoreResult | null> => {
+    async (audioBlob: Blob, { referenceText, nativeClipWav, locale }: ScoreOptions): Promise<ShadowScoreResult | null> => {
       if (!audioBlob || audioBlob.size === 0) {
         setError("No audio recorded");
         return null;
@@ -90,7 +98,7 @@ export function useShadowScore() {
         // 1. Transcript match (server) + 2. acoustic match (client) in parallel.
         const [fnResponse, acoustic] = await Promise.all([
           supabase.functions.invoke("score-shadow-attempt", {
-            body: { audioBase64, mimeType: "audio/wav", referenceText, dialect: activeDialect },
+            body: { audioBase64, mimeType: "audio/wav", referenceText, dialect: activeDialect, locale },
           }),
           nativeClipWav
             ? acousticSimilarity(userWav, nativeClipWav).catch(() => null)
@@ -122,6 +130,10 @@ export function useShadowScore() {
               recognizedText,
               closeness: overall,
               wordDiffs,
+              // Same reason as the scorer: the tips have to be about the
+              // language in the clip, and the dialect names the learner's L1.
+              locale,
+              dialect: activeDialect,
             },
           });
           if (Array.isArray(tipData?.tips)) tips = tipData.tips;

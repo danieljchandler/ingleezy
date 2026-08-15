@@ -67,10 +67,18 @@ async function call(
 
 // ── score-shadow-attempt ────────────────────────────────────────────────────
 
+/**
+ * A shadowing take on a bridged ARABIC clip.
+ *
+ * `locale` is explicit because the clip's language now picks the recogniser:
+ * these cases all use Arabic reference lines and Munsit is the engine for
+ * them. English clips route to Deepgram instead — that split has its own file,
+ * `shadow_test.ts`, since getting it wrong is silent rather than loud.
+ */
 const shadow = (reference: string, recognised: string, over: Record<string, unknown> = {}) =>
   call(
     "score-shadow-attempt",
-    { audioBase64: AUDIO, referenceText: reference, mimeType: "audio/wav", ...over },
+    { audioBase64: AUDIO, referenceText: reference, mimeType: "audio/wav", locale: "ar-SA", ...over },
     caller({ "api.munsit.com": heard(recognised) }),
   );
 
@@ -172,7 +180,7 @@ Deno.test("score-shadow-attempt retries on the other model when the first hears 
   let attempt = 0;
   const { body, calls } = await call(
     "score-shadow-attempt",
-    { audioBase64: AUDIO, referenceText: "الجو حلو", mimeType: "audio/wav" },
+    { audioBase64: AUDIO, referenceText: "الجو حلو", mimeType: "audio/wav", locale: "ar-SA" },
     caller({
       "api.munsit.com": () => {
         attempt += 1;
@@ -193,7 +201,7 @@ Deno.test("score-shadow-attempt retries on the other model when the first hears 
 Deno.test("score-shadow-attempt names the upload after the container", async () => {
   const { bodies, calls } = await call(
     "score-shadow-attempt",
-    { audioBase64: btoa("RIFFfake"), referenceText: "الجو", mimeType: "audio/webm" },
+    { audioBase64: btoa("RIFFfake"), referenceText: "الجو", mimeType: "audio/webm", locale: "ar-SA" },
     caller({ "api.munsit.com": heard("الجو") }),
   );
 
@@ -220,7 +228,7 @@ Deno.test("score-shadow-attempt refuses a request missing either half", async ()
 Deno.test("score-shadow-attempt says so when its key is missing", async () => {
   const { status, body } = await call(
     "score-shadow-attempt",
-    { audioBase64: AUDIO, referenceText: "الجو" },
+    { audioBase64: AUDIO, referenceText: "الجو", locale: "ar-SA" },
     caller({ "api.munsit.com": heard("الجو") }),
     { env: { MUNSIT_API_KEY: undefined } },
   );
@@ -232,7 +240,7 @@ Deno.test("score-shadow-attempt says so when its key is missing", async () => {
 Deno.test("score-shadow-attempt scores an anonymous take without recording anything", async () => {
   const { status, body } = await call(
     "score-shadow-attempt",
-    { audioBase64: AUDIO, referenceText: "الجو حلو", mimeType: "audio/wav" },
+    { audioBase64: AUDIO, referenceText: "الجو حلو", mimeType: "audio/wav", locale: "ar-SA" },
     caller({ "api.munsit.com": heard("الجو بارد") }),
     { jwt: null },
   );
