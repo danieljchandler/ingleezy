@@ -1,34 +1,77 @@
+/**
+ * discover-trending-videos — find English Shorts worth turning into lessons.
+ *
+ * Flipped from Hakiya, where this crawled the six Gulf states for Arabic
+ * Shorts. It now crawls the US and the UK, which is where the English an
+ * Arabic speaker is actually trying to understand gets spoken: films, media,
+ * work calls, and the internet.
+ *
+ * Two regions rather than six, so the per-region keep is raised to hold the
+ * batch size an admin review session expects.
+ *
+ * The queries are chosen for one property — people TALKING. A Short with no
+ * speech is worthless to a listening pipeline however well it trends, which is
+ * also why the exclusions changed shape: Hakiya excluded Quran recitation,
+ * which has no English analogue, and the equivalent noise here is the enormous
+ * category of Shorts with no spoken word in them at all (music, ASMR,
+ * "satisfying", no-talking compilations). Gaming stays excluded for the reason
+ * it always was: gameplay commentary is jargon-dense and half-intelligible
+ * even to natives.
+ */
 import { getCorsHeaders } from '../_shared/cors.ts';
 import { enforceDailyCap } from '../_shared/usageCap.ts';
 
 const YOUTUBE_API_KEY = Deno.env.get('YOUTUBE_API_KEY');
 
-const GULF_REGIONS = ['SA', 'AE', 'KW', 'QA', 'BH', 'OM'];
+/**
+ * Where the English comes from. Two regions, deliberately: US and UK are the
+ * accents an Arabic speaker meets in media and at work, and splitting the
+ * crawl further would thin each bucket without adding a variety of English
+ * that matters at this stage. Adding a region is adding a string here.
+ */
+const ENGLISH_REGIONS = ['US', 'GB'];
 
-// Search queries that surface Gulf Arabic Shorts (rotated per fetch)
+/**
+ * Search queries that surface English Shorts with actual speech in them
+ * (rotated per fetch). Every one of these is a format where somebody talks to
+ * camera or to another person — which is the whole point, since the transcript
+ * is the product.
+ */
 const SEARCH_QUERIES = [
-  'شورتس',        // "shorts" in Arabic
-  'يوميات',       // daily vlogs
-  'مضحك',         // funny
-  'طبخ عربي',     // Arabic cooking
-  'كوميديا',      // comedy
-  'سعودي',        // Saudi
-  'إماراتي',      // Emirati
-  'كويتي',        // Kuwaiti
-  'خليجي',        // Gulf / Khaleeji
-  'تحدي',         // challenge
+  'street interview',
+  'day in my life',
+  'storytime',
+  'podcast clip',
+  'explained in 60 seconds',
+  'how to',
+  'reaction',
+  'vlog',
+  'british slang',
+  'american slang',
+  'small talk',
+  'job interview tips',
 ];
 
-const QURAN_KEYWORDS = [
-  'قرآن', 'تلاوة', 'سورة', 'آية', 'حفص', 'ورش', 'ختمة', 'مصحف', 'تجويد',
-  'القرآن', 'الكريم', 'ختم', 'حفظ القرآن', 'قارئ',
-  'quran', 'recitation', 'tilawah', 'surah', 'ayah', 'hafiz', 'tajweed',
+/**
+ * Shorts with no spoken English in them.
+ *
+ * This is the slot Hakiya used for Quran recitation — content that trends
+ * hugely and teaches the target language nothing. English has no single
+ * equivalent, but it has a large one in aggregate: music, ASMR, and the
+ * "satisfying"/"no talking" genres, none of which carry a sentence anyone
+ * could learn from.
+ */
+const NO_SPEECH_KEYWORDS = [
+  'no talking', 'asmr', 'satisfying', 'oddly satisfying', 'lyrics', 'lyric video',
+  'official music video', 'official video', 'audio only', 'full song', 'cover song',
+  'instrumental', 'sleep sounds', 'white noise', 'relaxing music', 'study music',
+  'slowed reverb', 'nightcore', 'edit audio',
 ];
 
 const GAMING_KEYWORDS = [
-  'ألعاب', 'لعبة', 'جيمنج', 'بلايستيشن', 'ببجي', 'فورت نايت', 'ماين كرافت',
-  'جيمر', 'فري فاير', 'كلاش', 'gaming', 'gameplay', 'gamer', 'fortnite',
-  'pubg', 'ps5', 'xbox', 'minecraft', 'free fire', 'warzone', 'roblox', 'valorant',
+  'gaming', 'gameplay', 'gamer', 'fortnite', 'pubg', 'ps5', 'xbox', 'minecraft',
+  'free fire', 'warzone', 'roblox', 'valorant', 'speedrun', 'no commentary',
+  'let\'s play', 'twitch', 'clutch', 'ranked', 'loadout',
 ];
 
 interface VideoCandidate {
@@ -47,7 +90,8 @@ interface VideoCandidate {
   discovered_at: string;
 }
 
-const MAX_PER_REGION = 8;
+/** Two regions instead of six, so each keeps more to leave the batch the same size. */
+const MAX_PER_REGION = 12;
 
 Deno.serve(async (req) => {
   const corsHeaders = getCorsHeaders(req);
@@ -68,7 +112,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    console.log('Starting discovery of trending Gulf Arabic YouTube Shorts...');
+    console.log('Starting discovery of trending English YouTube Shorts...');
 
     // Pick 2 random search queries per fetch to vary results
     const shuffled = [...SEARCH_QUERIES].sort(() => Math.random() - 0.5);
@@ -78,7 +122,7 @@ Deno.serve(async (req) => {
     // For each region, search with each query in parallel
     const tasks: Promise<{ region: string; candidates: VideoCandidate[] }>[] = [];
 
-    for (const region of GULF_REGIONS) {
+    for (const region of ENGLISH_REGIONS) {
       for (const query of queries) {
         tasks.push(searchShorts(region, query));
       }
@@ -109,7 +153,7 @@ Deno.serve(async (req) => {
     const allCandidates: VideoCandidate[] = [];
     const regionSummary: Record<string, number> = {};
 
-    for (const region of GULF_REGIONS) {
+    for (const region of ENGLISH_REGIONS) {
       const bucket = regionBuckets[region] ?? [];
       bucket.sort((a, b) => b.trending_score - a.trending_score);
       const kept = bucket.slice(0, MAX_PER_REGION);
@@ -118,7 +162,7 @@ Deno.serve(async (req) => {
       console.log(`Region ${region}: ${kept.length} videos kept from ${bucket.length} found`);
     }
 
-    console.log(`Total: ${allCandidates.length} Gulf Arabic Shorts candidates`);
+    console.log(`Total: ${allCandidates.length} English Shorts candidates`);
 
     return new Response(
       JSON.stringify({
@@ -151,7 +195,7 @@ async function searchShorts(
     `&videoDuration=short` +
     `&order=viewCount` +
     `&regionCode=${region}` +
-    `&relevanceLanguage=ar` +
+    `&relevanceLanguage=en` +
     `&q=${encodeURIComponent(query)}` +
     `&maxResults=25` +
     `&publishedAfter=${getRecentDate()}` +
@@ -195,10 +239,13 @@ async function searchShorts(
     const title = video.snippet.title;
     const description = video.snippet.description ?? '';
 
-    // Must have Arabic in title or description
-    if (!/[\u0600-\u06FF]/.test(title) && !/[\u0600-\u06FF]/.test(description)) continue;
+    // Must be an English-language listing. Region and relevanceLanguage are
+    // hints rather than guarantees — a US regionCode returns plenty of Spanish
+    // and Hindi Shorts — so the title has to carry Latin script and must not be
+    // mostly another one.
+    if (!hasEnglishText(title)) continue;
 
-    // Exclude Quran/religious and gaming
+    // Exclude the no-speech genres and gaming
     if (isExcluded(title, description, video.snippet.categoryId)) continue;
 
     const durationSeconds = parseDuration(video.contentDetails?.duration);
@@ -248,12 +295,32 @@ function getRecentDate(): string {
   return d.toISOString();
 }
 
+/**
+ * Is this listing plausibly in English?
+ *
+ * `regionCode=US` and `relevanceLanguage=en` are ranking hints, not filters —
+ * a US crawl returns plenty of Spanish and Hindi Shorts. The title is checked
+ * rather than the description because a description is often boilerplate,
+ * hashtags and links in whatever language the uploader's template is in.
+ *
+ * The test is proportional, not "contains a Latin letter": a title like
+ * "أفضل vlog" would pass a contains-check while being a video nobody is
+ * speaking English in.
+ */
+function hasEnglishText(title: string): boolean {
+  const letters = title.replace(/[^\p{L}]/gu, '');
+  if (letters.length === 0) return false;
+  const latin = letters.replace(/[^A-Za-z]/g, '').length;
+  return latin / letters.length >= 0.6;
+}
+
 function isExcluded(title: string, description: string, categoryId?: string): boolean {
   if (categoryId === '20') return true; // Gaming category
+  if (categoryId === '10') return true; // Music category — sung, not spoken
   const text = (title + ' ' + description).toLowerCase();
   return (
-    QURAN_KEYWORDS.some((kw) => text.includes(kw.toLowerCase())) ||
-    GAMING_KEYWORDS.some((kw) => text.includes(kw.toLowerCase()))
+    NO_SPEECH_KEYWORDS.some((kw) => text.includes(kw)) ||
+    GAMING_KEYWORDS.some((kw) => text.includes(kw))
   );
 }
 
@@ -271,17 +338,24 @@ function parseDuration(iso?: string): number {
 function detectTopic(title: string, description: string): string {
   const text = (title + ' ' + description).toLowerCase();
   const topics: Record<string, string[]> = {
-    music: ['موسيقى', 'أغنية', 'مطرب', 'music', 'song', 'كليب'],
-    comedy: ['كوميديا', 'مضحك', 'نكتة', 'comedy', 'funny', 'ضحك'],
-    sports: ['رياضة', 'كرة', 'مباراة', 'sports', 'football', 'دوري'],
-    news: ['أخبار', 'خبر', 'news', 'breaking'],
-    food: ['طعام', 'طبخ', 'وصفة', 'food', 'cooking', 'recipe', 'أكل', 'شيف'],
-    travel: ['سفر', 'سياحة', 'travel', 'tourism', 'رحلة'],
-    beauty: ['مكياج', 'makeup', 'skincare', 'جمال', 'beauty'],
-    lifestyle: ['حياة', 'يوميات', 'lifestyle', 'vlog', 'روتين'],
-    kids: ['أطفال', 'kids', 'children', 'كرتون'],
-    tech: ['تقنية', 'tech', 'technology', 'آيفون', 'مراجعة'],
-    education: ['تعليم', 'درس', 'education', 'lesson', 'شرح', 'تعلم'],
+    comedy: ['comedy', 'funny', 'joke', 'standup', 'stand-up', 'prank'],
+    sports: ['sports', 'football', 'soccer', 'nba', 'premier league', 'match'],
+    news: ['news', 'breaking', 'headline', 'reporter'],
+    food: ['food', 'cooking', 'recipe', 'chef', 'restaurant', 'baking', 'taste test'],
+    travel: ['travel', 'tourism', 'trip', 'airport', 'flight', 'backpacking'],
+    beauty: ['makeup', 'skincare', 'beauty', 'grwm', 'get ready with me'],
+    lifestyle: ['lifestyle', 'vlog', 'routine', 'day in my life', 'storytime'],
+    kids: ['kids', 'children', 'cartoon', 'toddler'],
+    // No bare 'ai': it is a substring of "explained", "said" and "email", and
+    // matched them all before this list was ever exercised.
+    tech: ['tech', 'technology', 'iphone', 'review', 'gadget', 'chatgpt', 'smartphone'],
+    // The one an English-learning app cares about most: clips that are already
+    // teaching the language, from slang explainers to pronunciation drills.
+    // No bare 'tips' — "makeup tips" and "travel tips" are not lessons.
+    education: ['education', 'lesson', 'explained', 'learn', 'slang', 'grammar', 'pronunciation'],
+    // 'job interview' rather than 'interview': a street interview is a vox pop,
+    // and it is one of the queries this crawler runs.
+    work: ['job interview', 'career', 'workplace', 'meeting', 'salary', 'boss', 'resume'],
   };
 
   for (const [topic, keywords] of Object.entries(topics)) {

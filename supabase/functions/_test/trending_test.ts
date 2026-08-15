@@ -6,13 +6,13 @@ import { json, type UpstreamHandler } from "./upstreams.ts";
  * `discover-trending-videos` — the YouTube crawler behind /admin/trending.
  *
  * Almost all of its behaviour is filtering, and every filter is there because
- * something unsuitable reached the admin queue: non-Arabic clips, Quran
- * recitation, gaming, videos too long to be Shorts, and videos with too few
- * views to be worth a transcription budget. None of it had ever been executed.
+ * something unsuitable reached the admin queue: clips that are not in English,
+ * clips with no speech in them at all, gaming, videos too long to be Shorts,
+ * and videos with too few views to be worth a transcription budget.
  *
- * It searches six Gulf regions with two randomly chosen queries each, so the
- * fixtures answer every region identically and the de-duplication decides
- * which bucket a video lands in.
+ * Post-flip it searches the US and the UK with two randomly chosen queries
+ * each, so the fixtures answer both regions identically and the
+ * de-duplication decides which bucket a video lands in.
  */
 
 const USER = "00000000-0000-4000-8000-000000000001";
@@ -111,8 +111,8 @@ async function call(
   }
 }
 
-const arabicClip = () =>
-  video("vid-1", { title: "يوميات في الرياض", description: "vlog" });
+const englishClip = () =>
+  video("vid-1", { title: "A day in my life in London", description: "vlog" });
 
 Deno.test("discover-trending-videos answers the preflight", async () => {
   const fn = await loadFunction("discover-trending-videos", { upstreams: caller() });
@@ -128,7 +128,7 @@ Deno.test("discover-trending-videos answers the preflight", async () => {
 Deno.test("discover-trending-videos will not run for an anonymous caller", async () => {
   // It drives the paid YouTube Data API, so the cap's auth check is the point
   // rather than the daily allowance.
-  const result = await call({}, caller(youtube([arabicClip()])), { jwt: null });
+  const result = await call({}, caller(youtube([englishClip()])), { jwt: null });
 
   assertEquals(result.status, 401);
   assertEquals(result.body.error, "auth_required");
@@ -142,7 +142,7 @@ Deno.test("discover-trending-videos says so when it has no API key", async () =>
 });
 
 Deno.test("discover-trending-videos returns a candidate per accepted video", async () => {
-  const result = await call({}, caller(youtube([arabicClip()])));
+  const result = await call({}, caller(youtube([englishClip()])));
 
   assertEquals(result.status, 200);
   assertEquals(result.body.success, true);
@@ -151,7 +151,7 @@ Deno.test("discover-trending-videos returns a candidate per accepted video", asy
   const found = result.candidates[0];
   assertEquals(found.video_id, "vid-1");
   assertEquals(found.url, "https://www.youtube.com/shorts/vid-1");
-  assertEquals(found.title, "يوميات في الرياض");
+  assertEquals(found.title, "A day in my life in London");
   assertEquals(found.creator_name, "A creator");
   assertEquals(found.creator_handle, "UC-fixture");
   assertEquals(found.thumbnail_url, "https://i.ytimg.com/high.jpg");
@@ -159,12 +159,12 @@ Deno.test("discover-trending-videos returns a candidate per accepted video", asy
 });
 
 Deno.test("discover-trending-videos counts each region separately", async () => {
-  const result = await call({}, caller(youtube([arabicClip()])));
+  const result = await call({}, caller(youtube([englishClip()])));
 
   const summary = result.body.region_summary as Record<string, number>;
-  // Every region is reported, even the empty ones — an admin needs to see that
-  // Oman returned nothing rather than that Oman was not searched.
-  assertEquals(Object.keys(summary).sort(), ["AE", "BH", "KW", "OM", "QA", "SA"]);
+  // Both regions are reported, even an empty one — an admin needs to see that
+  // the UK returned nothing rather than that the UK was not searched.
+  assertEquals(Object.keys(summary).sort(), ["GB", "US"]);
   // Deduplication is global, so an identical video across every region lands in
   // exactly one bucket.
   assertEquals(Object.values(summary).reduce((a, b) => a + b, 0), 1);
@@ -175,7 +175,7 @@ Deno.test("discover-trending-videos falls back to the medium thumbnail", async (
     {},
     caller(youtube([
       video("vid-1", {
-        title: "يوميات",
+        title: "A day in my life",
         thumbnails: { medium: { url: "https://i.ytimg.com/med.jpg" } },
       }),
     ])),
@@ -187,34 +187,59 @@ Deno.test("discover-trending-videos falls back to the medium thumbnail", async (
 Deno.test("discover-trending-videos accepts a video with no thumbnail at all", async () => {
   const result = await call(
     {},
-    caller(youtube([video("vid-1", { title: "يوميات", thumbnails: {} })])),
+    caller(youtube([video("vid-1", { title: "A day in my life", thumbnails: {} })])),
   );
 
   assertEquals(result.candidates[0].thumbnail_url, null);
 });
 
-Deno.test("discover-trending-videos drops a video with no Arabic anywhere", async () => {
+Deno.test("discover-trending-videos drops a title that is not in English", async () => {
+  // regionCode and relevanceLanguage are ranking hints, not filters: a US
+  // crawl returns plenty of Shorts in other languages, and the transcription
+  // budget is spent before anyone notices.
   const result = await call(
     {},
-    caller(youtube([video("vid-1", { title: "Daily vlog", description: "in English" })])),
+    caller(youtube([video("vid-1", { title: "يوميات في الرياض", description: "vlog" })])),
   );
 
   assertEquals(result.body.candidates_found, 0);
 });
 
-Deno.test("discover-trending-videos keeps a video whose Arabic is only in the description", async () => {
+Deno.test("discover-trending-videos judges the title by proportion, not by presence", async () => {
+  // A contains-a-Latin-letter check would keep this: one English loanword in
+  // an otherwise Arabic title, on a video nobody speaks English in.
   const result = await call(
     {},
-    caller(youtube([video("vid-1", { title: "Daily vlog", description: "يوميات" })])),
+    caller(youtube([video("vid-1", { title: "أفضل vlog", description: "" })])),
+  );
+
+  assertEquals(result.body.candidates_found, 0);
+});
+
+Deno.test("discover-trending-videos reads the title, not the description", async () => {
+  // Descriptions are boilerplate, hashtags and links, often in whatever
+  // language the uploader's template happens to be in.
+  const result = await call(
+    {},
+    caller(youtube([video("vid-1", { title: "Street interview in London", description: "يوميات" })])),
   );
 
   assertEquals(result.body.candidates_found, 1);
 });
 
-Deno.test("discover-trending-videos drops Quran recitation", async () => {
+Deno.test("discover-trending-videos drops Shorts with no speech in them", async () => {
+  // The slot Quran recitation used to occupy: content that trends hugely and
+  // teaches the target language nothing, because nobody says a sentence.
+  for (const title of ["Oddly satisfying slime", "Relaxing music for study", "ASMR no talking"]) {
+    const result = await call({}, caller(youtube([video("vid-1", { title })])));
+    assertEquals(result.body.candidates_found, 0, `${title} should be dropped`);
+  }
+});
+
+Deno.test("discover-trending-videos drops music by YouTube's own category", async () => {
   const result = await call(
     {},
-    caller(youtube([video("vid-1", { title: "تلاوة سورة البقرة", description: "" })])),
+    caller(youtube([video("vid-1", { title: "A day in my life", categoryId: "10" })])),
   );
 
   assertEquals(result.body.candidates_found, 0);
@@ -223,7 +248,7 @@ Deno.test("discover-trending-videos drops Quran recitation", async () => {
 Deno.test("discover-trending-videos drops gaming by keyword", async () => {
   const result = await call(
     {},
-    caller(youtube([video("vid-1", { title: "ببجي مع الشباب", description: "" })])),
+    caller(youtube([video("vid-1", { title: "Fortnite with the lads", description: "" })])),
   );
 
   assertEquals(result.body.candidates_found, 0);
@@ -232,7 +257,7 @@ Deno.test("discover-trending-videos drops gaming by keyword", async () => {
 Deno.test("discover-trending-videos drops gaming by YouTube's own category", async () => {
   const result = await call(
     {},
-    caller(youtube([video("vid-1", { title: "يوميات في الرياض", categoryId: "20" })])),
+    caller(youtube([video("vid-1", { title: "A day in my life", categoryId: "20" })])),
   );
 
   assertEquals(result.body.candidates_found, 0);
@@ -242,7 +267,7 @@ Deno.test("discover-trending-videos drops a video longer than a Short", async ()
   const result = await call(
     {},
     caller(youtube([
-      video("vid-1", { title: "يوميات" }, { viewCount: "50000" }, "PT3M1S"),
+      video("vid-1", { title: "A day in my life" }, { viewCount: "50000" }, "PT3M1S"),
     ])),
   );
 
@@ -253,7 +278,7 @@ Deno.test("discover-trending-videos keeps a video right on the three-minute line
   const result = await call(
     {},
     caller(youtube([
-      video("vid-1", { title: "يوميات" }, { viewCount: "50000" }, "PT3M"),
+      video("vid-1", { title: "A day in my life" }, { viewCount: "50000" }, "PT3M"),
     ])),
   );
 
@@ -264,7 +289,7 @@ Deno.test("discover-trending-videos keeps a video right on the three-minute line
 Deno.test("discover-trending-videos drops a video with no readable duration", async () => {
   const result = await call(
     {},
-    caller(youtube([video("vid-1", { title: "يوميات" }, { viewCount: "50000" }, "")])),
+    caller(youtube([video("vid-1", { title: "A day in my life" }, { viewCount: "50000" }, "")])),
   );
 
   assertEquals(result.body.candidates_found, 0);
@@ -273,7 +298,7 @@ Deno.test("discover-trending-videos drops a video with no readable duration", as
 Deno.test("discover-trending-videos drops a video below the view threshold", async () => {
   const result = await call(
     {},
-    caller(youtube([video("vid-1", { title: "يوميات" }, { viewCount: "999" })])),
+    caller(youtube([video("vid-1", { title: "A day in my life" }, { viewCount: "999" })])),
   );
 
   assertEquals(result.body.candidates_found, 0);
@@ -283,7 +308,7 @@ Deno.test("discover-trending-videos scores views, likes and comments together", 
   const result = await call(
     {},
     caller(youtube([
-      video("vid-1", { title: "يوميات" }, {
+      video("vid-1", { title: "A day in my life" }, {
         viewCount: "100000",
         likeCount: "10000",
         commentCount: "2000",
@@ -298,7 +323,7 @@ Deno.test("discover-trending-videos scores views, likes and comments together", 
 Deno.test("discover-trending-videos scores a video with no engagement stats", async () => {
   const result = await call(
     {},
-    caller(youtube([video("vid-1", { title: "يوميات" }, { viewCount: "20000" })])),
+    caller(youtube([video("vid-1", { title: "A day in my life" }, { viewCount: "20000" })])),
   );
 
   assertEquals(result.candidates[0].trending_score, 80);
@@ -306,11 +331,19 @@ Deno.test("discover-trending-videos scores a video with no engagement stats", as
 
 Deno.test("discover-trending-videos labels the topic it can recognise", async () => {
   const cases: Array<[string, string]> = [
-    ["وصفة طبخ سريعة", "food"],
-    ["مباراة كرة القدم", "sports"],
-    ["أخبار اليوم", "news"],
-    ["روتين يوميات", "lifestyle"],
-    ["شرح درس تعلم", "education"],
+    ["Quick pasta recipe", "food"],
+    ["Premier League reaction", "sports"],
+    ["Breaking news today", "news"],
+    ["My morning routine", "lifestyle"],
+    ["British slang explained", "education"],
+    ["Job interview tips", "work"],
+    // Three traps the first draft of these lists fell into, all of them silent:
+    // a bare "ai" matched "expl-ai-ned", a bare "tips" made every beauty and
+    // travel clip a lesson, and a bare "interview" filed a vox pop under work
+    // — while "street interview" is one of the queries this crawler runs.
+    ["Street interview in London", "general"],
+    ["Makeup tips for beginners", "beauty"],
+    ["What she said next", "general"],
   ];
 
   for (const [title, topic] of cases) {
@@ -322,18 +355,18 @@ Deno.test("discover-trending-videos labels the topic it can recognise", async ()
 Deno.test("discover-trending-videos labels an unrecognised topic as general", async () => {
   const result = await call(
     {},
-    caller(youtube([video("vid-1", { title: "شيء ما" })])),
+    caller(youtube([video("vid-1", { title: "Something or other" })])),
   );
 
   assertEquals(result.candidates[0].detected_topic, "general");
 });
 
 Deno.test("discover-trending-videos searches only the last two weeks", async () => {
-  const result = await call({}, caller(youtube([arabicClip()])));
+  const result = await call({}, caller(youtube([englishClip()])));
 
   const search = result.calls.find((url) => url.includes("youtube/v3/search")) ?? "";
   assertStringIncludes(search, "videoDuration=short");
-  assertStringIncludes(search, "relevanceLanguage=ar");
+  assertStringIncludes(search, "relevanceLanguage=en");
   assertStringIncludes(search, "order=viewCount");
 
   const publishedAfter = new URL(search).searchParams.get("publishedAfter") ?? "";
@@ -341,15 +374,15 @@ Deno.test("discover-trending-videos searches only the last two weeks", async () 
   assert(days > 13.9 && days < 14.1, `publishedAfter should be ~14 days ago, was ${days}`);
 });
 
-Deno.test("discover-trending-videos searches every Gulf region", async () => {
-  const result = await call({}, caller(youtube([arabicClip()])));
+Deno.test("discover-trending-videos searches both English regions", async () => {
+  const result = await call({}, caller(youtube([englishClip()])));
 
   const regions = new Set(
     result.calls
       .filter((url) => url.includes("youtube/v3/search"))
       .map((url) => new URL(url).searchParams.get("regionCode")),
   );
-  assertEquals([...regions].sort(), ["AE", "BH", "KW", "OM", "QA", "SA"]);
+  assertEquals([...regions].sort(), ["GB", "US"]);
 });
 
 Deno.test("discover-trending-videos skips the details call when a search found nothing", async () => {

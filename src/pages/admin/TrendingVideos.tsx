@@ -41,7 +41,19 @@ interface TrendingCandidate {
   dismissed: boolean | null;
 }
 
+/**
+ * Where the crawl looks. Kept in step with ENGLISH_REGIONS in
+ * discover-trending-videos: a region the function crawls but this map has no
+ * label for renders as a bare code with no filter chip.
+ *
+ * Rows crawled before the flip carry Gulf codes, so those labels stay — a
+ * historical candidate should say where it came from rather than showing a
+ * two-letter code nothing explains.
+ */
 const REGION_LABELS: Record<string, { flag: string; name: string }> = {
+  US: { flag: '🇺🇸', name: 'United States' },
+  GB: { flag: '🇬🇧', name: 'United Kingdom' },
+  // Pre-flip candidates, for display only — not offered as filters.
   SA: { flag: '🇸🇦', name: 'Saudi Arabia' },
   AE: { flag: '🇦🇪', name: 'UAE' },
   KW: { flag: '🇰🇼', name: 'Kuwait' },
@@ -50,7 +62,8 @@ const REGION_LABELS: Record<string, { flag: string; name: string }> = {
   OM: { flag: '🇴🇲', name: 'Oman' },
 };
 
-const GULF_REGION_CODES = Object.keys(REGION_LABELS);
+/** Only the regions still being crawled get a filter chip. */
+const CRAWLED_REGION_CODES = ['US', 'GB'];
 
 const TOPIC_COLORS: Record<string, string> = {
   music: 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-200',
@@ -195,6 +208,9 @@ const TrendingVideos = () => {
           embed_url: embedUrl,
           thumbnail_url: thumbnailUrl,
           duration_seconds: candidate.duration_seconds,
+          // Names the dialect the Arabic scaffold gets written in, not the
+          // language spoken in the clip — which is English for everything this
+          // page approves. An admin can change it on the video form.
           dialect: 'Gulf',
           difficulty: 'Intermediate',
           published: false,
@@ -303,7 +319,7 @@ const TrendingVideos = () => {
                   Trending Videos
                 </h1>
                 <p className="text-sm text-muted-foreground">
-                  Discover and curate trending Gulf Arabic YouTube videos
+                  Discover and curate trending English YouTube videos from the US and UK
                 </p>
               </div>
             </div>
@@ -346,7 +362,7 @@ const TrendingVideos = () => {
           >
             All Regions
           </Button>
-          {GULF_REGION_CODES.map((code) => (
+          {CRAWLED_REGION_CODES.map((code) => (
             <Button
               key={code}
               size="sm"
@@ -380,7 +396,7 @@ const TrendingVideos = () => {
               <TrendingUp className="h-12 w-12 mx-auto mb-4 opacity-30" />
               <p className="text-lg font-medium">No candidates found</p>
               <p className="text-sm mt-1">
-                Click "Fetch Trending" to discover new Gulf Arabic videos from YouTube.
+                Click "Fetch Trending" to discover new English videos from YouTube.
               </p>
             </CardContent>
           </Card>

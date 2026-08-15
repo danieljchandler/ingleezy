@@ -205,8 +205,37 @@ generation conditioning.
       non-meme uploads to it. Learner transcript rendering DONE (EnglishLineCard,
       TappableEnglishText, translate-phrase en_to_ar). Home lead clip
       prefers native English over bridged; Discover badges bridged rows
-      as immersion. Remaining: trending discovery flip or prune, Arabic
-      pipeline prune once memes decided.
+      as immersion. Remaining: Arabic pipeline prune once memes decided.
+- [x] **Trending discovery → FLIPPED to the US and the UK.** The crawler
+      searched six Gulf states for Arabic Shorts; it now searches `US`
+      and `GB` for English ones — the accents an Arabic speaker actually
+      meets in media and at work. Two regions instead of six, so the
+      per-region keep rises from 8 to 12 and a fetch still fills an admin
+      review session.
+      The queries are picked for one property: people TALKING (street
+      interview, storytime, podcast clip, day in my life). A Short with
+      no speech is worthless to a listening pipeline however well it
+      trends, which is also what the exclusions had to become. Hakiya
+      excluded Quran recitation — content that trends hugely and teaches
+      the target language nothing. English has no single equivalent but a
+      large one in aggregate, so that slot now holds music, ASMR and the
+      "satisfying"/"no talking" genres, plus YouTube's own music
+      category. Gaming stays excluded for the reason it always was.
+      The Arabic-script requirement inverts into an English one, and it
+      is **proportional rather than presence-based**: `regionCode` and
+      `relevanceLanguage` are ranking hints, not filters, so a US crawl
+      returns plenty of Shorts in other languages, and a
+      contains-a-Latin-letter test would keep "أفضل vlog". It reads the
+      title, not the description — descriptions are boilerplate and
+      hashtags in whatever language the uploader's template is in.
+      Three silent mislabels were found and pinned while writing the
+      topic lists: a bare `ai` matched "expl-ai-ned", a bare `tips` filed
+      every makeup and travel clip under education, and a bare
+      `interview` filed a vox pop under work — while "street interview"
+      is one of the crawler's own queries.
+      The admin page keeps the Gulf region labels for display, since
+      pre-flip candidates still carry those codes, but only US/GB get
+      filter chips.
 - [x] CEFR video rating: FLIPPED — English transcripts (lines carrying
       `english`) rate against an English A1/A2 baseline with English
       descriptors (phrasal verbs, connected speech); transcripts without

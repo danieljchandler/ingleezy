@@ -42,8 +42,8 @@ test.describe("the queue", () => {
   test("shows a candidate with everything the crawler found", async ({ page, db }) => {
     db.seed("trending_video_candidates", [
       aTrendingCandidate({
-        title: "لقطة مضحكة",
-        creator_name: "Abu Fulan",
+        title: "A funny street interview",
+        creator_name: "Some Creator",
         // The score badge lives inside the thumbnail block, so a candidate the
         // crawler found no image for shows no score either. Inline data so the
         // hermetic host block never sees a request.
@@ -51,18 +51,18 @@ test.describe("the queue", () => {
         view_count: 1_500_000,
         trending_score: 9_400,
         detected_topic: "comedy",
-        region_code: "AE",
+        region_code: "US",
       }),
     ]);
 
     await page.goto("/admin/trending");
 
-    await expect(page.getByText("لقطة مضحكة")).toBeVisible();
-    await expect(page.getByText("Abu Fulan")).toBeVisible();
+    await expect(page.getByText("A funny street interview")).toBeVisible();
+    await expect(page.getByText("Some Creator")).toBeVisible();
     await expect(page.getByText("1.5M")).toBeVisible();
     await expect(page.getByText("Score: 9,400")).toBeVisible();
     await expect(page.getByText("comedy")).toBeVisible();
-    await expect(page.getByTitle("UAE")).toBeVisible();
+    await expect(page.getByTitle("United States")).toBeVisible();
   });
 
   test("abbreviates view counts by magnitude", async ({ page, db }) => {
@@ -175,42 +175,42 @@ test.describe("the filters", () => {
 
   test("narrows by region, and says so in the URL", async ({ page, db }) => {
     db.seed("trending_video_candidates", [
-      aTrendingCandidate({ id: candidateId(0), title: "from Saudi", region_code: "SA" }),
-      aTrendingCandidate({ id: candidateId(1), title: "from Kuwait", region_code: "KW", video_id: "b" }),
+      aTrendingCandidate({ id: candidateId(0), title: "a US clip", region_code: "US" }),
+      aTrendingCandidate({ id: candidateId(1), title: "a UK clip", region_code: "GB", video_id: "b" }),
     ]);
 
     await page.goto("/admin/trending");
-    await page.getByRole("button", { name: /Kuwait/ }).click();
+    await page.getByRole("button", { name: /United Kingdom/ }).click();
 
-    await expect(page).toHaveURL(/\?region=KW$/);
-    await expect(page.getByText("from Kuwait")).toBeVisible();
-    await expect(page.getByText("from Saudi")).toHaveCount(0);
+    await expect(page).toHaveURL(/\?region=GB$/);
+    await expect(page.getByText("a UK clip")).toBeVisible();
+    await expect(page.getByText("a US clip")).toHaveCount(0);
   });
 
   test("restores the region from the URL on load", async ({ page, db }) => {
     db.seed("trending_video_candidates", [
-      aTrendingCandidate({ id: candidateId(0), title: "from Saudi", region_code: "SA" }),
-      aTrendingCandidate({ id: candidateId(1), title: "from Kuwait", region_code: "KW", video_id: "b" }),
+      aTrendingCandidate({ id: candidateId(0), title: "a US clip", region_code: "US" }),
+      aTrendingCandidate({ id: candidateId(1), title: "a UK clip", region_code: "GB", video_id: "b" }),
     ]);
 
-    await page.goto("/admin/trending?region=SA");
+    await page.goto("/admin/trending?region=US");
 
-    await expect(page.getByText("from Saudi")).toBeVisible();
-    await expect(page.getByText("from Kuwait")).toHaveCount(0);
+    await expect(page.getByText("a US clip")).toBeVisible();
+    await expect(page.getByText("a UK clip")).toHaveCount(0);
   });
 
   test("clears the region back out of the URL", async ({ page, db }) => {
     db.seed("trending_video_candidates", [
-      aTrendingCandidate({ id: candidateId(0), title: "from Saudi", region_code: "SA" }),
+      aTrendingCandidate({ id: candidateId(0), title: "a US clip", region_code: "US" }),
     ]);
 
-    await page.goto("/admin/trending?region=KW");
+    await page.goto("/admin/trending?region=GB");
     await expect(page.getByText(/no candidates found/i)).toBeVisible();
 
     await page.getByRole("button", { name: /all regions/i }).click();
 
     await expect(page).toHaveURL(/\/admin\/trending$/);
-    await expect(page.getByText("from Saudi")).toBeVisible();
+    await expect(page.getByText("a US clip")).toBeVisible();
   });
 
   test("filters by region without asking the server again", async ({ page, db }) => {
@@ -218,13 +218,13 @@ test.describe("the filters", () => {
     // part of the query key. A region switch that refetched would cost a round
     // trip per click.
     db.seed("trending_video_candidates", [
-      aTrendingCandidate({ id: candidateId(0), region_code: "SA" }),
+      aTrendingCandidate({ id: candidateId(0), region_code: "US" }),
     ]);
     await page.goto("/admin/trending");
     await expect(page.getByText("A trending clip")).toBeVisible();
     const before = db.readsOf("trending_video_candidates").length;
 
-    await page.getByRole("button", { name: /Qatar/ }).click();
+    await page.getByRole("button", { name: /United Kingdom/ }).click();
 
     await expect(page.getByText(/no candidates found/i)).toBeVisible();
     expect(db.readsOf("trending_video_candidates")).toHaveLength(before);
@@ -415,7 +415,7 @@ test.describe("fetching new candidates", () => {
     backend.stubFunction("discover-trending-videos", {
       success: true,
       candidates_found: 2,
-      region_summary: { SA: 1, KW: 1 },
+      region_summary: { US: 1, GB: 1 },
       candidates: [
         {
           platform: "youtube",
@@ -423,7 +423,7 @@ test.describe("fetching new candidates", () => {
           url: "https://www.youtube.com/watch?v=one",
           title: "first",
           creator_name: "A",
-          region_code: "SA",
+          region_code: "US",
           view_count: 100,
           trending_score: 50,
         },
@@ -433,7 +433,7 @@ test.describe("fetching new candidates", () => {
           url: "https://www.youtube.com/watch?v=two",
           title: "second",
           creator_name: "B",
-          region_code: "KW",
+          region_code: "GB",
         },
       ],
     });
@@ -442,7 +442,7 @@ test.describe("fetching new candidates", () => {
     await page.getByRole("button", { name: /fetch trending/i }).click();
 
     await expect(page.getByText("Found 2 new candidates")).toBeVisible();
-    await expect(page.getByText("🇸🇦 1  🇰🇼 1")).toBeVisible();
+    await expect(page.getByText("🇺🇸 1  🇬🇧 1")).toBeVisible();
     expect(db.rows("trending_video_candidates")).toHaveLength(2);
     await expect(page.getByText("first")).toBeVisible();
   });
