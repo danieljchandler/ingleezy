@@ -442,9 +442,8 @@ test.describe("suggesting a story to import", () => {
   test("writes, imports and opens the story in one tap", async ({ page, backend }) => {
     backend.stubFunction("suggest-stories", { suggestions: [suggestion] });
     backend.stubFunction("generate-suggested-story-text", {
-      body_arabic: "كان يا ما كان",
+      body_english: "Once upon a time",
       author: "Traditional",
-      author_arabic: "تراثي",
     });
     backend.stubFunction("import-authentic-story", {
       story: { id: storyId(3), title: "The Generous Host" },
@@ -464,10 +463,12 @@ test.describe("suggesting a story to import", () => {
       estimated_length: "medium",
       themes: ["generosity", "wisdom"],
     });
+    // The generated English goes through the same importer as a pasted text,
+    // so both reach their dialect scaffold by one path rather than two.
     expect(backend.lastCallTo("import-authentic-story")?.body).toMatchObject({
       title: "The Generous Host",
       author: "Traditional",
-      body_arabic: "كان يا ما كان",
+      body_english: "Once upon a time",
       license: "public_domain",
       source_name: "cultural narrative",
     });
@@ -495,7 +496,7 @@ test.describe("suggesting a story to import", () => {
     // The three-step chain has no transaction, so this is the one failure the
     // page can only describe rather than undo.
     backend.stubFunction("suggest-stories", { suggestions: [suggestion] });
-    backend.stubFunction("generate-suggested-story-text", { body_arabic: "نص" });
+    backend.stubFunction("generate-suggested-story-text", { body_english: "text" });
     backend.stubFunction("import-authentic-story", { story: null });
 
     await openSuggestions(page);

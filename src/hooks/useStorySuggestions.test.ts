@@ -120,12 +120,11 @@ describe("suggesting stories", () => {
 });
 
 describe("expanding a suggestion into a story", () => {
-  it("returns the Arabic text and its attribution", async () => {
+  it("returns the English text and its attribution", async () => {
     const { result } = render((backend) =>
       backend.stubFunction("generate-suggested-story-text", {
-        body_arabic: "كان يا ما كان",
+        body_english: "Once upon a time",
         author: "Anonymous",
-        author_arabic: "مجهول",
       }),
     );
 
@@ -135,16 +134,17 @@ describe("expanding a suggestion into a story", () => {
       difficulty: "intermediate",
     });
 
+    // English only. The dialect scaffold is import-authentic-story's job, so
+    // that a generated story and a pasted one reach it by the same path.
     expect(story).toEqual({
-      body_arabic: "كان يا ما كان",
+      body_english: "Once upon a time",
       author: "Anonymous",
-      author_arabic: "مجهول",
     });
   });
 
   it("passes the whole suggestion through, not just its title", async () => {
     const { result, backend } = render((backend) =>
-      backend.stubFunction("generate-suggested-story-text", { body_arabic: "نص" }),
+      backend.stubFunction("generate-suggested-story-text", { body_english: "text" }),
     );
 
     await result.current.expand.mutateAsync({
@@ -169,7 +169,7 @@ describe("expanding a suggestion into a story", () => {
 
   it("records an unattributed story as having no author", async () => {
     const { result } = render((backend) =>
-      backend.stubFunction("generate-suggested-story-text", { body_arabic: "نص" }),
+      backend.stubFunction("generate-suggested-story-text", { body_english: "text" }),
     );
 
     const story = await result.current.expand.mutateAsync({
@@ -181,7 +181,6 @@ describe("expanding a suggestion into a story", () => {
     // Null rather than undefined: the value is written straight to a nullable
     // column, and an author line reading "undefined" would ship to learners.
     expect(story.author).toBeNull();
-    expect(story.author_arabic).toBeNull();
   });
 
   it("prefers the detailed reason when the function explains itself", async () => {

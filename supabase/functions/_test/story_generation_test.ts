@@ -316,10 +316,11 @@ const storyLine = (index: number, over: Record<string, unknown> = {}) => ({
   id: `line-${index}`,
   story_id: STORY,
   line_index: index,
+  // English is what gets narrated post-flip; the Arabic is the scaffold and is
+  // never spoken. Both are populated so a function reading the wrong one still
+  // produces plausible-looking audio — which is what makes it worth asserting.
+  english: `line ${index}`,
   arabic: `سطر ${index}`,
-  arabic_vocalized: `سَطْر ${index}`,
-  dialect: null,
-  dialect_vocalized: null,
   audio_url: null,
   ...over,
 });
@@ -457,8 +458,23 @@ Deno.test("generate-story-full-audio conditions each line on its neighbours", as
   const middle = result.bodies[
     result.calls.map((u, i) => ({ u, i })).filter((c) => c.u.includes("elevenlabs"))[1]?.i ?? -1
   ] ?? "";
-  assertStringIncludes(middle, "سَطْر 0");
-  assertStringIncludes(middle, "سَطْر 2");
+  assertStringIncludes(middle, "line 0");
+  assertStringIncludes(middle, "line 2");
+});
+
+Deno.test("generate-story-full-audio narrates the English, not the Arabic beside it", async () => {
+  const result = await call(
+    "generate-story-full-audio",
+    { story_id: STORY },
+    audioBackend({
+      lines: [storyLine(0, { english: "Traders arrive early", arabic: "التجّار يوصلون بدري" })],
+    }),
+  );
+
+  assertEquals(result.status, 200);
+  const spoken = result.bodies[result.calls.findIndex((u) => u.includes("elevenlabs"))] ?? "";
+  assertStringIncludes(spoken, "Traders arrive early");
+  assert(!spoken.includes("التجّار"));
 });
 
 Deno.test("generate-story-full-audio gives a skipped line a zero duration", async () => {
@@ -466,7 +482,7 @@ Deno.test("generate-story-full-audio gives a skipped line a zero duration", asyn
     "generate-story-full-audio",
     { story_id: STORY },
     audioBackend({
-      lines: [storyLine(0, { arabic: "", arabic_vocalized: null }), storyLine(1)],
+      lines: [storyLine(0, { english: "" }), storyLine(1)],
     }),
   );
 

@@ -14,11 +14,14 @@ import { json, type UpstreamHandler } from "./upstreams.ts";
  * uploads, the incremental segment writes and the terminal status all land in
  * the background. `fn.background()` is what makes them observable.
  *
- * The two things this function is built around are consistency and Arabic
- * purity. One `style_anchor` and one cast list are prepended to every scene
- * prompt so six independently generated images look like one book; and
- * `validateArabicOnly` rejects a beat with Latin letters in it, because a
- * narrator reading an English sentence is worse than a story with no narration.
+ * The two things this function is built around are consistency and staying on
+ * the right side of the flip. One `style_anchor` and one cast list are
+ * prepended to every scene prompt so six independently generated images look
+ * like one book; and `validateEnglishOnly` rejects a beat with no Latin
+ * letters in it. That check is inverted from the Arabic era and kept rather
+ * than dropped: it catches a story whose columns were filled the wrong way
+ * round, which would otherwise ship a narrator reading the learner their own
+ * translation.
  */
 
 const USER = "00000000-0000-4000-8000-000000000001";
@@ -29,9 +32,9 @@ const PNG_B64 =
   "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==";
 
 const BEATS = [
-  "كان يا ما كان في قديم الزمان",
-  "ثم مشى الولد إلى السوق",
-  "وفي المساء رجع إلى بيته",
+  "Once upon a time, long ago",
+  "Then the boy walked to the market",
+  "And in the evening he returned home",
 ];
 
 const aScene = (index: number, over: Record<string, unknown> = {}) => ({
@@ -85,7 +88,7 @@ function backend(
       title: "The boy and the souq",
       title_arabic: "الولد والسوق",
       body_english: "A boy goes to the market.",
-      body_fusha: "كان يا ما كان في قديم الزمان",
+      body_english: "Once upon a time, long ago. Then the boy walked to the market.",
       // Yemeni rather than Gulf on purpose: `planProvider` only reaches for
       // Munsit on Gulf, and Munsit's voice list is cached at module scope for
       // the life of the process. Staying off that path keeps these tests
@@ -106,6 +109,18 @@ function backend(
         ? json(story, storyStatus)
         : json([], 200),
     ...gateway(plan, image),
+    // English narration goes through the shared English provider plan, which
+    // prefers ElevenLabs and falls back to Azure en-US. Both are stubbed so a
+    // change of preference does not silently leave the narration unmocked.
+    //
+    // 32 KB rather than the 4 KB below it: durations are estimated from byte
+    // count against the provider's bitrate, and ElevenLabs is 128 kbps, so a
+    // 4 KB clip rounds to zero seconds and reads as a failed synthesis.
+    "api.elevenlabs.io": () =>
+      new Response(new Uint8Array(32768), {
+        status: 200,
+        headers: { "content-type": "audio/mpeg" },
+      }),
     "tts.speech.microsoft.com": () =>
       new Response(new Uint8Array(4096), {
         status: 200,
@@ -276,7 +291,7 @@ Deno.test("generate-story-video-full refuses to start with no image key configur
 
 // ── Planning the storyboard ──────────────────────────────────────────────────
 
-Deno.test("generate-story-video-full plans from the Arabic script, not the translation", async () => {
+Deno.test("generate-story-video-full plans from the story's English text", async () => {
   const result = await call({ story_id: STORY }, backend());
 
   const planIndex = result.calls.findIndex((u) => u.includes("chat/completions"));
@@ -285,12 +300,12 @@ Deno.test("generate-story-video-full plans from the Arabic script, not the trans
   };
   const user = sent.messages.find((m) => m.role === "user")?.content ?? "";
 
-  // The Arabic is labelled authoritative and the English is explicitly demoted
-  // to context, because a planner that works off the translation produces
-  // beats that cannot be quoted back verbatim from the script.
-  assertStringIncludes(user, "ARABIC SCRIPT (authoritative");
-  assertStringIncludes(user, "كان يا ما كان في قديم الزمان");
-  assertStringIncludes(user, "context only");
+  // The English is the story, so it is what the planner reads and what beats
+  // must be quotable from. It used to read `body_fusha`, which the flipped
+  // importer never writes — leaving the director planning scenes from the
+  // title alone and calling the real text "context only".
+  assertStringIncludes(user, "STORY (authoritative");
+  assertStringIncludes(user, "Once upon a time, long ago");
 });
 
 Deno.test("generate-story-video-full asks the planner for strict JSON", async () => {
@@ -303,7 +318,10 @@ Deno.test("generate-story-video-full asks the planner for strict JSON", async ()
   assertEquals(sent.response_format?.type, "json_object");
 });
 
-Deno.test("generate-story-video-full tells the planner which culture to draw", async () => {
+Deno.test("generate-story-video-full does not force an Arab setting onto the story", async () => {
+  // Removed with the flip, deliberately. `dialect` is the LEARNER's own
+  // language, not the story's origin — keying the scene on it dressed a London
+  // news article in kanduras because the reader happens to be Gulf.
   const result = await call({ story_id: STORY }, backend());
 
   const planIndex = result.calls.findIndex((u) => u.includes("chat/completions"));
@@ -311,59 +329,8 @@ Deno.test("generate-story-video-full tells the planner which culture to draw", a
     messages: Array<{ role: string; content: string }>;
   };
   const system = sent.messages.find((m) => m.role === "system")?.content ?? "";
-
-  // Yemeni resolves to its own setting rather than the generic fallback — the
-  // difference between Sana'a tower houses and an unplaced "Arab setting".
-  assertStringIncludes(system, "Yemeni");
-  assertStringIncludes(system, "Sana'a tower houses");
-});
-
-Deno.test("generate-story-video-full maps a Gulf story onto the Khaleeji setting", async () => {
-  const result = await call(
-    { story_id: STORY },
-    backend({
-      story: {
-        id: STORY,
-        title: "t",
-        title_arabic: "ت",
-        body_english: "e",
-        body_fusha: "كان يا ما كان",
-        dialect: "Emirati",
-        story_video_approved: true,
-      },
-    }),
-  );
-
-  const planIndex = result.calls.findIndex((u) => u.includes("chat/completions"));
-  const sent = JSON.parse(result.bodies[planIndex] ?? "{}") as {
-    messages: Array<{ role: string; content: string }>;
-  };
-  // Emirati is matched into Gulf by substring, so the whole Gulf family shares
-  // one setting rather than falling through to the generic one.
-  assertStringIncludes(sent.messages[0].content, "Khaleeji");
-});
-
-Deno.test("generate-story-video-full falls back to a generic setting for an unknown dialect", async () => {
-  const result = await call(
-    { story_id: STORY },
-    backend({
-      story: {
-        id: STORY,
-        title: "t",
-        title_arabic: "ت",
-        body_english: "e",
-        body_fusha: "كان يا ما كان",
-        dialect: "Moroccan",
-        story_video_approved: true,
-      },
-    }),
-  );
-
-  const planIndex = result.calls.findIndex((u) => u.includes("chat/completions"));
-  const sent = JSON.parse(result.bodies[planIndex] ?? "{}") as {
-    messages: Array<{ role: string; content: string }>;
-  };
-  assertStringIncludes(sent.messages[0].content, "matching the story's origin");
+  assertEquals(system.includes("Sana'a tower houses"), false);
+  assertEquals(system.includes("authentic Arab cultural setting"), false);
 });
 
 Deno.test("generate-story-video-full rejects a plan with too few scenes", async () => {
@@ -388,20 +355,21 @@ Deno.test("generate-story-video-full rejects a plan with no style anchor", async
   assertStringIncludes(String(result.body.error), "invalid plan");
 });
 
-Deno.test("generate-story-video-full rejects a beat written in English", async () => {
+Deno.test("generate-story-video-full rejects a beat with no English in it", async () => {
   const result = await call(
     { story_id: STORY },
     backend({
       plan: aPlan({
-        scenes: [aScene(0), aScene(1), aScene(2, { arabic_beat: "The boy walked to the souq" })],
+        scenes: [aScene(0), aScene(1), aScene(2, { arabic_beat: "مشى الولد إلى السوق" })],
       }),
     }),
   );
 
-  // The beat is narrated verbatim by an Arabic voice, so one English scene
-  // would ship a clip of a bilingual reader mid-story.
+  // The beat is narrated verbatim by an English voice, so one Arabic scene
+  // would ship a clip of a bilingual reader mid-story — and is a sign the
+  // story's columns were filled the wrong way round.
   assertEquals(result.status, 500);
-  assertStringIncludes(String(result.body.error), "Latin/English characters");
+  assertStringIncludes(String(result.body.error), "no English text");
   assertEquals(result.calls.some((u) => u.includes("images/generations")), false);
 });
 
@@ -527,7 +495,7 @@ Deno.test("generate-story-video-full forbids text inside the artwork", async () 
   // of either script.
   const prompt = imagePrompts(result)[0];
   assertStringIncludes(prompt, "No text of any language in the image");
-  assertStringIncludes(prompt, "no Latin letters, no Arabic letters");
+  assertStringIncludes(prompt, "No text of any language in the image");
 });
 
 Deno.test("generate-story-video-full narrates each scene with its own beat", async () => {
@@ -541,7 +509,7 @@ Deno.test("generate-story-video-full narrates each scene with its own beat", asy
 });
 
 Deno.test("generate-story-video-full trims a long beat before narrating it", async () => {
-  const longBeat = Array.from({ length: 60 }, (_, i) => `كلمة${i}`).join(" ");
+  const longBeat = Array.from({ length: 60 }, (_, i) => `word${i}`).join(" ");
   const result = await call(
     { story_id: STORY },
     backend({
@@ -553,7 +521,7 @@ Deno.test("generate-story-video-full trims a long beat before narrating it", asy
   // the untrimmed beat still drives the image, only the narration is capped.
   const narration = String(lastSegments(result)[0].narration_arabic);
   assertEquals(narration.split(/\s+/).length, 40);
-  assertStringIncludes(imagePrompts(result)[0], "كلمة59");
+  assertStringIncludes(imagePrompts(result)[0], "word59");
 });
 
 Deno.test("generate-story-video-full writes each segment as it finishes", async () => {
@@ -643,6 +611,7 @@ Deno.test("generate-story-video-full marks the story failed when every scene fai
 Deno.test("generate-story-video-full records a narration outage as a failure", async () => {
   const result = await call({ story_id: STORY }, {
     ...backend(),
+    "api.elevenlabs.io": () => new Response("voice unavailable", { status: 500 }),
     "tts.speech.microsoft.com": () => new Response("voice unavailable", { status: 500 }),
   });
 

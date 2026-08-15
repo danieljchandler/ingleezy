@@ -288,11 +288,11 @@ export const defaultFunctions: Record<string, FunctionHandler> = {
   "souq-news": () => ok({ articles: [] }),
   "souq-news-quiz": () => ok({ questions: [] }),
   "suggest-stories": () => ok({ suggestions: [] }),
-  // `body_arabic`, plus the author fields the model may or may not know. The
-  // old `{ text: "" }` left useGenerateStoryText destructuring undefined, so
-  // the reading-library import could never complete.
+  // `body_english`, plus the author the model may or may not know. The old
+  // `{ text: "" }` left useGenerateStoryText destructuring undefined, so the
+  // reading-library import could never complete.
   "generate-suggested-story-text": () =>
-    ok({ body_arabic: "كان يا ما كان", author: null, author_arabic: null }),
+    ok({ body_english: "Once upon a time", author: null }),
   "request-situation-phrases": () => ok({ phrases: [] }),
   "practice-sentence-coach": () => ok({ feedback: "" }),
   "culture-guide": () => ok({ answer: "" }),

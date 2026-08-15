@@ -1,8 +1,9 @@
 // generate-story-full-audio — Full TTS generation for all lines of an authentic story.
-// Uses the shared listenTts.ts helpers for multi-dialect TTS.
+// Uses the shared listenTts.ts helpers. Narrates the ENGLISH line: post-flip
+// the story's text is English and the Arabic is the scaffold beside it.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-import { planProvider, synthesizeLine } from "../_shared/listenTts.ts";
+import { planEnglishProvider, synthesizeLine } from "../_shared/listenTts.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
 
 
@@ -72,15 +73,15 @@ Deno.serve(async (req) => {
       });
     }
 
-    const dialect = story.dialect || "Gulf";
-    const plan = await planProvider(dialect);
+    // English narration — see generate-story-preview-audio for why.
+    const plan = planEnglishProvider();
 
     const lineDurations: number[] = [];
     let totalDuration = 0;
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
-      const textToSpeak = line.dialect_vocalized || line.arabic_vocalized || line.dialect || line.arabic;
+      const textToSpeak = line.english;
 
       if (!textToSpeak) {
         lineDurations.push(0);
@@ -93,8 +94,8 @@ Deno.serve(async (req) => {
         const prevLine = lines[i - 1];
         const nextLine = lines[i + 1];
         const bytes = await synthesizeLine(textToSpeak, "narrator", i, plan, {
-          previousText: prevLine ? (prevLine.dialect_vocalized || prevLine.arabic_vocalized || prevLine.dialect || prevLine.arabic || undefined) : undefined,
-          nextText: nextLine ? (nextLine.dialect_vocalized || nextLine.arabic_vocalized || nextLine.dialect || nextLine.arabic || undefined) : undefined,
+          previousText: prevLine?.english ?? undefined,
+          nextText: nextLine?.english ?? undefined,
         });
         const path = `authentic-stories/${story_id}/line-${i}.${plan.ext}`;
 

@@ -106,22 +106,22 @@ const ReadingLibrary = () => {
               >
                 <div className="space-y-2">
                   <div className="flex items-start justify-between">
-                    <h3 className="font-semibold text-base">{story.title}</h3>
+                    <h3 className="font-english font-semibold text-base">{story.title}</h3>
                     <Badge variant="outline" className="text-xs shrink-0 ms-2">
                       {story.difficulty}
                     </Badge>
                   </div>
                   {story.title_arabic && (
-                    <p className="text-base font-arabic text-muted-foreground" dir="rtl">
+                    <p className="text-base text-muted-foreground">
                       {story.title_arabic}
                     </p>
                   )}
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    {story.author && <span>{story.author}</span>}
+                    {story.author && <span className="font-english">{story.author}</span>}
                     {story.dialect && <Badge variant="secondary" className="text-xs">{story.dialect}</Badge>}
                     {story.video_status === 'ready' && (
                       <span className="flex items-center gap-1">
-                        <Headphones className="h-3 w-3" /> Audio
+                        <Headphones className="h-3 w-3" /> صوت
                       </span>
                     )}
                     {formatDuration(story.duration_seconds) && (
@@ -131,7 +131,9 @@ const ReadingLibrary = () => {
                     )}
                   </div>
                   {story.source_name && (
-                    <p className="text-xs text-muted-foreground">Source: {story.source_name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      المصدر: <span className="font-english">{story.source_name}</span>
+                    </p>
                   )}
                 </div>
               </Card>

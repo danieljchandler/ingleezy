@@ -7,9 +7,11 @@ import { json, type UpstreamHandler } from "./upstreams.ts";
  * one narration clip, standing in for a real generated video.
  *
  * Two guards make it worth testing. The narration is built out of the story's
- * own Arabic and refuses anything with Latin letters in it, because a preview
- * that reads out an English sentence in an Arabic voice is worse than no
- * preview. And the status write at the end deliberately preserves an existing
+ * own ENGLISH — the text the learner is here to read — and refuses anything
+ * with no Latin letters in it. That check is inverted from the Arabic era and
+ * kept rather than dropped: it is what catches a story whose columns were
+ * filled the wrong way round, which is the failure the flip exists to
+ * prevent. And the status write at the end deliberately preserves an existing
  * `video_status: "ready"` — regenerating a preview must not hide the Publish
  * button on a story whose full audio is already done.
  */
@@ -22,10 +24,7 @@ const PNG_B64 =
   "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==";
 
 const line = (over: Record<string, unknown> = {}) => ({
-  arabic: "كان يا ما كان في قديم الزمان. وبعد ذلك مشى.",
-  arabic_vocalized: null,
-  dialect: null,
-  dialect_vocalized: null,
+  english: "Once upon a time. And then he walked.",
   ...over,
 });
 
@@ -43,7 +42,6 @@ function backend(
       title: "A story",
       title_arabic: "قصة",
       body_english: "Once upon a time",
-      body_fusha: "كان يا ما كان",
       dialect: "Yemeni",
     },
     lines = [line()],
@@ -144,7 +142,7 @@ Deno.test("generate-story-video returns the image and the narration", async () =
   assertEquals(result.body.status, "ready");
   assert(String(result.body.image_url).includes("listen-audio"));
   assert(String(result.body.audio_url).includes("listen-audio"));
-  assertEquals(result.body.narration_arabic, "كان يا ما كان في قديم الزمان.");
+  assertEquals(result.body.narration_arabic, "Once upon a time.");
   assertEquals(typeof result.body.duration_seconds, "number");
 });
 
@@ -186,67 +184,60 @@ Deno.test("generate-story-video leaves a finished story ready", async () => {
 Deno.test("generate-story-video narrates the story's first sentence only", async () => {
   const result = await call(
     { story_id: STORY },
-    backend({ lines: [line({ arabic: "الجملة الأولى. الجملة الثانية." })] }),
+    backend({ lines: [line({ english: "The first sentence. The second sentence." })] }),
   );
 
-  assertEquals(result.body.narration_arabic, "الجملة الأولى.");
+  assertEquals(result.body.narration_arabic, "The first sentence.");
 });
 
 Deno.test("generate-story-video caps the narration at 26 words", async () => {
-  const long = Array.from({ length: 40 }, (_, i) => `كلمة${i}`).join(" ");
-  const result = await call({ story_id: STORY }, backend({ lines: [line({ arabic: long })] }));
+  const long = Array.from({ length: 40 }, (_, i) => `word${i}`).join(" ");
+  const result = await call({ story_id: STORY }, backend({ lines: [line({ english: long })] }));
 
   assertEquals(String(result.body.narration_arabic).split(/\s+/).length, 26);
 });
 
-Deno.test("generate-story-video prefers the vocalised dialect line", async () => {
+Deno.test("generate-story-video narrates the line's English", async () => {
+  // The fallback chain over vocalised/dialect/bare Arabic went with the flip:
+  // there is one field to narrate and it is the story's own text.
   const result = await call(
     { story_id: STORY },
-    backend({
-      lines: [
-        line({
-          dialect_vocalized: "بِالدَّارِجَة.",
-          dialect: "بالدارجة.",
-          arabic_vocalized: "بِالفُصْحَى.",
-          arabic: "بالفصحى.",
-        }),
-      ],
-    }),
+    backend({ lines: [line({ english: "The market opens at dawn." })] }),
   );
 
-  assertEquals(result.body.narration_arabic, "بِالدَّارِجَة.");
+  assertEquals(result.body.narration_arabic, "The market opens at dawn.");
 });
 
 Deno.test("generate-story-video falls back to the story body when it has no lines", async () => {
   const result = await call({ story_id: STORY }, backend({ lines: [] }));
 
   assertEquals(result.status, 200);
-  assertEquals(result.body.narration_arabic, "كان يا ما كان");
+  assertEquals(result.body.narration_arabic, "Once upon a time");
 });
 
-Deno.test("generate-story-video refuses to narrate Latin text", async () => {
-  // A preview that reads an English sentence in an Arabic voice is worse than
-  // no preview, so this is a hard failure rather than a fallback.
+Deno.test("generate-story-video refuses to narrate a line with no English in it", async () => {
+  // The direction guard. A story whose `english` column somehow holds Arabic
+  // has been filled the wrong way round, and narrating it would hand the
+  // learner their own language read in an English voice.
   const result = await call(
     { story_id: STORY },
     backend({
-      lines: [line({ arabic: "Once upon a time." })],
+      lines: [line({ english: "كان يا ما كان." })],
       story: {
         id: STORY,
         title: "A story",
         title_arabic: "قصة",
-        body_english: "Once upon a time",
-        body_fusha: "",
+        body_english: "",
         dialect: "Gulf",
       },
     }),
   );
 
   assertEquals(result.status, 500);
-  assertStringIncludes(String(result.body.error), "Latin/English characters");
+  assertStringIncludes(String(result.body.error), "no English text");
 });
 
-Deno.test("generate-story-video refuses when there is no Arabic at all", async () => {
+Deno.test("generate-story-video refuses when there is no English at all", async () => {
   const result = await call(
     { story_id: STORY },
     backend({
@@ -255,86 +246,44 @@ Deno.test("generate-story-video refuses when there is no Arabic at all", async (
         id: STORY,
         title: "A story",
         title_arabic: null,
-        body_english: "Once upon a time",
-        body_fusha: "",
+        body_english: "",
         dialect: "Gulf",
       },
     }),
   );
 
   assertEquals(result.status, 500);
-  assertStringIncludes(String(result.body.error), "No Arabic script");
+  assertStringIncludes(String(result.body.error), "No English text");
 });
 
 Deno.test("generate-story-video asks for a picture with no writing in it", async () => {
-  // The image sits behind Arabic subtitles in the player, and a model that
-  // renders its own text produces gibberish letters over real ones.
+  // The image sits behind subtitles in the player, and a model that renders
+  // its own text produces gibberish letters over real ones.
   const result = await call({ story_id: STORY }, backend());
 
   const prompt = imagePrompt(result);
   assertStringIncludes(prompt, "no text of any language");
-  assertStringIncludes(prompt, "no Arabic letters visible in the scene");
+  assertStringIncludes(prompt, "no letters visible in the scene");
 });
 
-Deno.test("generate-story-video sets the scene from the story's dialect", async () => {
-  const yemeni = await call({ story_id: STORY }, backend());
-  assertStringIncludes(imagePrompt(yemeni), "Sana'a tower houses");
-
-  const gulf = await call(
-    { story_id: STORY },
-    backend({
-      story: {
-        id: STORY,
-        title: "A story",
-        title_arabic: "قصة",
-        body_english: null,
-        body_fusha: "كان يا ما كان",
-        dialect: "Gulf",
-      },
-    }),
-  );
-  assertStringIncludes(imagePrompt(gulf), "Khaleeji");
-
-  const egyptian = await call(
-    { story_id: STORY },
-    backend({
-      story: {
-        id: STORY,
-        title: "A story",
-        title_arabic: "قصة",
-        body_english: null,
-        body_fusha: "كان يا ما كان",
-        dialect: "Egyptian",
-      },
-    }),
-  );
-  assertStringIncludes(imagePrompt(egyptian), "Cairo streets");
-});
-
-Deno.test("generate-story-video falls back to a generic Arab setting", async () => {
-  const result = await call(
-    { story_id: STORY },
-    backend({
-      story: {
-        id: STORY,
-        title: "A story",
-        title_arabic: "قصة",
-        body_english: null,
-        body_fusha: "كان يا ما كان",
-        dialect: null,
-      },
-    }),
-  );
-
-  assertStringIncludes(imagePrompt(result), "authentic Arab cultural setting");
-});
-
-Deno.test("generate-story-video draws the scene from the narration, not the English", async () => {
+Deno.test("generate-story-video does not force an Arab setting onto the story", async () => {
+  // Removed with the flip, deliberately. `dialect` is the LEARNER's own
+  // language, not the story's origin — so keying the scene on it dressed a
+  // London news article in kanduras because the reader happens to be Gulf.
+  // The scene now follows whatever the text itself describes.
   const result = await call({ story_id: STORY }, backend());
 
   const prompt = imagePrompt(result);
-  assertStringIncludes(prompt, "كان يا ما كان");
-  assertEquals(prompt.includes("Once upon a time"), false);
+  assertEquals(prompt.includes("Sana'a tower houses"), false);
+  assertEquals(prompt.includes("authentic Arab cultural setting"), false);
+});
+
+Deno.test("generate-story-video draws the scene from the narrated line", async () => {
+  const result = await call({ story_id: STORY }, backend());
+
+  // The image and the narration describe the same moment, so they are built
+  // from the same text rather than from two different fields.
+  assertStringIncludes(imagePrompt(result), "Once upon a time.");
 });
 
 Deno.test("generate-story-video reads only the first few lines", async () => {
@@ -391,8 +340,8 @@ Deno.test("generate-story-video reports a TTS outage", async () => {
     { story_id: STORY },
     backend({
       extra: {
+        "api.elevenlabs.io": () => json({ error: "down" }, 503),
         "tts.speech.microsoft.com": () => json({ error: "down" }, 503),
-        "api.munsit.com": () => json({ error: "down" }, 503),
       },
     }),
   );

@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { TappableArabicText } from '@/components/shared/TappableArabicText';
+import { TappableEnglishText } from '@/components/shared/TappableEnglishText';
 import { AskAISentence } from '@/components/shared/AskAISentence';
 import { TranslationPair } from '@/components/shared/TranslationPair';
 import { MarkUnknownsProvider } from '@/contexts/MarkUnknownsContext';
@@ -73,8 +73,17 @@ const ReadingLibraryStory = () => {
 
   useDocumentTitle(story?.title ? `${story.title} — Reading Library` : 'Reading Library');
 
-  const [showDialect, setShowDialect] = useState(false);
-  const [showEnglish, setShowEnglish] = useState(false);
+  /**
+   * Whether the Arabic scaffold is on show. The English is always visible —
+   * it is the text — so the only thing a toggle can hide is the help beside
+   * it. Named `showScaffold` rather than inheriting the old `showEnglish`
+   * flag, which meant the opposite thing and would read as a bug here.
+   *
+   * Defaults on: a learner who opens a story and sees only English has no way
+   * to know the scaffold exists, and the point of this library over plain
+   * reading is that the help is there when a sentence stops making sense.
+   */
+  const [showScaffold, setShowScaffold] = useState(true);
   const [currentLineIndex, setCurrentLineIndex] = useState(-1);
   const [isPlaying, setIsPlaying] = useState(false);
   const [activeSceneIdx, setActiveSceneIdx] = useState(0);
@@ -224,9 +233,9 @@ const ReadingLibraryStory = () => {
               <IconBack className="h-5 w-5" />
             </Button>
             <div className="flex-1">
-              <h1 className="text-lg font-bold">{story.title}</h1>
+              <h1 className="font-english text-lg font-bold">{story.title}</h1>
               {story.title_arabic && (
-                <p className="text-base font-arabic text-muted-foreground" dir="rtl">{story.title_arabic}</p>
+                <p className="text-base text-muted-foreground">{story.title_arabic}</p>
               )}
             </div>
             <div className="flex gap-1">
@@ -272,31 +281,25 @@ const ReadingLibraryStory = () => {
           {/* Caption card: current phrase under the picture, with prev/next */}
           {lines && lines.length > 0 && focusedLine && (
             <Card className="p-4 mb-4 border-2 border-primary/20 shadow-sm">
-              <div dir="rtl" className="text-xl leading-loose text-center min-h-[3rem]">
-                <TappableArabicText
-                  text={showDialect
-                    ? (focusedLine.dialect_vocalized || focusedLine.dialect || focusedLine.arabic_vocalized || focusedLine.arabic)
-                    : (focusedLine.arabic_vocalized || focusedLine.arabic)
-                  }
-                  sentenceContext={{ english: focusedLine.english ?? undefined }}
+              <div className="font-english text-xl leading-loose text-center min-h-[3rem]">
+                <TappableEnglishText
+                  text={focusedLine.english ?? ''}
+                  sentenceArabic={focusedLine.arabic ?? undefined}
                   source="reading-library"
                 />
               </div>
-              {showEnglish && focusedLine.english && (
+              {showScaffold && focusedLine.arabic && (
                 <TranslationPair
                   variant="compact"
                   literal={(focusedLine as { english_literal?: string | null }).english_literal}
-                  natural={focusedLine.english}
+                  natural={focusedLine.arabic}
                   className="text-center mt-2"
                 />
               )}
 
               <div className="flex justify-center mt-2">
                 <AskAISentence
-                  arabic={showDialect
-                    ? (focusedLine.dialect_vocalized || focusedLine.dialect || focusedLine.arabic_vocalized || focusedLine.arabic)
-                    : (focusedLine.arabic_vocalized || focusedLine.arabic)
-                  }
+                  arabic={focusedLine.arabic ?? undefined}
                   english={focusedLine.english ?? undefined}
                   variant="chip"
                 />
@@ -323,18 +326,13 @@ const ReadingLibraryStory = () => {
             </Card>
           )}
 
-          {/* Display toggles */}
+          {/* Display toggle — the English is the text and always shows; this
+              hides the Arabic beside it for a learner reading unaided. */}
           <Card className="p-3 mb-4">
             <div className="flex flex-wrap items-center gap-4">
-              {story.body_dialect && (
-                <div className="flex items-center gap-2">
-                  <Switch checked={showDialect} onCheckedChange={setShowDialect} id="dialect-toggle" />
-                  <Label htmlFor="dialect-toggle" className="text-sm">العامية</Label>
-                </div>
-              )}
               <div className="flex items-center gap-2">
-                <Switch checked={showEnglish} onCheckedChange={setShowEnglish} id="english-toggle" />
-                <Label htmlFor="english-toggle" className="text-sm">الإنجليزي</Label>
+                <Switch checked={showScaffold} onCheckedChange={setShowScaffold} id="scaffold-toggle" />
+                <Label htmlFor="scaffold-toggle" className="text-sm">ورّني العربي</Label>
               </div>
             </div>
           </Card>
@@ -352,24 +350,21 @@ const ReadingLibraryStory = () => {
                 )}
                 onClick={() => line.audio_url && playLine(idx)}
               >
-                {/* Arabic text (tappable) */}
-                <div dir="rtl" className="text-lg leading-relaxed">
-                  <TappableArabicText
-                    text={showDialect
-                      ? (line.dialect_vocalized || line.dialect || line.arabic_vocalized || line.arabic)
-                      : (line.arabic_vocalized || line.arabic)
-                    }
-                    sentenceContext={{ english: line.english ?? undefined }}
+                {/* The English line — the text itself, tappable word by word */}
+                <div className="font-english text-lg leading-relaxed">
+                  <TappableEnglishText
+                    text={line.english ?? ''}
+                    sentenceArabic={line.arabic ?? undefined}
                     source="reading-library"
                   />
                 </div>
 
-                {/* English translation */}
-                {showEnglish && line.english && (
+                {/* The Arabic scaffold beside it */}
+                {showScaffold && line.arabic && (
                   <TranslationPair
                     variant="compact"
                     literal={(line as { english_literal?: string | null }).english_literal}
-                    natural={line.english}
+                    natural={line.arabic}
                     className="mt-1"
                   />
                 )}
@@ -379,9 +374,11 @@ const ReadingLibraryStory = () => {
 
           {/* Story metadata */}
           <div className="mt-8 pt-4 border-t text-sm text-muted-foreground space-y-1">
-            {story.author && <p>Author: {story.author} {story.author_arabic && `(${story.author_arabic})`}</p>}
-            {story.source_name && <p>Source: {story.source_name}</p>}
-            {story.license && <p>License: {story.license}</p>}
+            {story.author && (
+              <p>الكاتب: <span className="font-english">{story.author}</span>{story.author_arabic && ` (${story.author_arabic})`}</p>
+            )}
+            {story.source_name && <p>المصدر: <span className="font-english">{story.source_name}</span></p>}
+            {story.license && <p>الترخيص: <span className="font-english">{story.license}</span></p>}
           </div>
         </div>
 

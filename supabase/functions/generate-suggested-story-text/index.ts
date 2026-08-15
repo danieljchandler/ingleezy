@@ -1,7 +1,17 @@
-// generate-suggested-story-text — Expands an AI story suggestion (title + description)
-// into the full authentic Arabic story text, ready to be imported directly via
-// import-authentic-story. This closes the loop on the "Suggest Stories" flow so a
-// suggestion can be turned into a real, importable story with a single tap.
+// generate-suggested-story-text — Expands a story suggestion (title +
+// description) into full ENGLISH story text, ready to be imported directly via
+// import-authentic-story. This closes the loop on the "Suggest Stories" flow so
+// a suggestion can be turned into a real, importable story with a single tap.
+//
+// This is the reading library's empty-shelf path. The library prefers real
+// imported texts — that is what "authentic" means, and it is why the importer
+// exists — but a shelf with nothing on it teaches nobody, so an admin can
+// generate a level-appropriate English piece rather than wait to find one that
+// is both suitable and licensable.
+//
+// It emits ENGLISH only. Building the Arabic scaffold stays
+// import-authentic-story's job, so a generated story and an imported one reach
+// their dialect lines by exactly one path rather than two that can drift.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { askBrain } from "../_shared/aiBrain.ts";
@@ -14,7 +24,8 @@ const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
 interface GenerateRequest {
   title: string;
-  title_arabic: string;
+  /** The dialect title, when the suggestion carried one. Not required to generate English. */
+  title_arabic?: string;
   description?: string;
   source_type?: string;
   estimated_length?: string;
@@ -56,9 +67,9 @@ Deno.serve(async (req) => {
     }
 
     const body: GenerateRequest = await req.json().catch(() => ({} as GenerateRequest));
-    const { title, title_arabic } = body;
-    if (!title || !title_arabic) {
-      return new Response(JSON.stringify({ error: "missing_fields", detail: "title and title_arabic are required" }), {
+    const { title } = body;
+    if (!title) {
+      return new Response(JSON.stringify({ error: "missing_fields", detail: "title is required" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -68,52 +79,55 @@ Deno.serve(async (req) => {
     const targetDifficulty = body.difficulty || "intermediate";
 
     const result = await askBrain<{
-      body_arabic: string;
+      body_english: string;
       author?: string;
-      author_arabic?: string;
     }>({
       purpose: "utility",
+      // English target: everything this function writes is English, so the
+      // MSA-leak scan and the dialect rulebook have nothing to police here.
+      // The dialect is still passed because the CEFR-ish difficulty band is
+      // about what THIS learner can read.
+      target: "english",
       dialect: targetDialect,
       strategy: "solo",
       skipRepair: true,
       models: ["google/gemini-3-flash-preview"],
-      systemPromptExtra: `You are an expert in authentic Arabic literature. You faithfully write out the full text of real, well-known Arabic stories, folktales, fables, and cultural narratives (public domain / traditional material) so they can be used for language-learning reading practice.
+      systemPromptExtra: `You write ENGLISH reading material for Arabic speakers learning English.
 
 Requirements:
-- Write the COMPLETE story text in Modern Standard Arabic (Fusha), suitable for a ${targetDifficulty} level learner.
-- The story should faithfully represent the real/traditional narrative described, not a vague summary.
+- Write the COMPLETE text in natural, contemporary English suitable for a ${targetDifficulty} level learner. Not textbook-stiff English — the way it would really be written.
+- Match the piece described: if it names a real, well-known public-domain story or folktale, retell it faithfully rather than summarising it. Otherwise write an original piece on the subject.
 - Length: match "${body.estimated_length || "medium"}" (roughly 200-800 words).
-- Use clear sentences appropriate for line-by-line reading practice.
-- If the story has a known traditional author, include it; otherwise leave author fields empty.
+- Use clear sentence boundaries — this will be split into lines for line-by-line reading, so avoid sprawling multi-clause sentences.
+- Grade the vocabulary and grammar honestly to the level. A beginner piece that quietly uses B2 idioms is worse than a shorter one.
+- If the piece has a known author, include it; otherwise leave the author field empty.
 - Do not include the title inside the body text itself.`,
-      userPrompt: `Write the full Arabic text for this story so it can be added to our reading library:
+      userPrompt: `Write the full English text for this piece so it can be added to our reading library:
 
-Title (English): ${title}
-Title (Arabic): ${title_arabic}
+Title: ${title}
 ${body.description ? `Description: ${body.description}` : ""}
 Source type: ${body.source_type || "folktale"}
 Themes: ${(body.themes || []).join(", ")}
 
-Write the complete, faithful Arabic story text now.`,
+Write the complete English text now.`,
       maxTokens: 4000,
       temperature: 0.7,
       tool: {
         name: "emit_story_text",
-        description: "Return the full Arabic story text and optional author info.",
+        description: "Return the full English story text and optional author info.",
         parameters: {
           type: "object",
           properties: {
-            body_arabic: { type: "string", description: "The complete Arabic story text" },
-            author: { type: "string", description: "Author name in English, if known" },
-            author_arabic: { type: "string", description: "Author name in Arabic, if known" },
+            body_english: { type: "string", description: "The complete English story text" },
+            author: { type: "string", description: "Author name, if known" },
           },
-          required: ["body_arabic"],
+          required: ["body_english"],
         },
       },
     });
 
-    const bodyArabic = result.output?.body_arabic;
-    if (!bodyArabic) {
+    const bodyEnglish = result.output?.body_english;
+    if (!bodyEnglish) {
       return new Response(JSON.stringify({ error: "generation_failed", detail: "AI failed to generate story text" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -121,9 +135,8 @@ Write the complete, faithful Arabic story text now.`,
     }
 
     return new Response(JSON.stringify({
-      body_arabic: bodyArabic,
+      body_english: bodyEnglish,
       author: result.output?.author ?? null,
-      author_arabic: result.output?.author_arabic ?? null,
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

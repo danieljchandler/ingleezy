@@ -175,60 +175,73 @@ Deno.test("suggest-stories answers an empty proposal with an empty list", async 
 
 // ── generate-suggested-story-text ────────────────────────────────────────────
 
-Deno.test("generate-suggested-story-text needs both titles", async () => {
-  const result = await call(
-    "generate-suggested-story-text",
-    { title: "The Generous Host" },
-    admin(),
-  );
+Deno.test("generate-suggested-story-text needs a title", async () => {
+  // The dialect title was required back when the body it produced was Arabic.
+  // What it writes now is English, so the English title is the only input it
+  // cannot work without.
+  const result = await call("generate-suggested-story-text", {}, admin());
 
   assertEquals(result.status, 400);
   assertEquals(result.body.error, "missing_fields");
 });
 
+Deno.test("generate-suggested-story-text works from an English title alone", async () => {
+  const result = await call(
+    "generate-suggested-story-text",
+    { title: "The Generous Host" },
+    admin({
+      "ai.gateway.lovable.dev": emitting({ body_english: "text" }),
+      "openrouter.ai": emitting({ body_english: "text" }),
+    }),
+  );
+
+  assertEquals(result.status, 200);
+});
+
 Deno.test("generate-suggested-story-text turns away a signed-in learner", async () => {
   const result = await call(
     "generate-suggested-story-text",
-    { title: "T", title_arabic: "ت" },
+    { title: "T" },
     plainUser(),
   );
 
   assertEquals(result.status, 403);
 });
 
-Deno.test("generate-suggested-story-text returns the body and any author", async () => {
+Deno.test("generate-suggested-story-text returns ENGLISH and any author", async () => {
   const result = await call(
     "generate-suggested-story-text",
-    { title: "The Generous Host", title_arabic: "المضيف الكريم", estimated_length: "short" },
+    { title: "The Generous Host", estimated_length: "short" },
     admin({
       "ai.gateway.lovable.dev": emitting({
-        body_arabic: "كان يا ما كان",
+        body_english: "Once upon a time",
         author: "Traditional",
-        author_arabic: "تراثي",
       }),
-      "openrouter.ai": emitting({ body_arabic: "كان يا ما كان" }),
+      "openrouter.ai": emitting({ body_english: "Once upon a time" }),
     }),
   );
 
   assertEquals(result.status, 200);
-  assertEquals(result.body.body_arabic, "كان يا ما كان");
+  assertEquals(result.body.body_english, "Once upon a time");
   assertEquals(result.body.author, "Traditional");
-  assertEquals(result.body.author_arabic, "تراثي");
+  // This is the empty-shelf path and it feeds the importer, which is what
+  // builds the Arabic. Emitting a scaffold here too would give a generated
+  // story a second route to one, free to drift from the imported route.
+  assertEquals(result.body.body_arabic, undefined);
 });
 
 Deno.test("generate-suggested-story-text nulls an author the model did not know", async () => {
   const result = await call(
     "generate-suggested-story-text",
-    { title: "T", title_arabic: "ت" },
+    { title: "T" },
     admin({
-      "ai.gateway.lovable.dev": emitting({ body_arabic: "نص" }),
-      "openrouter.ai": emitting({ body_arabic: "نص" }),
+      "ai.gateway.lovable.dev": emitting({ body_english: "text" }),
+      "openrouter.ai": emitting({ body_english: "text" }),
     }),
   );
 
   assertEquals(result.status, 200);
   assertEquals(result.body.author, null);
-  assertEquals(result.body.author_arabic, null);
 });
 
 Deno.test("generate-suggested-story-text asks for the requested length and level", async () => {
@@ -236,14 +249,13 @@ Deno.test("generate-suggested-story-text asks for the requested length and level
     "generate-suggested-story-text",
     {
       title: "The Generous Host",
-      title_arabic: "المضيف الكريم",
       estimated_length: "long",
       difficulty: "advanced",
       themes: ["generosity"],
     },
     admin({
-      "ai.gateway.lovable.dev": emitting({ body_arabic: "نص" }),
-      "openrouter.ai": emitting({ body_arabic: "نص" }),
+      "ai.gateway.lovable.dev": emitting({ body_english: "text" }),
+      "openrouter.ai": emitting({ body_english: "text" }),
     }),
   );
 
@@ -251,12 +263,14 @@ Deno.test("generate-suggested-story-text asks for the requested length and level
   assertStringIncludes(prompt, "long");
   assertStringIncludes(prompt, "advanced");
   assertStringIncludes(prompt, "generosity");
+  // And that what it is being asked for is English at all.
+  assertStringIncludes(prompt, "ENGLISH reading material");
 });
 
 Deno.test("generate-suggested-story-text reports a model that wrote nothing", async () => {
   const result = await call(
     "generate-suggested-story-text",
-    { title: "T", title_arabic: "ت" },
+    { title: "T" },
     admin({
       // A tool call that carried an author but no text. A reply with no tool
       // call at all is a different failure — askBrain throws, and the function
@@ -273,20 +287,17 @@ Deno.test("generate-suggested-story-text reports a model that wrote nothing", as
 // ── import-authentic-story ───────────────────────────────────────────────────
 
 const processed = {
+  title_arabic: "المضيف الكريم",
   lines: [
     {
-      arabic: "كان يا ما كان",
-      arabic_vocalized: "كَانَ يَا مَا كَانَ",
       english: "Once upon a time",
-      literal: "was o what was",
+      arabic: "كان يا ما كان",
+      literal: "كان مرة على زمن",
     },
-    {
-      arabic: "في قديم الزمان",
-      arabic_vocalized: "فِي قَدِيمِ الزَّمَان",
-      english: "in the old days",
-    },
+    // No `literal` — the gloss is the part a model is most likely to skip.
+    { english: "in the old days", arabic: "في قديم الزمان" },
   ],
-  vocabulary: [{ arabic: "زمان", english: "time", root: "ز م ن" }],
+  vocabulary: [{ english: "time", arabic: "زمان" }],
 };
 
 function importUpstreams(extra: Record<string, UpstreamHandler> = {}) {
@@ -299,7 +310,7 @@ function importUpstreams(extra: Record<string, UpstreamHandler> = {}) {
   });
 }
 
-Deno.test("import-authentic-story needs a title and a body", async () => {
+Deno.test("import-authentic-story needs a title and an English body", async () => {
   const result = await call(
     "import-authentic-story",
     { title: "The Generous Host", title_arabic: "المضيف الكريم" },
@@ -310,10 +321,30 @@ Deno.test("import-authentic-story needs a title and a body", async () => {
   assertEquals(result.body.error, "missing_fields");
 });
 
+Deno.test("import-authentic-story imports without a dialect title", async () => {
+  // An admin pasting a real English article is not necessarily an Arabic
+  // writer, so the dialect title is derived rather than demanded.
+  const result = await call(
+    "import-authentic-story",
+    { title: "The Generous Host", body_english: "Once upon a time. In the old days." },
+    importUpstreams(),
+  );
+
+  assertEquals(result.status, 200);
+  const saved = JSON.parse(
+    result.bodies[
+      result.calls.findIndex(
+        (url, i) => url.includes("/rest/v1/authentic_stories") && result.methods[i] === "POST",
+      )
+    ] ?? "{}",
+  ) as Record<string, string>;
+  assertEquals(saved.title_arabic, "المضيف الكريم");
+});
+
 Deno.test("import-authentic-story turns away a signed-in learner", async () => {
   const result = await call(
     "import-authentic-story",
-    { title: "T", title_arabic: "ت", body_arabic: "نص" },
+    { title: "T", body_english: "text" },
     plainUser(),
   );
 
@@ -326,7 +357,7 @@ Deno.test("import-authentic-story saves the story as a draft", async () => {
     {
       title: "The Generous Host",
       title_arabic: "المضيف الكريم",
-      body_arabic: "كان يا ما كان في قديم الزمان",
+      body_english: "Once upon a time. In the old days.",
       dialect: "Egyptian",
     },
     importUpstreams(),
@@ -351,7 +382,7 @@ Deno.test("import-authentic-story saves the story as a draft", async () => {
 Deno.test("import-authentic-story rebuilds the body from the segmented lines", async () => {
   const result = await call(
     "import-authentic-story",
-    { title: "T", title_arabic: "ت", body_arabic: "نص طويل" },
+    { title: "T", body_english: "a long text" },
     importUpstreams(),
   );
 
@@ -364,15 +395,19 @@ Deno.test("import-authentic-story rebuilds the body from the segmented lines", a
   // The stored body is the model's segmentation joined back up, not the text
   // the admin pasted — so what is read line by line and what is read as prose
   // cannot drift apart.
-  assertEquals(saved.body_fusha, "كان يا ما كان\nفي قديم الزمان");
-  assertEquals(saved.body_fusha_vocalized, "كَانَ يَا مَا كَانَ\nفِي قَدِيمِ الزَّمَان");
   assertEquals(saved.body_english, "Once upon a time\nin the old days");
+  // The Arabic lands in the scaffold column. The Fusha pair belonged to the
+  // Arabic-source era; writing to them would put Arabic back where the reader
+  // used to look for the primary text.
+  assertEquals(saved.body_dialect, "كان يا ما كان\nفي قديم الزمان");
+  assertEquals(saved.body_fusha, undefined);
+  assertEquals(saved.body_fusha_vocalized, undefined);
 });
 
 Deno.test("import-authentic-story writes a row per line, in order", async () => {
   const result = await call(
     "import-authentic-story",
-    { title: "T", title_arabic: "ت", body_arabic: "نص" },
+    { title: "T", body_english: "text" },
     importUpstreams(),
   );
 
@@ -383,15 +418,57 @@ Deno.test("import-authentic-story writes a row per line, in order", async () => 
   assertEquals(rows.length, 2);
   assertEquals(rows[0].line_index, 0);
   assertEquals(rows[0].story_id, STORY);
-  assertEquals(rows[0].english_literal, "was o what was");
+  // English is the line; Arabic is the help beside it.
+  assertEquals(rows[0].english, "Once upon a time");
+  assertEquals(rows[0].arabic, "كان يا ما كان");
+  assertEquals(rows[0].english_literal, "كان مرة على زمن");
   // The second line's gloss is optional and the model omitted it.
   assertEquals(rows[1].english_literal, null);
+});
+
+Deno.test("import-authentic-story keeps the pasted English out of the model's hands", async () => {
+  const result = await call(
+    "import-authentic-story",
+    { title: "T", body_english: "text" },
+    importUpstreams(),
+  );
+
+  // The one instruction holding the direction in place: a model handed English
+  // and asked to "process" it will otherwise translate it into Arabic and
+  // leave the library reading the wrong way round again.
+  const prompt = promptOf(result.bodies, result.calls);
+  assertStringIncludes(prompt, "do not translate it");
+});
+
+Deno.test("import-authentic-story drops a line the model left unglossed", async () => {
+  // `authentic_story_lines.arabic` is NOT NULL, so one skipped gloss would
+  // fail the whole insert and lose an import the admin already waited on.
+  const result = await call(
+    "import-authentic-story",
+    { title: "T", body_english: "text" },
+    importUpstreams({
+      "ai.gateway.lovable.dev": emitting({
+        ...processed,
+        lines: [processed.lines[0], { english: "in the old days", arabic: "  " }],
+      }),
+      "openrouter.ai": emitting({
+        ...processed,
+        lines: [processed.lines[0], { english: "in the old days", arabic: "  " }],
+      }),
+    }),
+  );
+
+  assertEquals(result.status, 200);
+  const rows = JSON.parse(
+    result.bodies[result.calls.findIndex((url) => url.includes("/rest/v1/authentic_story_lines"))] ?? "[]",
+  ) as Array<Record<string, unknown>>;
+  assertEquals(rows.length, 1);
 });
 
 Deno.test("import-authentic-story reports a model that segmented nothing", async () => {
   const result = await call(
     "import-authentic-story",
-    { title: "T", title_arabic: "ت", body_arabic: "نص" },
+    { title: "T", body_english: "text" },
     importUpstreams({
       "ai.gateway.lovable.dev": emitting({ lines: [], vocabulary: [] }),
       "openrouter.ai": emitting({ lines: [], vocabulary: [] }),
@@ -405,7 +482,7 @@ Deno.test("import-authentic-story reports a model that segmented nothing", async
 Deno.test("import-authentic-story reports a rejected save", async () => {
   const result = await call(
     "import-authentic-story",
-    { title: "T", title_arabic: "ت", body_arabic: "نص" },
+    { title: "T", body_english: "text" },
     importUpstreams({
       "/rest/v1/authentic_stories": () => json({ message: "permission denied" }, 403),
     }),
@@ -421,7 +498,7 @@ Deno.test("import-authentic-story keeps the story when its lines fail to save", 
   // and re-importing would create a second copy rather than repair the first.
   const result = await call(
     "import-authentic-story",
-    { title: "T", title_arabic: "ت", body_arabic: "نص" },
+    { title: "T", body_english: "text" },
     importUpstreams({
       "/rest/v1/authentic_story_lines": () => json({ message: "permission denied" }, 403),
     }),
@@ -435,14 +512,26 @@ Deno.test("import-authentic-story keeps the story when its lines fail to save", 
 
 const translated = {
   lines: [
-    { dialect: "كان في مرة", dialect_vocalized: "كَان فِي مَرَّة" },
-    { dialect: "من زمان", dialect_vocalized: "مِن زَمَان" },
+    { arabic: "كان في مرة", literal: "كان مرة على زمن" },
+    { arabic: "من زمان", literal: "من الأيام القديمة" },
   ],
 };
 
 const storyLines = [
-  { id: "line-0", story_id: STORY, line_index: 0, arabic: "كان يا ما كان" },
-  { id: "line-1", story_id: STORY, line_index: 1, arabic: "في قديم الزمان" },
+  {
+    id: "line-0",
+    story_id: STORY,
+    line_index: 0,
+    english: "Once upon a time",
+    arabic: "كان يا ما كان",
+  },
+  {
+    id: "line-1",
+    story_id: STORY,
+    line_index: 1,
+    english: "in the old days",
+    arabic: "في قديم الزمان",
+  },
 ];
 
 function translateUpstreams(extra: Record<string, UpstreamHandler> = {}) {
@@ -473,10 +562,11 @@ Deno.test("translate-story-dialect turns away an anonymous caller", async () => 
   assertEquals(result.status, 401);
 });
 
-Deno.test("translate-story-dialect lets any signed-in user run it", async () => {
-  // Pinned, not fixed. Its three siblings all check for the admin role; this
-  // one does not, so any authenticated account can rewrite every line of a
-  // published story in the reading library.
+Deno.test("translate-story-dialect turns away a signed-in learner", async () => {
+  // Previously pinned as a live gap: its three siblings all checked for the
+  // admin role and this one did not, so any authenticated account could
+  // re-gloss every line of a published story out from under the learners
+  // reading it. Closed when the function was flipped.
   const result = await call(
     "translate-story-dialect",
     { story_id: STORY, dialect: "Gulf" },
@@ -488,8 +578,7 @@ Deno.test("translate-story-dialect lets any signed-in user run it", async () => 
     }),
   );
 
-  assertEquals(result.status, 200);
-  assertEquals(result.body.success, true);
+  assertEquals(result.status, 403);
 });
 
 Deno.test("translate-story-dialect says so when the story has no lines", async () => {
@@ -503,7 +592,7 @@ Deno.test("translate-story-dialect says so when the story has no lines", async (
   assertEquals(result.body.error, "story_not_found");
 });
 
-Deno.test("translate-story-dialect writes both scripts back to each line", async () => {
+Deno.test("translate-story-dialect writes the new scaffold back to each line", async () => {
   const result = await call(
     "translate-story-dialect",
     { story_id: STORY, dialect: "Egyptian" },
@@ -518,8 +607,22 @@ Deno.test("translate-story-dialect writes both scripts back to each line", async
     .filter((c) => c.url.includes("/rest/v1/authentic_story_lines") && c.method === "PATCH");
 
   assertEquals(patches.length, 2);
-  assertEquals(JSON.parse(patches[0].body ?? "{}").dialect, "كان في مرة");
-  assertEquals(JSON.parse(patches[1].body ?? "{}").dialect_vocalized, "مِن زَمَان");
+  assertEquals(JSON.parse(patches[0].body ?? "{}").arabic, "كان في مرة");
+  assertEquals(JSON.parse(patches[1].body ?? "{}").english_literal, "من الأيام القديمة");
+});
+
+Deno.test("translate-story-dialect re-glosses from the English, not the old Arabic", async () => {
+  const result = await call(
+    "translate-story-dialect",
+    { story_id: STORY, dialect: "Egyptian" },
+    translateUpstreams(),
+  );
+
+  // Going dialect-to-dialect would compound whatever the first pass got wrong.
+  // The English is the source of truth and is what does not change.
+  const prompt = promptOf(result.bodies, result.calls);
+  assertStringIncludes(prompt, "Once upon a time");
+  assertStringIncludes(prompt, "Egyptian");
 });
 
 Deno.test("translate-story-dialect stamps the dialect on the story too", async () => {
@@ -536,12 +639,14 @@ Deno.test("translate-story-dialect stamps the dialect on the story too", async (
   const saved = JSON.parse(patch?.body ?? "{}") as Record<string, string>;
   assertEquals(saved.dialect, "Egyptian");
   assertEquals(saved.body_dialect, "كان في مرة\nمن زمان");
-  assertEquals(saved.body_dialect_vocalized, "كَان فِي مَرَّة\nمِن زَمَان");
 });
 
-Deno.test("translate-story-dialect stops at the shorter of the two lists", async () => {
-  // A model that returned fewer lines than the story has leaves the tail
-  // untouched rather than shifting every later line onto the wrong translation.
+Deno.test("translate-story-dialect refuses to relabel a half-converted story", async () => {
+  // A model that returns fewer lines than the story has still leaves the tail
+  // untouched rather than shifting every later line onto the wrong gloss — but
+  // the story must not then be badged with the new dialect, because the label
+  // is what a learner picks it by. Half Egyptian and half Gulf under an
+  // "Egyptian" badge is worse than a run that plainly failed.
   const result = await call(
     "translate-story-dialect",
     { story_id: STORY, dialect: "Gulf" },
@@ -551,20 +656,27 @@ Deno.test("translate-story-dialect stops at the shorter of the two lists", async
     }),
   );
 
-  assertEquals(result.status, 200);
+  assertEquals(result.status, 502);
+  assertEquals(result.body.error, "partial_translation");
   assertEquals(result.body.lines_translated, 1);
+  assertEquals(result.body.lines_expected, 2);
 
   const patches = result.calls.filter(
     (url, i) => url.includes("/rest/v1/authentic_story_lines") && result.methods[i] === "PATCH",
   );
   assertEquals(patches.length, 1);
+
+  const storyPatch = result.calls
+    .map((url, i) => ({ url, method: result.methods[i], body: result.bodies[i] }))
+    .find((c) => c.url.includes("/rest/v1/authentic_stories") && c.method === "PATCH");
+  assertEquals(JSON.parse(storyPatch?.body ?? "{}").dialect, undefined);
 });
 
-Deno.test("translate-story-dialect reports success even when nothing was translated", async () => {
-  // Pinned, not fixed. A model that returned no lines still writes an empty
-  // body_dialect over whatever the story had, and answers `success: true` with
-  // `lines_translated: 0` — so a failed run looks like a completed one and has
-  // erased the previous translation on the way.
+Deno.test("translate-story-dialect reports a run that translated nothing", async () => {
+  // Previously pinned as a live bug: a model that returned no lines still
+  // answered `success: true`, so a failed run looked like a completed one —
+  // having erased the previous scaffold on the way. It now fails loudly and
+  // leaves the story's dialect label alone.
   const result = await call(
     "translate-story-dialect",
     { story_id: STORY, dialect: "Gulf" },
@@ -574,11 +686,26 @@ Deno.test("translate-story-dialect reports success even when nothing was transla
     }),
   );
 
-  assertEquals(result.status, 200);
+  assertEquals(result.status, 502);
+  assertEquals(result.body.error, "partial_translation");
   assertEquals(result.body.lines_translated, 0);
 
   const patch = result.calls
     .map((url, i) => ({ url, method: result.methods[i], body: result.bodies[i] }))
     .find((c) => c.url.includes("/rest/v1/authentic_stories") && c.method === "PATCH");
-  assertEquals(JSON.parse(patch?.body ?? "{}").body_dialect, "");
+  assertEquals(JSON.parse(patch?.body ?? "{}").dialect, undefined);
+});
+
+Deno.test("translate-story-dialect says so when the story has no English to work from", async () => {
+  const result = await call(
+    "translate-story-dialect",
+    { story_id: STORY, dialect: "Gulf" },
+    translateUpstreams({
+      "/rest/v1/authentic_story_lines": () =>
+        json([{ id: "line-0", story_id: STORY, line_index: 0, english: "", arabic: "قديم" }]),
+    }),
+  );
+
+  assertEquals(result.status, 422);
+  assertEquals(result.body.error, "no_english_lines");
 });

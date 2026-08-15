@@ -1,12 +1,18 @@
 // generate-story-video — Generate a slideshow-style preview: one AI-generated
-// scene image + one Arabic narration clip. Cheap replacement for Veo video.
+// scene image + one narration clip. Cheap replacement for Veo video.
+//
+// Post-flip the narration is ENGLISH, for the same reason the story audio is:
+// the story's text is English and hearing it read is the point. Narrating the
+// dialect scaffold would be reading the learner the translation. The old
+// version demanded Arabic script and threw on Latin characters, so it would
+// have rejected every story in the flipped library outright.
 // Reused columns:
 //   story_video_url      -> preview scene IMAGE url
 //   video_preview_url    -> preview narration AUDIO url
 //   story_video_status   -> 'generating' | 'ready' | 'failed'
 
 import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-import { estimateSeconds, planProvider, synthesizeLine } from "../_shared/listenTts.ts";
+import { estimateSeconds, planEnglishProvider, synthesizeLine } from "../_shared/listenTts.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
 
 
@@ -22,57 +28,43 @@ type Story = {
   title: string;
   title_arabic: string | null;
   body_english: string | null;
-  body_fusha: string | null;
   dialect: string | null;
 };
 
 type StoryLine = {
-  arabic: string | null;
-  arabic_vocalized: string | null;
-  dialect: string | null;
-  dialect_vocalized: string | null;
+  english: string | null;
 };
 
 function hasLatin(text: string): boolean {
   return /[A-Za-z]/.test(text);
 }
-function normalizeArabicText(text: string): string {
+function normalizeText(text: string): string {
   return text.replace(/\s+/g, " ").trim();
 }
 function firstWords(text: string, maxWords: number): string {
-  return normalizeArabicText(text).split(/\s+/).slice(0, maxWords).join(" ");
-}
-function pickLineText(line: StoryLine): string {
-  return normalizeArabicText(
-    line.dialect_vocalized || line.arabic_vocalized || line.dialect || line.arabic || "",
-  );
+  return normalizeText(text).split(/\s+/).slice(0, maxWords).join(" ");
 }
 
 function buildNarrationText(story: Story, lines: StoryLine[]): string {
-  const fromLines = lines.map(pickLineText).find(Boolean);
-  const source = fromLines || story.body_fusha || "";
-  const firstSentence = normalizeArabicText(source).split(/(?<=[.!?؟。])\s+/)[0] || source;
+  const fromLines = lines.map((l) => normalizeText(l.english ?? "")).find(Boolean);
+  const source = fromLines || story.body_english || "";
+  const firstSentence = normalizeText(source).split(/(?<=[.!?])\s+/)[0] || source;
   const narration = firstWords(firstSentence, 26);
-  if (!narration) throw new Error("No Arabic script found for preview narration");
-  if (hasLatin(narration)) throw new Error("Preview narration contains Latin/English characters");
+  if (!narration) throw new Error("No English text found for preview narration");
+  // Inverted from the Arabic era, and kept rather than dropped: the check is
+  // what catches a story whose columns have been filled the wrong way round,
+  // which is the failure this whole flip exists to prevent.
+  if (!hasLatin(narration)) throw new Error("Preview narration contains no English text");
   return narration;
 }
 
-function culturalSetting(dialect: string | null): string {
-  const d = (dialect ?? "").toLowerCase();
-  if (d.includes("gulf") || d.includes("khaleeji") || d.includes("emirati") || d.includes("saudi"))
-    return "authentic Gulf Arab (Khaleeji) setting — kanduras, ghutras, desert/coastal palette";
-  if (d.includes("egypt")) return "authentic Egyptian setting — Cairo streets, galabiyas, warm tones";
-  if (d.includes("yemen")) return "authentic Yemeni setting — Sana'a tower houses, mountain terrain";
-  if (d.includes("levant") || d.includes("syria") || d.includes("lebanon") || d.includes("palest") || d.includes("jordan"))
-    return "authentic Levantine setting — old-city stone architecture";
-  return "authentic Arab cultural setting matching the story's origin";
-}
-
-function buildImagePrompt(story: Story, arabicScript: string): string {
-  const setting = culturalSetting(story.dialect);
-  const excerpt = normalizeArabicText(arabicScript).slice(0, 800);
-  return `Warm cinematic storybook illustration for an Arabic short story. ${setting}. Photorealistic painterly style, soft natural lighting, rich color palette, no text of any language, no captions, no signs, no logos, no watermarks, no Latin letters, no Arabic letters visible in the scene. Depict the following story moment visually only:\n\n${excerpt}`;
+function buildImagePrompt(story: Story, storyText: string): string {
+  const excerpt = normalizeText(storyText).slice(0, 800);
+  // No `culturalSetting(dialect)` here any more: the dialect is the learner's
+  // own, not the story's origin, so pinning a Gulf or Egyptian setting onto an
+  // English text put every story in the wrong place. The scene now follows
+  // whatever the text describes.
+  return `Warm cinematic storybook illustration for a short story. Photorealistic painterly style, soft natural lighting, rich color palette, no text of any language, no captions, no signs, no logos, no watermarks, no letters visible in the scene. Depict the following story moment visually only:\n\n${excerpt}`;
 }
 
 /**
@@ -114,7 +106,7 @@ async function synthesizePreviewNarration(
   lines: StoryLine[],
 ): Promise<{ url: string; text: string; duration: number }> {
   const text = buildNarrationText(story, lines);
-  const plan = await planProvider(story.dialect || "Gulf");
+  const plan = planEnglishProvider();
   const bytes = await synthesizeLine(text, "narrator", 0, plan);
   const path = `authentic-stories/${story.id}/preview-narration-${Date.now()}.${plan.ext}`;
   const up = await admin.storage.from(BUCKET).upload(path, bytes, {
@@ -170,7 +162,7 @@ Deno.serve(async (req) => {
 
     const { data: story, error: storyErr } = await admin
       .from("authentic_stories")
-      .select("id, title, title_arabic, body_english, body_fusha, dialect")
+      .select("id, title, title_arabic, body_english, dialect")
       .eq("id", story_id)
       .single();
     if (storyErr || !story) {
@@ -187,7 +179,7 @@ Deno.serve(async (req) => {
 
     const { data: lines } = await admin
       .from("authentic_story_lines")
-      .select("arabic, arabic_vocalized, dialect, dialect_vocalized")
+      .select("english")
       .eq("story_id", story_id)
       .order("line_index", { ascending: true })
       .limit(3);

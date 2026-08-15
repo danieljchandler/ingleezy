@@ -241,8 +241,66 @@ generation conditioning.
       descriptors (phrasal verbs, connected speech); transcripts without
       English lines are Hakiya-bridged clips and keep the Arabic-era
       dialect-aware path.
-- [~] Stories / reading library / listen episodes / daily story: FLIP
+- [x] Stories / reading library / listen episodes / daily story: FLIP
       generation direction (English text, Arabic scaffold).
+      **Reading library DONE — and it was the last whole feature still
+      pointing the old way.** Filed under this bullet next to "reading
+      practice", which had been done for weeks, so it read as finished; it
+      is a separate feature and none of it had been touched. Front to back
+      it still ran Hakiya's direction: `import-authentic-story` took a
+      pasted *Arabic* text, vocalised it with tashkeel and translated it to
+      English; `ReadingLibraryStory` rendered `arabic_vocalized || arabic`
+      as the primary tappable line with the English behind a toggle; the
+      two audio functions narrated the Arabic through `planProvider(dialect)`.
+      Nothing errored, because the whole path agreed with itself — an
+      Arabic speaker simply opened the library and got Arabic reading
+      practice with English glosses.
+      Now: the admin pastes **real English** (article, essay, story), the
+      importer keeps it verbatim and generates the scaffold around it —
+      dialect line + literal gloss in English word order + English-headword
+      vocabulary, the same `{english, arabic, literal}` contract as
+      reading-passage. Tashkeel is gone: it is a reading aid for Arabic
+      script and nobody is reading Arabic script here. The reader is
+      English-primary tappable lines (`TappableEnglishText`), scaffold
+      behind one toggle that defaults ON (a learner who cannot see the help
+      does not know it is there), and the audio functions narrate
+      `line.english` via `planEnglishProvider()`.
+      Per the empty-shelf decision, **generation is kept as a fallback**:
+      `generate-suggested-story-text` now writes graded ENGLISH and feeds
+      the same importer, so a generated story and a pasted one reach their
+      scaffold by one path rather than two that can drift.
+      `translate-story-dialect` got a better job than it had — it used to
+      turn a Fusha source into dialect, a step that only existed because
+      the source was Arabic; it now **re-scaffolds a story into a different
+      dialect from the English**, so a piece imported for a Gulf learner
+      can be moved to Egyptian without re-importing or re-narrating it.
+      Two bugs previously *pinned* in `story_admin_test.ts` are fixed on
+      the way: it now refuses to stamp a story with a new dialect when only
+      some lines converted (a story badged Egyptian with a Gulf second half
+      is worse than a run that plainly failed), and a run that translated
+      nothing reports 502 instead of `success: true` after erasing the old
+      scaffold. A third — **no admin check at all**, so any signed-in
+      account could re-gloss every line of a published story — is closed
+      too.
+      **The story-video generators went with it**, found by grepping for
+      what still read the retired columns. `generate-story-video-full`
+      planned its storyboard from `story.body_fusha`, which the flipped
+      importer never writes — so post-flip it handed the director an empty
+      story and captioned the real text "ENGLISH REFERENCE TRANSLATION
+      (context only, do NOT use English words in prompts)". Its preview
+      sibling narrated the Arabic and *threw* on Latin characters, so it
+      would have rejected every story in the flipped library outright. Both
+      now read the English, narrate it through `planEnglishProvider()`, and
+      keep their script guards **inverted rather than deleted** — a beat
+      with no Latin in it is now the error, because that check is what
+      catches a story whose columns were filled the wrong way round.
+      Also dropped from both: `culturalSetting(dialect)`, which keyed the
+      illustration style on the dialect. That was right when the dialect
+      was the story's origin; post-flip it is the *learner's own language*,
+      so it was dressing a London news article in kanduras because the
+      reader happens to be Gulf.
+      Learner-facing e2e coverage added (`e2e/reading-library.spec.ts`);
+      the surface had none.
       **Daily story DONE**: english-target Brain call, English-primary
       sentences {english, arabic, literal}, transliteration retired,
       body_arabic nullable (20260813170000), reader flipped to tappable
@@ -376,9 +434,24 @@ generation conditioning.
       dialect now means the learner's own. saved_text_translations
       stores the flipped sentence shape in the same jsonb.
       (sentence coach DONE — the model for the rest)
-- [ ] TTS: English voices for targets; Arabic TTS kept for scaffold audio
-- [ ] Realtime conversation simulator: KEEP, English persona
-      (⚠ port Hakiya's usage-cap findings: meter minutes, not sessions)
+- [x] TTS: English voices for targets; Arabic TTS kept for scaffold audio.
+      `planEnglishProvider()` (ElevenLabs premade English voices, Azure
+      en-US fallback) is the shared plan, used by the listen-episode audio,
+      the story audio and the English Sounds journey's `SoundAudioButton` —
+      which has to force the Azure English path explicitly, since
+      `useAzureTTS` routes Gulf dialects through Munsit for every *other*
+      button in the app. `planProvider(dialect)` stays for scaffold audio.
+- [x] Realtime conversation simulator: KEEP, English persona.
+      `realtime-session-token` bakes an English-only immersion partner
+      (speaks only English, recasts transfer errors rather than stopping to
+      correct, expects the dropped-article / missing-copula / /p/-as-/b/ /
+      epenthesis set for the learner's L1); the Ask-AI persona beside it is
+      deliberately bilingual, explaining in dialect. `conversation-practice`
+      matches. Hakiya's usage-cap finding was ported: `voiceBudgetCore` +
+      `recordVoiceUsage` meter SECONDS, not sessions.
+      *(Both were checked off late — the code landed with the Brain flip
+      and the boxes drifted. Found while auditing what was left after the
+      English Sounds rebuild.)*
 
 ### Content generators (admin) — FLIP
 - [x] `curriculum-chat` FLIPPED: the builder now drafts ENGLISH lessons,

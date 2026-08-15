@@ -26,7 +26,8 @@ import type { Page } from "@playwright/test";
 const STORY = storyId(0);
 
 const importButton = (page: Page) => page.getByRole("button", { name: "Import & Process" });
-const arabicBody = (page: Page) => page.getByPlaceholder("الصق النص العربي هنا...");
+const englishBody = (page: Page) =>
+  page.getByPlaceholder("Paste the article, essay or story here…");
 
 function seedStory(db: MemoryDb, over: Record<string, unknown> = {}, lines = 0) {
   db.seed("authentic_stories", [
@@ -38,7 +39,7 @@ function seedStory(db: MemoryDb, over: Record<string, unknown> = {}, lines = 0) 
       author_arabic: "ابن المقفع",
       source_name: "Hindawi Foundation",
       source_url: "https://hindawi.org/books/1",
-      body_fusha: "كان يا ما كان",
+      body_english: "A fox saw grapes hanging high.",
       status: "draft",
       ...over,
     }),
@@ -74,30 +75,42 @@ test.describe("importing a new story", () => {
     await page.goto("/admin/reading-library/new");
 
     await expect(page.getByRole("heading", { name: "Import Authentic Story" })).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Arabic Text" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "English Text" })).toBeVisible();
     // The production controls are meaningless until there is a story to work
     // on, so they are absent rather than disabled.
     await expect(page.getByText("Workflow Actions")).toHaveCount(0);
   });
 
-  test("refuses to import without a title, an Arabic title and a body", async ({ page, backend }) => {
+  test("refuses to import without a title and a body", async ({ page, backend }) => {
     await page.goto("/admin/reading-library/new");
     await importButton(page).click();
 
-    await expect(page.getByText("Please fill title, Arabic title, and Arabic body text")).toBeVisible();
+    await expect(page.getByText("Please fill the title and the English body text")).toBeVisible();
     expect(backend.callsTo("import-authentic-story")).toHaveLength(0);
   });
 
-  test("still refuses with only two of the three", async ({ page, backend }) => {
+  test("still refuses with a title but no text", async ({ page, backend }) => {
     await page.goto("/admin/reading-library/new");
     await page.getByPlaceholder("The Fox and the Grapes").fill("The Fox and the Grapes");
-    await page.getByPlaceholder("الثعلب والعنب").fill("الثعلب والعنب");
     await importButton(page).click();
 
     // Segmentation with no text produces a story with no lines, which reads
     // downstream as a completed import.
-    await expect(page.getByText("Please fill title, Arabic title, and Arabic body text")).toBeVisible();
+    await expect(page.getByText("Please fill the title and the English body text")).toBeVisible();
     expect(backend.callsTo("import-authentic-story")).toHaveLength(0);
+  });
+
+  test("imports with no dialect title, deriving one from the English", async ({ page, backend }) => {
+    // An admin pasting a real English article is not necessarily an Arabic
+    // writer, so the dialect title is generated rather than demanded of them.
+    backend.stubFunction("import-authentic-story", { story: { id: STORY } });
+
+    await page.goto("/admin/reading-library/new");
+    await page.getByPlaceholder("The Fox and the Grapes").fill("The Fox and the Grapes");
+    await englishBody(page).fill("A fox saw grapes hanging high.");
+    await importButton(page).click();
+
+    await expect(page.getByText("Story imported successfully!")).toBeVisible();
   });
 
   test("sends the whole citation, not just the text", async ({ page, backend }) => {
@@ -110,7 +123,7 @@ test.describe("importing a new story", () => {
     await page.getByPlaceholder("ابن المقفع").fill("ابن المقفع");
     await page.getByPlaceholder("https://hindawi.org/...").fill("https://hindawi.org/books/1");
     await page.getByPlaceholder("Hindawi Foundation").fill("Hindawi Foundation");
-    await arabicBody(page).fill("كان يا ما كان");
+    await englishBody(page).fill("A fox saw grapes hanging high.");
     await importButton(page).click();
 
     // The library republishes other people's writing, so author, source and
@@ -124,7 +137,7 @@ test.describe("importing a new story", () => {
       source_url: "https://hindawi.org/books/1",
       source_name: "Hindawi Foundation",
       license: "public_domain",
-      body_arabic: "كان يا ما كان",
+      body_english: "A fox saw grapes hanging high.",
       dialect: "Gulf",
       difficulty: "intermediate",
     });
@@ -136,7 +149,7 @@ test.describe("importing a new story", () => {
     await page.goto("/admin/reading-library/new");
     await page.getByPlaceholder("The Fox and the Grapes").fill("The Fox and the Grapes");
     await page.getByPlaceholder("الثعلب والعنب").fill("الثعلب والعنب");
-    await arabicBody(page).fill("كان يا ما كان");
+    await englishBody(page).fill("A fox saw grapes hanging high.");
     await importButton(page).click();
 
     // Import is step one of eight; landing back on the list would make the
@@ -160,13 +173,13 @@ test.describe("importing a new story", () => {
     await page.goto("/admin/reading-library/new");
     await page.getByPlaceholder("The Fox and the Grapes").fill("The Fox and the Grapes");
     await page.getByPlaceholder("الثعلب والعنب").fill("الثعلب والعنب");
-    await arabicBody(page).fill("كان يا ما كان");
+    await englishBody(page).fill("A fox saw grapes hanging high.");
     await importButton(page).click();
 
     // Still on the form with the pasted text intact — the text is the expensive
     // part to reproduce.
     await expect(page).toHaveURL(/\/admin\/reading-library\/new$/);
-    await expect(arabicBody(page)).toHaveValue("كان يا ما كان");
+    await expect(englishBody(page)).toHaveValue("A fox saw grapes hanging high.");
   });
 });
 
@@ -196,8 +209,9 @@ test.describe("the editor for an imported story", () => {
     await page.goto(`/admin/reading-library/${STORY}/edit`);
 
     await expect(page.getByText("Story Lines (3)")).toBeVisible();
-    await expect(page.getByText("سَطْر 0")).toBeVisible();
+    // English first — it is the story. The dialect gloss sits under it.
     await expect(page.getByText("Line 0")).toBeVisible();
+    await expect(page.getByText("سطر 0")).toBeVisible();
   });
 
   test("marks which lines already have narration", async ({ page, db }) => {
@@ -216,10 +230,10 @@ test.describe("the editor for an imported story", () => {
 
     await page.goto(`/admin/reading-library/${STORY}/edit`);
 
-    // Pinned. The Arabic Text card is new-story only, so there is no way back
+    // Pinned. The English Text card is new-story only, so there is no way back
     // to the source text from the editor — a mis-segmented story has to be
     // deleted and re-imported rather than corrected.
-    await expect(arabicBody(page)).toHaveCount(0);
+    await expect(englishBody(page)).toHaveCount(0);
   });
 });
 

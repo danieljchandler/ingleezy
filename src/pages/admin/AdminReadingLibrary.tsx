@@ -87,8 +87,8 @@ const AdminReadingLibrary = () => {
   const handleSelectSuggestion = async (suggestion: StorySuggestion, idx: number) => {
     setCreatingIdx(idx);
     try {
-      // 1. Expand the suggestion into full Arabic story text (the missing "link").
-      const { body_arabic, author, author_arabic } = await generateTextMutation.mutateAsync({
+      // 1. Expand the suggestion into full English story text (the missing "link").
+      const { body_english, author } = await generateTextMutation.mutateAsync({
         suggestion,
         dialect: suggestDialect,
         difficulty: suggestDifficulty,
@@ -100,10 +100,9 @@ const AdminReadingLibrary = () => {
           title: suggestion.title,
           title_arabic: suggestion.title_arabic,
           author: author || undefined,
-          author_arabic: author_arabic || undefined,
           source_name: suggestion.source_type.replace('_', ' '),
           license: 'public_domain',
-          body_arabic,
+          body_english,
           dialect: suggestDialect,
           difficulty: suggestDifficulty,
         },

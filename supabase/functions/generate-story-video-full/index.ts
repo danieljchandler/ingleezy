@@ -5,7 +5,7 @@
 // duration_seconds, prompt, index }.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-import { estimateSeconds, planProvider, synthesizeLine } from "../_shared/listenTts.ts";
+import { estimateSeconds, planEnglishProvider, synthesizeLine } from "../_shared/listenTts.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
 import { MODEL_IDS } from "../_shared/modelRegistry.ts";
 
@@ -24,7 +24,6 @@ type Story = {
   title: string;
   title_arabic: string | null;
   body_english: string | null;
-  body_fusha: string | null;
   dialect: string | null;
   story_video_approved: boolean | null;
 };
@@ -45,42 +44,39 @@ function normalizeArabicText(text: string): string { return text.replace(/\s+/g,
 function firstWords(text: string, maxWords: number): string {
   return normalizeArabicText(text).split(/\s+/).slice(0, maxWords).join(" ");
 }
-function validateArabicOnly(label: string, text: string): string {
+/**
+ * Inverted from the Arabic era, and kept rather than dropped: the story beats
+ * must be quoted from the ENGLISH text now, and this check is what catches a
+ * story whose columns were filled the wrong way round — the failure the whole
+ * flip exists to prevent.
+ */
+function validateEnglishOnly(label: string, text: string): string {
   const normalized = normalizeArabicText(text);
   if (!normalized) throw new Error(`${label} is empty`);
-  if (hasLatin(normalized)) throw new Error(`${label} contains Latin/English characters`);
+  if (!hasLatin(normalized)) throw new Error(`${label} contains no English text`);
   return normalized;
 }
 
-function culturalSetting(dialect: string | null): string {
-  const d = (dialect ?? "").toLowerCase();
-  if (d.includes("gulf") || d.includes("khaleeji") || d.includes("emirati") || d.includes("saudi"))
-    return "authentic Gulf Arab (Khaleeji) setting: kanduras, ghutras, traditional souq or majlis architecture, desert or coastal palette";
-  if (d.includes("egypt")) return "authentic Egyptian setting: Cairo streets, galabiyas, distinctive Egyptian architecture and warm tones";
-  if (d.includes("yemen")) return "authentic Yemeni setting: Sana'a tower houses, jambiya belts, mountain terrain";
-  if (d.includes("levant") || d.includes("syria") || d.includes("lebanon") || d.includes("palest") || d.includes("jordan"))
-    return "authentic Levantine setting: old-city stone architecture";
-  return "authentic Arab cultural setting matching the story's origin";
-}
-
 async function planFilm(story: Story): Promise<Plan> {
-  const fullArabic = story.body_fusha ?? "";
+  // The story text. Post-flip this is the ENGLISH: `body_fusha` held the
+  // Arabic source and is null on everything the flipped importer writes, so
+  // reading it here handed the storyboard director an empty story and left it
+  // planning scenes from the title alone.
   const fullEnglish = story.body_english ?? "";
-  const setting = culturalSetting(story.dialect);
 
-  const system = `You are a storyboard director planning a slideshow that adapts an Arabic story. You will read the ENTIRE story and design a coherent visual world where every scene image feels like part of one storybook.
+  const system = `You are a storyboard director planning a slideshow that adapts a short story. You will read the ENTIRE story and design a coherent visual world where every scene image feels like part of one storybook.
 
 Return STRICT JSON:
 {
-  "style_anchor": "one paragraph (<=60 words) describing shared illustration style: lighting, color palette, era, painterly feel, and the ${setting}",
+  "style_anchor": "one paragraph (<=60 words) describing shared illustration style: lighting, color palette, era, painterly feel, and a setting that suits the story itself",
   "characters": [
     { "id": "short_slug", "appearance": "concrete visual description: age, build, face, hair, exact clothing, distinguishing features" }
   ],
   "scenes": [
     {
       "index": 0,
-      "arabic_beat": "the Arabic sentence(s) from the story this scene depicts, quoted verbatim from the script",
-      "visual_prompt": "single storybook illustration description of WHAT IS DEPICTED in the frame that matches arabic_beat. Do NOT include style/setting/character descriptions (prepended automatically). No text in image, no captions, no subtitles.",
+      "arabic_beat": "the sentence(s) from the story this scene depicts, quoted verbatim from the story text",
+      "visual_prompt": "single storybook illustration description of WHAT IS DEPICTED in the frame that matches the beat. Do NOT include style/setting/character descriptions (prepended automatically). No text in image, no captions, no subtitles.",
       "characters_in_scene": ["character_id_slug"]
     }
   ]
@@ -88,20 +84,16 @@ Return STRICT JSON:
 
 Hard rules:
 - Between ${MIN_SCENES} and ${MAX_SCENES} scenes, ordered start-to-end, covering the WHOLE story with no gaps.
-- Every scene MUST correspond to real content from the provided Arabic script. Do not invent events.
+- Every scene MUST correspond to real content from the provided story. Do not invent events.
 - Characters listed once with consistent appearance; reused across scenes by id.
-- arabic_beat MUST be Arabic script quoted verbatim from the provided script. Never English.
+- arabic_beat MUST be quoted verbatim from the provided English story. (The field keeps its old name; its contents are the story's own words, which are English.)
 - No text/captions/subtitles/signs in the generated image.
-- Setting: ${setting}.
 - Output valid JSON only, no prose, no markdown fences.`;
 
-  const user = `STORY TITLE: ${story.title}${story.title_arabic ? ` / ${story.title_arabic}` : ""}
-DIALECT: ${story.dialect ?? "unspecified"}
+  const user = `STORY TITLE: ${story.title}
 
-ARABIC SCRIPT (authoritative — every scene must match this):
-${fullArabic}
-
-${fullEnglish ? `ENGLISH REFERENCE TRANSLATION (context only, do NOT use English words in prompts):\n${fullEnglish}` : ""}`;
+STORY (authoritative — every scene must match this):
+${fullEnglish}`;
 
   const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
@@ -132,8 +124,8 @@ ${fullEnglish ? `ENGLISH REFERENCE TRANSLATION (context only, do NOT use English
     scenes: parsed.scenes.slice(0, MAX_SCENES).map((scene, idx) => ({
       ...scene,
       index: idx,
-      arabic_beat: validateArabicOnly(`scene ${idx + 1} arabic_beat`, scene.arabic_beat),
-      visual_prompt: scene.visual_prompt || "A precise storybook depiction of the Arabic story beat.",
+      arabic_beat: validateEnglishOnly(`scene ${idx + 1} arabic_beat`, scene.arabic_beat),
+      visual_prompt: scene.visual_prompt || "A precise storybook depiction of the story beat.",
       characters_in_scene: Array.isArray(scene.characters_in_scene) ? scene.characters_in_scene : [],
     })),
   };
@@ -186,8 +178,8 @@ async function synthesizeSceneNarration(
   sceneIndex: number,
   arabicBeat: string,
 ): Promise<{ audio_url: string; narration_arabic: string; duration_seconds: number }> {
-  const narration = validateArabicOnly(`scene ${sceneIndex + 1} narration`, firstWords(arabicBeat, 40));
-  const providerPlan = await planProvider(story.dialect || "Gulf");
+  const narration = validateEnglishOnly(`scene ${sceneIndex + 1} narration`, firstWords(arabicBeat, 40));
+  const providerPlan = planEnglishProvider();
   const bytes = await synthesizeLine(narration, "narrator", sceneIndex, providerPlan);
   const path = `authentic-stories/${story.id}/full-${sceneIndex}-narration-${Date.now()}.${providerPlan.ext}`;
   const up = await admin.storage.from(BUCKET).upload(path, bytes, {
@@ -303,7 +295,7 @@ Deno.serve(async (req) => {
 
     const { data: story, error: storyErr } = await admin
       .from("authentic_stories")
-      .select("id, title, title_arabic, body_english, body_fusha, dialect, story_video_approved")
+      .select("id, title, title_arabic, body_english, dialect, story_video_approved")
       .eq("id", story_id)
       .single();
     if (storyErr || !story) {

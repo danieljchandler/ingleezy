@@ -31,15 +31,19 @@ export function useStorySuggestions() {
 }
 
 export interface GeneratedStoryText {
-  body_arabic: string;
+  body_english: string;
   author: string | null;
-  author_arabic: string | null;
 }
 
 /**
- * Expands a StorySuggestion (title + description only) into the full Arabic
- * story text, so it can be imported directly without the admin having to
- * find and paste a source text themselves.
+ * Expands a StorySuggestion (title + description only) into full ENGLISH story
+ * text, so it can be imported directly without the admin having to find and
+ * paste a source text themselves.
+ *
+ * This is the reading library's empty-shelf path: the library prefers real
+ * imported texts, and generation is what keeps it stocked when none is to
+ * hand. The generated English then goes through the same importer as a pasted
+ * one, so both reach their dialect scaffold by a single path.
  */
 export function useGenerateStoryText() {
   return useMutation({
@@ -63,13 +67,12 @@ export function useGenerateStoryText() {
       });
       if (error) throw new Error(error.message);
       if (data?.error) throw new Error(data.detail || data.error);
-      if (!data?.body_arabic) {
+      if (!data?.body_english) {
         throw new Error("No story text returned");
       }
       return {
-        body_arabic: data.body_arabic,
+        body_english: data.body_english,
         author: data.author ?? null,
-        author_arabic: data.author_arabic ?? null,
       };
     },
   });

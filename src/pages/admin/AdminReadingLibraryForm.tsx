@@ -39,7 +39,7 @@ const AdminReadingLibraryForm = () => {
   const [sourceUrl, setSourceUrl] = useState('');
   const [sourceName, setSourceName] = useState(searchParams.get('source_type')?.replace('_', ' ') || '');
   const [license, setLicense] = useState('public_domain');
-  const [bodyArabic, setBodyArabic] = useState('');
+  const [bodyEnglish, setBodyEnglish] = useState('');
   const [dialect, setDialect] = useState(searchParams.get('dialect') || 'Gulf');
   const [difficulty, setDifficulty] = useState(searchParams.get('difficulty') || 'intermediate');
   const [importing, setImporting] = useState(false);
@@ -107,15 +107,15 @@ const AdminReadingLibraryForm = () => {
       setSourceUrl(story.source_url || '');
       setSourceName(story.source_name || '');
       setLicense(story.license || 'public_domain');
-      setBodyArabic(story.body_fusha || '');
+      setBodyEnglish(story.body_english || '');
       setDialect(story.dialect || 'Gulf');
       setDifficulty(story.difficulty || 'intermediate');
     }
   }, [story]);
 
   const handleImport = async () => {
-    if (!title || !titleArabic || !bodyArabic) {
-      toast.error('Please fill title, Arabic title, and Arabic body text');
+    if (!title || !bodyEnglish) {
+      toast.error('Please fill the title and the English body text');
       return;
     }
     setImporting(true);
@@ -125,7 +125,7 @@ const AdminReadingLibraryForm = () => {
         body: {
           title, title_arabic: titleArabic, author, author_arabic: authorArabic,
           source_url: sourceUrl, source_name: sourceName, license,
-          body_arabic: bodyArabic, dialect, difficulty,
+          body_english: bodyEnglish, dialect, difficulty,
         },
       });
       if (resp.error) throw new Error(resp.error.message);
@@ -418,26 +418,30 @@ const AdminReadingLibraryForm = () => {
           </CardContent>
         </Card>
 
-        {/* Arabic Text Input (new story only) */}
+        {/* English source text (new story only) */}
         {!isEditing && (
           <Card>
             <CardHeader>
-              <CardTitle>Arabic Text</CardTitle>
+              <CardTitle>English Text</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label>Paste Arabic text (will be segmented and processed by AI)</Label>
+                <Label>
+                  Paste the English text. It gets segmented into lines and each line
+                  glossed into the learner's dialect — the English itself is kept verbatim.
+                </Label>
                 <Textarea
-                  value={bodyArabic}
-                  onChange={e => setBodyArabic(e.target.value)}
-                  dir="rtl"
-                  className="min-h-[200px] font-arabic text-lg"
-                  placeholder="الصق النص العربي هنا..."
+                  value={bodyEnglish}
+                  onChange={e => setBodyEnglish(e.target.value)}
+                  dir="ltr"
+                  lang="en"
+                  className="min-h-[200px] text-lg"
+                  placeholder="Paste the article, essay or story here…"
                 />
               </div>
               <Button onClick={handleImport} disabled={importing}>
                 {importing && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                Import & Process
+                Import &amp; Process
               </Button>
             </CardContent>
           </Card>
@@ -718,11 +722,15 @@ const AdminReadingLibraryForm = () => {
                       <Badge variant="outline" className="text-xs">#{line.line_index}</Badge>
                       {line.audio_url && <Badge variant="secondary" className="text-xs">🔊</Badge>}
                     </div>
-                    <p className="text-base font-arabic" dir="rtl">{line.arabic_vocalized || line.arabic}</p>
-                    {line.dialect_vocalized && (
-                      <p className="text-sm font-arabic text-blue-600" dir="rtl">{line.dialect_vocalized}</p>
+                    {/* English first — it is the story now; the Arabic under it
+                        is the scaffold the import generated. */}
+                    <p className="text-base" dir="ltr" lang="en">{line.english}</p>
+                    <p className="text-sm font-arabic text-blue-600" dir="rtl">{line.arabic}</p>
+                    {(line as { english_literal?: string | null }).english_literal && (
+                      <p className="text-xs font-arabic text-muted-foreground" dir="rtl">
+                        {(line as { english_literal?: string | null }).english_literal}
+                      </p>
                     )}
-                    <p className="text-sm text-muted-foreground">{line.english}</p>
                     {line.audio_url && (
                       <audio controls src={line.audio_url} className="w-full h-8" />
                     )}

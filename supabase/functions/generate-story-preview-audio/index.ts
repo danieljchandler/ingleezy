@@ -1,8 +1,9 @@
 // generate-story-preview-audio — Generates TTS for first N lines only (preview)
-// Uses the shared listenTts.ts helpers for multi-dialect TTS.
+// Uses the shared listenTts.ts helpers. Narrates the ENGLISH line: post-flip
+// the story's text is English and the Arabic is the scaffold beside it.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-import { planProvider, synthesizeLine } from "../_shared/listenTts.ts";
+import { planEnglishProvider, synthesizeLine } from "../_shared/listenTts.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
 
 
@@ -65,8 +66,10 @@ Deno.serve(async (req) => {
       });
     }
 
-    const dialect = story.dialect || "Gulf";
-    const plan = await planProvider(dialect);
+    // English narration: the story IS the English now, and hearing it read is
+    // the point of the audio. Narrating the dialect scaffold instead would be
+    // reading the learner the translation rather than the text.
+    const plan = planEnglishProvider();
 
     // Generate audio for preview lines
     const audioUrls: string[] = [];
@@ -74,8 +77,7 @@ Deno.serve(async (req) => {
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
-      // Prefer vocalized dialect text, fallback to vocalized arabic, then raw arabic
-      const textToSpeak = line.dialect_vocalized || line.arabic_vocalized || line.dialect || line.arabic;
+      const textToSpeak = line.english;
 
       if (!textToSpeak) continue;
 

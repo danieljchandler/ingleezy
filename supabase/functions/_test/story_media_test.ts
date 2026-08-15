@@ -6,9 +6,12 @@ import { json, type UpstreamHandler } from "./upstreams.ts";
  * `generate-story-preview-audio` and `edit-story-scene-image` — the two
  * story-media functions an admin drives by hand.
  *
- * The preview reads a story's first five lines and narrates them, choosing the
- * text to speak through a fallback chain (vocalised dialect, vocalised Fusha,
- * plain dialect, plain Arabic) that decides what the learner actually hears.
+ * The preview reads a story's first five lines and narrates them. Post-flip it
+ * narrates the ENGLISH: the story's text is English now and hearing it read is
+ * the whole point of story audio, so the Arabic beside it is the translation
+ * and narrating that instead would be reading the learner the subtitles. The
+ * old fallback chain (vocalised dialect, vocalised Fusha, plain Arabic) went
+ * with the flip — there is one field to speak and no chain to pick it.
  * It also carries on past a failed line rather than abandoning the preview.
  *
  * The scene editor replaces one image inside a JSONB array by index, from
@@ -82,10 +85,9 @@ const storyLine = (index: number, over: Record<string, unknown> = {}) => ({
   id: `line-${index}`,
   story_id: STORY,
   line_index: index,
+  english: `line ${index}`,
+  // The scaffold. Present on every line and never narrated.
   arabic: `سطر ${index}`,
-  arabic_vocalized: `سَطْر ${index}`,
-  dialect: null,
-  dialect_vocalized: null,
   ...over,
 });
 
@@ -172,7 +174,9 @@ Deno.test("generate-story-preview-audio narrates each line and reports the count
   assertEquals(result.status, 200);
   assertEquals(result.body.success, true);
   assertEquals(result.body.preview_lines, 2);
-  assertEquals(result.body.provider, "azure");
+  // English narration goes through the shared English provider plan, which
+  // prefers ElevenLabs and falls back to Azure en-US.
+  assertEquals(result.body.provider, "elevenlabs");
   assert(String(result.body.preview_url).includes("listen-audio"));
 });
 
@@ -224,73 +228,32 @@ Deno.test("generate-story-preview-audio marks the story as previewed", async () 
   assert(String(patch?.video_preview_url).includes("listen-audio"));
 });
 
-Deno.test("generate-story-preview-audio prefers the vocalised dialect text", async () => {
-  // The fallback chain decides what the learner hears: dialect with tashkeel
-  // first, because that is the version the reading view highlights.
+Deno.test("generate-story-preview-audio narrates the English, not the Arabic beside it", async () => {
+  // The direction test. Both fields are populated on every line, so a function
+  // reading the wrong one still produces audio of the right length for the
+  // right story — just in the language the learner already speaks.
   const result = await call(
     "generate-story-preview-audio",
     { story_id: STORY },
     previewBackend({
-      lines: [
-        storyLine(0, {
-          dialect_vocalized: "بِالدَّارِجَة",
-          dialect: "بالدارجة",
-          arabic_vocalized: "بِالفُصْحَى",
-          arabic: "بالفصحى",
-        }),
-      ],
+      lines: [storyLine(0, { english: "The market opens at dawn", arabic: "السوق يفتح مع الفجر" })],
     }),
   );
 
   assertEquals(result.status, 200);
-  const spoken = result.bodies[result.calls.findIndex((u) => u.includes("speech.microsoft.com"))];
-  assertStringIncludes(spoken ?? "", "بِالدَّارِجَة");
+  const spoken = result.bodies[result.calls.findIndex((u) => u.includes("api.elevenlabs.io"))];
+  assertStringIncludes(spoken ?? "", "The market opens at dawn");
+  assert(!(spoken ?? "").includes("السوق"));
 });
 
-Deno.test("generate-story-preview-audio falls back to the vocalised Fusha", async () => {
+Deno.test("generate-story-preview-audio skips a line with no English", async () => {
+  // A line whose gloss survived but whose English did not has nothing to
+  // narrate; speaking its Arabic would be worse than staying silent.
   const result = await call(
     "generate-story-preview-audio",
     { story_id: STORY },
     previewBackend({
-      lines: [
-        storyLine(0, {
-          dialect_vocalized: null,
-          dialect: null,
-          arabic_vocalized: "بِالفُصْحَى",
-          arabic: "بالفصحى",
-        }),
-      ],
-    }),
-  );
-
-  const spoken = result.bodies[result.calls.findIndex((u) => u.includes("speech.microsoft.com"))];
-  assertStringIncludes(spoken ?? "", "بِالفُصْحَى");
-});
-
-Deno.test("generate-story-preview-audio falls back to bare Arabic last", async () => {
-  const result = await call(
-    "generate-story-preview-audio",
-    { story_id: STORY },
-    previewBackend({
-      lines: [
-        storyLine(0, { dialect_vocalized: null, dialect: null, arabic_vocalized: null }),
-      ],
-    }),
-  );
-
-  const spoken = result.bodies[result.calls.findIndex((u) => u.includes("speech.microsoft.com"))];
-  assertStringIncludes(spoken ?? "", "سطر 0");
-});
-
-Deno.test("generate-story-preview-audio skips a line with no text at all", async () => {
-  const result = await call(
-    "generate-story-preview-audio",
-    { story_id: STORY },
-    previewBackend({
-      lines: [
-        storyLine(0, { arabic: "", arabic_vocalized: null }),
-        storyLine(1),
-      ],
+      lines: [storyLine(0, { english: "" }), storyLine(1)],
     }),
   );
 
@@ -326,7 +289,10 @@ Deno.test("generate-story-preview-audio reports a TTS outage", async () => {
     "generate-story-preview-audio",
     { story_id: STORY },
     previewBackend({
-      extra: { "tts.speech.microsoft.com": () => json({ error: "down" }, 503) },
+      extra: {
+        "api.elevenlabs.io": () => json({ error: "down" }, 503),
+        "tts.speech.microsoft.com": () => json({ error: "down" }, 503),
+      },
     }),
   );
 
