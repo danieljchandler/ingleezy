@@ -8,7 +8,7 @@ export interface UserPhrase {
   user_id: string;
   phrase_arabic: string;
   phrase_english: string;
-  transliteration: string | null;
+  phonetic_ar: string | null;
   notes: string | null;
   source: string;
   dialect: string;
@@ -165,7 +165,7 @@ export const useAddUserPhrase = () => {
     mutationFn: async (phrase: {
       phrase_arabic: string;
       phrase_english: string;
-      transliteration?: string;
+      phonetic_ar?: string;
       notes?: string;
       source?: string;
       dialect?: string;
@@ -178,7 +178,7 @@ export const useAddUserPhrase = () => {
           user_id: user.id,
           phrase_arabic: phrase.phrase_arabic,
           phrase_english: phrase.phrase_english,
-          transliteration: phrase.transliteration || null,
+          phonetic_ar: phrase.phonetic_ar || null,
           notes: phrase.notes || null,
           source: phrase.source || "how-do-i-say",
           dialect: phrase.dialect || activeDialect,

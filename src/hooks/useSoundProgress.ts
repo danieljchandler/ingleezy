@@ -5,16 +5,18 @@ import { useAuth } from "@/hooks/useAuth";
 import { ENGLISH_SOUNDS, SOUND_STEPS, type SoundStepId } from "@/data/englishSounds";
 
 /**
- * Progress through the English Sounds journey (formerly the Arabic Alphabet
- * Journey — see src/data/englishSounds.ts for why the content flipped and
- * the table names didn't). `user_letter_progress.letter_code` now stores a
- * sound code ("p", "beat_bit", "clusters"...) instead of an Arabic letter
- * code; the shape of a "stop" — six steps, a best score per game, a mastery
- * date — needed no change at all, so neither did the table or the RPC.
+ * Progress through the English Sounds journey, formerly the Arabic Alphabet
+ * Journey — see src/data/englishSounds.ts for why the content flipped.
+ *
+ * The shape of a "stop" survived the rebuild untouched: six steps, a best
+ * score per game, a mastery date. Only the names moved, and only once the
+ * content had settled — `user_letter_progress.letter_code` became
+ * `user_sound_progress.sound_code`, because a sound code ("p", "beat_bit",
+ * "clusters") is not a letter and several of them are not one letter.
  */
 
 export interface SoundProgressRow {
-  letter_code: string;
+  sound_code: string;
   steps_completed: SoundStepId[];
   best_spot_score: number;
   best_sound_score: number;
@@ -38,14 +40,14 @@ export function useSoundProgress() {
     enabled: !!user?.id,
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("user_letter_progress" as any)
-        .select("letter_code, steps_completed, best_spot_score, best_sound_score, mastered_at, last_practiced_at")
+        .from("user_sound_progress" as any)
+        .select("sound_code, steps_completed, best_spot_score, best_sound_score, mastered_at, last_practiced_at")
         .eq("user_id", user!.id);
       if (error) throw error;
       const map: Record<string, SoundProgressRow> = {};
       for (const row of (data as any[]) ?? []) {
-        map[row.letter_code] = {
-          letter_code: row.letter_code,
+        map[row.sound_code] = {
+          sound_code: row.sound_code,
           steps_completed: Array.isArray(row.steps_completed) ? row.steps_completed : [],
           best_spot_score: row.best_spot_score ?? 0,
           best_sound_score: row.best_sound_score ?? 0,
@@ -78,7 +80,7 @@ export function useSoundProgress() {
         SOUND_STEPS.every((s) => stepsSet.has(s)) && !existing?.mastered_at;
       const row = {
         user_id: user.id,
-        letter_code: soundCode,
+        sound_code: soundCode,
         steps_completed: stepsCompleted,
         best_spot_score: Math.max(existing?.best_spot_score ?? 0, spotScore ?? 0),
         best_sound_score: Math.max(existing?.best_sound_score ?? 0, soundScore ?? 0),
@@ -87,8 +89,8 @@ export function useSoundProgress() {
         last_practiced_at: new Date().toISOString(),
       };
       const { error } = await supabase
-        .from("user_letter_progress" as any)
-        .upsert(row, { onConflict: "user_id,letter_code" });
+        .from("user_sound_progress" as any)
+        .upsert(row, { onConflict: "user_id,sound_code" });
       if (error) throw error;
       return { mastered };
     },

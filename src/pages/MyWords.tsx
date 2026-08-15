@@ -140,7 +140,7 @@ const MyWords = () => {
    * here would promise a lookup the function resolves for free as "none".
    */
   const rootlessCount = useMemo(
-    () => (words ?? []).filter((w) => w.root === null && !/\s/.test(w.word_english ?? "")).length,
+    () => (words ?? []).filter((w) => w.word_family === null && !/\s/.test(w.word_english ?? "")).length,
     [words],
   );
 
@@ -152,7 +152,7 @@ const MyWords = () => {
       if (categoryFilter && w.source !== categoryFilter) return false;
       if (deckFilter && w.deck_name !== deckFilter) return false;
       if (tagFilter && !(w.tags || []).includes(tagFilter)) return false;
-      if (rootFilter && familyKey(w.root) !== rootFilter) return false;
+      if (rootFilter && familyKey(w.word_family) !== rootFilter) return false;
       return true;
     });
   }, [words, sourceFilter, categoryFilter, deckFilter, tagFilter, rootFilter]);
@@ -799,22 +799,22 @@ const MyWords = () => {
                       here too, which is the honest place for them: visible as
                       leftover data, never presented as an English family.
                     */}
-                    {word.root && (
-                      familyKey(word.root) && !selectMode ? (
+                    {word.word_family && (
+                      familyKey(word.word_family) && !selectMode ? (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            const key = familyKey(word.root)!;
+                            const key = familyKey(word.word_family)!;
                             setRootFilter(rootFilter === key ? null : key);
                           }}
                           title="أظهر كل كلماتك من هذي العائلة"
                           className="text-xs font-english text-muted-foreground bg-muted hover:bg-muted/70 hover:text-foreground px-1.5 py-0.5 rounded transition-colors"
                         >
-                          {formatFamily(word.root)}
+                          {formatFamily(word.word_family)}
                         </button>
                       ) : (
                         <span className="text-xs font-mono text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
-                          {formatFamily(word.root) ?? word.root}
+                          {formatFamily(word.word_family) ?? word.word_family}
                         </span>
                       )
                     )}

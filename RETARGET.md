@@ -119,6 +119,74 @@ generation conditioning.
       dialect eval harness (eval-dialect-live, golden sets) STAY — they
       serve the Arabic scaffold direction.
 
+### Column names — the deferred rename, now DONE
+- [x] Through the retarget the rule was: keep the Arabic-era column names,
+      flip only the content. That was right while features were moving —
+      one concern per change, no migration per PR — and the debt it built
+      is that a handful of columns ended up saying one thing and holding
+      another. Paid off in `20260815120000_semantic_column_renames.sql`,
+      while no real Supabase project is linked: plain renames, no
+      expand/contract, no backfill.
+      `learner_errors.target_arabic` / `produced_arabic` →
+      `target_text` / `produced_text` — neither `_arabic` nor `_english`
+      is honest, because shadowing still scores bridged Arabic clips and
+      the recogniser is picked per clip. `user_vocabulary.root` and
+      `vocabulary_words.root` → `word_family`: an Arabic root is generative
+      (ك-ت-ب → كتب, كتاب, مكتب) and an English word family is not, which is
+      the whole reason `wordFamily.ts` replaced `arabicRoot.ts`.
+      `authentic_story_lines.english_literal` → `literal_arabic` and
+      `daily_vocab_stories.body_english_literal` → `body_literal_arabic`,
+      the most actively wrong of the set — both hold Arabic, and they hold
+      the same kind of thing, so they now answer to one word. `user_phrases`
+      and
+      `set_phrases` `transliteration` → `phonetic_ar`: these hold the
+      English respelled in Arabic letters ("ثانك يو"), the *opposite* of
+      `user_vocabulary.transliteration`, which is a Latin transliteration
+      of Arabic and keeps its name. One identifier meaning opposite things
+      two tables apart was the clearest case for moving. And
+      `user_letter_progress.letter_code` → `user_sound_progress.sound_code`,
+      since a sound code ("p", "clusters") is not a letter and several are
+      not one letter. Deliberately NOT renamed: `word_arabic` /
+      `word_english` and friends, which name the *language* and still name
+      it correctly — what flipped is which is target and which is scaffold,
+      and that is a property of the app, not the column.
+      Dropped with it: `body_fusha`, `body_fusha_vocalized`,
+      `body_dialect_vocalized`, `arabic_vocalized`, `dialect`,
+      `dialect_vocalized` — vocalisation is a reading aid for Arabic script
+      and the library no longer renders Arabic script as its text — plus
+      `daily_vocab_stories.body_transliteration`, romanization of Arabic for
+      a reader who reads Arabic, hard-nulled since the flip, and
+      `picture_scene_hotspots.root`, which outlived the feature that wrote
+      it. That last one is dropped rather than renamed for a specific
+      reason: `schemaContract` attributes a column to any table that has it,
+      so one surviving `root` anywhere kept a stale `root` acceptable
+      everywhere. Not hypothetical — that is exactly how a `root` in
+      MyWordsReview's select list survived this pass's own sweep and turned
+      the saved-words deck up empty.
+      **Bugs that fell out of the pass.** `user_vocabulary`'s uniqueness was
+      `(user_id, word_arabic, dialect)`, right when the Arabic was the word
+      being learned; post-flip the Arabic is the *gloss* and distinct
+      English words routinely share one — "big" and "large" are both كبير,
+      so the second save was silently dropped as a duplicate in the one
+      flow where a learner is actively collecting vocabulary. Now keyed on
+      `word_english`. And `columnDefaults.ts`, which reads the migrations
+      to work out what the emulator should default, did not follow
+      `ALTER TABLE … RENAME` — so a renamed table silently lost every
+      default it had, invisibly, until a test asserted on a defaulted
+      column and got undefined. It follows renames now.
+      A third came out of the same gap: `suggest-flashcards` emitted `root`
+      in its tool schema while `SuggestFlashcardsDialog` read `word_family`,
+      so every suggested card arrived without the family the model had just
+      been asked for and was queued for a backfill it did not need. Nothing
+      errored — a missing optional key never does. The deno test now pins
+      the key rather than the value. Two type-level `root`s went the same
+      way, `VocabularyCard`'s `VocabularyWord` and `MyWordsReview`'s row
+      types, both of which are shaped after the table and so silently stop
+      matching it. What all four have in common is that TypeScript cannot
+      see through a PostgREST select string or an AI tool schema, which is
+      the whole reason the emulator rejects unknown columns and the reason
+      it now has no `root` left to accept.
+
 ### SRS / flashcards — FLIP (mostly renames)
 - [~] Decks: front = English word/phrase (clickable-word save flow KEEP),
       back = Arabic dialect + Fusha + audio.

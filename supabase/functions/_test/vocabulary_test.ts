@@ -683,7 +683,7 @@ Deno.test("persist-word-audio turns an anonymous caller away", async () => {
 // ── enrich-word-roots ───────────────────────────────────────────────────────
 
 /**
- * The catch-up pass that fills in `user_vocabulary.root`.
+ * The catch-up pass that fills in `user_vocabulary.word_family`.
  *
  * Post-flip that column holds an English word family's base form, derived from
  * `word_english`. Families were only ever written on one save path, so most of
@@ -726,8 +726,10 @@ const someWords = (n: number, prefix = "word") =>
   }));
 
 /** A tool response answering every word in the batch with the same family. */
-const rootsFor = (count: number, root = "act") =>
-  emitting({ roots: Array.from({ length: count }, (_, i) => ({ index: i + 1, root })) });
+const rootsFor = (count: number, family = "act") =>
+  emitting({
+    families: Array.from({ length: count }, (_, i) => ({ index: i + 1, word_family: family })),
+  });
 
 Deno.test("enrich-word-roots asks about forty words at a time", async () => {
   const { status, body, calls } = await call(
@@ -779,7 +781,7 @@ Deno.test("enrich-word-roots stores a word with no family as '' so it is never a
     {},
     caller({
       ...vocabulary([{ id: "voc-0", word_english: "pizza" }], writes),
-      "ai.gateway.lovable.dev": emitting({ roots: [{ index: 1, root: "" }] }),
+      "ai.gateway.lovable.dev": emitting({ families: [{ index: 1, word_family: "" }] }),
     }),
   );
 
@@ -799,7 +801,7 @@ Deno.test("enrich-word-roots refuses an answer that is not a base form", async (
       {},
       caller({
         ...vocabulary([{ id: "voc-0", word_english: "action" }]),
-        "ai.gateway.lovable.dev": emitting({ roots: [{ index: 1, root: notAFamily }] }),
+        "ai.gateway.lovable.dev": emitting({ families: [{ index: 1, word_family: notAFamily }] }),
       }),
     );
 
@@ -818,9 +820,9 @@ Deno.test("enrich-word-roots skips an index it cannot place rather than shifting
     caller({
       ...vocabulary(someWords(3)),
       "ai.gateway.lovable.dev": emitting({
-        roots: [
-          { index: 1, root: "act" },
-          { index: 99, root: "form" },
+        families: [
+          { index: 1, word_family: "act" },
+          { index: 99, word_family: "form" },
         ],
       }),
     }),

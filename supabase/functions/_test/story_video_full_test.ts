@@ -39,7 +39,7 @@ const BEATS = [
 
 const aScene = (index: number, over: Record<string, unknown> = {}) => ({
   index,
-  arabic_beat: BEATS[index % BEATS.length],
+  story_beat: BEATS[index % BEATS.length],
   visual_prompt: `scene ${index} depiction`,
   characters_in_scene: ["boy"],
   ...over,
@@ -360,7 +360,7 @@ Deno.test("generate-story-video-full rejects a beat with no English in it", asyn
     { story_id: STORY },
     backend({
       plan: aPlan({
-        scenes: [aScene(0), aScene(1), aScene(2, { arabic_beat: "مشى الولد إلى السوق" })],
+        scenes: [aScene(0), aScene(1), aScene(2, { story_beat: "مشى الولد إلى السوق" })],
       }),
     }),
   );
@@ -503,9 +503,9 @@ Deno.test("generate-story-video-full narrates each scene with its own beat", asy
   const segments = lastSegments(result);
 
   assertEquals(segments.length, 3);
-  assertEquals(segments[0].narration_arabic, BEATS[0]);
-  assertEquals(segments[1].narration_arabic, BEATS[1]);
-  assertEquals(segments[2].narration_arabic, BEATS[2]);
+  assertEquals(segments[0].narration_text, BEATS[0]);
+  assertEquals(segments[1].narration_text, BEATS[1]);
+  assertEquals(segments[2].narration_text, BEATS[2]);
 });
 
 Deno.test("generate-story-video-full trims a long beat before narrating it", async () => {
@@ -513,13 +513,13 @@ Deno.test("generate-story-video-full trims a long beat before narrating it", asy
   const result = await call(
     { story_id: STORY },
     backend({
-      plan: aPlan({ scenes: [aScene(0, { arabic_beat: longBeat }), aScene(1), aScene(2)] }),
+      plan: aPlan({ scenes: [aScene(0, { story_beat: longBeat }), aScene(1), aScene(2)] }),
     }),
   );
 
   // Forty words is roughly the length a single slide can hold the viewer for;
   // the untrimmed beat still drives the image, only the narration is capped.
-  const narration = String(lastSegments(result)[0].narration_arabic);
+  const narration = String(lastSegments(result)[0].narration_text);
   assertEquals(narration.split(/\s+/).length, 40);
   assertStringIncludes(imagePrompts(result)[0], "word59");
 });
@@ -563,7 +563,7 @@ Deno.test("generate-story-video-full keeps the prompt it used on the segment", a
   // The prompt is the only record of why a frame looks the way it does, and the
   // admin form offers a re-roll from it.
   assertStringIncludes(String(lastSegments(result)[0].prompt), "SCENE 1 of 3");
-  assertEquals(lastSegments(result)[0].arabic_beat, BEATS[0]);
+  assertEquals(lastSegments(result)[0].story_beat, BEATS[0]);
 });
 
 Deno.test("generate-story-video-full marks the story ready when every scene lands", async () => {
@@ -596,7 +596,7 @@ Deno.test("generate-story-video-full reports a story as ready with scenes missin
   assertEquals(result.patches.at(-1)?.story_video_full_status, "ready");
   assertEquals(result.patches.at(-1)?.story_video_full_error, null);
   // The gap is visible in the data if anyone looks, but nothing surfaces it.
-  assertEquals(lastSegments(result).map((s) => s.arabic_beat), [BEATS[0], BEATS[2]]);
+  assertEquals(lastSegments(result).map((s) => s.story_beat), [BEATS[0], BEATS[2]]);
 });
 
 Deno.test("generate-story-video-full marks the story failed when every scene fails", async () => {

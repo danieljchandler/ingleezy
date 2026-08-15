@@ -251,7 +251,7 @@ describe("keeping a phrase", () => {
     expect(phrasesWrittenTo(backend)[0]).toMatchObject({
       phrase_english: "I'm so sorry for your loss",
       phrase_arabic: "الله يرحمه ويصبركم",
-      transliteration: "أيم سو سوري فور يور لوس",
+      phonetic_ar: "أيم سو سوري فور يور لوس",
       source: `situation:${A_SITUATION}`,
       dialect: "Gulf",
     });

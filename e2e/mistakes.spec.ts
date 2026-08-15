@@ -25,8 +25,8 @@ const anError = (n: number, over: Record<string, unknown> = {}) => ({
   dialect: "Gulf",
   source: "pronunciation",
   error_kind: "mispronunciation",
-  target_arabic: "مرحبا",
-  produced_arabic: "مرهبا",
+  target_text: "مرحبا",
+  produced_text: "مرهبا",
   detail: {},
   word_id: null,
   user_vocabulary_id: null,
@@ -75,9 +75,9 @@ test.describe("the list", () => {
 
   test("collapses repeated attempts at the same target into one entry", async ({ page, db }) => {
     seedMistakes(db, [
-      anError(1, { target_arabic: "مرحبا" }),
-      anError(2, { target_arabic: "مرحبا" }),
-      anError(3, { target_arabic: "مرحبا" }),
+      anError(1, { target_text: "مرحبا" }),
+      anError(2, { target_text: "مرحبا" }),
+      anError(3, { target_text: "مرحبا" }),
     ]);
 
     await page.goto("/mistakes");
@@ -89,9 +89,9 @@ test.describe("the list", () => {
 
   test("says how often a target was missed", async ({ page, db }) => {
     seedMistakes(db, [
-      anError(1, { target_arabic: "مرحبا" }),
-      anError(2, { target_arabic: "مرحبا" }),
-      anError(3, { target_arabic: "مرحبا" }),
+      anError(1, { target_text: "مرحبا" }),
+      anError(2, { target_text: "مرحبا" }),
+      anError(3, { target_text: "مرحبا" }),
     ]);
 
     await page.goto("/mistakes");
@@ -101,8 +101,8 @@ test.describe("the list", () => {
 
   test("keeps different targets apart", async ({ page, db }) => {
     seedMistakes(db, [
-      anError(1, { target_arabic: "مرحبا" }),
-      anError(2, { target_arabic: "شكرا" }),
+      anError(1, { target_text: "مرحبا" }),
+      anError(2, { target_text: "شكرا" }),
     ]);
 
     await page.goto("/mistakes");
@@ -113,8 +113,8 @@ test.describe("the list", () => {
 
   test("shows only the active dialect's mistakes", async ({ page, db }) => {
     seedMistakes(db, [
-      anError(1, { target_arabic: "مرحبا", dialect: "Gulf" }),
-      anError(2, { target_arabic: "إزيك", dialect: "Egyptian" }),
+      anError(1, { target_text: "مرحبا", dialect: "Gulf" }),
+      anError(2, { target_text: "إزيك", dialect: "Egyptian" }),
     ]);
 
     await page.goto("/mistakes");
@@ -127,8 +127,8 @@ test.describe("the list", () => {
 
   test("leaves out anything already dismissed", async ({ page, db }) => {
     seedMistakes(db, [
-      anError(1, { target_arabic: "مرحبا" }),
-      anError(2, { target_arabic: "شكرا", resolved_at: new Date().toISOString() }),
+      anError(1, { target_text: "مرحبا" }),
+      anError(2, { target_text: "شكرا", resolved_at: new Date().toISOString() }),
     ]);
 
     await page.goto("/mistakes");
@@ -150,9 +150,9 @@ test.describe("the list", () => {
 
   test("shows nothing belonging to another learner", async ({ page, db }) => {
     seedMistakes(db, [
-      anError(1, { target_arabic: "مرحبا" }),
+      anError(1, { target_text: "مرحبا" }),
       anError(2, {
-        target_arabic: "شكرا",
+        target_text: "شكرا",
         user_id: "00000000-0000-4000-8000-0000000000ff",
       }),
     ]);
@@ -203,9 +203,9 @@ test.describe("dismissing a mistake", () => {
 
   test("resolves every attempt behind the entry", async ({ page, db }) => {
     seedMistakes(db, [
-      anError(1, { target_arabic: "مرحبا" }),
-      anError(2, { target_arabic: "مرحبا" }),
-      anError(3, { target_arabic: "مرحبا" }),
+      anError(1, { target_text: "مرحبا" }),
+      anError(2, { target_text: "مرحبا" }),
+      anError(3, { target_text: "مرحبا" }),
     ]);
 
     await page.goto("/mistakes");
@@ -221,8 +221,8 @@ test.describe("dismissing a mistake", () => {
 
   test("leaves other targets alone", async ({ page, db }) => {
     seedMistakes(db, [
-      anError(1, { target_arabic: "مرحبا" }),
-      anError(2, { target_arabic: "شكرا" }),
+      anError(1, { target_text: "مرحبا" }),
+      anError(2, { target_text: "شكرا" }),
     ]);
 
     await page.goto("/mistakes");

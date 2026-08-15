@@ -1,7 +1,7 @@
 // generate-story-video-full — After admin approves the preview slideshow,
 // generate the full multi-scene slideshow: N scene images + N Arabic
 // narration clips, saved as ordered segments on story_video_segments.
-// Each segment: { image_url, audio_url, narration_arabic, arabic_beat,
+// Each segment: { image_url, audio_url, narration_text, story_beat,
 // duration_seconds, prompt, index }.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
@@ -33,7 +33,7 @@ type Plan = {
   characters: { id: string; appearance: string }[];
   scenes: {
     index: number;
-    arabic_beat: string;
+    story_beat: string;
     visual_prompt: string;
     characters_in_scene: string[];
   }[];
@@ -75,7 +75,7 @@ Return STRICT JSON:
   "scenes": [
     {
       "index": 0,
-      "arabic_beat": "the sentence(s) from the story this scene depicts, quoted verbatim from the story text",
+      "story_beat": "the sentence(s) from the story this scene depicts, quoted verbatim from the story text",
       "visual_prompt": "single storybook illustration description of WHAT IS DEPICTED in the frame that matches the beat. Do NOT include style/setting/character descriptions (prepended automatically). No text in image, no captions, no subtitles.",
       "characters_in_scene": ["character_id_slug"]
     }
@@ -86,7 +86,7 @@ Hard rules:
 - Between ${MIN_SCENES} and ${MAX_SCENES} scenes, ordered start-to-end, covering the WHOLE story with no gaps.
 - Every scene MUST correspond to real content from the provided story. Do not invent events.
 - Characters listed once with consistent appearance; reused across scenes by id.
-- arabic_beat MUST be quoted verbatim from the provided English story. (The field keeps its old name; its contents are the story's own words, which are English.)
+- story_beat MUST be quoted verbatim from the provided English story. (The field keeps its old name; its contents are the story's own words, which are English.)
 - No text/captions/subtitles/signs in the generated image.
 - Output valid JSON only, no prose, no markdown fences.`;
 
@@ -124,7 +124,7 @@ ${fullEnglish}`;
     scenes: parsed.scenes.slice(0, MAX_SCENES).map((scene, idx) => ({
       ...scene,
       index: idx,
-      arabic_beat: validateEnglishOnly(`scene ${idx + 1} arabic_beat`, scene.arabic_beat),
+      story_beat: validateEnglishOnly(`scene ${idx + 1} story_beat`, scene.story_beat),
       visual_prompt: scene.visual_prompt || "A precise storybook depiction of the story beat.",
       characters_in_scene: Array.isArray(scene.characters_in_scene) ? scene.characters_in_scene : [],
     })),
@@ -142,7 +142,7 @@ function buildScenePrompt(plan: Plan, sceneIdx: number): string {
     `ILLUSTRATION STYLE (constant across the whole story): ${plan.style_anchor}`,
     cast ? `CHARACTERS IN THIS SCENE (keep appearance identical across scenes):\n${cast}` : "",
     `SCENE ${sceneIdx + 1} of ${plan.scenes.length}. Storybook illustration depicting this exact story beat.`,
-    `STORY BEAT (do not include the text in the image, only depict it visually): ${scene.arabic_beat}`,
+    `STORY BEAT (do not include the text in the image, only depict it visually): ${scene.story_beat}`,
     `SCENE DESCRIPTION: ${scene.visual_prompt}`,
     `CONSTRAINTS: No text of any language in the image. No captions, no subtitles, no signs, no logos, no watermarks, no Latin letters, no Arabic letters. Purely visual.`,
   ].filter(Boolean).join("\n\n");
@@ -177,7 +177,7 @@ async function synthesizeSceneNarration(
   story: Story,
   sceneIndex: number,
   arabicBeat: string,
-): Promise<{ audio_url: string; narration_arabic: string; duration_seconds: number }> {
+): Promise<{ audio_url: string; narration_text: string; duration_seconds: number }> {
   const narration = validateEnglishOnly(`scene ${sceneIndex + 1} narration`, firstWords(arabicBeat, 40));
   const providerPlan = planEnglishProvider();
   const bytes = await synthesizeLine(narration, "narrator", sceneIndex, providerPlan);
@@ -190,7 +190,7 @@ async function synthesizeSceneNarration(
   const { data: pub } = admin.storage.from(BUCKET).getPublicUrl(path);
   return {
     audio_url: pub.publicUrl,
-    narration_arabic: narration,
+    narration_text: narration,
     duration_seconds: estimateSeconds(bytes.byteLength, providerPlan),
   };
 }
@@ -216,11 +216,11 @@ async function runFull(admin: ReturnType<typeof createClient>, story: Story, pla
     const segments: {
       image_url: string;
       audio_url: string;
-      narration_arabic: string;
+      narration_text: string;
       duration_seconds: number;
       prompt: string;
       index: number;
-      arabic_beat: string;
+      story_beat: string;
       // legacy field kept for backwards compat in UI selectors
       url?: string;
     }[] = [];
@@ -228,18 +228,18 @@ async function runFull(admin: ReturnType<typeof createClient>, story: Story, pla
     for (let i = 0; i < plan.scenes.length; i++) {
       try {
         const prompt = buildScenePrompt(plan, i);
-        const narration = await synthesizeSceneNarration(admin, story, i, plan.scenes[i].arabic_beat);
+        const narration = await synthesizeSceneNarration(admin, story, i, plan.scenes[i].story_beat);
         const bytes = await generateSceneImage(prompt);
         const imageUrl = await uploadImage(admin, story.id, bytes, `full-${i}-scene`);
         segments.push({
           image_url: imageUrl,
           url: imageUrl,
           audio_url: narration.audio_url,
-          narration_arabic: narration.narration_arabic,
+          narration_text: narration.narration_text,
           duration_seconds: narration.duration_seconds,
           prompt,
           index: i,
-          arabic_beat: plan.scenes[i].arabic_beat,
+          story_beat: plan.scenes[i].story_beat,
         });
 
         await admin

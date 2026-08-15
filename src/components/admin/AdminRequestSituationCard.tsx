@@ -68,7 +68,7 @@ export const AdminRequestSituationCard = ({ occasions, onSaved }: Props) => {
       dialect: activeDialect,
       occasion_id: occasionId || null,
       phrase_arabic: p.phrase_arabic,
-      phrase_transliteration: p.transliteration || null,
+      phrase_phonetic_ar: p.transliteration || null,
       phrase_english: p.phrase_english || null,
       cultural_note: p.notes || null,
       scenario_english: situation.trim(),

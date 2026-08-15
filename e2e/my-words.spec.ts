@@ -195,11 +195,11 @@ test.describe("word families", () => {
     db.seed("user_vocabulary", [
       // Three spellings of one family. Before they were canonicalised these
       // were three strangers, and the grouping this test asserts was impossible.
-      aUserVocabulary({ id: vocabId(0), user_id: TEST_USER_ID, word_english: "act", root: "Act" }),
-      aUserVocabulary({ id: vocabId(1), user_id: TEST_USER_ID, word_english: "action", root: "act" }),
-      aUserVocabulary({ id: vocabId(2), user_id: TEST_USER_ID, word_english: "actor", root: " ACT " }),
-      aUserVocabulary({ id: vocabId(3), user_id: TEST_USER_ID, word_english: "form", root: "form" }),
-      aUserVocabulary({ id: vocabId(4), user_id: TEST_USER_ID, word_english: "formal", root: "form" }),
+      aUserVocabulary({ id: vocabId(0), user_id: TEST_USER_ID, word_english: "act", word_family: "Act" }),
+      aUserVocabulary({ id: vocabId(1), user_id: TEST_USER_ID, word_english: "action", word_family: "act" }),
+      aUserVocabulary({ id: vocabId(2), user_id: TEST_USER_ID, word_english: "actor", word_family: " ACT " }),
+      aUserVocabulary({ id: vocabId(3), user_id: TEST_USER_ID, word_english: "form", word_family: "form" }),
+      aUserVocabulary({ id: vocabId(4), user_id: TEST_USER_ID, word_english: "formal", word_family: "form" }),
     ]);
 
     await page.goto("/my-words");
@@ -212,10 +212,10 @@ test.describe("word families", () => {
 
   test("filtering by a family narrows the list to it", async ({ page, db }) => {
     db.seed("user_vocabulary", [
-      aUserVocabulary({ id: vocabId(0), user_id: TEST_USER_ID, word_english: "action", root: "act" }),
-      aUserVocabulary({ id: vocabId(1), user_id: TEST_USER_ID, word_english: "actor", root: "Act" }),
-      aUserVocabulary({ id: vocabId(2), user_id: TEST_USER_ID, word_english: "formal", root: "form" }),
-      aUserVocabulary({ id: vocabId(3), user_id: TEST_USER_ID, word_english: "form", root: "form" }),
+      aUserVocabulary({ id: vocabId(0), user_id: TEST_USER_ID, word_english: "action", word_family: "act" }),
+      aUserVocabulary({ id: vocabId(1), user_id: TEST_USER_ID, word_english: "actor", word_family: "Act" }),
+      aUserVocabulary({ id: vocabId(2), user_id: TEST_USER_ID, word_english: "formal", word_family: "form" }),
+      aUserVocabulary({ id: vocabId(3), user_id: TEST_USER_ID, word_english: "form", word_family: "form" }),
     ]);
 
     await page.goto("/my-words");
@@ -227,8 +227,8 @@ test.describe("word families", () => {
 
   test("keeps quiet when no two words share a family", async ({ page, db }) => {
     db.seed("user_vocabulary", [
-      aUserVocabulary({ id: vocabId(0), user_id: TEST_USER_ID, word_english: "action", root: "act" }),
-      aUserVocabulary({ id: vocabId(1), user_id: TEST_USER_ID, word_english: "formal", root: "form" }),
+      aUserVocabulary({ id: vocabId(0), user_id: TEST_USER_ID, word_english: "action", word_family: "act" }),
+      aUserVocabulary({ id: vocabId(1), user_id: TEST_USER_ID, word_english: "formal", word_family: "form" }),
     ]);
 
     await page.goto("/my-words");
@@ -241,8 +241,8 @@ test.describe("word families", () => {
 
   test("offers to look up the families that are missing, and never does it unasked", async ({ page, db, backend }) => {
     db.seed("user_vocabulary", [
-      aUserVocabulary({ id: vocabId(0), user_id: TEST_USER_ID, word_english: "action", root: null }),
-      aUserVocabulary({ id: vocabId(1), user_id: TEST_USER_ID, word_english: "actor", root: null }),
+      aUserVocabulary({ id: vocabId(0), user_id: TEST_USER_ID, word_english: "action", word_family: null }),
+      aUserVocabulary({ id: vocabId(1), user_id: TEST_USER_ID, word_english: "actor", word_family: null }),
     ]);
     backend.stubFunction("enrich-word-roots", { ok: true, examined: 2, resolved: 2, skippedFree: 0 });
 

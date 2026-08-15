@@ -463,7 +463,7 @@ const Review = () => {
                 {/* Only after the reveal. On a production card the Arabic is
                     the answer, and a root shown alongside the English prompt
                     would hand over most of it. */}
-                <RootChip root={currentWord.root} className="mt-2" />
+                <RootChip root={currentWord.word_family} className="mt-2" />
               </div>
             )}
             {!showAnswer && (

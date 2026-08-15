@@ -140,7 +140,7 @@ function sanitiseFamily(raw: unknown): string {
 const NO_ANSWER = new Set(["na", "none", "nil", "null", "undefined", "unknown", "unclear"]);
 
 async function rootsForBatch(batch: string[], dialect: Dialect): Promise<Map<number, string>> {
-  const result = await askBrain<{ roots?: Array<{ index: number; root: string }> }>({
+  const result = await askBrain<{ families?: Array<{ index: number; word_family: string }> }>({
     purpose: "vocab_root",
     dialect,
     target: "english",
@@ -165,36 +165,36 @@ async function rootsForBatch(batch: string[], dialect: Dialect): Promise<Map<num
       parameters: {
         type: "object",
         properties: {
-          roots: {
+          families: {
             type: "array",
             items: {
               type: "object",
               properties: {
                 index: { type: "integer", description: "1-based index from the input list" },
-                root: {
+                word_family: {
                   type: "string",
                   description: 'Lowercase base form, letters only, or "" if none',
                 },
               },
-              required: ["index", "root"],
+              required: ["index", "word_family"],
               additionalProperties: false,
             },
           },
         },
-        required: ["roots"],
+        required: ["families"],
         additionalProperties: false,
       },
     },
   });
 
   const byIndex = new Map<number, string>();
-  for (const entry of result.output?.roots ?? []) {
+  for (const entry of result.output?.families ?? []) {
     // Explicit indices rather than a positional array: a short or reordered
     // response then skips a word instead of silently assigning word 7's family
     // to word 8, which is the failure mode that would be impossible to notice.
     const index = Number(entry?.index) - 1;
     if (!Number.isInteger(index) || index < 0 || index >= batch.length) continue;
-    byIndex.set(index, sanitiseFamily(entry?.root));
+    byIndex.set(index, sanitiseFamily(entry?.word_family));
   }
   return byIndex;
 }
@@ -251,7 +251,7 @@ Deno.serve(async (req) => {
     let query = supabase
       .from(table)
       .select("id, word_english")
-      .is("root", null)
+      .is("word_family", null)
       .order("created_at", { ascending: false })
       .limit(limit);
 
@@ -301,8 +301,8 @@ Deno.serve(async (req) => {
     const updates = [...resolved.entries()];
     for (let start = 0; start < updates.length; start += 20) {
       await Promise.all(
-        updates.slice(start, start + 20).map(([id, root]) => {
-          const write = supabase.from(table).update({ root }).eq("id", id);
+        updates.slice(start, start + 20).map(([id, family]) => {
+          const write = supabase.from(table).update({ word_family: family }).eq("id", id);
           // The owner predicate is the belt to the service role's braces on the
           // personal deck. Curriculum rows have no owner — the admin check at
           // the top of the request is what stands in for it.

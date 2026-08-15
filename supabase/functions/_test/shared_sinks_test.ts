@@ -369,8 +369,8 @@ Deno.test("a mistake is recorded against the learner who made it", async () => {
       user_id: USER_ID,
       dialect: "Egyptian",
       source: "pronunciation",
-      target_arabic: "شخبارك",
-      produced_arabic: "شخبارج",
+      target_text: "شخبارك",
+      produced_text: "شخبارج",
       error_kind: "phoneme",
       detail: { phoneme: "k" },
       word_id: "word-1",
@@ -389,7 +389,7 @@ Deno.test("an entry with no dialect or kind gets the defaults the read side expe
     assertEquals(row.dialect, "Gulf");
     assertEquals(row.error_kind, "other");
     assertEquals(row.detail, {});
-    assertEquals(row.produced_arabic, null);
+    assertEquals(row.produced_text, null);
   });
 });
 
@@ -402,8 +402,8 @@ Deno.test("surrounding whitespace is trimmed off both sides of the pair", async 
     const [row] = bodyOf((await waitForCall(up, "learner_errors"))[0]);
     // Resolution matches on the exact string later, so an untrimmed row could
     // never be cleared.
-    assertEquals(row.target_arabic, "شخبارك");
-    assertEquals(row.produced_arabic, "شخبارج");
+    assertEquals(row.target_text, "شخبارك");
+    assertEquals(row.produced_text, "شخبارج");
   });
 });
 
@@ -414,7 +414,7 @@ Deno.test("a produced form that is only whitespace is stored as nothing", async 
     const [row] = bodyOf((await waitForCall(up, "learner_errors"))[0]);
     // Silence from the recogniser is a real outcome; storing it as an empty
     // string would render as an invisible "you said" line in review.
-    assertEquals(row.produced_arabic, null);
+    assertEquals(row.produced_text, null);
   });
 });
 
@@ -427,7 +427,7 @@ Deno.test("entries with no target are dropped, not written blank", async () => {
 
     const rows = bodyOf((await waitForCall(up, "learner_errors"))[0]);
     assertEquals(rows.length, 1);
-    assertEquals(rows[0].target_arabic, "كتاب");
+    assertEquals(rows[0].target_text, "كتاب");
   });
 });
 
@@ -453,8 +453,8 @@ Deno.test("a long utterance cannot write more than twelve rows", async () => {
     // A learner reading a paragraph badly would otherwise write a row per word,
     // and the weak set becomes noise the moment it is that large.
     assertEquals(rows.length, 12);
-    assertEquals(rows[0].target_arabic, "كلمة0");
-    assertEquals(rows[11].target_arabic, "كلمة11");
+    assertEquals(rows[0].target_text, "كلمة0");
+    assertEquals(rows[11].target_text, "كلمة11");
   });
 });
 
@@ -488,7 +488,7 @@ Deno.test("a correct answer clears the matching unresolved errors", async () => 
     assert(typeof bodyOf(call).resolved_at === "string");
     const url = decodeURIComponent(call.url);
     assert(url.includes(`user_id=eq.${USER_ID}`), url);
-    assert(url.includes("target_arabic=in."), url);
+    assert(url.includes("target_text=in."), url);
     // Only the ones still open: re-stamping an already-resolved row would move
     // its resolution date every time the learner got it right again.
     assert(url.includes("resolved_at=is.null"), url);
@@ -510,7 +510,7 @@ Deno.test("repeated targets are collapsed into one filter", async () => {
     await mod.resolveLearnerErrors(USER_ID, ["كتاب", " كتاب ", "كتاب"]);
 
     const [call] = await waitForCall(up, "learner_errors");
-    const list = decodeURIComponent(call.url).split("target_arabic=in.")[1].split("&")[0];
+    const list = decodeURIComponent(call.url).split("target_text=in.")[1].split("&")[0];
     // One `in` over N round trips is the stated reason the list form exists;
     // duplicates would defeat it on exactly the utterance that repeats a word.
     assertEquals(list.replace(/[()"]/g, "").split(",").length, 1);

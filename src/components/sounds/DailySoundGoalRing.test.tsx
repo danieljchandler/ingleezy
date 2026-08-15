@@ -39,7 +39,7 @@ afterEach(() => {
 });
 
 const aRow = (masteredAt: string | null): SoundProgressRow => ({
-  letter_code: "p",
+  sound_code: "p",
   steps_completed: [],
   best_spot_score: 0,
   best_sound_score: 0,

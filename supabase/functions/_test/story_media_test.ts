@@ -307,7 +307,7 @@ const segment = (index: number, over: Record<string, unknown> = {}) => ({
   image_url: `https://cdn.test/scene-${index}.png`,
   url: `https://cdn.test/scene-${index}.png`,
   prompt: `a desert at dusk, scene ${index}`,
-  narration_arabic: `سطر ${index}`,
+  narration_text: `سطر ${index}`,
   duration_seconds: 4,
   ...over,
 });
@@ -489,7 +489,7 @@ Deno.test("edit-story-scene-image replaces only the scene it was asked about", a
   assert(String(segments[1].image_url).includes("listen-audio"));
   assertEquals(segments[1].image_url, segments[1].url);
   // Everything else about the scene survives the rewrite.
-  assertEquals(segments[1].narration_arabic, "سطر 1");
+  assertEquals(segments[1].narration_text, "سطر 1");
   assertEquals(segments[1].duration_seconds, 4);
 });
 

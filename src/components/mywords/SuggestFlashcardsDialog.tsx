@@ -13,7 +13,7 @@ interface Suggestion {
   word_arabic: string;
   word_english: string;
   transliteration?: string;
-  root?: string;
+  word_family?: string;
   example_arabic?: string;
   example_english?: string;
 }
@@ -90,7 +90,7 @@ export const SuggestFlashcardsDialog = ({ open, onOpenChange }: Props) => {
           word_english: c.word_english,
           // Carried through so a suggested card arrives with its root already
           // known, rather than waiting for the backfill to ask again.
-          root: c.root || undefined,
+          word_family: c.word_family || undefined,
           source: "ai-suggest",
           sentence_text: c.example_arabic || undefined,
           sentence_english: c.example_english || undefined,

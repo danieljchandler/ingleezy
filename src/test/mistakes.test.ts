@@ -15,8 +15,8 @@ const row = (over: Partial<LearnerErrorRow> = {}): LearnerErrorRow => ({
   id: `e${seq++}`,
   dialect: "Gulf",
   source: "pronunciation",
-  target_arabic: "شغل",
-  produced_arabic: null,
+  target_text: "شغل",
+  produced_text: null,
   error_kind: "mispronunciation",
   created_at: daysAgo(1),
   ...over,
@@ -48,22 +48,22 @@ describe("groupMistakes", () => {
 
   it("ranks by count, then by recency", () => {
     const groups = groupMistakes([
-      row({ target_arabic: "twice-old", created_at: daysAgo(9) }),
-      row({ target_arabic: "twice-old", created_at: daysAgo(8) }),
-      row({ target_arabic: "twice-new", created_at: daysAgo(1) }),
-      row({ target_arabic: "twice-new", created_at: daysAgo(2) }),
-      row({ target_arabic: "thrice", created_at: daysAgo(20) }),
-      row({ target_arabic: "thrice", created_at: daysAgo(21) }),
-      row({ target_arabic: "thrice", created_at: daysAgo(22) }),
+      row({ target_text: "twice-old", created_at: daysAgo(9) }),
+      row({ target_text: "twice-old", created_at: daysAgo(8) }),
+      row({ target_text: "twice-new", created_at: daysAgo(1) }),
+      row({ target_text: "twice-new", created_at: daysAgo(2) }),
+      row({ target_text: "thrice", created_at: daysAgo(20) }),
+      row({ target_text: "thrice", created_at: daysAgo(21) }),
+      row({ target_text: "thrice", created_at: daysAgo(22) }),
     ]);
     expect(groups.map((g) => g.target)).toEqual(["thrice", "twice-new", "twice-old"]);
   });
 
   it("lists attempts newest first and without duplicates", () => {
     const groups = groupMistakes([
-      row({ produced_arabic: "شغلة", created_at: daysAgo(3) }),
-      row({ produced_arabic: "شغال", created_at: daysAgo(1) }),
-      row({ produced_arabic: "شغلة", created_at: daysAgo(2) }),
+      row({ produced_text: "شغلة", created_at: daysAgo(3) }),
+      row({ produced_text: "شغال", created_at: daysAgo(1) }),
+      row({ produced_text: "شغلة", created_at: daysAgo(2) }),
     ]);
     expect(groups[0].attempts).toEqual(["شغال", "شغلة"]);
   });
@@ -87,7 +87,7 @@ describe("groupMistakes", () => {
   });
 
   it("skips rows with no target rather than making a blank group", () => {
-    expect(groupMistakes([row({ target_arabic: "   " }), row()])).toHaveLength(1);
+    expect(groupMistakes([row({ target_text: "   " }), row()])).toHaveLength(1);
   });
 
   it("returns nothing for a learner with a clean record", () => {

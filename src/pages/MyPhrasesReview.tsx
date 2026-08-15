@@ -356,8 +356,8 @@ const MyPhrasesReview = () => {
                 </p>
                 {/* transliteration carries phonetic_ar — the English phrase in
                     Arabic letters, a reading aid for the answer. */}
-                {current.transliteration && (
-                  <p className="text-sm text-primary/80">{current.transliteration}</p>
+                {current.phonetic_ar && (
+                  <p className="text-sm text-primary/80">{current.phonetic_ar}</p>
                 )}
                 {current.notes && (
                   <p className="text-xs text-muted-foreground italic">{current.notes}</p>
@@ -492,7 +492,7 @@ const MyPhrasesReview = () => {
               rowId={current.id}
               arabic={current.phrase_arabic}
               english={current.phrase_english}
-              transliteration={current.transliteration}
+              transliteration={current.phonetic_ar}
               dialect={activeDialect}
               mnemonic={current.mnemonic ?? null}
               invalidateKeys={[["user-phrases-due"], ["user-phrases"]]}

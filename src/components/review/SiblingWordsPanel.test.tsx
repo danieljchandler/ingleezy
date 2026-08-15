@@ -41,7 +41,7 @@ const aWord = (index: number, over: Record<string, unknown> = {}) =>
     user_id: TEST_USER_ID,
     word_arabic: `كلمة${index}`,
     word_english: `word ${index}`,
-    root: ROOT,
+    word_family: ROOT,
     dialect: "Gulf",
     ...over,
   });

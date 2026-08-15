@@ -119,7 +119,7 @@ describe("formatFamily", () => {
 });
 
 describe("buildWordFamilies", () => {
-  const word = (id: string, root: string | null) => ({ id, root });
+  const word = (id: string, family: string | null) => ({ id, word_family: family });
 
   it("puts differently-spelled families together — the regression this turns on", () => {
     const families = buildWordFamilies([

@@ -77,7 +77,7 @@ export const SaveUnknownsBar = ({ source }: Props) => {
         // Left null on purpose: the word family is derived from the ENGLISH
         // side, and enrich-word-roots only fills rows where root IS NULL.
         // Writing anything here now would lock the card out of ever getting one.
-        root: null,
+        word_family: null,
         transliteration: (e as { transliteration?: string | null }).transliteration ?? null,
         source: e.source,
         dialect: activeDialect,

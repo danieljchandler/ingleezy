@@ -11,9 +11,8 @@ export interface DailyStory {
   dialect: string;
   title: string;
   body_arabic: string;
-  body_transliteration: string | null;
   body_english: string | null;
-  body_english_literal: string | null;
+  body_literal_arabic: string | null;
   /** Per-sentence text for the reader. Null on stories generated before it existed. */
   sentences: ReaderSentence[] | null;
   vocab_used: string[];

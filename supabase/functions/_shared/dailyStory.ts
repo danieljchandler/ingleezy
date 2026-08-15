@@ -212,7 +212,7 @@ Reading level: matched to the learner. Short sentences, concrete imagery, one cl
 
 Also provide:
 - body_arabic: a natural ${dialect} dialect Arabic translation of the whole story (the learner's own dialect — NOT Modern Standard Arabic).
-- body_english_literal: a word-for-word ARABIC gloss of the story preserving the ENGLISH word order, so the learner sees how the English is built. Stiffness is expected.
+- body_literal_arabic: a word-for-word ARABIC gloss of the story preserving the ENGLISH word order, so the learner sees how the English is built. Stiffness is expected.
 - sentences: the story split one entry per sentence, in order — the learner reads a sentence at a time. The english values joined back together must be body_english, unchanged. Each entry carries its ${dialect} Arabic translation as arabic and its word-order Arabic gloss as literal.
 
 Return ONLY the structured fields via the provided tool.`;
@@ -225,7 +225,7 @@ Return ONLY the structured fields via the provided tool.`;
       title: string;
       body_english: string;
       body_arabic: string;
-      body_english_literal: string;
+      body_literal_arabic: string;
       sentences: StorySentence[];
       used_mature: string[];
       used_new: string[];
@@ -249,7 +249,7 @@ Return ONLY the structured fields via the provided tool.`;
             title: { type: "string", description: "Short evocative English title" },
             body_english: { type: "string", description: "The story in natural spoken English, ~200 words" },
             body_arabic: { type: "string", description: "Natural dialect-Arabic translation of the whole story (the learner's dialect, never MSA)" },
-            body_english_literal: { type: "string", description: "Word-for-word Arabic gloss of the story preserving the English word order (may sound stiff; shows how sentences are built)" },
+            body_literal_arabic: { type: "string", description: "Word-for-word Arabic gloss of the story preserving the English word order (may sound stiff; shows how sentences are built)" },
             sentences: {
               type: "array",
               description: "body_english split into its individual sentences, in order, each with its dialect-Arabic translation and word-order Arabic gloss",
@@ -280,7 +280,7 @@ Return ONLY the structured fields via the provided tool.`;
   const title = String(parsed.title ?? "").slice(0, 160) || "Today's story";
   const bodyEnglish = String(parsed.body_english ?? "").trim();
   const bodyArabic = String(parsed.body_arabic ?? "").trim();
-  const bodyEnglishLiteral = String(parsed.body_english_literal ?? "").trim();
+  const bodyLiteralArabic = String(parsed.body_literal_arabic ?? "").trim();
   if (!bodyEnglish) {
     throw new DailyStoryError("empty_story", brain.raw.slice(0, 400));
   }
@@ -299,12 +299,11 @@ Return ONLY the structured fields via the provided tool.`;
         dialect,
         title,
         // Column roles after the direction flip: body_english is the story
-        // (primary), body_arabic its dialect scaffold. body_transliteration
-        // is retired — an Arabic speaker needs no romanization of Arabic.
+        // (primary), body_arabic its dialect scaffold, body_literal_arabic the
+        // same Arabic rearranged into English word order.
         body_english: bodyEnglish,
         body_arabic: bodyArabic || null, // nullable since 20260813170000
-        body_transliteration: null,
-        body_english_literal: bodyEnglishLiteral || null,
+        body_literal_arabic: bodyLiteralArabic || null,
         sentences: sentences.length > 0 ? sentences : null,
         vocab_used: vocabUsed,
         new_words: newUsed,

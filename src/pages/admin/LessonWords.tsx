@@ -29,8 +29,8 @@ interface VocabWord {
   audio_url: string | null;
   display_order: number;
   dialect_module: string;
-  /** Arabic root. Null until backfilled; '' means the word has none. */
-  root?: string | null;
+  /** English word-family base form. Null until backfilled; '' means the word has none. */
+  word_family?: string | null;
 }
 
 interface LessonDetail {
@@ -76,7 +76,7 @@ const LessonWords = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('vocabulary_words')
-        .select('id, word_arabic, word_english, image_url, audio_url, display_order, dialect_module, root')
+        .select('id, word_arabic, word_english, image_url, audio_url, display_order, dialect_module, word_family')
         .eq('lesson_id', lessonId!)
         .order('display_order', { ascending: true });
       if (error) throw error;
@@ -165,7 +165,7 @@ const LessonWords = () => {
   const isLoading = lessonLoading || wordsLoading;
   const missingImageCount = words?.filter((w) => !w.image_url).length ?? 0;
   /** Words nobody has looked a root up for. `''` means we looked and there is none. */
-  const missingRootCount = words?.filter((w) => w.root === null || w.root === undefined).length ?? 0;
+  const missingRootCount = words?.filter((w) => w.word_family === null || w.word_family === undefined).length ?? 0;
 
   /**
    * Look up the Arabic roots for this lesson's words.
@@ -325,7 +325,7 @@ const LessonWords = () => {
                       <div>
                         <p className="font-bold text-xl" dir="rtl">{word.word_arabic}</p>
                         <p className="text-muted-foreground">{word.word_english}</p>
-                        <RootChip root={word.root} className="mt-1" />
+                        <RootChip root={word.word_family} className="mt-1" />
                       </div>
                       {word.audio_url && (
                         <Button

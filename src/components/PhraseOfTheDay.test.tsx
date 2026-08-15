@@ -258,7 +258,7 @@ describe("saving it", () => {
       expect(backend.db.lastWriteTo("user_phrases")?.payload[0]).toMatchObject({
         phrase_english: "How's it going?",
         phrase_arabic: "شخبارك؟",
-        transliteration: "هاوز إت قوينق؟",
+        phonetic_ar: "هاوز إت قوينق؟",
         source: "phrase-of-the-day",
       }),
     );

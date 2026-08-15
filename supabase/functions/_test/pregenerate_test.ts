@@ -22,9 +22,8 @@ const SERVICE_ROLE = "fixture-service-role";
 const story = {
   title: "يوم في السوق",
   body_arabic: "كَانَ البَيْت هَادِئًا",
-  body_transliteration: "kaan al-bayt haadi'an",
   body_english: "The house was quiet",
-  body_english_literal: "was the-house quiet",
+  body_literal_arabic: "كان الـ بيت هادي",
   used_mature: ["بيت"],
   used_new: ["شغل"],
 };

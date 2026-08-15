@@ -18,7 +18,7 @@ import type { SupabaseBackend } from "@/test/support/server/handler";
  * The write side belongs to the edge functions under the service role. The
  * client can read its own rows and set `resolved_at`, and nothing else — the
  * 20260726140000 migration revoked blanket UPDATE and re-granted it on that one
- * column, because `target_arabic` and `detail` feed content generation and a
+ * column, because `target_text` and `detail` feed content generation and a
  * client that could rewrite them could steer what it is taught.
  */
 
@@ -42,9 +42,9 @@ function render(rows: Record<string, unknown>[], dialect = "Gulf") {
 describe("reading the corpus", () => {
   it("groups repeated failures on one word", async () => {
     const { result } = render([
-      aLearnerError({ id: "e1", target_arabic: "شغل", created_at: daysAgo(1) }),
-      aLearnerError({ id: "e2", target_arabic: "شغل", created_at: daysAgo(2) }),
-      aLearnerError({ id: "e3", target_arabic: "كتاب", created_at: daysAgo(3) }),
+      aLearnerError({ id: "e1", target_text: "شغل", created_at: daysAgo(1) }),
+      aLearnerError({ id: "e2", target_text: "شغل", created_at: daysAgo(2) }),
+      aLearnerError({ id: "e3", target_text: "كتاب", created_at: daysAgo(3) }),
     ]);
 
     await waitFor(() => expect(result.current.mistakes.isSuccess).toBe(true));
@@ -58,8 +58,8 @@ describe("reading the corpus", () => {
 
   it("keeps the same word in two dialects apart", async () => {
     const { result } = render([
-      aLearnerError({ id: "e1", target_arabic: "شغل", dialect: "Gulf" }),
-      aLearnerError({ id: "e2", target_arabic: "شغل", dialect: "Egyptian" }),
+      aLearnerError({ id: "e1", target_text: "شغل", dialect: "Gulf" }),
+      aLearnerError({ id: "e2", target_text: "شغل", dialect: "Egyptian" }),
     ]);
 
     await waitFor(() => expect(result.current.mistakes.isSuccess).toBe(true));
@@ -71,8 +71,8 @@ describe("reading the corpus", () => {
 
   it("leaves out anything already put right", async () => {
     const { result } = render([
-      aLearnerError({ id: "e1", target_arabic: "شغل" }),
-      aLearnerError({ id: "e2", target_arabic: "كتاب", resolved_at: daysAgo(1) }),
+      aLearnerError({ id: "e1", target_text: "شغل" }),
+      aLearnerError({ id: "e2", target_text: "كتاب", resolved_at: daysAgo(1) }),
     ]);
 
     await waitFor(() => expect(result.current.mistakes.isSuccess).toBe(true));
@@ -83,8 +83,8 @@ describe("reading the corpus", () => {
 
   it("leaves out another learner's errors", async () => {
     const { result } = render([
-      aLearnerError({ id: "e1", target_arabic: "شغل" }),
-      aLearnerError({ id: "e2", target_arabic: "كتاب", user_id: "someone-else" }),
+      aLearnerError({ id: "e1", target_text: "شغل" }),
+      aLearnerError({ id: "e2", target_text: "كتاب", user_id: "someone-else" }),
     ]);
 
     await waitFor(() => expect(result.current.mistakes.isSuccess).toBe(true));
@@ -93,8 +93,8 @@ describe("reading the corpus", () => {
 
   it("puts the most recent trouble first", async () => {
     const { result } = render([
-      aLearnerError({ id: "e1", target_arabic: "قديم", created_at: daysAgo(30) }),
-      aLearnerError({ id: "e2", target_arabic: "جديد", created_at: daysAgo(1) }),
+      aLearnerError({ id: "e1", target_text: "قديم", created_at: daysAgo(30) }),
+      aLearnerError({ id: "e2", target_text: "جديد", created_at: daysAgo(1) }),
     ]);
 
     await waitFor(() => expect(result.current.mistakes.isSuccess).toBe(true));
@@ -104,7 +104,7 @@ describe("reading the corpus", () => {
 
   it("carries what the learner actually said", async () => {
     const { result } = render([
-      aLearnerError({ id: "e1", target_arabic: "شغل", produced_arabic: "شغال", source: "shadow" }),
+      aLearnerError({ id: "e1", target_text: "شغل", produced_text: "شغال", source: "shadow" }),
     ]);
 
     await waitFor(() => expect(result.current.mistakes.isSuccess).toBe(true));
@@ -148,8 +148,8 @@ describe("reading the corpus", () => {
 describe("dismissing a mistake", () => {
   it("stamps every row in the group as resolved", async () => {
     const { result, backend } = render([
-      aLearnerError({ id: "e1", target_arabic: "شغل", created_at: daysAgo(1) }),
-      aLearnerError({ id: "e2", target_arabic: "شغل", created_at: daysAgo(2) }),
+      aLearnerError({ id: "e1", target_text: "شغل", created_at: daysAgo(1) }),
+      aLearnerError({ id: "e2", target_text: "شغل", created_at: daysAgo(2) }),
     ]);
     await waitFor(() => expect(result.current.mistakes.isSuccess).toBe(true));
 
@@ -164,8 +164,8 @@ describe("dismissing a mistake", () => {
 
   it("clears exactly the rows the learner was looking at", async () => {
     const { result, backend } = render([
-      aLearnerError({ id: "e1", target_arabic: "شغل" }),
-      aLearnerError({ id: "e2", target_arabic: "كتاب" }),
+      aLearnerError({ id: "e1", target_text: "شغل" }),
+      aLearnerError({ id: "e2", target_text: "كتاب" }),
     ]);
     await waitFor(() => expect(result.current.mistakes.isSuccess).toBe(true));
 
@@ -178,7 +178,7 @@ describe("dismissing a mistake", () => {
   });
 
   it("refreshes the list afterwards", async () => {
-    const { result, backend } = render([aLearnerError({ id: "e1", target_arabic: "شغل" })]);
+    const { result, backend } = render([aLearnerError({ id: "e1", target_text: "شغل" })]);
     await waitFor(() => expect(result.current.mistakes.isSuccess).toBe(true));
     const readsBefore = backend.db.reads.filter((read) => read.table === "learner_errors").length;
 
@@ -205,7 +205,7 @@ describe("dismissing a mistake", () => {
   });
 
   it("reports a failed dismissal rather than swallowing it", async () => {
-    const { result, backend } = render([aLearnerError({ id: "e1", target_arabic: "شغل" })]);
+    const { result, backend } = render([aLearnerError({ id: "e1", target_text: "شغل" })]);
     await waitFor(() => expect(result.current.mistakes.isSuccess).toBe(true));
     backend.db.failWrites("learner_errors", 403, { message: "denied" });
 

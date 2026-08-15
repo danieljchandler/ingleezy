@@ -39,7 +39,7 @@ const aWord = (index: number, over: Record<string, unknown> = {}) =>
     user_id: TEST_USER_ID,
     word_arabic: `كلمة${index}`,
     word_english: `word ${index}`,
-    root: "act",
+    word_family: "act",
     dialect: "Gulf",
     ...over,
   });
@@ -66,9 +66,9 @@ function render(
 describe("opening a family", () => {
   it("lists every word in it, however the root was spelled", async () => {
     render([
-      aWord(0, { root: "Act" }),
-      aWord(1, { root: "act" }),
-      aWord(2, { root: "act" }),
+      aWord(0, { word_family: "Act" }),
+      aWord(1, { word_family: "act" }),
+      aWord(2, { word_family: "act" }),
     ]);
 
     expect(await screen.findByText("word 0")).toBeInTheDocument();

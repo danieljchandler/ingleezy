@@ -20,8 +20,8 @@ import type { SupabaseBackend } from "@/test/support/server/handler";
  * to a worse attempt, silently un-does work the learner has done.
  *
  * This is the flipped descendant of Hakiya's useAlphabetProgress — same
- * table, same shape (`letter_code` now holds a sound code), same rules. See
- * src/hooks/useSoundProgress.ts for why the table didn't need to move.
+ * shape and same rules, on a table since renamed from `user_letter_progress`
+ * to match what it actually records.
  */
 
 const FIRST = ENGLISH_SOUNDS[0].code;
@@ -43,7 +43,7 @@ afterEach(() => {
 
 const aSoundRow = (code: string, over: Record<string, unknown> = {}) => ({
   user_id: TEST_USER_ID,
-  letter_code: code,
+  sound_code: code,
   steps_completed: [],
   best_spot_score: 0,
   best_sound_score: 0,
@@ -67,7 +67,7 @@ async function render(seed?: (backend: SupabaseBackend) => void) {
     {
       persona: "free",
       seed: (backend) => {
-        backend.db.seed("user_letter_progress", []);
+        backend.db.seed("user_sound_progress", []);
         seed?.(backend);
       },
     },
@@ -90,7 +90,7 @@ describe("what a learner has unlocked", () => {
 
   it("unlocks the next sound once the current one is mastered", async () => {
     const { result } = await render((backend) => {
-      backend.db.seed("user_letter_progress", [aMasteredSound(FIRST)]);
+      backend.db.seed("user_sound_progress", [aMasteredSound(FIRST)]);
     });
 
     await waitFor(() => expect(result.current.isUnlocked(1)).toBe(true));
@@ -99,7 +99,7 @@ describe("what a learner has unlocked", () => {
 
   it("keeps a mastered sound unlocked", async () => {
     const { result } = await render((backend) => {
-      backend.db.seed("user_letter_progress", [aMasteredSound(FIRST)]);
+      backend.db.seed("user_sound_progress", [aMasteredSound(FIRST)]);
     });
 
     // Revisiting a sound is how a learner practises; locking it behind them
@@ -109,7 +109,7 @@ describe("what a learner has unlocked", () => {
 
   it("does not unlock the next sound for a partly finished one", async () => {
     const { result } = await render((backend) => {
-      backend.db.seed("user_letter_progress", [
+      backend.db.seed("user_sound_progress", [
         aSoundRow(FIRST, { steps_completed: ["meet", "mouth"] }),
       ]);
     });
@@ -123,7 +123,7 @@ describe("what a learner has unlocked", () => {
   it("skips past a gap rather than stalling on it", async () => {
     const { result } = await render((backend) => {
       // Mastered out of order — possible if the unlock rule ever changed.
-      backend.db.seed("user_letter_progress", [
+      backend.db.seed("user_sound_progress", [
         aMasteredSound(FIRST),
         aMasteredSound(THIRD),
       ]);
@@ -138,7 +138,7 @@ describe("what a learner has unlocked", () => {
 
   it("counts how many sounds are mastered", async () => {
     const { result } = await render((backend) => {
-      backend.db.seed("user_letter_progress", [
+      backend.db.seed("user_sound_progress", [
         aMasteredSound(FIRST),
         aMasteredSound(SECOND),
         aSoundRow(THIRD, { steps_completed: ["meet"] }),
@@ -153,12 +153,12 @@ describe("what a learner has unlocked", () => {
   it("reports nothing for a signed-out visitor", async () => {
     const harness = renderHookWithProviders(() => useSoundProgress(), {
       seed: (backend) =>
-        backend.db.seed("user_letter_progress", [aMasteredSound(FIRST)]),
+        backend.db.seed("user_sound_progress", [aMasteredSound(FIRST)]),
     });
     cleanup = harness.cleanup;
 
     await waitFor(() =>
-      expect(harness.backend.db.readsOf("user_letter_progress")).toHaveLength(0),
+      expect(harness.backend.db.readsOf("user_sound_progress")).toHaveLength(0),
     );
     expect(harness.result.current.masteredCount).toBe(0);
     expect(harness.result.current.isUnlocked(0)).toBe(true);
@@ -173,14 +173,14 @@ describe("finishing a step", () => {
       await result.current.completeStep({ soundCode: FIRST, step: "meet" });
     });
 
-    const row = backend.db.rows("user_letter_progress")[0];
-    expect(row.letter_code).toBe(FIRST);
+    const row = backend.db.rows("user_sound_progress")[0];
+    expect(row.sound_code).toBe(FIRST);
     expect(row.steps_completed).toEqual(["meet"]);
   });
 
   it("adds to the steps already done rather than replacing them", async () => {
     const { result, backend } = await render((b) => {
-      b.db.seed("user_letter_progress", [
+      b.db.seed("user_sound_progress", [
         aSoundRow(FIRST, { steps_completed: ["meet", "mouth"] }),
       ]);
     });
@@ -191,7 +191,7 @@ describe("finishing a step", () => {
 
     // The write is an upsert of the whole row, so a replace here would erase
     // two steps the learner had already finished.
-    expect(backend.db.rows("user_letter_progress")[0].steps_completed).toEqual([
+    expect(backend.db.rows("user_sound_progress")[0].steps_completed).toEqual([
       "meet",
       "mouth",
       "spell",
@@ -200,7 +200,7 @@ describe("finishing a step", () => {
 
   it("keeps the steps in their taught order, not the order finished", async () => {
     const { result, backend } = await render((b) => {
-      b.db.seed("user_letter_progress", [aSoundRow(FIRST, { steps_completed: ["contrast"] })]);
+      b.db.seed("user_sound_progress", [aSoundRow(FIRST, { steps_completed: ["contrast"] })]);
     });
     await waitFor(() => expect(result.current.progress[FIRST]).toBeTruthy());
 
@@ -210,7 +210,7 @@ describe("finishing a step", () => {
 
     // The progress dots read left to right; storing them in completion order
     // would draw them scrambled.
-    expect(backend.db.rows("user_letter_progress")[0].steps_completed).toEqual([
+    expect(backend.db.rows("user_sound_progress")[0].steps_completed).toEqual([
       "meet",
       "contrast",
     ]);
@@ -236,7 +236,7 @@ describe("finishing a step", () => {
     // is a progress dot that will not stay filled.
     //
     // This test fails once the merge reads the row it is writing.
-    expect(backend.db.rows("user_letter_progress")[0].steps_completed).toEqual(["mouth"]);
+    expect(backend.db.rows("user_sound_progress")[0].steps_completed).toEqual(["mouth"]);
   });
 
   it("does the same step twice without duplicating it", async () => {
@@ -247,12 +247,12 @@ describe("finishing a step", () => {
       await result.current.completeStep({ soundCode: FIRST, step: "meet" });
     });
 
-    expect(backend.db.rows("user_letter_progress")[0].steps_completed).toEqual(["meet"]);
+    expect(backend.db.rows("user_sound_progress")[0].steps_completed).toEqual(["meet"]);
   });
 
   it("keeps the better of two scores", async () => {
     const { result, backend } = await render((b) => {
-      b.db.seed("user_letter_progress", [
+      b.db.seed("user_sound_progress", [
         aSoundRow(FIRST, { steps_completed: ["spot"], best_spot_score: 90 }),
       ]);
     });
@@ -263,12 +263,12 @@ describe("finishing a step", () => {
 
     // "Best" has to mean best; overwriting turns practice into a way of losing
     // a score already earned.
-    expect(Number(backend.db.rows("user_letter_progress")[0].best_spot_score)).toBe(90);
+    expect(Number(backend.db.rows("user_sound_progress")[0].best_spot_score)).toBe(90);
   });
 
   it("takes a better score when there is one", async () => {
     const { result, backend } = await render((b) => {
-      b.db.seed("user_letter_progress", [
+      b.db.seed("user_sound_progress", [
         aSoundRow(FIRST, { steps_completed: ["spot"], best_spot_score: 40 }),
       ]);
     });
@@ -277,7 +277,7 @@ describe("finishing a step", () => {
       await result.current.completeStep({ soundCode: FIRST, step: "spot", spotScore: 95 });
     });
 
-    expect(Number(backend.db.rows("user_letter_progress")[0].best_spot_score)).toBe(95);
+    expect(Number(backend.db.rows("user_sound_progress")[0].best_spot_score)).toBe(95);
   });
 
   it("keeps the two scores apart", async () => {
@@ -287,7 +287,7 @@ describe("finishing a step", () => {
       await result.current.completeStep({ soundCode: FIRST, step: "contrast", soundScore: 77 });
     });
 
-    const row = backend.db.rows("user_letter_progress")[0];
+    const row = backend.db.rows("user_sound_progress")[0];
     expect(Number(row.best_sound_score)).toBe(77);
     expect(Number(row.best_spot_score)).toBe(0);
   });
@@ -295,7 +295,7 @@ describe("finishing a step", () => {
   it("masters the sound only on the last step", async () => {
     const partial = SOUND_STEPS.slice(0, -1);
     const { result, backend } = await render((b) => {
-      b.db.seed("user_letter_progress", [
+      b.db.seed("user_sound_progress", [
         aSoundRow(FIRST, { steps_completed: [...partial] }),
       ]);
     });
@@ -306,7 +306,7 @@ describe("finishing a step", () => {
 
     // Mastery is what unlocks the next sound, so declaring it early opens the
     // whole track and declaring it late strands the learner.
-    expect(backend.db.rows("user_letter_progress")[0].mastered_at).toBeTruthy();
+    expect(backend.db.rows("user_sound_progress")[0].mastered_at).toBeTruthy();
   });
 
   it("does not mark it mastered before then", async () => {
@@ -316,13 +316,13 @@ describe("finishing a step", () => {
       await result.current.completeStep({ soundCode: FIRST, step: "meet" });
     });
 
-    expect(backend.db.rows("user_letter_progress")[0].mastered_at).toBeNull();
+    expect(backend.db.rows("user_sound_progress")[0].mastered_at).toBeNull();
   });
 
   it("keeps the date a sound was first mastered", async () => {
     const originally = new Date("2026-03-01T12:00:00Z").toISOString();
     const { result, backend } = await render((b) => {
-      b.db.seed("user_letter_progress", [aMasteredSound(FIRST)]);
+      b.db.seed("user_sound_progress", [aMasteredSound(FIRST)]);
     });
 
     await act(async () => {
@@ -331,7 +331,7 @@ describe("finishing a step", () => {
 
     // Practising a mastered sound must not restamp it as newly learned; the
     // date is a record of when it happened.
-    expect(backend.db.rows("user_letter_progress")[0].mastered_at).toBe(originally);
+    expect(backend.db.rows("user_sound_progress")[0].mastered_at).toBe(originally);
   });
 
   it("keeps one row per sound", async () => {
@@ -343,14 +343,14 @@ describe("finishing a step", () => {
       await result.current.completeStep({ soundCode: FIRST, step: "mouth" });
     });
 
-    // Upserted on (user_id, letter_code); two rows for one sound would give it
+    // Upserted on (user_id, sound_code); two rows for one sound would give it
     // two different sets of completed steps.
-    expect(backend.db.rows("user_letter_progress")).toHaveLength(2);
+    expect(backend.db.rows("user_sound_progress")).toHaveLength(2);
   });
 
   it("refuses to record anything when signed out", async () => {
     const harness = renderHookWithProviders(() => useSoundProgress(), {
-      seed: (b) => b.db.seed("user_letter_progress", []),
+      seed: (b) => b.db.seed("user_sound_progress", []),
     });
     cleanup = harness.cleanup;
 
@@ -359,7 +359,7 @@ describe("finishing a step", () => {
         harness.result.current.completeStep({ soundCode: FIRST, step: "meet" }),
       ).rejects.toThrow(/not signed in/i);
     });
-    expect(harness.backend.db.rows("user_letter_progress")).toHaveLength(0);
+    expect(harness.backend.db.rows("user_sound_progress")).toHaveLength(0);
   });
 });
 

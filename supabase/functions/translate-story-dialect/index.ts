@@ -145,7 +145,7 @@ Return exactly one entry per numbered line, in the same order. Do not merge, spl
         .from("authentic_story_lines")
         .update({
           arabic: gloss.arabic,
-          english_literal: gloss.literal ?? null,
+          literal_arabic: gloss.literal ?? null,
         })
         .eq("id", translatable[i].id);
       if (updateErr) {

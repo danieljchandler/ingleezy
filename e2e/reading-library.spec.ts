@@ -53,7 +53,7 @@ function seedStory(
             line_index: 0,
             english: "The market opens at dawn.",
             arabic: "السوق يفتح مع الفجر.",
-            english_literal: "الـ سوق يفتح عند الـ فجر.",
+            literal_arabic: "الـ سوق يفتح عند الـ فجر.",
             audio_url: null,
           }),
           anAuthenticStoryLine({
@@ -62,7 +62,7 @@ function seedStory(
             line_index: 1,
             english: "Traders arrive early.",
             arabic: "التجّار يوصلون بدري.",
-            english_literal: "الـ تجّار يوصلون بدري.",
+            literal_arabic: "الـ تجّار يوصلون بدري.",
             audio_url: null,
           }),
         ],

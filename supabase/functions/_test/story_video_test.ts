@@ -142,7 +142,7 @@ Deno.test("generate-story-video returns the image and the narration", async () =
   assertEquals(result.body.status, "ready");
   assert(String(result.body.image_url).includes("listen-audio"));
   assert(String(result.body.audio_url).includes("listen-audio"));
-  assertEquals(result.body.narration_arabic, "Once upon a time.");
+  assertEquals(result.body.narration_text, "Once upon a time.");
   assertEquals(typeof result.body.duration_seconds, "number");
 });
 
@@ -187,14 +187,14 @@ Deno.test("generate-story-video narrates the story's first sentence only", async
     backend({ lines: [line({ english: "The first sentence. The second sentence." })] }),
   );
 
-  assertEquals(result.body.narration_arabic, "The first sentence.");
+  assertEquals(result.body.narration_text, "The first sentence.");
 });
 
 Deno.test("generate-story-video caps the narration at 26 words", async () => {
   const long = Array.from({ length: 40 }, (_, i) => `word${i}`).join(" ");
   const result = await call({ story_id: STORY }, backend({ lines: [line({ english: long })] }));
 
-  assertEquals(String(result.body.narration_arabic).split(/\s+/).length, 26);
+  assertEquals(String(result.body.narration_text).split(/\s+/).length, 26);
 });
 
 Deno.test("generate-story-video narrates the line's English", async () => {
@@ -205,14 +205,14 @@ Deno.test("generate-story-video narrates the line's English", async () => {
     backend({ lines: [line({ english: "The market opens at dawn." })] }),
   );
 
-  assertEquals(result.body.narration_arabic, "The market opens at dawn.");
+  assertEquals(result.body.narration_text, "The market opens at dawn.");
 });
 
 Deno.test("generate-story-video falls back to the story body when it has no lines", async () => {
   const result = await call({ story_id: STORY }, backend({ lines: [] }));
 
   assertEquals(result.status, 200);
-  assertEquals(result.body.narration_arabic, "Once upon a time");
+  assertEquals(result.body.narration_text, "Once upon a time");
 });
 
 Deno.test("generate-story-video refuses to narrate a line with no English in it", async () => {

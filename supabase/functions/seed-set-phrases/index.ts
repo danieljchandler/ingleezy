@@ -29,9 +29,9 @@ ${DIALECT_RULES[dialect] ?? DIALECT_RULES.Gulf}
 Rules:
 - Generate 10 distinct REAL English phrases native speakers actually say for the occasion. Contemporary spoken English — contractions welcome; NO invented or textbook-stiff phrases.
 - Mix difficulties A1-B2; mix formality (casual/neutral/formal).
-- CRITICAL: Every phrase MUST include the most common native reply (reply_english, reply_arabic, reply_transliteration). Set phrases are conversational — there is ALWAYS an expected response (greeting → return greeting, apology → standard acceptance, thanks → standard reply, etc.). Never omit the reply.
+- CRITICAL: Every phrase MUST include the most common native reply (reply_english, reply_arabic, reply_phonetic_ar). Set phrases are conversational — there is ALWAYS an expected response (greeting → return greeting, apology → standard acceptance, thanks → standard reply, etc.). Never omit the reply.
 - phrase_arabic / reply_arabic: the phrase's natural dialect-Arabic gloss.
-- phrase_transliteration / reply_transliteration: the ENGLISH pronounced in Arabic letters (e.g. "ثانك يو" for "thank you"), readable aloud immediately.
+- phrase_phonetic_ar / reply_phonetic_ar: the ENGLISH pronounced in Arabic letters (e.g. "ثانك يو" for "thank you"), readable aloud immediately.
 - scenario_english: a 1-sentence scenario in the learner's dialect Arabic describing when someone says the phrase (the column name is historical).
 - For BOTH the phrase and its reply, also provide a "literal" word-for-word ARABIC gloss (phrase_literal, reply_literal) that preserves the ENGLISH word order. It may sound stiff — it shows learners how the English is built.
 - cultural_note: a short usage note in the learner's dialect Arabic, only when register or culture matters.`;
@@ -61,17 +61,17 @@ Rules:
                     phrase_english: { type: "string", description: "The English phrase the learner practises." },
                     phrase_arabic: { type: "string", description: "Its dialect-Arabic gloss." },
                     phrase_literal: { type: "string", description: "Word-for-word Arabic gloss of the phrase, preserving ENGLISH word order." },
-                    phrase_transliteration: { type: "string", description: "The English pronounced in Arabic letters (phonetic_ar)." },
+                    phrase_phonetic_ar: { type: "string", description: "The English pronounced in Arabic letters (phonetic_ar)." },
                     reply_english: { type: "string" },
                     reply_arabic: { type: "string" },
                     reply_literal: { type: "string", description: "Word-for-word Arabic gloss of the reply, preserving ENGLISH word order." },
-                    reply_transliteration: { type: "string", description: "The reply pronounced in Arabic letters (phonetic_ar)." },
+                    reply_phonetic_ar: { type: "string", description: "The reply pronounced in Arabic letters (phonetic_ar)." },
                     scenario_english: { type: "string", description: "The scenario in the learner's dialect Arabic (column name historical)." },
                     cultural_note: { type: "string", description: "Usage note in the learner's dialect Arabic." },
                     formality: { type: "string", enum: ["casual", "neutral", "formal", "religious"] },
                     difficulty: { type: "string", enum: ["A1", "A2", "B1", "B2", "C1"] },
                   },
-                  required: ["phrase_english", "phrase_arabic", "reply_english", "reply_arabic", "reply_transliteration", "scenario_english", "formality", "difficulty"],
+                  required: ["phrase_english", "phrase_arabic", "reply_english", "reply_arabic", "reply_phonetic_ar", "scenario_english", "formality", "difficulty"],
                 },
               },
             },
@@ -135,11 +135,11 @@ serve(async (req) => {
           phrase_arabic: p.phrase_arabic,
           phrase_english: p.phrase_english ?? null,
           phrase_literal: p.phrase_literal ?? null,
-          phrase_transliteration: p.phrase_transliteration ?? null,
+          phrase_phonetic_ar: p.phrase_phonetic_ar ?? null,
           reply_arabic: p.reply_arabic ?? null,
           reply_english: p.reply_english ?? null,
           reply_literal: p.reply_literal ?? null,
-          reply_transliteration: p.reply_transliteration ?? null,
+          reply_phonetic_ar: p.reply_phonetic_ar ?? null,
           scenario_english: p.scenario_english ?? null,
           cultural_note: p.cultural_note ?? null,
           formality: p.formality ?? "neutral",

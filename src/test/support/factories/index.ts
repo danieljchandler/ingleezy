@@ -199,9 +199,9 @@ export const aVocabularyWord = (over: Row = {}): Row => ({
   topic_id: null,
   lesson_id: null,
   image_position: null,
-  // Null, not a root: the column postdates every authored lesson, so an
+  // Null, not a family: the column postdates every authored lesson, so an
   // un-backfilled word is the normal state of curriculum vocabulary.
-  root: null,
+  word_family: null,
   display_order: 1,
   dialect_module: "Gulf",
   created_at: daysAgo(30),
@@ -250,7 +250,7 @@ export const aUserVocabulary = (over: Row = {}): Row => ({
   word_arabic: "محفوظ",
   word_english: "saved word",
   transliteration: null,
-  root: null,
+  word_family: null,
   source: "e2e",
   dialect: "Gulf",
   ease_factor: 4,
@@ -292,7 +292,7 @@ export const aUserPhrase = (over: Row = {}): Row => ({
   user_id: TEST_USER_ID,
   phrase_arabic: "عبارة",
   phrase_english: "saved phrase",
-  transliteration: null,
+  phonetic_ar: null,
   notes: null,
   source: "e2e",
   dialect: "Gulf",
@@ -317,11 +317,11 @@ export const aSetPhrase = (over: Row = {}): Row => ({
   id: setPhraseId(0),
   phrase_arabic: "عبارة ثابتة",
   phrase_english: "set phrase",
-  // The columns are prefixed: phrase_transliteration and phrase_literal.
-  phrase_transliteration: null,
+  // The columns are prefixed: phrase_phonetic_ar and phrase_literal.
+  phrase_phonetic_ar: null,
   phrase_literal: null,
   reply_arabic: null,
-  reply_transliteration: null,
+  reply_phonetic_ar: null,
   reply_english: null,
   scenario_english: null,
   cultural_note: null,
@@ -378,8 +378,8 @@ export const aLearnerError = (over: Row = {}): Row => ({
   user_id: TEST_USER_ID,
   dialect: "Gulf",
   source: "pronunciation",
-  target_arabic: "شغل",
-  produced_arabic: "شغال",
+  target_text: "شغل",
+  produced_text: "شغال",
   error_kind: "mispronunciation",
   resolved_at: null,
   created_at: iso(),
@@ -643,8 +643,6 @@ export const anAuthenticStory = (over: Row = {}): Row => ({
   source_name: null,
   source_url: null,
   license: "public_domain",
-  body_fusha: null,
-  body_fusha_vocalized: null,
   body_english: null,
   dialect: "Gulf",
   // `difficulty` and `status`, not cefr_level and is_published.
@@ -663,20 +661,18 @@ export const anAuthenticStory = (over: Row = {}): Row => ({
 /**
  * One segmented line of an authentic story.
  *
- * The reading page renders `arabic_vocalized` when it exists and falls back to
- * `arabic`, and treats `audio_url` as the flag for whether narration has been
- * synthesised for this line yet.
+ * Post-flip `english` is the line — the text the learner is here to read —
+ * and `arabic` is the dialect gloss beside it, with `literal_arabic` the same
+ * gloss rearranged into English word order. `audio_url` is the flag for
+ * whether narration has been synthesised for this line yet.
  */
 export const anAuthenticStoryLine = (over: Row = {}): Row => ({
   id: storyLineId(0),
   story_id: storyId(0),
   line_index: 0,
-  arabic: "كان يا ما كان في قديم الزمان.",
-  arabic_vocalized: "كَانَ يَا مَا كَانَ فِي قَدِيمِ الزَّمَانِ.",
-  dialect: null,
-  dialect_vocalized: null,
   english: "Once upon a time.",
-  english_literal: "was oh what was in old the-time",
+  arabic: "كان يا ما كان في قديم الزمان.",
+  literal_arabic: "كان مرة في زمن قديم",
   audio_url: null,
   duration_seconds: null,
   created_at: daysAgo(5),

@@ -18,8 +18,8 @@ type StorySceneSegment = {
   image_url?: string;
   url?: string; // legacy
   audio_url?: string;
-  narration_arabic?: string;
-  arabic_beat?: string;
+  narration_text?: string;
+  story_beat?: string;
   prompt?: string;
   index?: number;
   duration_seconds?: number;
@@ -615,8 +615,8 @@ const AdminReadingLibraryForm = () => {
                         </div>
                       )}
                     </div>
-                    {active?.narration_arabic && (
-                      <p className="mt-2 text-sm font-arabic" dir="rtl">{active.narration_arabic}</p>
+                    {active?.narration_text && (
+                      <p className="mt-2 text-sm font-arabic" dir="rtl">{active.narration_text}</p>
                     )}
 
                     {/* Per-scene image editing */}
@@ -726,9 +726,9 @@ const AdminReadingLibraryForm = () => {
                         is the scaffold the import generated. */}
                     <p className="text-base" dir="ltr" lang="en">{line.english}</p>
                     <p className="text-sm font-arabic text-blue-600" dir="rtl">{line.arabic}</p>
-                    {(line as { english_literal?: string | null }).english_literal && (
+                    {(line as { literal_arabic?: string | null }).literal_arabic && (
                       <p className="text-xs font-arabic text-muted-foreground" dir="rtl">
-                        {(line as { english_literal?: string | null }).english_literal}
+                        {(line as { literal_arabic?: string | null }).literal_arabic}
                       </p>
                     )}
                     {line.audio_url && (

@@ -128,7 +128,7 @@ describe("MyWordsSection — the list", () => {
   });
 
   it("shows the root when the word has one", async () => {
-    render({ seed: (b) => b.db.add("user_vocabulary", aWord(1, { root: "ك ت ب" })) });
+    render({ seed: (b) => b.db.add("user_vocabulary", aWord(1, { word_family: "ك ت ب" })) });
     await heading();
     expect(screen.getByText("ك ت ب")).toBeInTheDocument();
   });

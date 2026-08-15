@@ -136,7 +136,7 @@ test.describe("working through a lesson", () => {
         display_order: 0,
         // Stored capitalised, as one of the AI paths writes it — the display
         // canonicalises whatever spelling reached the column.
-        root: "Book",
+        word_family: "Book",
       }),
     ]);
 
@@ -161,7 +161,7 @@ test.describe("working through a lesson", () => {
         word_arabic: "كمبيوتر",
         word_english: "computer",
         display_order: 0,
-        root: null,
+        word_family: null,
       }),
     ]);
 

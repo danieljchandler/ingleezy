@@ -235,7 +235,7 @@ serve(async (req) => {
       const expected = type === "reply" ? p.reply_english : p.phrase_english;
       const expectedAr = type === "reply" ? p.reply_arabic : p.phrase_arabic;
       const expectedAudio = type === "reply" ? p.reply_audio_url : p.phrase_audio_url;
-      const expectedTrans = type === "reply" ? p.reply_transliteration : p.phrase_transliteration;
+      const expectedTrans = type === "reply" ? p.reply_phonetic_ar : p.phrase_phonetic_ar;
 
       // Build choices: correct + up to 3 distractors. Fallback: pick from other phrases.
       let choiceDistractors = distractors.slice(0, 3);

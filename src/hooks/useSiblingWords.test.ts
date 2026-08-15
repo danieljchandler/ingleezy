@@ -53,7 +53,7 @@ const aWord = (index: number, over: Record<string, unknown> = {}) =>
     user_id: TEST_USER_ID,
     word_arabic: `كلمة${index}`,
     word_english: `word ${index}`,
-    root: ROOT,
+    word_family: ROOT,
     dialect: "Gulf",
     ...over,
   });
@@ -108,10 +108,10 @@ describe("finding siblings", () => {
 
   it("matches roots that were saved in different spellings", async () => {
     const { result } = render({ root: "Act" }, [
-      aWord(0, { root: "Act" }),
-      aWord(1, { root: "act" }),
-      aWord(2, { root: "act" }),
-      aWord(3, { root: " ACT " }),
+      aWord(0, { word_family: "Act" }),
+      aWord(1, { word_family: "act" }),
+      aWord(2, { word_family: "act" }),
+      aWord(3, { word_family: " ACT " }),
     ]);
 
     await settled(result);
@@ -130,7 +130,7 @@ describe("finding siblings", () => {
   });
 
   it("leaves out words on a different root", async () => {
-    const { result } = render({}, [aWord(0), aWord(1), aWord(2, { root: "form" })]);
+    const { result } = render({}, [aWord(0), aWord(1), aWord(2, { word_family: "form" })]);
 
     await settled(result);
     expect(result.current.hook.siblings.map((w) => w.id)).toEqual(["voc-1"]);
@@ -210,14 +210,14 @@ describe("finding siblings", () => {
     expect(result.current.hook.siblings[0]).toMatchObject({
       word_arabic: "كتاب",
       word_english: "book",
-      root: ROOT,
+      word_family: ROOT,
       image_url: "https://cdn.test/book.png",
       word_audio_url: "https://cdn.test/book.mp3",
     });
   });
 
   it("hands back the family ready to render and to open a family with", async () => {
-    const { result } = render({ root: "Act" }, [aWord(0, { root: "Act" })]);
+    const { result } = render({ root: "Act" }, [aWord(0, { word_family: "Act" })]);
 
     await settled(result);
     expect(result.current.hook.rootDisplay).toBe("act");
@@ -247,8 +247,8 @@ describe("when not to look", () => {
 
   it("treats the 'no root exists' sentinel as no root", async () => {
     const { result } = render({ root: "" }, [
-      aWord(0, { root: "" }),
-      aWord(1, { root: "" }),
+      aWord(0, { word_family: "" }),
+      aWord(1, { word_family: "" }),
     ]);
 
     await settled(result);

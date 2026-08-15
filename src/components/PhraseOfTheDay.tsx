@@ -153,7 +153,7 @@ export const PhraseOfTheDay = () => {
       await addPhrase.mutateAsync({
         phrase_arabic: phrase.phrase_arabic,
         phrase_english: phrase.phrase_english,
-        transliteration: phrase.transliteration,
+        phonetic_ar: phrase.transliteration,
         notes: phrase.notes,
         source: "phrase-of-the-day",
       });

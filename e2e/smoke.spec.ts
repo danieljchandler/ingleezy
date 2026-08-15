@@ -384,8 +384,8 @@ test.describe("signed in — mistakes", () => {
     user_id: TEST_USER_ID,
     dialect: "Gulf",
     source: "pronunciation",
-    target_arabic: "شغل",
-    produced_arabic: "شغال",
+    target_text: "شغل",
+    produced_text: "شغال",
     error_kind: "mispronunciation",
     resolved_at: null,
     created_at: new Date().toISOString(),
@@ -399,7 +399,7 @@ test.describe("signed in — mistakes", () => {
         learner_errors: [
           errorRow(),
           errorRow(),
-          errorRow({ target_arabic: "مشى", produced_arabic: null, source: "quiz" }),
+          errorRow({ target_text: "مشى", produced_text: null, source: "quiz" }),
         ],
       },
     });
@@ -417,10 +417,10 @@ test.describe("signed in — mistakes", () => {
     await stubSupabase(page, {
       tables: {
         learner_errors: [
-          errorRow({ target_arabic: "once" }),
-          errorRow({ target_arabic: "thrice" }),
-          errorRow({ target_arabic: "thrice" }),
-          errorRow({ target_arabic: "thrice" }),
+          errorRow({ target_text: "once" }),
+          errorRow({ target_text: "thrice" }),
+          errorRow({ target_text: "thrice" }),
+          errorRow({ target_text: "thrice" }),
         ],
       },
     });

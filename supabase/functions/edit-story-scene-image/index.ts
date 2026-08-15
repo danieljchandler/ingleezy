@@ -20,8 +20,8 @@ type Segment = {
   image_url?: string;
   url?: string;
   audio_url?: string;
-  narration_arabic?: string;
-  arabic_beat?: string;
+  narration_text?: string;
+  story_beat?: string;
   duration_seconds?: number;
   prompt?: string;
   index?: number;

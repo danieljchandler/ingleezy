@@ -69,9 +69,10 @@ export const IntroCard = ({ word, onContinue, topicLabel }: IntroCardProps) => {
             >
               {word.word_arabic}
             </p>
-            {/* Under the Arabic, not beside it: the root is context for a word
-                the learner has just chosen to see, never a hint before that. */}
-            <RootChip root={word.root} className="mt-1.5" />
+            {/* Under the Arabic, not beside it: the family is context for a
+                word the learner has just chosen to see, never a hint before
+                that. */}
+            <RootChip root={word.word_family} className="mt-1.5" />
           </div>
         ) : (
           <p className="text-sm text-muted-foreground/70 italic">

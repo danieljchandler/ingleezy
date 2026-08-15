@@ -69,21 +69,27 @@ const aCard = (word_arabic: string, word_english = "a word") => ({
   word_english,
 });
 
-Deno.test("suggest-flashcards carries a root through to the client", async () => {
+Deno.test("suggest-flashcards carries a word family through to the client", async () => {
   const { status, body } = await call(
     "suggest-flashcards",
     { topic: "reading", dialect: "Gulf", count: 1 },
     caller({
       "ai.gateway.lovable.dev": emitting({
-        flashcards: [{ ...aCard("مكتبة", "library"), root: "ك ت ب" }],
+        flashcards: [{ ...aCard("مكتبة", "library"), word_family: "library" }],
       }),
     }),
   );
 
   assertEquals(status, 200);
-  // The model call is happening anyway, so asking for the root costs a handful
-  // of tokens and saves the card from the root backfill entirely.
-  assertEquals((body.flashcards as Array<Record<string, unknown>>)[0].root, "ك ت ب");
+  // The model call is happening anyway, so asking for the family costs a
+  // handful of tokens and saves the card from the backfill entirely. The key
+  // has to be the one `SuggestFlashcardsDialog` reads on the way to
+  // `user_vocabulary.word_family` — under any other name it arrives, is
+  // ignored, and the card is enqueued for a backfill it did not need.
+  assertEquals(
+    (body.flashcards as Array<Record<string, unknown>>)[0].word_family,
+    "library",
+  );
 });
 
 Deno.test("suggest-flashcards returns the cards it generated", async () => {

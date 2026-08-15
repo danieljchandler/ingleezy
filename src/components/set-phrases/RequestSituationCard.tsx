@@ -62,7 +62,7 @@ export const RequestSituationCard = () => {
       await addPhrase.mutateAsync({
         phrase_arabic: p.phrase_arabic,
         phrase_english: p.phrase_english,
-        transliteration: p.transliteration,
+        phonetic_ar: p.transliteration,
         notes: p.notes || undefined,
         source: `situation:${situation.trim().slice(0, 80)}`,
         dialect: activeDialect,
@@ -81,7 +81,7 @@ export const RequestSituationCard = () => {
         await addPhrase.mutateAsync({
           phrase_arabic: phrases[i].phrase_arabic,
           phrase_english: phrases[i].phrase_english,
-          transliteration: phrases[i].transliteration,
+          phonetic_ar: phrases[i].transliteration,
           notes: phrases[i].notes || undefined,
           source: `situation:${situation.trim().slice(0, 80)}`,
           dialect: activeDialect,

@@ -123,6 +123,36 @@ function load(): ColumnDefaults {
     )) {
       recordDefault(defaults, match[1], match[2], match[3]);
     }
+
+    // Renames, applied after this file's other statements so a table created
+    // and renamed in one migration lands under its final name.
+    //
+    // Without this a renamed table silently loses every default it had: the
+    // defaults are filed under the CREATE TABLE name, nothing ever looks them
+    // up under the new one, and the emulator starts leaving columns null that
+    // the real database fills. That is invisible until a test asserts on a
+    // defaulted column and gets undefined.
+    for (const match of sql.matchAll(
+      /ALTER\s+TABLE\s+(?:IF\s+EXISTS\s+)?(?:public\.)?"?(\w+)"?\s+RENAME\s+TO\s+"?(\w+)"?/gi,
+    )) {
+      const [, from, to] = match;
+      const columns = defaults.get(from);
+      if (columns) {
+        defaults.set(to, columns);
+        defaults.delete(from);
+      }
+    }
+
+    for (const match of sql.matchAll(
+      /ALTER\s+TABLE\s+(?:IF\s+EXISTS\s+)?(?:public\.)?"?(\w+)"?\s+RENAME\s+(?:COLUMN\s+)?"?(\w+)"?\s+TO\s+"?(\w+)"?/gi,
+    )) {
+      const [, table, from, to] = match;
+      const columns = defaults.get(table);
+      if (columns?.has(from)) {
+        columns.set(to, columns.get(from));
+        columns.delete(from);
+      }
+    }
   }
 
   return defaults;

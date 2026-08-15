@@ -283,7 +283,7 @@ serve(async (req) => {
     // Persist misses so the target comes back around in generated content —
     // tagged with the interference categories, which is what makes the
     // flywheel L1-aware. (learner_errors columns keep their Arabic-era names
-    // until the data-model rename; target_arabic carries the English target.)
+    // until the data-model rename; target_text carries the English target.)
     const feedback = brain.output as CoachFeedback;
     const interference = [
       ...new Set([

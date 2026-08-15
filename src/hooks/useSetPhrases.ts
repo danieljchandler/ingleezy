@@ -24,12 +24,12 @@ export interface SetPhrase {
   occasion_id: string | null;
   dialect: string;
   phrase_arabic: string;
-  phrase_transliteration: string | null;
+  phrase_phonetic_ar: string | null;
   phrase_english: string | null;
   phrase_literal: string | null;
   phrase_audio_url: string | null;
   reply_arabic: string | null;
-  reply_transliteration: string | null;
+  reply_phonetic_ar: string | null;
   reply_english: string | null;
   reply_literal: string | null;
   reply_audio_url: string | null;

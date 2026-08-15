@@ -126,7 +126,7 @@ export const QuizQuestion = ({
         </p>
         {/* Held back until the question is answered. The root of a word is a
             strong clue to its meaning, which is exactly what is being asked. */}
-        {showResult && <RootChip root={currentWord.root} className="mb-2" />}
+        {showResult && <RootChip root={currentWord.word_family} className="mb-2" />}
         <p className="text-muted-foreground text-sm font-sans">
           وش هذي بالإنجليزي؟
         </p>

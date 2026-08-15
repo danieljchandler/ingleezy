@@ -78,8 +78,8 @@ export async function recordLearnerErrors(
       user_id: userId,
       dialect: e.dialect || "Gulf",
       source: e.source,
-      target_arabic: e.targetArabic.trim(),
-      produced_arabic: e.producedArabic?.trim() || null,
+      target_text: e.targetArabic.trim(),
+      produced_text: e.producedArabic?.trim() || null,
       error_kind: e.errorKind || "other",
       detail: e.detail ?? {},
       word_id: e.wordId ?? null,
@@ -151,7 +151,7 @@ export async function resolveLearnerErrors(
       .from("learner_errors")
       .update({ resolved_at: new Date().toISOString() })
       .eq("user_id", userId)
-      .in("target_arabic", targets)
+      .in("target_text", targets)
       .is("resolved_at", null);
     if (dialect) q = q.eq("dialect", dialect);
     const { error } = await q;

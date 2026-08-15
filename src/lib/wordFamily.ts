@@ -131,7 +131,7 @@ export interface WordFamily<T> {
  * `minSize` defaults to 2 because a family of one is just a word: it makes a
  * fine card annotation but a useless filter chip.
  */
-export function buildWordFamilies<T extends { root: string | null }>(
+export function buildWordFamilies<T extends { word_family: string | null }>(
   rows: readonly T[],
   options?: { minSize?: number },
 ): WordFamily<T>[] {
@@ -139,7 +139,7 @@ export function buildWordFamilies<T extends { root: string | null }>(
   const buckets = new Map<string, T[]>();
 
   for (const row of rows) {
-    const key = familyKey(row.root);
+    const key = familyKey(row.word_family);
     if (!key) continue;
     const bucket = buckets.get(key);
     if (bucket) bucket.push(row);

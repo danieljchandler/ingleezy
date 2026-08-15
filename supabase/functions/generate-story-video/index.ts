@@ -220,7 +220,7 @@ Deno.serve(async (req) => {
         status: "ready",
         image_url: imageUrl,
         audio_url: narration.url,
-        narration_arabic: narration.text,
+        narration_text: narration.text,
         duration_seconds: narration.duration,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },

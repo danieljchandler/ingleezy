@@ -541,7 +541,7 @@ test.describe("requesting phrases for a situation", () => {
       dialect: "Gulf",
       occasion_id: null,
       phrase_arabic: "الله يرحمه",
-      phrase_transliteration: "allah yarhamu",
+      phrase_phonetic_ar: "allah yarhamu",
       phrase_english: "May God have mercy on him",
       cultural_note: "Said on hearing of a death.",
       scenario_english: "Comforting a grieving friend",

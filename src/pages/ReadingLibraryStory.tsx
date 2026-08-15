@@ -59,8 +59,8 @@ type StorySegment = {
   image_url?: string;
   url?: string;
   audio_url?: string;
-  arabic_beat?: string;
-  narration_arabic?: string;
+  story_beat?: string;
+  narration_text?: string;
   duration_seconds?: number;
   index?: number;
 };
@@ -291,7 +291,7 @@ const ReadingLibraryStory = () => {
               {showScaffold && focusedLine.arabic && (
                 <TranslationPair
                   variant="compact"
-                  literal={(focusedLine as { english_literal?: string | null }).english_literal}
+                  literal={(focusedLine as { literal_arabic?: string | null }).literal_arabic}
                   natural={focusedLine.arabic}
                   className="text-center mt-2"
                 />
@@ -363,7 +363,7 @@ const ReadingLibraryStory = () => {
                 {showScaffold && line.arabic && (
                   <TranslationPair
                     variant="compact"
-                    literal={(line as { english_literal?: string | null }).english_literal}
+                    literal={(line as { literal_arabic?: string | null }).literal_arabic}
                     natural={line.arabic}
                     className="mt-1"
                   />

@@ -87,10 +87,10 @@ const AdminSetPhrases = () => {
     setEditingId(p.id);
     setDraft({
       phrase_arabic: p.phrase_arabic ?? "",
-      phrase_transliteration: p.phrase_transliteration ?? "",
+      phrase_phonetic_ar: p.phrase_phonetic_ar ?? "",
       phrase_english: p.phrase_english ?? "",
       reply_arabic: p.reply_arabic ?? "",
-      reply_transliteration: p.reply_transliteration ?? "",
+      reply_phonetic_ar: p.reply_phonetic_ar ?? "",
       reply_english: p.reply_english ?? "",
       scenario_english: p.scenario_english ?? "",
       cultural_note: p.cultural_note ?? "",
@@ -190,13 +190,13 @@ const AdminSetPhrases = () => {
                     <label className="text-xs font-semibold">Phrase (Arabic)</label>
                     <Input dir="rtl" value={draft.phrase_arabic} onChange={(e) => setDraft({ ...draft, phrase_arabic: e.target.value })} />
                     <label className="text-xs font-semibold">Phrase (Transliteration)</label>
-                    <Input value={draft.phrase_transliteration} onChange={(e) => setDraft({ ...draft, phrase_transliteration: e.target.value })} />
+                    <Input value={draft.phrase_phonetic_ar} onChange={(e) => setDraft({ ...draft, phrase_phonetic_ar: e.target.value })} />
                     <label className="text-xs font-semibold">Phrase (English)</label>
                     <Input value={draft.phrase_english} onChange={(e) => setDraft({ ...draft, phrase_english: e.target.value })} />
                     <label className="text-xs font-semibold">Reply (Arabic)</label>
                     <Input dir="rtl" value={draft.reply_arabic} onChange={(e) => setDraft({ ...draft, reply_arabic: e.target.value })} />
                     <label className="text-xs font-semibold">Reply (Transliteration)</label>
-                    <Input value={draft.reply_transliteration} onChange={(e) => setDraft({ ...draft, reply_transliteration: e.target.value })} />
+                    <Input value={draft.reply_phonetic_ar} onChange={(e) => setDraft({ ...draft, reply_phonetic_ar: e.target.value })} />
                     <label className="text-xs font-semibold">Reply (English)</label>
                     <Input value={draft.reply_english} onChange={(e) => setDraft({ ...draft, reply_english: e.target.value })} />
                     <label className="text-xs font-semibold">Scenario</label>

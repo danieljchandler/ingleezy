@@ -17,15 +17,15 @@ export interface LearnerErrorRow {
   id: string;
   dialect: string;
   source: string;
-  target_arabic: string;
-  produced_arabic: string | null;
+  target_text: string;
+  produced_text: string | null;
   error_kind: string;
   created_at: string;
 }
 
 export interface MistakeGroup {
   /** The ENGLISH the learner was aiming for (column names are Arabic-era —
-   *  target_arabic carries English targets post-flip). Identity of the group. */
+   *  target_text carries English targets post-flip). Identity of the group. */
   target: string;
   dialect: string;
   /** How many unresolved errors are recorded against it. */
@@ -98,7 +98,7 @@ export function groupMistakes(rows: LearnerErrorRow[]): MistakeGroup[] {
   const sorted = [...rows].sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at));
 
   for (const row of sorted) {
-    const target = row.target_arabic?.trim();
+    const target = row.target_text?.trim();
     if (!target) continue;
 
     // Dialect is part of the identity: the same word can be right in Gulf and
@@ -111,7 +111,7 @@ export function groupMistakes(rows: LearnerErrorRow[]): MistakeGroup[] {
         target,
         dialect: row.dialect,
         count: 1,
-        attempts: row.produced_arabic?.trim() ? [row.produced_arabic.trim()] : [],
+        attempts: row.produced_text?.trim() ? [row.produced_text.trim()] : [],
         sources: [row.source],
         kinds: [row.error_kind],
         lastAt: row.created_at,
@@ -122,7 +122,7 @@ export function groupMistakes(rows: LearnerErrorRow[]): MistakeGroup[] {
 
     existing.count += 1;
     existing.ids.push(row.id);
-    const produced = row.produced_arabic?.trim();
+    const produced = row.produced_text?.trim();
     if (produced && !existing.attempts.includes(produced)) existing.attempts.push(produced);
     if (!existing.sources.includes(row.source)) existing.sources.push(row.source);
     if (!existing.kinds.includes(row.error_kind)) existing.kinds.push(row.error_kind);

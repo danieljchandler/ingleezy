@@ -205,8 +205,8 @@ Deno.test("writing-coach records each correction as a writing error", async () =
   assertEquals(rows[0].user_id, USER);
   assertEquals(rows[0].dialect, "Gulf");
   // target is what it should be; produced is what the learner typed.
-  assertEquals(rows[0].target_arabic, "I went to the market");
-  assertEquals(rows[0].produced_arabic, "I go to market");
+  assertEquals(rows[0].target_text, "I went to the market");
+  assertEquals(rows[0].produced_text, "I go to market");
   assertEquals(rows[0].error_kind, "verb_tense");
   assertEquals(rows[1].error_kind, "article");
 });

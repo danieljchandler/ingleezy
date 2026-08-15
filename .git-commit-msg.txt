@@ -1,0 +1,69 @@
+Rename the columns that say one thing and hold another
+
+Through the retarget the rule was: keep the Arabic-era column names, flip
+only the content. That was right while features were moving — one concern
+per change, no migration per pull request — and the debt it built is that a
+handful of columns ended up naming something the flip took away. No real
+Supabase project is linked yet, so this is the cheapest the rename will ever
+be: plain ALTERs, no expand/contract, no backfill.
+
+Renamed:
+  learner_errors.target_arabic / produced_arabic -> target_text /
+    produced_text. Neither _arabic nor _english is honest, because shadowing
+    still scores bridged Arabic clips and the recogniser is chosen per clip.
+  user_vocabulary.root, vocabulary_words.root -> word_family. An Arabic root
+    is generative (ك-ت-ب gives كتب, كتاب, مكتب); an English word family is
+    not, which is why wordFamily.ts replaced arabicRoot.ts.
+  authentic_story_lines.english_literal -> literal_arabic, and
+    daily_vocab_stories.body_english_literal -> body_literal_arabic. Both
+    hold Arabic in English word order; both said the opposite.
+  user_phrases.transliteration -> phonetic_ar, and the two set_phrases
+    equivalents. These hold the English respelled in Arabic letters — the
+    mirror image of user_vocabulary.transliteration, which is a Latin
+    transliteration of Arabic and keeps its name. One identifier meaning
+    opposite things two tables apart was the clearest case for moving.
+  user_letter_progress.letter_code -> user_sound_progress.sound_code, since
+    a sound code ("p", "clusters") is not a letter and several are not one
+    letter. Indexes, triggers and policies renamed with the table.
+
+Deliberately not renamed: word_arabic / word_english and friends, which name
+the LANGUAGE and still name it correctly. What flipped is which of the two
+is target and which is scaffold, and that is a property of the app.
+
+Dropped: body_fusha, body_fusha_vocalized, body_dialect_vocalized,
+arabic_vocalized, dialect, dialect_vocalized — vocalisation is a reading aid
+for Arabic script and the library no longer renders Arabic script as its
+text; daily_vocab_stories.body_transliteration, hard-nulled since the flip;
+and picture_scene_hotspots.root, which outlived the feature that wrote it.
+That last is dropped rather than renamed for a specific reason —
+schemaContract attributes a column to any table that has it, so one
+surviving root anywhere kept a stale root acceptable everywhere.
+
+Bugs the pass turned up:
+
+  user_vocabulary was UNIQUE on (user_id, word_arabic, dialect), right when
+  the Arabic was the word being learned. Post-flip the Arabic is the gloss
+  and distinct English words routinely share one — "big" and "large" are
+  both كبير — so the second save was dropped as a duplicate, silently, in
+  the one flow where a learner is actively collecting vocabulary. Now keyed
+  on word_english.
+
+  columnDefaults.ts reads the migrations to work out what the emulator
+  should default, and did not follow ALTER TABLE ... RENAME, so a renamed
+  table lost every default it had. It follows renames now.
+
+  MyWordsReview's select list still named root, which the emulator rejects
+  as an unknown column — the saved-words deck came up empty. VocabularyCard's
+  VocabularyWord type had the same stale field, so a lesson card never showed
+  its family chip. And suggest-flashcards emitted root in its tool schema
+  while SuggestFlashcardsDialog read word_family, so a suggested card arrived
+  without the family the model had just been asked for. None of the three
+  errored: TypeScript cannot see through a select string or an AI tool
+  schema, which is the whole reason the emulator rejects unknown columns.
+
+Verified with a real PostgreSQL: all 170 migrations replay and every rename
+lands, with no root, body_transliteration or body_english_literal left in
+the rebuilt schema.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_016xErQdWX6dDyADeHFDv5P6

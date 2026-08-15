@@ -42,7 +42,7 @@ const aWord = (index: number, over: Record<string, unknown> = {}) =>
     user_id: TEST_USER_ID,
     word_arabic: `كلمة${index}`,
     word_english: `word ${index}`,
-    root: ROOT,
+    word_family: ROOT,
     dialect: "Gulf",
     ...over,
   });
@@ -70,10 +70,10 @@ function render(rows: Record<string, unknown>[] = []) {
 describe("bucketing the deck", () => {
   it("groups differently-spelled families under one key", async () => {
     const { result } = render([
-      aWord(0, { root: "Act" }),
-      aWord(1, { root: "act" }),
-      aWord(2, { root: " ACT " }),
-      aWord(3, { root: "form" }),
+      aWord(0, { word_family: "Act" }),
+      aWord(1, { word_family: "act" }),
+      aWord(2, { word_family: " ACT " }),
+      aWord(3, { word_family: "form" }),
     ]);
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -122,7 +122,7 @@ describe("bucketing the deck", () => {
 
 describe("what never enters the index", () => {
   it("skips words nobody has looked up a root for", async () => {
-    const { result } = render([aWord(0), aWord(1, { root: null })]);
+    const { result } = render([aWord(0), aWord(1, { word_family: null })]);
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(result.current.data?.get("act")).toHaveLength(1);
@@ -130,9 +130,9 @@ describe("what never enters the index", () => {
 
   it("skips the 'no root exists' sentinel rather than making a family of it", async () => {
     const { result } = render([
-      aWord(0, { root: "" }),
-      aWord(1, { root: "" }),
-      aWord(2, { root: "" }),
+      aWord(0, { word_family: "" }),
+      aWord(1, { word_family: "" }),
+      aWord(2, { word_family: "" }),
     ]);
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -144,11 +144,11 @@ describe("what never enters the index", () => {
 
   it("skips families that cannot be read as base forms", async () => {
     const { result } = render([
-      aWord(0, { root: "n/a" }),
+      aWord(0, { word_family: "n/a" }),
       // An Arabic root from before the flip. It has to drop out of the index
       // rather than form a family an English learner cannot use.
-      aWord(1, { root: "ك ت ب" }),
-      aWord(2, { root: "the act of doing" }),
+      aWord(1, { word_family: "ك ت ب" }),
+      aWord(2, { word_family: "the act of doing" }),
     ]);
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -170,7 +170,7 @@ describe("what it costs", () => {
       }),
       {
         persona: "free",
-        seed: countingSeed([aWord(0), aWord(1, { root: "form" })], counter),
+        seed: countingSeed([aWord(0), aWord(1, { word_family: "form" })], counter),
       },
     );
     cleanup = harness.cleanup;

@@ -64,7 +64,7 @@ describe("coverage across the schema", () => {
       "invite_codes",
       "profiles",
       "listen_episodes",
-      "user_letter_progress",
+      "user_sound_progress",
       "beta_feedback",
     ];
     const found = tables.filter((table) => defaultsFor(table).size > 0);

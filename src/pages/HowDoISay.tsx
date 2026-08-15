@@ -150,7 +150,7 @@ const HowDoISay = () => {
         await addUserVocabulary.mutateAsync({
           word_arabic: word.arabic,
           word_english: word.english,
-          root: word.root,
+          word_family: word.root,
           source: "how-do-i-say",
         });
         setSavedWords((prev) => new Set(prev).add(word.english));
@@ -173,11 +173,11 @@ const HowDoISay = () => {
       try {
         await addUserPhrase.mutateAsync({
           // Flipped semantics: the ENGLISH phrase is what is being learned;
-          // the Arabic gloss rides in phrase_arabic. transliteration carries
-          // the Arabic-script phonetic rendering of the English.
+          // the Arabic gloss rides in phrase_arabic. phonetic_ar carries the
+          // Arabic-script phonetic rendering of the English.
           phrase_arabic: translation.arabic,
           phrase_english: translation.english,
-          transliteration: translation.phonetic_ar,
+          phonetic_ar: translation.phonetic_ar,
           notes: translation.context || undefined,
           source: "how-do-i-say",
         });

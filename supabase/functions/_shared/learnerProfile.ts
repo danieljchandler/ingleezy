@@ -213,7 +213,7 @@ export async function buildLearnerProfile(
     safeRows(
       supabase
         .from("learner_errors")
-        .select("target_arabic")
+        .select("target_text")
         .eq("user_id", userId)
         .eq("dialect", dialect)
         .is("resolved_at", null)
@@ -261,7 +261,7 @@ export async function buildLearnerProfile(
 
   const errorTargets = new Set(
     errorRows
-      .map((e) => str(e.target_arabic)?.trim())
+      .map((e) => str(e.target_text)?.trim())
       .filter((t): t is string => !!t),
   );
 

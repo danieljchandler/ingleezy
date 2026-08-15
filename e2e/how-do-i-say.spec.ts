@@ -277,7 +277,7 @@ test.describe("saving what came back", () => {
     expect(db.rows("user_phrases")[0]).toMatchObject({
       phrase_english: "How's it going?",
       phrase_arabic: "شلونك",
-      transliteration: "هاوز إت قوينق",
+      phonetic_ar: "هاوز إت قوينق",
       source: "how-do-i-say",
     });
   });

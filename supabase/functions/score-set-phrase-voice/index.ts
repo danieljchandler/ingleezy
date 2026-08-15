@@ -162,7 +162,7 @@ serve(async (req) => {
 
     // Record rejected attempts so the phrase resurfaces in generated practice;
     // clear the flag once it's said acceptably. Fire-and-forget. The
-    // target_arabic column carries English targets since the retarget.
+    // target_text column carries English targets since the retarget.
     if (!accepted) {
       void recordLearnerErrorsForRequest(req, [{
         source: "set_phrase_voice",

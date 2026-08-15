@@ -35,7 +35,7 @@ const story = {
   title: "A day at the market",
   body_english: "The house was quiet. Ali went to work",
   body_arabic: "كان البيت هادي. راح علي للشغل",
-  body_english_literal: "الـ بيت كان هادي. علي راح إلى الـ شغل",
+  body_literal_arabic: "الـ بيت كان هادي. علي راح إلى الـ شغل",
   sentences: [
     {
       english: "The house was quiet.",
@@ -297,9 +297,10 @@ Deno.test("generate-daily-story saves the story it generated", async () => {
   assertEquals(saved.title, "A day at the market");
   assertEquals(saved.body_english, story.body_english);
   assertEquals(saved.body_arabic, story.body_arabic);
-  // Retired: an Arabic speaker needs no romanization of Arabic.
-  assertEquals(saved.body_transliteration, null);
-  assertEquals(saved.body_english_literal, story.body_english_literal);
+  // Dropped with the flip: an Arabic speaker needs no romanization of Arabic,
+  // so the generator must not resurrect the column by writing it.
+  assertEquals(saved.body_transliteration, undefined);
+  assertEquals(saved.body_literal_arabic, story.body_literal_arabic);
   assertEquals(saved.vocab_used, ["house"]);
   assertEquals(saved.new_words, ["work"]);
 });
@@ -369,14 +370,14 @@ Deno.test("generate-daily-story stores an absent optional field as null", async 
       extra: emitting({
         ...story,
         body_arabic: "",
-        body_english_literal: "",
+        body_literal_arabic: "",
       }),
     }),
   );
 
   const saved = savedRow(result);
   assertEquals(saved.body_arabic, null);
-  assertEquals(saved.body_english_literal, null);
+  assertEquals(saved.body_literal_arabic, null);
 });
 
 Deno.test("generate-daily-story titles an untitled story", async () => {

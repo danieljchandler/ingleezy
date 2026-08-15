@@ -140,10 +140,7 @@ export type Database = {
           author: string | null
           author_arabic: string | null
           body_dialect: string | null
-          body_dialect_vocalized: string | null
           body_english: string | null
-          body_fusha: string | null
-          body_fusha_vocalized: string | null
           created_at: string
           created_by: string | null
           dialect: string
@@ -175,10 +172,7 @@ export type Database = {
           author?: string | null
           author_arabic?: string | null
           body_dialect?: string | null
-          body_dialect_vocalized?: string | null
           body_english?: string | null
-          body_fusha?: string | null
-          body_fusha_vocalized?: string | null
           created_at?: string
           created_by?: string | null
           dialect?: string
@@ -210,10 +204,7 @@ export type Database = {
           author?: string | null
           author_arabic?: string | null
           body_dialect?: string | null
-          body_dialect_vocalized?: string | null
           body_english?: string | null
-          body_fusha?: string | null
-          body_fusha_vocalized?: string | null
           created_at?: string
           created_by?: string | null
           dialect?: string
@@ -245,14 +236,11 @@ export type Database = {
       authentic_story_lines: {
         Row: {
           arabic: string
-          arabic_vocalized: string | null
           audio_url: string | null
           created_at: string
-          dialect: string | null
-          dialect_vocalized: string | null
           duration_seconds: number | null
           english: string | null
-          english_literal: string | null
+          literal_arabic: string | null
           id: string
           line_index: number
           story_id: string
@@ -260,14 +248,11 @@ export type Database = {
         }
         Insert: {
           arabic: string
-          arabic_vocalized?: string | null
           audio_url?: string | null
           created_at?: string
-          dialect?: string | null
-          dialect_vocalized?: string | null
           duration_seconds?: number | null
           english?: string | null
-          english_literal?: string | null
+          literal_arabic?: string | null
           id?: string
           line_index: number
           story_id: string
@@ -275,14 +260,11 @@ export type Database = {
         }
         Update: {
           arabic?: string
-          arabic_vocalized?: string | null
           audio_url?: string | null
           created_at?: string
-          dialect?: string | null
-          dialect_vocalized?: string | null
           duration_seconds?: number | null
           english?: string | null
-          english_literal?: string | null
+          literal_arabic?: string | null
           id?: string
           line_index?: number
           story_id?: string
@@ -1023,8 +1005,7 @@ export type Database = {
           audio_url: string | null
           body_arabic: string
           body_english: string | null
-          body_english_literal: string | null
-          body_transliteration: string | null
+          body_literal_arabic: string | null
           created_at: string
           dialect: string
           id: string
@@ -1040,8 +1021,7 @@ export type Database = {
           audio_url?: string | null
           body_arabic: string
           body_english?: string | null
-          body_english_literal?: string | null
-          body_transliteration?: string | null
+          body_literal_arabic?: string | null
           created_at?: string
           dialect?: string
           id?: string
@@ -1057,8 +1037,7 @@ export type Database = {
           audio_url?: string | null
           body_arabic?: string
           body_english?: string | null
-          body_english_literal?: string | null
-          body_transliteration?: string | null
+          body_literal_arabic?: string | null
           created_at?: string
           dialect?: string
           id?: string
@@ -1708,10 +1687,10 @@ export type Database = {
           dialect: string
           error_kind: string
           id: string
-          produced_arabic: string | null
+          produced_text: string | null
           resolved_at: string | null
           source: string
-          target_arabic: string
+          target_text: string
           user_id: string
           user_vocabulary_id: string | null
           word_id: string | null
@@ -1722,10 +1701,10 @@ export type Database = {
           dialect?: string
           error_kind?: string
           id?: string
-          produced_arabic?: string | null
+          produced_text?: string | null
           resolved_at?: string | null
           source: string
-          target_arabic: string
+          target_text: string
           user_id: string
           user_vocabulary_id?: string | null
           word_id?: string | null
@@ -1736,10 +1715,10 @@ export type Database = {
           dialect?: string
           error_kind?: string
           id?: string
-          produced_arabic?: string | null
+          produced_text?: string | null
           resolved_at?: string | null
           source?: string
-          target_arabic?: string
+          target_text?: string
           user_id?: string
           user_vocabulary_id?: string | null
           word_id?: string | null
@@ -2378,7 +2357,6 @@ export type Database = {
           display_order: number
           id: string
           radius_pct: number
-          root: string | null
           scene_id: string
           updated_at: string
           word_arabic: string
@@ -2392,7 +2370,6 @@ export type Database = {
           display_order?: number
           id?: string
           radius_pct?: number
-          root?: string | null
           scene_id: string
           updated_at?: string
           word_arabic: string
@@ -2406,7 +2383,6 @@ export type Database = {
           display_order?: number
           id?: string
           radius_pct?: number
-          root?: string | null
           scene_id?: string
           updated_at?: string
           word_arabic?: string
@@ -3051,12 +3027,12 @@ export type Database = {
           phrase_audio_url: string | null
           phrase_english: string | null
           phrase_literal: string | null
-          phrase_transliteration: string | null
+          phrase_phonetic_ar: string | null
           reply_arabic: string | null
           reply_audio_url: string | null
           reply_english: string | null
           reply_literal: string | null
-          reply_transliteration: string | null
+          reply_phonetic_ar: string | null
           scenario_english: string | null
           status: string
           tags: string[]
@@ -3077,12 +3053,12 @@ export type Database = {
           phrase_audio_url?: string | null
           phrase_english?: string | null
           phrase_literal?: string | null
-          phrase_transliteration?: string | null
+          phrase_phonetic_ar?: string | null
           reply_arabic?: string | null
           reply_audio_url?: string | null
           reply_english?: string | null
           reply_literal?: string | null
-          reply_transliteration?: string | null
+          reply_phonetic_ar?: string | null
           scenario_english?: string | null
           status?: string
           tags?: string[]
@@ -3103,12 +3079,12 @@ export type Database = {
           phrase_audio_url?: string | null
           phrase_english?: string | null
           phrase_literal?: string | null
-          phrase_transliteration?: string | null
+          phrase_phonetic_ar?: string | null
           reply_arabic?: string | null
           reply_audio_url?: string | null
           reply_english?: string | null
           reply_literal?: string | null
-          reply_transliteration?: string | null
+          reply_phonetic_ar?: string | null
           scenario_english?: string | null
           status?: string
           tags?: string[]
@@ -3709,14 +3685,14 @@ export type Database = {
         }
         Relationships: []
       }
-      user_letter_progress: {
+      user_sound_progress: {
         Row: {
           best_sound_score: number
           best_spot_score: number
           created_at: string
           id: string
           last_practiced_at: string
-          letter_code: string
+          sound_code: string
           mastered_at: string | null
           steps_completed: Json
           updated_at: string
@@ -3728,7 +3704,7 @@ export type Database = {
           created_at?: string
           id?: string
           last_practiced_at?: string
-          letter_code: string
+          sound_code: string
           mastered_at?: string | null
           steps_completed?: Json
           updated_at?: string
@@ -3740,7 +3716,7 @@ export type Database = {
           created_at?: string
           id?: string
           last_practiced_at?: string
-          letter_code?: string
+          sound_code?: string
           mastered_at?: string | null
           steps_completed?: Json
           updated_at?: string
@@ -3769,7 +3745,7 @@ export type Database = {
           phrase_english: string
           repetitions: number
           source: string
-          transliteration: string | null
+          phonetic_ar: string | null
           updated_at: string
           user_id: string
         }
@@ -3793,7 +3769,7 @@ export type Database = {
           phrase_english: string
           repetitions?: number
           source?: string
-          transliteration?: string | null
+          phonetic_ar?: string | null
           updated_at?: string
           user_id: string
         }
@@ -3817,7 +3793,7 @@ export type Database = {
           phrase_english?: string
           repetitions?: number
           source?: string
-          transliteration?: string | null
+          phonetic_ar?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -3978,7 +3954,7 @@ export type Database = {
           production_repetitions: number
           repetitions: number
           review_count: number
-          root: string | null
+          word_family: string | null
           sentence_audio_url: string | null
           sentence_english: string | null
           sentence_text: string | null
@@ -4026,7 +4002,7 @@ export type Database = {
           production_repetitions?: number
           repetitions?: number
           review_count?: number
-          root?: string | null
+          word_family?: string | null
           sentence_audio_url?: string | null
           sentence_english?: string | null
           sentence_text?: string | null
@@ -4074,7 +4050,7 @@ export type Database = {
           production_repetitions?: number
           repetitions?: number
           review_count?: number
-          root?: string | null
+          word_family?: string | null
           sentence_audio_url?: string | null
           sentence_english?: string | null
           sentence_text?: string | null
@@ -4338,7 +4314,7 @@ export type Database = {
           lesson_id: string | null
           msa_form: string | null
           msa_note: string | null
-          root: string | null
+          word_family: string | null
           topic_id: string | null
           updated_at: string
           word_arabic: string
@@ -4355,7 +4331,7 @@ export type Database = {
           lesson_id?: string | null
           msa_form?: string | null
           msa_note?: string | null
-          root?: string | null
+          word_family?: string | null
           topic_id?: string | null
           updated_at?: string
           word_arabic: string
@@ -4372,7 +4348,7 @@ export type Database = {
           lesson_id?: string | null
           msa_form?: string | null
           msa_note?: string | null
-          root?: string | null
+          word_family?: string | null
           topic_id?: string | null
           updated_at?: string
           word_arabic?: string

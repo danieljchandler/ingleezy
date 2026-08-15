@@ -10,7 +10,7 @@ export interface WordWithTopic {
   image_url: string | null;
   audio_url: string | null;
   image_position: string | null;
-  root?: string | null;
+  word_family?: string | null;
   display_order: number;
   topic_id: string | null;
   lesson_id: string | null;
@@ -43,7 +43,7 @@ export const useAllWords = (onlyNew = false) => {
           image_url,
           audio_url,
           image_position,
-          root,
+          word_family,
           display_order,
           topic_id,
           lesson_id,

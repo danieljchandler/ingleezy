@@ -1043,7 +1043,7 @@ const Transcribe = () => {
       await addUserVocabulary.mutateAsync({
         word_arabic: word.arabic,
         word_english: word.english,
-        root: word.root,
+        word_family: word.root,
         source: "transcription",
         sentence_text: word.sentenceText,
         sentence_english: word.sentenceEnglish,

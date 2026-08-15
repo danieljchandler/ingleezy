@@ -75,10 +75,12 @@ Generate ${count} new flashcards.`;
                         transliteration: { type: "string", description: "Optional Latin-script transliteration" },
                         // Costs a handful of output tokens on a call that is
                         // already being made, and saves the word from the
-                        // root backfill later. Optional: an invented root is
-                        // worse than none, since a false family is what the
-                        // whole feature has to avoid.
-                        root: { type: "string", description: 'Consonantal root, radicals separated by spaces (e.g. "ك ت ب"), or "" if the word has none' },
+                        // family backfill later. Optional: an invented family
+                        // is worse than none, since a false family is what the
+                        // whole feature has to avoid. The family belongs to
+                        // word_english — `enrich-word-roots` and `familyKey`
+                        // both derive it from the English, not from the gloss.
+                        word_family: { type: "string", description: 'Base form of the English word family (e.g. "act" for action/active/actor), or "" if the word has none' },
                         example_arabic: { type: "string", description: "Optional short example sentence in the dialect" },
                         example_english: { type: "string", description: "English translation of the example" },
                       },

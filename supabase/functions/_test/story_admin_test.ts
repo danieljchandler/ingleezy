@@ -421,9 +421,9 @@ Deno.test("import-authentic-story writes a row per line, in order", async () => 
   // English is the line; Arabic is the help beside it.
   assertEquals(rows[0].english, "Once upon a time");
   assertEquals(rows[0].arabic, "كان يا ما كان");
-  assertEquals(rows[0].english_literal, "كان مرة على زمن");
+  assertEquals(rows[0].literal_arabic, "كان مرة على زمن");
   // The second line's gloss is optional and the model omitted it.
-  assertEquals(rows[1].english_literal, null);
+  assertEquals(rows[1].literal_arabic, null);
 });
 
 Deno.test("import-authentic-story keeps the pasted English out of the model's hands", async () => {
@@ -608,7 +608,7 @@ Deno.test("translate-story-dialect writes the new scaffold back to each line", a
 
   assertEquals(patches.length, 2);
   assertEquals(JSON.parse(patches[0].body ?? "{}").arabic, "كان في مرة");
-  assertEquals(JSON.parse(patches[1].body ?? "{}").english_literal, "من الأيام القديمة");
+  assertEquals(JSON.parse(patches[1].body ?? "{}").literal_arabic, "من الأيام القديمة");
 });
 
 Deno.test("translate-story-dialect re-glosses from the English, not the old Arabic", async () => {

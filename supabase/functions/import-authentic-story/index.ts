@@ -19,7 +19,7 @@
 // same convention the rest of the retarget uses:
 //   english        — the English target sentence (now the primary text)
 //   arabic         — the learner's dialect translation (the scaffold)
-//   english_literal— the literal ARABIC gloss in English word order
+//   literal_arabic— the literal ARABIC gloss in English word order
 // `arabic_vocalized` / `dialect` / `dialect_vocalized` are Arabic-source-era
 // columns with nothing to hold post-flip and are left null.
 
@@ -232,7 +232,7 @@ ${body_english}`,
       line_index: i,
       english: l.english,
       arabic: l.arabic,
-      english_literal: l.literal ?? null,
+      literal_arabic: l.literal ?? null,
     }));
 
     const { error: linesErr } = await supabaseAdmin

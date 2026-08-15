@@ -405,7 +405,7 @@ Deno.test("a word the learner keeps getting wrong is marked weak", async () => {
 
 Deno.test("a word the learner mispronounces is weak even when its schedule looks healthy", async () => {
   await withProfile(
-    { personal: [aKnownWord("كتاب")], errors: [{ target_arabic: " كتاب " }] },
+    { personal: [aKnownWord("كتاب")], errors: [{ target_text: " كتاب " }] },
     async (mod) => {
       const profile = await mod.buildLearnerProfile({ userId: USER_ID, dialect: "Gulf" });
 

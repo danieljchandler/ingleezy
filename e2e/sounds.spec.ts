@@ -26,7 +26,7 @@ const aSoundProgress = (
 ) => ({
   id: `aaaaaaaa-0000-4000-8000-${soundCode.padEnd(12, "0").slice(0, 12)}`,
   user_id: TEST_USER_ID,
-  letter_code: soundCode,
+  sound_code: soundCode,
   steps_completed: ["meet", "mouth", "spell", "examples", "spot", "contrast"],
   best_spot_score: 100,
   best_sound_score: 100,
@@ -41,7 +41,7 @@ const aSoundProgress = (
 const SOUNDS = ["m", "b", "t", "d"];
 
 function seedProgress(db: MemoryDb, rows: Array<Record<string, unknown>> = []) {
-  db.seed("user_letter_progress", rows);
+  db.seed("user_sound_progress", rows);
   db.seed("user_checkpoint_progress", []);
 }
 
@@ -144,7 +144,7 @@ test.describe("the trail", () => {
   }) => {
     expectConsoleErrors([/.*/]);
     seedProgress(db, SOUNDS.map((code) => aSoundProgress(code)));
-    db.failAlways("user_letter_progress", 500);
+    db.failAlways("user_sound_progress", 500);
 
     await page.goto("/sounds");
 
@@ -207,10 +207,10 @@ test.describe("a stop's mini-lesson", () => {
 
     await page.getByRole("button", { name: "سمعته" }).click();
 
-    await expect.poll(() => db.rows("user_letter_progress").length).toBe(1);
-    expect(db.rows("user_letter_progress")[0]).toMatchObject({
+    await expect.poll(() => db.rows("user_sound_progress").length).toBe(1);
+    expect(db.rows("user_sound_progress")[0]).toMatchObject({
       user_id: TEST_USER_ID,
-      letter_code: "m",
+      sound_code: "m",
       steps_completed: ["meet"],
       mastered_at: null,
     });
@@ -230,7 +230,7 @@ test.describe("a stop's mini-lesson", () => {
     // to finish things in. That is what makes "2/6" mean the same thing on
     // every row.
     await expect
-      .poll(() => db.rows("user_letter_progress")[0].steps_completed)
+      .poll(() => db.rows("user_sound_progress")[0].steps_completed)
       .toEqual(["meet", "spot", "contrast"]);
   });
 
@@ -248,7 +248,7 @@ test.describe("a stop's mini-lesson", () => {
     await page.getByRole("button", { name: "سمعته" }).click();
 
     await expect
-      .poll(() => db.rows("user_letter_progress")[0].mastered_at)
+      .poll(() => db.rows("user_sound_progress")[0].mastered_at)
       .not.toBeNull();
   });
 
@@ -265,7 +265,7 @@ test.describe("a stop's mini-lesson", () => {
     // Practising a mastered sound again must not re-date the achievement —
     // `mastered_at` is what the trail counts and what orders the milestones.
     await expect
-      .poll(() => db.rows("user_letter_progress")[0].mastered_at)
+      .poll(() => db.rows("user_sound_progress")[0].mastered_at)
       .toBe(firstTime);
   });
 
@@ -326,7 +326,7 @@ test.describe("when the step cannot be saved", () => {
     expectConsoleErrors([/.*/]);
     await signInAs("free");
     seedProgress(db);
-    db.failWrites("user_letter_progress", 500);
+    db.failWrites("user_sound_progress", 500);
 
     await page.goto("/sounds/m");
     await expect(page.getByText("الخطوة 1 من 6")).toBeVisible();
@@ -336,6 +336,6 @@ test.describe("when the step cannot be saved", () => {
     // claim about the request having been made, not about anything having been
     // stored. Reloading loses the step silently.
     await expect(page.locator("button.bg-green-500")).toHaveCount(1);
-    expect(db.rows("user_letter_progress")).toHaveLength(0);
+    expect(db.rows("user_sound_progress")).toHaveLength(0);
   });
 });

@@ -78,10 +78,10 @@ const generated = {
     {
       phrase_english: "Good morning!",
       phrase_arabic: "صباح الخير",
-      phrase_transliteration: "قود مورنينق",
+      phrase_phonetic_ar: "قود مورنينق",
       reply_english: "Morning! How are you?",
       reply_arabic: "صباح النور! شلونك؟",
-      reply_transliteration: "مورنينق! هاو ار يو؟",
+      reply_phonetic_ar: "مورنينق! هاو ار يو؟",
       scenario_english: "تسلم على زميلك أول ما توصل الدوام.",
       formality: "neutral",
       difficulty: "A1",
@@ -162,7 +162,7 @@ Deno.test("seed-set-phrases writes the generated phrases as drafts", async () =>
   // English pronounced in Arabic letters.
   assertEquals(rows[0].phrase_english, "Good morning!");
   assertEquals(rows[0].phrase_arabic, "صباح الخير");
-  assertEquals(rows[0].phrase_transliteration, "قود مورنينق");
+  assertEquals(rows[0].phrase_phonetic_ar, "قود مورنينق");
   // The gloss columns are optional in the tool schema, so a phrase without
   // them lands as null rather than as undefined.
   assertEquals(rows[0].phrase_literal, null);
@@ -266,11 +266,11 @@ const scenarioPhrase = (over: Record<string, unknown> = {}) => ({
   id: PHRASE,
   phrase_english: "You're doing a great job",
   phrase_arabic: "الله يعطيك العافية",
-  phrase_transliteration: null,
+  phrase_phonetic_ar: null,
   phrase_audio_url: null,
   reply_english: null,
   reply_arabic: null,
-  reply_transliteration: null,
+  reply_phonetic_ar: null,
   reply_audio_url: null,
   // scenario_english carries the dialect-Arabic scenario since the retarget.
   scenario_english: "واحد خلص شغل طويل وتبي تشجعه.",

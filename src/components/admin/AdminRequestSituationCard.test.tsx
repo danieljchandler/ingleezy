@@ -222,7 +222,7 @@ describe("adding a phrase to the drafts", () => {
     expect(draftsWritten(backend)[0]).toMatchObject({
       dialect: "Gulf",
       phrase_arabic: "الله يرحمه",
-      phrase_transliteration: "allah yirhamah",
+      phrase_phonetic_ar: "allah yirhamah",
       phrase_english: "May God have mercy on him",
       cultural_note: "Said on hearing of a death.",
       scenario_english: A_SITUATION,

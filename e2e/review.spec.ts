@@ -312,14 +312,14 @@ test.describe("saved-word decks", () => {
         user_id: TEST_USER_ID,
         word_arabic: "كتاب",
         word_english: "book",
-        root: "Book",
+        word_family: "Book",
       }),
       aUserVocabulary({
         id: vocabId(1),
         user_id: TEST_USER_ID,
         word_arabic: "مكتبة",
         word_english: "library",
-        root: "book",
+        word_family: "book",
         next_review_at: new Date(Date.now() + 86_400_000).toISOString(),
       }),
     ]);
@@ -343,12 +343,12 @@ test.describe("saved-word decks", () => {
 
   test("says nothing about families when the learner has turned them off", async ({ page, db }) => {
     db.seed("user_vocabulary", [
-      aUserVocabulary({ id: vocabId(0), user_id: TEST_USER_ID, word_arabic: "كتاب", root: "book" }),
+      aUserVocabulary({ id: vocabId(0), user_id: TEST_USER_ID, word_arabic: "كتاب", word_family: "book" }),
       aUserVocabulary({
         id: vocabId(1),
         user_id: TEST_USER_ID,
         word_arabic: "مكتبة",
-        root: "book",
+        word_family: "book",
         next_review_at: new Date(Date.now() + 86_400_000).toISOString(),
       }),
     ]);

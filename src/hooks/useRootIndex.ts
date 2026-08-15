@@ -9,7 +9,7 @@ export interface RootIndexEntry {
   word_arabic: string;
   word_english: string;
   /** The stored spelling — kept for display; never compare on it. */
-  root: string;
+  word_family: string;
   dialect: string;
   /** FSRS stability, in days. `ease_factor` is the column it lives in. */
   ease_factor: number;
@@ -22,7 +22,7 @@ export interface RootIndexEntry {
 export type RootIndex = Map<string, RootIndexEntry[]>;
 
 const ROOT_INDEX_COLUMNS =
-  "id, word_arabic, word_english, root, dialect, ease_factor, repetitions, word_audio_url, image_url";
+  "id, word_arabic, word_english, word_family, dialect, ease_factor, repetitions, word_audio_url, image_url";
 
 /**
  * The learner's family-bearing vocabulary, bucketed by canonical family.
@@ -61,12 +61,12 @@ export const useRootIndex = (options?: { enabled?: boolean }) => {
         .eq("user_id", user.id)
         // `null` means nobody has looked yet; `''` means we looked and there is
         // no family. Neither can join one, so neither is worth fetching.
-        .not("root", "is", null)
-        .neq("root", "");
+        .not("word_family", "is", null)
+        .neq("word_family", "");
       if (error) throw error;
 
       for (const row of (data ?? []) as RootIndexEntry[]) {
-        const key = familyKey(row.root);
+        const key = familyKey(row.word_family);
         if (!key) continue;
         const bucket = index.get(key);
         if (bucket) bucket.push(row);

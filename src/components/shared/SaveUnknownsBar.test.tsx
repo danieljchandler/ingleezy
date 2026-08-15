@@ -90,7 +90,7 @@ function render({ persona = "free", seed }: Options = {}) {
     seed: (backend) => {
       backend.stubFunction("word-enrichment", {
         definition: "restaurant",
-        root: "ط ع م",
+        word_family: "ط ع م",
         transliteration: "mat'am",
       });
       seed?.(backend);
@@ -220,7 +220,7 @@ describe("saving", () => {
     // and that backfill only ever fills rows where root IS NULL. Writing
     // anything here — as this path used to, with the Arabic root the lookup
     // returned — would lock the card out of ever getting a real family.
-    expect(saved(backend)[0].root).toBeNull();
+    expect(saved(backend)[0].word_family).toBeNull();
   });
 
   it("saves the word anyway when the lookup fails", async () => {
@@ -242,7 +242,7 @@ describe("saving", () => {
     await save();
 
     await waitFor(() => expect(saved(backend)).toHaveLength(2));
-    expect(saved(backend)[0]).toMatchObject({ word_english: "", root: null, transliteration: null });
+    expect(saved(backend)[0]).toMatchObject({ word_english: "", word_family: null, transliteration: null });
   });
 
   it("says how many landed", async () => {

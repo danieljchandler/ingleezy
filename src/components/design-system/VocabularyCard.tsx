@@ -12,8 +12,8 @@ export interface VocabularyWord {
   audio_url: string | null;
   image_position?: string | null;
   transliteration?: string | null;
-  /** Arabic root. Null until looked up; '' means the word has none. */
-  root?: string | null;
+  /** English word family. Null until looked up; '' means the word has none. */
+  word_family?: string | null;
 }
 
 interface VocabularyCardProps {

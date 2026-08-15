@@ -145,7 +145,7 @@ const Words = () => {
                     <div>
                       <p className="font-bold text-xl" dir="rtl">{word.word_arabic}</p>
                       <p className="text-muted-foreground">{word.word_english}</p>
-                      <RootChip root={word.root} className="mt-1" />
+                      <RootChip root={word.word_family} className="mt-1" />
                     </div>
                     <Button
                       variant="ghost"

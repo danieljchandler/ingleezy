@@ -10,7 +10,7 @@ import { groupMistakes, type LearnerErrorRow, type MistakeGroup } from "@/lib/mi
  * client can read its own and set `resolved_at` — and nothing else: the
  * 20260726140000 migration revoked blanket UPDATE and re-granted it on that one
  * column, so a learner can dismiss a mistake but not rewrite what it says. That
- * matters because `target_arabic` and `detail` feed their own content
+ * matters because `target_text` and `detail` feed their own content
  * generation.
  */
 
@@ -28,7 +28,7 @@ export const useMistakes = (dialect: string) => {
       if (!user) return [];
       const { data, error } = await supabase
         .from("learner_errors" as never)
-        .select("id, dialect, source, target_arabic, produced_arabic, error_kind, created_at")
+        .select("id, dialect, source, target_text, produced_text, error_kind, created_at")
         .eq("user_id", user.id)
         .eq("dialect", dialect)
         .is("resolved_at", null)

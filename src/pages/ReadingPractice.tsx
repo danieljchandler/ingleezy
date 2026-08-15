@@ -437,7 +437,7 @@ const ReadingPractice = () => {
       {
         word_arabic: arabic,
         word_english: english,
-        root: root || undefined,
+        word_family: root || undefined,
         transliteration: transliteration || undefined,
         source: "reading-practice",
         sentence_text: sentence?.arabic || undefined,

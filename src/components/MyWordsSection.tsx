@@ -99,9 +99,9 @@ export const MyWordsSection = () => {
               >
                 {word.word_arabic}
               </span>
-              {word.root && (
+              {word.word_family && (
                 <span className="text-xs font-mono text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
-                  {word.root}
+                  {word.word_family}
                 </span>
               )}
             </div>

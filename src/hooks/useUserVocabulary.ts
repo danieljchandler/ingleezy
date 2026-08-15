@@ -9,7 +9,7 @@ export interface UserVocabularyWord {
   user_id: string;
   word_arabic: string;
   word_english: string;
-  root: string | null;
+  word_family: string | null;
   source: string;
   ease_factor: number;
   difficulty: number;
@@ -130,7 +130,7 @@ export const useAddUserVocabulary = () => {
     mutationFn: async (word: {
       word_arabic: string;
       word_english: string;
-      root?: string;
+      word_family?: string;
       transliteration?: string;
       source?: string;
       sentence_text?: string;
@@ -147,7 +147,7 @@ export const useAddUserVocabulary = () => {
           user_id: user.id,
           word_arabic: word.word_arabic,
           word_english: word.word_english,
-          root: word.root || null,
+          word_family: word.word_family || null,
           transliteration: word.transliteration || null,
           source: word.source || "transcription",
           sentence_text: word.sentence_text || null,
@@ -318,7 +318,7 @@ export const useUpdateUserVocabularyImage = () => {
 export interface BulkVocabInput {
   word_arabic: string;
   word_english: string;
-  root?: string | null;
+  word_family?: string | null;
   source?: string;
   word_audio_url?: string | null;
   image_url?: string | null;
@@ -348,7 +348,7 @@ export const useBulkAddUserVocabulary = () => {
         user_id: user.id,
         word_arabic: w.word_arabic,
         word_english: w.word_english,
-        root: w.root ?? null,
+        word_family: w.word_family ?? null,
         source: w.source ?? source,
         word_audio_url: w.word_audio_url ?? null,
         image_url: w.image_url ?? null,
@@ -358,7 +358,11 @@ export const useBulkAddUserVocabulary = () => {
       const { data, error } = await supabase
         .from("user_vocabulary")
         .upsert(rows as any, {
-          onConflict: "user_id,word_arabic,dialect",
+          // Keyed on the ENGLISH: post-flip the card's identity is the word
+          // being learned, and distinct English words routinely share one
+          // gloss ("big" and "large" are both كبير). Conflicting on the Arabic
+          // dropped the second as a duplicate of the first.
+          onConflict: "user_id,word_english,dialect",
           ignoreDuplicates: true,
         })
         .select("id");
