@@ -1,28 +1,32 @@
 import { act, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderHookWithProviders, TEST_USER_ID } from "@/test/support/react/harness";
-import { ARABIC_LETTERS, LETTER_STEPS } from "@/data/arabicAlphabet";
+import { ENGLISH_SOUNDS, SOUND_STEPS } from "@/data/englishSounds";
 import { useAuth } from "./useAuth";
-import { useAlphabetProgress, useCheckpointProgress } from "./useAlphabetProgress";
+import { useSoundProgress, useCheckpointProgress } from "./useSoundProgress";
 import type { SupabaseBackend } from "@/test/support/server/handler";
 
 /**
- * The alphabet journey.
+ * The English Sounds journey.
  *
- * A strictly sequential track: letters unlock one at a time and only when the
- * one before is mastered, and mastery means finishing all six steps. That makes
- * the unlock rule the whole feature — too loose and a beginner can skip to the
- * end, too tight and they are stuck on a letter they have already finished with
- * no way to say so.
+ * A strictly sequential track: sounds unlock one at a time and only when the
+ * one before is mastered, and mastery means finishing all six steps. That
+ * makes the unlock rule the whole feature — too loose and a beginner can
+ * skip to the end, too tight and they are stuck on a sound they have already
+ * finished with no way to say so.
  *
- * Progress is upserted per letter rather than appended, so every write has to
- * merge with what is already there. Losing a step, or resetting a best score to
- * a worse attempt, silently un-does work the learner has done.
+ * Progress is upserted per sound rather than appended, so every write has to
+ * merge with what is already there. Losing a step, or resetting a best score
+ * to a worse attempt, silently un-does work the learner has done.
+ *
+ * This is the flipped descendant of Hakiya's useAlphabetProgress — same
+ * table, same shape (`letter_code` now holds a sound code), same rules. See
+ * src/hooks/useSoundProgress.ts for why the table didn't need to move.
  */
 
-const FIRST = ARABIC_LETTERS[0].code;
-const SECOND = ARABIC_LETTERS[1].code;
-const THIRD = ARABIC_LETTERS[2].code;
+const FIRST = ENGLISH_SOUNDS[0].code;
+const SECOND = ENGLISH_SOUNDS[1].code;
+const THIRD = ENGLISH_SOUNDS[2].code;
 
 let cleanup: (() => void) | undefined;
 
@@ -37,7 +41,7 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
-const aLetterRow = (code: string, over: Record<string, unknown> = {}) => ({
+const aSoundRow = (code: string, over: Record<string, unknown> = {}) => ({
   user_id: TEST_USER_ID,
   letter_code: code,
   steps_completed: [],
@@ -48,10 +52,10 @@ const aLetterRow = (code: string, over: Record<string, unknown> = {}) => ({
   ...over,
 });
 
-/** A letter with every step finished. */
-const aMasteredLetter = (code: string) =>
-  aLetterRow(code, {
-    steps_completed: [...LETTER_STEPS],
+/** A sound with every step finished. */
+const aMasteredSound = (code: string) =>
+  aSoundRow(code, {
+    steps_completed: [...SOUND_STEPS],
     mastered_at: new Date("2026-03-01T12:00:00Z").toISOString(),
     best_spot_score: 90,
     best_sound_score: 85,
@@ -59,7 +63,7 @@ const aMasteredLetter = (code: string) =>
 
 async function render(seed?: (backend: SupabaseBackend) => void) {
   const harness = renderHookWithProviders(
-    () => ({ ...useAlphabetProgress(), user: useAuth().user }),
+    () => ({ ...useSoundProgress(), user: useAuth().user }),
     {
       persona: "free",
       seed: (backend) => {
@@ -75,43 +79,43 @@ async function render(seed?: (backend: SupabaseBackend) => void) {
 }
 
 describe("what a learner has unlocked", () => {
-  it("unlocks only the first letter at the start", async () => {
+  it("unlocks only the first sound at the start", async () => {
     const { result } = await render();
 
     expect(result.current.isUnlocked(0)).toBe(true);
-    // Sequential is the point: a beginner who can jump to letter 28 skips the
-    // shapes the later ones are built from.
+    // Sequential is the point: a beginner who can jump to sound 28 skips the
+    // contrasts the later ones are built from.
     expect(result.current.isUnlocked(1)).toBe(false);
   });
 
-  it("unlocks the next letter once the current one is mastered", async () => {
+  it("unlocks the next sound once the current one is mastered", async () => {
     const { result } = await render((backend) => {
-      backend.db.seed("user_letter_progress", [aMasteredLetter(FIRST)]);
+      backend.db.seed("user_letter_progress", [aMasteredSound(FIRST)]);
     });
 
     await waitFor(() => expect(result.current.isUnlocked(1)).toBe(true));
     expect(result.current.isUnlocked(2)).toBe(false);
   });
 
-  it("keeps a mastered letter unlocked", async () => {
+  it("keeps a mastered sound unlocked", async () => {
     const { result } = await render((backend) => {
-      backend.db.seed("user_letter_progress", [aMasteredLetter(FIRST)]);
+      backend.db.seed("user_letter_progress", [aMasteredSound(FIRST)]);
     });
 
-    // Revisiting a letter is how a learner practises; locking it behind them
+    // Revisiting a sound is how a learner practises; locking it behind them
     // would make the track one-way.
     await waitFor(() => expect(result.current.isUnlocked(0)).toBe(true));
   });
 
-  it("does not unlock the next letter for a partly finished one", async () => {
+  it("does not unlock the next sound for a partly finished one", async () => {
     const { result } = await render((backend) => {
       backend.db.seed("user_letter_progress", [
-        aLetterRow(FIRST, { steps_completed: ["meet", "examples"] }),
+        aSoundRow(FIRST, { steps_completed: ["meet", "mouth"] }),
       ]);
     });
 
     // Started is not finished. Unlocking on first touch would let a learner
-    // walk the whole alphabet by opening each letter once.
+    // walk the whole journey by opening each sound once.
     await waitFor(() => expect(result.current.progress[FIRST]).toBeTruthy());
     expect(result.current.isUnlocked(1)).toBe(false);
   });
@@ -120,35 +124,36 @@ describe("what a learner has unlocked", () => {
     const { result } = await render((backend) => {
       // Mastered out of order — possible if the unlock rule ever changed.
       backend.db.seed("user_letter_progress", [
-        aMasteredLetter(FIRST),
-        aMasteredLetter(THIRD),
+        aMasteredSound(FIRST),
+        aMasteredSound(THIRD),
       ]);
     });
 
-    // The frontier is the first *un*mastered letter, so the second one is where
-    // the learner is sent — not the third, which they have already done.
+    // The frontier is the first *un*mastered sound, so the second one is
+    // where the learner is sent — not the third, which they have already
+    // done.
     await waitFor(() => expect(result.current.isUnlocked(1)).toBe(true));
     expect(result.current.isUnlocked(2)).toBe(false);
   });
 
-  it("counts how many letters are mastered", async () => {
+  it("counts how many sounds are mastered", async () => {
     const { result } = await render((backend) => {
       backend.db.seed("user_letter_progress", [
-        aMasteredLetter(FIRST),
-        aMasteredLetter(SECOND),
-        aLetterRow(THIRD, { steps_completed: ["meet"] }),
+        aMasteredSound(FIRST),
+        aMasteredSound(SECOND),
+        aSoundRow(THIRD, { steps_completed: ["meet"] }),
       ]);
     });
 
-    // Counted on mastered_at, not on having a row: the third letter has been
+    // Counted on mastered_at, not on having a row: the third sound has been
     // started and must not inflate the count on the home card.
     await waitFor(() => expect(result.current.masteredCount).toBe(2));
   });
 
   it("reports nothing for a signed-out visitor", async () => {
-    const harness = renderHookWithProviders(() => useAlphabetProgress(), {
+    const harness = renderHookWithProviders(() => useSoundProgress(), {
       seed: (backend) =>
-        backend.db.seed("user_letter_progress", [aMasteredLetter(FIRST)]),
+        backend.db.seed("user_letter_progress", [aMasteredSound(FIRST)]),
     });
     cleanup = harness.cleanup;
 
@@ -161,11 +166,11 @@ describe("what a learner has unlocked", () => {
 });
 
 describe("finishing a step", () => {
-  it("records it against the letter", async () => {
+  it("records it against the sound", async () => {
     const { result, backend } = await render();
 
     await act(async () => {
-      await result.current.completeStep({ letterCode: FIRST, step: "meet" });
+      await result.current.completeStep({ soundCode: FIRST, step: "meet" });
     });
 
     const row = backend.db.rows("user_letter_progress")[0];
@@ -176,38 +181,38 @@ describe("finishing a step", () => {
   it("adds to the steps already done rather than replacing them", async () => {
     const { result, backend } = await render((b) => {
       b.db.seed("user_letter_progress", [
-        aLetterRow(FIRST, { steps_completed: ["meet", "examples"] }),
+        aSoundRow(FIRST, { steps_completed: ["meet", "mouth"] }),
       ]);
     });
 
     await act(async () => {
-      await result.current.completeStep({ letterCode: FIRST, step: "trace" });
+      await result.current.completeStep({ soundCode: FIRST, step: "spell" });
     });
 
     // The write is an upsert of the whole row, so a replace here would erase
     // two steps the learner had already finished.
     expect(backend.db.rows("user_letter_progress")[0].steps_completed).toEqual([
       "meet",
-      "examples",
-      "trace",
+      "mouth",
+      "spell",
     ]);
   });
 
   it("keeps the steps in their taught order, not the order finished", async () => {
     const { result, backend } = await render((b) => {
-      b.db.seed("user_letter_progress", [aLetterRow(FIRST, { steps_completed: ["sound"] })]);
+      b.db.seed("user_letter_progress", [aSoundRow(FIRST, { steps_completed: ["contrast"] })]);
     });
     await waitFor(() => expect(result.current.progress[FIRST]).toBeTruthy());
 
     await act(async () => {
-      await result.current.completeStep({ letterCode: FIRST, step: "meet" });
+      await result.current.completeStep({ soundCode: FIRST, step: "meet" });
     });
 
     // The progress dots read left to right; storing them in completion order
     // would draw them scrambled.
     expect(backend.db.rows("user_letter_progress")[0].steps_completed).toEqual([
       "meet",
-      "sound",
+      "contrast",
     ]);
   });
 
@@ -215,8 +220,8 @@ describe("finishing a step", () => {
     const { result, backend } = await render();
 
     await act(async () => {
-      await result.current.completeStep({ letterCode: FIRST, step: "meet" });
-      await result.current.completeStep({ letterCode: FIRST, step: "trace" });
+      await result.current.completeStep({ soundCode: FIRST, step: "meet" });
+      await result.current.completeStep({ soundCode: FIRST, step: "mouth" });
     });
 
     // Recording current behaviour. `completeStep` merges against `query.data`
@@ -231,15 +236,15 @@ describe("finishing a step", () => {
     // is a progress dot that will not stay filled.
     //
     // This test fails once the merge reads the row it is writing.
-    expect(backend.db.rows("user_letter_progress")[0].steps_completed).toEqual(["trace"]);
+    expect(backend.db.rows("user_letter_progress")[0].steps_completed).toEqual(["mouth"]);
   });
 
   it("does the same step twice without duplicating it", async () => {
     const { result, backend } = await render();
 
     await act(async () => {
-      await result.current.completeStep({ letterCode: FIRST, step: "meet" });
-      await result.current.completeStep({ letterCode: FIRST, step: "meet" });
+      await result.current.completeStep({ soundCode: FIRST, step: "meet" });
+      await result.current.completeStep({ soundCode: FIRST, step: "meet" });
     });
 
     expect(backend.db.rows("user_letter_progress")[0].steps_completed).toEqual(["meet"]);
@@ -248,12 +253,12 @@ describe("finishing a step", () => {
   it("keeps the better of two scores", async () => {
     const { result, backend } = await render((b) => {
       b.db.seed("user_letter_progress", [
-        aLetterRow(FIRST, { steps_completed: ["spot"], best_spot_score: 90 }),
+        aSoundRow(FIRST, { steps_completed: ["spot"], best_spot_score: 90 }),
       ]);
     });
 
     await act(async () => {
-      await result.current.completeStep({ letterCode: FIRST, step: "spot", spotScore: 40 });
+      await result.current.completeStep({ soundCode: FIRST, step: "spot", spotScore: 40 });
     });
 
     // "Best" has to mean best; overwriting turns practice into a way of losing
@@ -264,12 +269,12 @@ describe("finishing a step", () => {
   it("takes a better score when there is one", async () => {
     const { result, backend } = await render((b) => {
       b.db.seed("user_letter_progress", [
-        aLetterRow(FIRST, { steps_completed: ["spot"], best_spot_score: 40 }),
+        aSoundRow(FIRST, { steps_completed: ["spot"], best_spot_score: 40 }),
       ]);
     });
 
     await act(async () => {
-      await result.current.completeStep({ letterCode: FIRST, step: "spot", spotScore: 95 });
+      await result.current.completeStep({ soundCode: FIRST, step: "spot", spotScore: 95 });
     });
 
     expect(Number(backend.db.rows("user_letter_progress")[0].best_spot_score)).toBe(95);
@@ -279,7 +284,7 @@ describe("finishing a step", () => {
     const { result, backend } = await render();
 
     await act(async () => {
-      await result.current.completeStep({ letterCode: FIRST, step: "sound", soundScore: 77 });
+      await result.current.completeStep({ soundCode: FIRST, step: "contrast", soundScore: 77 });
     });
 
     const row = backend.db.rows("user_letter_progress")[0];
@@ -287,19 +292,19 @@ describe("finishing a step", () => {
     expect(Number(row.best_spot_score)).toBe(0);
   });
 
-  it("marks the letter mastered only on the last step", async () => {
-    const partial = LETTER_STEPS.slice(0, -1);
+  it("masters the sound only on the last step", async () => {
+    const partial = SOUND_STEPS.slice(0, -1);
     const { result, backend } = await render((b) => {
       b.db.seed("user_letter_progress", [
-        aLetterRow(FIRST, { steps_completed: [...partial] }),
+        aSoundRow(FIRST, { steps_completed: [...partial] }),
       ]);
     });
 
     await act(async () => {
-      await result.current.completeStep({ letterCode: FIRST, step: LETTER_STEPS.at(-1)! });
+      await result.current.completeStep({ soundCode: FIRST, step: SOUND_STEPS.at(-1)! });
     });
 
-    // Mastery is what unlocks the next letter, so declaring it early opens the
+    // Mastery is what unlocks the next sound, so declaring it early opens the
     // whole track and declaring it late strands the learner.
     expect(backend.db.rows("user_letter_progress")[0].mastered_at).toBeTruthy();
   });
@@ -308,50 +313,50 @@ describe("finishing a step", () => {
     const { result, backend } = await render();
 
     await act(async () => {
-      await result.current.completeStep({ letterCode: FIRST, step: "meet" });
+      await result.current.completeStep({ soundCode: FIRST, step: "meet" });
     });
 
     expect(backend.db.rows("user_letter_progress")[0].mastered_at).toBeNull();
   });
 
-  it("keeps the date a letter was first mastered", async () => {
+  it("keeps the date a sound was first mastered", async () => {
     const originally = new Date("2026-03-01T12:00:00Z").toISOString();
     const { result, backend } = await render((b) => {
-      b.db.seed("user_letter_progress", [aMasteredLetter(FIRST)]);
+      b.db.seed("user_letter_progress", [aMasteredSound(FIRST)]);
     });
 
     await act(async () => {
-      await result.current.completeStep({ letterCode: FIRST, step: "spot", spotScore: 99 });
+      await result.current.completeStep({ soundCode: FIRST, step: "spot", spotScore: 99 });
     });
 
-    // Practising a mastered letter must not restamp it as newly learned; the
+    // Practising a mastered sound must not restamp it as newly learned; the
     // date is a record of when it happened.
     expect(backend.db.rows("user_letter_progress")[0].mastered_at).toBe(originally);
   });
 
-  it("keeps one row per letter", async () => {
+  it("keeps one row per sound", async () => {
     const { result, backend } = await render();
 
     await act(async () => {
-      await result.current.completeStep({ letterCode: FIRST, step: "meet" });
-      await result.current.completeStep({ letterCode: SECOND, step: "meet" });
-      await result.current.completeStep({ letterCode: FIRST, step: "trace" });
+      await result.current.completeStep({ soundCode: FIRST, step: "meet" });
+      await result.current.completeStep({ soundCode: SECOND, step: "meet" });
+      await result.current.completeStep({ soundCode: FIRST, step: "mouth" });
     });
 
-    // Upserted on (user_id, letter_code); two rows for one letter would give it
+    // Upserted on (user_id, letter_code); two rows for one sound would give it
     // two different sets of completed steps.
     expect(backend.db.rows("user_letter_progress")).toHaveLength(2);
   });
 
   it("refuses to record anything when signed out", async () => {
-    const harness = renderHookWithProviders(() => useAlphabetProgress(), {
+    const harness = renderHookWithProviders(() => useSoundProgress(), {
       seed: (b) => b.db.seed("user_letter_progress", []),
     });
     cleanup = harness.cleanup;
 
     await act(async () => {
       await expect(
-        harness.result.current.completeStep({ letterCode: FIRST, step: "meet" }),
+        harness.result.current.completeStep({ soundCode: FIRST, step: "meet" }),
       ).rejects.toThrow(/not signed in/i);
     });
     expect(harness.backend.db.rows("user_letter_progress")).toHaveLength(0);

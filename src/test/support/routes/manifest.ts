@@ -87,10 +87,10 @@ export const ROUTES: RouteSpec[] = [
   { path: "/placement", gate: "public", boundary: "PlacementQuizRoute" },
   { path: "/grammar", gate: "public", boundary: "GrammarRoute" },
 
-  // ── Alphabet ───────────────────────────────────────────────────────────────
-  { path: "/alphabet", gate: "public", boundary: "AlphabetJourneyRoute" },
-  { path: "/alphabet/:letterCode", params: { letterCode: "alif" }, gate: "public", boundary: "AlphabetLetterRoute" },
-  { path: "/alphabet/checkpoint/:index", params: { index: "0" }, gate: "auth", boundary: "AlphabetCheckpointRoute" },
+  // ── English Sounds ────────────────────────────────────────────────────────
+  { path: "/sounds", gate: "public", boundary: "EnglishSoundsRoute" },
+  { path: "/sounds/:soundCode", params: { soundCode: "p" }, gate: "public", boundary: "EnglishSoundRoute" },
+  { path: "/sounds/checkpoint/:index", params: { index: "0" }, gate: "auth", boundary: "SoundsCheckpointRoute" },
 
   // ── Review and saved decks ─────────────────────────────────────────────────
   { path: "/review", gate: "auth", boundary: "ReviewRoute" },

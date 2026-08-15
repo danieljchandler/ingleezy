@@ -25,7 +25,7 @@ const HIDE_PATTERNS: RegExp[] = [
   /^\/learn\/[^/]+/,
   /^\/battles\/[^/]+/,
   /^\/listen\/[^/]+/,
-  /^\/alphabet\/[^/]+/,
+  /^\/sounds\/[^/]+/,
   /^\/auth$/,
   /^\/onboarding$/,
   /^\/reset-password$/,

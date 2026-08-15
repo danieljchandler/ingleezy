@@ -5,18 +5,18 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArabicKeyboard } from "@/components/writing/ArabicKeyboard";
+import { SoundAudioButton } from "@/components/sounds/SoundAudioButton";
 import {
   buildDrill,
   keystrokeMatches,
   scoreDrill,
-  TYPING_STAGES,
+  SPELLING_STAGES,
   type DrillItem,
 } from "@/lib/typingDrills";
 import { supabase } from "@/integrations/supabase/client";
 import { useDialect } from "@/contexts/DialectContext";
 import { labelForKind } from "@/lib/mistakes";
-import { CheckCircle2, Keyboard, Loader2, PenLine, RefreshCw, Sparkles } from "lucide-react";
+import { CheckCircle2, Ear, Loader2, PenLine, RefreshCw, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
 /**
@@ -204,9 +204,15 @@ const WriteTab = () => {
   );
 };
 
-// ── Typing tab ───────────────────────────────────────────────────────────────
+// ── Spelling tab ─────────────────────────────────────────────────────────────
+//
+// Was a progressive Arabic-keyboard drill — a Hakiya leftover that taught the
+// Arabic script to Arabic speakers, which the English Sounds rebuild retired.
+// This is its replacement: hear the word, type its spelling. See
+// src/lib/typingDrills.ts for why English needed a spelling drill rather than
+// a keyboard-layout one.
 
-const BEST_KEY = "typing-trainer-best";
+const BEST_KEY = "spelling-trainer-best";
 
 function readBest(): Record<string, number> {
   try {
@@ -216,25 +222,45 @@ function readBest(): Record<string, number> {
   }
 }
 
-const TypingTab = () => {
+const SpellingTab = () => {
   const [stageIndex, setStageIndex] = useState(0);
   const [itemIndex, setItemIndex] = useState(0);
-  const [charIndex, setCharIndex] = useState(0);
+  const [inputValue, setInputValue] = useState("");
   const [typed, setTyped] = useState(0);
   const [errors, setErrors] = useState(0);
   const [flash, setFlash] = useState(false);
   const [done, setDone] = useState(false);
   const [best, setBest] = useState<Record<string, number>>(() => readBest());
-  const focusRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  /**
+   * The pending "advance to the next word" timer, so a stage switch or an
+   * unmount can cancel it. Without this, finishing a word and immediately
+   * switching stages left the 400ms timeout to fire against the NEW stage's
+   * freshly-reset state — using the OLD word's typed/error counts, since
+   * that's what its closure captured — silently corrupting whichever stage
+   * the learner had switched to. Unmounting mid-timeout is the same bug in
+   * miniature: a `setState` on a component that's already gone.
+   */
+  const advanceTimerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (advanceTimerRef.current !== null) window.clearTimeout(advanceTimerRef.current);
+    };
+  }, []);
 
   const drill = useMemo(() => buildDrill(stageIndex), [stageIndex]);
   const item: DrillItem | undefined = drill[itemIndex];
   const score = scoreDrill(typed, errors);
 
   const reset = useCallback((stage: number) => {
+    if (advanceTimerRef.current !== null) {
+      window.clearTimeout(advanceTimerRef.current);
+      advanceTimerRef.current = null;
+    }
     setStageIndex(stage);
     setItemIndex(0);
-    setCharIndex(0);
+    setInputValue("");
     setTyped(0);
     setErrors(0);
     setDone(false);
@@ -256,46 +282,47 @@ const TypingTab = () => {
     });
   }, [stageIndex]);
 
-  const handleChar = useCallback(
-    (char: string) => {
-      if (!item || done) return;
-      const expected = item.target[charIndex];
-      if (!expected) return;
-      const nextTyped = typed + 1;
-      setTyped(nextTyped);
-      if (keystrokeMatches(char, expected)) {
-        if (charIndex + 1 >= item.target.length) {
-          if (itemIndex + 1 >= drill.length) {
-            finish(nextTyped, errors);
-          } else {
-            setItemIndex((i) => i + 1);
-            setCharIndex(0);
-          }
-        } else {
-          setCharIndex((i) => i + 1);
-        }
-      } else {
-        setErrors((e) => e + 1);
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!item || done) return;
+    const value = e.target.value.slice(0, item.target.length);
+
+    // A character was added (not a backspace) — score it against the target.
+    // Computed into locals rather than read back from state, which would
+    // still hold the previous keystroke's value by the time this runs.
+    let nextTyped = typed;
+    let nextErrors = errors;
+    if (value.length > inputValue.length) {
+      const addedChar = value[value.length - 1];
+      const expected = item.target[value.length - 1];
+      nextTyped = typed + 1;
+      if (!keystrokeMatches(addedChar, expected)) {
+        nextErrors = errors + 1;
         setFlash(true);
         setTimeout(() => setFlash(false), 250);
       }
-    },
-    [item, done, charIndex, typed, itemIndex, drill.length, errors, finish],
-  );
+      setTyped(nextTyped);
+      setErrors(nextErrors);
+    }
 
-  const onKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key.length === 1) {
-      e.preventDefault();
-      handleChar(e.key);
+    setInputValue(value);
+
+    if (value.length === item.target.length) {
+      advanceTimerRef.current = window.setTimeout(() => {
+        advanceTimerRef.current = null;
+        if (itemIndex + 1 >= drill.length) {
+          finish(nextTyped, nextErrors);
+        } else {
+          setItemIndex((i) => i + 1);
+          setInputValue("");
+        }
+      }, 400);
     }
   };
-
-  const expectedChar = item?.target[charIndex];
 
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap gap-2">
-        {TYPING_STAGES.map((stage) => (
+        {SPELLING_STAGES.map((stage) => (
           <button
             key={stage.index}
             type="button"
@@ -306,9 +333,9 @@ const TypingTab = () => {
                 : "rounded-full border border-border px-3 py-1 text-xs text-muted-foreground hover:bg-muted"
             }
           >
-            Stage {stage.index + 1} · {stage.title}
+            المرحلة {stage.index + 1} · <span className="font-english" dir="ltr">{stage.title}</span>
             {best[String(stage.index)] !== undefined && (
-              <span className="ms-1 text-[10px]">best {best[String(stage.index)]}%</span>
+              <span className="ms-1 text-[10px]">الأفضل {best[String(stage.index)]}%</span>
             )}
           </button>
         ))}
@@ -317,61 +344,47 @@ const TypingTab = () => {
       {done ? (
         <div className="rounded-xl border border-border bg-card p-6 text-center">
           <CheckCircle2 className="mx-auto h-8 w-8 text-emerald-500" />
-          <p className="mt-2 text-lg font-semibold">{score.accuracy}% accuracy</p>
+          <p className="mt-2 text-lg font-semibold">دقة {score.accuracy}%</p>
           <p className="text-sm text-muted-foreground">
-            {score.typed} keystrokes, {score.errors} slips.
+            {score.typed} حرف، {score.errors} أخطاء.
           </p>
           <div className="mt-4 flex justify-center gap-2">
             <Button variant="outline" size="sm" onClick={() => reset(stageIndex)}>
-              <RefreshCw className="me-1 h-3.5 w-3.5" /> Again
+              <RefreshCw className="me-1 h-3.5 w-3.5" /> إعادة
             </Button>
-            {stageIndex + 1 < TYPING_STAGES.length && (
+            {stageIndex + 1 < SPELLING_STAGES.length && (
               <Button size="sm" onClick={() => reset(stageIndex + 1)}>المرحلة الجاية</Button>
             )}
           </div>
         </div>
       ) : item ? (
         <div
-          ref={focusRef}
-          tabIndex={0}
-          role="application"
-          aria-label="تمرين الكتابة"
-          onKeyDown={onKeyDown}
-          className={`rounded-xl border bg-card p-6 text-center outline-none transition-colors focus:ring-2 focus:ring-primary/40 ${flash ? "border-red-400" : "border-border"}`}
-          onClick={() => focusRef.current?.focus()}
+          className={`rounded-xl border bg-card p-6 text-center transition-colors ${flash ? "border-red-400" : "border-border"}`}
         >
           <p className="text-xs text-muted-foreground">
-            {itemIndex + 1} / {drill.length} · {item.kind === "letter" ? "letter" : "word"} · {score.accuracy}%
+            {itemIndex + 1} / {drill.length} · {score.accuracy}%
           </p>
-          <p dir="rtl" className="mt-3 font-arabic text-4xl tracking-wide">
-            {[...item.target].map((c, i) => (
-              <span
-                key={i}
-                className={
-                  i < charIndex
-                    ? "text-emerald-600"
-                    : i === charIndex
-                      ? "text-primary underline decoration-2 underline-offset-8"
-                      : "text-muted-foreground/60"
-                }
-              >
-                {c}
-              </span>
-            ))}
-          </p>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {item.translit}
-            {item.english ? ` — ${item.english}` : ""}
-          </p>
-          <p className="mt-1 text-[11px] text-muted-foreground">
-            دوس على الحرف المضيء، أو اكتب من لوحة مفاتيحك.
-          </p>
+          <div className="mt-3 flex justify-center">
+            <SoundAudioButton text={item.display} size="lg" autoplay label="شغّل الكلمة" />
+          </div>
+          <p className="mt-2 text-sm text-muted-foreground">{item.ar}</p>
+          <input
+            ref={inputRef}
+            dir="ltr"
+            lang="en"
+            autoCapitalize="off"
+            autoCorrect="off"
+            spellCheck={false}
+            value={inputValue}
+            onChange={handleChange}
+            aria-label="اكتب الكلمة"
+            className="font-english mt-4 w-full max-w-[240px] rounded-lg border-2 border-border bg-background px-4 py-2 text-center text-2xl tracking-wide outline-none focus:border-primary"
+          />
+          <p className="mt-2 text-[11px] text-muted-foreground">اسمع الكلمة ثم اكتب تهجئتها.</p>
         </div>
       ) : (
         <p className="text-sm text-muted-foreground">ما فيه تمرين لهذي المرحلة.</p>
       )}
-
-      {!done && <ArabicKeyboard highlight={expectedChar} onKey={handleChar} />}
     </div>
   );
 };
@@ -386,7 +399,7 @@ const WritingPractice = () => {
           <div>
             <h1 className="text-2xl font-bold">الكتابة</h1>
             <p className="text-sm text-muted-foreground">
-              Text like a native — and learn the keyboard while you're at it.
+              راسل بإنجليزية طبيعية — وتدرّب على تهجئة أصعب أصواتها في نفس الوقت.
             </p>
           </div>
           <HomeButton />
@@ -395,17 +408,17 @@ const WritingPractice = () => {
         <Tabs defaultValue="write">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="write">
-              <PenLine className="me-1.5 h-4 w-4" /> Write
+              <PenLine className="me-1.5 h-4 w-4" /> اكتب
             </TabsTrigger>
-            <TabsTrigger value="typing">
-              <Keyboard className="me-1.5 h-4 w-4" /> Typing
+            <TabsTrigger value="spelling">
+              <Ear className="me-1.5 h-4 w-4" /> التهجئة
             </TabsTrigger>
           </TabsList>
           <TabsContent value="write" className="mt-4">
             <WriteTab />
           </TabsContent>
-          <TabsContent value="typing" className="mt-4">
-            <TypingTab />
+          <TabsContent value="spelling" className="mt-4">
+            <SpellingTab />
           </TabsContent>
         </Tabs>
       </div>

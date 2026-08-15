@@ -1,28 +1,38 @@
 import { useNavigate } from "react-router-dom";
-import { ARABIC_LETTERS, CHECKPOINT_INDICES } from "@/data/arabicAlphabet";
-import { useAlphabetProgress, useCheckpointProgress } from "@/hooks/useAlphabetProgress";
+import { ENGLISH_SOUNDS, CHECKPOINT_INDICES } from "@/data/englishSounds";
+import { useSoundProgress, useCheckpointProgress } from "@/hooks/useSoundProgress";
 import { AppShell } from "@/components/layout/AppShell";
 import { HomeButton } from "@/components/HomeButton";
 import { InfoHint } from "@/components/InfoHint";
-import { DesertBackdrop } from "@/components/alphabet/DesertBackdrop";
-import { StopOrnament } from "@/components/alphabet/StopOrnament";
-import { CaravanMarker } from "@/components/alphabet/CaravanMarker";
-import { StopMasteryRing } from "@/components/alphabet/StopMasteryRing";
-import { MilestoneBanner } from "@/components/alphabet/MilestoneBanner";
+import { DesertBackdrop } from "@/components/sounds/DesertBackdrop";
+import { StopOrnament } from "@/components/sounds/StopOrnament";
+import { CaravanMarker } from "@/components/sounds/CaravanMarker";
+import { StopMasteryRing } from "@/components/sounds/StopMasteryRing";
+import { MilestoneBanner } from "@/components/sounds/MilestoneBanner";
 import { tapFeedback } from "@/lib/tapFeedback";
 import { useSoundPref } from "@/lib/uiPrefs";
 import { Lock, Check, Flag, Trophy, Volume2, VolumeX } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const AlphabetJourney = () => {
+/**
+ * The English Sounds journey — a 28-stop caravan through the English sound
+ * system, replacing the Alphabet Journey that taught the Arabic alphabet
+ * (the wrong direction once the app itself flipped). See
+ * src/data/englishSounds.ts for the curriculum and its research basis.
+ *
+ * The trail chrome (desert backdrop, caravan marker, checkpoint oases) is
+ * unchanged from Hakiya — it was never Arabic-specific, just a "journey"
+ * motif — so only the content and the copy needed to flip.
+ */
+const EnglishSounds = () => {
   const navigate = useNavigate();
-  const { progress, isUnlocked, masteredCount } = useAlphabetProgress();
+  const { progress, isUnlocked, masteredCount } = useSoundProgress();
   const { checkpoints } = useCheckpointProgress();
   const [soundOn, setSoundOn] = useSoundPref();
 
-  // Current stop = first non-mastered unlocked letter
-  const currentStopIndex = ARABIC_LETTERS.findIndex(
-    (l) => isUnlocked(l.order_index) && !progress[l.code]?.mastered_at,
+  // Current stop = first non-mastered unlocked sound
+  const currentStopIndex = ENGLISH_SOUNDS.findIndex(
+    (s) => isUnlocked(s.order_index) && !progress[s.code]?.mastered_at,
   );
 
   return (
@@ -34,37 +44,32 @@ const AlphabetJourney = () => {
           <button
             onClick={() => setSoundOn(!soundOn)}
             className="p-1.5 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
-            title={soundOn ? "Mute chimes" : "Unmute chimes"}
-            aria-label={soundOn ? "Mute chimes" : "Unmute chimes"}
+            title={soundOn ? "كتم الأصوات" : "تشغيل الأصوات"}
+            aria-label={soundOn ? "كتم الأصوات" : "تشغيل الأصوات"}
           >
             {soundOn ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
           </button>
           <p className="text-xs text-muted-foreground">
-            {masteredCount} / 28 mastered
+            {masteredCount} / 28 مُتقَن
           </p>
         </div>
       </div>
 
       <MilestoneBanner masteredCount={masteredCount} />
 
-
       <header className="mb-6 text-center">
         <h1 className="text-2xl font-bold text-foreground flex items-center justify-center gap-2" style={{ fontFamily: "'Montserrat', sans-serif" }}>
-          Alphabet Journey 🐪
+          رحلة أصوات الإنجليزية 🐪
           <InfoHint
-            title="Alphabet Journey"
-            body="A 28-stop caravan through the Arabic alphabet. Each stop is a 3-minute mini-lesson: meet the letter, hear it, trace it, see its four shapes, then two quick games. Master one to unlock the next."
+            title="رحلة أصوات الإنجليزية"
+            body="قافلة من 28 محطة عبر أصوات الإنجليزية — وأغلبها الأصوات التي لا توجد في العربية أو تُلبس بصوت عربي قريب. كل محطة درس مصغّر: اسمع الصوت، افهم كيف يُشكَّل، شاهد كيف يُكتب، ثم تدرّبان عليه بلعبتين. أتقن محطة لتفتح التي تليها."
           />
         </h1>
-        <p
-          className="text-3xl text-primary mt-2"
-          style={{ fontFamily: "'Noto Sans Arabic', serif" }}
-          dir="rtl"
-        >
-          أ ب ت ث
+        <p className="font-english text-3xl text-primary mt-2" dir="ltr">
+          p · v · θ · ʃ
         </p>
         <p className="text-sm text-muted-foreground mt-1">
-          Tap a stop to begin. The trail unlocks letter by letter.
+          اضغط على محطة للبدء. المسار يُفتح صوتاً بعد صوت.
         </p>
       </header>
 
@@ -80,26 +85,26 @@ const AlphabetJourney = () => {
         />
 
         <div className="relative space-y-3">
-          {ARABIC_LETTERS.map((letter) => {
-            const row = progress[letter.code];
-            const unlocked = isUnlocked(letter.order_index);
+          {ENGLISH_SOUNDS.map((sound) => {
+            const row = progress[sound.code];
+            const unlocked = isUnlocked(sound.order_index);
             const mastered = !!row?.mastered_at;
             const stepsCompleted = row?.steps_completed?.length ?? 0;
-            const isLeft = letter.order_index % 2 === 0;
-            const isCheckpointAfter = CHECKPOINT_INDICES.includes(letter.order_index);
-            const checkpointIdx = CHECKPOINT_INDICES.indexOf(letter.order_index);
+            const isLeft = sound.order_index % 2 === 0;
+            const isCheckpointAfter = CHECKPOINT_INDICES.includes(sound.order_index);
+            const checkpointIdx = CHECKPOINT_INDICES.indexOf(sound.order_index);
 
             return (
-              <div key={letter.code}>
+              <div key={sound.code}>
                 <button
                   onClick={(e) => {
                     if (unlocked) {
                       tapFeedback(e.currentTarget.querySelector("[data-tap-node]") as HTMLElement);
-                      navigate(`/alphabet/${letter.code}`);
+                      navigate(`/sounds/${sound.code}`);
                     }
                   }}
                   disabled={!unlocked}
-                  aria-label={`Letter ${letter.code}${unlocked ? "" : " (locked)"}`}
+                  aria-label={`الصوت ${sound.code}${unlocked ? "" : " (مقفل)"}`}
                   className={cn(
                     "w-full flex items-center gap-2",
                     isLeft ? "flex-row" : "flex-row-reverse",
@@ -116,14 +121,14 @@ const AlphabetJourney = () => {
                     )}
                   >
                     <p className="text-[10px] font-semibold uppercase tracking-wider text-[#5C3A46]/70">
-                      Stop {letter.order_index + 1}
+                      محطة {sound.order_index + 1}
                     </p>
-                    <p className="text-sm font-medium text-foreground">
-                      {letter.name_translit}
+                    <p className="font-english text-sm font-medium text-foreground" dir="ltr">
+                      {sound.ipa}
                     </p>
                     {unlocked && !mastered && stepsCompleted > 0 && (
                       <p className="text-[10px] text-primary mt-0.5">
-                        {stepsCompleted}/6 steps
+                        {stepsCompleted}/6 خطوات
                       </p>
                     )}
                   </div>
@@ -168,12 +173,13 @@ const AlphabetJourney = () => {
                     ) : (
                       <span
                         className={cn(
-                          "text-3xl relative",
+                          "font-english text-2xl relative",
                           mastered ? "text-[#7A5320]" : "text-[#5C3A46]",
                         )}
-                        style={{ fontFamily: "'Noto Sans Arabic', serif", lineHeight: 1 }}
+                        style={{ lineHeight: 1 }}
+                        dir="ltr"
                       >
-                        {letter.isolated}
+                        {sound.display}
                       </span>
                     )}
                     {mastered && (
@@ -182,7 +188,7 @@ const AlphabetJourney = () => {
                       </span>
                     )}
                     {/* Caravan: marks the learner's current spot */}
-                    {letter.order_index === currentStopIndex && (
+                    {sound.order_index === currentStopIndex && (
                       <div className="absolute -top-7 left-1/2 -translate-x-1/2 pointer-events-none drop-shadow">
                         <CaravanMarker size={32} />
                       </div>
@@ -192,7 +198,7 @@ const AlphabetJourney = () => {
                   {/* Ornament instead of empty spacer */}
                   <div className="flex-1 flex justify-center">
                     <StopOrnament
-                      index={letter.order_index}
+                      index={sound.order_index}
                       side={isLeft ? "right" : "left"}
                       active={unlocked}
                     />
@@ -205,7 +211,7 @@ const AlphabetJourney = () => {
                     onClick={(e) => {
                       if (mastered) {
                         tapFeedback(e.currentTarget);
-                        navigate(`/alphabet/checkpoint/${checkpointIdx}`);
+                        navigate(`/sounds/checkpoint/${checkpointIdx}`);
                       }
                     }}
                     disabled={!mastered}
@@ -245,10 +251,10 @@ const AlphabetJourney = () => {
                       <Flag className="h-5 w-5 text-[#A57B1F] relative" />
                     )}
                     <span className="font-bold text-[#5C3A46] relative">
-                      Oasis Checkpoint {checkpointIdx + 1}
+                      نقطة تفتيش الواحة {checkpointIdx + 1}
                     </span>
                     {checkpoints[checkpointIdx] && (
-                      <span className="text-xs font-semibold text-[#A57B1F] ml-1 relative">
+                      <span className="text-xs font-semibold text-[#A57B1F] me-1 relative">
                         {checkpoints[checkpointIdx].score}%
                       </span>
                     )}
@@ -263,4 +269,4 @@ const AlphabetJourney = () => {
   );
 };
 
-export default AlphabetJourney;
+export default EnglishSounds;

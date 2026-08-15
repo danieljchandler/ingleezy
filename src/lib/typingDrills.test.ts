@@ -1,117 +1,68 @@
 import { describe, expect, it } from "vitest";
-import { ARABIC_LETTERS } from "@/data/arabicAlphabet";
-import {
-  buildDrill,
-  coverageBase,
-  KEYBOARD_ROWS,
-  keyForChar,
-  keystrokeMatches,
-  lettersThrough,
-  normalizeChar,
-  scoreDrill,
-  TYPING_STAGES,
-  typingTarget,
-} from "./typingDrills";
+import { ENGLISH_SOUNDS } from "@/data/englishSounds";
+import { buildDrill, keystrokeMatches, scoreDrill, SPELLING_STAGES } from "./typingDrills";
 
 /**
- * The typing trainer's whole promise is progressive introduction: stage 1
- * never asks for a key the learner has not met. That property — and the
- * keyboard data it depends on — is what these tests pin.
+ * The spelling trainer replaced a progressive Arabic-keyboard drill — see
+ * the module doc comment for why English needed a spelling drill rather
+ * than a keyboard-layout one. What's left to pin: the stage grouping
+ * mirrors the English Sounds journey's four checkpoints, the drill draws
+ * only from that stage's sounds, and the scoring math (untouched from the
+ * Arabic version) still holds.
  */
 
-describe("keyboard layout", () => {
-  it("covers all 28 alphabet letters on the base layer", () => {
-    for (const letter of ARABIC_LETTERS) {
-      expect(keyForChar(letter.isolated), `${letter.name_translit} has no key`).toBeDefined();
-    }
-  });
-
-  it("assigns each key one character and each character one key", () => {
-    const chars = KEYBOARD_ROWS.flat().map((k) => k.char);
-    const qwerty = KEYBOARD_ROWS.flat().map((k) => k.qwerty);
-    expect(new Set(chars).size).toBe(chars.length);
-    expect(new Set(qwerty).size).toBe(qwerty.length);
-  });
-
-  it("finds the key for a hamza-carrier form via the fold", () => {
-    // أ is shift-layer; the trainer folds it to the plain alif key.
-    expect(keyForChar("أ")?.qwerty).toBe("H");
-  });
-});
-
 describe("normalisation", () => {
-  it("folds hamza-carrier alifs to plain alif", () => {
-    expect(normalizeChar("أ")).toBe("ا");
-    expect(normalizeChar("إ")).toBe("ا");
-    expect(normalizeChar("آ")).toBe("ا");
-    expect(normalizeChar("ب")).toBe("ب");
-  });
-
-  it("strips diacritics and off-layout characters from a typing target", () => {
-    // Fully vocalised بَيْت still types as بيت.
-    expect(typingTarget("بَيْت")).toBe("بيت");
-    expect(typingTarget("أرنب")).toBe("ارنب");
-  });
-
-  it("accepts either side of a fold as a matching keystroke", () => {
-    expect(keystrokeMatches("ا", "أ")).toBe(true);
-    expect(keystrokeMatches("أ", "ا")).toBe(true);
-    expect(keystrokeMatches("ب", "ت")).toBe(false);
+  it("matches a keystroke regardless of case", () => {
+    expect(keystrokeMatches("P", "p")).toBe(true);
+    expect(keystrokeMatches("p", "P")).toBe(true);
+    expect(keystrokeMatches("b", "p")).toBe(false);
   });
 });
 
 describe("stages", () => {
-  it("mirrors the Alphabet Journey's four checkpoint groups of seven", () => {
-    expect(TYPING_STAGES).toHaveLength(4);
-    for (const stage of TYPING_STAGES) expect(stage.letters).toHaveLength(7);
-    // Between them, the whole alphabet, in order.
-    const all = TYPING_STAGES.flatMap((s) => s.letters.map((l) => l.code));
-    expect(all).toEqual(ARABIC_LETTERS.map((l) => l.code));
-  });
-
-  it("accumulates known letters stage over stage", () => {
-    expect(lettersThrough(0).size).toBe(7);
-    expect(lettersThrough(3).size).toBe(28);
-    // Everything known at stage 0 is still known at stage 3.
-    for (const c of lettersThrough(0)) expect(lettersThrough(3).has(c)).toBe(true);
-  });
-
-  it("counts a variant glyph as its base letter", () => {
-    expect(coverageBase("ة")).toBe("ه");
-    expect(coverageBase("ى")).toBe("ي");
-    expect(coverageBase("ء")).toBe("ا");
+  it("mirrors the English Sounds journey's four checkpoint groups of seven", () => {
+    expect(SPELLING_STAGES).toHaveLength(4);
+    for (const stage of SPELLING_STAGES) expect(stage.sounds).toHaveLength(7);
+    // Between them, every sound, in order.
+    const all = SPELLING_STAGES.flatMap((s) => s.sounds.map((snd) => snd.code));
+    expect(all).toEqual(ENGLISH_SOUNDS.map((s) => s.code));
   });
 });
 
 describe("drills", () => {
-  it("teaches the stage's seven letters first", () => {
-    const drill = buildDrill(0);
-    const letters = drill.filter((d) => d.kind === "letter");
-    expect(letters.map((d) => d.display)).toEqual(
-      TYPING_STAGES[0].letters.map((l) => l.isolated),
-    );
-  });
-
-  it("never asks for a key that has not been introduced", () => {
-    for (const stage of TYPING_STAGES) {
-      const known = lettersThrough(stage.index);
+  it("draws only from the stage's own sounds", () => {
+    for (const stage of SPELLING_STAGES) {
+      const stageWords = new Set(
+        stage.sounds.flatMap((s) => s.examples.map((e) => e.en.toLowerCase())),
+      );
       for (const item of buildDrill(stage.index)) {
-        for (const c of item.target) {
-          if (c === " ") continue;
-          expect(
-            known.has(coverageBase(c)),
-            `stage ${stage.index} drill "${item.display}" needs ${c}`,
-          ).toBe(true);
-        }
+        expect(stageWords.has(item.target)).toBe(true);
       }
     }
   });
 
-  it("includes real example words once their letters are available", () => {
-    // باب (door) is ba + alif + ba — alif and ba are both in stage 1.
-    const words = buildDrill(0).filter((d) => d.kind === "word");
-    expect(words.length).toBeGreaterThan(0);
-    expect(words.map((d) => d.display)).toContain("باب");
+  it("lowercases the target but keeps the word's normal casing to display", () => {
+    const drill = buildDrill(0);
+    for (const item of drill) {
+      expect(item.target).toBe(item.display.toLowerCase());
+    }
+  });
+
+  it("carries the Arabic gloss through", () => {
+    const drill = buildDrill(0);
+    expect(drill[0].ar.length).toBeGreaterThan(0);
+  });
+
+  it("drops a word repeated across two sounds in the same stage rather than drilling it twice", () => {
+    // "bag" is both /b/'s final-position example and final_devoicing's — but
+    // final_devoicing is stage 4, so within one stage the more common case is
+    // two different sounds sharing an example word by coincidence. Either
+    // way the drill must never show the same target twice.
+    for (const stage of SPELLING_STAGES) {
+      const drill = buildDrill(stage.index);
+      const targets = drill.map((d) => d.target);
+      expect(new Set(targets).size).toBe(targets.length);
+    }
   });
 
   it("is deterministic", () => {

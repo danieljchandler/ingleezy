@@ -314,8 +314,11 @@ generation conditioning.
       pronounce with the Arabic meaning behind a reveal; deck "listen
       first" audio removed until English card audio exists. Shadow mode
       deliberately stays Arabic (immersion echo of native clips).
-      Still open: a seeded minimal-pairs drill set — goes with the
-      English Sounds journey.
+      Still open: a seeded minimal-pairs drill set for THIS page (the
+      general pronunciation deck). The English Sounds journey (now built,
+      see Arabic-only-surfaces) has its own minimal pairs per sound in
+      `src/data/englishSounds.ts` — a ready source to pull from rather than
+      re-authoring a second set from scratch.
 - [~] Shadowing, sentence coach, set phrases: KEEP loops, English targets.
       **Shadowing DONE, and it was broken rather than merely unflipped.**
       `useShadowQueue` had always worked out the right language per line —
@@ -411,13 +414,63 @@ generation conditioning.
       examples as English rather than RTL Arabic.
 
 ### Arabic-only surfaces — PRUNE or REPURPOSE
-- [~] Alphabet Journey → **English Sounds** journey (phonics for Arabic
-      speakers) — repurpose structure, all-new content. Its learner-facing
-      entry points are now hidden (LearnHub tile, Home progression card,
-      DailyLetterGoalRing) since teaching the Arabic alphabet to Arabic
-      speakers is absurd post-flip; the /alphabet routes and components
-      remain in place as the skeleton for the English Sounds rebuild.
-- [~] **Written production (WritingPractice + `writing-coach`) →
+- [x] Alphabet Journey → **English Sounds journey, DONE**. Researched
+      first (contrastive Arabic/English phonology, TESOL's Arabic-speaker
+      pronunciation guidance, cluster-epenthesis studies) rather than
+      guessing, then rebuilt on that basis — not a copy-edit of the old
+      28-letter tour, a different curriculum entirely.
+      `src/data/englishSounds.ts` replaces `arabicAlphabet.ts`: 28 stops,
+      four groups of seven mirroring the old checkpoint shape, ordered by
+      contrastive difficulty rather than A-B-C — sounds Arabic already has
+      first (m b t d s n l, then k f h w y z, ending the familiar set on a
+      *retrained* ر since English /r/ is no trill), then sounds genuinely
+      IN Arabic that get under-taught (ش ث ذ, the dialect-dependent ق/ج→/g/
+      case) paired with the vowel-LENGTH bridge (beat/bit, fool/full,
+      bet/bat — leaning on the short/long vowel concept Arabic already
+      has), then the sounds Arabic has no phoneme for at all: /p/ (→/b/),
+      /v/ (→/f/), /tʃ/, /ŋ/, /ʒ/, consonant clusters (the documented
+      vowel-epenthesis repair — "street"→"istreet"), and word-final
+      devoicing as the capstone (flagged in the literature as
+      disproportionately important because it's a word-final phenomenon).
+      The three phonology rules already hardcoded in
+      `englishPromptCore.ts`'s FALLBACK_INTERFERENCE_RULES — p→b, v→f,
+      cluster epenthesis — are dedicated stops here too, so the Journey and
+      the AI coaching prompts teach against the same documented errors.
+      Each stop carries an IPA, spellings (English's opaque orthography
+      needed a dedicated "how is it written" step — the letter-tracing step
+      it replaced taught letter SHAPE, which nobody reaching this journey
+      needs; English's actual writing problem is one sound spelled several
+      ways), position-tagged example words, curated spot-words (English
+      spelling can't be scanned for a sound the way Arabic script can, so
+      SpotTheSoundGame reads a hand-tagged word list instead of deriving
+      membership), and minimal pairs (park/bark, pin/bin) that drive both a
+      mouth-position/voicing panel (MouthGuidePanel, with a "hand on your
+      throat" voicing check generated once rather than authored 28 times)
+      and a listening-discrimination game (MinimalPairGame — "which word
+      did you hear", the standard mechanic the literature converges on,
+      not a shape-matching game). Six steps per stop: meet, mouth, spell,
+      examples, spot, contrast. Checkpoints became an 8-round "which word
+      did you hear" boss battle over the whole pool covered so far.
+      TTS is real English audio (`en-US-JennyNeural`, forced past the
+      dialect-routing hook that every other button in the app uses to play
+      Arabic back) — SoundAudioButton is the mirror of LetterAudioButton
+      but always English, never dialect-routed.
+      Learner-facing entry points are back: LearnHub's tile and a
+      DailySoundGoalRing card on Home, both pointing at the real feature
+      this time instead of the placeholder that used to sit there.
+      **Also resolved the coupled Typing tab**, left running-but-undecided
+      since the fourth sweep: it was an Arabic-keyboard drill tied to the
+      old alphabet's letter order and stage math, and would have broken
+      outright once `arabicAlphabet.ts` was deleted. Rebuilt as a spelling
+      drill instead of a keyboard-layout one — English doesn't need a
+      mapped on-screen keyboard (every learner already has a physical
+      QWERTY one and already knows where its keys are), it needs spelling
+      practice, since the same sound can be written several ways. Stages
+      now come from `SPELLING_STAGES` (built off `englishSounds.ts`'s own
+      checkpoint groups), and `ArabicKeyboard.tsx` is gone along with the
+      whole key-layout/normalisation half of `typingDrills.ts` — no
+      physical keyboard to map, so nothing to replace it with.
+- [x] **Written production (WritingPractice + `writing-coach`) →
       FLIPPED**. Found during the fourth sweep, and it was the last whole
       feature still pointing the old way: the "Write" tab asked the model
       for a casual incoming message *in the learner's dialect* and then
@@ -437,10 +490,9 @@ generation conditioning.
       a reply typed entirely in Arabic is now refused (`not_english`)
       rather than coached, which is what stops the feature quietly
       becoming the Arabic-writing trainer it used to be.
-      Remaining: the **"Typing" tab is still an Arabic-keyboard drill**
-      in the Alphabet Journey's letter order. It belongs with the English
-      Sounds rebuild — either a Latin/QWERTY drill or pruned outright —
-      and is deliberately left running until that call is made.
+      The "Typing" tab's Arabic-keyboard drill was the one thing left
+      hanging here — **resolved by the English Sounds rebuild** below,
+      which retired it in favour of a spelling drill.
 - [x] MSA Bridge → PRUNED (only stale generated-types references remain
       until types regeneration)
 - [x] Dialect Compare → PRUNED (revisit later as "how do Brits vs
@@ -524,9 +576,10 @@ generation conditioning.
       DailyChallenge / SavedChats / SavedTranslations / SetPhrases /
       NativeFeedback / Quiz / PlacementQuiz / ReadingPractice /
       ReadingLibraryStory / WritingPractice / Translate / Transcribe /
-      TutorUpload / SouqNews pages. Deliberately left English: the
-      /alphabet routes (slated for an all-new English Sounds rebuild, so
-      translating Arabic-alphabet copy is wasted work) and the Privacy /
+      TutorUpload / SouqNews pages. Deliberately left English at the time:
+      the /alphabet routes (slated for an all-new English Sounds rebuild,
+      so translating Arabic-alphabet copy would have been wasted work —
+      since done, see the Arabic-only-surfaces section) and the Privacy /
       Terms pages (legal text, translated with the lawyer not the
       linter).
       A **third sweep** then took the chrome that sits above and beside
@@ -630,7 +683,7 @@ generation conditioning.
 6. **Hakiya bridge**
 7. **Speaking feedback** (pronunciation + shadowing)
 8. **Arabic-first UI pass** (big, mechanical, best done once features settle)
-9. **English Sounds journey**
+9. **English Sounds journey** — DONE
 
 Each step keeps `npm run typecheck && npm test && npm run test:e2e` green —
 same bar as Hakiya's CI.

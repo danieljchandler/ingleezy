@@ -70,9 +70,9 @@ const BattlePlay = lazyPage(() => import("./pages/BattlePlay"));
 const PlacementQuiz = lazyPage(() => import("./pages/PlacementQuiz"));
 const SouqNews = lazyPage(() => import("./pages/SouqNews"));
 const MyTranscriptions = lazyPage(() => import("./pages/MyTranscriptions"));
-const AlphabetJourney = lazyPage(() => import("./pages/AlphabetJourney"));
-const AlphabetLetter = lazyPage(() => import("./pages/AlphabetLetter"));
-const AlphabetCheckpoint = lazyPage(() => import("./pages/AlphabetCheckpoint"));
+const EnglishSounds = lazyPage(() => import("./pages/EnglishSounds"));
+const EnglishSound = lazyPage(() => import("./pages/EnglishSound"));
+const SoundsCheckpoint = lazyPage(() => import("./pages/SoundsCheckpoint"));
 const Listen = lazyPage(() => import("./pages/Listen"));
 const ListenEpisode = lazyPage(() => import("./pages/ListenEpisode"));
 const Terms = lazyPage(() => import("./pages/Terms"));
@@ -394,8 +394,8 @@ const App = () => {
             <Route path="/my-transcriptions" element={
               <ErrorBoundary name="MyTranscriptionsRoute"><ProtectedRoute><MyTranscriptions /></ProtectedRoute></ErrorBoundary>
             } />
-            <Route path="/alphabet" element={
-              <ErrorBoundary name="AlphabetJourneyRoute"><AlphabetJourney /></ErrorBoundary>
+            <Route path="/sounds" element={
+              <ErrorBoundary name="EnglishSoundsRoute"><EnglishSounds /></ErrorBoundary>
             } />
             <Route path="/terms" element={
               <ErrorBoundary name="TermsRoute"><Terms /></ErrorBoundary>
@@ -404,11 +404,11 @@ const App = () => {
               <ErrorBoundary name="PrivacyRoute"><Privacy /></ErrorBoundary>
             } />
 
-            <Route path="/alphabet/checkpoint/:index" element={
-              <ErrorBoundary name="AlphabetCheckpointRoute"><ProtectedRoute><AlphabetCheckpoint /></ProtectedRoute></ErrorBoundary>
+            <Route path="/sounds/checkpoint/:index" element={
+              <ErrorBoundary name="SoundsCheckpointRoute"><ProtectedRoute><SoundsCheckpoint /></ProtectedRoute></ErrorBoundary>
             } />
-            <Route path="/alphabet/:letterCode" element={
-              <ErrorBoundary name="AlphabetLetterRoute"><AlphabetLetter /></ErrorBoundary>
+            <Route path="/sounds/:soundCode" element={
+              <ErrorBoundary name="EnglishSoundRoute"><EnglishSound /></ErrorBoundary>
             } />
 
             {/* Standalone login — must sit OUTSIDE AdminLayout, which redirects

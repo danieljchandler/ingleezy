@@ -1,14 +1,14 @@
 /**
  * CaravanMarker - small camel SVG that bobs in place, used to indicate the
- * learner's current spot on the Alphabet Journey trail.
+ * learner's current spot on the English Sounds trail.
  */
 export function CaravanMarker({ size = 36 }: { size?: number }) {
   return (
     <div
       className="animate-camel-bob inline-flex"
       style={{ width: size, height: size }}
-      aria-label="You are here"
-      title="You are here"
+      aria-label="أنت هنا"
+      title="أنت هنا"
     >
       <svg viewBox="0 0 64 48" width={size} height={size} xmlns="http://www.w3.org/2000/svg">
         {/* body */}

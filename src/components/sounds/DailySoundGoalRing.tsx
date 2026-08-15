@@ -1,21 +1,21 @@
 import { useMemo } from "react";
 import { Flame } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useAlphabetProgress } from "@/hooks/useAlphabetProgress";
+import { useSoundProgress } from "@/hooks/useSoundProgress";
 
-interface DailyLetterGoalRingProps {
-  /** Target letters to master per day. Default 3. */
+interface DailySoundGoalRingProps {
+  /** Target sounds to master per day. Default 3. */
   goal?: number;
   className?: string;
 }
 
 /**
  * Compact ring widget that lives next to the streak display on Home.
- * Shows progress toward today's letter-mastery goal pulled from
- * `useAlphabetProgress` (counts letters whose `mastered_at` is today).
+ * Shows progress toward today's sound-mastery goal pulled from
+ * `useSoundProgress` (counts sounds whose `mastered_at` is today).
  */
-export const DailyLetterGoalRing = ({ goal = 3, className }: DailyLetterGoalRingProps) => {
-  const { progress } = useAlphabetProgress();
+export const DailySoundGoalRing = ({ goal = 3, className }: DailySoundGoalRingProps) => {
+  const { progress } = useSoundProgress();
 
   const masteredToday = useMemo(() => {
     const start = new Date();
@@ -44,7 +44,7 @@ export const DailyLetterGoalRing = ({ goal = 3, className }: DailyLetterGoalRing
         complete ? "border-amber-500/60" : "border-border",
         className,
       )}
-      title={`${masteredToday} of ${goal} letters mastered today`}
+      title={`${masteredToday} من ${goal} أصوات اليوم`}
     >
       <div className="relative" style={{ width: SIZE, height: SIZE }}>
         <svg width={SIZE} height={SIZE} className="-rotate-90">
@@ -80,10 +80,10 @@ export const DailyLetterGoalRing = ({ goal = 3, className }: DailyLetterGoalRing
       </div>
       <div className="min-w-0">
         <p className="text-xs font-semibold text-foreground leading-tight">
-          {complete ? "Goal hit!" : "Daily letters"}
+          {complete ? "أنجزت الهدف!" : "أصوات اليوم"}
         </p>
         <p className="text-[10px] text-muted-foreground leading-tight">
-          {complete ? "Stretch goal: +1?" : `${goal - masteredToday} to go`}
+          {complete ? "هدف إضافي: +1؟" : `${goal - masteredToday} متبقٍ`}
         </p>
       </div>
     </div>

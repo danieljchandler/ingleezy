@@ -36,6 +36,7 @@ import { LandingHero } from "@/components/LandingHero";
 import { Footer } from "@/components/Footer";
 import { AR } from "@/lib/strings";
 import { ChevronOpen } from "@/components/shared/DirectionalIcon";
+import { DailySoundGoalRing } from "@/components/sounds/DailySoundGoalRing";
 
 
 // Daily-queue task hints, keyed by useTodayQueue's TodayTaskId — the hint
@@ -346,11 +347,13 @@ const Index = () => {
                 </button>
               )}
 
-              {/* Secondary progression tracks — distinct from the daily queue.
-                  The Arabic Alphabet Journey card and DailyLetterGoalRing were
-                  removed here: teaching the Arabic alphabet to Arabic speakers
-                  makes no sense post-flip. The track returns as the English
-                  Sounds journey (see RETARGET.md). */}
+              {/* Secondary progression track — distinct from the daily queue.
+                  The English Sounds journey teaches the sounds Arabic
+                  doesn't have; a tap opens the trail, the ring alone shows
+                  today's progress toward it. */}
+              <button onClick={() => navigate("/sounds")} className="w-full text-start">
+                <DailySoundGoalRing className="w-full" />
+              </button>
               <div className="flex gap-3">
                 <XPDisplay compact className="flex-1" />
                 <StreakDisplay compact />

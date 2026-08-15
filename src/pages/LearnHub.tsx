@@ -1,4 +1,4 @@
-import { GraduationCap, PenTool, MessageCircle, Sparkles, Library, Headphones, Shuffle } from "lucide-react";
+import { GraduationCap, PenTool, MessageCircle, Sparkles, Library, Headphones, Shuffle, Ear } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { HubHeader, HubSection } from "@/components/layout/HubGrid";
 
@@ -18,9 +18,14 @@ const LearnHub = () => {
             to: "/placement",
             accent: "bg-primary/15 text-primary",
           },
-          // The Arabic Alphabet Journey tile lived here — hidden post-flip
-          // (Arabic speakers don't need it). Returns as the English Sounds
-          // journey; see RETARGET.md.
+          {
+            id: "sounds",
+            label: "أصوات الإنجليزية",
+            description: "الأصوات التي لا توجد في العربية، صوتاً بصوت",
+            icon: Ear,
+            to: "/sounds",
+            accent: "bg-rose-500/10 text-rose-600",
+          },
         ]}
       />
 

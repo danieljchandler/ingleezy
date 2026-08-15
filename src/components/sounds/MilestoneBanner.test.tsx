@@ -4,16 +4,16 @@ import { MilestoneBanner } from "./MilestoneBanner";
 
 /**
  * The banner that congratulates a learner for crossing a quarter of the
- * alphabet.
+ * English Sounds journey.
  *
- * Twenty-eight letters is a long climb with no natural finish line before the
+ * Twenty-eight sounds is a long climb with no natural finish line before the
  * end, so the trainer plants four: 7, 14, 21, 28. Each is meant to be seen
  * once and then never again, which is the only interesting thing about the
  * component — the celebration is trivial, and remembering that it has already
  * happened is not.
  */
 
-const STORAGE_KEY = "ingleezy:alphabet:milestone-seen";
+const STORAGE_KEY = "ingleezy:sounds:milestone-seen";
 
 const reduced = vi.hoisted(() => ({ value: false }));
 vi.mock("@/lib/uiPrefs", async (importOriginal) => ({
@@ -34,7 +34,13 @@ const seen = (...thresholds: number[]) =>
   localStorage.setItem(STORAGE_KEY, JSON.stringify(thresholds));
 
 const banner = () => screen.queryByRole("status");
-const dismiss = () => fireEvent.click(screen.getByRole("button", { name: "Dismiss" }));
+const dismiss = () => fireEvent.click(screen.getByRole("button", { name: "إغلاق" }));
+
+/** Arabic count phrase this component renders for a given threshold. */
+const countText = (n: number) => {
+  if (n >= 3 && n <= 10) return `${n} أصوات`;
+  return `${n} صوتاً`;
+};
 
 describe("MilestoneBanner — when it appears", () => {
   it("stays away below the first milestone", () => {
@@ -42,34 +48,34 @@ describe("MilestoneBanner — when it appears", () => {
     expect(banner()).not.toBeInTheDocument();
   });
 
-  it("appears on the seventh letter", () => {
+  it("appears on the seventh sound", () => {
     render(<MilestoneBanner masteredCount={7} />);
-    expect(screen.getByText("7 letters mastered!")).toBeInTheDocument();
+    expect(screen.getByText(`أتقنت ${countText(7)}!`)).toBeInTheDocument();
   });
 
-  it.each([7, 14, 21, 28])("celebrates %i letters", (count) => {
+  it.each([7, 14, 21, 28])("celebrates %i sounds", (count) => {
     render(<MilestoneBanner masteredCount={count} />);
-    expect(screen.getByText(`${count} letters mastered!`)).toBeInTheDocument();
+    expect(screen.getByText(`أتقنت ${countText(count)}!`)).toBeInTheDocument();
   });
 
   it("celebrates the milestone passed, not the exact count", () => {
     render(<MilestoneBanner masteredCount={17} />);
-    expect(screen.getByText("14 letters mastered!")).toBeInTheDocument();
+    expect(screen.getByText(`أتقنت ${countText(14)}!`)).toBeInTheDocument();
   });
 
   it("shows the highest one reached rather than the first", () => {
     // A learner who comes back after a long break, or whose progress loads all
     // at once, should see the achievement they actually have.
     render(<MilestoneBanner masteredCount={28} />);
-    expect(screen.getByText("28 letters mastered!")).toBeInTheDocument();
+    expect(screen.getByText(`أتقنت ${countText(28)}!`)).toBeInTheDocument();
   });
 
-  it("appears when a later letter pushes the count over the line", () => {
+  it("appears when a later sound pushes the count over the line", () => {
     const { rerender } = render(<MilestoneBanner masteredCount={13} />);
-    expect(screen.queryByText("14 letters mastered!")).not.toBeInTheDocument();
+    expect(screen.queryByText(`أتقنت ${countText(14)}!`)).not.toBeInTheDocument();
 
     rerender(<MilestoneBanner masteredCount={14} />);
-    expect(screen.getByText("14 letters mastered!")).toBeInTheDocument();
+    expect(screen.getByText(`أتقنت ${countText(14)}!`)).toBeInTheDocument();
   });
 
   it("announces itself politely rather than interrupting", () => {
@@ -81,14 +87,12 @@ describe("MilestoneBanner — when it appears", () => {
 describe("MilestoneBanner — what it says", () => {
   it("keeps the learner going at the intermediate milestones", () => {
     render(<MilestoneBanner masteredCount={21} />);
-    expect(screen.getByText("Keep going — the caravan moves on.")).toBeInTheDocument();
+    expect(screen.getByText("استمر — القافلة تواصل مسيرها.")).toBeInTheDocument();
   });
 
-  it("marks the whole alphabet differently", () => {
+  it("marks the whole journey differently", () => {
     render(<MilestoneBanner masteredCount={28} />);
-    expect(
-      screen.getByText("You've completed the entire alphabet caravan 🐪"),
-    ).toBeInTheDocument();
+    expect(screen.getByText("أنهيت رحلة القافلة كاملة 🐪")).toBeInTheDocument();
   });
 
   it("animates the shine by default", () => {
@@ -100,7 +104,7 @@ describe("MilestoneBanner — what it says", () => {
     reduced.value = true;
     const { container } = render(<MilestoneBanner masteredCount={7} />);
     expect(container.querySelector(".animate-banner-shine")).not.toBeInTheDocument();
-    expect(screen.getByText("7 letters mastered!")).toBeInTheDocument();
+    expect(screen.getByText(`أتقنت ${countText(7)}!`)).toBeInTheDocument();
   });
 });
 
@@ -129,7 +133,7 @@ describe("MilestoneBanner — remembering it has been seen", () => {
   it("appears again at the next milestone", () => {
     seen(7);
     render(<MilestoneBanner masteredCount={14} />);
-    expect(screen.getByText("14 letters mastered!")).toBeInTheDocument();
+    expect(screen.getByText(`أتقنت ${countText(14)}!`)).toBeInTheDocument();
   });
 
   it("adds to the record rather than replacing it", () => {
@@ -144,7 +148,7 @@ describe("MilestoneBanner — remembering it has been seen", () => {
     // extension left junk in the key.
     localStorage.setItem(STORAGE_KEY, "not json");
     render(<MilestoneBanner masteredCount={7} />);
-    expect(screen.getByText("7 letters mastered!")).toBeInTheDocument();
+    expect(screen.getByText(`أتقنت ${countText(7)}!`)).toBeInTheDocument();
   });
 
   it("survives storage it cannot write to", () => {
@@ -165,7 +169,7 @@ describe("MilestoneBanner — remembering it has been seen", () => {
     // 21, then 14, then 7: four celebrations of milestones long past, each a
     // smaller number than the last.
     const first = render(<MilestoneBanner masteredCount={28} />);
-    expect(screen.getByText("28 letters mastered!")).toBeInTheDocument();
+    expect(screen.getByText(`أتقنت ${countText(28)}!`)).toBeInTheDocument();
     dismiss();
     first.unmount();
 
@@ -188,10 +192,10 @@ describe("MilestoneBanner — remembering it has been seen", () => {
     first.unmount();
 
     render(<MilestoneBanner masteredCount={21} />);
-    expect(screen.getByText("21 letters mastered!")).toBeInTheDocument();
+    expect(screen.getByText(`أتقنت ${countText(21)}!`)).toBeInTheDocument();
   });
 
-  it("stays dismissed when one more letter is mastered", () => {
+  it("stays dismissed when one more sound is mastered", () => {
     // The effect reruns on `masteredCount`, so before the fix the next lower
     // threshold arrived without even a reload.
     const { rerender } = render(<MilestoneBanner masteredCount={28} />);

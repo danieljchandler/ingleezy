@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { Sparkles, X } from "lucide-react";
 import { useReducedMotion } from "@/lib/uiPrefs";
+import { arCount } from "@/lib/strings";
 import { cn } from "@/lib/utils";
 
-const STORAGE_KEY = "ingleezy:alphabet:milestone-seen";
+const STORAGE_KEY = "ingleezy:sounds:milestone-seen";
 
 const THRESHOLDS = [7, 14, 21, 28];
 
@@ -47,7 +48,7 @@ interface Props {
 }
 
 /**
- * One-time celebratory banner shown when the learner crosses 7/14/21/28 mastered letters.
+ * One-time celebratory banner shown when the learner crosses 7/14/21/28 mastered sounds.
  * Dismissal is remembered in localStorage so the banner doesn't reappear.
  */
 export const MilestoneBanner = ({ masteredCount }: Props) => {
@@ -91,18 +92,19 @@ export const MilestoneBanner = ({ masteredCount }: Props) => {
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-bold text-[#5C3A46]">
-            {active} letters mastered!
+            أتقنت{" "}
+            {arCount(active, { one: "صوتاً واحداً", two: "صوتين", few: "أصوات", many: "صوتاً" })}!
           </p>
           <p className="text-xs text-[#5C3A46]/75">
             {active === 28
-              ? "You've completed the entire alphabet caravan 🐪"
-              : "Keep going — the caravan moves on."}
+              ? "أنهيت رحلة القافلة كاملة 🐪"
+              : "استمر — القافلة تواصل مسيرها."}
           </p>
         </div>
         <button
           onClick={dismiss}
           className="p-1.5 rounded-full text-[#5C3A46]/70 hover:text-[#5C3A46] hover:bg-[#5C3A46]/10 transition-colors"
-          aria-label="Dismiss"
+          aria-label="إغلاق"
         >
           <X className="h-4 w-4" />
         </button>
