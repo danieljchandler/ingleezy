@@ -149,7 +149,7 @@ generation conditioning.
       (act/action/active/actor) — same linking pattern, different linguistics
 
 ### Media pipeline — FLIP + BRIDGE
-- [~] **Hakiya bridge**: `sync-hakiya-videos` function + `source` column
+- [x] **Hakiya bridge**: `sync-hakiya-videos` function + `source` column
       landed (same discover_videos table, so existing surfaces serve bridged
       rows with zero UI changes; idempotent upsert on Hakiya UUIDs; drift
       degrades to stale/skipped rows). config.toml entry, the deno suite
@@ -157,8 +157,15 @@ generation conditioning.
       happy path with a drifted row skipped) and the learner-surface
       rendering split all landed — `TranscriptLine.english` is the switch:
       absent means a bridged Arabic clip, so the reader takes the
-      Arabic-clip path with `translation` primary. Remaining: admin
-      trigger button.
+      Arabic-clip path with `translation` primary. The admin trigger
+      landed too: a "Sync from Hakiya" button on /admin/videos that
+      reports both counts the function returns — how many landed and how
+      many were skipped for drift — because a bridge that has quietly
+      stopped copying looks identical to a healthy one otherwise, and
+      names an unconfigured bridge as unconfigured rather than as a
+      failure, since that is its normal state until the env vars are
+      set. Bridged rows carry a "Hakiya" badge in the list: editing one
+      is pointless, because the next sync overwrites it. **DONE.**
 - [~] **English uploads** (YouTube/TikTok): `process-english-video` landed —
       Deepgram nova-3 EN with utterance segmentation, batched Arabic-target
       Brain calls for the scaffold (dialect + fusha + literal gloss of the

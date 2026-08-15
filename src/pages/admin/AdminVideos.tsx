@@ -3,8 +3,10 @@ import { useAdminDiscoverVideos, useDeleteDiscoverVideo, useTogglePublish } from
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, ArrowLeft, Plus, Edit, Trash2, Eye, EyeOff } from "lucide-react";
+import { Loader2, ArrowLeft, Plus, Edit, Trash2, Eye, EyeOff, DownloadCloud } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,10 +23,58 @@ import { formatDuration } from "@/lib/videoEmbed";
 const AdminVideos = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const qc = useQueryClient();
   const { data: videos, isLoading } = useAdminDiscoverVideos();
   const deleteMutation = useDeleteDiscoverVideo();
   const togglePublish = useTogglePublish();
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [syncing, setSyncing] = useState(false);
+
+  /**
+   * Pull Hakiya's published clips in as secondary immersion content.
+   *
+   * The function is a snapshot copier keyed on Hakiya's own UUIDs, so running
+   * this twice updates rather than duplicates — which is why it can be a plain
+   * button with no confirmation. What it reports back is the pair that
+   * matters: how many landed, and how many were skipped because the remote row
+   * had drifted (no id, no embed_url). A silent "done" would hide a bridge
+   * that had quietly stopped copying anything.
+   */
+  const syncFromHakiya = async () => {
+    setSyncing(true);
+    const { data, error } = await supabase.functions.invoke("sync-hakiya-videos", { body: {} });
+    setSyncing(false);
+
+    if (error || !data?.success) {
+      // On a non-2xx, supabase-js leaves `data` null and hands the raw
+      // response over on `error.context` — so the function's own reason for
+      // refusing is only reachable by reading that body back.
+      const ctx = (error as { context?: Response } | null)?.context;
+      let failure = (data as { error?: string; detail?: string } | null) ?? null;
+      if (!failure && ctx && typeof ctx === "object" && "status" in ctx) {
+        try {
+          failure = (await (ctx as Response).clone().json()) as { error?: string; detail?: string };
+        } catch {
+          // Not JSON — the generic message below is all there is to say.
+        }
+      }
+      toast({
+        variant: "destructive",
+        title: failure?.error === "bridge_not_configured"
+          ? "Hakiya bridge is not configured"
+          : "Sync failed",
+        description: failure?.detail ?? error?.message ?? "The sync did not complete.",
+      });
+      return;
+    }
+
+    const { synced = 0, skipped = 0 } = data as { synced?: number; skipped?: number };
+    toast({
+      title: `Synced ${synced} video${synced === 1 ? "" : "s"} from Hakiya`,
+      description: skipped > 0 ? `${skipped} skipped — the remote rows were incomplete.` : undefined,
+    });
+    void qc.invalidateQueries({ queryKey: ["admin-discover-videos"] });
+  };
 
   if (isLoading) {
     return (
@@ -44,10 +94,20 @@ const AdminVideos = () => {
             </Button>
             <h1 className="text-xl font-bold">Manage Videos</h1>
           </div>
-          <Button onClick={() => navigate("/admin/videos/new")}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Video
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => void syncFromHakiya()} disabled={syncing}>
+              {syncing ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <DownloadCloud className="h-4 w-4 mr-2" />
+              )}
+              Sync from Hakiya
+            </Button>
+            <Button onClick={() => navigate("/admin/videos/new")}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Video
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -79,6 +139,13 @@ const AdminVideos = () => {
                         <Badge variant={video.published ? "default" : "secondary"} className="text-xs">
                           {video.published ? "Published" : "Draft"}
                         </Badge>
+                        {/* Bridged rows are Hakiya's, not ours: editing one is
+                            pointless because the next sync overwrites it. */}
+                        {video.source === "hakiya" && (
+                          <Badge variant="outline" className="text-xs text-purple-600 border-purple-300">
+                            Hakiya
+                          </Badge>
+                        )}
                         {video.transcription_status === 'pending' && (
                           <Badge variant="outline" className="text-xs text-amber-600 border-amber-300">
                             Queued
