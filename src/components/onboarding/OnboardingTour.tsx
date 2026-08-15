@@ -156,7 +156,7 @@ export function OnboardingTour() {
           <button
             onClick={finish}
             className="text-muted-foreground hover:text-foreground -mt-1 -mr-1 p-1"
-            aria-label="Skip tour"
+            aria-label="تخطّى الجولة"
           >
             <X className="h-4 w-4" />
           </button>

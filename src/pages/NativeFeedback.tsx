@@ -124,7 +124,7 @@ const NativeFeedback = () => {
         {status?.purchase_enabled && (
           <Button onClick={buy} disabled={busy} className="gap-1.5">
             <Sparkles className="h-4 w-4" />
-            Buy {status.credits_per_pack} credits
+            اشترِ {status.credits_per_pack} رصيد
           </Button>
         )}
       </div>
@@ -133,7 +133,7 @@ const NativeFeedback = () => {
         <Textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder={`Write a few sentences in ${activeDialect} Arabic…`}
+          placeholder="اكتب كم جملة بالإنجليزي…"
           dir="auto"
           rows={4}
           aria-label="نصّك"

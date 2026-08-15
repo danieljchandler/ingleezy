@@ -73,7 +73,7 @@ describe("WeeklyGoalCard — when there is nothing to show", () => {
 describe("WeeklyGoalCard — the two goals", () => {
   it("names itself", () => {
     renderCard();
-    expect(screen.getByRole("heading", { name: "Weekly Goals" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "أهداف الأسبوع" })).toBeInTheDocument();
   });
 
   it("shows both counts against their targets", () => {

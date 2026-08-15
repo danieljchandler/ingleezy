@@ -325,7 +325,7 @@ const FillBlankGame = ({ words, onComplete }: { words: WordPair[]; onComplete: (
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && input.trim() && handleCheck()}
-              placeholder="Type it in English..."
+              placeholder="اكتبها بالإنجليزي…"
               className="w-full p-3 rounded-xl bg-muted border border-border text-center text-foreground text-lg focus:outline-none focus:ring-2 focus:ring-primary"
               autoFocus
             />

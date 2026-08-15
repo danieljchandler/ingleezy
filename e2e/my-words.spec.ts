@@ -141,7 +141,7 @@ test.describe("deleting", () => {
     await expect(page.getByText("كلمة1")).toBeVisible();
 
     // Each card carries its own delete control.
-    await page.getByRole("button", { name: "Delete word 1" }).click();
+    await page.getByRole("button", { name: "احذف word 1" }).click();
 
     await expect
       .poll(() => db.rows("user_vocabulary").length, { timeout: 10_000 })
@@ -163,7 +163,7 @@ test.describe("deleting", () => {
     await expect(page.getByText("كلمة1")).toBeVisible();
 
     db.failWrites("user_vocabulary", 403);
-    await page.getByRole("button", { name: "Delete word 1" }).click();
+    await page.getByRole("button", { name: "احذف word 1" }).click();
 
     await page.waitForTimeout(500);
     expect(db.rows("user_vocabulary")).toHaveLength(2);

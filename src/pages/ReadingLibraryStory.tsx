@@ -163,7 +163,7 @@ const ReadingLibraryStory = () => {
     audio.play().catch(() => {
       if (!mountedRef.current) return;
       setIsPlaying(false);
-      toast.error('Failed to play audio');
+      toast.error("تعذّر تشغيل الصوت");
     });
   };
 

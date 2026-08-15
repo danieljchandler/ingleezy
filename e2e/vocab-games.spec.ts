@@ -313,7 +313,7 @@ test.describe("fill in the blank", () => {
   test("asks for the English of one word at a time", async ({ page }) => {
     await expect(page.getByRole("heading", { name: "أكمل الفراغ" })).toBeVisible();
     await expect(page.getByText("كيف تقولها بالإنجليزية؟")).toBeVisible();
-    await expect(page.getByPlaceholder("Type it in English...")).toBeVisible();
+    await expect(page.getByPlaceholder("اكتبها بالإنجليزي…")).toBeVisible();
   });
 
   test("will not check an empty answer", async ({ page }) => {
@@ -324,7 +324,7 @@ test.describe("fill in the blank", () => {
     const arabic = await page.locator('p[dir="rtl"]').first().innerText();
     const english = PAIRS.find((p) => p.arabic === arabic)!.english;
 
-    await page.getByPlaceholder("Type it in English...").fill(english.toUpperCase());
+    await page.getByPlaceholder("اكتبها بالإنجليزي…").fill(english.toUpperCase());
     await page.getByRole("button", { name: "تحقق" }).click();
 
     // Nobody types "Door" meaning something different from "door"; a
@@ -336,7 +336,7 @@ test.describe("fill in the blank", () => {
     const arabic = await page.locator('p[dir="rtl"]').first().innerText();
     const english = PAIRS.find((p) => p.arabic === arabic)!.english;
 
-    await page.getByPlaceholder("Type it in English...").fill(`  ${english}  `);
+    await page.getByPlaceholder("اكتبها بالإنجليزي…").fill(`  ${english}  `);
     await page.getByRole("button", { name: "تحقق" }).click();
 
     await expect(page.getByText("صحيح!")).toBeVisible();
@@ -346,7 +346,7 @@ test.describe("fill in the blank", () => {
     const arabic = await page.locator('p[dir="rtl"]').first().innerText();
     const english = PAIRS.find((p) => p.arabic === arabic)!.english;
 
-    await page.getByPlaceholder("Type it in English...").fill("something else");
+    await page.getByPlaceholder("اكتبها بالإنجليزي…").fill("something else");
     await page.getByRole("button", { name: "تحقق" }).click();
 
     await expect(page.getByText(english, { exact: false }).first()).toBeVisible();
@@ -356,7 +356,7 @@ test.describe("fill in the blank", () => {
     for (let i = 0; i < 6; i++) {
       const arabic = await page.locator('p[dir="rtl"]').first().innerText();
       const english = PAIRS.find((p) => p.arabic === arabic)!.english;
-      await page.getByPlaceholder("Type it in English...").fill(english);
+      await page.getByPlaceholder("اكتبها بالإنجليزي…").fill(english);
       await page.getByRole("button", { name: "تحقق" }).click();
       await page.getByRole("button", { name: /التالي|النتائج/ }).click();
     }

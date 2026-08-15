@@ -40,7 +40,7 @@ export function AskAiFab({ className }: { className?: string }) {
   return (
     <button
       type="button"
-      aria-label="Ask AI"
+      aria-label="اسأل الذكاء"
       data-feedback-ignore="true"
       onClick={() => openChat()}
       className={cn(
@@ -52,7 +52,7 @@ export function AskAiFab({ className }: { className?: string }) {
       )}
     >
       <Sparkles className="h-4 w-4 shrink-0" />
-      <span className="text-[13px] font-semibold leading-none tracking-tight">Ask AI</span>
+      <span className="text-[13px] font-semibold leading-none tracking-tight">اسأل الذكاء</span>
     </button>
   );
 }

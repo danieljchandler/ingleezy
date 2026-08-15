@@ -168,7 +168,7 @@ test.describe("working through a lesson", () => {
 
     // Most curriculum words have no root until an admin backfills them, so an
     // empty chip would be the normal case rather than the exception.
-    await expect(page.getByTitle("Arabic root")).toHaveCount(0);
+    await expect(page.getByTitle("الجذر العربي")).toHaveCount(0);
   });
 
   test("asks for the English once the quiz starts", async ({ page }) => {

@@ -72,7 +72,7 @@ function render({ signedOut = false, existing = null, seed }: Options = {}) {
 }
 
 const star = (n: number) =>
-  screen.getByRole("button", { name: `Rate ${n} out of 5` });
+  screen.getByRole("button", { name: `قيّم ${n} من ٥` });
 const stars = () => screen.getAllByRole("button");
 const filled = () =>
   stars().filter((b) => b.querySelector(".fill-primary") !== null).length;
@@ -84,7 +84,7 @@ describe("before anything is rated", () => {
   it("asks for a rating", () => {
     render();
 
-    expect(screen.getByText("Rate this video")).toBeInTheDocument();
+    expect(screen.getByText("قيّم المقطع")).toBeInTheDocument();
     expect(stars()).toHaveLength(5);
   });
 
@@ -94,7 +94,7 @@ describe("before anything is rated", () => {
     expect(filled()).toBe(0);
     // No label either: a description with nothing selected would be describing
     // a rating the learner has not given.
-    expect(screen.queryByText("Good")).toBeNull();
+    expect(screen.queryByText("حلو")).toBeNull();
   });
 
   it("names each star for a screen reader", () => {
@@ -112,8 +112,8 @@ describe("a rating already given", () => {
     render({ existing: 4 });
 
     await waitFor(() => expect(filled()).toBe(4));
-    expect(screen.getByText("Your rating")).toBeInTheDocument();
-    expect(screen.getByText("Great")).toBeInTheDocument();
+    expect(screen.getByText("تقييمك")).toBeInTheDocument();
+    expect(screen.getByText("ممتاز")).toBeInTheDocument();
   });
 
   it("looks it up for this learner and this video only", async () => {
@@ -133,7 +133,7 @@ describe("a rating already given", () => {
     // Discover is browsable signed out. A query with no user filter would read
     // somebody else's rating.
     expect(backend.db.readsOf("video_ratings")).toHaveLength(0);
-    expect(screen.getByText("Rate this video")).toBeInTheDocument();
+    expect(screen.getByText("قيّم المقطع")).toBeInTheDocument();
   });
 });
 
@@ -143,10 +143,10 @@ describe("hovering", () => {
 
     fireEvent.mouseEnter(star(3));
 
-    // The label is what makes the scale mean anything — three stars is "Good",
+    // The label is what makes the scale mean anything — three stars is "حلو",
     // not just three of five.
     expect(filled()).toBe(3);
-    expect(screen.getByText("Good")).toBeInTheDocument();
+    expect(screen.getByText("حلو")).toBeInTheDocument();
   });
 
   it("previews over a rating already given", async () => {
@@ -156,7 +156,7 @@ describe("hovering", () => {
     fireEvent.mouseEnter(star(5));
 
     expect(filled()).toBe(5);
-    expect(screen.getByText("Love it — more like this!")).toBeInTheDocument();
+    expect(screen.getByText("عجبني — زودوا مثله!")).toBeInTheDocument();
   });
 
   it("goes back to the real rating when the pointer leaves", async () => {
@@ -169,7 +169,7 @@ describe("hovering", () => {
     // Leaving a hover preview stuck at five would misreport what the learner
     // actually said.
     expect(filled()).toBe(2);
-    expect(screen.getByText("Somewhat useful")).toBeInTheDocument();
+    expect(screen.getByText("أفادني شوي")).toBeInTheDocument();
   });
 });
 
@@ -208,19 +208,19 @@ describe("rating a video", () => {
       fireEvent.click(star(5));
     });
 
-    // "Love it — more like this!" tells the learner their tap will change the
+    // "عجبني — زودوا مثله!" tells the learner their tap will change the
     // feed, which is the only reason to bother rating anything.
     await waitFor(() =>
-      expect(toasts.success).toHaveBeenCalledWith("Love it — more like this!"),
+      expect(toasts.success).toHaveBeenCalledWith("عجبني — زودوا مثله!"),
     );
   });
 
   it.each([
-    [1, "Not useful"],
-    [2, "Somewhat useful"],
-    [3, "Good"],
-    [4, "Great"],
-    [5, "Love it — more like this!"],
+    [1, "ما أفادني"],
+    [2, "أفادني شوي"],
+    [3, "حلو"],
+    [4, "ممتاز"],
+    [5, "عجبني — زودوا مثله!"],
   ])("describes %i stars as %s", async (value, label) => {
     render();
 
@@ -268,10 +268,10 @@ describe("rating a video", () => {
     // Leaving them filled would tell the learner their rating counted when it
     // did not.
     await waitFor(() =>
-      expect(toasts.error).toHaveBeenCalledWith("Failed to save rating"),
+      expect(toasts.error).toHaveBeenCalledWith("تعذّر حفظ التقييم"),
     );
     expect(filled()).toBe(0);
-    expect(screen.getByText("Rate this video")).toBeInTheDocument();
+    expect(screen.getByText("قيّم المقطع")).toBeInTheDocument();
   });
 
   it("can be rated again after a failure", async () => {
@@ -293,7 +293,7 @@ describe("when nobody is signed in", () => {
       fireEvent.click(star(4));
     });
 
-    expect(toasts.error).toHaveBeenCalledWith("Please log in to rate videos");
+    expect(toasts.error).toHaveBeenCalledWith("سجّل دخولك عشان تقيّم");
     expect(ratings(backend)).toHaveLength(0);
   });
 

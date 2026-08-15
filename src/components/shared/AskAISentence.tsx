@@ -32,6 +32,10 @@ export const AskAISentence = ({
         type="button"
         variant="outline"
         size="sm"
+        // The chip sits beside one line; the floating button covers the whole
+        // page. On screen they read the same, so the chip carries the longer
+        // label to say which of the two it is.
+        aria-label="اسأل الذكاء عن هذي الجملة"
         onClick={open}
         className={cn(
           "h-7 gap-1 rounded-full border-primary/40 bg-primary/5 px-2.5 text-xs font-medium text-primary hover:bg-primary/10 hover:text-primary",
@@ -39,7 +43,7 @@ export const AskAISentence = ({
         )}
       >
         <Sparkles className="h-3 w-3" />
-        Ask AI
+        اسأل الذكاء
       </Button>
     );
   }
@@ -49,7 +53,7 @@ export const AskAISentence = ({
       type="button"
       variant="ghost"
       size="icon"
-      aria-label="Ask AI about this sentence"
+      aria-label="اسأل الذكاء عن هذي الجملة"
       onClick={open}
       className={cn("h-7 w-7 text-muted-foreground hover:text-primary", className)}
     >

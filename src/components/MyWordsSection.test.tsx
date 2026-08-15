@@ -77,7 +77,7 @@ const seedWords = (count: number, over: Record<string, unknown> = {}) => (backen
   for (let n = count; n >= 1; n--) backend.db.add("user_vocabulary", aWord(n, over));
 };
 
-const heading = () => screen.findByRole("heading", { name: "My Words" });
+const heading = () => screen.findByRole("heading", { name: "كلماتي" });
 
 describe("MyWordsSection — when there is nothing to show", () => {
   it("takes up no space at all for a learner with no saved words", async () => {
@@ -327,7 +327,7 @@ describe("MyWordsSection — deleting a word", () => {
     await heading();
 
     fireEvent.click(deleteButtons()[0]);
-    await waitFor(() => expect(toast.success).toHaveBeenCalledWith("Word deleted"));
+    await waitFor(() => expect(toast.success).toHaveBeenCalledWith("انحذفت الكلمة"));
   });
 
   it("takes the row off the list", async () => {
@@ -344,7 +344,7 @@ describe("MyWordsSection — deleting a word", () => {
     backend.db.failAlways("user_vocabulary");
 
     fireEvent.click(deleteButtons()[0]);
-    await waitFor(() => expect(toast.error).toHaveBeenCalledWith("Failed to delete word"));
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith("تعذّر حذف الكلمة"));
   });
 
   it("leaves the word on screen when the deletion fails", async () => {

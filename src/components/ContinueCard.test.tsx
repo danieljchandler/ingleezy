@@ -93,7 +93,7 @@ function render({ entry, raw, resumable = null, activeDialect = "Gulf" }: Option
   return harness;
 }
 
-const card = () => screen.queryByRole("button", { name: /^Continue / });
+const card = () => screen.queryByRole("button", { name: /^كمّل / });
 
 describe("ContinueCard — with nothing to continue", () => {
   it("renders nothing at all", () => {
@@ -123,7 +123,7 @@ describe("ContinueCard — the local entry", () => {
   it("offers the thing the learner was last on", () => {
     render({ entry: anEntry() });
     expect(screen.getByText("The Merchant of Muscat")).toBeInTheDocument();
-    expect(screen.getByText("Continue story")).toBeInTheDocument();
+    expect(screen.getByText("كمّل القصة")).toBeInTheDocument();
   });
 
   it("says how long ago it was", () => {
@@ -132,9 +132,9 @@ describe("ContinueCard — the local entry", () => {
   });
 
   it.each([
-    ["story", "Continue story"],
-    ["video", "Continue video"],
-    ["lesson", "Continue lesson"],
+    ["story", "كمّل القصة"],
+    ["video", "كمّل الفيديو"],
+    ["lesson", "كمّل الدرس"],
   ] as const)("labels a %s entry", (kind, label) => {
     render({ entry: anEntry({ kind }) });
     expect(screen.getByText(label)).toBeInTheDocument();
@@ -148,7 +148,7 @@ describe("ContinueCard — the local entry", () => {
   it("names both the kind and the title for a screen reader", () => {
     render({ entry: anEntry({ kind: "video", title: "Souq walkthrough" }) });
     expect(
-      screen.getByRole("button", { name: "Continue Video: Souq walkthrough" }),
+      screen.getByRole("button", { name: "كمّل الفيديو: Souq walkthrough" }),
     ).toBeInTheDocument();
   });
 
@@ -186,7 +186,7 @@ describe("ContinueCard — falling back to the server", () => {
   it("offers the in-progress lesson when there is nothing stored locally", () => {
     render({ resumable: aResumable() });
     expect(screen.getByText("Ordering coffee")).toBeInTheDocument();
-    expect(screen.getByText("Continue lesson")).toBeInTheDocument();
+    expect(screen.getByText("كمّل الدرس")).toBeInTheDocument();
   });
 
   it("routes to the lesson", () => {
@@ -258,19 +258,19 @@ describe("ContinueCard — falling back to the server", () => {
 describe("ContinueCard — dismissing", () => {
   it("takes the card away", () => {
     render({ entry: anEntry() });
-    fireEvent.click(screen.getByTitle("Dismiss"));
+    fireEvent.click(screen.getByTitle("أخفِ"));
     expect(card()).not.toBeInTheDocument();
   });
 
   it("forgets the stored entry", () => {
     render({ entry: anEntry() });
-    fireEvent.click(screen.getByTitle("Dismiss"));
+    fireEvent.click(screen.getByTitle("أخفِ"));
     expect(localStorage.getItem(STORAGE_KEY)).toBeNull();
   });
 
   it("does not navigate on the way out", () => {
     render({ entry: anEntry() });
-    fireEvent.click(screen.getByTitle("Dismiss"));
+    fireEvent.click(screen.getByTitle("أخفِ"));
     expect(navigate).not.toHaveBeenCalled();
   });
 
@@ -279,7 +279,7 @@ describe("ContinueCard — dismissing", () => {
     // learner really is mid-lesson — so without the dismissed-route guard the
     // card would reappear on the same render and the button would look broken.
     render({ resumable: aResumable() });
-    fireEvent.click(screen.getByTitle("Dismiss"));
+    fireEvent.click(screen.getByTitle("أخفِ"));
     expect(card()).not.toBeInTheDocument();
   });
 
@@ -287,7 +287,7 @@ describe("ContinueCard — dismissing", () => {
     // Dismissal is keyed on the route rather than being a session-wide mute, so
     // starting something else still gets an offer to resume it.
     const { rerender } = render({ resumable: aResumable({ lessonId: "one" }) });
-    fireEvent.click(screen.getByTitle("Dismiss"));
+    fireEvent.click(screen.getByTitle("أخفِ"));
 
     lesson.data = aResumable({ lessonId: "two", title: "Haggling" });
     rerender(<ContinueCard />);

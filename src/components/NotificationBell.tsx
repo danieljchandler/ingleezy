@@ -72,7 +72,7 @@ export function NotificationBell() {
                 <button
                   key={n.id}
                   onClick={() => handleAction(n)}
-                  aria-label={`Notification: ${n.title}`}
+                  aria-label={`إشعار: ${n.title}`}
                   className={cn(
                     "w-full text-left p-3 transition-colors hover:bg-muted/50",
                     n.priority === "high" && "bg-destructive/5"

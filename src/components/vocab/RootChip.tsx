@@ -30,7 +30,7 @@ export const RootChip = ({ root, className }: RootChipProps) => {
   return (
     <span
       dir="rtl"
-      title="Arabic root"
+      title="الجذر العربي"
       className={cn(
         "inline-block rounded bg-muted px-1.5 py-0.5 font-arabic text-xs text-muted-foreground",
         className,

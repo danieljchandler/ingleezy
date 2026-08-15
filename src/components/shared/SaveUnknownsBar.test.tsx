@@ -101,7 +101,7 @@ function render({ persona = "free", seed }: Options = {}) {
 }
 
 const saveButton = () => screen.getByRole("button", { name: /^Save \d+$/ });
-const cancel = () => screen.getByRole("button", { name: "Cancel" });
+const cancel = () => screen.getByRole("button", { name: "إلغاء" });
 
 /**
  * `useAuth` resolves the session on a macrotask, and `handleSave` refuses
@@ -303,7 +303,7 @@ describe("when nobody is signed in", () => {
 
     // Mark-mode works signed out — it is on the reading surface, which is
     // public. The refusal has to name the reason or the button looks broken.
-    expect(toasts.error).toHaveBeenCalledWith("Sign in to save words");
+    expect(toasts.error).toHaveBeenCalledWith("سجّل دخولك عشان تحفظ الكلمات");
   });
 
   it("keeps the marks so they survive signing in", async () => {

@@ -48,7 +48,7 @@ export const PhraseOfTheDay = () => {
     if (!phrase) return null;
     return {
       kind: "phrase",
-      title: "Phrase of the Day",
+      title: "عبارة اليوم",
       summary: `The learner's home screen is showing today's English Phrase of the Day, glossed in ${phrase.dialect} Arabic.`,
       content: [
         `Today's English Phrase of the Day (${phrase.date}):`,
@@ -100,7 +100,7 @@ export const PhraseOfTheDay = () => {
           break;
         }
         if (res.data?.fallback) {
-          toast.error(res.data.message || "Phrase of the day unavailable right now.");
+          toast.error(res.data.message || "عبارة اليوم مو متوفرة الحين.");
           lastErr = null;
           break;
         }
@@ -145,7 +145,7 @@ export const PhraseOfTheDay = () => {
 
   const handleSave = async () => {
     if (!isAuthenticated) {
-      toast.error("Please sign in to save phrases");
+      toast.error("سجّل دخولك عشان تحفظ العبارات");
       return;
     }
     if (!phrase) return;
@@ -158,9 +158,9 @@ export const PhraseOfTheDay = () => {
         source: "phrase-of-the-day",
       });
       setSaved(true);
-      toast.success("Saved to your flashcards");
+      toast.success("حفظناها في بطاقاتك");
     } catch (e: any) {
-      toast.error(e.message || "Couldn't save");
+      toast.error(e.message || "تعذّر الحفظ");
     }
   };
 
@@ -189,8 +189,8 @@ export const PhraseOfTheDay = () => {
           size="icon"
           onClick={() => fetchPhrase(true)}
           disabled={loading}
-          title="New phrase"
-          aria-label="Refresh phrase"
+          title="عبارة جديدة"
+          aria-label="جدّد العبارة"
           className="h-8 w-8"
         >
           <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />
@@ -199,7 +199,7 @@ export const PhraseOfTheDay = () => {
 
       {loading && !phrase ? (
         <div className="py-8 text-center text-sm text-muted-foreground">
-          Generating today's phrase…
+          نجهّز عبارة اليوم…
         </div>
       ) : phrase ? (
         <div className="space-y-3 relative z-10">
@@ -210,11 +210,11 @@ export const PhraseOfTheDay = () => {
           ) : (
             <button
               onClick={() => setShowEnglish(true)}
-              aria-label="Reveal English phrase"
+              aria-label="اكشف العبارة بالإنجليزي"
               className="w-full py-3 rounded-lg border-2 border-dashed border-accent/40 bg-card/40 text-sm text-muted-foreground hover:bg-card/60 transition flex items-center justify-center gap-2"
             >
               <Eye className="h-4 w-4" />
-              Tap to reveal English
+              اضغط تشوف الإنجليزي
             </button>
           )}
 
@@ -253,7 +253,7 @@ export const PhraseOfTheDay = () => {
               ) : (
                 <>
                   <BookmarkPlus className="h-4 w-4 mr-1.5" />
-                  Save as flashcard
+                  احفظها كبطاقة
                 </>
               )}
             </Button>
@@ -268,8 +268,8 @@ export const PhraseOfTheDay = () => {
                 size="sm"
                 variant="outline"
                 onClick={() => setShowEnglish(false)}
-                title="Hide English"
-                aria-label="Hide English"
+                title="أخفِ الإنجليزي"
+                aria-label="أخفِ الإنجليزي"
               >
                 <EyeOff className="h-4 w-4" />
               </Button>

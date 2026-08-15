@@ -19,7 +19,7 @@ const SetPhrases = () => {
   return (
     <AppShell>
       <HomeButton />
-      <h1 className="text-2xl font-bold mt-4 mb-4 inline-flex items-center gap-2" style={{ fontFamily: "'Montserrat', sans-serif" }}>Set Phrases <InfoHint {...PAGE_HINTS["set-phrases"]} size="md" /></h1>
+      <h1 className="text-2xl font-bold mt-4 mb-4 inline-flex items-center gap-2" style={{ fontFamily: "'Montserrat', sans-serif" }}>عبارات جاهزة <InfoHint {...PAGE_HINTS["set-phrases"]} size="md" /></h1>
       <div className="space-y-4">
         <Card className="p-4 bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border-emerald-500/30">
           <div className="flex items-start gap-3">
@@ -27,7 +27,7 @@ const SetPhrases = () => {
               <MessageCircle className="h-5 w-5 text-emerald-700 dark:text-emerald-300" />
             </div>
             <div className="flex-1">
-              <h2 className="font-semibold">Practice English situational phrases</h2>
+              <h2 className="font-semibold">تمرّن على عبارات إنجليزية لمواقف حقيقية</h2>
               <p className="text-xs text-muted-foreground mt-1">
                 Greetings, small talk, phone calls, apologies and more — voice or
                 choice quizzes with spaced repetition, glossed in {activeDialect} Arabic.

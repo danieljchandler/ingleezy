@@ -40,7 +40,7 @@ function render(dialect = "Gulf") {
   return harness;
 }
 
-const chip = () => screen.getByRole("button", { name: /active dialect:/i });
+const chip = () => screen.getByRole("button", { name: /لهجتك الحالية:/ });
 const openPicker = () => fireEvent.click(chip());
 /** A dialect card inside the overlay — scoped, because the chip behind it
  *  carries the active dialect's name too. */
@@ -55,15 +55,15 @@ describe("the chip", () => {
 
     // A learner who cannot tell which dialect they are in will not trust
     // anything the app tells them about how something is said.
-    expect(chip()).toHaveTextContent("Active dialect");
-    expect(chip()).toHaveTextContent("Gulf Arabic");
-    expect(chip()).toHaveTextContent("خليجي");
+    expect(chip()).toHaveTextContent("لهجتك الحالية");
+    expect(chip()).toHaveTextContent("Khaleeji");
+    expect(chip()).toHaveTextContent("Khaleeji");
   });
 
   it("follows the dialect the learner last chose", () => {
     render("Egyptian");
 
-    expect(chip()).toHaveTextContent("Egyptian Arabic");
+    expect(chip()).toHaveTextContent("Masri");
   });
 
   it("names the current dialect to a screen reader", () => {
@@ -71,7 +71,7 @@ describe("the chip", () => {
 
     expect(chip()).toHaveAttribute(
       "aria-label",
-      "Active dialect: Gulf Arabic. Tap to change.",
+      "لهجتك الحالية: Khaleeji. اضغط للتغيير.",
     );
   });
 
@@ -80,7 +80,7 @@ describe("the chip", () => {
 
     // The stored value outlives the list of supported dialects; an unknown one
     // must not blank the chip.
-    expect(chip()).toHaveTextContent("Gulf Arabic");
+    expect(chip()).toHaveTextContent("Khaleeji");
   });
 });
 
@@ -98,10 +98,10 @@ describe("opening the picker", () => {
 
     // The names alone mean nothing to a beginner. The one-line sketch is what
     // makes this a choice rather than a guess.
-    expect(screen.getByRole("dialog", { name: /choose dialect/i })).toBeInTheDocument();
-    expect(screen.getByText(/unhurried cadence of the majlis/)).toBeInTheDocument();
-    expect(screen.getByText(/lingua franca of Arab cinema/)).toBeInTheDocument();
-    expect(screen.getByText(/Mountain Arabic/)).toBeInTheDocument();
+    expect(screen.getByRole("dialog", { name: /اختر لهجتك/ })).toBeInTheDocument();
+    expect(screen.getByText(/إيقاع المجلس على مهله/)).toBeInTheDocument();
+    expect(screen.getByText(/لغة السينما العربية/)).toBeInTheDocument();
+    expect(screen.getByText(/عربي الجبال/)).toBeInTheDocument();
   });
 
   it("says what switching actually does", () => {
@@ -119,8 +119,8 @@ describe("opening the picker", () => {
     render();
     openPicker();
 
-    expect(card("Gulf Arabic").className).toContain("border-current");
-    expect(card("Egyptian Arabic").className).toContain("border-border");
+    expect(card("Khaleeji").className).toContain("border-current");
+    expect(card("Masri").className).toContain("border-border");
   });
 
   it("stops the page behind it from scrolling", () => {
@@ -137,7 +137,7 @@ describe("opening the picker", () => {
     render();
     openPicker();
 
-    fireEvent.click(screen.getByRole("button", { name: "Close" }));
+    fireEvent.click(screen.getByRole("button", { name: "إغلاق" }));
 
     expect(document.body.style.overflow).not.toBe("hidden");
   });
@@ -148,7 +148,7 @@ describe("closing it without choosing", () => {
     render();
     openPicker();
 
-    fireEvent.click(screen.getByRole("button", { name: "Close" }));
+    fireEvent.click(screen.getByRole("button", { name: "إغلاق" }));
 
     expect(screen.queryByRole("dialog")).toBeNull();
   });
@@ -157,7 +157,7 @@ describe("closing it without choosing", () => {
     render();
     openPicker();
 
-    fireEvent.click(screen.getByRole("button", { name: /close dialect picker/i }));
+    fireEvent.click(screen.getByRole("button", { name: /أغلق قائمة اللهجات/ }));
 
     expect(screen.queryByRole("dialog")).toBeNull();
   });
@@ -177,7 +177,7 @@ describe("closing it without choosing", () => {
     render();
     openPicker();
 
-    fireEvent.click(screen.getByRole("button", { name: "Close" }));
+    fireEvent.click(screen.getByRole("button", { name: "إغلاق" }));
 
     expect(localStorage.getItem(STORAGE_KEY)).toBe("Gulf");
   });
@@ -186,7 +186,7 @@ describe("closing it without choosing", () => {
     render();
     openPicker();
 
-    fireEvent.click(card("Gulf Arabic"));
+    fireEvent.click(card("Khaleeji"));
 
     // No wash, no flip, no re-tuning: choosing what you already have is a
     // decision to leave things alone.
@@ -201,7 +201,7 @@ describe("switching", () => {
     render();
     openPicker();
 
-    fireEvent.click(card("Egyptian Arabic"));
+    fireEvent.click(card("Masri"));
 
     // The switch is not held back for the animation — the rest of the app is
     // already re-keying its queries.
@@ -213,7 +213,7 @@ describe("switching", () => {
     render();
     openPicker();
 
-    fireEvent.click(card("Egyptian Arabic"));
+    fireEvent.click(card("Masri"));
     expect(screen.getByRole("dialog")).toBeInTheDocument();
 
     act(() => {
@@ -230,11 +230,11 @@ describe("switching", () => {
     render();
     openPicker();
 
-    fireEvent.click(card("Egyptian Arabic"));
-    for (const dialect of ["Gulf Arabic", "Egyptian Arabic", "Yemeni Arabic"]) {
+    fireEvent.click(card("Masri"));
+    for (const dialect of ["Khaleeji", "Masri", "Yamani"]) {
       expect(card(dialect)).toBeDisabled();
     }
-    fireEvent.click(card("Yemeni Arabic"));
+    fireEvent.click(card("Yamani"));
 
     // Two dialect changes in flight at once would leave the queries keyed to
     // one and the chip showing the other.
@@ -245,9 +245,9 @@ describe("switching", () => {
     vi.useFakeTimers();
     render();
     openPicker();
-    fireEvent.click(card("Egyptian Arabic"));
+    fireEvent.click(card("Masri"));
 
-    fireEvent.click(screen.getByRole("button", { name: "Close" }));
+    fireEvent.click(screen.getByRole("button", { name: "إغلاق" }));
 
     expect(screen.getByRole("dialog")).toBeInTheDocument();
   });
@@ -257,12 +257,12 @@ describe("switching", () => {
     render();
     openPicker();
 
-    fireEvent.click(card("Yemeni Arabic"));
+    fireEvent.click(card("Yamani"));
     act(() => {
       vi.advanceTimersByTime(260);
     });
 
-    expect(chip()).toHaveTextContent("Yemeni Arabic");
+    expect(chip()).toHaveTextContent("Yamani");
     expect(chip()).toHaveTextContent("يمني");
   });
 
@@ -270,7 +270,7 @@ describe("switching", () => {
     vi.useFakeTimers();
     const { unmount } = render();
     openPicker();
-    fireEvent.click(card("Egyptian Arabic"));
+    fireEvent.click(card("Masri"));
 
     unmount();
     act(() => {

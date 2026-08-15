@@ -465,7 +465,7 @@ test.describe("saving a word from a scene", () => {
 
     await page.goto(`/stories/${STORY}`);
 
-    // The handler opens with `if (!user) toast.error('Sign in to save words')`,
+    // The handler opens with `if (!user) toast.error('سجّل دخولك عشان تحفظ الكلمات')`,
     // but the same button is `disabled={isSaved || !user}` — so the click never
     // lands and that message is unreachable. A signed-out reader sees a word
     // pill with a plus on it that does nothing, and is told nothing.

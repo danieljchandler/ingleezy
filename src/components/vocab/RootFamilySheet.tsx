@@ -104,7 +104,7 @@ export const RootFamilySheet = ({
                     size="icon"
                     className="h-8 w-8 shrink-0"
                     onClick={() => onPlayAudio(word.word_audio_url!)}
-                    aria-label={`Play ${word.word_english}`}
+                    aria-label={`شغّل ${word.word_english}`}
                   >
                     <Volume2 className="h-4 w-4" />
                   </Button>

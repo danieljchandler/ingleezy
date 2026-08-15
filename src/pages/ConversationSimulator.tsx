@@ -494,7 +494,7 @@ export default function ConversationSimulator() {
                 handleSend();
               }
             }}
-            placeholder="Type in English…"
+            placeholder="اكتب بالإنجليزي…"
             dir="auto"
             disabled={sending || recording || transcribing}
             className="font-english"

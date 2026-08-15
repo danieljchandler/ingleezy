@@ -30,14 +30,14 @@ import { cn } from "@/lib/utils";
 type ContextKind = PageAiContext["kind"] | "sentence";
 
 const KIND_META: Record<ContextKind, { icon: typeof Quote; label: string }> = {
-  sentence: { icon: Quote, label: "Sentence" },
-  video: { icon: Clapperboard, label: "In this video" },
-  story: { icon: BookOpen, label: "In this story" },
-  passage: { icon: FileText, label: "In this passage" },
-  drill: { icon: Dumbbell, label: "In this drill" },
-  word: { icon: Languages, label: "This word" },
-  phrase: { icon: Sparkles, label: "This phrase" },
-  page: { icon: LayoutGrid, label: "On this page" },
+  sentence: { icon: Quote, label: "جملة" },
+  video: { icon: Clapperboard, label: "في هذا المقطع" },
+  story: { icon: BookOpen, label: "في هذي القصة" },
+  passage: { icon: FileText, label: "في هذا النص" },
+  drill: { icon: Dumbbell, label: "في هذا التمرين" },
+  word: { icon: Languages, label: "هذي الكلمة" },
+  phrase: { icon: Sparkles, label: "هذي العبارة" },
+  page: { icon: LayoutGrid, label: "في هذي الصفحة" },
 };
 
 interface AskAiContextCardProps {
@@ -82,7 +82,7 @@ export function AskAiContextCard({ seed, payload, pageKind, onClearSeed }: AskAi
           {seed && (
             <button
               type="button"
-              aria-label="Clear sentence context"
+              aria-label="امسح سياق الجملة"
               onClick={onClearSeed}
               className="shrink-0 rounded-full p-1 text-muted-foreground transition-colors hover:bg-background hover:text-foreground"
             >
@@ -93,7 +93,7 @@ export function AskAiContextCard({ seed, payload, pageKind, onClearSeed }: AskAi
             <CollapsibleTrigger asChild>
               <button
                 type="button"
-                aria-label={open ? "Hide context" : "Show context"}
+                aria-label={open ? "أخفِ السياق" : "ورّني السياق"}
                 className="shrink-0 rounded-full p-1 text-muted-foreground transition-colors hover:bg-background hover:text-foreground"
               >
                 <ChevronDown

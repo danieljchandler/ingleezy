@@ -109,7 +109,7 @@ describe("SoundSpotlight — the rows", () => {
 
   it("leaves the example out when there is none", () => {
     renderSpotlight([{ sound: "ق", explanation: "Further back than k." }]);
-    expect(screen.queryByRole("button", { name: /^Play/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /^شغّل/ })).not.toBeInTheDocument();
   });
 
   it("keeps two rows apart even when they name the same sound", () => {
@@ -126,13 +126,13 @@ describe("SoundSpotlight — the rows", () => {
 describe("SoundSpotlight — hearing an example", () => {
   it("offers to play each example", () => {
     renderSpotlight();
-    expect(screen.getByRole("button", { name: "Play عين" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Play حار" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "شغّل عين" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "شغّل حار" })).toBeInTheDocument();
   });
 
   it("plays the clip that was made for that example", () => {
     renderSpotlight();
-    fireEvent.click(screen.getByRole("button", { name: "Play عين" }));
+    fireEvent.click(screen.getByRole("button", { name: "شغّل عين" }));
     expect(play).toHaveBeenCalledWith("blob:sound");
   });
 
@@ -158,7 +158,7 @@ describe("SoundSpotlight — hearing an example", () => {
     // to ask for its clip.
     tts.url = null;
     renderSpotlight();
-    expect(screen.getAllByRole("button", { name: /^Play/ })).toHaveLength(2);
+    expect(screen.getAllByRole("button", { name: /^شغّل/ })).toHaveLength(2);
   });
 });
 
@@ -201,7 +201,7 @@ describe("SoundSpotlight — collapsing", () => {
     // folded it back paid for a full round of TTS calls, twice over for a
     // two-sound lesson.
     renderSpotlight();
-    fireEvent.click(screen.getAllByRole("button", { name: /^Play/ })[0]);
+    fireEvent.click(screen.getAllByRole("button", { name: /^شغّل/ })[0]);
     expect(lastAskFor("عين")?.skip).toBe(false);
 
     fireEvent.click(toggle());
@@ -222,7 +222,7 @@ describe("SoundSpotlight — collapsing", () => {
 
   it("requests only the clip that was tapped", () => {
     renderSpotlight();
-    fireEvent.click(screen.getAllByRole("button", { name: /^Play/ })[0]);
+    fireEvent.click(screen.getAllByRole("button", { name: /^شغّل/ })[0]);
     expect(tts.asked.filter((a) => !a.skip)).toHaveLength(1);
   });
 });

@@ -499,7 +499,7 @@ const ListeningPractice = () => {
             <Input
               value={answer}
               onChange={(e) => setAnswer(e.target.value)}
-              placeholder="Type what you heard..."
+              placeholder="اكتب اللي سمعته بالإنجليزي…"
               className="font-english text-2xl text-center h-16"
               disabled={showResult}
             />

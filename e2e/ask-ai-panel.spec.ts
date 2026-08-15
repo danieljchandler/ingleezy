@@ -35,7 +35,7 @@ const PASSAGE = {
 };
 
 const openPanel = async (page: Page) => {
-  await page.getByRole("button", { name: "Ask AI" }).click();
+  await page.getByRole("button", { name: "اسأل الذكاء", exact: true }).click();
   await expect(page.getByRole("dialog")).toBeVisible();
 };
 
@@ -88,15 +88,15 @@ test.describe("Ask AI panel", () => {
     const dialog = page.getByRole("dialog");
     const peekTop = (await dialog.boundingBox())!.y;
 
-    await page.getByRole("button", { name: "Expand panel" }).click();
-    await expect(page.getByRole("button", { name: "Collapse panel" })).toBeVisible();
+    await page.getByRole("button", { name: "كبّر اللوحة" }).click();
+    await expect(page.getByRole("button", { name: "صغّر اللوحة" })).toBeVisible();
     const fullTop = (await dialog.boundingBox())!.y;
     expect(fullTop).toBeLessThan(peekTop);
 
     await page.screenshot({ path: "/tmp/ask-ai-mobile-full.png" });
 
-    await page.getByRole("button", { name: "Collapse panel" }).click();
-    await expect(page.getByRole("button", { name: "Expand panel" })).toBeVisible();
+    await page.getByRole("button", { name: "صغّر اللوحة" }).click();
+    await expect(page.getByRole("button", { name: "كبّر اللوحة" })).toBeVisible();
   });
 
   test("shows the sentence it was opened about, with the passage still on screen", async ({
@@ -112,14 +112,14 @@ test.describe("Ask AI panel", () => {
     const line = page.getByRole("button", { name: "cafe", exact: true }).first();
     await expect(line).toBeVisible();
 
-    // The per-line chip and the floating action button share the name "Ask AI";
-    // the chip comes first, the FAB is mounted last in the shell.
-    await page.getByRole("button", { name: "Ask AI" }).first().click();
+    // The per-line chip and the floating button read the same on screen; the
+    // chip's longer accessible name is what separates them.
+    await page.getByRole("button", { name: "اسأل الذكاء عن هذي الجملة" }).first().click();
     await expect(page.getByRole("dialog")).toBeVisible();
 
     // The card names the sentence, and the passage is still readable above it.
     const dialog = page.getByRole("dialog");
-    await expect(dialog.getByText("Sentence")).toBeVisible();
+    await expect(dialog.getByText("جملة")).toBeVisible();
     await expect(dialog.getByText("رحت المقهى الصبح.").first()).toBeVisible();
     await expect(line).toBeInViewport();
 

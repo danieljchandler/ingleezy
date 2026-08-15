@@ -19,9 +19,9 @@ export const MyWordsSection = () => {
     e.stopPropagation();
     try {
       await deleteWord.mutateAsync(wordId);
-      toast.success("Word deleted");
+      toast.success("انحذفت الكلمة");
     } catch (error) {
-      toast.error("Failed to delete word");
+      toast.error("تعذّر حذف الكلمة");
     }
   };
 
@@ -47,7 +47,7 @@ export const MyWordsSection = () => {
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <BookOpen className="h-5 w-5 text-primary" />
-          <h2 className="font-semibold text-foreground">My Words</h2>
+          <h2 className="font-semibold text-foreground">كلماتي</h2>
           <span className="text-sm text-muted-foreground">
             ({words.length})
           </span>

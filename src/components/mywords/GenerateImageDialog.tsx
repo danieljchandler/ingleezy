@@ -50,7 +50,7 @@ export const GenerateImageDialog = ({ word, open, onOpenChange, onImageSaved }: 
       if (showCapToastIfLimited(error, data)) return;
       if (error) throw error;
       if (data?.fallback || !data?.imageUrl) {
-        throw new Error(data?.message || "Image generation is temporarily unavailable. Please try again.");
+        throw new Error(data?.message || "توليد الصور مو متاح الحين. جرّب مرة ثانية.");
       }
 
       const urlWithCacheBust = `${data.imageUrl}?t=${Date.now()}`;
@@ -60,10 +60,10 @@ export const GenerateImageDialog = ({ word, open, onOpenChange, onImageSaved }: 
       }
 
       setPreviewUrl(urlWithCacheBust);
-      toast.success("Image generated!");
+      toast.success("جهزت الصورة!");
     } catch (err: any) {
       console.error("Image generation failed:", err);
-      toast.error(err.message || "Failed to generate image");
+      toast.error(err.message || "تعذّر توليد الصورة");
     } finally {
       setIsGenerating(false);
     }
@@ -77,7 +77,7 @@ export const GenerateImageDialog = ({ word, open, onOpenChange, onImageSaved }: 
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-primary" />
-            Generate Flashcard Image
+            ولّد صورة للبطاقة
           </DialogTitle>
         </DialogHeader>
 
@@ -116,7 +116,7 @@ export const GenerateImageDialog = ({ word, open, onOpenChange, onImageSaved }: 
             <div className="flex items-center justify-between gap-2">
               <label className="text-sm font-medium flex items-center gap-1.5">
                 <Lock className="h-3.5 w-3.5 text-primary" />
-                Lock my style
+                ثبّت ستايلي
               </label>
               <Switch
                 checked={styleLock.enabled}
@@ -132,7 +132,7 @@ export const GenerateImageDialog = ({ word, open, onOpenChange, onImageSaved }: 
                   rows={2}
                   disabled={isGenerating}
                   className="text-xs"
-                  placeholder="Your signature style (lighting, mood, background...)"
+                  placeholder="ستايلك الخاص (الإضاءة، الجو، الخلفية…)"
                 />
                 <div className="flex items-center justify-between text-[11px] text-muted-foreground">
                   <span>Seed: <code className="font-mono">{styleLock.seed}</code></span>
@@ -143,14 +143,14 @@ export const GenerateImageDialog = ({ word, open, onOpenChange, onImageSaved }: 
                     className="inline-flex items-center gap-1 hover:text-foreground transition-colors"
                   >
                     <Dices className="h-3 w-3" />
-                    New seed
+                    بذرة جديدة
                   </button>
                 </div>
               </>
             )}
             {!styleLock.enabled && (
               <p className="text-[11px] text-muted-foreground">
-                Keep a consistent look across all your flashcard images.
+                خلّي شكل كل بطاقاتك متناسق.
               </p>
             )}
           </div>
@@ -163,17 +163,17 @@ export const GenerateImageDialog = ({ word, open, onOpenChange, onImageSaved }: 
             {isGenerating ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Generating...
+                نولّد…
               </>
             ) : currentImage ? (
               <>
                 <RefreshCw className="h-4 w-4" />
-                Regenerate Image
+                ولّد صورة ثانية
               </>
             ) : (
               <>
                 <Sparkles className="h-4 w-4" />
-                Generate Image
+                ولّد الصورة
               </>
             )}
           </Button>

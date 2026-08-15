@@ -317,7 +317,7 @@ test.describe("the result", () => {
     // control*: the vocabulary row renders its save button only behind
     // `isAuthenticated`, and the transcript panel is handed `undefined` for its
     // save callback on the same condition. `handleSaveWord`'s own
-    // "Sign in to save words" branch is therefore unreachable — a signed-out
+    // "سجّل دخولك عشان تحفظ الكلمات" branch is therefore unreachable — a signed-out
     // learner is never told saving exists, which is the same dead-guard shape
     // as How Do I Say and Liked Videos.
     await expect(page.locator("button:has(svg.lucide-plus)")).toHaveCount(0);

@@ -81,7 +81,7 @@ export function LevelJourneyCard() {
         </>
       ) : (
         <>
-          <div className="mb-3 flex items-end gap-1.5" aria-label="Level history">
+          <div className="mb-3 flex items-end gap-1.5" aria-label="سجل المستويات">
             {dialectRows.slice(-8).map((row, index) => (
               <div key={`${row.taken_at}-${index}`} className="flex flex-col items-center gap-1">
                 <div

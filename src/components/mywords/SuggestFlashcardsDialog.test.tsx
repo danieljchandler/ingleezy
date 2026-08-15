@@ -97,7 +97,7 @@ async function render({ dialect = "Gulf", owned = [], seed }: Options = {}) {
 }
 
 const topicBox = () => screen.getByPlaceholderText(/ordering food at a restaurant/);
-const generateButton = () => screen.getByRole("button", { name: /generate suggestions/i });
+const generateButton = () => screen.getByRole("button", { name: /ولّد اقتراحات/ });
 
 const generate = async (topic = "ordering food") => {
   fireEvent.change(topicBox(), { target: { value: topic } });
@@ -161,7 +161,7 @@ describe("asking for suggestions", () => {
 
     // A learner who owns everything on the topic needs to be told to pick
     // another one, not shown an empty list.
-    expect(toasts.error).toHaveBeenCalledWith("No new suggestions returned. Try a different topic.");
+    expect(toasts.error).toHaveBeenCalledWith("ما رجعت اقتراحات جديدة. جرّب موضوعاً ثانياً.");
   });
 
   it("reports a generation that failed", async () => {
@@ -217,14 +217,14 @@ describe("choosing from the suggestions", () => {
       fireEvent.click(box);
     }
 
-    expect(screen.getByRole("button", { name: /save to my words/i })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /احفظ في كلماتي/ })).toBeDisabled();
   });
 });
 
 describe("saving the chosen words", () => {
   const save = async () => {
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: /save to my words/i }));
+      fireEvent.click(screen.getByRole("button", { name: /احفظ في كلماتي/ }));
     });
   };
 

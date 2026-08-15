@@ -30,7 +30,7 @@ export const HomeButton = React.forwardRef<HTMLButtonElement, HomeButtonProps>(
           "focus:outline-none focus:ring-2 focus:ring-primary/30",
           className,
         )}
-        aria-label="Go home"
+        aria-label="الرئيسية"
         type="button"
       >
         <Home className="w-5 h-5 text-muted-foreground" />

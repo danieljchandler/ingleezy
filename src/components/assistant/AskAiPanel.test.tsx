@@ -147,7 +147,7 @@ describe("AskAiPanel", () => {
     });
 
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: /New chat/ }));
+      fireEvent.click(screen.getByRole("button", { name: /محادثة جديدة/ }));
     });
 
     expect(screen.queryByText(/Because it is idiomatic\./)).toBeNull();
@@ -182,14 +182,14 @@ describe("AskAiPanel", () => {
       render();
       await open();
 
-      const handle = screen.getByRole("button", { name: "Expand panel" });
+      const handle = screen.getByRole("button", { name: "كبّر اللوحة" });
       expect(handle).toHaveAttribute("aria-expanded", "false");
 
       await act(async () => {
         fireEvent.click(handle);
       });
 
-      expect(screen.getByRole("button", { name: "Collapse panel" })).toHaveAttribute(
+      expect(screen.getByRole("button", { name: "صغّر اللوحة" })).toHaveAttribute(
         "aria-expanded",
         "true",
       );
@@ -198,14 +198,14 @@ describe("AskAiPanel", () => {
     it("expands automatically for a live voice call", async () => {
       render();
       await open();
-      expect(screen.getByRole("button", { name: "Expand panel" })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "كبّر اللوحة" })).toBeInTheDocument();
 
       await act(async () => {
         // Radix tabs switch on mousedown, not click.
-        fireEvent.mouseDown(screen.getByRole("tab", { name: /Live voice/ }));
+        fireEvent.mouseDown(screen.getByRole("tab", { name: /مكالمة مباشرة/ }));
       });
 
-      expect(screen.getByRole("button", { name: "Collapse panel" })).toHaveAttribute(
+      expect(screen.getByRole("button", { name: "صغّر اللوحة" })).toHaveAttribute(
         "aria-expanded",
         "true",
       );
@@ -224,7 +224,7 @@ describe("AskAiPanel", () => {
       });
       await open();
 
-      expect(screen.getByText("In this video")).toBeInTheDocument();
+      expect(screen.getByText("في هذا المقطع")).toBeInTheDocument();
       expect(
         screen.getAllByText(/Current subtitle: كم سعر هذا؟/).length,
       ).toBeGreaterThan(0);
@@ -236,7 +236,7 @@ describe("AskAiPanel", () => {
       expect(screen.getByText("How are you today?")).toBeInTheDocument();
 
       await act(async () => {
-        fireEvent.click(screen.getByRole("button", { name: "Hide context" }));
+        fireEvent.click(screen.getByRole("button", { name: "أخفِ السياق" }));
       });
 
       expect(screen.queryByText("How are you today?")).toBeNull();

@@ -100,14 +100,14 @@ describe("showing today's phrase", () => {
     // Reading a phrase you can already see teaches nothing. Reaching for the
     // English and then checking is the exercise.
     expect(screen.queryByText("How's it going?")).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /reveal english/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /اكشف العبارة بالإنجليزي/ })).toBeInTheDocument();
   });
 
   it("reveals the English and its phonetic reading together", async () => {
     render();
     await waitFor(() => expect(screen.getByText("شخبارك؟")).toBeInTheDocument());
 
-    fireEvent.click(screen.getByRole("button", { name: /reveal english/i }));
+    fireEvent.click(screen.getByRole("button", { name: /اكشف العبارة بالإنجليزي/ }));
 
     // The phonetic_ar is the answer key to the pronunciation, so it belongs
     // with the reveal rather than beside the prompt.
@@ -118,9 +118,9 @@ describe("showing today's phrase", () => {
   it("can be hidden again for another go", async () => {
     render();
     await waitFor(() => expect(screen.getByText("شخبارك؟")).toBeInTheDocument());
-    fireEvent.click(screen.getByRole("button", { name: /reveal english/i }));
+    fireEvent.click(screen.getByRole("button", { name: /اكشف العبارة بالإنجليزي/ }));
 
-    fireEvent.click(screen.getByRole("button", { name: /hide english/i }));
+    fireEvent.click(screen.getByRole("button", { name: /أخفِ الإنجليزي/ }));
 
     expect(screen.queryByText("How's it going?")).not.toBeInTheDocument();
   });
@@ -202,7 +202,7 @@ describe("asking for another", () => {
     await waitFor(() => expect(screen.getByText("صباح الخير")).toBeInTheDocument());
 
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: /refresh phrase/i }));
+      fireEvent.click(screen.getByRole("button", { name: /جدّد العبارة/ }));
     });
 
     await waitFor(() => expect(backend.callsTo("phrase-of-the-day")).toHaveLength(1));
@@ -217,7 +217,7 @@ describe("asking for another", () => {
     await waitFor(() => expect(screen.getByText("شخبارك؟")).toBeInTheDocument());
 
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: /refresh phrase/i }));
+      fireEvent.click(screen.getByRole("button", { name: /جدّد العبارة/ }));
     });
 
     // Otherwise "another one" returns a third greeting, and the learner
@@ -232,15 +232,15 @@ describe("asking for another", () => {
   it("hides the English again for the new phrase", async () => {
     render();
     await waitFor(() => expect(screen.getByText("شخبارك؟")).toBeInTheDocument());
-    fireEvent.click(screen.getByRole("button", { name: /reveal english/i }));
+    fireEvent.click(screen.getByRole("button", { name: /اكشف العبارة بالإنجليزي/ }));
 
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: /refresh phrase/i }));
+      fireEvent.click(screen.getByRole("button", { name: /جدّد العبارة/ }));
     });
 
     // A new phrase arriving already revealed would skip the exercise.
     await waitFor(() =>
-      expect(screen.getByRole("button", { name: /reveal english/i })).toBeInTheDocument(),
+      expect(screen.getByRole("button", { name: /اكشف العبارة بالإنجليزي/ })).toBeInTheDocument(),
     );
   });
 });
@@ -251,7 +251,7 @@ describe("saving it", () => {
     await waitFor(() => expect(screen.getByText("شخبارك؟")).toBeInTheDocument());
 
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: /save as flashcard/i }));
+      fireEvent.click(screen.getByRole("button", { name: /احفظها كبطاقة/ }));
     });
 
     await waitFor(() =>
@@ -269,7 +269,7 @@ describe("saving it", () => {
     await waitFor(() => expect(screen.getByText("شخبارك؟")).toBeInTheDocument());
 
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: /save as flashcard/i }));
+      fireEvent.click(screen.getByRole("button", { name: /احفظها كبطاقة/ }));
     });
 
     // And stops being pressable, so a second tap cannot add the same phrase
@@ -282,7 +282,7 @@ describe("saving it", () => {
     await waitFor(() => expect(screen.getByText("شخبارك؟")).toBeInTheDocument());
 
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: /save as flashcard/i }));
+      fireEvent.click(screen.getByRole("button", { name: /احفظها كبطاقة/ }));
     });
 
     // The card is worth showing to somebody who has not signed up — it is the
@@ -312,7 +312,7 @@ describe("telling the assistant what's on screen", () => {
       expect(screen.getByTestId("ai-page-context").textContent).toContain("hidden"),
     );
 
-    fireEvent.click(screen.getByRole("button", { name: /reveal english/i }));
+    fireEvent.click(screen.getByRole("button", { name: /اكشف العبارة بالإنجليزي/ }));
 
     // Once revealed, the "hidden" caveat would just be wrong.
     await waitFor(() =>
@@ -330,11 +330,11 @@ describe("telling the assistant what's on screen", () => {
     expect(screen.getByTestId("ai-page-context").textContent).toBe("");
   });
 
-  it("opens the assistant seeded with the phrase from the Ask AI chip", async () => {
+  it("opens the assistant seeded with the phrase from the ask-AI chip", async () => {
     render();
     await waitFor(() => expect(screen.getByText("شخبارك؟")).toBeInTheDocument());
 
-    fireEvent.click(screen.getByRole("button", { name: /ask ai/i }));
+    fireEvent.click(screen.getByRole("button", { name: /اسأل الذكاء/ }));
 
     // The chip pins the conversation to this exact phrase, so follow-up
     // questions ("why this word order?") have a stable referent.
@@ -352,7 +352,7 @@ describe("when there is no phrase", () => {
     // first thing a learner sees, and the rest of the page is unaffected.
     await waitFor(() => expect(backend.callsTo("phrase-of-the-day").length).toBeGreaterThan(0));
     expect(screen.getByText("عبارة اليوم")).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /save as flashcard/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /احفظها كبطاقة/ })).not.toBeInTheDocument();
   });
 
   it("reports the reason when the generator declines", async () => {

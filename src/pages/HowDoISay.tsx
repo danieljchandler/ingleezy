@@ -72,7 +72,7 @@ async function readInvokeError(err: unknown): Promise<string> {
 }
 
 const NaturalnessStars = ({ value }: { value: number }) => (
-  <div className="flex gap-0.5" aria-label={`Naturalness ${value} out of 5`}>
+  <div className="flex gap-0.5" aria-label={`الطبيعية ${value} من ٥`}>
     {[1, 2, 3, 4, 5].map((i) => (
       <Star
         key={i}

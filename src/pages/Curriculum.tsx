@@ -86,7 +86,7 @@ const Curriculum = () => {
 
       <HubHeader
         title="Curriculum"
-        subtitle={`Your ${activeDialect} path, stage by stage.`}
+        subtitle={`مسارك بشرح ${activeDialect}، مرحلة مرحلة.`}
       />
 
       {!isAuthenticated && (

@@ -166,7 +166,7 @@ test.describe("the answer", () => {
 
     await ask(page);
 
-    await expect(page.getByLabel("Naturalness 3 out of 5")).toBeVisible();
+    await expect(page.getByLabel("الطبيعية 3 من ٥")).toBeVisible();
   });
 
   test("offers the key words behind the answer", async ({ page, backend }) => {

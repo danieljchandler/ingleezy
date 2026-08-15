@@ -48,7 +48,7 @@ export function BottomNav() {
     <nav
       className="fixed bottom-0 inset-x-0 z-40 border-t border-[#5C3A46]/15 bg-[#F9F7F2]/95 backdrop-blur supports-[backdrop-filter]:bg-[#F9F7F2]/85"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
-      aria-label="Primary"
+      aria-label="التنقّل الرئيسي"
     >
       <ul className="mx-auto flex max-w-2xl items-stretch justify-around px-2 pt-1.5 pb-1">
         {TABS.map(({ to, label, icon: Icon, match, tourId }) => {

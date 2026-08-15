@@ -119,7 +119,7 @@ export const DiscoverPreviewCard = memo(function DiscoverPreviewCard({ video, on
       <div className="flex items-center justify-between px-4 py-3 bg-primary/5">
         <div className="flex items-center gap-2">
           <Play className="h-4 w-4 text-primary" aria-hidden="true" />
-          <span className="text-sm font-semibold text-primary">Start Watching</span>
+          <span className="text-sm font-semibold text-primary">ابدأ المشاهدة</span>
         </div>
         <ChevronRight className="h-4 w-4 text-primary" aria-hidden="true" />
       </div>

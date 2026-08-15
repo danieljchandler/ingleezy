@@ -83,7 +83,7 @@ const ResetPassword = () => {
       </div>
       <div className="max-w-sm mx-auto">
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold font-heading mb-2">Set a new password</h1>
+          <h1 className="text-2xl font-bold font-heading mb-2">عيّن كلمة مرور جديدة</h1>
           <p className="text-muted-foreground text-sm">
             Choose a new password for your Ingleezy account.
           </p>

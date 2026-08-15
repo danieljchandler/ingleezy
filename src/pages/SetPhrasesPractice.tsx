@@ -192,9 +192,9 @@ const SetPhrasesPractice = ({ reviewMode = false }: Props) => {
               {scoreVoice.isPending ? (
                 <Loader2 className="h-5 w-5 animate-spin" />
               ) : recording ? (
-                <><MicOff className="h-5 w-5 mr-2" /> Release to submit</>
+                <><MicOff className="h-5 w-5 mr-2" /> ارفع إصبعك للإرسال</>
               ) : (
-                <><Mic className="h-5 w-5 mr-2" /> Hold to speak</>
+                <><Mic className="h-5 w-5 mr-2" /> اضغط مطوّلاً وتكلّم</>
               )}
             </Button>
             <Button variant="outline" className="w-full" onClick={() => setShowChoices((s) => !s)}>

@@ -29,7 +29,7 @@ const SESSION_KEY = "session_listening_practice";
 const dictationCard = (page: Page) => page.getByText("الإملاء", { exact: true });
 const comprehensionCard = (page: Page) => page.getByText("الفهم", { exact: true });
 const speedCard = (page: Page) => page.getByText("تمرين السرعة", { exact: true });
-const answerBox = (page: Page) => page.getByPlaceholder("Type what you heard...");
+const answerBox = (page: Page) => page.getByPlaceholder("اكتب اللي سمعته بالإنجليزي…");
 
 /**
  * Wait for a function call to land.

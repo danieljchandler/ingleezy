@@ -48,13 +48,13 @@ describe("the way in", () => {
 
     // It hangs off every sentence in the app, so the default has to disappear
     // into the line rather than compete with it.
-    expect(screen.getByRole("button", { name: "Ask AI about this sentence" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "اسأل الذكاء عن هذي الجملة" })).toBeInTheDocument();
     expect(screen.getByTestId("probe")).toHaveTextContent("closed");
   });
 
   it("can be a labelled chip where there is room", () => {
     render({ variant: "chip" });
-    expect(screen.getByRole("button", { name: /Ask AI/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /اسأل الذكاء/ })).toBeInTheDocument();
   });
 });
 
@@ -62,7 +62,7 @@ describe("opening the assistant", () => {
   it("opens the global chat seeded with the sentence", () => {
     render({ variant: "chip" });
 
-    fireEvent.click(screen.getByRole("button", { name: /Ask AI/ }));
+    fireEvent.click(screen.getByRole("button", { name: /اسأل الذكاء/ }));
 
     expect(screen.getByTestId("probe")).toHaveTextContent(
       "open|chat|شفيك اليوم؟~What's up with you today?",
@@ -72,7 +72,7 @@ describe("opening the assistant", () => {
   it("passes the sentence without an English gloss when none exists", () => {
     render({ english: undefined });
 
-    fireEvent.click(screen.getByRole("button", { name: "Ask AI about this sentence" }));
+    fireEvent.click(screen.getByRole("button", { name: "اسأل الذكاء عن هذي الجملة" }));
 
     expect(screen.getByTestId("probe")).toHaveTextContent("open|chat|شفيك اليوم؟~");
   });

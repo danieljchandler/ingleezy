@@ -85,7 +85,7 @@ function render({ word = A_WORD, seed }: Options = {}) {
 }
 
 const generateButton = () =>
-  screen.getByRole("button", { name: /generate image|regenerate image/i });
+  screen.getByRole("button", { name: /ولّد الصورة|ولّد صورة ثانية/ });
 
 const generate = async () => {
   await act(async () => {
@@ -106,7 +106,7 @@ describe("setting up the picture", () => {
   it("offers to generate when the card has no picture", () => {
     render();
 
-    expect(screen.getByRole("button", { name: /^Generate Image$/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^ولّد الصورة$/ })).toBeInTheDocument();
     expect(screen.queryByRole("img")).toBeNull();
   });
 
@@ -115,7 +115,7 @@ describe("setting up the picture", () => {
 
     // Regenerating is the common case — the first picture is often nearly right.
     expect(screen.getByRole("img")).toHaveAttribute("src", "https://images.test/old.png");
-    expect(screen.getByRole("button", { name: /regenerate image/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /ولّد صورة ثانية/ })).toBeInTheDocument();
   });
 });
 
@@ -154,7 +154,7 @@ describe("generating", () => {
     // Cache-busted, or the browser shows the picture this one replaced.
     expect(url).toMatch(/^https:\/\/images\.test\/apple\.png\?t=\d+$/);
     expect(screen.getByRole("img")).toHaveAttribute("src", url);
-    expect(toasts.success).toHaveBeenCalledWith("Image generated!");
+    expect(toasts.success).toHaveBeenCalledWith("جهزت الصورة!");
   });
 
   it("says so when the generator declined", async () => {
@@ -222,7 +222,7 @@ describe("the style lock", () => {
     // Forty cards that each look like a different app is the thing this exists
     // to prevent, and the switch alone does not say that.
     expect(
-      screen.getByText(/Keep a consistent look across all your flashcard images/),
+      screen.getByText(/خلّي شكل كل بطاقاتك متناسق/),
     ).toBeInTheDocument();
   });
 
@@ -233,7 +233,7 @@ describe("the style lock", () => {
 
     // The seed is the half that makes it a *lock*: the same description with a
     // different seed still drifts.
-    expect(screen.getByPlaceholderText(/Your signature style/)).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/ستايلك الخاص/)).toBeInTheDocument();
     expect(screen.getByText(/Seed:/)).toBeInTheDocument();
   });
 
@@ -241,7 +241,7 @@ describe("the style lock", () => {
     const { backend } = render();
     fireEvent.click(screen.getByRole("switch"));
 
-    fireEvent.change(screen.getByPlaceholderText(/Your signature style/), {
+    fireEvent.change(screen.getByPlaceholderText(/ستايلك الخاص/), {
       target: { value: "flat pastel illustration, soft light" },
     });
     fireEvent.change(instructionsBox(), { target: { value: "on a table" } });
@@ -259,7 +259,7 @@ describe("the style lock", () => {
     fireEvent.click(screen.getByRole("switch"));
     const before = screen.getByText(/Seed:/).textContent;
 
-    fireEvent.click(screen.getByRole("button", { name: /new seed/i }));
+    fireEvent.click(screen.getByRole("button", { name: /بذرة جديدة/ }));
 
     // A learner who dislikes the look their seed produces needs a way out of it
     // that is not "turn the whole thing off".
@@ -270,7 +270,7 @@ describe("the style lock", () => {
     render();
 
     fireEvent.click(screen.getByRole("switch"));
-    fireEvent.change(screen.getByPlaceholderText(/Your signature style/), {
+    fireEvent.change(screen.getByPlaceholderText(/ستايلك الخاص/), {
       target: { value: "flat pastel illustration" },
     });
 

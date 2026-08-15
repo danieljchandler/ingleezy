@@ -90,8 +90,8 @@ async function startTopic(page: Page, label = "حديث حر") {
 }
 
 async function send(page: Page, text: string) {
-  await page.getByPlaceholder("Type in English…").fill(text);
-  await page.getByPlaceholder("Type in English…").press("Enter");
+  await page.getByPlaceholder("اكتب بالإنجليزي…").fill(text);
+  await page.getByPlaceholder("اكتب بالإنجليزي…").press("Enter");
 }
 
 test.describe("starting a conversation", () => {
@@ -120,11 +120,11 @@ test.describe("starting a conversation", () => {
     // Pinned as-is: the input is mounted only once `messages` is non-empty, so
     // a learner who wants to open with their own sentence has to pick a topic
     // first and talk over the tutor's greeting.
-    await expect(page.getByPlaceholder("Type in English…")).toHaveCount(0);
+    await expect(page.getByPlaceholder("اكتب بالإنجليزي…")).toHaveCount(0);
 
     await startTopic(page);
     await expectSaid(page, OPENER);
-    await expect(page.getByPlaceholder("Type in English…")).toBeVisible();
+    await expect(page.getByPlaceholder("اكتب بالإنجليزي…")).toBeVisible();
   });
 
   test("opens with an empty history so the tutor speaks first", async ({ page, backend }) => {
@@ -244,7 +244,7 @@ test.describe("the streamed reply", () => {
     await send(page, "أنا بخير");
 
     await expect(page.getByText("أنا بخير")).toBeVisible();
-    await expect(page.getByPlaceholder("Type in English…")).toHaveValue("");
+    await expect(page.getByPlaceholder("اكتب بالإنجليزي…")).toHaveValue("");
   });
 
   test("lifts a correction out of the front of the reply", async ({ page, backend }) => {
@@ -304,7 +304,7 @@ test.describe("the streamed reply", () => {
 
     // `[DONE]` is what breaks the read loop. Without it the box stays disabled
     // and the conversation is one turn long forever.
-    await expect(page.getByPlaceholder("Type in English…")).toBeEnabled();
+    await expect(page.getByPlaceholder("اكتب بالإنجليزي…")).toBeEnabled();
   });
 
   test("sends nothing for an empty box", async ({ page, backend }) => {
@@ -316,7 +316,7 @@ test.describe("the streamed reply", () => {
     await expectSaid(page, OPENER);
     const before = backend.callsTo("free-chat").length;
 
-    await page.getByPlaceholder("Type in English…").press("Enter");
+    await page.getByPlaceholder("اكتب بالإنجليزي…").press("Enter");
 
     expect(backend.callsTo("free-chat")).toHaveLength(before);
   });

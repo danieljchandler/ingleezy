@@ -6,11 +6,11 @@ import { toast } from "sonner";
 
 const LABELS = [
   "",
-  "Not useful",
-  "Somewhat useful",
-  "Good",
-  "Great",
-  "Love it — more like this!",
+  "ما أفادني",
+  "أفادني شوي",
+  "حلو",
+  "ممتاز",
+  "عجبني — زودوا مثله!",
 ];
 
 interface VideoRatingProps {
@@ -39,7 +39,7 @@ export const VideoRating = ({ videoId, userId }: VideoRatingProps) => {
 
   const submitRating = async (value: number) => {
     if (!userId) {
-      toast.error("Please log in to rate videos");
+      toast.error("سجّل دخولك عشان تقيّم");
       return;
     }
     setSaving(true);
@@ -55,7 +55,7 @@ export const VideoRating = ({ videoId, userId }: VideoRatingProps) => {
     setSaving(false);
     if (error) {
       console.error("Rating error:", error);
-      toast.error("Failed to save rating");
+      toast.error("تعذّر حفظ التقييم");
       setRating(null);
     } else {
       toast.success(LABELS[value]);
@@ -67,7 +67,7 @@ export const VideoRating = ({ videoId, userId }: VideoRatingProps) => {
   return (
     <div className="flex flex-col items-center gap-2 py-4">
       <p className="text-sm font-medium text-muted-foreground">
-        {rating ? "Your rating" : "Rate this video"}
+        {rating ? "تقييمك" : "قيّم المقطع"}
       </p>
       <div
         className="flex gap-1"
@@ -84,7 +84,7 @@ export const VideoRating = ({ videoId, userId }: VideoRatingProps) => {
               "p-1 transition-transform hover:scale-110 focus:outline-none",
               saving && "opacity-50 pointer-events-none"
             )}
-            aria-label={`Rate ${star} out of 5`}
+            aria-label={`قيّم ${star} من ٥`}
           >
             <Star
               className={cn(

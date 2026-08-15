@@ -30,9 +30,9 @@ const KIND_META: Record<
   ContinueEntry["kind"],
   { icon: typeof BookOpen; label: string }
 > = {
-  story: { icon: BookOpen, label: "Story" },
-  video: { icon: Play, label: "Video" },
-  lesson: { icon: GraduationCap, label: "Lesson" },
+  story: { icon: BookOpen, label: "القصة" },
+  video: { icon: Play, label: "الفيديو" },
+  lesson: { icon: GraduationCap, label: "الدرس" },
 };
 
 export const ContinueCard = () => {
@@ -99,7 +99,7 @@ export const ContinueCard = () => {
     >
       <button
         onClick={() => navigate(resolved.route)}
-        aria-label={`Continue ${label}: ${resolved.title}`}
+        aria-label={`كمّل ${label}: ${resolved.title}`}
         className="flex-1 min-w-0 flex items-center gap-3 p-4 text-left active:scale-[0.99] transition-transform"
       >
         <div className="h-11 w-11 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
@@ -108,7 +108,7 @@ export const ContinueCard = () => {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-0.5">
             <span className="text-[10px] uppercase tracking-wider font-semibold text-primary">
-              Continue {label.toLowerCase()}
+              كمّل {label}
             </span>
             <span className="text-[10px] text-muted-foreground">
               · {formatRelativeTime(resolved.updatedAt)}
@@ -133,8 +133,8 @@ export const ContinueCard = () => {
           setDismissedRoute(resolved.route);
         }}
         className="px-2 text-muted-foreground/60 hover:text-foreground transition-colors"
-        aria-label="Dismiss"
-        title="Dismiss"
+        aria-label="أخفِ"
+        title="أخفِ"
       >
         <X className="h-4 w-4" />
       </button>

@@ -78,7 +78,7 @@ test.describe("what each visitor is shown", () => {
     await page.goto("/pricing");
 
     await expect(page.getByText("أنت على باقة Standard")).toBeVisible();
-    await expect(page.getByText("Your Plan", { exact: true })).toBeVisible();
+    await expect(page.getByText("باقتك", { exact: true })).toBeVisible();
     // Standard subscribers can still see the upgrade, and only the upgrade.
     await expect(page.getByRole("button", { name: "اشترك" })).toHaveCount(1);
   });

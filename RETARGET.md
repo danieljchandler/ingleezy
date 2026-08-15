@@ -152,9 +152,13 @@ generation conditioning.
 - [~] **Hakiya bridge**: `sync-hakiya-videos` function + `source` column
       landed (same discover_videos table, so existing surfaces serve bridged
       rows with zero UI changes; idempotent upsert on Hakiya UUIDs; drift
-      degrades to stale/skipped rows). Remaining: config.toml entry, admin
-      trigger button, learner-surface rendering flip (English primary,
-      dialect + Fusha as scaffold), deno happy-path test.
+      degrades to stale/skipped rows). config.toml entry, the deno suite
+      (auth posture, unconfigured bridge → 503, upstream failure → 502,
+      happy path with a drifted row skipped) and the learner-surface
+      rendering split all landed — `TranscriptLine.english` is the switch:
+      absent means a bridged Arabic clip, so the reader takes the
+      Arabic-clip path with `translation` primary. Remaining: admin
+      trigger button.
 - [~] **English uploads** (YouTube/TikTok): `process-english-video` landed —
       Deepgram nova-3 EN with utterance segmentation, batched Arabic-target
       Brain calls for the scaffold (dialect + fusha + literal gloss of the
@@ -349,7 +353,15 @@ generation conditioning.
       path. Auth posture kept identical to the function it replaced
       (verify_jwt = false, no cap) — the route has no guard and a
       signed-out visitor can already read a post there.
-- [ ] Souq news: still Arabic news. FLIP to English news or prune.
+- [x] **Souq news → FLIPPED**: the regional search was the part worth
+      keeping — a Yemeni learner reading about Sanaa is reading news they
+      already half-know, which is the cheapest comprehension scaffold
+      there is. So the region queries stay, `lang: "en"` sources English
+      articles, and the AI retells each story in easy spoken English
+      (`title_english` / `body_english` / per-sentence `arabic` + `literal`)
+      with a dialect headline and summary beside it. `souq-news-quiz`
+      takes the English body. Page chrome is Arabic; article text renders
+      `font-english`.
 
 ### Arabic-first UI — FLIP (dedicated pass)
 - [x] `dir="rtl"` root landed: `<html lang="ar" dir="rtl">`; manifest was
@@ -383,9 +395,8 @@ generation conditioning.
       Remaining: Me-area pages (MyWords, Profile, analytics…),
       the learner-facing pass is now COMPLETE — every
       hub, practice surface, content page, Me-area tool and the video
-      player speak Arabic. Admin stays English by design. What is left
-      is Souq news (still Arabic) and the Transcribe/tutor-upload
-      pipelines. **Correction**: "complete" was overstated twice over.
+      player speak Arabic. Admin stays English by design.
+      **Correction**: "complete" was overstated twice over.
       The first pass covered pages and missed the shared components
       underneath them; an audit found ~125 English strings still live in
       learner-facing code. A second sweep migrated them: the subscription
@@ -403,6 +414,25 @@ generation conditioning.
       translating Arabic-alphabet copy is wasted work) and the Privacy /
       Terms pages (legal text, translated with the lawyer not the
       linter).
+      A **third sweep** then took the chrome that sits above and beside
+      the pages rather than inside them, which the page-by-page audits
+      kept skipping: the bottom nav, the Ask-AI FAB and panel, the
+      onboarding tour, the notification bell, the Continue card, the
+      home-button / navigation arrows / phrase-of-the-day, the dialect
+      ritual switcher, the weekly-goal and level-journey cards, the
+      referral card and video rating, MyWordsSection and the My Words
+      dialogs, SaveUnknownsBar, RootChip / RootFamilySheet,
+      SoundSpotlight, DiscoverPreviewCard, and the ConversationSimulator
+      / Curriculum / HowDoISay / ListeningPractice / MyWords /
+      MyWordsReview / NativeFeedback / Pricing / PronunciationPractice /
+      ReadingLibrary / ResetPassword / SetPhrases / SetPhrasesPractice /
+      VocabGames / DiscoverVideo pages. Two of these were direction bugs,
+      not just untranslated strings: NativeFeedback asked the learner to
+      "write a few sentences in Arabic" when post-flip they write English
+      for a native English speaker to review, and the dialect switcher
+      rendered the same Arabic word twice once both its label fields were
+      translated (the second field now carries a Latin transliteration,
+      so the chip still shows two scripts).
       — grammar drills, listening practice, conversation + live voice,
       and the vocab games/battles now done. Backend flips landed with
       them: listening-quiz generates English audio via the Brain's

@@ -52,7 +52,7 @@ describe("DiscoverPreviewCard — the whole card is the target", () => {
 
   it("offers a visible call to action as well", () => {
     renderCard();
-    expect(screen.getByText("Start Watching")).toBeInTheDocument();
+    expect(screen.getByText("ابدأ المشاهدة")).toBeInTheDocument();
   });
 
   it("carries the dialect, level and length in the accessible name", () => {

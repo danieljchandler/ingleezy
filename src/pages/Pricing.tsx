@@ -159,7 +159,7 @@ const Pricing = () => {
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-xl">{SUBSCRIPTION_TIERS.standard.name}</CardTitle>
                     {tier === 'standard' && (
-                      <Badge variant="default" className="bg-primary">Your Plan</Badge>
+                      <Badge variant="default" className="bg-primary">باقتك</Badge>
                     )}
                   </div>
                   <CardDescription>للمتعلم الجاد</CardDescription>
@@ -215,7 +215,7 @@ const Pricing = () => {
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-xl">{SUBSCRIPTION_TIERS.allin.name}</CardTitle>
                     {tier === 'allin' && (
-                      <Badge variant="default" className="bg-primary">Your Plan</Badge>
+                      <Badge variant="default" className="bg-primary">باقتك</Badge>
                     )}
                   </div>
                   <CardDescription>كل شيء بلا حدود</CardDescription>

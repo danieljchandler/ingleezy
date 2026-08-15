@@ -687,8 +687,8 @@ const MyWordsReview = () => {
           >
             <SelectTrigger
               className="h-8 w-auto gap-1 px-2.5 text-xs font-medium"
-              aria-label="New cards per session"
-              title="New cards per session"
+              aria-label="بطاقات جديدة لكل جلسة"
+              title="بطاقات جديدة لكل جلسة"
             >
               <Sparkles className="h-3.5 w-3.5 text-amber-500" />
               <SelectValue>{formatCap(newCap)}/اليوم</SelectValue>

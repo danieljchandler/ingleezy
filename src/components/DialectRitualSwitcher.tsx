@@ -21,31 +21,31 @@ const DIALECTS: Meta[] = [
   {
     id: "Gulf",
     arabic: "خليجي",
-    english: "Gulf Arabic",
+    english: "Khaleeji",
     flag: "🗺️",
-    tag: "Majlis · Pearls · Coastal trade",
+    tag: "مجلس · لؤلؤ · تجارة السواحل",
     tagArabic: "مرحبا بالمعازيب",
-    vibe: "The unhurried cadence of the majlis — coffee, oud, the Gulf wind.",
+    vibe: "إيقاع المجلس على مهله — قهوة وعود وهوا الخليج.",
     hsl: "12 68% 32%",
   },
   {
     id: "Egyptian",
     arabic: "مصري",
-    english: "Egyptian Arabic",
+    english: "Masri",
     flag: "🇪🇬",
-    tag: "Cairo streets · Cinema · Wit",
+    tag: "شوارع القاهرة · سينما · إفيهات",
     tagArabic: "أهلاً يا باشا",
-    vibe: "Quick, warm, theatrical — the lingua franca of Arab cinema.",
+    vibe: "سريع ودافي ومسرحي — لغة السينما العربية.",
     hsl: "38 85% 45%",
   },
   {
     id: "Yemeni",
     arabic: "يمني",
-    english: "Yemeni Arabic",
+    english: "Yamani",
     flag: "🇾🇪",
-    tag: "Highlands · Honey · Ancient poetry",
+    tag: "مرتفعات · عسل · شعر قديم",
     tagArabic: "حياك الله",
-    vibe: "Mountain Arabic — old vowels, deep hospitality, slow verse.",
+    vibe: "عربي الجبال — حروف قديمة وكرم عميق وشعر على مهله.",
     hsl: "0 70% 42%",
   },
 ];
@@ -122,12 +122,12 @@ export const DialectRitualSwitcher = ({ className }: Props) => {
           className="fixed inset-0 z-50 flex items-center justify-center px-4 py-6"
           role="dialog"
           aria-modal="true"
-          aria-label="Choose dialect"
+          aria-label="اختر لهجتك"
         >
           {/* Backdrop */}
           <button
             type="button"
-            aria-label="Close dialect picker"
+            aria-label="أغلق قائمة اللهجات"
             onClick={() => !flippingId && setOpen(false)}
             className="absolute inset-0 z-0 bg-background/80 backdrop-blur-md animate-fade-up"
           />
@@ -150,17 +150,17 @@ export const DialectRitualSwitcher = ({ className }: Props) => {
             <div className="flex items-center justify-between mb-4">
               <div className="flex flex-col">
                 <span className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground font-semibold">
-                  Ingleezy · حكية
+                  إنجليزي · Ingleezy
                 </span>
                 <h2 className="text-t-title font-bold text-foreground">
-                  Choose your dialect
+                  اختر لهجتك
                 </h2>
               </div>
               <button
                 type="button"
                 onClick={() => !flippingId && setOpen(false)}
                 className="p-2 rounded-full hover:bg-muted transition-colors"
-                aria-label="Close"
+                aria-label="إغلاق"
               >
                 <X className="h-4 w-4 text-muted-foreground" />
               </button>
@@ -255,7 +255,7 @@ export const DialectRitualSwitcher = ({ className }: Props) => {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        aria-label={`Active dialect: ${current.english}. Tap to change.`}
+        aria-label={`لهجتك الحالية: ${current.english}. اضغط للتغيير.`}
         className={cn(
           "group w-full flex items-center justify-between gap-3",
           "px-4 py-3 rounded-2xl",
@@ -286,7 +286,7 @@ export const DialectRitualSwitcher = ({ className }: Props) => {
           </span>
           <span className="flex flex-col items-start min-w-0">
             <span className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium">
-              Active dialect
+              لهجتك الحالية
             </span>
             <span className="flex items-baseline gap-2 min-w-0">
               <span
@@ -296,7 +296,9 @@ export const DialectRitualSwitcher = ({ className }: Props) => {
               >
                 {current.arabic}
               </span>
-              <span className="text-sm font-medium text-foreground truncate">
+              {/* Latin spelling of the same name — the two scripts together
+                  are how a learner recognises their dialect at a glance. */}
+              <span className="font-english text-sm font-medium text-muted-foreground truncate">
                 {current.english}
               </span>
             </span>

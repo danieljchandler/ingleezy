@@ -83,7 +83,7 @@ const SoundRow = ({ entry }: { entry: SoundSpotlightEntry }) => {
             <button
               type="button"
               onClick={handlePlay}
-              aria-label={`Play ${example}`}
+              aria-label={`شغّل ${example}`}
               className="text-muted-foreground hover:text-primary transition-colors"
             >
               <Volume2 className="h-4 w-4" />

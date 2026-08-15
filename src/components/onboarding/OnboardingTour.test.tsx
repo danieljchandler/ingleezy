@@ -199,7 +199,7 @@ describe("leaving early", () => {
     openTour();
     next();
 
-    fireEvent.click(screen.getByRole("button", { name: "Skip tour" }));
+    fireEvent.click(screen.getByRole("button", { name: "تخطّى الجولة" }));
 
     // Same outcome from the middle of the tour as from the start.
     expect(tour()).toBeNull();

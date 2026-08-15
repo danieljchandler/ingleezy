@@ -38,7 +38,7 @@ export function ReferralCard() {
       if (error || !data?.code) throw error ?? new Error("no code");
       setInfo(data as ReferralInfo);
     } catch {
-      toast.error("Couldn't load your invite code — try again in a moment.");
+      toast.error("ما قدرنا نجيب كود الدعوة — جرّب بعد شوي.");
       setOpen(false);
     } finally {
       setLoading(false);
@@ -52,7 +52,7 @@ export function ReferralCard() {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      toast.error("Couldn't copy — long-press the code instead.");
+      toast.error("ما انقلب النسخ — اضغط مطوّلاً على الكود.");
     }
   };
 
@@ -86,14 +86,14 @@ export function ReferralCard() {
       if (error || data?.error) {
         const message =
           (data as { message?: string } | null)?.message ??
-          "Couldn't redeem that code.";
+          "ما قدرنا نفعّل هذا الكود.";
         toast.error(message);
         return;
       }
       toast.success(
         info?.rewards_enabled
-          ? "Code accepted — your first month's discount applies at checkout."
-          : "Code accepted!",
+          ? "قُبل الكود — خصم أول شهر بينطبق عند الدفع."
+          : "قُبل الكود!",
       );
       setInfo((prev) => (prev ? { ...prev, redeemed: true } : prev));
       setRedeemInput("");
@@ -116,7 +116,7 @@ export function ReferralCard() {
       <div className="flex items-center gap-2">
         <Gift className="h-4 w-4 text-primary" />
         <p className="text-sm font-semibold">
-          {info?.rewards_enabled ? "Give a month, get a month" : "Invite friends"}
+          {info?.rewards_enabled ? "اهدِ شهراً واكسب شهراً" : "ادعُ أصحابك"}
         </p>
       </div>
 
@@ -129,17 +129,17 @@ export function ReferralCard() {
           <p className="text-xs text-muted-foreground">
             {info.rewards_enabled
               ? "Friends who join with your code get their first month free — and when they subscribe, a month's credit lands on your account."
-              : "Share your code with friends learning Arabic."}
+              : "شارك كودك مع أصحابك اللي يتعلّمون إنجليزي."}
           </p>
 
           <div className="flex items-center gap-2">
             <code className="flex-1 rounded-md border border-border bg-muted/50 px-3 py-2 text-center font-mono text-lg tracking-widest">
               {info.code}
             </code>
-            <Button size="icon" variant="outline" onClick={copy} aria-label="Copy invite">
+            <Button size="icon" variant="outline" onClick={copy} aria-label="انسخ الدعوة">
               {copied ? <Check className="h-4 w-4 text-emerald-500" /> : <Copy className="h-4 w-4" />}
             </Button>
-            <Button size="icon" variant="outline" onClick={share} aria-label="Share invite">
+            <Button size="icon" variant="outline" onClick={share} aria-label="شارك الدعوة">
               <Share2 className="h-4 w-4" />
             </Button>
           </div>
@@ -153,11 +153,11 @@ export function ReferralCard() {
           {!info.redeemed && (
             <div className="flex items-center gap-2 border-t border-border pt-3">
               <Input
-                placeholder="Got a code? Enter it here"
+                placeholder="عندك كود؟ اكتبه هنا"
                 value={redeemInput}
                 onChange={(e) => setRedeemInput(e.target.value)}
                 className="h-8 text-sm"
-                aria-label="Referral code"
+                aria-label="كود الدعوة"
               />
               <Button size="sm" onClick={redeem} disabled={redeeming || !redeemInput.trim()}>
                 {redeeming ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Redeem"}

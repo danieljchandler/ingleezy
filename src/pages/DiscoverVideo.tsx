@@ -166,9 +166,9 @@ const ClickableWord = ({
               disabled={isSaved}
             >
               {isSaved ? (
-                <><Check className="h-4 w-4" /> Saved to My Words</>
+                <><Check className="h-4 w-4" /> محفوظة في كلماتي</>
               ) : (
-                <><BookOpen className="h-4 w-4" /> Save to My Words</>
+                <><BookOpen className="h-4 w-4" /> احفظ في كلماتي</>
               )}
             </Button>
           )}

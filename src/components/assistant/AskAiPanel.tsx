@@ -112,11 +112,11 @@ export function AskAiPanel() {
       {
         onSuccess: (row) => {
           setConversationId(row.id);
-          toast.success(conversationId ? "Conversation updated" : "Conversation saved", {
-            description: "Find it any time under Saved chats.",
+          toast.success(conversationId ? "حدّثنا المحادثة" : "حفظنا المحادثة", {
+            description: "تلقاها في «المحادثات المحفوظة».",
           });
         },
-        onError: () => toast.error("Couldn't save the conversation"),
+        onError: () => toast.error("تعذّر حفظ المحادثة"),
       },
     );
   };
@@ -166,7 +166,7 @@ export function AskAiPanel() {
             type="button"
             aria-expanded={snap === "full"}
             aria-controls="ask-ai-body"
-            aria-label={snap === "full" ? "Collapse panel" : "Expand panel"}
+            aria-label={snap === "full" ? "صغّر اللوحة" : "كبّر اللوحة"}
             onClick={onHandleClick}
             onPointerDown={onHandlePointerDown}
             onPointerUp={onHandlePointerUp}
@@ -176,7 +176,7 @@ export function AskAiPanel() {
           </button>
           <button
             type="button"
-            aria-label="Close Ask AI"
+            aria-label="أغلق اسأل الذكاء"
             onClick={close}
             className="ml-auto rounded-full p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >
@@ -190,7 +190,7 @@ export function AskAiPanel() {
           <div className="flex items-center gap-1.5">
             <SheetTitle className="mr-auto flex items-center gap-2 text-base">
               <Sparkles className="h-4 w-4 text-primary" />
-              Ask AI
+              اسأل الذكاء
             </SheetTitle>
             {messages.length > 0 && (
               <Button
@@ -201,7 +201,7 @@ export function AskAiPanel() {
                 onClick={newChat}
               >
                 <Plus className="h-3 w-3" />
-                New chat
+                محادثة جديدة
               </Button>
             )}
             {canSave && (
@@ -220,7 +220,7 @@ export function AskAiPanel() {
                 ) : (
                   <Bookmark className="h-3 w-3" />
                 )}
-                {conversationId ? "Saved" : "Save"}
+                {conversationId ? "محفوظة" : "احفظ"}
               </Button>
             )}
             {user && (
@@ -231,7 +231,7 @@ export function AskAiPanel() {
                 size="sm"
                 className="h-6 gap-1 px-2 text-xs text-muted-foreground"
               >
-                <Link to="/saved-chats" onClick={close} aria-label="Saved chats">
+                <Link to="/saved-chats" onClick={close} aria-label="المحادثات المحفوظة">
                   <History className="h-3 w-3" />
                 </Link>
               </Button>
@@ -257,7 +257,7 @@ export function AskAiPanel() {
               </TabsTrigger>
               <TabsTrigger value="voice" className="h-6 gap-1 text-xs">
                 <Mic className="h-3 w-3" />
-                Live voice
+                مكالمة مباشرة
               </TabsTrigger>
             </TabsList>
           </Tabs>

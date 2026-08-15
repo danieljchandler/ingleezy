@@ -73,7 +73,7 @@ function render(data: SmartNotification[] = []) {
 
 const bell = () => screen.getByRole("button", { name: "Notifications" });
 const badge = (container: HTMLElement) => container.querySelector(".rounded-full.text-\\[10px\\]");
-const item = (title: string) => screen.getByRole("button", { name: `Notification: ${title}` });
+const item = (title: string) => screen.getByRole("button", { name: `إشعار: ${title}` });
 
 describe("the badge", () => {
   it("shows nothing when there is nothing to say", () => {
@@ -222,8 +222,8 @@ describe("reading the notifications", () => {
       .slice(1)
       .map((b) => b.getAttribute("aria-label"));
     expect(titles).toEqual([
-      "Notification: Your streak ends in 3 hours",
-      "Notification: 12 reviews are due",
+      "إشعار: Your streak ends in 3 hours",
+      "إشعار: 12 reviews are due",
     ]);
   });
 });

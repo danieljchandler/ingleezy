@@ -332,7 +332,7 @@ test.describe("pricing", () => {
     await signInAs("standard");
     await page.goto("/pricing");
 
-    await expect(page.getByText("Your Plan", { exact: true })).toBeVisible();
+    await expect(page.getByText("باقتك", { exact: true })).toBeVisible();
     await expect(page.getByText(/أنت على باقة/)).toBeVisible();
     // No second charge offered for the plan they already have.
     await expect(page.getByRole("button", { name: "اشترك" })).toHaveCount(1);

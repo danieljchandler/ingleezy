@@ -37,7 +37,7 @@ const usePublishedStories = (filters: { difficulty?: string; dialect?: string })
   });
 
 const ReadingLibrary = () => {
-  useDocumentTitle('Reading Library — Ingleezy');
+  useDocumentTitle('مكتبة القراءة — Ingleezy');
   const navigate = useNavigate();
   const [difficulty, setDifficulty] = useState('all');
   const [dialect, setDialect] = useState('all');
@@ -57,7 +57,7 @@ const ReadingLibrary = () => {
         <div className="flex items-center gap-3 mb-6">
           <BookOpen className="h-7 w-7 text-primary" />
           <div>
-            <h1 className="text-2xl font-bold font-heading">Reading Library</h1>
+            <h1 className="text-2xl font-bold font-heading">مكتبة القراءة</h1>
             <p className="text-sm text-muted-foreground">Authentic Arabic stories for reading & listening practice</p>
           </div>
         </div>
@@ -69,7 +69,7 @@ const ReadingLibrary = () => {
               <SelectValue placeholder="Difficulty" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Levels</SelectItem>
+              <SelectItem value="all">كل المستويات</SelectItem>
               <SelectItem value="beginner">Beginner</SelectItem>
               <SelectItem value="intermediate">Intermediate</SelectItem>
               <SelectItem value="advanced">Advanced</SelectItem>
@@ -81,7 +81,7 @@ const ReadingLibrary = () => {
               <SelectValue placeholder="Dialect" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Dialects</SelectItem>
+              <SelectItem value="all">كل اللهجات</SelectItem>
               <SelectItem value="Gulf">Gulf</SelectItem>
               <SelectItem value="Egyptian">Egyptian</SelectItem>
               <SelectItem value="Yemeni">Yemeni</SelectItem>
@@ -140,8 +140,8 @@ const ReadingLibrary = () => {
         ) : (
           <div className="text-center py-16">
             <BookOpen className="h-16 w-16 text-muted-foreground/30 mx-auto mb-4" />
-            <h2 className="text-xl font-bold mb-2">No Stories Available</h2>
-            <p className="text-muted-foreground">Check back soon for authentic Arabic reading material</p>
+            <h2 className="text-xl font-bold mb-2">ما فيه قصص</h2>
+            <p className="text-muted-foreground">ارجع لنا قريباً، بننزل نصوصاً إنجليزية أصلية</p>
           </div>
         )}
       </div>

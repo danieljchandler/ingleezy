@@ -132,7 +132,7 @@ describe("playing a word", () => {
     const onPlayAudio = vi.fn();
     render([aWord(0, { word_audio_url: "https://cdn.test/book.mp3" })], { onPlayAudio });
 
-    await user.click(await screen.findByRole("button", { name: "Play word 0" }));
+    await user.click(await screen.findByRole("button", { name: "شغّل word 0" }));
 
     expect(onPlayAudio).toHaveBeenCalledWith("https://cdn.test/book.mp3");
   });

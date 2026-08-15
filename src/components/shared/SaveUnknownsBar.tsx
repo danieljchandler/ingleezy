@@ -30,7 +30,7 @@ export const SaveUnknownsBar = ({ source }: Props) => {
 
   const handleSave = async () => {
     if (!user) {
-      toast.error("Sign in to save words");
+      toast.error("سجّل دخولك عشان تحفظ الكلمات");
       return;
     }
     setSaving(true);
@@ -103,7 +103,7 @@ export const SaveUnknownsBar = ({ source }: Props) => {
       setEnabled(false);
     } catch (e: any) {
       console.error("Bulk save failed", e);
-      toast.error(e?.message || "Failed to save words");
+      toast.error(e?.message || "تعذّر حفظ الكلمات");
     } finally {
       setSaving(false);
     }
@@ -121,7 +121,7 @@ export const SaveUnknownsBar = ({ source }: Props) => {
             setEnabled(false);
           }}
           disabled={saving}
-          aria-label="Cancel"
+          aria-label="إلغاء"
         >
           <X className="h-4 w-4" />
         </Button>

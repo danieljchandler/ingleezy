@@ -18,7 +18,7 @@ export const NavigationArrow = ({
     <button
       onClick={onClick}
       disabled={disabled}
-      aria-label={`Navigate ${direction}`}
+      aria-label={`تنقّل ${direction}`}
       className={cn(
         "w-16 h-16 md:w-20 md:h-20 rounded-full",
         "flex items-center justify-center",

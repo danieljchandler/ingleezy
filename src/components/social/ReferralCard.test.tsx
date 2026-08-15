@@ -51,13 +51,13 @@ describe("laziness", () => {
 describe("the offer copy", () => {
   it("promises the month only when the backend can grant it", async () => {
     await open();
-    expect(screen.getByText("Give a month, get a month")).toBeInTheDocument();
+    expect(screen.getByText("اهدِ شهراً واكسب شهراً")).toBeInTheDocument();
   });
 
   it("falls back to a plain invite when rewards are not configured", async () => {
     invoke.mockResolvedValue({ data: info({ rewards_enabled: false }), error: null });
     await open();
-    expect(screen.getByText("Invite friends")).toBeInTheDocument();
+    expect(screen.getByText("ادعُ أصحابك")).toBeInTheDocument();
     expect(screen.queryByText(/first month free/)).not.toBeInTheDocument();
   });
 
@@ -70,7 +70,7 @@ describe("the offer copy", () => {
 describe("redeeming", () => {
   it("sends the entered code and confirms", async () => {
     await open();
-    fireEvent.change(screen.getByLabelText("Referral code"), { target: { value: "ABCD2345" } });
+    fireEvent.change(screen.getByLabelText("كود الدعوة"), { target: { value: "ABCD2345" } });
     invoke.mockResolvedValueOnce({ data: { ok: true }, error: null });
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: "Redeem" }));
@@ -81,19 +81,19 @@ describe("redeeming", () => {
     });
     // The input row retires once this account has redeemed.
     await waitFor(() =>
-      expect(screen.queryByLabelText("Referral code")).not.toBeInTheDocument(),
+      expect(screen.queryByLabelText("كود الدعوة")).not.toBeInTheDocument(),
     );
   });
 
   it("hides the redeem row for an account that already used a code", async () => {
     invoke.mockResolvedValue({ data: info({ redeemed: true }), error: null });
     await open();
-    expect(screen.queryByLabelText("Referral code")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("كود الدعوة")).not.toBeInTheDocument();
   });
 
   it("surfaces the server's reason when a redeem is refused", async () => {
     await open();
-    fireEvent.change(screen.getByLabelText("Referral code"), { target: { value: "OLDACCT2" } });
+    fireEvent.change(screen.getByLabelText("كود الدعوة"), { target: { value: "OLDACCT2" } });
     invoke.mockResolvedValueOnce({
       data: { error: "new_accounts_only", message: "Referral codes can only be used within your first month." },
       error: null,
@@ -103,7 +103,7 @@ describe("redeeming", () => {
     });
 
     // The input stays — the learner may have another (valid) code.
-    expect(screen.getByLabelText("Referral code")).toBeInTheDocument();
+    expect(screen.getByLabelText("كود الدعوة")).toBeInTheDocument();
   });
 });
 

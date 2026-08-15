@@ -294,7 +294,7 @@ test.describe("the daily goal", () => {
 
     await page.getByRole("button", { name: /الهدف اليومي/ }).click();
     await page.getByRole("spinbutton").fill("250");
-    await page.getByRole("button", { name: "حفظ" }).click();
+    await page.getByRole("button", { name: "حفظ", exact: true }).click();
 
     const stored = await page.evaluate(() => window.localStorage.getItem("today.goal"));
     expect(stored).toBe("250");
@@ -305,7 +305,7 @@ test.describe("the daily goal", () => {
 
     await page.getByRole("button", { name: /الهدف اليومي/ }).click();
     await page.getByRole("spinbutton").fill("0");
-    await page.getByRole("button", { name: "حفظ" }).click();
+    await page.getByRole("button", { name: "حفظ", exact: true }).click();
 
     // A zero goal would divide by zero in the ring; the input is left as-is
     // rather than being stored.

@@ -42,7 +42,7 @@ export const SuggestFlashcardsDialog = ({ open, onOpenChange }: Props) => {
 
   const handleGenerate = async () => {
     if (!topic.trim()) {
-      toast.error("Please enter a topic");
+      toast.error("اكتب موضوعاً");
       return;
     }
     setLoading(true);
@@ -56,13 +56,13 @@ export const SuggestFlashcardsDialog = ({ open, onOpenChange }: Props) => {
       if (error) throw error;
       const cards = (data?.flashcards || []) as Suggestion[];
       if (cards.length === 0) {
-        toast.error("No new suggestions returned. Try a different topic.");
+        toast.error("ما رجعت اقتراحات جديدة. جرّب موضوعاً ثانياً.");
       } else {
         setSuggestions(cards);
         setSelected(new Set(cards.map((_, i) => i)));
       }
     } catch (e: any) {
-      toast.error(e?.message || "Failed to generate suggestions");
+      toast.error(e?.message || "تعذّر توليد الاقتراحات");
     } finally {
       setLoading(false);
     }
@@ -76,7 +76,7 @@ export const SuggestFlashcardsDialog = ({ open, onOpenChange }: Props) => {
 
   const handleSave = async () => {
     if (selected.size === 0) {
-      toast.error("Select at least one word");
+      toast.error("اختر كلمة على الأقل");
       return;
     }
     setSaving(true);
@@ -130,7 +130,7 @@ export const SuggestFlashcardsDialog = ({ open, onOpenChange }: Props) => {
           />
           <Button onClick={handleGenerate} disabled={loading || !topic.trim()} className="w-full gap-2">
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-            {loading ? "Generating…" : "Generate suggestions"}
+            {loading ? "نولّد…" : "ولّد اقتراحات"}
           </Button>
         </div>
 
@@ -174,7 +174,7 @@ export const SuggestFlashcardsDialog = ({ open, onOpenChange }: Props) => {
             <span className="text-sm text-muted-foreground">{selected.size} selected</span>
             <Button onClick={handleSave} disabled={saving || selected.size === 0} className="gap-2">
               {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-              Save to My Words
+              احفظ في كلماتي
             </Button>
           </div>
         )}
