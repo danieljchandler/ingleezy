@@ -172,7 +172,6 @@ Deno.test("word-enrichment returns the gloss the popover shows", async () => {
       ...allowed(),
       ...modelReturns({
         definition: "how are you",
-        root: "خ ب ر",
         transliteration: "shakhbarak",
         uses: [{ arabic: "شخبار الأهل", english: "how is the family" }],
       }),
@@ -180,26 +179,32 @@ Deno.test("word-enrichment returns the gloss the popover shows", async () => {
   );
 
   assertEquals(status, 200);
-  // TappableArabicText reads definition, root and transliteration onto the
-  // saved flashcard, so these names are a contract with My Words.
+  // TappableArabicText reads definition and transliteration onto the saved
+  // flashcard, so these names are a contract with My Words.
   assertEquals(body.definition, "how are you");
-  assertEquals(body.root, "خ ب ر");
   assertEquals(body.transliteration, "shakhbarak");
   assertEquals((body.uses as unknown[]).length, 1);
+  // No `root`, deliberately. This function serves the bridged Arabic clips, so
+  // the only root it could return is an Arabic one — and that column now holds
+  // an English word family. Writing an Arabic root there would both be
+  // unreadable to the client and lock the row out of the backfill, which only
+  // fills rows where root IS NULL.
+  assertEquals(body.root, undefined);
 });
 
 Deno.test("word-enrichment answers with nulls rather than missing keys", async () => {
   const { status, body } = await call(
     "word-enrichment",
     { word: "شخبارك", dialect: "Gulf" },
-    { ...allowed(), ...modelReturns({ definition: "", root: "", transliteration: "", uses: [] }) },
+    { ...allowed(), ...modelReturns({ definition: "", transliteration: "", uses: [] }) },
   );
 
   assertEquals(status, 200);
-  // The client does `out.root || undefined`; an absent key and a null behave
-  // the same there, but an absent key would break a strict consumer later.
+  // The client does `out.definition || undefined`; an absent key and a null
+  // behave the same there, but an absent key would break a strict consumer
+  // later.
   assertEquals(body.definition, null);
-  assertEquals(body.root, null);
+  assertEquals(body.transliteration, null);
   assertEquals(body.uses, []);
 });
 
@@ -211,7 +216,6 @@ Deno.test("word-enrichment caps how many related uses it returns", async () => {
       ...allowed(),
       ...modelReturns({
         definition: "how are you",
-        root: "خ ب ر",
         transliteration: "shakhbarak",
         uses: Array.from({ length: 12 }, (_, index) => ({
           arabic: `مثال${index}`,

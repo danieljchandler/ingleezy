@@ -7,7 +7,7 @@ import { RootFamilySheet } from "./RootFamilySheet";
 import type { SupabaseBackend } from "@/test/support/server/handler";
 
 /**
- * The whole of one root family, reached from the "+N more" under a reviewed
+ * The whole of one word family, reached from the "+N more" under a reviewed
  * card.
  *
  * It exists because the footnote on the card has to stay short — five words at
@@ -18,7 +18,7 @@ import type { SupabaseBackend } from "@/test/support/server/handler";
  * The one deliberate difference from the card footnote is dialect. On the card
  * siblings are restricted to the card's own dialect, because a pattern that
  * only holds in one of them would teach the wrong thing mid-recall. Browsing a
- * family is the opposite: seeing the same root turn up across dialects is the
+ * family is the opposite: a family is a fact about English, and seeing it turn up across all three dialect decks is the
  * interesting part, so they are shown and labelled rather than filtered out.
  */
 
@@ -39,7 +39,7 @@ const aWord = (index: number, over: Record<string, unknown> = {}) =>
     user_id: TEST_USER_ID,
     word_arabic: `كلمة${index}`,
     word_english: `word ${index}`,
-    root: "ك ت ب",
+    root: "act",
     dialect: "Gulf",
     ...over,
   });
@@ -50,7 +50,7 @@ function render(
 ) {
   const harness = renderWithProviders(
     <RootFamilySheet
-      familyKey={props.familyKey === undefined ? "كتب" : props.familyKey}
+      familyKey={props.familyKey === undefined ? "act" : props.familyKey}
       onOpenChange={props.onOpenChange ?? (() => {})}
       onPlayAudio={props.onPlayAudio}
     />,
@@ -66,9 +66,9 @@ function render(
 describe("opening a family", () => {
   it("lists every word in it, however the root was spelled", async () => {
     render([
-      aWord(0, { root: "ك-ت-ب" }),
-      aWord(1, { root: "ك ت ب" }),
-      aWord(2, { root: "كتب" }),
+      aWord(0, { root: "Act" }),
+      aWord(1, { root: "act" }),
+      aWord(2, { root: "act" }),
     ]);
 
     expect(await screen.findByText("word 0")).toBeInTheDocument();
@@ -79,14 +79,14 @@ describe("opening a family", () => {
   it("titles itself with the root, spaced out", async () => {
     render([aWord(0), aWord(1)]);
 
-    expect(await screen.findByText("ك · ت · ب")).toBeInTheDocument();
+    expect(await screen.findByText("act")).toBeInTheDocument();
   });
 
   it("counts the family, in the singular when there is one", async () => {
     render([aWord(0)]);
 
     expect(
-      await screen.findByText("1 word you know is built from this root"),
+      await screen.findByText("كلمة وحدة تعرفها من هذي العائلة"),
     ).toBeInTheDocument();
   });
 

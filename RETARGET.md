@@ -145,8 +145,38 @@ generation conditioning.
       scoreBand labels (flip with the pronunciation pages).
 - [ ] Clickable transcript words → save-as-flashcard: KEEP mechanism,
       direction flips (tap English word, card scaffolds in Arabic)
-- [ ] Root-morphology sibling cards → English **word families**
-      (act/action/active/actor) — same linking pattern, different linguistics
+- [x] **Root-morphology sibling cards → English word families**. Same
+      linking pattern, genuinely different linguistics: Arabic *generates*
+      a vocabulary from a consonantal root, so ك-ت-ب is a real derivable
+      thing that three letters identify. English has no such generator —
+      it has the word family, a base word plus what is built from it
+      (act → action, active, actor). `user_vocabulary.root` keeps its
+      name and carries the base form instead.
+      `src/lib/arabicRoot.ts` became `src/lib/wordFamily.ts`, and the
+      rule changes follow the linguistics: the 2-5 radical bound
+      (which doubled as a garbage filter) becomes a 2-20 letter bound,
+      the "ك · ت · ب" display transform is gone because an English base
+      form *is* a readable word, and case and hyphens fold. Two rules
+      are new. `none`/`unknown`/`n/a` are rejected explicitly — the
+      Arabic version got that free, since they are not Arabic letters,
+      but in English they are well-formed base forms and would collect
+      every unanalysable word into one enormous fake family. And
+      `familyKey` refuses Arabic script, which quietly retires every
+      root written before the flip: those rows drop out of the index
+      rather than needing a migration.
+      `enrich-word-roots` derives from `word_english` with an English
+      closed-class stoplist and a prompt that names the trap directly
+      ("actual" is NOT in the "act" family). Its sanitiser now *refuses*
+      rather than strips, because stripping the spaces out of "the act
+      of doing" leaves "theactofdoing", which passes every shape check
+      there is — the Arabic version could strip freely only because a
+      laundered phrase never fit in five letters.
+      One real bug fixed on the way: `word-enrichment` returned the
+      Arabic root and the save path wrote it into `root`. Post-flip that
+      is wrong twice over — the client refuses to display it, and since
+      the backfill only fills rows where `root IS NULL`, the card was
+      locked out of ever getting a real family. It no longer returns
+      one, and both save paths leave the column null for the backfill.
 
 ### Media pipeline — FLIP + BRIDGE
 - [x] **Hakiya bridge**: `sync-hakiya-videos` function + `source` column

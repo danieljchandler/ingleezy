@@ -22,7 +22,6 @@ import { useBridgeMode } from "@/hooks/useBridgeMode";
 interface WordEnrichment {
   definition?: string;
   literal?: string;
-  root?: string;
   transliteration?: string;
   otherUses?: { arabic: string; english: string }[];
 }
@@ -57,7 +56,6 @@ const enrichWord = async (
     return {
       definition: data?.definition || undefined,
       literal: data?.literal || undefined,
-      root: data?.root || undefined,
       transliteration: data?.transliteration || undefined,
       otherUses: Array.isArray(data?.uses) ? data.uses : [],
     };
@@ -83,7 +81,7 @@ interface TappableArabicTextProps {
 
 /**
  * Renders Arabic text where each word is tappable.
- * Tapping a word → popover with translation, root, related forms, save.
+ * Tapping a word → popover with translation, related forms, save.
  * Long-pressing (or using "Combine with neighbour") starts PHRASE MODE:
  *   words become checkbox-like; tap any word and the contiguous range
  *   between the first and last picked is highlighted. A floating bar
@@ -169,7 +167,7 @@ export const TappableArabicText = ({
     }
   };
 
-  const saveAsFlashcard = (arabic: string, english: string, root?: string, transliteration?: string) => {
+  const saveAsFlashcard = (arabic: string, english: string, transliteration?: string) => {
     if (!user) {
       toast.error("سجّل دخولك عشان تحفظ البطاقات");
       return;
@@ -178,7 +176,6 @@ export const TappableArabicText = ({
       {
         word_arabic: arabic,
         word_english: english,
-        root: root || undefined,
         transliteration: transliteration || undefined,
         source,
         sentence_text: sentenceContext?.arabic || text || undefined,
@@ -247,7 +244,7 @@ export const TappableArabicText = ({
       toast.info("ترجمها أول، بعدين احفظها");
       return;
     }
-    saveAsFlashcard(phraseText, english, phraseData?.enrichment?.root, phraseData?.enrichment?.transliteration);
+    saveAsFlashcard(phraseText, english, phraseData?.enrichment?.transliteration);
   };
 
   // ── Long-press handlers (mobile-first) ────────────────────────────
@@ -403,14 +400,7 @@ export const TappableArabicText = ({
                     {wordData.enriching ? (
                       <div className="flex items-center gap-2 pt-1">
                         <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
-                        <span className="text-xs text-muted-foreground">نجيب الجذر والاستعمالات…</span>
-                      </div>
-                    ) : wordData.enrichment?.root ? (
-                      <div className="pt-1 border-t border-border">
-                        <p className="text-xs font-medium text-muted-foreground">الجذر</p>
-                        <p className="font-arabic text-sm text-foreground" dir="rtl">
-                          {wordData.enrichment.root}
-                        </p>
+                        <span className="text-xs text-muted-foreground">نجيب الاستعمالات…</span>
                       </div>
                     ) : null}
 
@@ -528,7 +518,7 @@ export const TappableArabicText = ({
                         className="w-full text-xs mt-1"
                         onClick={(e) => {
                           e.stopPropagation();
-                          saveAsFlashcard(cleanWord, wordData.translation, wordData.enrichment?.root, wordData.enrichment?.transliteration);
+                          saveAsFlashcard(cleanWord, wordData.translation, wordData.enrichment?.transliteration);
                         }}
                       >
                         <BookmarkPlus className="h-3 w-3 mr-1" />

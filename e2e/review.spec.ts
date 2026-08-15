@@ -305,21 +305,21 @@ test.describe("saved-word decks", () => {
    * carrying different spellings of it. Matching on the stored string made them
    * strangers; matching on a canonical key makes them a family.
    */
-  test("shows the words you know from the card's root, however each was spelled", async ({ page, db }) => {
+  test("shows the words you know from the card's family, however each was spelled", async ({ page, db }) => {
     db.seed("user_vocabulary", [
       aUserVocabulary({
         id: vocabId(0),
         user_id: TEST_USER_ID,
         word_arabic: "كتاب",
         word_english: "book",
-        root: "ك-ت-ب",
+        root: "Book",
       }),
       aUserVocabulary({
         id: vocabId(1),
         user_id: TEST_USER_ID,
         word_arabic: "مكتبة",
         word_english: "library",
-        root: "ك ت ب",
+        root: "book",
         next_review_at: new Date(Date.now() + 86_400_000).toISOString(),
       }),
     ]);
@@ -328,11 +328,11 @@ test.describe("saved-word decks", () => {
     await expect(page.getByText("book")).toBeVisible();
 
     // Nothing before the learner has committed to an answer.
-    await expect(page.getByText(/في هذا الجذر/)).toHaveCount(0);
+    await expect(page.getByText(/من نفس العائلة/)).toHaveCount(0);
 
     await page.getByRole("button", { name: /أظهر/ }).click();
 
-    const footnote = page.getByRole("button", { name: /كلمة واحدة تعرفها تشترك في هذا الجذر/ });
+    const footnote = page.getByRole("button", { name: /كلمة واحدة تعرفها من نفس العائلة/ });
     await expect(footnote).toBeVisible();
     // Collapsed until asked: the learner is mid-recall.
     await expect(footnote).toHaveAttribute("aria-expanded", "false");
@@ -341,14 +341,14 @@ test.describe("saved-word decks", () => {
     await expect(page.getByText("library")).toBeVisible();
   });
 
-  test("says nothing about roots when the learner has turned them off", async ({ page, db }) => {
+  test("says nothing about families when the learner has turned them off", async ({ page, db }) => {
     db.seed("user_vocabulary", [
-      aUserVocabulary({ id: vocabId(0), user_id: TEST_USER_ID, word_arabic: "كتاب", root: "ك ت ب" }),
+      aUserVocabulary({ id: vocabId(0), user_id: TEST_USER_ID, word_arabic: "كتاب", root: "book" }),
       aUserVocabulary({
         id: vocabId(1),
         user_id: TEST_USER_ID,
         word_arabic: "مكتبة",
-        root: "ك ت ب",
+        root: "book",
         next_review_at: new Date(Date.now() + 86_400_000).toISOString(),
       }),
     ]);
@@ -360,7 +360,7 @@ test.describe("saved-word decks", () => {
     await page.goto("/review/my-words");
     await page.getByRole("button", { name: /أظهر/ }).click();
 
-    await expect(page.getByText(/في هذا الجذر/)).toHaveCount(0);
+    await expect(page.getByText(/من نفس العائلة/)).toHaveCount(0);
   });
 
   test("reports the deck finished when nothing is due", async ({ page, db }) => {

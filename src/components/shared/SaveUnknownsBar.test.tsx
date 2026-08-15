@@ -214,9 +214,13 @@ describe("saving", () => {
     await waitFor(() => expect(saved(backend)).toHaveLength(2));
     expect(saved(backend)[0]).toMatchObject({
       word_english: "restaurant",
-      root: "ط ع م",
       transliteration: "mat'am",
     });
+    // The word family is derived from the English side by enrich-word-roots,
+    // and that backfill only ever fills rows where root IS NULL. Writing
+    // anything here — as this path used to, with the Arabic root the lookup
+    // returned — would lock the card out of ever getting a real family.
+    expect(saved(backend)[0].root).toBeNull();
   });
 
   it("saves the word anyway when the lookup fails", async () => {

@@ -8,10 +8,22 @@ import { getCorsHeaders } from "../_shared/cors.ts";
 interface EnrichmentOut {
   definition?: string | null;
   literal?: string | null;
-  root?: string | null;
   transliteration?: string | null;
   uses?: Array<{ arabic: string; english: string }>;
 }
+
+/**
+ * No `root` here any more, and its absence is deliberate.
+ *
+ * This function serves the Hakiya-bridged Arabic clips: the learner taps an
+ * Arabic word and gets its English meaning. Pre-flip it also returned the
+ * Arabic triliteral root, which the save path wrote into
+ * `user_vocabulary.root`. That column now carries an ENGLISH word family, so
+ * an Arabic root written there is worse than nothing twice over — the client
+ * refuses to display it, and because `enrich-word-roots` only fills rows where
+ * `root IS NULL`, the row is permanently locked out of ever getting its real
+ * family. Leaving it null is what lets the backfill do its job.
+ */
 
 serve(async (req) => {
   const corsHeaders = getCorsHeaders(req);
@@ -40,8 +52,8 @@ serve(async (req) => {
       : '';
 
     const systemExtra = isPhrase
-      ? `Task: given a multi-word Arabic PHRASE or expression, return its IDIOMATIC English meaning as a whole — NOT word-by-word — in "definition". SEPARATELY, in "literal", give a word-for-word English gloss that preserves the Arabic word order (may sound stiff — it shows how the phrase is built). Also return the root of the head/most lexically meaningful word, and up to 3 related expressions in the SAME dialect.`
-      : `Task: given an Arabic word, return its English definition, its root, and up to 3 related words/expressions in the SAME dialect.`;
+      ? `Task: given a multi-word Arabic PHRASE or expression, return its IDIOMATIC English meaning as a whole — NOT word-by-word — in "definition". SEPARATELY, in "literal", give a word-for-word English gloss that preserves the Arabic word order (may sound stiff — it shows how the phrase is built). Also return up to 3 related expressions in the SAME dialect.`
+      : `Task: given an Arabic word, return its English definition and up to 3 related words/expressions in the SAME dialect.`;
 
     // literal (word-for-word gloss) only makes sense for multi-word phrases.
     const phraseProps = isPhrase
@@ -62,13 +74,12 @@ serve(async (req) => {
       temperature: 0.2,
       tool: {
         name: 'return_enrichment',
-        description: 'Return the word/phrase definition, root, transliteration, and related uses.',
+        description: 'Return the word/phrase definition, transliteration, and related uses.',
         parameters: {
           type: 'object',
           properties: {
             definition: { type: 'string', description: 'English meaning' },
             ...phraseProps,
-            root: { type: 'string', description: 'Trilateral root, e.g. "ك-ت-ب", or empty string if not applicable' },
             transliteration: { type: 'string', description: 'Latin-letter transliteration of the word/phrase' },
             uses: {
               type: 'array',
@@ -84,7 +95,7 @@ serve(async (req) => {
               },
             },
           },
-          required: ['definition', ...phraseRequired, 'root', 'transliteration', 'uses'],
+          required: ['definition', ...phraseRequired, 'transliteration', 'uses'],
           additionalProperties: false,
         },
       },
@@ -98,7 +109,6 @@ serve(async (req) => {
     return new Response(JSON.stringify({
       definition: out.definition || null,
       literal: out.literal || null,
-      root: out.root || null,
       transliteration: out.transliteration || null,
       uses: Array.isArray(out.uses) ? out.uses.slice(0, 5) : [],
       _meta: { strategy: result.strategy, models: result.models, msaRepairs: result.msaRepairs },
@@ -110,7 +120,7 @@ serve(async (req) => {
       });
     }
     console.error('word-enrichment error:', e);
-    return new Response(JSON.stringify({ root: null, uses: [] }), {
+    return new Response(JSON.stringify({ uses: [] }), {
       status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }

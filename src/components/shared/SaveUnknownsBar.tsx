@@ -51,7 +51,6 @@ export const SaveUnknownsBar = ({ source }: Props) => {
             return {
               word_arabic: entry.arabic,
               word_english: data?.definition || "",
-              root: data?.root || null,
               transliteration: data?.transliteration || null,
               source,
               sentence_text: entry.sentence_text,
@@ -75,7 +74,10 @@ export const SaveUnknownsBar = ({ source }: Props) => {
         user_id: user.id,
         word_arabic: e.word_arabic,
         word_english: e.word_english,
-        root: e.root ?? null,
+        // Left null on purpose: the word family is derived from the ENGLISH
+        // side, and enrich-word-roots only fills rows where root IS NULL.
+        // Writing anything here now would lock the card out of ever getting one.
+        root: null,
         transliteration: (e as { transliteration?: string | null }).transliteration ?? null,
         source: e.source,
         dialect: activeDialect,

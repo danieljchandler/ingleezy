@@ -8,13 +8,13 @@ import { useSiblingWords } from "./useSiblingWords";
 import type { SupabaseBackend } from "@/test/support/server/handler";
 
 /**
- * The learner's root-bearing vocabulary, bucketed by canonical root.
+ * The learner's family-bearing vocabulary, bucketed by canonical family.
  *
  * The shape of this hook is the whole argument for it. The lookup it replaced
  * ran *inside* the review loop — one round trip per card revealed — and asked
  * SQL to compare an unnormalised free-text column, so it was simultaneously the
  * most frequent query in a review session and one that could not match. Fetching
- * once and grouping in TypeScript makes it both cheaper and correct: `rootKey`
+ * once and grouping in TypeScript makes it both cheaper and correct: `familyKey`
  * reconciles the spellings already sitting in the database, with no migration
  * and no backfill of existing rows.
  *
@@ -23,7 +23,7 @@ import type { SupabaseBackend } from "@/test/support/server/handler";
  * when the learner has the feature switched off.
  */
 
-const ROOT = "ك ت ب";
+const ROOT = "act";
 
 let cleanup: (() => void) | undefined;
 
@@ -68,17 +68,17 @@ function render(rows: Record<string, unknown>[] = []) {
 }
 
 describe("bucketing the deck", () => {
-  it("groups differently-spelled roots under one key", async () => {
+  it("groups differently-spelled families under one key", async () => {
     const { result } = render([
-      aWord(0, { root: "ك-ت-ب" }),
-      aWord(1, { root: "ك ت ب" }),
-      aWord(2, { root: "كَتَبَ" }),
-      aWord(3, { root: "د ر س" }),
+      aWord(0, { root: "Act" }),
+      aWord(1, { root: "act" }),
+      aWord(2, { root: " ACT " }),
+      aWord(3, { root: "form" }),
     ]);
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect([...(result.current.data?.keys() ?? [])].sort()).toEqual(["درس", "كتب"]);
-    expect(result.current.data?.get("كتب")?.map((w) => w.id).sort()).toEqual([
+    expect([...(result.current.data?.keys() ?? [])].sort()).toEqual(["act", "form"]);
+    expect(result.current.data?.get("act")?.map((w) => w.id).sort()).toEqual([
       "voc-0",
       "voc-1",
       "voc-2",
@@ -92,7 +92,7 @@ describe("bucketing the deck", () => {
     // Scoping the query by dialect would be wrong for a mixed-dialect session,
     // where the deck spans all three at once. The per-card filter is the
     // caller's job — this index has to be able to answer for any of them.
-    expect(result.current.data?.get("كتب")).toHaveLength(2);
+    expect(result.current.data?.get("act")).toHaveLength(2);
   });
 
   it("orders each family strongest-remembered first", async () => {
@@ -105,7 +105,7 @@ describe("bucketing the deck", () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     // `ease_factor` holds FSRS stability in days — how well the word is
     // remembered right now, which is what makes it usable as an anchor.
-    expect(result.current.data?.get("كتب")?.map((w) => w.id)).toEqual([
+    expect(result.current.data?.get("act")?.map((w) => w.id)).toEqual([
       "voc-1",
       "voc-2",
       "voc-0",
@@ -116,7 +116,7 @@ describe("bucketing the deck", () => {
     const { result } = render([aWord(0), aWord(1, { user_id: "someone-else" })]);
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(result.current.data?.get("كتب")).toHaveLength(1);
+    expect(result.current.data?.get("act")).toHaveLength(1);
   });
 });
 
@@ -125,7 +125,7 @@ describe("what never enters the index", () => {
     const { result } = render([aWord(0), aWord(1, { root: null })]);
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(result.current.data?.get("كتب")).toHaveLength(1);
+    expect(result.current.data?.get("act")).toHaveLength(1);
   });
 
   it("skips the 'no root exists' sentinel rather than making a family of it", async () => {
@@ -138,15 +138,17 @@ describe("what never enters the index", () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     // '' is written deliberately by the backfill for loanwords and particles so
     // it never pays to look them up twice. Keyed on, it would collect every
-    // rootless word in the deck into one enormous false family.
+    // family-less word in the deck into one enormous false family.
     expect(result.current.data?.size).toBe(0);
   });
 
-  it("skips roots that cannot be read as roots", async () => {
+  it("skips families that cannot be read as base forms", async () => {
     const { result } = render([
       aWord(0, { root: "n/a" }),
-      aWord(1, { root: "kataba" }),
-      aWord(2, { root: "من الكتاب" }),
+      // An Arabic root from before the flip. It has to drop out of the index
+      // rather than form a family an English learner cannot use.
+      aWord(1, { root: "ك ت ب" }),
+      aWord(2, { root: "the act of doing" }),
     ]);
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -159,16 +161,16 @@ describe("what it costs", () => {
     const counter = { vocabularyReads: 0 };
     const harness = renderHookWithProviders(
       () => ({
-        // Five cards on five different roots, as a review session would.
-        a: useSiblingWords({ root: "ك ت ب", excludeId: "x", dialect: "Gulf" }),
-        b: useSiblingWords({ root: "د ر س", excludeId: "x", dialect: "Gulf" }),
-        c: useSiblingWords({ root: "ك-ت-ب", excludeId: "x", dialect: "Gulf" }),
-        d: useSiblingWords({ root: "ع م ل", excludeId: "x", dialect: "Gulf" }),
+        // Five cards on five different families, as a review session would.
+        a: useSiblingWords({ root: "act", excludeId: "x", dialect: "Gulf" }),
+        b: useSiblingWords({ root: "form", excludeId: "x", dialect: "Gulf" }),
+        c: useSiblingWords({ root: "Act", excludeId: "x", dialect: "Gulf" }),
+        d: useSiblingWords({ root: "use", excludeId: "x", dialect: "Gulf" }),
         index: useRootIndex(),
       }),
       {
         persona: "free",
-        seed: countingSeed([aWord(0), aWord(1, { root: "د ر س" })], counter),
+        seed: countingSeed([aWord(0), aWord(1, { root: "form" })], counter),
       },
     );
     cleanup = harness.cleanup;

@@ -9,7 +9,7 @@ import type { SupabaseBackend } from "@/test/support/server/handler";
 
 /**
  * The footnote under a reviewed card listing the other words the learner knows
- * from the same root.
+ * from the same word family.
  *
  * This file did not exist while the component did, which is how the component
  * shipped reading `user_vocabulary.stage` — a column created by no migration,
@@ -22,7 +22,7 @@ import type { SupabaseBackend } from "@/test/support/server/handler";
  * nothing to say, and never claim a family is smaller than it is.
  */
 
-const ROOT = "ك ت ب";
+const ROOT = "act";
 
 let cleanup: (() => void) | undefined;
 
@@ -63,7 +63,7 @@ function render(rows: Record<string, unknown>[], props: Partial<{ onOpenFamily: 
   return harness;
 }
 
-const summary = () => screen.findByRole("button", { name: /في هذا الجذر/ });
+const summary = () => screen.findByRole("button", { name: /من نفس العائلة/ });
 
 /**
  * Open the list, whatever it was showing when it mounted.
@@ -106,7 +106,7 @@ describe("staying out of the way", () => {
   it("starts collapsed, showing only how many words there are", async () => {
     render([aWord(0), aWord(1), aWord(2)]);
 
-    expect(await screen.findByText("كلمتان تعرفهما تشتركان في هذا الجذر")).toBeInTheDocument();
+    expect(await screen.findByText("كلمتان تعرفهما من نفس العائلة")).toBeInTheDocument();
     // The words themselves are an opt-in: the learner is mid-recall.
     expect(screen.queryByText("word 1")).not.toBeInTheDocument();
   });
@@ -114,14 +114,14 @@ describe("staying out of the way", () => {
   it("counts one sibling in the singular", async () => {
     render([aWord(0), aWord(1)]);
 
-    expect(await screen.findByText("كلمة واحدة تعرفها تشترك في هذا الجذر")).toBeInTheDocument();
+    expect(await screen.findByText("كلمة واحدة تعرفها من نفس العائلة")).toBeInTheDocument();
   });
 
-  it("shows the root spaced out so it reads as a root", async () => {
+  it("shows the family as the English base form it is", async () => {
     render([aWord(0), aWord(1)]);
 
     await summary();
-    expect(screen.getByText("ك · ت · ب")).toBeInTheDocument();
+    expect(screen.getByText("act")).toBeInTheDocument();
   });
 
   it("opens and closes on click", async () => {
@@ -180,7 +180,7 @@ describe("the family behind the list", () => {
     // Eight siblings, five shown.
     await user.click(screen.getByRole("button", { name: "+3 أخرى" }));
 
-    expect(onOpenFamily).toHaveBeenCalledWith("كتب");
+    expect(onOpenFamily).toHaveBeenCalledWith("act");
   });
 
   it("does not offer more when the whole family is already listed", async () => {

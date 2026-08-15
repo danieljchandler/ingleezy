@@ -125,7 +125,7 @@ test.describe("working through a lesson", () => {
     await expect(page.getByText("كلمة1")).toBeVisible();
   });
 
-  test("shows the word's root once the Arabic is revealed, and not before", async ({ page, db }) => {
+  test("shows the word's family once the Arabic is revealed, and not before", async ({ page, db }) => {
     db.seed("vocabulary_words", [
       aVocabularyWord({
         id: wordId(0),
@@ -134,23 +134,25 @@ test.describe("working through a lesson", () => {
         word_arabic: "كتاب",
         word_english: "book",
         display_order: 0,
-        // Stored with hyphens, as one of the AI paths writes it — the display
+        // Stored capitalised, as one of the AI paths writes it — the display
         // canonicalises whatever spelling reached the column.
-        root: "ك-ت-ب",
+        root: "Book",
       }),
     ]);
 
     await page.goto(`/learn/${LESSON}`);
-    // The root is a strong clue to the meaning, and the learner is being asked
-    // to produce the word from the picture.
-    await expect(page.getByText("ك · ت · ب")).toHaveCount(0);
+    // The family is a strong clue to the meaning, and the learner is being
+    // asked to produce the word from the picture. Asserted through the chip's
+    // own title rather than its text: the English headword is on screen from
+    // the start, so matching on "book" would find that instead.
+    await expect(page.getByTitle("عائلة الكلمة")).toHaveCount(0);
 
     await page.getByRole("button", { name: "ورّني العربي" }).click();
 
-    await expect(page.getByText("ك · ت · ب")).toBeVisible();
+    await expect(page.getByTitle("عائلة الكلمة")).toBeVisible();
   });
 
-  test("shows no root chip for a word that has none", async ({ page, db }) => {
+  test("shows no family chip for a word that has none", async ({ page, db }) => {
     db.seed("vocabulary_words", [
       aVocabularyWord({
         id: wordId(0),
@@ -166,9 +168,9 @@ test.describe("working through a lesson", () => {
     await page.goto(`/learn/${LESSON}`);
     await page.getByRole("button", { name: "ورّني العربي" }).click();
 
-    // Most curriculum words have no root until an admin backfills them, so an
-    // empty chip would be the normal case rather than the exception.
-    await expect(page.getByTitle("الجذر العربي")).toHaveCount(0);
+    // Most curriculum words have no family until an admin backfills them, so
+    // an empty chip would be the normal case rather than the exception.
+    await expect(page.getByTitle("عائلة الكلمة")).toHaveCount(0);
   });
 
   test("asks for the English once the quiz starts", async ({ page }) => {

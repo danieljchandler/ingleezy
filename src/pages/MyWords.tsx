@@ -20,7 +20,7 @@ const ImportFromAnkiDialog = lazy(() =>
 import { Wand2 } from "lucide-react";
 import { InfoHint } from "@/components/InfoHint";
 import { PAGE_HINTS } from "@/lib/pageHints";
-import { buildRootFamilies, formatRoot, rootKey } from "@/lib/arabicRoot";
+import { buildWordFamilies, familyKey, formatFamily } from "@/lib/wordFamily";
 import { useRootFamilyPrefs } from "@/hooks/useRootFamilyPrefs";
 import { showCapToastIfLimited } from "@/lib/handleCapResponse";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -118,7 +118,7 @@ const MyWords = () => {
   }, [words]);
 
   /**
-   * Root families, grouped from the deck already in memory.
+   * Word families, grouped from the deck already in memory.
    *
    * `useUserVocabulary` fetches every word, so grouping here costs a pass over
    * an array rather than a query. Families of one are dropped: a single word is
@@ -126,13 +126,20 @@ const MyWords = () => {
    * of chips that each filter to exactly one card.
    */
   const rootOptions = useMemo(
-    () => buildRootFamilies(words ?? [], { minSize: 2 }),
+    () => buildWordFamilies(words ?? [], { minSize: 2 }),
     [words],
   );
 
-  /** Words nobody has looked up a root for yet — `''` means we looked and found none. */
+  /**
+   * Words nobody has looked up a family for yet — `''` means we looked and
+   * found none.
+   *
+   * The multi-word check reads the ENGLISH side, because that is what the
+   * backfill derives from: a phrase has no family of its own, and counting one
+   * here would promise a lookup the function resolves for free as "none".
+   */
   const rootlessCount = useMemo(
-    () => (words ?? []).filter((w) => w.root === null && !/\s/.test(w.word_arabic)).length,
+    () => (words ?? []).filter((w) => w.root === null && !/\s/.test(w.word_english ?? "")).length,
     [words],
   );
 
@@ -144,7 +151,7 @@ const MyWords = () => {
       if (categoryFilter && w.source !== categoryFilter) return false;
       if (deckFilter && w.deck_name !== deckFilter) return false;
       if (tagFilter && !(w.tags || []).includes(tagFilter)) return false;
-      if (rootFilter && rootKey(w.root) !== rootFilter) return false;
+      if (rootFilter && familyKey(w.root) !== rootFilter) return false;
       return true;
     });
   }, [words, sourceFilter, categoryFilter, deckFilter, tagFilter, rootFilter]);
@@ -171,15 +178,15 @@ const MyWords = () => {
       const found = Number((data as { resolved?: number } | null)?.resolved ?? 0);
       toast.success(
         found > 0
-          ? `Found roots for ${found} ${found === 1 ? "word" : "words"}`
-          : "No new roots found in that batch",
+          ? `لقينا عائلات لـ${found} ${found === 1 ? "كلمة" : "كلمات"}`
+          : "ما لقينا عائلات جديدة في هذي الدفعة",
       );
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["user-vocabulary"] }),
         queryClient.invalidateQueries({ queryKey: ["root-index"] }),
       ]);
     } catch {
-      toast.error("تعذّر البحث عن الجذور الآن");
+      toast.error("تعذّر البحث عن العائلات الآن");
     } finally {
       setBackfilling(false);
     }
@@ -592,13 +599,13 @@ const MyWords = () => {
           )}
 
           {/*
-            Root families. Hidden entirely when there are none — a learner whose
-            words have no roots yet should not be shown an empty shelf labelled
-            with something they cannot use.
+            Word families. Hidden entirely when there are none — a learner
+            whose words have no families yet should not be shown an empty shelf
+            labelled with something they cannot use.
           */}
           {rootFamiliesEnabled && (rootOptions.length > 0 || rootlessCount > 0) && (
             <div>
-              <p className="text-xs font-medium text-muted-foreground mb-1.5">الجذور</p>
+              <p className="text-xs font-medium text-muted-foreground mb-1.5">عائلات الكلمات</p>
               {/* No chip row at all before any family exists — an "All" chip on
                   its own filters nothing and only asks to be clicked. */}
               {rootOptions.length > 0 && (
@@ -618,15 +625,15 @@ const MyWords = () => {
                     onClick={() =>
                       setRootFilter(rootFilter === family.key ? null : family.key)
                     }
-                    title={`${family.words.length} words from this root`}
+                    title={`${family.words.length} كلمة من هذي العائلة`}
                     className={cn(
-                      "px-2.5 py-1 rounded-full text-xs border transition-colors font-arabic",
+                      "px-2.5 py-1 rounded-full text-xs border transition-colors",
                       rootFilter === family.key
                         ? "bg-primary text-primary-foreground border-primary"
                         : "bg-card border-border text-muted-foreground hover:text-foreground",
                     )}
                   >
-                    <span dir="rtl">{family.display}</span>{" "}
+                    <span className="font-english">{family.display}</span>{" "}
                     <span className="opacity-70">· {family.words.length}</span>
                   </button>
                 ))}
@@ -635,7 +642,7 @@ const MyWords = () => {
 
               {/*
                 The only part of this feature that spends credits, and it never
-                runs on its own. Most cards have no root because only one save
+                runs on its own. Most cards have no family because only one save
                 path ever wrote one — this is how an imported deck catches up,
                 at a moment the learner picks.
               */}
@@ -647,8 +654,8 @@ const MyWords = () => {
                 >
                   {backfilling && <Loader2 className="h-3 w-3 animate-spin" />}
                   {backfilling
-                    ? "Finding roots…"
-                    : `Find roots for ${rootlessCount} ${rootOptions.length > 0 ? "more " : ""}${rootlessCount === 1 ? "word" : "words"}`}
+                    ? "ندوّر العائلات…"
+                    : `دوّر عائلات لـ${rootlessCount} ${rootOptions.length > 0 ? "كلمة إضافية" : "كلمة"}`}
                 </button>
               )}
             </div>
@@ -696,10 +703,10 @@ const MyWords = () => {
       <AlertDialog open={confirmBackfill} onOpenChange={setConfirmBackfill}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>أتريد البحث عن جذور كلماتك؟</AlertDialogTitle>
+            <AlertDialogTitle>تبي ندوّر عائلات كلماتك؟</AlertDialogTitle>
             <AlertDialogDescription>
-              This asks the AI for the Arabic root of up to 120 words that don't have one yet,
-              and uses some of your daily AI allowance. Each word is only ever looked up once.
+              هذا يسأل الذكاء عن عائلة الكلمة لِما يصل إلى 120 كلمة ما لها عائلة بعد،
+              ويستهلك جزءاً من حصتك اليومية. كل كلمة تُسأل مرة وحدة بس.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -707,7 +714,7 @@ const MyWords = () => {
             <AlertDialogAction
               onClick={(e) => { e.preventDefault(); setConfirmBackfill(false); findRoots(); }}
               disabled={backfilling}
-            >ابحث عن الجذور</AlertDialogAction>
+            >دوّر العائلات</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -785,27 +792,28 @@ const MyWords = () => {
                     </span>
                     {/*
                       Falls back to the raw stored value when it will not
-                      canonicalise, so a card whose root was written oddly still
-                      shows what it has rather than silently losing it — it just
-                      cannot be filtered on.
+                      canonicalise, so a card whose family was written oddly
+                      still shows what it has rather than silently losing it —
+                      it just cannot be filtered on. Pre-flip Arabic roots land
+                      here too, which is the honest place for them: visible as
+                      leftover data, never presented as an English family.
                     */}
                     {word.root && (
-                      rootKey(word.root) && !selectMode ? (
+                      familyKey(word.root) && !selectMode ? (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            const key = rootKey(word.root)!;
+                            const key = familyKey(word.root)!;
                             setRootFilter(rootFilter === key ? null : key);
                           }}
-                          title="أظهر كل كلماتك من هذا الجذر"
-                          className="text-xs font-arabic text-muted-foreground bg-muted hover:bg-muted/70 hover:text-foreground px-1.5 py-0.5 rounded transition-colors"
-                          dir="rtl"
+                          title="أظهر كل كلماتك من هذي العائلة"
+                          className="text-xs font-english text-muted-foreground bg-muted hover:bg-muted/70 hover:text-foreground px-1.5 py-0.5 rounded transition-colors"
                         >
-                          {formatRoot(word.root)}
+                          {formatFamily(word.root)}
                         </button>
                       ) : (
                         <span className="text-xs font-mono text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
-                          {formatRoot(word.root) ?? word.root}
+                          {formatFamily(word.root) ?? word.root}
                         </span>
                       )
                     )}

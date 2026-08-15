@@ -80,15 +80,15 @@ export const SiblingWordsPanel = ({
         aria-expanded={open}
         className="flex w-full items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
       >
-        <span className="font-arabic text-sm" dir="rtl">
+        <span className="font-english text-sm">
           {rootDisplay}
         </span>
         <span className="text-left">
           {total === 1
-            ? "كلمة واحدة تعرفها تشترك في هذا الجذر"
+            ? "كلمة واحدة تعرفها من نفس العائلة"
             : total === 2
-            ? "كلمتان تعرفهما تشتركان في هذا الجذر"
-            : `${total} كلمات تعرفها تشترك في هذا الجذر`}
+            ? "كلمتان تعرفهما من نفس العائلة"
+            : `${total} كلمات تعرفها من نفس العائلة`}
         </span>
         <ChevronDown
           className={cn("ml-auto h-3.5 w-3.5 shrink-0 transition-transform", open && "rotate-180")}

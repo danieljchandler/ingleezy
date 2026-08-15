@@ -520,10 +520,10 @@ const Settings = () => {
             </div>
             <div className="flex items-center justify-between p-3 rounded-xl bg-card border border-border">
               <div className="min-w-0 pr-3">
-                <p className="font-medium text-foreground text-sm">أظهر الكلمات المرتبطة بالجذر نفسه</p>
+                <p className="font-medium text-foreground text-sm">أظهر كلمات من نفس العائلة</p>
                 <p className="text-xs text-muted-foreground">
-                  تحت البطاقة التي أجبت عنها، تظهر بهدوء كلماتك الأخرى المبنية من الجذر
-                  العربي نفسه — كتب، كتاب، مكتب.
+                  تحت البطاقة التي أجبت عنها، تظهر بهدوء كلماتك الأخرى من نفس عائلة
+                  الكلمة — <span className="font-english">act, action, active, actor</span>.
                 </p>
               </div>
               <Switch checked={rootFamiliesEnabled} onCheckedChange={setRootFamiliesEnabled} />

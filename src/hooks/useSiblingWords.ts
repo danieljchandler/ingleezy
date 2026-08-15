@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { formatRoot, rootKey } from "@/lib/arabicRoot";
+import { familyKey as toFamilyKey, formatFamily } from "@/lib/wordFamily";
 import { useRootFamilyPrefs } from "./useRootFamilyPrefs";
 import { useRootIndex, type RootIndexEntry } from "./useRootIndex";
 
@@ -15,29 +15,31 @@ export interface SiblingWords {
   total: number;
   /** The canonical key, for opening the family sheet. Null when there is no usable root. */
   familyKey: string | null;
-  /** Ready-to-render root, e.g. "ك · ت · ب". */
+  /** Ready-to-render base form, e.g. "act". */
   rootDisplay: string | null;
   isLoading: boolean;
 }
 
 /**
- * Words in the learner's deck sharing a root with the card in front of them.
+ * Words in the learner's deck sharing a word family with the card in front of
+ * them.
  *
- * Arabic morphology is the reason this exists: كتب, كتاب, مكتب and كاتب are one
- * root away from each other, and seeing them together during review turns four
- * unrelated memorisations into one pattern. Surfacing the wrong siblings is
- * worse than surfacing none — a false connection is harder to unlearn than no
- * connection.
+ * This began as Arabic root morphology — كتب, كتاب, مكتب and كاتب are one root
+ * apart — and the teaching move survives the flip even though the linguistics
+ * do not: act, action, active and actor are one family, and seeing them
+ * together during review turns four unrelated memorisations into one pattern.
+ * Surfacing the wrong siblings is worse than surfacing none — a false
+ * connection is harder to unlearn than no connection.
  *
  * So the selection is narrow on purpose: same learner, same dialect as the card
- * being reviewed, same canonical root, never the card itself.
+ * being reviewed, same canonical family, never the card itself.
  *
  * Two things changed from the query this used to be, both of which were quietly
  * returning nothing:
  *
- * - Matching goes through `rootKey` rather than SQL equality. The column holds
- *   whatever spelling the AI that saved the card happened to use, so "ك-ت-ب"
- *   and "ك ت ب" were never siblings despite being the same root.
+ * - Matching goes through `familyKey` rather than SQL equality. The column
+ *   holds whatever spelling the AI that saved the card happened to use, so
+ *   "Act" and "act" were never siblings despite being the same family.
  * - The dialect compared is the *card's*, not the app's active dialect. In a
  *   mixed-dialect session the deck spans all three, so filtering on the active
  *   one matched Yemeni cards against Gulf siblings.
@@ -57,7 +59,7 @@ export const useSiblingWords = (params: {
 }): SiblingWords => {
   const { root, excludeId, dialect, limit = SIBLING_LIMIT, enabled = true } = params;
 
-  const familyKey = rootKey(root);
+  const familyKey = toFamilyKey(root);
   const { enabled: rootFamiliesEnabled } = useRootFamilyPrefs();
   const { data: index, isLoading } = useRootIndex({ enabled: enabled && !!familyKey });
   const show = enabled && rootFamiliesEnabled;
@@ -76,7 +78,7 @@ export const useSiblingWords = (params: {
       siblings: matches.slice(0, limit),
       total: matches.length,
       familyKey,
-      rootDisplay: show ? formatRoot(root) : null,
+      rootDisplay: show ? formatFamily(root) : null,
       isLoading: show && !!familyKey && isLoading,
     };
   }, [index, familyKey, excludeId, dialect, limit, root, isLoading, show]);

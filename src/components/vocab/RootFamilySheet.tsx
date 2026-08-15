@@ -12,7 +12,7 @@ import { getSRSStageByStability, type SRSStageBreakdown } from "@/lib/srsStats";
 import { cn } from "@/lib/utils";
 
 interface RootFamilySheetProps {
-  /** Canonical root key, or null when closed. */
+  /** Canonical family key, or null when closed. */
   familyKey: string | null;
   onOpenChange: (open: boolean) => void;
   onPlayAudio?: (url: string) => void;
@@ -37,17 +37,17 @@ const STRENGTH_OPACITY: Record<keyof SRSStageBreakdown, string> = {
 };
 
 /**
- * Every word the learner knows from one root, in one place.
+ * Every word the learner knows from one word family, in one place.
  *
- * Opened from the footnote under a reviewed card and from a root chip on My
+ * Opened from the footnote under a reviewed card and from a family chip on My
  * Words, so a family looks the same wherever it is reached from. It reads the
  * index already in cache — no query of its own, and nothing to pay for.
  *
  * Dialect is shown rather than filtered here. On the review card the sibling
- * list is scoped to the card's own dialect, because a pattern that only holds
- * in one of them would teach the wrong thing mid-recall; browsing a family is
- * the opposite situation, where seeing that the same root turns up across
- * dialects is the interesting part.
+ * list is scoped to the card's own dialect, because a gloss that only holds in
+ * one of them would teach the wrong thing mid-recall; browsing a family is the
+ * opposite situation — the family is a fact about English, and seeing it turn
+ * up across all three dialect decks is the interesting part.
  */
 export const RootFamilySheet = ({
   familyKey,
@@ -56,20 +56,20 @@ export const RootFamilySheet = ({
 }: RootFamilySheetProps) => {
   const { data: index } = useRootIndex({ enabled: !!familyKey });
   const words = (familyKey && index?.get(familyKey)) || [];
-  const display = familyKey ? familyKey.split("").join(" · ") : "";
+  const display = familyKey ?? "";
   const dialects = new Set(words.map((word) => word.dialect));
 
   return (
     <Sheet open={!!familyKey} onOpenChange={onOpenChange}>
       <SheetContent side="bottom" className="max-h-[80vh] overflow-y-auto">
         <SheetHeader className="text-left">
-          <SheetTitle className="font-arabic text-2xl" dir="rtl">
+          <SheetTitle className="font-english text-2xl">
             {display}
           </SheetTitle>
           <SheetDescription>
             {words.length === 1
-              ? "1 word you know is built from this root"
-              : `${words.length} words you know are built from this root`}
+              ? "كلمة وحدة تعرفها من هذي العائلة"
+              : `${words.length} كلمات تعرفها من هذي العائلة`}
           </SheetDescription>
         </SheetHeader>
 

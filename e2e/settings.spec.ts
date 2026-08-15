@@ -238,11 +238,11 @@ test.describe("review preferences", () => {
     await expect(leechRow().getByRole("switch")).not.toBeChecked();
   });
 
-  test("the root-families toggle persists across a reload", async ({ page }) => {
+  test("the word-families toggle persists across a reload", async ({ page }) => {
     await page.goto("/settings");
 
     const rootRow = () =>
-      page.locator("div.rounded-xl").filter({ hasText: /الكلمات المرتبطة بالجذر/ });
+      page.locator("div.rounded-xl").filter({ hasText: /كلمات من نفس العائلة/ });
     const toggle = rootRow().getByRole("switch");
     // On by default: the footnote only appears when a family actually exists,
     // so it is quiet until it has something to say.

@@ -83,7 +83,6 @@ Deno.test("word-enrichment returns one word's detail, not a list", async () => {
     caller({
       "ai.gateway.lovable.dev": emitting({
         definition: "book",
-        root: "ك-ت-ب",
         transliteration: "kitaab",
         uses: [{ arabic: "مكتبة", english: "library" }],
       }),
@@ -93,9 +92,11 @@ Deno.test("word-enrichment returns one word's detail, not a list", async () => {
   assertEquals(status, 200);
   // Flat fields at the top level — the word popover reads each one directly.
   assertEquals(body.definition, "book");
-  assertEquals(body.root, "ك-ت-ب");
   assertEquals(body.transliteration, "kitaab");
   assertEquals((body.uses as unknown[]).length, 1);
+  // No root: this path serves the bridged Arabic clips, and the column it used
+  // to fill now holds an English word family.
+  assertEquals(body.root, undefined);
 });
 
 Deno.test("word-enrichment asks for a literal gloss only for a phrase", async () => {
@@ -227,7 +228,6 @@ Deno.test("word-enrichment normalises empty strings to null", async () => {
     caller({
       "ai.gateway.lovable.dev": emitting({
         definition: "book",
-        root: "",
         transliteration: "",
         uses: [],
       }),
@@ -236,7 +236,6 @@ Deno.test("word-enrichment normalises empty strings to null", async () => {
 
   // The popover renders a row per non-null field. An empty string is truthy
   // enough to draw a labelled row with nothing in it.
-  assertEquals(body.root, null);
   assertEquals(body.transliteration, null);
 });
 
@@ -289,7 +288,6 @@ Deno.test("word-enrichment degrades to an empty shape on failure", async () => {
   // `TappableArabicText` reads the fields optionally, so a lookup that fails
   // shows an empty popover instead of throwing inside a render.
   assertEquals(status, 500);
-  assertEquals(body.root, null);
   assertEquals(body.uses, []);
 });
 
@@ -687,15 +685,16 @@ Deno.test("persist-word-audio turns an anonymous caller away", async () => {
 /**
  * The catch-up pass that fills in `user_vocabulary.root`.
  *
- * Roots were only ever written on one save path, so most of a learner's deck
- * has none and the "words from the same root" footnote has nothing to say. The
- * interesting surface here is not the happy path — it is everything the
- * function refuses to spend money on, and what it does with an answer it does
- * not trust.
+ * Post-flip that column holds an English word family's base form, derived from
+ * `word_english`. Families were only ever written on one save path, so most of
+ * a learner's deck has none and the "words from the same family" footnote has
+ * nothing to say. The interesting surface here is not the happy path — it is
+ * everything the function refuses to spend money on, and what it does with an
+ * answer it does not trust.
  */
 
 /** Vocabulary rows on the read, and a capture of every write. */
-function vocabulary(rows: Array<{ id: string; word_arabic: string }>, writes: string[] = []) {
+function vocabulary(rows: Array<{ id: string; word_english: string }>, writes: string[] = []) {
   return {
     "/rest/v1/user_vocabulary": (request: Request) => {
       if (request.method === "PATCH") {
@@ -708,26 +707,26 @@ function vocabulary(rows: Array<{ id: string; word_arabic: string }>, writes: st
 }
 
 /**
- * Distinct words made only of Arabic letters.
+ * Distinct words made only of Latin letters.
  *
- * Numbering them "كلمة1" would be the obvious thing and would prove nothing:
- * the function resolves anything containing a digit locally as "no root", so
+ * Numbering them "word1" would be the obvious thing and would prove nothing:
+ * the function resolves anything containing a digit locally as "no family", so
  * every fixture word would be answered for free and no model would ever be
  * called.
  */
-const someWords = (n: number, prefix = "كلمة") =>
+const someWords = (n: number, prefix = "word") =>
   Array.from({ length: n }, (_, i) => ({
     id: `voc-${i}`,
-    word_arabic:
+    word_english:
       prefix +
       String(i)
         .split("")
-        .map((digit) => "ابتثجحخدذر"[Number(digit)])
+        .map((digit) => "abcdefghij"[Number(digit)])
         .join(""),
   }));
 
-/** A tool response answering every word in the batch with the same root. */
-const rootsFor = (count: number, root = "ك ت ب") =>
+/** A tool response answering every word in the batch with the same family. */
+const rootsFor = (count: number, root = "act") =>
   emitting({ roots: Array.from({ length: count }, (_, i) => ({ index: i + 1, root })) });
 
 Deno.test("enrich-word-roots asks about forty words at a time", async () => {
@@ -746,11 +745,13 @@ Deno.test("enrich-word-roots asks about forty words at a time", async () => {
 
 Deno.test("enrich-word-roots resolves the hopeless cases without asking anyone", async () => {
   const rows = [
-    { id: "phrase", word_arabic: "من فضلك" },
-    { id: "particle", word_arabic: "في" },
-    { id: "latin", word_arabic: "kataba" },
-    { id: "digits", word_arabic: "١٢٣" },
-    { id: "real", word_arabic: "كتاب" },
+    { id: "phrase", word_english: "as well as" },
+    { id: "function-word", word_english: "the" },
+    // A leftover Arabic root from before the flip. It has to resolve locally
+    // rather than being sent to a model that would helpfully invent a family.
+    { id: "arabic", word_english: "كتاب" },
+    { id: "digits", word_english: "123" },
+    { id: "real", word_english: "action" },
   ];
   const { status, body, calls, bodies } = await call(
     "enrich-word-roots",
@@ -766,42 +767,46 @@ Deno.test("enrich-word-roots resolves the hopeless cases without asking anyone",
   const prompts = bodies
     .filter((_, i) => calls[i].includes("ai.gateway.lovable.dev"))
     .join("\n");
-  assertStringIncludes(prompts, "كتاب");
-  assert(!prompts.includes("من فضلك"));
-  assert(!prompts.includes("kataba"));
+  assertStringIncludes(prompts, "action");
+  assert(!prompts.includes("as well as"));
+  assert(!prompts.includes("كتاب"));
 });
 
-Deno.test("enrich-word-roots stores a word with no root as '' so it is never asked about twice", async () => {
+Deno.test("enrich-word-roots stores a word with no family as '' so it is never asked about twice", async () => {
   const writes: string[] = [];
   const { status } = await call(
     "enrich-word-roots",
     {},
     caller({
-      ...vocabulary([{ id: "voc-0", word_arabic: "كمبيوتر" }], writes),
+      ...vocabulary([{ id: "voc-0", word_english: "pizza" }], writes),
       "ai.gateway.lovable.dev": emitting({ roots: [{ index: 1, root: "" }] }),
     }),
   );
 
   assertEquals(status, 200);
   // Left null it would come back on every future run; '' is the record that we
-  // asked. The client reads '' as "no root", never as a family.
+  // asked. The client reads '' as "no family", never as one.
   assertEquals(writes.length, 1);
 });
 
-Deno.test("enrich-word-roots refuses an answer that is not radicals", async () => {
-  for (const notARoot of ["من الكتاب", "kataba", "unknown"]) {
+Deno.test("enrich-word-roots refuses an answer that is not a base form", async () => {
+  // "unknown" and "none" are the ones English adds: they are well-formed words,
+  // so the shape check alone would let them through and collect every
+  // unanalysable card into one enormous fake family.
+  for (const notAFamily of ["the act of doing", "كتب", "unknown", "none", "123"]) {
     const { status, body } = await call(
       "enrich-word-roots",
       {},
       caller({
-        ...vocabulary([{ id: "voc-0", word_arabic: "كتاب" }]),
-        "ai.gateway.lovable.dev": emitting({ roots: [{ index: 1, root: notARoot }] }),
+        ...vocabulary([{ id: "voc-0", word_english: "action" }]),
+        "ai.gateway.lovable.dev": emitting({ roots: [{ index: 1, root: notAFamily }] }),
       }),
     );
 
     assertEquals(status, 200);
     // A prose answer written into the column would be indistinguishable from a
-    // real root afterwards, and would put a false family in front of a learner.
+    // real family afterwards, and would put a false connection in front of a
+    // learner — who then has to unlearn it.
     assertEquals(body.resolved, 0);
   }
 });
@@ -814,15 +819,15 @@ Deno.test("enrich-word-roots skips an index it cannot place rather than shifting
       ...vocabulary(someWords(3)),
       "ai.gateway.lovable.dev": emitting({
         roots: [
-          { index: 1, root: "ك ت ب" },
-          { index: 99, root: "د ر س" },
+          { index: 1, root: "act" },
+          { index: 99, root: "form" },
         ],
       }),
     }),
   );
 
   assertEquals(status, 200);
-  // A positional array would have handed word 99's root to word 2. Explicit
+  // A positional array would have handed word 99's family to word 2. Explicit
   // indices make a short or reordered response a gap, not a silent mix-up.
   assertEquals(body.resolved, 1);
 });
@@ -854,8 +859,8 @@ Deno.test("enrich-word-roots works through the dialect it was asked for", async 
   );
 
   assertEquals(status, 200);
-  // My Words counts the words missing a root in the deck on screen. If the run
-  // ignored that scope, pressing "Find roots for 12 words" while looking at
+  // My Words counts the words missing a family in the deck on screen. If the
+  // run ignored that scope, pressing "find families for 12 words" while on
   // Gulf could spend the batch on the Egyptian deck and leave the number
   // exactly where it was — which reads as the button doing nothing.
   assert(requests.some((search) => search.includes("dialect=eq.Yemeni")));

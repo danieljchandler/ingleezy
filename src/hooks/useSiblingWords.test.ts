@@ -7,23 +7,24 @@ import { useRootIndex } from "./useRootIndex";
 import type { SupabaseBackend } from "@/test/support/server/handler";
 
 /**
- * Words in the learner's deck sharing a root with the card in front of them.
+ * Words in the learner's deck sharing a word family with the card in front of
+ * them.
  *
- * Arabic morphology is the reason this exists: كتب, كتاب, مكتب and كاتب are one
- * root away from each other, and seeing them together during review turns four
- * unrelated memorisations into one pattern. Surfacing the wrong siblings is
- * worse than surfacing none — a false connection is harder to unlearn than no
- * connection.
+ * This began as Arabic root morphology and the teaching move survived the flip
+ * intact: act, action, active and actor are one family, and seeing them
+ * together during review turns four unrelated memorisations into one pattern.
+ * Surfacing the wrong siblings is worse than surfacing none — a false
+ * connection is harder to unlearn than no connection.
  *
- * So the selection is narrow on purpose: same learner, same dialect, same root,
- * never the card itself.
+ * So the selection is narrow on purpose: same learner, same dialect, same
+ * family, never the card itself.
  *
  * Two of those were broken for as long as the feature has shipped, and the
  * tests that cover them are the point of this file:
  *
- * - **Root spelling.** The column holds free text written by whichever AI path
- *   saved the card — "ك-ت-ب" from `word-enrichment`, "ك ت ب" from others, bare
- *   "كتب" from older rows. SQL equality made those three strangers.
+ * - **Family spelling.** The column holds free text written by whichever AI
+ *   path saved the card — "Act" from one, "act" from another, " ACT " from a
+ *   third. SQL equality made those three strangers.
  * - **Dialect.** The comparison is against the *card's* dialect. Passing the
  *   app's active dialect instead means a mixed-dialect session matches Yemeni
  *   cards against Gulf siblings.
@@ -33,7 +34,7 @@ import type { SupabaseBackend } from "@/test/support/server/handler";
  * order comes from FSRS stability in `ease_factor`.
  */
 
-const ROOT = "ك ت ب";
+const ROOT = "act";
 
 let cleanup: (() => void) | undefined;
 
@@ -106,15 +107,15 @@ describe("finding siblings", () => {
   });
 
   it("matches roots that were saved in different spellings", async () => {
-    const { result } = render({ root: "ك-ت-ب" }, [
-      aWord(0, { root: "ك-ت-ب" }),
-      aWord(1, { root: "ك ت ب" }),
-      aWord(2, { root: "كتب" }),
-      aWord(3, { root: "كَتَبَ" }),
+    const { result } = render({ root: "Act" }, [
+      aWord(0, { root: "Act" }),
+      aWord(1, { root: "act" }),
+      aWord(2, { root: "act" }),
+      aWord(3, { root: " ACT " }),
     ]);
 
     await settled(result);
-    // The whole feature turns on this: these four cards are one root written
+    // The whole feature turns on this: these four cards are one family written
     // four ways, and comparing the stored strings made them four strangers.
     expect(result.current.hook.siblings.map((w) => w.id)).toEqual(["voc-1", "voc-2", "voc-3"]);
   });
@@ -129,7 +130,7 @@ describe("finding siblings", () => {
   });
 
   it("leaves out words on a different root", async () => {
-    const { result } = render({}, [aWord(0), aWord(1), aWord(2, { root: "د ر س" })]);
+    const { result } = render({}, [aWord(0), aWord(1), aWord(2, { root: "form" })]);
 
     await settled(result);
     expect(result.current.hook.siblings.map((w) => w.id)).toEqual(["voc-1"]);
@@ -215,12 +216,12 @@ describe("finding siblings", () => {
     });
   });
 
-  it("hands back the root ready to render and to open a family with", async () => {
-    const { result } = render({ root: "ك-ت-ب" }, [aWord(0, { root: "ك-ت-ب" })]);
+  it("hands back the family ready to render and to open a family with", async () => {
+    const { result } = render({ root: "Act" }, [aWord(0, { root: "Act" })]);
 
     await settled(result);
-    expect(result.current.hook.rootDisplay).toBe("ك · ت · ب");
-    expect(result.current.hook.familyKey).toBe("كتب");
+    expect(result.current.hook.rootDisplay).toBe("act");
+    expect(result.current.hook.familyKey).toBe("act");
   });
 });
 
@@ -228,7 +229,7 @@ describe("when not to look", () => {
   it("finds nothing without a root", async () => {
     const { result } = render({ root: null }, [aWord(0), aWord(1)]);
 
-    // Most saved words have no root yet — enrichment is best-effort — so this
+    // Most saved words have no family yet — the backfill is opt-in — so this
     // is the common case, not an edge one.
     await settled(result);
     expect(result.current.hook.siblings).toEqual([]);
@@ -252,7 +253,7 @@ describe("when not to look", () => {
 
     await settled(result);
     // The backfill writes '' for loanwords and particles so it never pays for
-    // them twice. If that were a key, every rootless word in the deck would be
+    // them twice. If that were a key, every family-less word in the deck would be
     // a sibling of every other one.
     expect(result.current.hook.familyKey).toBeNull();
     expect(result.current.hook.siblings).toEqual([]);

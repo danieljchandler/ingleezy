@@ -186,75 +186,75 @@ test.describe("the free-tier vocabulary cap", () => {
   });
 });
 
-test.describe("root families", () => {
+test.describe("word families", () => {
   test.beforeEach(async ({ signInAs }) => {
     await signInAs("free");
   });
 
-  test("groups the deck by root, whatever spelling each card was saved with", async ({ page, db }) => {
+  test("groups the deck by family, whatever spelling each card was saved with", async ({ page, db }) => {
     db.seed("user_vocabulary", [
-      // Three spellings of one root. Before roots were canonicalised these were
-      // three strangers, and the grouping this test asserts was impossible.
-      aUserVocabulary({ id: vocabId(0), user_id: TEST_USER_ID, word_arabic: "كتب", root: "ك-ت-ب" }),
-      aUserVocabulary({ id: vocabId(1), user_id: TEST_USER_ID, word_arabic: "كتاب", root: "ك ت ب" }),
-      aUserVocabulary({ id: vocabId(2), user_id: TEST_USER_ID, word_arabic: "مكتبة", root: "كتب" }),
-      aUserVocabulary({ id: vocabId(3), user_id: TEST_USER_ID, word_arabic: "درس", root: "د ر س" }),
-      aUserVocabulary({ id: vocabId(4), user_id: TEST_USER_ID, word_arabic: "مدرسة", root: "د ر س" }),
+      // Three spellings of one family. Before they were canonicalised these
+      // were three strangers, and the grouping this test asserts was impossible.
+      aUserVocabulary({ id: vocabId(0), user_id: TEST_USER_ID, word_english: "act", root: "Act" }),
+      aUserVocabulary({ id: vocabId(1), user_id: TEST_USER_ID, word_english: "action", root: "act" }),
+      aUserVocabulary({ id: vocabId(2), user_id: TEST_USER_ID, word_english: "actor", root: " ACT " }),
+      aUserVocabulary({ id: vocabId(3), user_id: TEST_USER_ID, word_english: "form", root: "form" }),
+      aUserVocabulary({ id: vocabId(4), user_id: TEST_USER_ID, word_english: "formal", root: "form" }),
     ]);
 
     await page.goto("/my-words");
 
-    await expect(page.getByText("الجذور", { exact: true })).toBeVisible();
+    await expect(page.getByText("عائلات الكلمات", { exact: true })).toBeVisible();
     // Biggest family first.
-    await expect(page.getByRole("button", { name: /ك · ت · ب · 3/ })).toBeVisible();
-    await expect(page.getByRole("button", { name: /د · ر · س · 2/ })).toBeVisible();
+    await expect(page.getByRole("button", { name: /act · 3/ })).toBeVisible();
+    await expect(page.getByRole("button", { name: /form · 2/ })).toBeVisible();
   });
 
-  test("filtering by a root narrows the list to that family", async ({ page, db }) => {
+  test("filtering by a family narrows the list to it", async ({ page, db }) => {
     db.seed("user_vocabulary", [
-      aUserVocabulary({ id: vocabId(0), user_id: TEST_USER_ID, word_arabic: "كتاب", root: "ك ت ب" }),
-      aUserVocabulary({ id: vocabId(1), user_id: TEST_USER_ID, word_arabic: "مكتبة", root: "ك-ت-ب" }),
-      aUserVocabulary({ id: vocabId(2), user_id: TEST_USER_ID, word_arabic: "مدرسة", root: "د ر س" }),
-      aUserVocabulary({ id: vocabId(3), user_id: TEST_USER_ID, word_arabic: "درس", root: "د ر س" }),
+      aUserVocabulary({ id: vocabId(0), user_id: TEST_USER_ID, word_english: "action", root: "act" }),
+      aUserVocabulary({ id: vocabId(1), user_id: TEST_USER_ID, word_english: "actor", root: "Act" }),
+      aUserVocabulary({ id: vocabId(2), user_id: TEST_USER_ID, word_english: "formal", root: "form" }),
+      aUserVocabulary({ id: vocabId(3), user_id: TEST_USER_ID, word_english: "form", root: "form" }),
     ]);
 
     await page.goto("/my-words");
-    await page.getByRole("button", { name: /ك · ت · ب · 2/ }).click();
+    await page.getByRole("button", { name: /act · 2/ }).click();
 
-    await expect(page.getByText("مكتبة")).toBeVisible();
-    await expect(page.getByText("مدرسة")).toHaveCount(0);
+    await expect(page.getByText("actor")).toBeVisible();
+    await expect(page.getByText("formal")).toHaveCount(0);
   });
 
-  test("keeps quiet when no two words share a root", async ({ page, db }) => {
+  test("keeps quiet when no two words share a family", async ({ page, db }) => {
     db.seed("user_vocabulary", [
-      aUserVocabulary({ id: vocabId(0), user_id: TEST_USER_ID, word_arabic: "كتاب", root: "ك ت ب" }),
-      aUserVocabulary({ id: vocabId(1), user_id: TEST_USER_ID, word_arabic: "مدرسة", root: "د ر س" }),
+      aUserVocabulary({ id: vocabId(0), user_id: TEST_USER_ID, word_english: "action", root: "act" }),
+      aUserVocabulary({ id: vocabId(1), user_id: TEST_USER_ID, word_english: "formal", root: "form" }),
     ]);
 
     await page.goto("/my-words");
 
-    await expect(page.getByText("كتاب")).toBeVisible();
+    await expect(page.getByText("action")).toBeVisible();
     // Two families of one is not a shelf worth showing. The backfill prompt is
-    // also absent, because every word here already has a root.
-    await expect(page.getByText("الجذور", { exact: true })).toHaveCount(0);
+    // also absent, because every word here already has a family.
+    await expect(page.getByText("عائلات الكلمات", { exact: true })).toHaveCount(0);
   });
 
-  test("offers to look up the roots that are missing, and never does it unasked", async ({ page, db, backend }) => {
+  test("offers to look up the families that are missing, and never does it unasked", async ({ page, db, backend }) => {
     db.seed("user_vocabulary", [
-      aUserVocabulary({ id: vocabId(0), user_id: TEST_USER_ID, word_arabic: "كتاب", root: null }),
-      aUserVocabulary({ id: vocabId(1), user_id: TEST_USER_ID, word_arabic: "مكتبة", root: null }),
+      aUserVocabulary({ id: vocabId(0), user_id: TEST_USER_ID, word_english: "action", root: null }),
+      aUserVocabulary({ id: vocabId(1), user_id: TEST_USER_ID, word_english: "actor", root: null }),
     ]);
     backend.stubFunction("enrich-word-roots", { ok: true, examined: 2, resolved: 2, skippedFree: 0 });
 
     await page.goto("/my-words");
-    await expect(page.getByRole("button", { name: /find roots for 2 words/i })).toBeVisible();
+    await expect(page.getByRole("button", { name: /دوّر عائلات لـ2/ })).toBeVisible();
 
     // Nothing has been spent just by opening the page: this is the only part of
     // the feature that costs credits, and it waits to be asked twice.
     expect(backend.functionCalls.filter((c) => c.name === "enrich-word-roots")).toHaveLength(0);
 
-    await page.getByRole("button", { name: /find roots for 2 words/i }).click();
-    await page.getByRole("button", { name: "ابحث عن الجذور" }).click();
+    await page.getByRole("button", { name: /دوّر عائلات لـ2/ }).click();
+    await page.getByRole("button", { name: "دوّر العائلات" }).click();
 
     await expect
       .poll(() => backend.functionCalls.filter((c) => c.name === "enrich-word-roots").length)
