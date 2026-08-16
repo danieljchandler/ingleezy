@@ -883,6 +883,41 @@ generation conditioning.
       the physical classes there correct again. The shadcn primitives under
       `components/ui` are shared with admin and were left untouched for the
       same reason.
+- [x] **Fifth sweep: the screens nobody browses to.** Found by grepping for
+      capitalised English inside `toast()` and `title:` in learner files
+      rather than by walking the app, because these three are exactly the
+      screens a walkthrough does not reach.
+      *The onboarding tour* was the worst of them: entirely English, and
+      still describing Hakiya — "Curriculum, alphabet, and grammar drills",
+      "Real native videos ... absorb dialect". It is the **first thing a new
+      learner sees**, and it was in the language they came here not knowing,
+      describing a different app. Now Arabic throughout, titled from
+      `AR.nav.*` so each step names the tab in the same word the tab itself
+      uses — a tour that renames what it is pointing at describes a screen
+      the reader cannot find. The hardcoded Montserrat on the heading went
+      with it, since it has no Arabic glyphs.
+      *`ErrorBoundary`* was half-flipped, which is how it survived: the
+      reload button was already Arabic, so it scanned as done, while every
+      title and description around it was English. A learner meeting an error
+      screen is already having a bad time; that is the wrong moment to insist
+      they read the language they came here to learn. The raw error text
+      stays English on purpose — it is a fact for whoever gets the
+      screenshot, not a message for the learner.
+      *`ResetPassword`* had Arabic labels and English everything else —
+      validation, toasts, and the submit button.
+      *And it surfaced an unrelated crash.* Translating the error boundary
+      failed one e2e test — which turned out to be a test that **pinned a
+      crash rather than a behaviour**, asserting the boundary's own heading.
+      `/quiz/:lessonId` shuffled its words in a `useEffect`, so on the render
+      where the query resolved, `topic.words` was already long enough to pass
+      the four-word gate while the shuffled list was still empty, and
+      `key={currentWord.id}` dereferenced undefined. That is *every* lesson
+      the quiz can run: with fewer than four words it returns early and never
+      reaches the crash, which is exactly why route-coverage never saw it.
+      Fixed by deriving the shuffle instead of storing it, so there is no
+      render where one exists and the other does not, and the test replaced
+      with what it was always meant to assert — one question per word,
+      Arabic prompt with English options, full marks at the end.
 
 ---
 

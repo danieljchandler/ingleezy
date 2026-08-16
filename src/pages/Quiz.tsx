@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useTopic, VocabularyWord } from "@/hooks/useTopic";
 import { HomeButton } from "@/components/HomeButton";
@@ -29,7 +29,7 @@ const Quiz = () => {
   const navigate = useNavigate();
   const { data: topic, isLoading, error } = useTopic(lessonId);
   
-  const [shuffledWords, setShuffledWords] = useState<VocabularyWord[]>([]);
+  const [round, setRound] = useState(0);
   const [quizState, setQuizState] = useState<QuizState>({
     currentIndex: 0,
     score: 0,
@@ -37,23 +37,35 @@ const Quiz = () => {
     isComplete: false,
   });
 
-  useEffect(() => {
-    if (topic?.words && topic.words.length > 0) {
-      setShuffledWords(shuffleArray(topic.words));
-    }
-  }, [topic]);
+  /**
+   * Derived, not stored in an effect.
+   *
+   * The shuffle used to happen in a `useEffect`, which runs *after* the render
+   * that first has the words. On that render `topic.words` was already long
+   * enough to pass the four-word gate below while `shuffledWords` was still
+   * empty, so `currentWord` was undefined and `key={currentWord.id}` threw.
+   * That is every lesson the quiz can actually run — with fewer than four
+   * words it returned early and never reached the crash, which is why the
+   * route-coverage suite never saw it. Deriving the shuffle closes the gap
+   * instead of guarding it: there is no longer a render where one exists and
+   * the other does not.
+   */
+  const shuffledWords = useMemo<VocabularyWord[]>(
+    // `round` is the re-shuffle trigger — restarting deals the same words out
+    // in a fresh order rather than replaying the previous run.
+    () => (round >= 0 && topic?.words?.length ? shuffleArray(topic.words) : []),
+    [topic, round],
+  );
 
   const resetQuiz = useCallback(() => {
-    if (topic?.words) {
-      setShuffledWords(shuffleArray(topic.words));
-      setQuizState({
-        currentIndex: 0,
-        score: 0,
-        answers: [],
-        isComplete: false,
-      });
-    }
-  }, [topic]);
+    setRound((r) => r + 1);
+    setQuizState({
+      currentIndex: 0,
+      score: 0,
+      answers: [],
+      isComplete: false,
+    });
+  }, []);
 
   const handleAnswer = (isCorrect: boolean) => {
     const currentWord = shuffledWords[quizState.currentIndex];

@@ -518,23 +518,37 @@ test.describe("the standalone quiz", () => {
     seedLesson(db, 5);
   });
 
-  test("crashes on any lesson it could actually quiz", async ({ page, expectConsoleErrors }) => {
-    expectConsoleErrors([/Cannot read properties of undefined/, /ErrorBoundary caught error/]);
-
+  test("asks one question per word and reaches the results", async ({ page }) => {
+    // This replaces a test that pinned a crash rather than a behaviour. The
+    // shuffle used to happen in a `useEffect`, so on the render where the
+    // query resolved the word list was long enough to pass the four-word gate
+    // while the shuffled list was still empty — `key={currentWord.id}`
+    // dereferenced undefined and the route rendered the error boundary. It
+    // reproduced for every lesson the quiz can actually run; with fewer than
+    // four words it returned early and never got that far, which is why the
+    // route-coverage suite never saw it. The shuffle is derived now, so there
+    // is no render where one exists and the other does not.
     await page.goto(`/quiz/${LESSON}`);
 
-    // A real bug, recorded rather than fixed here. Quiz.tsx shuffles the words
-    // in a useEffect, so on the render where the query resolves `shuffledWords`
-    // is still empty — `key={currentWord.id}` then dereferences undefined and
-    // the route renders the error boundary. It reproduces for every lesson with
-    // four or more words, which is every lesson the page will run at all; with
-    // fewer it returns "Need more words" before reaching the crash, which is
-    // why the route-coverage suite never saw it.
-    //
-    // This test fails once the guard is added. Replace it then with the real
-    // assertions: progress counter, one question per word, and the results
-    // screen.
-    await expect(page.getByRole("heading", { name: /something went wrong/i })).toBeVisible();
+    await expect(page.getByText("1 / 5")).toBeVisible();
+    // Arabic prompt, English options: the learner is asked to *produce* the
+    // English, not pick the Arabic out of a line-up.
+    await expect(page.getByText("وش معناها بالإنجليزي؟")).toBeVisible();
+    await expect(page.getByRole("radio")).toHaveCount(4);
+
+    // The deck is shuffled, so the answer has to be read off the prompt rather
+    // than assumed — which is also the only way this test would notice the
+    // options drifting out of step with the word being asked about.
+    for (let index = 1; index <= 5; index++) {
+      await expect(page.getByText(`${index} / 5`)).toBeVisible();
+      const prompt = await page.locator("p.font-arabic").filter({ hasText: /^كلمة\d$/ }).innerText();
+      const answer = `word ${prompt.replace("كلمة", "")}`;
+      await page.getByRole("radio", { name: answer, exact: true }).click();
+    }
+
+    // Every answer was the right one, so the run ends on full marks rather
+    // than merely ending.
+    await expect(page.getByText("ممتاز! كامل الدرجة")).toBeVisible();
   });
 
   test("refuses to run without enough words to make choices", async ({ page, db }) => {

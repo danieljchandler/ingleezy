@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
 import {X} from "lucide-react";
 import { ChevronOpen } from "@/components/shared/DirectionalIcon";
+import { AR } from "@/lib/strings";
 
 const TOUR_KEY = "ingleezy:tourCompleted";
 const TRIGGER_KEY = "ingleezy:showTour";
@@ -18,35 +19,41 @@ interface Step {
   placement?: "top" | "bottom" | "center";
 }
 
+/**
+ * The first thing a new learner sees, so it is also the first place the app
+ * gets to be in their language. Each step names the tab it is pointing at,
+ * using the same word the tab itself uses — a tour that calls it something
+ * else is describing a screen the reader cannot find.
+ */
 const STEPS: Step[] = [
   {
     selector: "[data-tour='nav-today']",
-    title: "Today",
-    body: "Your daily home — reviews, streak, and what to do next. Start here every day.",
+    title: AR.nav.home,
+    body: "بيتك اليومي — المراجعات، السلسلة، وشنو تسوي بعدين. ابدأ من هنا كل يوم.",
     placement: "top",
   },
   {
     selector: "[data-tour='nav-learn']",
-    title: "Learn",
-    body: "Curriculum, alphabet, and grammar drills. Build foundations step-by-step.",
+    title: AR.nav.learn,
+    body: "المنهج، أصوات الإنجليزي، وتمارين القواعد. تبني الأساس خطوة خطوة.",
     placement: "top",
   },
   {
     selector: "[data-tour='nav-discover']",
-    title: "Discover",
-    body: "Real native videos with tap-to-translate subtitles. One of the best ways to absorb dialect.",
+    title: AR.nav.discover,
+    body: "مقاطع حقيقية بالإنجليزي مع ترجمة تطلع بضغطة على الكلمة. من أحسن الطرق تسمع إنجليزي كما يُحكى فعلاً.",
     placement: "top",
   },
   {
     selector: "[data-tour='nav-practice']",
-    title: "Practice",
-    body: "Spaced repetition, speaking, listening, and games to lock in what you learn.",
+    title: AR.nav.practice,
+    body: "مراجعة متباعدة، محادثة، استماع، وألعاب تثبّت اللي تعلّمته.",
     placement: "top",
   },
   {
     selector: "[data-tour='nav-me']",
-    title: "Me",
-    body: "Your library, saved words, tools, and account settings live here.",
+    title: AR.nav.me,
+    body: "مكتبتك، كلماتك المحفوظة، الأدوات، وإعدادات حسابك كلها هنا.",
     placement: "top",
   },
 ];
@@ -151,9 +158,7 @@ export function OnboardingTour() {
         style={{ top: tooltipTop }}
       >
         <div className="flex items-start justify-between gap-2 mb-1">
-          <h3 className="font-bold text-foreground" style={{ fontFamily: "'Montserrat', sans-serif" }}>
-            {step.title}
-          </h3>
+          <h3 className="font-bold text-foreground">{step.title}</h3>
           <button
             onClick={finish}
             className="text-muted-foreground hover:text-foreground -mt-1 -me-1 p-1"
@@ -176,16 +181,16 @@ export function OnboardingTour() {
           </div>
           <div className="flex items-center gap-2">
             <button onClick={finish} className="text-xs text-muted-foreground hover:text-foreground px-2 py-1">
-              Skip
+              تخطّي
             </button>
             <Button size="sm" onClick={next} className="h-8">
-              {stepIdx === STEPS.length - 1 ? "Done" : "Next"}
+              {stepIdx === STEPS.length - 1 ? "خلصنا" : "التالي"}
               {stepIdx < STEPS.length - 1 && <ChevronOpen className="h-3.5 w-3.5 ms-0.5" />}
             </Button>
           </div>
         </div>
         <p className="text-[10px] text-muted-foreground/70 mt-2 text-center">
-          Step {stepIdx + 1} of {STEPS.length}
+          خطوة {stepIdx + 1} من {STEPS.length}
         </p>
       </div>
     </div>,

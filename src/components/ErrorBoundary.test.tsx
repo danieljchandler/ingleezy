@@ -82,8 +82,8 @@ describe("ErrorBoundary — passing children through", () => {
 
   it("shows no fallback panel while the tree is healthy", () => {
     render();
-    expect(screen.queryByText("Something went wrong")).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Try again" })).not.toBeInTheDocument();
+    expect(screen.queryByText("صار خطأ")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "جرّب مرة ثانية" })).not.toBeInTheDocument();
   });
 
   it("keeps rendering children across a re-render", () => {
@@ -101,13 +101,13 @@ describe("ErrorBoundary — catching", () => {
   it("replaces the throwing subtree with the fallback", () => {
     render(new Error("kaboom"));
     expect(screen.queryByText("child content")).not.toBeInTheDocument();
-    expect(screen.getByText("Something went wrong")).toBeInTheDocument();
+    expect(screen.getByText("صار خطأ")).toBeInTheDocument();
   });
 
   it("explains that the failure was logged", () => {
     render(new Error("kaboom"));
     expect(
-      screen.getByText("This page hit an error while loading. The details have been logged."),
+      screen.getByText("الصفحة واجهت خطأ وهي تحمّل. سجّلنا التفاصيل عندنا."),
     ).toBeInTheDocument();
   });
 });
@@ -122,9 +122,9 @@ describe("ErrorBoundary — classifying the error", () => {
 
   it.each(network)("treats %s as a connection problem", (_label, message) => {
     render(new Error(message));
-    expect(screen.getByText("Connection problem")).toBeInTheDocument();
+    expect(screen.getByText("ما قدرنا نوصل")).toBeInTheDocument();
     expect(
-      screen.getByText("We couldn't reach the server. Check your internet connection and try again."),
+      screen.getByText("ما وصلنا للخادم. تأكد من الإنترنت وجرّب مرة ثانية."),
     ).toBeInTheDocument();
   });
 
@@ -137,13 +137,13 @@ describe("ErrorBoundary — classifying the error", () => {
 
   it.each(auth)("treats %s as an expired session", (_label, message) => {
     render(new Error(message));
-    expect(screen.getByText("Your session expired")).toBeInTheDocument();
-    expect(screen.getByText("Please sign in again to continue.")).toBeInTheDocument();
+    expect(screen.getByText("انتهت الجلسة")).toBeInTheDocument();
+    expect(screen.getByText("سجّل دخولك مرة ثانية عشان تكمّل.")).toBeInTheDocument();
   });
 
   it("matches keywords regardless of case", () => {
     render(new Error("FAILED TO FETCH"));
-    expect(screen.getByText("Connection problem")).toBeInTheDocument();
+    expect(screen.getByText("ما قدرنا نوصل")).toBeInTheDocument();
   });
 
   it("prefers the connection reading when a message carries both signals", () => {
@@ -151,17 +151,17 @@ describe("ErrorBoundary — classifying the error", () => {
     // useful of the two — a token request that could not leave the device is a
     // connection problem, not an expired session.
     render(new Error("failed to fetch token"));
-    expect(screen.getByText("Connection problem")).toBeInTheDocument();
+    expect(screen.getByText("ما قدرنا نوصل")).toBeInTheDocument();
   });
 
   it("falls back to the generic panel for anything unrecognised", () => {
     render(new Error("Cannot read properties of undefined (reading 'map')"));
-    expect(screen.getByText("Something went wrong")).toBeInTheDocument();
+    expect(screen.getByText("صار خطأ")).toBeInTheDocument();
   });
 
   it("survives an error with no message at all", () => {
     render(new Error(""));
-    expect(screen.getByText("Something went wrong")).toBeInTheDocument();
+    expect(screen.getByText("صار خطأ")).toBeInTheDocument();
   });
 
   it("does not read a JSON parse failure as an expired session", () => {
@@ -170,8 +170,8 @@ describe("ErrorBoundary — classifying the error", () => {
     // errors there is. Matching a bare "token" substring sent that user to
     // /auth, where signing in again fixed nothing.
     render(new SyntaxError("Unexpected token < in JSON at position 0"));
-    expect(screen.getByText("Something went wrong")).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Sign in" })).not.toBeInTheDocument();
+    expect(screen.getByText("صار خطأ")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "سجّل الدخول" })).not.toBeInTheDocument();
   });
 
   const tokens = [
@@ -185,30 +185,30 @@ describe("ErrorBoundary — classifying the error", () => {
     // The narrowing has to keep the real cases: a token counts when something
     // says which kind it is, or what went wrong with it.
     render(new Error(message));
-    expect(screen.getByText("Your session expired")).toBeInTheDocument();
+    expect(screen.getByText("انتهت الجلسة")).toBeInTheDocument();
   });
 });
 
 describe("ErrorBoundary — the details disclosure", () => {
   it("keeps the message collapsed behind a toggle", () => {
     render(new Error("secret internal detail"));
-    expect(screen.getByRole("button", { name: "Show details" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "ورّني التفاصيل" })).toBeInTheDocument();
     expect(screen.queryByText("secret internal detail")).not.toBeInTheDocument();
   });
 
   it("reveals the raw message when expanded", () => {
     render(new Error("secret internal detail"));
-    fireEvent.click(screen.getByRole("button", { name: "Show details" }));
+    fireEvent.click(screen.getByRole("button", { name: "ورّني التفاصيل" }));
     expect(screen.getByText("secret internal detail")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Hide details" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "أخفِ التفاصيل" })).toBeInTheDocument();
   });
 
   it("collapses again on a second click", () => {
     render(new Error("secret internal detail"));
-    fireEvent.click(screen.getByRole("button", { name: "Show details" }));
-    fireEvent.click(screen.getByRole("button", { name: "Hide details" }));
+    fireEvent.click(screen.getByRole("button", { name: "ورّني التفاصيل" }));
+    fireEvent.click(screen.getByRole("button", { name: "أخفِ التفاصيل" }));
     expect(screen.queryByText("secret internal detail")).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Show details" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "ورّني التفاصيل" })).toBeInTheDocument();
   });
 
   it("offers the details on a connection panel too", () => {
@@ -216,13 +216,13 @@ describe("ErrorBoundary — the details disclosure", () => {
     // forward the screenshot to. Without it a misclassified error is
     // unreportable — the screen holds no fact about what actually failed.
     render(new Error("Failed to fetch /api/lessons"));
-    fireEvent.click(screen.getByRole("button", { name: "Show details" }));
+    fireEvent.click(screen.getByRole("button", { name: "ورّني التفاصيل" }));
     expect(screen.getByText("Failed to fetch /api/lessons")).toBeInTheDocument();
   });
 
   it("offers the details on a session panel too", () => {
     render(new Error("JWT expired at 1700000000"));
-    fireEvent.click(screen.getByRole("button", { name: "Show details" }));
+    fireEvent.click(screen.getByRole("button", { name: "ورّني التفاصيل" }));
     expect(screen.getByText("JWT expired at 1700000000")).toBeInTheDocument();
   });
 
@@ -235,19 +235,19 @@ describe("ErrorBoundary — the details disclosure", () => {
 describe("ErrorBoundary — recovery actions", () => {
   it("offers both a retry and a reload on a generic failure", () => {
     render(new Error("kaboom"));
-    expect(screen.getByRole("button", { name: "Try again" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "جرّب مرة ثانية" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "أعد تحميل الصفحة" })).toBeInTheDocument();
   });
 
   it("labels the retry as a retry on a connection failure", () => {
     render(new Error("Failed to fetch"));
-    expect(screen.getByRole("button", { name: "Try again" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "جرّب مرة ثانية" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "أعد تحميل الصفحة" })).toBeInTheDocument();
   });
 
   it("offers only sign-in on a session failure", () => {
     render(new Error("Unauthorized"));
-    expect(screen.getByRole("button", { name: "Sign in" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "سجّل الدخول" })).toBeInTheDocument();
     // Reloading an expired session just lands on the same panel, so it is
     // deliberately not offered.
     expect(screen.queryByRole("button", { name: "أعد تحميل الصفحة" })).not.toBeInTheDocument();
@@ -256,45 +256,45 @@ describe("ErrorBoundary — recovery actions", () => {
   it("re-renders the children when the retry succeeds", () => {
     render(new Error("kaboom"));
     control.throwing = false;
-    fireEvent.click(screen.getByRole("button", { name: "Try again" }));
+    fireEvent.click(screen.getByRole("button", { name: "جرّب مرة ثانية" }));
     expect(screen.getByText("child content")).toBeInTheDocument();
-    expect(screen.queryByText("Something went wrong")).not.toBeInTheDocument();
+    expect(screen.queryByText("صار خطأ")).not.toBeInTheDocument();
   });
 
   it("catches again when the retry hits the same failure", () => {
     render(new Error("kaboom"));
-    fireEvent.click(screen.getByRole("button", { name: "Try again" }));
-    expect(screen.getByText("Something went wrong")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "جرّب مرة ثانية" }));
+    expect(screen.getByText("صار خطأ")).toBeInTheDocument();
     expect(screen.queryByText("child content")).not.toBeInTheDocument();
   });
 
   it("re-classifies on a second, different failure", () => {
     render(new Error("kaboom"));
     control.error = new Error("Failed to fetch");
-    fireEvent.click(screen.getByRole("button", { name: "Try again" }));
-    expect(screen.getByText("Connection problem")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "جرّب مرة ثانية" }));
+    expect(screen.getByText("ما قدرنا نوصل")).toBeInTheDocument();
   });
 
   it("forgets an expanded disclosure across a retry", () => {
     render(new Error("kaboom"));
-    fireEvent.click(screen.getByRole("button", { name: "Show details" }));
-    fireEvent.click(screen.getByRole("button", { name: "Try again" }));
-    expect(screen.getByRole("button", { name: "Show details" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "ورّني التفاصيل" }));
+    fireEvent.click(screen.getByRole("button", { name: "جرّب مرة ثانية" }));
+    expect(screen.getByRole("button", { name: "ورّني التفاصيل" })).toBeInTheDocument();
     expect(screen.queryByText("kaboom")).not.toBeInTheDocument();
   });
 
   it("sends the user to the auth page from a session failure", () => {
     render(new Error("Unauthorized"));
-    fireEvent.click(screen.getByRole("button", { name: "Sign in" }));
+    fireEvent.click(screen.getByRole("button", { name: "سجّل الدخول" }));
     expect(window.location.href).toBe("/auth");
   });
 
   it("does not clear the panel when navigating to auth", () => {
     render(new Error("Unauthorized"));
-    fireEvent.click(screen.getByRole("button", { name: "Sign in" }));
+    fireEvent.click(screen.getByRole("button", { name: "سجّل الدخول" }));
     // The navigation replaces the document; leaving the panel up is correct,
     // because clearing it would flash the still-broken subtree first.
-    expect(screen.getByText("Your session expired")).toBeInTheDocument();
+    expect(screen.getByText("انتهت الجلسة")).toBeInTheDocument();
   });
 
   it("reloads the document from the reload button", () => {
@@ -350,7 +350,7 @@ describe("ErrorBoundary — reporting", () => {
 
   it("reports each failure separately across a failed retry", () => {
     render(new Error("kaboom"));
-    fireEvent.click(screen.getByRole("button", { name: "Try again" }));
+    fireEvent.click(screen.getByRole("button", { name: "جرّب مرة ثانية" }));
     expect(logClientError).toHaveBeenCalledTimes(2);
   });
 

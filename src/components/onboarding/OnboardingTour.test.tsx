@@ -2,6 +2,7 @@ import { act, fireEvent, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithProviders } from "@/test/support/react/harness";
 import { markTourPending, OnboardingTour } from "./OnboardingTour";
+import { AR } from "@/lib/strings";
 
 /**
  * The five-step walkthrough of the bottom navigation.
@@ -21,7 +22,16 @@ import { markTourPending, OnboardingTour } from "./OnboardingTour";
 const TOUR_KEY = "ingleezy:tourCompleted";
 const TRIGGER_KEY = "ingleezy:showTour";
 
-const STEP_TITLES = ["Today", "Learn", "Discover", "Practice", "Me"];
+// The tour titles each tab with the word the tab itself uses, from AR.nav —
+// a tour that renames the thing it is pointing at is describing a screen the
+// reader cannot find.
+const STEP_TITLES = [
+  AR.nav.home,
+  AR.nav.learn,
+  AR.nav.discover,
+  AR.nav.practice,
+  AR.nav.me,
+];
 
 let cleanup: (() => void) | undefined;
 let nav: HTMLElement | undefined;
@@ -78,7 +88,7 @@ function render({ pending = true, completed = false, withNav = true }: Options =
 const openTour = () => act(() => void vi.advanceTimersByTime(400));
 
 const tour = () => screen.queryByRole("dialog");
-const next = () => fireEvent.click(screen.getByRole("button", { name: /^(Next|Done)$/ }));
+const next = () => fireEvent.click(screen.getByRole("button", { name: /^(التالي|خلصنا)$/ }));
 const dots = () => Array.from(document.querySelectorAll(".rounded-full.h-1\\.5"));
 
 describe("deciding whether to run", () => {
@@ -125,9 +135,10 @@ describe("walking through the tabs", () => {
 
     openTour();
 
-    expect(screen.getByRole("heading", { name: "Today" })).toBeInTheDocument();
-    expect(screen.getByText(/Your daily home/)).toBeInTheDocument();
-    expect(screen.getByText("Step 1 of 5")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: AR.nav.home })).toBeInTheDocument();
+    expect(screen.getByText(/بيتك اليومي/)).toBeInTheDocument();
+    // Interpolated, so the text arrives in several nodes.
+    expect(screen.getByText(/خطوة\s*1\s*من\s*5/)).toBeInTheDocument();
   });
 
   it("advances through every tab in nav order", () => {
@@ -138,7 +149,7 @@ describe("walking through the tabs", () => {
       // Reading in the same order as the tabs on screen is the point — a tour
       // that jumps around teaches the learner nothing about where things are.
       expect(screen.getByRole("heading", { name: title })).toBeInTheDocument();
-      expect(screen.getByText(`Step ${index + 1} of 5`)).toBeInTheDocument();
+      expect(screen.getByText(new RegExp(`خطوة\\s*${index + 1}\\s*من\\s*5`))).toBeInTheDocument();
       if (index < STEP_TITLES.length - 1) next();
     }
   });
@@ -155,14 +166,14 @@ describe("walking through the tabs", () => {
     expect(dots()[1].className).toContain("w-5");
   });
 
-  it("offers Done rather than Next on the last tab", () => {
+  it("offers خلصنا rather than التالي on the last tab", () => {
     render();
     openTour();
     for (let i = 0; i < 4; i++) next();
 
-    // "Next" on the final step promises a sixth step that does not exist.
-    expect(screen.getByRole("button", { name: "Done" })).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Next" })).toBeNull();
+    // "التالي" on the final step promises a sixth step that does not exist.
+    expect(screen.getByRole("button", { name: "خلصنا" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "التالي" })).toBeNull();
   });
 
   it("closes for good once the last tab is acknowledged", () => {
@@ -185,7 +196,7 @@ describe("leaving early", () => {
     render();
     openTour();
 
-    fireEvent.click(screen.getByRole("button", { name: "Skip" }));
+    fireEvent.click(screen.getByRole("button", { name: "تخطّي" }));
 
     // Skipping counts as done: someone who dismissed it once should not be shown
     // it again on their next visit.
@@ -241,7 +252,7 @@ describe("highlighting the target", () => {
 
     // The text is the useful half; losing the whole tour because one nav is
     // hidden would be worse than losing the highlight.
-    expect(screen.getByRole("heading", { name: "Me" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: AR.nav.me })).toBeInTheDocument();
   });
 
   it("follows the page when it moves under the cutout", () => {
@@ -264,7 +275,7 @@ describe("highlighting the target", () => {
     render();
     openTour();
 
-    fireEvent.click(screen.getByRole("button", { name: "Skip" }));
+    fireEvent.click(screen.getByRole("button", { name: "تخطّي" }));
 
     // Scroll is listened for in the capture phase across the whole document; a
     // leak here fires on every scroll for the rest of the session.

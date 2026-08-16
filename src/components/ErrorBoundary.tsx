@@ -51,21 +51,26 @@ function classifyError(error: Error): "network" | "auth" | "unknown" {
   return "unknown";
 }
 
+// Arabic, like the rest of the chrome. A learner meeting an error screen is
+// already having a bad time; making them read it in the language they came
+// here to learn is the wrong moment to insist. The raw error text below stays
+// in English on purpose — that one is a fact for whoever gets the screenshot,
+// not a message for the learner.
 const ERROR_MESSAGES: Record<string, { title: string; description: string; action: string }> = {
   network: {
-    title: "Connection problem",
-    description: "We couldn't reach the server. Check your internet connection and try again.",
-    action: "Try again",
+    title: "ما قدرنا نوصل",
+    description: "ما وصلنا للخادم. تأكد من الإنترنت وجرّب مرة ثانية.",
+    action: "جرّب مرة ثانية",
   },
   auth: {
-    title: "Your session expired",
-    description: "Please sign in again to continue.",
-    action: "Sign in",
+    title: "انتهت الجلسة",
+    description: "سجّل دخولك مرة ثانية عشان تكمّل.",
+    action: "سجّل الدخول",
   },
   unknown: {
-    title: "Something went wrong",
-    description: "This page hit an error while loading. The details have been logged.",
-    action: "Try again",
+    title: "صار خطأ",
+    description: "الصفحة واجهت خطأ وهي تحمّل. سجّلنا التفاصيل عندنا.",
+    action: "جرّب مرة ثانية",
   },
 };
 
@@ -134,7 +139,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
                   onClick={this.toggleDetails}
                   className="text-xs text-muted-foreground underline hover:text-foreground"
                 >
-                  {this.state.showDetails ? "Hide details" : "Show details"}
+                  {this.state.showDetails ? "أخفِ التفاصيل" : "ورّني التفاصيل"}
                 </button>
                 {this.state.showDetails && (
                   <pre className="mt-2 text-xs whitespace-pre-wrap rounded-md bg-muted p-3 border">

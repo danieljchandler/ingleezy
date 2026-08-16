@@ -35,7 +35,7 @@ const ResetPassword = () => {
         setTimeout(async () => {
           const { data: again } = await supabase.auth.getSession();
           if (!again.session) {
-            setError("This password reset link is invalid or has expired. Please request a new one.");
+            setError("رابط إعادة التعيين غير صالح أو انتهت صلاحيته. اطلب رابطاً جديداً.");
           }
         }, 1500);
         return () => sub.data.subscription.unsubscribe();
@@ -47,7 +47,7 @@ const ResetPassword = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (password.length < 6) {
-      setError("Password must be at least 6 characters");
+      setError("كلمة المرور لازم 6 أحرف على الأقل");
       return;
     }
     if (password !== confirm) {
@@ -60,15 +60,15 @@ const ResetPassword = () => {
       const { error: updateError } = await supabase.auth.updateUser({ password });
       if (updateError) {
         toast({
-          title: "Couldn't update password",
+          title: "ما قدرنا نغيّر كلمة المرور",
           description: updateError.message,
           variant: "destructive",
         });
         return;
       }
       toast({
-        title: "Password updated",
-        description: "You're signed in with your new password.",
+        title: "تغيّرت كلمة المرور",
+        description: "دخلت بكلمة المرور الجديدة.",
       });
       navigate("/");
     } finally {
@@ -138,7 +138,7 @@ const ResetPassword = () => {
                 />
               </div>
               <Button type="submit" className="w-full h-11" disabled={isSubmitting}>
-                {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Update password"}
+                {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "غيّر كلمة المرور"}
               </Button>
             </form>
           )}
