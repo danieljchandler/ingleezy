@@ -120,7 +120,7 @@ const EnglishSounds = () => {
                         : "bg-muted/40 border-muted-foreground/15",
                     )}
                   >
-                    <p className="text-[10px] font-semibold uppercase tracking-wider text-[#2C3B74]/70">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-[#2C3B74]/70 dark:text-periwinkle/70">
                       محطة {sound.order_index + 1}
                     </p>
                     <p className="font-english text-sm font-medium text-foreground" dir="ltr">
@@ -174,7 +174,7 @@ const EnglishSounds = () => {
                       <span
                         className={cn(
                           "font-english text-2xl relative",
-                          mastered ? "text-[#8F5A24]" : "text-[#2C3B74]",
+                          mastered ? "text-[#8F5A24] dark:text-accent" : "text-[#2C3B74] dark:text-periwinkle",
                         )}
                         style={{ lineHeight: 1 }}
                         dir="ltr"
@@ -250,7 +250,7 @@ const EnglishSounds = () => {
                     ) : (
                       <Flag className="h-5 w-5 text-[#A57B1F] relative" />
                     )}
-                    <span className="font-bold text-[#2C3B74] relative">
+                    <span className="font-bold text-[#2C3B74] dark:text-periwinkle relative">
                       نقطة تفتيش الواحة {checkpointIdx + 1}
                     </span>
                     {checkpoints[checkpointIdx] && (

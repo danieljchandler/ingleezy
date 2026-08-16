@@ -5,7 +5,7 @@
  */
 export function DesertBackdrop() {
   return (
-    <div aria-hidden className="pointer-events-none fixed inset-0 -z-0 overflow-hidden">
+    <div aria-hidden className="pointer-events-none fixed inset-0 -z-0 overflow-hidden dark:opacity-25">
       {/* Static base: sky, sun, mountains */}
       <svg
         className="absolute inset-0 w-full h-full"

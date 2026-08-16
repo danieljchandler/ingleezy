@@ -141,7 +141,10 @@ const Index = () => {
 
       {/* Top bar with logo and auth */}
       <div className="flex items-center justify-between mb-4">
-        <IngleezyLogo className="text-4xl" />
+        <>
+          <IngleezyLogo iconOnly className="text-2xl sm:hidden" />
+          <IngleezyLogo className="hidden sm:inline-flex text-3xl" />
+        </>
         
         <div className="flex items-center gap-3">
           {!authLoading && (isAuthenticated ? (

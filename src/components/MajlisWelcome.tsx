@@ -85,7 +85,7 @@ export function MajlisWelcome() {
     <div
       className={cn(
         "relative overflow-hidden rounded-3xl mb-4",
-        "bg-[#F7F8FC] border border-[#2C3B74]/20",
+        "bg-[#F7F8FC] border border-[#2C3B74]/20 dark:bg-card dark:border-border",
         "px-4 py-4 sm:px-5 sm:py-5",
         "shadow-[0_1px_0_0_rgba(27,37,52,0.04),0_8px_24px_-12px_rgba(27,37,52,0.18)]"
       )}
@@ -110,13 +110,13 @@ export function MajlisWelcome() {
         {/* Left: greeting */}
         <div className="flex-1 min-w-0">
           <p
-            className="text-2xl sm:text-3xl leading-tight text-[#2C3B74] font-arabic"
+            className="text-2xl sm:text-3xl leading-tight text-[#2C3B74] dark:text-periwinkle font-arabic"
             dir="rtl"
           >
             {greeting.ar}
           </p>
           <p
-            className="mt-1 text-sm text-[#2C3B74]/70"
+            className="mt-1 text-sm text-[#2C3B74]/70 dark:text-muted-foreground"
           >
             {greeting.en}
             {isAuthenticated && name ? `, ${name}` : ""}
@@ -143,14 +143,14 @@ export function MajlisWelcome() {
                   "text-[11px] font-semibold border",
                   (streak?.current_streak ?? 0) > 0
                     ? "bg-gradient-to-r from-[#D98A3D]/20 to-[#D98A3D]/5 border-[#D98A3D]/40 text-[#8F5A24] dark:text-accent"
-                    : "bg-[#2C3B74]/5 border-[#2C3B74]/15 text-[#2C3B74]/60"
+                    : "bg-[#2C3B74]/5 border-[#2C3B74]/15 text-[#2C3B74]/60 dark:bg-white/5 dark:border-white/10 dark:text-muted-foreground"
                 )}
                 title={`${streak?.current_streak ?? 0}-day streak`}
               >
                 <Flame
                   className={cn(
                     "h-3 w-3",
-                    (streak?.current_streak ?? 0) > 0 ? "text-accent" : "text-[#2C3B74]/40 dark:text-periwinkle/40"
+                    (streak?.current_streak ?? 0) > 0 ? "text-accent" : "text-[#2C3B74]/40 dark:text-muted-foreground/60"
                   )}
                 />
                 {streak?.current_streak ?? 0}d
