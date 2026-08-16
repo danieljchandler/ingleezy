@@ -55,7 +55,7 @@ export const SUBSCRIPTION_TIERS = {
 } as const;
 
 export const useSubscription = () => {
-  const { user, session } = useAuth();
+  const { user, session, loading: authLoading } = useAuth();
   const [state, setState] = useState<SubscriptionState>({
     subscribed: false,
     tier: null,
@@ -94,14 +94,23 @@ export const useSubscription = () => {
     }
   }, [session?.access_token]);
 
-  // Check subscription on mount and when user changes
+  // Check subscription on mount and when user changes.
+  //
+  // The `authLoading` guard is what keeps `loading` honest. This effect runs
+  // once before auth has resolved, with `user` still null; it used to take the
+  // else branch and declare `loading: false` — an answer, not an absence — and
+  // nothing set it back to true when the user arrived. Every consumer that
+  // gates on this flag therefore had a window where the spinner was gone and
+  // the state was the default: /pricing spent that window offering a paying
+  // subscriber a fresh checkout for the plan they were already on.
   useEffect(() => {
+    if (authLoading) return;
     if (user) {
       checkSubscription();
     } else {
       setState({ subscribed: false, tier: null, subscriptionEnd: null, loading: false });
     }
-  }, [user, checkSubscription]);
+  }, [authLoading, user, checkSubscription]);
 
   // Auto-refresh every minute
   useEffect(() => {

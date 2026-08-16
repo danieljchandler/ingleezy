@@ -919,6 +919,37 @@ generation conditioning.
       with what it was always meant to assert — one question per word,
       Arabic prompt with English options, full marks at the end.
 
+### Inherited bugs the retarget did not cause — FIX
+The quiz crash above came from a test that pinned a bug rather than a
+behaviour, so the suite was swept for the rest of them (`grep` for
+"A bug, pinned"). Six, all from Hakiya, all still live. Ranked by what they
+cost a learner, the two worst share the quiz's shape exactly: a component
+acting on state that has not arrived yet.
+- [x] **The leaderboard profile dialog silently wiped settings.** Seeding
+      happened inline in `handleOpen`, guarded `if (isOpen && profile)` with
+      no else branch and nothing to catch up when the query landed. Open it
+      before the profile resolved and every field showed its `useState`
+      default — empty name, leaderboard switch **on**, no institution. Those
+      defaults are not a preview: Save writes them. A learner who opened the
+      dialog quickly lost their display name and was put back on a
+      leaderboard they had deliberately left, having touched no control —
+      data loss and a privacy reversal in one click. Seeded from an effect
+      now, and Save is held until there is something to save (gated on the
+      profile rather than on `isLoading`, since a failed query also clears
+      that flag with nothing to seed from).
+- [x] **/pricing offered a paying subscriber the plan they were already on.**
+      The page does gate on `subLoading`, but `useSubscription` cleared the
+      flag before it had an answer: the effect ran once with `user` still
+      null, took the else branch and declared "not subscribed", and nothing
+      set it back to true when the user arrived. For the whole round trip the
+      page rendered its default state with a live Subscribe button — a second
+      charge for a plan already held. Now waits on `authLoading` before
+      deciding, so `loading` means "no answer yet" rather than "no".
+- [ ] Four left, tracked separately: grammar-drill outcomes re-submitted on
+      reload, `useSearchUsers` computing `is_following` from a query it does
+      not depend on, the all-time leaderboard labelled with weekly XP, and a
+      Transcribe `isSaved` flag.
+
 ---
 
 ## Sequencing

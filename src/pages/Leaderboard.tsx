@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppShell } from "@/components/layout/AppShell";
 import { HomeButton } from "@/components/HomeButton";
@@ -150,16 +150,26 @@ const ProfileEditDialog = () => {
   const [showInstitution, setShowInstitution] = useState(true);
   const [open, setOpen] = useState(false);
 
-  const handleOpen = (isOpen: boolean) => {
-    setOpen(isOpen);
-    if (isOpen && profile) {
-      setDisplayName(profile.display_name || "");
-      setShowOnLeaderboard(profile.show_on_leaderboard);
-      setInstitutionId(profile.institution_id || "none");
-      setCustomInstitution(profile.custom_institution || "");
-      setShowInstitution(profile.show_institution);
-    }
-  };
+  /**
+   * Seed the form from the profile — in an effect, so it also catches a
+   * profile that lands *after* the dialog is already open.
+   *
+   * This used to happen inline in `handleOpen`, guarded by `if (isOpen &&
+   * profile)` with no else branch and nothing to catch up afterwards. Open the
+   * dialog before the query resolved and every field showed its `useState`
+   * default: empty name, leaderboard switch on, no institution. Those defaults
+   * are not a preview — Save writes them. A learner who opened the dialog
+   * quickly lost their display name and was put back on a leaderboard they had
+   * deliberately left, having touched neither control.
+   */
+  useEffect(() => {
+    if (!open || !profile) return;
+    setDisplayName(profile.display_name || "");
+    setShowOnLeaderboard(profile.show_on_leaderboard);
+    setInstitutionId(profile.institution_id || "none");
+    setCustomInstitution(profile.custom_institution || "");
+    setShowInstitution(profile.show_institution);
+  }, [open, profile]);
 
   const handleSave = async () => {
     try {
@@ -180,7 +190,7 @@ const ProfileEditDialog = () => {
   const hasInstitution = institutionId !== "none";
 
   return (
-    <Dialog open={open} onOpenChange={handleOpen}>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="ghost" size="icon">
           <Settings className="h-4 w-4" />
@@ -262,12 +272,16 @@ const ProfileEditDialog = () => {
           <Button
             onClick={handleSave}
             className="w-full"
-            disabled={updateProfile.isPending}
+            // Gated on the profile itself rather than on `isLoading`: if the
+            // query fails outright, `isLoading` goes false with nothing to
+            // seed from, and saving would write the defaults over real
+            // settings — the same damage by a different route.
+            disabled={updateProfile.isPending || !profile}
           >
             {updateProfile.isPending && (
               <Loader2 className="h-4 w-4 me-2 animate-spin" />
             )}
-            Save Changes
+            احفظ التعديلات
           </Button>
         </div>
       </DialogContent>

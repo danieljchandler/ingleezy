@@ -114,7 +114,7 @@ test.describe("what each visitor is shown", () => {
       .toMatchObject({ tier: "standard" });
   });
 
-  test("shows a subscriber the Subscribe buttons while their plan is still loading", async ({
+  test("does not offer a subscriber a checkout while their plan is loading", async ({
     page,
     signInAs,
     db,
@@ -125,18 +125,14 @@ test.describe("what each visitor is shown", () => {
     await page.goto("/pricing");
     await expect(page.getByRole("heading", { name: "اختر باقتك" })).toBeVisible();
 
-    // A bug, pinned. The page does gate on `subLoading` — but `useSubscription`
-    // clears that flag before it has an answer. Its effect runs first with
-    // `user` still null, takes the else branch and sets `loading: false`
-    // (useSubscription.ts:88); when `user` arrives, `checkSubscription` never
-    // sets it back to true. So the spinner is gone for the whole round trip and
-    // the page renders its default state: a paying Standard subscriber is
-    // offered a Standard checkout for the plan they are already on.
-    await expect(page.getByRole("button", { name: "اشترك" })).toHaveCount(2);
-    await expect(page.getByText(/أنت على باقة/)).toHaveCount(0);
+    // The page gates on `subLoading`, but the flag used to go false before
+    // there was an answer: the effect ran once with `user` still null, took
+    // the else branch and declared "not subscribed", and nothing set it back
+    // when the user arrived. For the whole round trip the page rendered its
+    // default state and offered a paying Standard subscriber a fresh Standard
+    // checkout — a second charge for the plan they were already on.
+    await expect(page.getByRole("button", { name: "اشترك" })).toHaveCount(0);
 
-    // It does settle correctly once the answer lands — the window is the bug,
-    // not the end state.
     await expect(page.getByText("أنت على باقة Standard")).toBeVisible();
     await expect(page.getByRole("button", { name: "اشترك" })).toHaveCount(1);
   });

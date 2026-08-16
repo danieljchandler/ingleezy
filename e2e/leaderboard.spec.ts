@@ -342,7 +342,7 @@ test.describe("editing the public profile", () => {
 
     await page.locator("button:has(svg.lucide-settings)").click();
     await page.getByLabel("الاسم الظاهر").fill("Layla al-Kuwaiti");
-    await page.getByRole("button", { name: /^Save/ }).click();
+    await page.getByRole("button", { name: /احفظ/ }).click();
 
     await expect
       .poll(() => db.rows("profiles").find((r) => r.user_id === TEST_USER_ID)?.display_name)
@@ -355,7 +355,7 @@ test.describe("editing the public profile", () => {
 
     await page.locator("button:has(svg.lucide-settings)").click();
     await page.getByRole("switch", { name: /لوحة الصدارة/ }).click();
-    await page.getByRole("button", { name: /^Save/ }).click();
+    await page.getByRole("button", { name: /احفظ/ }).click();
 
     // The switch behind the whole privacy story above. It has to reach the
     // column the view filters on, or the opt-out is decorative.
@@ -364,7 +364,7 @@ test.describe("editing the public profile", () => {
       .toBe(false);
   });
 
-  test("overwrites the saved profile when the dialog opens before it loads", async ({
+  test("catches up with the profile when the dialog opens before it loads", async ({
     page,
     db,
   }) => {
@@ -381,24 +381,26 @@ test.describe("editing the public profile", () => {
     await page.locator("button:has(svg.lucide-settings)").click();
     await expect(page.getByRole("dialog")).toBeVisible();
 
-    // A bug, pinned. `handleOpen` seeds the form only `if (isOpen && profile)`
-    // — with no else branch and no effect to catch up when the query lands. Open
-    // the dialog before it resolves and the form shows its `useState` defaults:
-    // empty name, "Show on Leaderboard" on, no institution.
-    await expect(page.getByLabel("الاسم الظاهر")).toHaveValue("");
-    await expect(page.getByRole("switch", { name: /لوحة الصدارة/ })).toBeChecked();
+    // Seeding used to happen inline in `handleOpen`, guarded by
+    // `if (isOpen && profile)` with no else and nothing to catch up — so a
+    // dialog opened before the query resolved showed the useState defaults,
+    // and Save wrote them. The learner lost their display name and was put
+    // back on a leaderboard they had deliberately left, having touched
+    // neither control. Save is now held until there is something to save.
+    await expect(page.getByRole("button", { name: /احفظ/ })).toBeDisabled();
 
-    await page.getByRole("button", { name: /^Save/ }).click();
+    await expect(page.getByLabel("الاسم الظاهر")).toHaveValue("Layla al-Kuwaiti");
+    await expect(page.getByRole("switch", { name: /لوحة الصدارة/ })).not.toBeChecked();
 
-    // Those defaults are not a preview — Save writes them. A learner who opened
-    // the dialog quickly loses their display name and is put back on the
-    // leaderboard they had deliberately left, having touched neither control.
+    await page.getByRole("button", { name: /احفظ/ }).click();
+
+    // Saving without touching a control leaves the profile as it was.
     await expect
       .poll(() => db.rows("profiles").find((r) => r.user_id === TEST_USER_ID))
       .toMatchObject({
-        display_name: null,
-        show_on_leaderboard: true,
-        custom_institution: null,
+        display_name: "Layla al-Kuwaiti",
+        show_on_leaderboard: false,
+        custom_institution: "Evening class",
       });
   });
 
@@ -410,7 +412,7 @@ test.describe("editing the public profile", () => {
     await page.getByRole("combobox").click();
     await page.getByRole("option", { name: /Other/ }).click();
     await page.getByLabel("اسم المؤسسة").fill("Evening class");
-    await page.getByRole("button", { name: /^Save/ }).click();
+    await page.getByRole("button", { name: /احفظ/ }).click();
 
     await expect
       .poll(() => db.rows("profiles").find((r) => r.user_id === TEST_USER_ID))
