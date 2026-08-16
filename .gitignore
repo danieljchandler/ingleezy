@@ -51,3 +51,6 @@ deno.lock
 
 # Local training-data export snapshots (scripts/export-training-data.mjs)
 training-exports/
+
+# Scratch commit-message file used by the agent workflow; never part of the tree.
+.git-commit-msg.txt

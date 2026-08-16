@@ -878,3 +878,15 @@ same bar as Hakiya's CI.
   day one.
 - **e2e fixtures** encode Arabic-direction data; flip fixtures alongside each
   feature or the suite rots.
+- **Migrations that only replay against the database they grew on.** Inherited,
+  not introduced here, and invisible until someone builds a new environment:
+  `migrationReplay` is skipped unless `DATABASE_URL` is set, so the pin drifted
+  and eight failures accumulated behind it unnoticed. Seven were the platform
+  re-emitting an already-authored migration under a fresh hashed filename, so
+  two files created the same objects and the second always failed — worse than
+  cosmetic in one case, where the failure aborted the rest of the authored file
+  and a rebuilt database silently lost the `learner-audio` storage bucket. The
+  eighth had never worked outside a wrapping transaction: a `CREATE TEMP TABLE
+  ... ON COMMIT DROP` whose table was gone by the time the next statement ran.
+  Cleared; five older duplicates remain pinned because each carries something
+  its twin does not.

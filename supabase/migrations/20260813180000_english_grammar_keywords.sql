@@ -7,9 +7,16 @@
 -- (pinned by src/test/grammarTaxonomy.test.ts against THIS migration, which
 -- supersedes the copy in 20260801150000). Adding keys is safe: a new key is a
 -- fresh mastery rung; renaming one is what orphans recorded mastery.
+--
+-- The keywords ride in a CTE rather than a temp table. `CREATE TEMP TABLE ...
+-- ON COMMIT DROP` only survives to the next statement when something wraps the
+-- file in a transaction: the Supabase CLI does, plain `psql -f` does not, and
+-- under the latter the table was dropped the instant it was committed and the
+-- INSERT that followed failed on a relation that no longer existed. A CTE is
+-- one statement, so it needs nothing from the runner.
 
-CREATE TEMP TABLE _grammar_kw (priority int, category text, keyword text) ON COMMIT DROP;
-INSERT INTO _grammar_kw (priority, category, keyword) VALUES
+WITH _grammar_kw (priority, category, keyword) AS (
+  VALUES
   (1, 'articles', 'article'),
   (2, 'articles', 'articles'),
   (3, 'articles', 'a/an'),
@@ -76,8 +83,8 @@ INSERT INTO _grammar_kw (priority, category, keyword) VALUES
   (64, 'verb-conjugation', 'perfect'),
   (65, 'verb-conjugation', 'تصريف'),
   (66, 'verb-conjugation', 'فعل'),
-  (67, 'verb-conjugation', 'افعال');
-
+  (67, 'verb-conjugation', 'افعال')
+)
 -- Re-key free-text grammar concepts that match the new categories' keywords
 -- (same normalization approach as 20260801150000: lowercase, trimmed).
 UPDATE public.curriculum_concepts c

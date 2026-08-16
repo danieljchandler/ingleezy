@@ -33,6 +33,14 @@ interface BuildResult {
  * fixed, because fixing the last two means writing migrations for tables whose
  * real shape only production knows — that needs a schema dump, not a guess.
  *
+ * The five duplicates are the tail of a pattern that has now been cleared
+ * everywhere else: the platform periodically re-emitted an already-authored
+ * migration under a fresh hashed filename, so the repo carried two files
+ * creating the same objects and the second one always failed. The clean
+ * duplicates were deleted; these five are held back because each also carries
+ * something the authored file does not (seed rows, an extra table), so working
+ * out what would be lost is a per-file question rather than a sweep.
+ *
  * The list is pinned so it cannot grow. Shrinking it is the goal.
  */
 const KNOWN_REPLAY_FAILURES = [
@@ -45,8 +53,16 @@ const KNOWN_REPLAY_FAILURES = [
   "20260529155315_a303684f-1e60-4e83-8c60-8f228e46c637.sql",
 ];
 
-/** Tables the app reads that replaying the migrations does not produce. */
-const KNOWN_MISSING_TABLES = ["processed_videos", "review_streaks", "subscribers"];
+/**
+ * Tables the app reads that replaying the migrations does not produce.
+ *
+ * `subscribers` used to be here and is not any more: it is created by
+ * 20260812103000 and by the platform snapshot beside it, both with
+ * IF NOT EXISTS, so a rebuilt database now gets it. That one mattered most —
+ * `_shared/usageCap.ts` reads it to decide whether a caller is paying, so
+ * without it every user looked free-tier on a fresh environment.
+ */
+const KNOWN_MISSING_TABLES = ["processed_videos", "review_streaks"];
 
 describe.skipIf(!DATABASE_URL)("migration replay", () => {
   let result: BuildResult;
@@ -104,10 +120,10 @@ describe.skipIf(!DATABASE_URL)("migration replay", () => {
   it("records the tables a rebuilt database would be missing", () => {
     const missing = KNOWN_MISSING_TABLES.filter((table) => !result.tables.includes(table));
 
-    // subscribers is the one that matters most: _shared/usageCap.ts reads it to
-    // decide whether a caller is a paying customer, so on a rebuilt database
-    // every user would look free-tier.
-    expect(missing.sort()).toEqual(KNOWN_MISSING_TABLES);
+    // Equality, not containment: a pinned table that starts appearing fails
+    // here too, so the list has to be trimmed rather than left overstating the
+    // damage. That is how `subscribers` came off it.
+    expect(missing.sort()).toEqual([...KNOWN_MISSING_TABLES].sort());
   });
 });
 

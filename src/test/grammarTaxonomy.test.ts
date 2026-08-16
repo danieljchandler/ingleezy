@@ -136,8 +136,11 @@ describe("the migration's keyword table stays in step with this module", () => {
       "utf8",
     );
 
+    // The keywords ride in a CTE rather than a temp table — `CREATE TEMP TABLE
+    // ... ON COMMIT DROP` only survives to the next statement if the runner
+    // wraps the file in a transaction, and plain psql does not.
     const block = sql.match(
-      /INSERT INTO _grammar_kw \(priority, category, keyword\) VALUES\n([\s\S]*?);/,
+      /WITH _grammar_kw \(priority, category, keyword\) AS \(\n\s*VALUES\n([\s\S]*?)\n\)/,
     );
     expect(block, "keyword VALUES block not found in the migration").not.toBeNull();
 
