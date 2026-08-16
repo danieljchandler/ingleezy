@@ -133,6 +133,29 @@ Deno.test("suggest-stories returns what the model proposed", async () => {
   assertEquals((result.body.suggestions as Array<{ title: string }>)[0].title, "The Generous Host");
 });
 
+Deno.test("suggest-stories asks for English texts, not Arabic ones", async () => {
+  // First stage of the pipeline. The other three were flipped with the library
+  // and this one was not, so an admin was offered Arabic folktales that the
+  // next stage then wrote out in English. Every stage still returned 200 —
+  // the mismatch is only visible in the prompt.
+  const result = await call(
+    "suggest-stories",
+    { dialect: "Egyptian", difficulty: "beginner" },
+    admin({
+      "/rest/v1/authentic_stories": () => json([]),
+      "/rest/v1/interactive_stories": () => json([]),
+      "ai.gateway.lovable.dev": emitting({ suggestions: [] }),
+      "openrouter.ai": emitting({ suggestions: [] }),
+    }),
+  );
+
+  const prompt = promptOf(result.bodies, result.calls);
+  assertStringIncludes(prompt, "curator of ENGLISH reading material");
+  assertStringIncludes(prompt, "public domain English literature");
+  // The dialect names the reader's first language, not the text's register.
+  assertStringIncludes(prompt, "native Egyptian Arabic speakers learning English");
+});
+
 Deno.test("suggest-stories tells the model what the library already has", async () => {
   const result = await call(
     "suggest-stories",

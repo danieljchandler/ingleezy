@@ -1424,6 +1424,7 @@ const AdminVideoForm = () => {
                 lines={transcriptLines}
                 onChange={setTranscriptLines}
                 audioUrl={stableAudioUrl}
+                dialect={dialect}
               />
             </CardContent>
           </Card>

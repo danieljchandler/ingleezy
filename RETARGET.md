@@ -369,6 +369,18 @@ generation conditioning.
       reader happens to be Gulf.
       Learner-facing e2e coverage added (`e2e/reading-library.spec.ts`);
       the surface had none.
+      **`suggest-stories` was the stage this bullet missed**, found later by
+      sweeping the edge functions for Arabic-target framing rather than by
+      following the pipeline. It is the pipeline's *first* stage — suggest an
+      idea, write its text, import it, gloss it — and it kept proposing
+      "authentic Arabic stories ... for learners studying Gulf Arabic", which
+      the flipped next stage then wrote out in English. Every stage returned
+      200; they agreed on their interfaces and disagreed only about which
+      language the library is for. Now an English curator, choosing for this
+      reader specifically: plain modern-readable prose over ornate or archaic
+      English, settings that do not turn on a holiday or a school system only
+      Britons and Americans know, and dialogue over description because
+      dialogue is the English a learner actually meets in speech.
       **Daily story DONE**: english-target Brain call, English-primary
       sentences {english, arabic, literal}, transliteration retired,
       body_arabic nullable (20260813170000), reader flipped to tappable
@@ -591,6 +603,28 @@ generation conditioning.
       collapsing keeps the line in the header rather than the gloss.
       Nothing here errored before the flip; a fluent answer to the wrong
       question reads exactly like a fluent answer.
+- [x] `ask-translation` **DELETED** rather than flipped. A second per-sentence
+      tutor with its own Arabic-target prompt, superseded when `AskAISentence`
+      stopped opening its own dialog and started seeding the global panel — no
+      client has called it since. Flipping it would have meant maintaining a
+      second tutor prompt nobody reaches, which is precisely the thing that
+      drifts. Gone with its tests, its fake-backend stub and its `config.toml`
+      entry.
+- [x] `ai-resegment-transcript` FLIPPED — the admin's "re-segment with AI"
+      button in the transcript editor. It hunted Arabic discourse markers
+      ("يا أخوي", "إيش", "شلون") and idafa boundaries in what are, post-flip,
+      ENGLISH ASR words, and asked for an English translation of an Arabic
+      line. None of those heuristics can fire on English, so it quietly
+      degraded to timing-only segmentation and never said so — the failure
+      mode of a heuristic is silence. Now the turn-start cues are English
+      (backchannels, question openers, vocatives), the break rules are English
+      (never between an article and its noun, an auxiliary and its verb), the
+      spoken form is preserved contractions and false starts included, and the
+      two support fields carry what they carry everywhere else: `translation`
+      is the dialect Arabic, `literal` that Arabic in English word order.
+      It also **never received a dialect** — the client sent only `segments`,
+      so every gloss came back Gulf whatever the clip was. Threaded through
+      from the video form and pinned.
 
 ### Arabic-only surfaces — PRUNE or REPURPOSE
 - [x] Alphabet Journey → **English Sounds journey, DONE**. Researched

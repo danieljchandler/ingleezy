@@ -297,7 +297,6 @@ export const defaultFunctions: Record<string, FunctionHandler> = {
   "practice-sentence-coach": () => ok({ feedback: "" }),
   "culture-guide": () => ok({ answer: "" }),
   "free-chat": () => ok({ reply: "" }),
-  "ask-translation": () => ok({ answer: "" }),
   "assistant-chat": () => streaming(""),
   "analyze-meme": () => ok({ analysis: "" }),
   // Transcribe's analyser. It reports failure in-band as `success: false`

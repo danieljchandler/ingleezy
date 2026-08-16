@@ -61,10 +61,15 @@ const aLine = (over: Partial<TranscriptLine> = {}): TranscriptLine => ({
   ...over,
 });
 
-function render(lines: TranscriptLine[] = [aLine()], audioUrl?: string) {
+function render(lines: TranscriptLine[] = [aLine()], audioUrl?: string, dialect?: string) {
   const onChange = vi.fn();
   const harness = renderWithProviders(
-    <AdminTranscriptEditor lines={lines} onChange={onChange} audioUrl={audioUrl} />,
+    <AdminTranscriptEditor
+      lines={lines}
+      onChange={onChange}
+      audioUrl={audioUrl}
+      dialect={dialect}
+    />,
   );
   cleanup = harness.cleanup;
   return { ...harness, onChange };
@@ -461,7 +466,23 @@ describe("AdminTranscriptEditor — AI re-segmentation", () => {
       await props().onAIResegment?.(segments);
     });
 
-    expect(backend.lastCallTo("ai-resegment-transcript")?.body).toEqual({ segments });
+    expect(backend.lastCallTo("ai-resegment-transcript")?.body).toMatchObject({ segments });
+  });
+
+  it("sends the clip's dialect, so the gloss is not always Gulf", async () => {
+    // Only the Arabic gloss depends on it — the segmentation itself reads
+    // English — but the function defaults to Gulf when it is missing, and it
+    // was missing, so an Egyptian clip came back glossed in Khaleeji.
+    const { backend } = render([aLine()], undefined, "Egyptian");
+    backend.stubFunction("ai-resegment-transcript", { segments: proposed });
+
+    await act(async () => {
+      await props().onAIResegment?.(segments);
+    });
+
+    expect(backend.lastCallTo("ai-resegment-transcript")?.body).toMatchObject({
+      dialect: "Egyptian",
+    });
   });
 
   it("returns the proposal for the editor to preview", async () => {

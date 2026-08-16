@@ -34,6 +34,12 @@ interface AdminTranscriptEditorProps {
   lines: TranscriptLine[];
   onChange: (lines: TranscriptLine[]) => void;
   audioUrl?: string;
+  /**
+   * The clip's dialect. Only the Arabic gloss depends on it — the segmentation
+   * itself reads English — but the resegmenter defaults to Gulf without it, so
+   * an Egyptian clip came back glossed in Khaleeji.
+   */
+  dialect?: string;
 }
 
 /**
@@ -42,7 +48,7 @@ interface AdminTranscriptEditorProps {
  *
  * Token glosses are preserved via a ref map so round-tripping doesn't lose data.
  */
-export function AdminTranscriptEditor({ lines, onChange, audioUrl }: AdminTranscriptEditorProps) {
+export function AdminTranscriptEditor({ lines, onChange, audioUrl, dialect }: AdminTranscriptEditorProps) {
   /**
    * The glosses that came in, kept per line and in order, so they survive the
    * round-trip through the editor.
@@ -165,7 +171,7 @@ export function AdminTranscriptEditor({ lines, onChange, audioUrl }: AdminTransc
     async (segments: Segment[]): Promise<Segment[] | null> => {
       try {
         const { data, error } = await supabase.functions.invoke("ai-resegment-transcript", {
-          body: { segments },
+          body: { segments, dialect },
         });
         if (error) throw error;
         const proposed = (data as { segments?: Segment[] } | null)?.segments;
@@ -191,7 +197,7 @@ export function AdminTranscriptEditor({ lines, onChange, audioUrl }: AdminTransc
         return null;
       }
     },
-    [],
+    [dialect],
   );
 
   return (

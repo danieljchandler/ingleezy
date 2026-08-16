@@ -1,5 +1,13 @@
 // suggest-stories — AI generates 3 unique story ideas for the reading library,
 // checking existing stories to avoid duplicates.
+//
+// First stage of the admin pipeline: suggest an idea, write its text
+// (generate-suggested-story-text), import it into lines and vocabulary
+// (import-authentic-story), gloss those lines into the learner's dialect
+// (translate-story-dialect). The other three were flipped to English with the
+// library; this one kept proposing Arabic folktales, and the next stage
+// dutifully wrote them out in English. Nothing failed — the stages agreed on
+// their interfaces and disagreed only about which language the library is for.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { askBrain } from "../_shared/aiBrain.ts";
@@ -87,22 +95,26 @@ Deno.serve(async (req) => {
       strategy: "solo",
       skipRepair: true,
       models: ["google/gemini-3-flash-preview"],
-      systemPromptExtra: `You are an expert Arabic literature curator for a language learning app. Your job is to suggest authentic Arabic stories suitable for reading practice.
+      systemPromptExtra: `You are an expert curator of ENGLISH reading material for a language learning app. Its learners are native ${targetDialect} Arabic speakers learning English. Your job is to suggest authentic English texts suitable for reading practice.
 
-Suggest stories from REAL sources — public domain Arabic literature, folktales, short stories by known authors, or well-known cultural narratives. These should be stories that actually exist or are well-known cultural narratives that can be faithfully reproduced.
+Suggest texts from REAL sources — public domain English literature, fables, short stories by known authors, essays, or well-known narratives. These should be texts that actually exist and can be faithfully reproduced, not inventions.
 
 Requirements:
-- Suggest exactly 3 story options
+- Suggest exactly 3 options
 - Each must be different in theme and style
 - Target difficulty: ${targetDifficulty}
-- Target dialect/register: ${targetDialect}
-- Stories should be 200-800 words when written out
-- Avoid any stories that overlap with existing content
+- Texts should be 200-800 words when written out
+- Avoid any that overlap with existing content
+
+Choosing for THIS reader:
+- The English is what is being learned, so the language has to carry the piece. Prefer plain, concrete, modern-readable prose over ornate or archaic English, whatever the text's date.
+- Prefer a setting a reader anywhere can follow. A story that turns on a holiday, a sport or a school system only Americans and Britons know spends the reader's attention on trivia instead of on English.
+- Dialogue is worth more than description here: it is the English they will actually meet in speech.
 
 Source types can be: "folktale", "short_story", "fable", "cultural_narrative", "poem", "proverb_collection", "historical_anecdote"
 
 ${allExisting ? `\nEXISTING STORIES TO AVOID (do not suggest anything similar):\n${allExisting}` : ""}`,
-      userPrompt: `Suggest 3 authentic Arabic stories for our reading library. They should be appropriate for ${targetDifficulty} level learners studying ${targetDialect} Arabic. Each should be engaging and culturally rich. Provide the title in both English and Arabic, a compelling description in both languages, the source type, estimated length, and key themes.`,
+      userPrompt: `Suggest 3 authentic English texts for our reading library, for ${targetDifficulty} level learners whose first language is ${targetDialect} Arabic. Give the title in English and again in ${targetDialect} Arabic, a compelling description in both, the source type, estimated length, and key themes.`,
       maxTokens: 2000,
       temperature: 0.9,
       tool: {
@@ -118,10 +130,10 @@ ${allExisting ? `\nEXISTING STORIES TO AVOID (do not suggest anything similar):\
               items: {
                 type: "object",
                 properties: {
-                  title: { type: "string", description: "Story title in English" },
-                  title_arabic: { type: "string", description: "Story title in Arabic" },
-                  description: { type: "string", description: "2-3 sentence description in English explaining what the story is about and why it's good for learners" },
-                  description_arabic: { type: "string", description: "2-3 sentence description in Arabic" },
+                  title: { type: "string", description: "The text's real English title" },
+                  title_arabic: { type: "string", description: `The title rendered in ${targetDialect} Arabic, as a handle for the admin — not a replacement for the English one` },
+                  description: { type: "string", description: "2-3 sentence description in English explaining what the text is about and why it suits these learners" },
+                  description_arabic: { type: "string", description: `The same description in ${targetDialect} Arabic` },
                   source_type: { type: "string", description: "Type of source: folktale, short_story, fable, cultural_narrative, poem, proverb_collection, historical_anecdote" },
                   estimated_length: { type: "string", description: "short (200-300 words), medium (300-500 words), or long (500-800 words)" },
                   themes: { type: "array", items: { type: "string" }, description: "2-4 key themes like 'generosity', 'wisdom', 'family'" },

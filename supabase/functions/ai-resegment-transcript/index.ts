@@ -3,6 +3,15 @@ import { getCorsHeaders } from "../_shared/cors.ts";
 // Takes existing word-level segments and asks an LLM to restructure them into
 // thought-by-thought lines, starting a new line on speaker changes. Word
 // timings are preserved by anchoring back to the original word objects.
+//
+// The words are ENGLISH: AdminVideoForm routes uploads to
+// `process-english-video`, so this edits an English transcript. It used to
+// hunt Arabic discourse markers ("يا أخوي", "شلون") in them and produce an
+// English translation of an Arabic line — heuristics that simply never fire on
+// English input, so it degraded to timing-only segmentation without ever
+// saying so. Now the cues are English, and the two support columns hold what
+// the rest of the app puts in them: `translation` is the dialect Arabic, and
+// `literal` is that Arabic rearranged into the English word order.
 
 
 interface Word {
@@ -35,31 +44,36 @@ interface AILine {
   wordIndices: number[];
 }
 
-const DIALECT_MARKERS: Record<string, string> = {
-  Gulf: `Dialect-specific cues for GULF (Khaleeji):
-- Discourse markers / acknowledgements: "إي", "إيه", "هاه", "زين", "طيب", "ماشي", "أوكي", "والله".
-- Question particles: "شلون", "وين", "شنو", "متى", "ليش".
-- Vocatives: "يا أخوي", "يا حبيبي", "يا الغالي".`,
-  Egyptian: `Dialect-specific cues for EGYPTIAN (مصري):
-- Discourse markers / acknowledgements: "أيوة", "تمام", "ماشي", "طب", "بس", "خلاص", "كده".
-- Question particles: "إزاي", "فين", "إيه", "إمتى", "ليه".
-- Vocatives: "يا باشا", "يا حبيبي", "يا عم".`,
-  Yemeni: `Dialect-specific cues for YEMENI (يمني):
-- Discourse markers / acknowledgements: "إيوه", "أيوه", "زين", "خلاص", "بس", "والله", "صدّق".
-- Question particles: "كيف", "وين", "أيش", "إيش", "متى", "ليش".
-- Vocatives: "يا حيّ", "يا أخي", "يا أبو".`,
+/**
+ * Which Arabic the gloss comes back in.
+ *
+ * The segmentation cues are English now — that is the transcript's language —
+ * but the dialect still has a job here, because the line's support text is
+ * written for one particular learner and MSA is not what any of them speak.
+ */
+const DIALECT_GLOSS: Record<string, string> = {
+  Gulf: `Write the Arabic gloss in GULF (Khaleeji) — شلون, وايد, زين. Never MSA, never Egyptian.`,
+  Egyptian: `Write the Arabic gloss in EGYPTIAN (مصري) — إزاي, أوي, كويس. Never MSA, never Gulf.`,
+  Yemeni: `Write the Arabic gloss in YEMENI (يمني) — كيف, وين, ذحين. Never MSA, never Gulf or Egyptian.`,
 };
 
-function buildSystemPrompt(dialect: string | undefined): string {
-  const key = dialect && DIALECT_MARKERS[dialect] ? dialect : "Gulf";
-  const markers = DIALECT_MARKERS[key];
-  return `You are an expert Arabic transcript editor for the Ingleezy dialect-learning platform.
+const ENGLISH_TURN_CUES = `English turn-start cues:
+- Acknowledgements and discourse markers, especially standalone: "yeah", "right", "okay", "mm-hmm", "sure", "exactly", "I mean", "so", "well", "anyway", "actually".
+- Question openers: "what", "where", "when", "why", "how", "who", "do you", "did you", "are you", "can you", "have you".
+- Direct address and names: "hey", "look", "listen", "you know", a name used vocatively.
+- Backchannels overlapping the other speaker: "wow", "no way", "really".`;
 
-You receive a flattened list of timestamped Arabic words from ASR output and must
+function buildSystemPrompt(dialect: string | undefined): string {
+  const key = dialect && DIALECT_GLOSS[dialect] ? dialect : "Gulf";
+  return `You are an expert English transcript editor for Ingleezy, where native Arabic speakers learn English from real clips.
+
+You receive a flattened list of timestamped ENGLISH words from ASR output and must
 group them into clean, learner-friendly subtitle lines.
 
-TARGET DIALECT: ${key}
-${markers}
+${ENGLISH_TURN_CUES}
+
+LEARNER'S DIALECT: ${key}
+${DIALECT_GLOSS[key]}
 
 RULES (in priority order):
 1. PRESERVE every original word and its index. Do NOT invent, drop, rewrite, or reorder words.
@@ -67,23 +81,25 @@ RULES (in priority order):
 2. Start a NEW LINE whenever the speaker changes. Use existing speaker tags when present
    ("[A]", "[B]", etc.). When no tags exist, infer speaker changes from:
    - Long pauses between adjacent words (gap > 0.6s)
-   - Question/answer alternation (use the dialect-specific question particles above)
-   - Vocatives ("يا ...") or direct address
-   - Discourse markers from the dialect cues above (treat them as turn-starts when standalone)
+   - Question/answer alternation (use the question openers above)
+   - Direct address, names, or an attention-getter ("hey", "look")
+   - Discourse markers from the cues above (treat them as turn-starts when standalone)
    Label speakers "A", "B", "C"... in order of appearance.
 3. Each line should express ONE complete thought or clause. Aim for:
    - 2.5–7 seconds of audio
-   - 4–14 Arabic words
+   - 5–16 English words
    - Avoid lines shorter than ~1.2s UNLESS they are a true short utterance from a different speaker
-     (e.g. a dialect acknowledgement listed above).
-4. Break at natural sentence/clause boundaries — never mid-phrase, never mid-idafa,
-   never separating a particle from its noun.
-5. Do NOT translate to MSA. Keep the exact dialectal forms the speaker used.
-6. Provide a faithful, casual English translation for each line — natural spoken English,
-   not literal word-for-word.
-6b. ALSO provide a "literal" word-for-word English gloss for each line that preserves the
-   Arabic word order (e.g. "what news-your?" for "شخبارك؟"). It may sound stiff or
-   ungrammatical — that is expected; it shows learners how the sentence is built.
+     (e.g. one of the acknowledgements listed above).
+4. Break at natural sentence/clause boundaries — never mid-phrase, never between an
+   article and its noun, an auxiliary and its verb, or a preposition and its object.
+5. PRESERVE the spoken English exactly as transcribed, contractions, false starts and all.
+   Do NOT tidy it into written English: what the speaker actually said is the material.
+6. Provide a natural ${key} Arabic translation of each line as "translation" — the
+   learner's own dialect, never MSA. This is the scaffold, not the subject.
+6b. ALSO provide a "literal" word-for-word ARABIC gloss for each line that keeps the
+   ENGLISH word order (e.g. "الـ ولد ذهب إلى الـ مدرسة" for "the boy went to the school").
+   It may sound stiff in Arabic — that is expected; it shows learners how the English
+   sentence is built.
 7. The line's start = first word's start, end = last word's end.
 
 Return your answer by calling the resegment_transcript tool with the structured output.`;
@@ -104,16 +120,16 @@ const TOOL_SCHEMA = {
             properties: {
               text: {
                 type: "string",
-                description: "Arabic text of the line (concatenation of the included words).",
+                description: "English text of the line (concatenation of the included words, unchanged).",
               },
               translation: {
                 type: "string",
-                description: "Natural casual English translation of the line.",
+                description: "Natural dialect-Arabic translation of the line — the learner's dialect, never MSA.",
               },
               literal: {
                 type: "string",
                 description:
-                  "Word-for-word English gloss of the line preserving Arabic word order; may sound stiff; reveals sentence structure.",
+                  "Word-for-word Arabic gloss of the line preserving the ENGLISH word order; may sound stiff in Arabic; reveals how the English is built.",
               },
               speaker: {
                 type: "string",

@@ -3,22 +3,23 @@ import { jsonRequest, loadFunction, optionsRequest } from "./harness.ts";
 import { geminiStream, json, sseCompletion, type UpstreamHandler } from "./upstreams.ts";
 
 /**
- * The three functions the app consumes as a stream.
+ * The two general-purpose chats the app consumes as a stream. (`assistant-chat`
+ * is the third streamer and has its own file, for its context blocks.)
  *
- * `free-chat` and `ask-translation` both delegate to `streamBrain`, which pipes
- * the gateway's SSE body through untouched while tapping it to accumulate the
- * assistant's text. `culture-guide` does not use the Brain at all: it calls
- * Gemini's native streaming endpoint directly — because `googleSearch` is not
- * an OpenAI-compatible tool — and *translates* each Gemini frame into the
- * OpenAI delta shape the client parser expects, then appends a Sources block
- * built from the grounding metadata.
+ * `free-chat` delegates to `streamBrain`, which pipes the gateway's SSE body
+ * through untouched while tapping it to accumulate the assistant's text.
+ * `culture-guide` does not use the Brain at all: it calls Gemini's native
+ * streaming endpoint directly — because `googleSearch` is not an
+ * OpenAI-compatible tool — and *translates* each Gemini frame into the OpenAI
+ * delta shape the client parser expects, then appends a Sources block built
+ * from the grounding metadata.
  *
  * That translation is the single most breakable thing here, and it is invisible
  * to a fixture that answers in OpenAI's shape already. These tests read the
  * emitted stream back frame by frame, so a passthrough that silently stopped
  * transforming would fail rather than look fine.
  *
- * All three are declared `verify_jwt = false` in config.toml and gate on
+ * Both are declared `verify_jwt = false` in config.toml and gate on
  * `enforceDailyCap` instead, so "who may call this" is a function-level
  * decision rather than a platform one — hence the anonymous and over-cap cases.
  */
@@ -280,89 +281,6 @@ Deno.test("free-chat turns an anonymous caller away", async () => {
   // the cap helper is the only thing standing in the way.
   assertEquals(response.status, 401);
   assertEquals((await response.json()).error, "auth_required");
-});
-
-// ── ask-translation ─────────────────────────────────────────────────────────
-
-Deno.test("ask-translation streams an answer about the sentence", async () => {
-  const { response } = await call(
-    "ask-translation",
-    {
-      arabic: "شلونك اليوم",
-      english: "How are you today",
-      messages: [{ role: "user", content: "Why شلونك and not كيف حالك?" }],
-    },
-    subscriber({ "ai.gateway.lovable.dev": () => sseCompletion("Because ", "شلونك is Gulf.") }),
-  );
-
-  assertEquals(response.status, 200);
-  assertEquals(await deltasOf(response), ["Because ", "شلونك is Gulf."]);
-});
-
-Deno.test("ask-translation puts the sentence in the system prompt", async () => {
-  const { bodies } = await call(
-    "ask-translation",
-    {
-      arabic: "شلونك اليوم",
-      english: "How are you today",
-      messages: [{ role: "user", content: "explain" }],
-    },
-    subscriber({ "ai.gateway.lovable.dev": () => sseCompletion("ok") }),
-  );
-
-  const sent = bodies.find((b) => b?.includes("system")) ?? "";
-  // The sentence is context, not a user turn — putting it in the messages would
-  // make the learner appear to have said it.
-  assertStringIncludes(sent, "شلونك اليوم");
-  assertStringIncludes(sent, "How are you today");
-});
-
-Deno.test("ask-translation says so when no English was provided", async () => {
-  const { bodies } = await call(
-    "ask-translation",
-    { arabic: "شلونك اليوم", messages: [{ role: "user", content: "explain" }] },
-    subscriber({ "ai.gateway.lovable.dev": () => sseCompletion("ok") }),
-  );
-
-  const sent = bodies.find((b) => b?.includes("system")) ?? "";
-  // Stated explicitly rather than left blank, so the model does not invent a
-  // translation it was never given and then explain its own invention.
-  assertStringIncludes(sent, "(no English translation provided)");
-});
-
-Deno.test("ask-translation refuses a request with no sentence", async () => {
-  const { response, calls } = await call(
-    "ask-translation",
-    { messages: [{ role: "user", content: "explain" }] },
-    subscriber(),
-  );
-
-  assertEquals(response.status, 400);
-  assert(!calls.some((url) => url.includes("ai.gateway")));
-});
-
-Deno.test("ask-translation refuses a request with no question", async () => {
-  const { response, calls } = await call(
-    "ask-translation",
-    { arabic: "شلونك", messages: [] },
-    subscriber(),
-  );
-
-  // An empty `messages` is not a question, and streaming an answer to nothing
-  // spends a model call to produce a greeting.
-  assertEquals(response.status, 400);
-  assert(!calls.some((url) => url.includes("ai.gateway")));
-});
-
-Deno.test("ask-translation turns an anonymous caller away", async () => {
-  const { response } = await call(
-    "ask-translation",
-    { arabic: "شلونك", messages: [{ role: "user", content: "explain" }] },
-    subscriber(),
-    null,
-  );
-
-  assertEquals(response.status, 401);
 });
 
 // ── culture-guide ───────────────────────────────────────────────────────────
@@ -648,9 +566,9 @@ Deno.test("culture-guide turns an anonymous caller away", async () => {
   assertEquals(response.status, 401);
 });
 
-// ── CORS, shared by all three ───────────────────────────────────────────────
+// ── CORS, shared by both ────────────────────────────────────────────────────
 
-for (const name of ["free-chat", "ask-translation", "culture-guide"]) {
+for (const name of ["free-chat", "culture-guide"]) {
   Deno.test(`${name} answers a preflight without touching the cap`, async () => {
     const fn = await loadFunction(name, { upstreams: subscriber() });
     try {

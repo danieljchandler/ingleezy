@@ -124,9 +124,6 @@ verify_jwt = false
 [functions.souq-news]
 verify_jwt = false
 
-[functions.ask-translation]
-verify_jwt = false
-
 [functions.assistant-chat]
 verify_jwt = false
 
