@@ -11,6 +11,12 @@ import { json, sseCompletion, type UpstreamHandler } from "./upstreams.ts";
  * The page context is learner/content-influenced text entering a system
  * prompt, so the length caps and the data-not-instructions framing are
  * security behavior, not formatting — they get their own cases.
+ *
+ * The other thing pinned here is the direction. This tutor teaches English to
+ * an Arabic speaker and explains in their dialect; before the flip it taught
+ * Arabic and explained in English. Both produce a fluent, confident answer, so
+ * the only place the difference is visible is the prompt — which is why these
+ * assertions read it rather than the reply.
  */
 
 const USER = "00000000-0000-4000-8000-000000000001";
@@ -119,6 +125,84 @@ Deno.test("assistant-chat puts the seed sentence into the system prompt", async 
   const sent = sentPrompt(bodies);
   assertStringIncludes(sent, "شلونك اليوم");
   assertStringIncludes(sent, "How are you today?");
+});
+
+Deno.test("assistant-chat calls the English the sentence and the Arabic the gloss", async () => {
+  // Both halves reach the prompt either way round, so presence proves nothing.
+  // What decides whether the learner gets an answer about the sentence they
+  // tapped is which one is labelled as the sentence.
+  const { bodies } = await call(
+    "assistant-chat",
+    {
+      messages: [{ role: "user", content: "explain" }],
+      dialect: "Gulf",
+      seed: { arabic: "شلونك اليوم", english: "How are you today?" },
+    },
+    subscriber({ "openrouter.ai": gateway }),
+  );
+
+  const sent = sentPrompt(bodies);
+  assertStringIncludes(sent, "English (this is the sentence): How are you today?");
+  assert(
+    /gloss: شلونك اليوم/.test(sent),
+    "the Arabic should be labelled as the gloss, not as the sentence",
+  );
+});
+
+Deno.test("assistant-chat still seeds from a line that has no English", async () => {
+  // Bridged Hakiya clips are Arabic all the way down. Dropping the seed for
+  // those would silently un-ground the chat on exactly the content where the
+  // learner is most likely to be lost.
+  const { bodies } = await call(
+    "assistant-chat",
+    {
+      messages: [{ role: "user", content: "explain" }],
+      dialect: "Gulf",
+      seed: { arabic: "شلونك اليوم" },
+    },
+    subscriber({ "openrouter.ai": gateway }),
+  );
+
+  const sent = sentPrompt(bodies);
+  assertStringIncludes(sent, "THE SENTENCE the learner opened this chat about");
+  assertStringIncludes(sent, "شلونك اليوم");
+});
+
+Deno.test("assistant-chat teaches English and explains in the learner's dialect", async () => {
+  const { bodies } = await call(
+    "assistant-chat",
+    { messages: [{ role: "user", content: "hi" }], dialect: "Egyptian" },
+    subscriber({ "openrouter.ai": gateway }),
+  );
+
+  const sent = sentPrompt(bodies);
+  // The subject is English; the language of instruction is the learner's own
+  // dialect, because a learner whose English is weak cannot learn English
+  // through English.
+  assertStringIncludes(sent, "expert English teacher");
+  assert(
+    /Answer in [^\n]*Egyptian[^\n]*Arabic/.test(sent),
+    "explanations should come back in the learner's dialect",
+  );
+  assertStringIncludes(sent, "Stay scoped to English learning");
+});
+
+Deno.test("assistant-chat asks for Arabic-letter pronunciation, not romanisation", async () => {
+  // The learner reads Arabic. A Latin transliteration of an English word is
+  // two unfamiliar scripts where one would do — and it is what this prompt
+  // asked for while it was still teaching Arabic to English speakers.
+  const { bodies } = await call(
+    "assistant-chat",
+    { messages: [{ role: "user", content: "hi" }], dialect: "Gulf" },
+    subscriber({ "openrouter.ai": gateway }),
+  );
+
+  const sent = sentPrompt(bodies);
+  assertStringIncludes(sent, "pronunciation in Arabic letters");
+  assert(
+    !/transliteration in parentheses/.test(sent),
+    "the Latin-transliteration rule belongs to the Arabic-target app",
+  );
 });
 
 Deno.test("assistant-chat frames the page context as data, not instructions", async () => {

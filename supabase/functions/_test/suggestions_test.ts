@@ -64,9 +64,10 @@ function promptOf(bodies: Array<string | null>, calls: string[]): string {
 
 // ── suggest-flashcards ──────────────────────────────────────────────────────
 
-const aCard = (word_arabic: string, word_english = "a word") => ({
-  word_arabic,
+// The English is the card; the Arabic is its gloss. Argument order follows.
+const aCard = (word_english: string, word_arabic = "كلمة") => ({
   word_english,
+  word_arabic,
 });
 
 Deno.test("suggest-flashcards carries a word family through to the client", async () => {
@@ -98,7 +99,7 @@ Deno.test("suggest-flashcards returns the cards it generated", async () => {
     { topic: "at the airport", dialect: "Gulf", count: 3 },
     caller({
       "ai.gateway.lovable.dev": emitting({
-        flashcards: [aCard("مطار", "airport"), aCard("جواز", "passport")],
+        flashcards: [aCard("airport", "مطار"), aCard("passport", "جواز")],
       }),
     }),
   );
@@ -107,49 +108,89 @@ Deno.test("suggest-flashcards returns the cards it generated", async () => {
   assertEquals((body.flashcards as unknown[]).length, 2);
 });
 
+Deno.test("suggest-flashcards asks for English words, glossed in the dialect", async () => {
+  // Both directions produce a plausible list of pairs, so the returned cards
+  // cannot tell you which way round the generator was pointed. The prompt can.
+  const { bodies, calls } = await call(
+    "suggest-flashcards",
+    { topic: "at the airport", dialect: "Egyptian", count: 3 },
+    caller({
+      "ai.gateway.lovable.dev": emitting({ flashcards: [aCard("airport", "مطار")] }),
+    }),
+  );
+
+  const prompt = promptOf(bodies, calls);
+  assertStringIncludes(prompt, "expert English vocabulary tutor");
+  assertStringIncludes(prompt, "ENGLISH words/short phrases");
+  assertStringIncludes(prompt, "The word being learned is the ENGLISH one");
+  // And the gloss follows the learner's own dialect, not whichever one the
+  // default happens to be.
+  assertStringIncludes(prompt, "Egyptian Arabic (Masri)");
+});
+
 Deno.test("suggest-flashcards filters out words the learner already has", async () => {
   const { body } = await call(
     "suggest-flashcards",
-    { topic: "at the airport", existingWords: ["مطار"] },
+    { topic: "at the airport", existingWords: ["airport"] },
     caller({
       "ai.gateway.lovable.dev": emitting({
-        flashcards: [aCard("مطار", "airport"), aCard("جواز", "passport")],
+        flashcards: [aCard("airport", "مطار"), aCard("passport", "جواز")],
       }),
     }),
   );
 
-  const cards = body.flashcards as Array<{ word_arabic: string }>;
+  const cards = body.flashcards as Array<{ word_english: string }>;
   // The prompt already asks for this, and the model already ignores it
   // sometimes. Prompts are advice; the filter is the guarantee — and a
   // "suggestion" the learner saved last week is worse than one fewer card.
-  assertEquals(cards.map((c) => c.word_arabic), ["جواز"]);
+  assertEquals(cards.map((c) => c.word_english), ["passport"]);
 });
 
-Deno.test("suggest-flashcards folds Arabic spelling before deduplicating", async () => {
+Deno.test("suggest-flashcards keeps a new English word that shares a gloss", async () => {
+  // "big" and "large" are both كبير. Deduplicating on the Arabic — which is
+  // what this did while the Arabic was the word being learned — silently
+  // withholds the second one from a learner who asked for synonyms.
   const { body } = await call(
     "suggest-flashcards",
-    { topic: "school", existingWords: ["مدرسة"] },
+    { topic: "describing size", existingWords: ["big"] },
     caller({
-      // Same word, ta marbuta written as ha, plus diacritics.
       "ai.gateway.lovable.dev": emitting({
-        flashcards: [aCard("مَدْرَسه", "school"), aCard("جامعة", "university")],
+        flashcards: [aCard("big", "كبير"), aCard("large", "كبير")],
       }),
     }),
   );
 
-  const cards = body.flashcards as Array<{ word_arabic: string }>;
-  // Comparing raw strings lets the same word through under any of its
-  // spellings, which is exactly how a duplicate reaches the deck.
-  assertEquals(cards.map((c) => c.word_arabic), ["جامعة"]);
+  const cards = body.flashcards as Array<{ word_english: string }>;
+  assertEquals(cards.map((c) => c.word_english), ["large"]);
 });
 
-Deno.test("suggest-flashcards drops cards with no Arabic", async () => {
+Deno.test("suggest-flashcards folds English spelling before deduplicating", async () => {
+  const { body } = await call(
+    "suggest-flashcards",
+    { topic: "travel", existingWords: ["check in"] },
+    caller({
+      // Same phrase, hyphenated, capitalised, with a stray period. Arabic's
+      // near-duplicates were orthographic; English's are punctuation.
+      "ai.gateway.lovable.dev": emitting({
+        flashcards: [aCard("Check-in.", "تسجيل الوصول"), aCard("boarding pass", "بطاقة صعود")],
+      }),
+    }),
+  );
+
+  const cards = body.flashcards as Array<{ word_english: string }>;
+  // Comparing raw strings lets the same word through under any of its
+  // spellings, which is exactly how a duplicate reaches the deck.
+  assertEquals(cards.map((c) => c.word_english), ["boarding pass"]);
+});
+
+Deno.test("suggest-flashcards drops cards with no English", async () => {
+  // A card with no English has no word to learn — it is a gloss of nothing.
   const { body } = await call(
     "suggest-flashcards",
     { topic: "school" },
     caller({
       "ai.gateway.lovable.dev": emitting({
-        flashcards: [aCard("مطار"), { word_english: "orphan" }, {}],
+        flashcards: [aCard("airport"), { word_arabic: "يتيم" }, {}],
       }),
     }),
   );
@@ -161,7 +202,7 @@ Deno.test("suggest-flashcards tells the model what is already saved", async () =
   const { bodies, calls } = await call(
     "suggest-flashcards",
     { topic: "school", existingWords: ["مدرسة", "جامعة"] },
-    caller({ "ai.gateway.lovable.dev": emitting({ flashcards: [aCard("قلم")] }) }),
+    caller({ "ai.gateway.lovable.dev": emitting({ flashcards: [aCard("pen")] }) }),
   );
 
   const prompt = promptOf(bodies, calls);
@@ -175,7 +216,7 @@ Deno.test("suggest-flashcards says so when nothing is saved yet", async () => {
   const { bodies, calls } = await call(
     "suggest-flashcards",
     { topic: "school" },
-    caller({ "ai.gateway.lovable.dev": emitting({ flashcards: [aCard("قلم")] }) }),
+    caller({ "ai.gateway.lovable.dev": emitting({ flashcards: [aCard("pen")] }) }),
   );
 
   // "(none)" rather than an empty line, so the model is not left guessing
@@ -188,16 +229,16 @@ Deno.test("suggest-flashcards caps how much of the deck it sends", async () => {
     "suggest-flashcards",
     {
       topic: "school",
-      existingWords: Array.from({ length: 2000 }, (_, i) => `كلمة${i}`),
+      existingWords: Array.from({ length: 2000 }, (_, i) => `word${i}`),
     },
-    caller({ "ai.gateway.lovable.dev": emitting({ flashcards: [aCard("قلم")] }) }),
+    caller({ "ai.gateway.lovable.dev": emitting({ flashcards: [aCard("pen")] }) }),
   );
 
   const prompt = promptOf(bodies, calls);
   // 500. A learner with several thousand saved words would otherwise send the
   // whole deck as a prompt on every suggestion.
-  assert(prompt.includes("كلمة499"));
-  assert(!prompt.includes("كلمة500"));
+  assert(prompt.includes("word499"));
+  assert(!prompt.includes("word500"));
 });
 
 Deno.test("suggest-flashcards still filters against the words it did not send", async () => {
@@ -205,28 +246,31 @@ Deno.test("suggest-flashcards still filters against the words it did not send", 
     "suggest-flashcards",
     {
       topic: "school",
-      existingWords: Array.from({ length: 2000 }, (_, i) => `كلمة${i}`),
+      existingWords: Array.from({ length: 2000 }, (_, i) => `word${i}`),
     },
-    caller({ "ai.gateway.lovable.dev": emitting({ flashcards: [aCard("كلمة3"), aCard("قلم")] }) }),
+    caller({ "ai.gateway.lovable.dev": emitting({ flashcards: [aCard("word3"), aCard("pen")] }) }),
   );
 
-  const cards = body.flashcards as Array<{ word_arabic: string }>;
+  const cards = body.flashcards as Array<{ word_english: string }>;
   // Pinned as a real limit. The post-filter uses the *same truncated list* as
   // the prompt, so a duplicate of word 501 or later passes both checks and
   // reaches the deck. Only the first 500 are protected either way.
-  assertEquals(cards.map((c) => c.word_arabic), ["قلم"]);
+  assertEquals(cards.map((c) => c.word_english), ["pen"]);
 });
 
-Deno.test("suggest-flashcards keeps the dialect out of MSA", async () => {
+Deno.test("suggest-flashcards keeps the gloss out of MSA", async () => {
   const { bodies, calls } = await call(
     "suggest-flashcards",
     { topic: "school", dialect: "Egyptian" },
-    caller({ "ai.gateway.lovable.dev": emitting({ flashcards: [aCard("قلم")] }) }),
+    caller({ "ai.gateway.lovable.dev": emitting({ flashcards: [aCard("pen")] }) }),
   );
 
   const prompt = promptOf(bodies, calls);
   assertStringIncludes(prompt, "Egyptian");
-  assertStringIncludes(prompt, "Never MSA");
+  // The gloss is the half that can drift into MSA, and MSA is not what the
+  // learner speaks — a gloss they have to translate is not a gloss.
+  assertStringIncludes(prompt, "never MSA, never another dialect");
+  assertStringIncludes(prompt, "Do NOT use MSA, Gulf, or Levantine");
 });
 
 Deno.test("suggest-flashcards refuses a request with no topic", async () => {

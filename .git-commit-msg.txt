@@ -1,69 +1,51 @@
-Rename the columns that say one thing and hold another
+Flip the AI tutor and flashcard suggestions to English
 
-Through the retarget the rule was: keep the Arabic-era column names, flip
-only the content. That was right while features were moving — one concern
-per change, no migration per pull request — and the debt it built is that a
-handful of columns ended up naming something the flip took away. No real
-Supabase project is linked yet, so this is the cheapest the rename will ever
-be: plain ALTERs, no expand/contract, no backfill.
+Two surfaces still running Hakiya's direction. Neither errored, and neither
+could: an assistant that fluently answers the wrong question reads exactly
+like an assistant that answers the right one.
 
-Renamed:
-  learner_errors.target_arabic / produced_arabic -> target_text /
-    produced_text. Neither _arabic nor _english is honest, because shadowing
-    still scores bridged Arabic clips and the recogniser is chosen per clip.
-  user_vocabulary.root, vocabulary_words.root -> word_family. An Arabic root
-    is generative (ك-ت-ب gives كتب, كتاب, مكتب); an English word family is
-    not, which is why wordFamily.ts replaced arabicRoot.ts.
-  authentic_story_lines.english_literal -> literal_arabic, and
-    daily_vocab_stories.body_english_literal -> body_literal_arabic. Both
-    hold Arabic in English word order; both said the opposite.
-  user_phrases.transliteration -> phonetic_ar, and the two set_phrases
-    equivalents. These hold the English respelled in Arabic letters — the
-    mirror image of user_vocabulary.transliteration, which is a Latin
-    transliteration of Arabic and keeps its name. One identifier meaning
-    opposite things two tables apart was the clearest case for moving.
-  user_letter_progress.letter_code -> user_sound_progress.sound_code, since
-    a sound code ("p", "clusters") is not a letter and several are not one
-    letter. Indexes, triggers and policies renamed with the table.
+assistant-chat is the Ask AI panel, reachable from every page. It
+introduced itself as "a friendly expert in spoken Gulf/Egyptian/Yemeni",
+answered in English because the learner was assumed to be an English
+speaker, and asked for Latin transliterations of Arabic words. It is now an
+English teacher whose learners are native Arabic speakers, and it explains
+in the learner's own dialect — a learner whose English is too weak to read
+English learns nothing from an explanation they have to decode first. The
+English being discussed is quoted unchanged in Latin script, because it is
+the material; hard words are followed by their pronunciation in Arabic
+letters, the way the rest of the app writes them. It runs through the Brain
+with target: 'english', so it gets the L1-interference rules and can name
+the Arabic habit behind a predictable mistake.
 
-Deliberately not renamed: word_arabic / word_english and friends, which name
-the LANGUAGE and still name it correctly. What flipped is which of the two
-is target and which is scaffold, and that is a property of the app.
+The seed was the sharper problem. Every caller sends the pair the same way
+round it always did — english is the target line, arabic its gloss — but
+the prompt labelled the ARABIC as "THE SENTENCE" and the English as
+"translation provided". A chat opened from an English story line was
+therefore told the gloss was the thing being asked about. Seeds with no
+English half still work: bridged Hakiya clips are Arabic all the way down,
+and dropping the seed there would un-ground the chat on exactly the content
+where a learner is most likely lost. AskAiContextCard follows the same
+order — English leads, gloss underneath, and collapsing keeps the line in
+the header rather than the gloss.
 
-Dropped: body_fusha, body_fusha_vocalized, body_dialect_vocalized,
-arabic_vocalized, dialect, dialect_vocalized — vocalisation is a reading aid
-for Arabic script and the library no longer renders Arabic script as its
-text; daily_vocab_stories.body_transliteration, hard-nulled since the flip;
-and picture_scene_hotspots.root, which outlived the feature that wrote it.
-That last is dropped rather than renamed for a specific reason —
-schemaContract attributes a column to any table that has it, so one
-surviving root anywhere kept a stale root acceptable everywhere.
+suggest-flashcards generated dialect Arabic words for a topic with English
+as the translation, returned a Latin transliteration, and deduplicated on
+the Arabic. That last one was a real defect: post-flip the Arabic is the
+gloss, so a learner who already owns "big" was silently refused "large" —
+both gloss to كبير, so the second was filtered as a duplicate — by the one
+feature whose entire job is finding words they do not have. It now
+generates English, glosses it in the learner's dialect, returns phonetic_ar
+instead of a romanization, and dedupes on the English. normalize() was
+folding ta marbuta and the alif family, which is what Arabic near-duplicates
+differ by; English's differ by punctuation and spacing, so it folds that
+instead ("Check-in." matches "check in"). The dialog sends English
+headwords, leads each card with the English, and its chrome is Arabic — it
+was still saying "2 selected" and "Added 2 words" in an Arabic-first UI.
 
-Bugs the pass turned up:
-
-  user_vocabulary was UNIQUE on (user_id, word_arabic, dialect), right when
-  the Arabic was the word being learned. Post-flip the Arabic is the gloss
-  and distinct English words routinely share one — "big" and "large" are
-  both كبير — so the second save was dropped as a duplicate, silently, in
-  the one flow where a learner is actively collecting vocabulary. Now keyed
-  on word_english.
-
-  columnDefaults.ts reads the migrations to work out what the emulator
-  should default, and did not follow ALTER TABLE ... RENAME, so a renamed
-  table lost every default it had. It follows renames now.
-
-  MyWordsReview's select list still named root, which the emulator rejects
-  as an unknown column — the saved-words deck came up empty. VocabularyCard's
-  VocabularyWord type had the same stale field, so a lesson card never showed
-  its family chip. And suggest-flashcards emitted root in its tool schema
-  while SuggestFlashcardsDialog read word_family, so a suggested card arrived
-  without the family the model had just been asked for. None of the three
-  errored: TypeScript cannot see through a select string or an AI tool
-  schema, which is the whole reason the emulator rejects unknown columns.
-
-Verified with a real PostgreSQL: all 170 migrations replay and every rename
-lands, with no root, body_transliteration or body_english_literal left in
-the rebuilt schema.
+Tests pin the direction rather than the output, since both directions
+produce well-formed results: the prompt assertions read which half is
+labelled the sentence, and the dedupe cases use a synonym pair that only
+survives if the filter compares the English.
 
 Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
 Claude-Session: https://claude.ai/code/session_016xErQdWX6dDyADeHFDv5P6

@@ -553,6 +553,44 @@ generation conditioning.
       order, countability), quoting real English lines, with Arabic
       titles and dialect explanations; DiscoverVideo renders the quoted
       examples as English rather than RTL Arabic.
+- [x] `suggest-flashcards` FLIPPED. It generated dialect Arabic words for
+      a topic with English as the translation, returned a Latin
+      transliteration, and — the part that mattered — **deduplicated on
+      the Arabic**. Post-flip the Arabic is the gloss, so a learner who
+      owns "big" was silently refused "large": same كبير, filtered as a
+      duplicate, in the one feature whose entire job is finding words
+      they do not have. Now generates English, glosses it in the
+      learner's dialect, returns `phonetic_ar`, and dedupes on the
+      English. `normalize()` was folding ta marbuta and the alif family;
+      it now folds what English near-duplicates actually differ by,
+      punctuation and spacing ("Check-in." = "check in"). The dialog
+      sends English headwords, leads each card with the English, and its
+      chrome is Arabic (it was still saying "2 selected" and "Added 2
+      words").
+
+### The AI tutor — FLIP
+- [x] `assistant-chat` FLIPPED — the Ask AI panel reachable from every
+      page. It was still "a friendly expert in spoken ${dialect}",
+      answering *in English* because the learner was assumed to be an
+      English speaker studying Arabic, and asking for Latin
+      transliterations of Arabic words. Now: an English teacher whose
+      learners are native Arabic speakers, explaining **in the learner's
+      dialect** — a learner whose English is too weak to read English
+      learns nothing from an explanation they have to decode first — and
+      quoting the English unchanged in Latin script, with hard words
+      followed by their pronunciation in Arabic letters. Runs through the
+      Brain with `target: 'english'`, so it gets the L1-interference
+      rules and can name the Arabic habit behind a predictable mistake.
+      The seed pair now labels the ENGLISH as the sentence and the Arabic
+      as the gloss; before, a chat opened on an English story line was
+      told the Arabic was the thing being asked about. Seeds with no
+      English half still work — bridged Hakiya clips are Arabic all the
+      way down, and dropping the seed there would un-ground the chat on
+      exactly the content where a learner is most likely lost.
+      `AskAiContextCard` follows: English leads, gloss underneath, and
+      collapsing keeps the line in the header rather than the gloss.
+      Nothing here errored before the flip; a fluent answer to the wrong
+      question reads exactly like a fluent answer.
 
 ### Arabic-only surfaces — PRUNE or REPURPOSE
 - [x] Alphabet Journey → **English Sounds journey, DONE**. Researched

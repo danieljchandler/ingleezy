@@ -57,7 +57,12 @@ export function AskAiContextCard({ seed, payload, pageKind, onClearSeed }: AskAi
   const kind: ContextKind = seed ? "sentence" : (pageKind ?? "page");
   const { icon: Icon, label } = KIND_META[kind];
 
-  const preview = seed?.arabic ?? payload.content ?? payload.title;
+  // The English is the line being studied, so it is what the card is about.
+  // Bridged Hakiya clips have no English half, and for those the Arabic is the
+  // line rather than the gloss — hence the fallback rather than a blank.
+  const seedPrimary = seed?.english || seed?.arabic;
+  const seedIsEnglish = !!seed?.english;
+  const preview = seedPrimary ?? payload.content ?? payload.title;
 
   return (
     <Collapsible open={open} onOpenChange={setOpen}>
@@ -72,9 +77,9 @@ export function AskAiContextCard({ seed, payload, pageKind, onClearSeed }: AskAi
           <span
             className={cn(
               "min-w-0 flex-1 truncate text-xs text-foreground/80",
-              seed && "text-right font-arabic",
+              seed && (seedIsEnglish ? "font-english" : "text-right font-arabic"),
             )}
-            dir={seed ? "rtl" : "auto"}
+            dir={seed && !seedIsEnglish ? "rtl" : "auto"}
             title={preview}
           >
             {open ? "" : preview}
@@ -108,10 +113,22 @@ export function AskAiContextCard({ seed, payload, pageKind, onClearSeed }: AskAi
           <div className="mt-1.5 space-y-1 border-t border-primary/15 pt-1.5">
             {seed && (
               <>
-                <p className="font-arabic text-[15px] leading-relaxed text-foreground" dir="rtl">
-                  {seed.arabic}
+                {/* The line first, its help underneath — the same order the
+                    reader, the transcript and the phrase card all use. */}
+                <p
+                  className={cn(
+                    "text-[15px] leading-relaxed text-foreground",
+                    seedIsEnglish ? "font-english" : "font-arabic",
+                  )}
+                  dir={seedIsEnglish ? "ltr" : "rtl"}
+                >
+                  {seedPrimary}
                 </p>
-                {seed.english && <p className="text-xs text-muted-foreground">{seed.english}</p>}
+                {seedIsEnglish && seed.arabic && (
+                  <p className="font-arabic text-xs text-muted-foreground" dir="rtl">
+                    {seed.arabic}
+                  </p>
+                )}
               </>
             )}
             {payload.content && (

@@ -7,15 +7,21 @@ import { Loader2, Sparkles, Wand2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserVocabulary, useAddUserVocabulary } from "@/hooks/useUserVocabulary";
 import { useDialect } from "@/contexts/DialectContext";
+import { arCount } from "@/lib/strings";
 import { toast } from "sonner";
 
+/**
+ * One suggested card. `word_english` is the word being learned and
+ * `word_arabic` its dialect gloss; `phonetic_ar` is the English respelled in
+ * Arabic letters, the same reading aid the phrase surfaces use.
+ */
 interface Suggestion {
-  word_arabic: string;
   word_english: string;
-  transliteration?: string;
+  word_arabic: string;
+  phonetic_ar?: string;
   word_family?: string;
-  example_arabic?: string;
   example_english?: string;
+  example_arabic?: string;
 }
 
 interface Props {
@@ -49,9 +55,12 @@ export const SuggestFlashcardsDialog = ({ open, onOpenChange }: Props) => {
     setSuggestions([]);
     setSelected(new Set());
     try {
-      const existingArabic = (existingWords || []).map((w) => w.word_arabic);
+      // The English headwords, because that is what the generator is asked not
+      // to repeat and what it deduplicates against. Sending the glosses would
+      // suppress a genuinely new word whenever it shares one with a saved card.
+      const existingEnglish = (existingWords || []).map((w) => w.word_english);
       const { data, error } = await supabase.functions.invoke("suggest-flashcards", {
-        body: { topic: topic.trim(), dialect: activeDialect, existingWords: existingArabic, count: 10 },
+        body: { topic: topic.trim(), dialect: activeDialect, existingWords: existingEnglish, count: 10 },
       });
       if (error) throw error;
       const cards = (data?.flashcards || []) as Suggestion[];
@@ -88,8 +97,8 @@ export const SuggestFlashcardsDialog = ({ open, onOpenChange }: Props) => {
         await addWord.mutateAsync({
           word_arabic: c.word_arabic,
           word_english: c.word_english,
-          // Carried through so a suggested card arrives with its root already
-          // known, rather than waiting for the backfill to ask again.
+          // Carried through so a suggested card arrives with its family
+          // already known, rather than waiting for the backfill to ask again.
           word_family: c.word_family || undefined,
           source: "ai-suggest",
           sentence_text: c.example_arabic || undefined,
@@ -102,7 +111,10 @@ export const SuggestFlashcardsDialog = ({ open, onOpenChange }: Props) => {
       }
     }
     setSaving(false);
-    toast.success(`Added ${added} word${added === 1 ? "" : "s"}${skipped ? ` (${skipped} skipped)` : ""}`);
+    toast.success(
+      `أضفنا ${arCount(added, { one: "كلمة واحدة", two: "كلمتين", few: "كلمات", many: "كلمة" })}` +
+        (skipped ? ` (تخطّينا ${skipped})` : ""),
+    );
     reset();
     onOpenChange(false);
   };
@@ -116,7 +128,7 @@ export const SuggestFlashcardsDialog = ({ open, onOpenChange }: Props) => {
             بطاقات يقترحها الذكاء
           </DialogTitle>
           <DialogDescription>
-            Enter a topic and the AI will suggest 10 {activeDialect} Arabic words you don't already have.
+            اكتب موضوعاً والذكاء يقترح ١٠ كلمات إنجليزية ما عندك منها.
           </DialogDescription>
         </DialogHeader>
 
@@ -147,21 +159,26 @@ export const SuggestFlashcardsDialog = ({ open, onOpenChange }: Props) => {
                   className="mt-1"
                 />
                 <div className="flex-1 min-w-0">
+                  {/* The English leads: it is the word being learned. The
+                      gloss sits opposite it, the way every other card in the
+                      app is laid out. */}
                   <div className="flex items-baseline justify-between gap-2">
-                    <span
-                      className="text-lg font-bold text-foreground"
-                      style={{ fontFamily: "'Amiri', 'Traditional Arabic', serif" }}
-                      dir="rtl"
-                    >
+                    <span className="font-english text-lg font-bold text-foreground">
+                      {c.word_english}
+                    </span>
+                    <span className="font-arabic text-sm text-muted-foreground" dir="rtl">
                       {c.word_arabic}
                     </span>
-                    <span className="text-sm text-muted-foreground">{c.word_english}</span>
                   </div>
-                  {c.transliteration && (
-                    <div className="text-xs text-muted-foreground italic">{c.transliteration}</div>
+                  {c.phonetic_ar && (
+                    <div className="font-arabic text-xs text-muted-foreground" dir="rtl">
+                      {c.phonetic_ar}
+                    </div>
                   )}
-                  {c.example_arabic && (
-                    <div className="text-xs text-muted-foreground mt-1" dir="rtl">{c.example_arabic}</div>
+                  {c.example_english && (
+                    <div className="font-english text-xs text-muted-foreground mt-1">
+                      {c.example_english}
+                    </div>
                   )}
                 </div>
               </label>
@@ -171,7 +188,9 @@ export const SuggestFlashcardsDialog = ({ open, onOpenChange }: Props) => {
 
         {suggestions.length > 0 && (
           <div className="border-t border-border pt-3 flex items-center justify-between gap-2">
-            <span className="text-sm text-muted-foreground">{selected.size} selected</span>
+            <span className="text-sm text-muted-foreground">
+              اخترت {arCount(selected.size, { one: "كلمة واحدة", two: "كلمتين", few: "كلمات", many: "كلمة" })}
+            </span>
             <Button onClick={handleSave} disabled={saving || selected.size === 0} className="gap-2">
               {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
               احفظ في كلماتي

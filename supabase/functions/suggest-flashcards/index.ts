@@ -1,6 +1,16 @@
+// Topic-driven flashcard suggestions: the learner names a subject and gets
+// back words they don't already have.
+//
+// Post-flip the words are ENGLISH with a dialect gloss, not the other way
+// round. The direction is not cosmetic here — it decides which half the
+// deduplication compares, and comparing the wrong half means the learner is
+// offered words they already own whenever two English words share a gloss.
 import { getCorsHeaders } from "../_shared/cors.ts";
 
 
+// The dialect the GLOSS is written in. The words themselves are English; this
+// picks the Arabic a learner from that region would actually use to explain
+// them to themselves.
 const DIALECT_GUIDE: Record<string, string> = {
   Gulf: "Gulf Arabic (Khaleeji) — as spoken in UAE, Saudi, Kuwait, Qatar, Bahrain, Oman. Use Khaleeji vocabulary and forms (e.g. شلونك, وايد, زين). Do NOT use MSA or Egyptian.",
   Egyptian: "Egyptian Arabic (Masri) — as spoken in Cairo. Use Egyptian vocabulary and forms (e.g. ازيك, اوي, كويس). Do NOT use MSA, Gulf, or Levantine.",
@@ -26,20 +36,20 @@ Deno.serve(async (req) => {
     const dialectGuide = DIALECT_GUIDE[dialect] ?? DIALECT_GUIDE.Gulf;
     const existingList = (existingWords as string[]).slice(0, 500);
 
-    const systemPrompt = `You are an expert Arabic vocabulary tutor.
-DIALECT: ${dialect}. ${dialectGuide}
-Generate exactly ${count} useful, distinct vocabulary words/short phrases related to the user's topic.
+    const systemPrompt = `You are an expert English vocabulary tutor. Your learners are native Arabic speakers.
+GLOSS DIALECT: ${dialect}. ${dialectGuide}
+Generate exactly ${count} useful, distinct ENGLISH words/short phrases related to the user's topic.
 RULES:
-- Use the dialect specified above. Never MSA. Never another dialect.
+- The word being learned is the ENGLISH one. The Arabic is its gloss, written in the dialect specified above — never MSA, never another dialect.
 - Each entry must be a single word or short common phrase (max 3 words).
-- Provide concise English translation.
-- Do NOT include any of the words the user already has saved (case-insensitive, ignore diacritics).
-- Avoid duplicates within your own list.
+- Natural spoken English, the register a person would actually meet the word in. Not textbook English.
+- Do NOT include any of the English words the user already has saved (case-insensitive).
+- Avoid duplicates within your own list, including two words that a learner would file as the same word (walk/walking).
 - Mix difficulty: include some everyday essentials and some less common but useful items on the topic.`;
 
     const userPrompt = `Topic / guidance: ${topic}
 
-Words the user already has saved (DO NOT repeat any of these):
+English words the user already has saved (DO NOT repeat any of these):
 ${existingList.length ? existingList.join(", ") : "(none)"}
 
 Generate ${count} new flashcards.`;
@@ -70,9 +80,13 @@ Generate ${count} new flashcards.`;
                     items: {
                       type: "object",
                       properties: {
-                        word_arabic: { type: "string", description: "The word/phrase in the target dialect (Arabic script, no diacritics required)" },
-                        word_english: { type: "string", description: "Concise English translation" },
-                        transliteration: { type: "string", description: "Optional Latin-script transliteration" },
+                        word_english: { type: "string", description: "The English word/phrase being learned" },
+                        word_arabic: { type: "string", description: "Its gloss in the dialect specified above (Arabic script, no diacritics required)" },
+                        // The learner reads Arabic, so the pronunciation aid is
+                        // the English respelled in Arabic letters — the same
+                        // phonetic_ar the phrase surfaces use. A Latin
+                        // transliteration would be a third script to decode.
+                        phonetic_ar: { type: "string", description: 'The English pronounced in Arabic letters (e.g. "ثانك يو" for "thank you")' },
                         // Costs a handful of output tokens on a call that is
                         // already being made, and saves the word from the
                         // family backfill later. Optional: an invented family
@@ -81,10 +95,10 @@ Generate ${count} new flashcards.`;
                         // word_english — `enrich-word-roots` and `familyKey`
                         // both derive it from the English, not from the gloss.
                         word_family: { type: "string", description: 'Base form of the English word family (e.g. "act" for action/active/actor), or "" if the word has none' },
-                        example_arabic: { type: "string", description: "Optional short example sentence in the dialect" },
-                        example_english: { type: "string", description: "English translation of the example" },
+                        example_english: { type: "string", description: "Optional short example sentence in natural spoken English using the word" },
+                        example_arabic: { type: "string", description: "Dialect gloss of the example sentence" },
                       },
-                      required: ["word_arabic", "word_english"],
+                      required: ["word_english", "word_arabic"],
                       additionalProperties: false,
                     },
                   },
@@ -120,10 +134,14 @@ Generate ${count} new flashcards.`;
     const args = toolCall?.function?.arguments;
     const parsed = args ? JSON.parse(args) : { flashcards: [] };
 
-    // Final dedupe against existing list
+    // Final dedupe against the learner's existing ENGLISH headwords. The prompt
+    // already asks for this and the model already ignores it sometimes; prompts
+    // are advice, the filter is the guarantee. Compared on the English because
+    // that is the card's identity — matching on the gloss would drop "large"
+    // for a learner who already has "big", since both gloss to كبير.
     const existingNorm = new Set(existingList.map((w) => normalize(w)));
     const flashcards = (parsed.flashcards || []).filter(
-      (c: any) => c?.word_arabic && !existingNorm.has(normalize(c.word_arabic))
+      (c: any) => c?.word_english && !existingNorm.has(normalize(c.word_english))
     );
 
     return new Response(JSON.stringify({ flashcards }), {
@@ -138,13 +156,21 @@ Generate ${count} new flashcards.`;
   }
 });
 
+/**
+ * Fold an English headword to the form two spellings of the same word share.
+ *
+ * The Arabic version of this folded orthographic variation — ta marbuta for
+ * ha, the alif family, dropped diacritics — because Arabic writes one word
+ * several ways. English writes one word one way, and its near-duplicates are
+ * punctuation and spacing instead: "check-in" against "check in", a trailing
+ * period, "  Airport  ". Same job, different alphabet.
+ */
 function normalize(s: string): string {
   return s
     .normalize("NFKD")
-    .replace(/[\u064B-\u065F\u0670]/g, "") // strip Arabic diacritics
-    .replace(/[إأآا]/g, "ا")
-    .replace(/ى/g, "ي")
-    .replace(/ة/g, "ه")
+    .replace(/\p{M}+/gu, "")
+    .replace(/[^\p{L}\p{N}]+/gu, " ")
     .trim()
+    .replace(/\s+/g, " ")
     .toLowerCase();
 }

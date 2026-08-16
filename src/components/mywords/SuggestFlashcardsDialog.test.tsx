@@ -26,20 +26,20 @@ vi.mock("sonner", () => ({
 }));
 
 const aSuggestion = (over: Record<string, unknown> = {}) => ({
-  word_arabic: "مطعم",
   word_english: "restaurant",
-  transliteration: "mat'am",
-  example_arabic: "رحنا المطعم أمس",
+  word_arabic: "مطعم",
+  phonetic_ar: "ريستورانت",
   example_english: "We went to the restaurant yesterday",
+  example_arabic: "رحنا المطعم أمس",
   ...over,
 });
 
 const ANOTHER = aSuggestion({
-  word_arabic: "قائمة",
   word_english: "menu",
-  transliteration: "qa'ima",
-  example_arabic: "عطني القائمة",
+  word_arabic: "قائمة",
+  phonetic_ar: "مينيو",
   example_english: "Give me the menu",
+  example_arabic: "عطني القائمة",
 });
 
 let cleanup: (() => void) | undefined;
@@ -77,7 +77,7 @@ async function render({ dialect = "Gulf", owned = [], seed }: Options = {}) {
         backend.db.seed(
           "user_vocabulary",
           owned.map((word, index) =>
-            aUserVocabulary({ id: vocabId(index), user_id: TEST_USER_ID, word_arabic: word }),
+            aUserVocabulary({ id: vocabId(index), user_id: TEST_USER_ID, word_english: word }),
           ),
         );
         backend.stubFunction("suggest-flashcards", {
@@ -110,10 +110,12 @@ const savedWords = (backend: SupabaseBackend) =>
   backend.db.writesTo("user_vocabulary").flatMap((write) => write.payload);
 
 describe("asking for suggestions", () => {
-  it("says what it will produce and in which dialect", async () => {
+  it("says what it will produce", async () => {
     await render({ dialect: "Egyptian" });
 
-    expect(screen.getByText(/suggest 10 Egyptian Arabic words you don't already have/)).toBeInTheDocument();
+    // English words, described in Arabic — the chrome is the learner's
+    // language, the content is what they came to learn.
+    expect(screen.getByText(/كلمات إنجليزية ما عندك منها/)).toBeInTheDocument();
   });
 
   it("will not generate without a topic", async () => {
@@ -137,7 +139,7 @@ describe("asking for suggestions", () => {
   });
 
   it("sends the words the learner already has, so it does not suggest them again", async () => {
-    const { backend } = await render({ owned: ["مطعم", "قائمة"] });
+    const { backend } = await render({ owned: ["restaurant", "menu"] });
 
     // The deck loads behind auth. Generating before it lands sends an empty
     // exclusion list, which is a real race in the product too — just not the
@@ -148,9 +150,10 @@ describe("asking for suggestions", () => {
     await generate();
 
     // Without this the dialog cheerfully offers ten cards the learner has been
-    // reviewing for a month.
+    // reviewing for a month. Sent as the ENGLISH headwords: that is the card's
+    // identity, and the half the generator deduplicates against.
     expect(backend.lastCallTo("suggest-flashcards")?.body).toMatchObject({
-      existingWords: expect.arrayContaining(["مطعم", "قائمة"]),
+      existingWords: expect.arrayContaining(["restaurant", "menu"]),
     });
   });
 
@@ -180,11 +183,15 @@ describe("choosing from the suggestions", () => {
 
     await generate();
 
-    expect(screen.getByText("مطعم")).toHaveAttribute("dir", "rtl");
+    // The English is the word; the Arabic beside it is the gloss.
     expect(screen.getByText("restaurant")).toBeInTheDocument();
-    expect(screen.getByText("mat'am")).toBeInTheDocument();
-    // The example is what shows whether the word is the one the learner meant.
-    expect(screen.getByText("رحنا المطعم أمس")).toBeInTheDocument();
+    expect(screen.getByText("مطعم")).toHaveAttribute("dir", "rtl");
+    // Pronunciation in Arabic letters, not a Latin transliteration: the
+    // learner reads Arabic, so romanising the English helps nobody.
+    expect(screen.getByText("ريستورانت")).toBeInTheDocument();
+    // The example is what shows whether the word is the one the learner meant,
+    // so it is the English one that has to be on screen.
+    expect(screen.getByText("We went to the restaurant yesterday")).toBeInTheDocument();
   });
 
   it("arrives with everything ticked", async () => {
@@ -194,7 +201,7 @@ describe("choosing from the suggestions", () => {
 
     // Somebody who asked for ten words about restaurants wants most of them.
     // The checkboxes are for pruning.
-    expect(screen.getByText("2 selected")).toBeInTheDocument();
+    expect(screen.getByText(/اخترت كلمتين/)).toBeInTheDocument();
     for (const box of screen.getAllByRole("checkbox")) {
       expect(box).toBeChecked();
     }
@@ -206,7 +213,7 @@ describe("choosing from the suggestions", () => {
 
     fireEvent.click(screen.getAllByRole("checkbox")[0]);
 
-    expect(screen.getByText("1 selected")).toBeInTheDocument();
+    expect(screen.getByText(/اخترت كلمة واحدة/)).toBeInTheDocument();
   });
 
   it("offers nothing to save once everything is unticked", async () => {
@@ -253,7 +260,7 @@ describe("saving the chosen words", () => {
     await save();
 
     await waitFor(() => expect(savedWords(backend)).toHaveLength(1));
-    expect(savedWords(backend)[0].word_arabic).toBe("قائمة");
+    expect(savedWords(backend)[0].word_english).toBe("menu");
   });
 
   it("says how many landed", async () => {
@@ -262,7 +269,7 @@ describe("saving the chosen words", () => {
 
     await save();
 
-    await waitFor(() => expect(toasts.success).toHaveBeenCalledWith("Added 2 words"));
+    await waitFor(() => expect(toasts.success).toHaveBeenCalledWith("أضفنا كلمتين"));
   });
 
   it("counts the ones it could not add", async () => {
@@ -274,7 +281,7 @@ describe("saving the chosen words", () => {
     // Duplicates are the ordinary reason one is skipped, so the count has to be
     // real rather than assumed.
     await waitFor(() =>
-      expect(toasts.success).toHaveBeenCalledWith("Added 0 words (2 skipped)"),
+      expect(toasts.success).toHaveBeenCalledWith("أضفنا 0 كلمة (تخطّينا 2)"),
     );
   });
 

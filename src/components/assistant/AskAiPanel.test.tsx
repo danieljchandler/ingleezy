@@ -230,16 +230,48 @@ describe("AskAiPanel", () => {
       ).toBeGreaterThan(0);
     });
 
+    it("leads with the English and keeps the dialect underneath", async () => {
+      // The seed is a pair, and which half the card leads with is the whole
+      // question: the English is the line the learner tapped, the Arabic is
+      // help. Led the other way round — as it was before the flip — the card
+      // still renders both, so nothing looks wrong.
+      render({ seed: { arabic: "شلونك اليوم", english: "How are you today?" } });
+      await open();
+
+      const english = screen.getByText("How are you today?");
+      const arabic = screen.getByText("شلونك اليوم");
+      expect(english).toBeInTheDocument();
+      expect(arabic).toBeInTheDocument();
+      expect(english.className).toContain("font-english");
+      expect(arabic.className).toContain("text-muted-foreground");
+    });
+
+    it("leads with the Arabic when the line has no English half", async () => {
+      // Bridged Hakiya clips are Arabic all the way down. There the Arabic IS
+      // the line, and demoting it to a gloss would leave the card headed by
+      // nothing.
+      render({ seed: { arabic: "شلونك اليوم" } });
+      await open();
+
+      const arabic = screen.getAllByText("شلونك اليوم");
+      expect(arabic.length).toBeGreaterThan(0);
+      expect(arabic.some((el) => el.className.includes("font-arabic"))).toBe(true);
+    });
+
     it("collapses to hide the detail", async () => {
       render({ seed: { arabic: "شلونك اليوم", english: "How are you today?" } });
       await open();
-      expect(screen.getByText("How are you today?")).toBeInTheDocument();
+      expect(screen.getByText("شلونك اليوم")).toBeInTheDocument();
 
       await act(async () => {
         fireEvent.click(screen.getByRole("button", { name: "أخفِ السياق" }));
       });
 
-      expect(screen.queryByText("How are you today?")).toBeNull();
+      // The gloss goes; the line itself stays, truncated, in the header — a
+      // collapsed card that says nothing about what it is scoped to is worse
+      // than no card.
+      expect(screen.queryByText("شلونك اليوم")).toBeNull();
+      expect(screen.getByText("How are you today?")).toBeInTheDocument();
     });
   });
 });
