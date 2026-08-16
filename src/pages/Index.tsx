@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { IngleezyLogo } from "@/components/brand/IngleezyLogo";
 import { useEffect, useMemo } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,8 +16,6 @@ import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { XPDisplay, StreakDisplay, WeeklyGoalCard, AchievementsGrid } from "@/components/gamification";
-import ingleezyLogoAsset from "@/assets/ingleezy-logo.png.asset.json";
-const lahjaLogo = ingleezyLogoAsset.url;
 import { useState } from "react";
 import { NotificationBell } from "@/components/NotificationBell";
 import { useDialect, DialectModule } from "@/contexts/DialectContext";
@@ -142,7 +141,7 @@ const Index = () => {
 
       {/* Top bar with logo and auth */}
       <div className="flex items-center justify-between mb-4">
-        <img src={lahjaLogo} alt="إنجليزي" className="h-24" />
+        <IngleezyLogo className="text-4xl" />
         
         <div className="flex items-center gap-3">
           {!authLoading && (isAuthenticated ? (

@@ -138,7 +138,7 @@ const DailyStoryPage = () => {
         {story && (
           <article className="rounded-2xl border-2 border-primary/20 bg-card p-5 sm:p-6 shadow-lg space-y-4">
             <header className="space-y-2 border-b border-border pb-3">
-              <h2 dir="rtl" className="text-2xl font-bold text-right" style={{ fontFamily: "'Noto Sans Arabic', serif" }}>
+              <h2 dir="rtl" className="text-2xl font-bold text-right" >
                 {story.title}
               </h2>
               <div className="flex items-center gap-2 flex-wrap">

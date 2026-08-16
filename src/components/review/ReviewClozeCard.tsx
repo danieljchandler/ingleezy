@@ -118,7 +118,7 @@ export const ReviewClozeCard = ({
   };
 
   return (
-    <div className="rounded-3xl bg-card border border-[#5C3A46]/15 p-7 text-center shadow-elegant">
+    <div className="rounded-3xl bg-card border border-[#2C3B74]/15 p-7 text-center shadow-elegant">
       <div className="flex items-center justify-center gap-2 mb-6">
         <span className="text-[10px] uppercase tracking-[0.18em] font-semibold text-muted-foreground">
           أكمل الكلمة الناقصة
@@ -174,7 +174,7 @@ export const ReviewClozeCard = ({
               onClick={() => handleSelect(opt)}
               disabled={selected != null}
               className={cn(
-                "font-english rounded-xl border-2 border-[#5C3A46]/15 bg-card px-3 min-h-[56px] text-xl transition-all",
+                "font-english rounded-xl border-2 border-[#2C3B74]/15 bg-card px-3 min-h-[56px] text-xl transition-all",
                 "hover:border-primary/40 hover:bg-primary/5 hover:-translate-y-0.5",
                 "disabled:hover:translate-y-0",
                 reveal && isTarget && "border-green-600 bg-green-500/12",
@@ -213,7 +213,6 @@ export const ReviewClozeCard = ({
               ) : (
                 <p
                   className="text-sm text-muted-foreground"
-                  style={{ fontFamily: "'Amiri', 'Traditional Arabic', serif" }}
                 >
                   {sentenceArabic}
                 </p>

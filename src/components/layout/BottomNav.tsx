@@ -46,7 +46,7 @@ export function BottomNav() {
 
   return (
     <nav
-      className="fixed bottom-0 inset-x-0 z-40 border-t border-[#5C3A46]/15 bg-[#F9F7F2]/95 backdrop-blur supports-[backdrop-filter]:bg-[#F9F7F2]/85"
+      className="fixed bottom-0 inset-x-0 z-40 border-t border-[#2C3B74]/15 bg-[#F7F8FC]/95 backdrop-blur supports-[backdrop-filter]:bg-[#F7F8FC]/85"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       aria-label="التنقّل الرئيسي"
     >
@@ -60,8 +60,8 @@ export function BottomNav() {
                 className={cn(
                   "relative flex flex-col items-center justify-center gap-0.5 py-1.5 px-2 mx-0.5 rounded-2xl text-[11px] transition-all",
                   active
-                    ? "text-[#5C3A46] font-semibold bg-[#5C3A46]/8"
-                    : "text-[#5C3A46]/55 font-medium hover:text-[#5C3A46]/80 hover:bg-[#5C3A46]/4",
+                    ? "text-[#2C3B74] font-semibold bg-[#2C3B74]/8"
+                    : "text-[#2C3B74]/55 font-medium hover:text-[#2C3B74]/80 hover:bg-[#2C3B74]/4",
                 )}
               >
                 <Icon
@@ -71,7 +71,7 @@ export function BottomNav() {
                 <span className="leading-none">{label}</span>
                 {active && (
                   <span
-                    className="absolute -top-1.5 left-1/2 -translate-x-1/2 h-1 w-1 rounded-full bg-[#5C3A46]"
+                    className="absolute -top-1.5 left-1/2 -translate-x-1/2 h-1 w-1 rounded-full bg-[#2C3B74]"
                     aria-hidden
                   />
                 )}

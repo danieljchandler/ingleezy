@@ -178,7 +178,6 @@ const InlineToken = ({
               </div>
               <p
                 className="text-xl font-bold text-foreground mb-1"
-                style={{ fontFamily: "'Amiri', 'Traditional Arabic', serif" }}
                 dir="rtl"
               >
                 {compoundSurface}
@@ -269,7 +268,6 @@ const InlineToken = ({
           <div className="text-center border-b border-border pb-2">
             <p 
               className="text-xl font-bold text-foreground mb-1"
-              style={{ fontFamily: "'Amiri', 'Traditional Arabic', serif" }}
               dir="rtl"
             >
               {token.surface}
@@ -597,7 +595,6 @@ interface TranscriptLineCardProps {
          <div
            className="flex-1 text-lg leading-loose cursor-pointer"
            dir="rtl"
-           style={{ fontFamily: "'Noto Naskh Arabic', 'Traditional Arabic', serif" }}
            onClick={(e) => {
              if ((e.target as HTMLElement).closest("[data-token]")) return;
              onToggle();
@@ -698,7 +695,7 @@ interface TranscriptLineCardProps {
            showTranslation ? "max-h-64 opacity-100 mt-3" : "max-h-0 opacity-0"
          )}
        >
-          <div className="pt-3 border-t border-border/50 space-y-2" style={{ fontFamily: "'Open Sans', sans-serif" }}>
+          <div className="pt-3 border-t border-border/50 space-y-2">
             <TranslationPair
               variant="compact"
               literal={line.literal}
@@ -929,7 +926,6 @@ export const LineByLineTranscript = ({
        <div className="flex items-center justify-between">
          <h3
            className="text-lg font-semibold text-foreground"
-           style={{ fontFamily: "'Montserrat', sans-serif" }}
           >
             الجمل
          </h3>

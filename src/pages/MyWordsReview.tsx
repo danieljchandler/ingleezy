@@ -791,7 +791,6 @@ const MyWordsReview = () => {
                     </p>
                     <p
                       className="text-2xl font-semibold text-foreground mb-6"
-                      style={{ fontFamily: "'Amiri', 'Traditional Arabic', serif" }}
                     >
                       {currentWord.word_arabic}
                     </p>
@@ -903,7 +902,6 @@ const MyWordsReview = () => {
                     <div
                       className="text-sm leading-relaxed space-y-1"
                       dir="rtl"
-                      style={{ fontFamily: "'Amiri', 'Traditional Arabic', serif" }}
                     >
                       {currentWord.jingle_lyrics.split(/\r?\n/).map((line, i) => (
                         line.trim() ? (
@@ -963,7 +961,6 @@ const MyWordsReview = () => {
                   <div className="animate-in fade-in duration-200 mb-4">
                     <p
                       className="text-xl text-muted-foreground"
-                      style={{ fontFamily: "'Amiri', 'Traditional Arabic', serif" }}
                     >
                       {currentWord.word_arabic}
                     </p>
@@ -1004,7 +1001,6 @@ const MyWordsReview = () => {
                     <p
                       className="text-base text-foreground/90 font-arabic leading-relaxed"
                       dir="rtl"
-                      style={{ fontFamily: "'Amiri', 'Traditional Arabic', serif" }}
                     >
                       {currentWord.sentence_text}
                     </p>

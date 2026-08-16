@@ -33,10 +33,13 @@ const DIALECT_DEPENDENT_KEYS = [
  *  Exposed as --dialect-accent for opt-in components only.
  *  We intentionally do NOT override --primary / --accent / --ring globally —
  *  that washes the entire app in one dialect's hue. */
+// Post-brand these are tints of one indigo system, not three hues: the brand
+// is deliberately restrained, and the dialect is the learner's L1 — identity
+// worth a whisper of variation, not a wash of color.
 const DIALECT_THEMES: Record<DialectModule, { accent: string; glow: string }> = {
-  Gulf:     { accent: '12 68% 32%', glow: '28 70% 48%' },
-  Egyptian: { accent: '38 85% 45%', glow: '42 95% 55%' },
-  Yemeni:   { accent: '0 70% 42%',  glow: '0 75% 55%'  },
+  Gulf:     { accent: '228 45% 31%', glow: '227 43% 61%' },
+  Egyptian: { accent: '224 42% 39%', glow: '227 45% 66%' },
+  Yemeni:   { accent: '216 32% 22%', glow: '224 42% 55%' },
 };
 
 function applyDialectTheme(dialect: DialectModule) {

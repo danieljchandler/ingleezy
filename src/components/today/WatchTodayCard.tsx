@@ -60,7 +60,6 @@ export function WatchTodayCard({ done = false, className }: WatchTodayCardProps)
         </div>
         <h2
           className="text-lg font-bold text-foreground flex items-center gap-1.5"
-          style={{ fontFamily: "'Montserrat', sans-serif" }}
         >
           {AR.queue.watchVideo}
           <InfoHint

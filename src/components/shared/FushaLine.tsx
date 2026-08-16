@@ -64,7 +64,6 @@ export const FushaLine = ({
       <p
         className={cn("text-base leading-relaxed text-foreground/75", centred && "text-center")}
         dir="rtl"
-        style={{ fontFamily: "'Noto Naskh Arabic', 'Traditional Arabic', serif" }}
       >
         {text}
       </p>

@@ -152,7 +152,6 @@ export const ArticleQuiz = ({ article }: ArticleQuizProps) => {
       <p
         className="text-xs text-muted-foreground font-arabic"
         dir="rtl"
-        style={{ fontFamily: "'Noto Naskh Arabic', 'Noto Sans Arabic', serif" }}
       >
         {q.question_arabic}
       </p>
@@ -192,7 +191,6 @@ export const ArticleQuiz = ({ article }: ArticleQuizProps) => {
                   <p
                     className="text-xs text-muted-foreground mt-0.5 font-arabic"
                     dir="rtl"
-                    style={{ fontFamily: "'Noto Naskh Arabic', 'Noto Sans Arabic', serif" }}
                   >
                     {choice.arabic}
                   </p>
@@ -209,7 +207,6 @@ export const ArticleQuiz = ({ article }: ArticleQuizProps) => {
           <p
             className="text-xs text-muted-foreground bg-muted/50 rounded-lg p-2 font-arabic"
             dir="rtl"
-            style={{ fontFamily: "'Noto Naskh Arabic', 'Noto Sans Arabic', serif" }}
           >
             💡 {q.explanation}
           </p>

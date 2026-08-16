@@ -110,7 +110,7 @@ const EnglishSound = () => {
         <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           الخطوة {stepIdx + 1} من {SOUND_STEPS.length}
         </p>
-        <h2 className="text-lg font-bold text-foreground mt-0.5" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+        <h2 className="text-lg font-bold text-foreground mt-0.5">
           {STEP_LABELS[step]}
         </h2>
       </header>

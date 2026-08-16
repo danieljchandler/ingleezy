@@ -226,14 +226,12 @@ const SouqNews = () => {
                     <p
                       dir="rtl"
                       className="font-semibold text-sm text-foreground mb-1 font-arabic"
-                      style={{ fontFamily: "'Noto Naskh Arabic', 'Noto Sans Arabic', serif" }}
                     >
                       {article.title_arabic}
                     </p>
                     <p
                       dir="rtl"
                       className="text-xs text-muted-foreground font-arabic"
-                      style={{ fontFamily: "'Noto Naskh Arabic', 'Noto Sans Arabic', serif" }}
                     >
                       {article.summary_arabic}
                     </p>

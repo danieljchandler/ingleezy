@@ -338,20 +338,19 @@ const MyPhrasesReview = () => {
       {/* Card */}
       <div className="py-4">
         <div className="max-w-sm mx-auto">
-          <div className="rounded-3xl bg-card border border-[#5C3A46]/15 p-7 text-center space-y-5 shadow-elegant">
+          <div className="rounded-3xl bg-card border border-[#2C3B74]/15 p-7 text-center space-y-5 shadow-elegant">
             <p className="text-[10px] uppercase tracking-[0.18em] font-semibold text-muted-foreground">
               قلها بالإنجليزية
             </p>
             <p
               className="text-2xl font-semibold text-foreground leading-relaxed"
-              style={{ fontFamily: "'Amiri', 'Traditional Arabic', serif" }}
             >
               {current.phrase_arabic}
             </p>
 
             {showAnswer ? (
               <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 space-y-4 pt-2">
-                <p className="font-english text-4xl font-bold text-[#5C3A46] leading-snug">
+                <p className="font-english text-4xl font-bold text-[#2C3B74] leading-snug">
                   {current.phrase_english}
                 </p>
                 {/* transliteration carries phonetic_ar — the English phrase in
@@ -439,7 +438,6 @@ const MyPhrasesReview = () => {
                         <div
                           className="text-sm leading-relaxed font-arabic space-y-1"
                           dir="rtl"
-                          style={{ fontFamily: "'Amiri', 'Traditional Arabic', serif" }}
                         >
                           {current.jingle_lyrics.split(/\r?\n/).map((line, i) => (
                             line.trim() ? (

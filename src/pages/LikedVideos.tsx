@@ -55,7 +55,6 @@ const LikedVideoCard = ({
     <div className="flex-1 p-3 min-w-0">
       <p
         className="font-semibold text-foreground text-sm line-clamp-2 mb-1"
-        style={{ fontFamily: "'Montserrat', sans-serif" }}
       >
         {video.title}
       </p>
@@ -63,7 +62,6 @@ const LikedVideoCard = ({
         <p
           className="text-xs text-muted-foreground line-clamp-1 mb-2"
           dir="rtl"
-          style={{ fontFamily: "'Noto Naskh Arabic', 'Noto Sans Arabic', serif" }}
         >
           {video.title_arabic}
         </p>

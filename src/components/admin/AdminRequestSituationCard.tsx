@@ -193,7 +193,7 @@ export const AdminRequestSituationCard = ({ occasions, onSaved }: Props) => {
           </div>
           {phrases.map((p, i) => (
             <div key={i} className="p-3 rounded-lg bg-card border border-border">
-              <p className="text-lg font-semibold" dir="rtl" style={{ fontFamily: "'Noto Sans Arabic', sans-serif" }}>
+              <p className="text-lg font-semibold" dir="rtl">
                 {p.phrase_arabic}
               </p>
               {p.transliteration && (

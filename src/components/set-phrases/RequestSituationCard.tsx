@@ -157,7 +157,7 @@ export const RequestSituationCard = () => {
               {p.transliteration && (
                 <p className="text-xs text-muted-foreground mt-0.5 font-arabic" dir="rtl">{p.transliteration}</p>
               )}
-              <p className="text-sm mt-1 font-arabic" dir="rtl" style={{ fontFamily: "'Noto Sans Arabic', sans-serif" }}>
+              <p className="text-sm mt-1 font-arabic" dir="rtl">
                 {p.phrase_arabic}
               </p>
               {p.literal && (

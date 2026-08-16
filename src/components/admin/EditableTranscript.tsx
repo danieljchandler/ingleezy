@@ -34,7 +34,6 @@ const EditableToken = ({
         <span
           dir="rtl"
           className="text-sm font-medium"
-          style={{ fontFamily: "'Noto Naskh Arabic', 'Noto Sans Arabic', serif" }}
         >
           {token.surface}
         </span>
@@ -267,7 +266,6 @@ const EditableLineCard = ({
                 onChange={(e) => setArabicVal(e.target.value)}
                 dir="rtl"
                 className="flex-1"
-                style={{ fontFamily: "'Noto Naskh Arabic', 'Noto Sans Arabic', serif" }}
                 autoFocus
                 onKeyDown={(e) => {
                   if (e.key === "Enter") saveArabic();
@@ -285,7 +283,6 @@ const EditableLineCard = ({
             <div
               className="text-lg leading-loose cursor-pointer group"
               dir="rtl"
-              style={{ fontFamily: "'Noto Naskh Arabic', 'Traditional Arabic', serif" }}
               onClick={() => setEditingArabic(true)}
             >
               {line.tokens && line.tokens.length > 0 ? (
@@ -357,7 +354,6 @@ const EditableLineCard = ({
           <p
             className="text-sm text-muted-foreground leading-relaxed cursor-pointer hover:text-foreground transition-colors group"
             onClick={() => setEditingTranslation(true)}
-            style={{ fontFamily: "'Open Sans', sans-serif" }}
           >
             {line.translation || <span className="italic">Click to add translation</span>}
             <Pencil className="h-3 w-3 inline-block ml-2 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -489,7 +485,6 @@ export const EditableTranscript = ({
       <div className="flex items-center justify-between">
         <h3
           className="text-lg font-semibold text-foreground"
-          style={{ fontFamily: "'Montserrat', sans-serif" }}
         >
           Sentences ({lines.length})
         </h3>

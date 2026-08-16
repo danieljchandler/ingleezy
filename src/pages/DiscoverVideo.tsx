@@ -134,7 +134,6 @@ const ClickableWord = ({
           <div className="text-center border-b border-border pb-2">
             <p
               className="text-xl font-bold text-foreground mb-1"
-              style={{ fontFamily: "'Amiri', 'Traditional Arabic', serif" }}
               dir="rtl"
             >
               {token.surface}
@@ -281,7 +280,6 @@ const TranscriptRow = ({
           isActive ? "text-foreground font-medium" : "text-foreground/80",
         )}
         dir="rtl"
-        style={{ fontFamily: "'Noto Naskh Arabic', 'Traditional Arabic', serif" }}
       >
         {line.tokens && line.tokens.length > 0
           ? line.tokens.map((token, i) => (
@@ -350,7 +348,6 @@ const TranscriptRow = ({
           showTranslation ? "max-h-64 opacity-100 mt-1" : "max-h-0 opacity-0",
         )}
         onClick={(e) => e.stopPropagation()}
-        style={{ fontFamily: "'Open Sans', sans-serif" }}
       >
         <TranslationPair
           variant="compact"
@@ -1612,7 +1609,6 @@ const DiscoverVideo = () => {
           <div className="flex-1 min-w-0">
             <h1
               className="text-base font-bold text-foreground"
-              style={{ fontFamily: "'Montserrat', sans-serif" }}
             >
               {video.title}
             </h1>
@@ -1620,7 +1616,6 @@ const DiscoverVideo = () => {
               <p
                 className="text-sm text-foreground/70 mt-0.5"
                 dir="rtl"
-                style={{ fontFamily: "'Noto Naskh Arabic', 'Noto Sans Arabic', serif" }}
               >
                 {video.title_arabic}
               </p>
@@ -1750,7 +1745,6 @@ const DiscoverVideo = () => {
                   <p
                     className="text-lg font-medium text-foreground leading-[2]"
                     dir="rtl"
-                    style={{ fontFamily: "'Noto Naskh Arabic', 'Traditional Arabic', serif" }}
                   >
                     {displayLine.tokens && displayLine.tokens.length > 0
                       ? displayLine.tokens.map((token, i) => (
@@ -1783,7 +1777,6 @@ const DiscoverVideo = () => {
                     <>
                       <p
                         className="text-sm text-muted-foreground leading-relaxed"
-                        style={{ fontFamily: "'Open Sans', sans-serif" }}
                       >
                         {displayLine.translation}
                       </p>
@@ -1792,7 +1785,6 @@ const DiscoverVideo = () => {
                   {showLiteral && displayLine.literal && (
                     <p
                       className="text-xs italic text-muted-foreground/80 leading-relaxed"
-                      style={{ fontFamily: "'Open Sans', sans-serif" }}
                     >
                       <span className="not-italic uppercase tracking-wide text-[9px] me-1.5 text-muted-foreground/60">
                         حرفي
@@ -1993,7 +1985,7 @@ const DiscoverVideo = () => {
             <div className="mt-3 space-y-2">
               {onScreenLines.map((line) => (
                 <div key={line.id} className="p-2 rounded-lg bg-muted/50">
-                  <p dir="rtl" className="text-base font-medium text-foreground" style={{ fontFamily: "'Noto Naskh Arabic', 'Noto Sans Arabic', serif" }}>
+                  <p dir="rtl" className="text-base font-medium text-foreground">
                     {line.arabic}
                   </p>
                   {line.translation && showTranslations && (
@@ -2017,7 +2009,7 @@ const DiscoverVideo = () => {
                   key={i}
                   className="flex items-center justify-between gap-2 p-2 rounded-lg bg-muted/50 text-sm"
                 >
-                  <span dir="rtl" className="font-medium text-foreground" style={{ fontFamily: "'Noto Naskh Arabic', 'Noto Sans Arabic', serif" }}>
+                  <span dir="rtl" className="font-medium text-foreground">
                     {v.arabic}
                   </span>
                   <span className="text-muted-foreground text-xs truncate">{v.english}</span>

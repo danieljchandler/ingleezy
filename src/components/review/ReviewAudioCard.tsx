@@ -128,7 +128,6 @@ export const ReviewAudioCard = ({
           </p>
           <p
             className="text-lg text-muted-foreground"
-            style={{ fontFamily: "'Amiri', 'Traditional Arabic', serif" }}
           >
             {wordArabic}
           </p>

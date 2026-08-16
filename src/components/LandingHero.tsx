@@ -1,9 +1,8 @@
 import { useNavigate } from "react-router-dom";
+import { IngleezyLogo } from "@/components/brand/IngleezyLogo";
 import { ArrowRight, Headphones, Brain, PlayCircle, Globe2 } from "lucide-react";
 import { Button, CampfireMedallion } from "@/components/design-system";
-import ingleezyLogoAsset from "@/assets/ingleezy-logo.png.asset.json";
 
-const ingleezyLogo = ingleezyLogoAsset.url;
 
 /**
  * Logged-out landing hero shown on `/` when the visitor isn't authenticated.
@@ -26,7 +25,7 @@ export function LandingHero() {
     <section className="py-6">
       {/* Logo */}
       <div className="flex justify-center mb-5">
-        <img src={ingleezyLogo} alt="إنجليزي" className="h-16 sm:h-20" />
+        <IngleezyLogo className="text-3xl sm:text-4xl" />
       </div>
 
       {/* The fire: campfire clip + its one-line beat */}

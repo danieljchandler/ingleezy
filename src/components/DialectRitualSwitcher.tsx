@@ -3,7 +3,6 @@ import { createPortal } from "react-dom";
 import { ChevronDown, X } from "lucide-react";
 import { useDialect, DialectModule } from "@/contexts/DialectContext";
 import { cn } from "@/lib/utils";
-import dallahAsset from "@/assets/dallah-icon.png.asset.json";
 
 type Meta = {
   id: DialectModule;
@@ -26,7 +25,7 @@ const DIALECTS: Meta[] = [
     tag: "مجلس · لؤلؤ · تجارة السواحل",
     tagArabic: "مرحبا بالمعازيب",
     vibe: "إيقاع المجلس على مهله — قهوة وعود وهوا الخليج.",
-    hsl: "12 68% 32%",
+    hsl: "228 45% 31%",
   },
   {
     id: "Egyptian",
@@ -36,7 +35,7 @@ const DIALECTS: Meta[] = [
     tag: "شوارع القاهرة · سينما · إفيهات",
     tagArabic: "أهلاً يا باشا",
     vibe: "سريع ودافي ومسرحي — لغة السينما العربية.",
-    hsl: "38 85% 45%",
+    hsl: "224 42% 39%",
   },
   {
     id: "Yemeni",
@@ -46,7 +45,7 @@ const DIALECTS: Meta[] = [
     tag: "مرتفعات · عسل · شعر قديم",
     tagArabic: "حياك الله",
     vibe: "عربي الجبال — حروف قديمة وكرم عميق وشعر على مهله.",
-    hsl: "0 70% 42%",
+    hsl: "216 32% 22%",
   },
 ];
 
@@ -203,7 +202,7 @@ export const DialectRitualSwitcher = ({ className }: Props) => {
                         aria-hidden
                       >
                         {d.id === "Gulf" ? (
-                          <img src={dallahAsset.url} alt="" className="w-8 h-8 object-contain" />
+                          <img src="/brand/ingleezy-icon.svg" alt="" className="w-8 h-8 object-contain" />
                         ) : (
                           d.flag
                         )}
@@ -279,7 +278,7 @@ export const DialectRitualSwitcher = ({ className }: Props) => {
             aria-hidden
           >
             {current.id === "Gulf" ? (
-              <img src={dallahAsset.url} alt="" className="w-5 h-5 object-contain" />
+              <img src="/brand/ingleezy-icon.svg" alt="" className="w-5 h-5 object-contain" />
             ) : (
               current.flag
             )}

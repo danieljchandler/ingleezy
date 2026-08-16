@@ -8,10 +8,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { HomeButton } from "@/components/HomeButton";
 import { AppShell } from "@/components/layout/AppShell";
+import { IngleezyLogo } from "@/components/brand/IngleezyLogo";
+import { IngleezyLoading } from "@/components/brand/IngleezyMark";
 import { Loader2, Mail, Lock, UserPlus, LogIn, Ticket } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import ingleezyIconAsset from "@/assets/ingleezy-icon.png.asset.json";
-const lahjaIcon = ingleezyIconAsset.url;
 
 // Lightweight inline validators — dropping `zod` here saves ~12 kB gz on the Auth chunk.
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -158,9 +158,7 @@ const Auth = () => {
   if (loading) {
     return (
       <AppShell>
-        <div className="flex items-center justify-center py-24">
-          <Loader2 className="h-10 w-10 animate-spin text-primary" />
-        </div>
+        <IngleezyLoading className="py-24" />
       </AppShell>
     );
   }
@@ -176,11 +174,7 @@ const Auth = () => {
       <div className="max-w-sm mx-auto">
         {/* Logo and Title */}
         <div className="text-center mb-10">
-          <img 
-            src={lahjaIcon} 
-            alt="إنجليزي" 
-            className="h-14 w-14 mx-auto mb-5"
-          />
+          <IngleezyLogo className="mx-auto mb-5 text-3xl" />
           <h1 className="text-2xl font-bold text-foreground mb-2 font-heading">
             {isLogin ? "أهلاً بعودتك" : "انضم إلى إنجليزي"}
           </h1>

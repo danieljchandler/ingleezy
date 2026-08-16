@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700&family=Montserrat:wght@600;700&family=Open+Sans:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,115 +6,140 @@
 
 @layer base {
   :root {
-    /* ── Ingleezy placeholder palette (final branding pending) ──
-       Cobalt primary (the teal→indigo bridge), warm amber accent for CTAs,
-       near-white neutral base. Swap these tokens when the brand guide lands. */
+    /* ── Ingleezy brand — Ink Navy / Indigo / Periwinkle system ──
+       From the brand guide: a cool, restrained navy-indigo palette with one
+       warm note (amber) reserved for streaks and mastery. No new saturated
+       hues — restraint is the identity. Hex sources:
+       Ink Navy #1B2534 · Indigo Deep #2C3B74 · Indigo Core #3A508E ·
+       Periwinkle #7184C6 · amber #D98A3D · success #3F9C6D · error #B94A48 */
 
-    /* Background: near-white, cool and clean */
-    --background: 228 25% 98%;
-    --foreground: 228 15% 15%;
+    /* Background: barely-cool white; cards sit on it in pure white with
+       borders doing the structural work (guide: white ground, #E2E5EC lines) */
+    --background: 225 25% 98%;
+    --foreground: 216 32% 15%;
 
-    /* Cards: pure white surface */
     --card: 0 0% 100%;
-    --card-foreground: 228 15% 15%;
+    --card-foreground: 216 32% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 228 15% 15%;
+    --popover-foreground: 216 32% 15%;
 
-    /* Cobalt - primary actions */
-    --primary: 224 70% 45%;
+    /* Indigo Deep — primary actions, CTAs */
+    --primary: 228 45% 31%;
     --primary-foreground: 0 0% 100%;
 
-    /* Deep slate secondary */
-    --secondary: 228 15% 25%;
+    /* Ink Navy secondary */
+    --secondary: 216 32% 15%;
     --secondary-foreground: 0 0% 100%;
 
-    /* Warm amber accent - CTAs, streaks, success moments */
-    --accent: 36 90% 50%;
-    --accent-foreground: 228 15% 15%;
+    /* Amber — the one warm note: streaks, mastery, celebration. Sparingly. */
+    --accent: 30 67% 55%;
+    --accent-foreground: 216 32% 15%;
 
-    /* Muted backgrounds - between background and card */
-    --muted: 228 20% 94%;
-    --muted-foreground: 228 10% 42%;
+    /* Periwinkle — hovers, chips, light accents */
+    --periwinkle: 227 43% 61%;
 
-    --destructive: 0 84% 60%;
+    --muted: 224 24% 95%;
+    --muted-foreground: 216 16% 35%;
+
+    --destructive: 1 44% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 152 55% 34%;
+    --success: 150 42% 43%;
     --success-foreground: 0 0% 100%;
 
-    /* Subtle cool border for structure */
-    --border: 228 20% 87%;
-    --input: 228 20% 93%;
-    --ring: 224 70% 45%;
+    --border: 222 21% 91%;
+    --input: 223 22% 93%;
+    --ring: 224 42% 39%;
 
-    --radius: 1rem;
+    /* Guide: soft radii (8–12px) against the wordmark's angularity */
+    --radius: 0.75rem;
 
-    /* Cobalt variant for scaffold accents (legacy token name kept: heavy usage) */
-    --olive: 224 60% 50%;
+    /* Indigo Core for scaffold accents (legacy token name kept: heavy usage) */
+    --olive: 224 42% 39%;
 
-    /* Topic gradients - aligned with placeholder palette */
-    --topic-colors: 224 70% 45%;
-    --topic-animals: 199 65% 55%;
-    --topic-household: 224 60% 50%;
-    --topic-tools: 228 15% 25%;
-    --topic-food: 36 90% 50%;
-    --topic-nature: 175 55% 40%;
+    /* Topic accent stripes — tints of the system plus the amber note */
+    --topic-colors: 228 45% 31%;
+    --topic-animals: 227 43% 61%;
+    --topic-household: 224 42% 39%;
+    --topic-tools: 216 32% 15%;
+    --topic-food: 30 67% 55%;
+    --topic-nature: 150 42% 43%;
 
-    /* Deep cobalt border color (legacy token name kept: heavy usage) */
-    --desert-red: 224 70% 35%;
+    /* Indigo Deep border color (legacy token name kept: heavy usage) */
+    --desert-red: 228 45% 31%;
 
     /* Card white (legacy token name kept: heavy usage) */
-    --card-cream: 228 25% 99%;
+    --card-cream: 0 0% 100%;
 
-    /* Shadows - very subtle, borders do the work */
-    --shadow-soft: 0 2px 8px -2px hsl(228 20% 50% / 0.08);
-    --shadow-card: 0 2px 12px -4px hsl(228 20% 40% / 0.1);
-    --shadow-elegant: 0 1px 2px hsl(228 20% 40% / 0.05), 0 8px 24px -10px hsl(224 70% 35% / 0.15);
-    --shadow-button: 0 4px 12px -4px hsl(224 70% 45% / 0.2);
-    /* Topic card shadows - subtle depth */
-    --shadow-topic: 0 2px 8px -2px hsl(224 70% 35% / 0.08), 0 4px 16px -4px hsl(228 20% 40% / 0.06);
-    --shadow-topic-hover: 0 4px 12px -2px hsl(224 70% 35% / 0.12), 0 8px 24px -6px hsl(228 20% 40% / 0.1);
+    /* Shadows: ink-navy tinted, very subtle — borders do the work */
+    --shadow-soft: 0 2px 8px -2px hsl(216 32% 30% / 0.08);
+    --shadow-card: 0 2px 12px -4px hsl(216 32% 25% / 0.1);
+    --shadow-elegant: 0 1px 2px hsl(216 32% 25% / 0.05), 0 8px 24px -10px hsl(228 45% 31% / 0.15);
+    --shadow-button: 0 4px 12px -4px hsl(228 45% 31% / 0.25);
+    --shadow-topic: 0 2px 8px -2px hsl(228 45% 31% / 0.08), 0 4px 16px -4px hsl(216 32% 25% / 0.06);
+    --shadow-topic-hover: 0 4px 12px -2px hsl(228 45% 31% / 0.12), 0 8px 24px -6px hsl(216 32% 25% / 0.1);
 
 
-    --sidebar-background: 228 25% 97%;
-    --sidebar-foreground: 228 15% 15%;
-    --sidebar-primary: 224 70% 45%;
+    --sidebar-background: 225 25% 97%;
+    --sidebar-foreground: 216 32% 15%;
+    --sidebar-primary: 228 45% 31%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 228 20% 92%;
-    --sidebar-accent-foreground: 228 15% 15%;
-    --sidebar-border: 228 20% 87%;
-    --sidebar-ring: 224 70% 45%;
+    --sidebar-accent: 224 24% 93%;
+    --sidebar-accent-foreground: 216 32% 15%;
+    --sidebar-border: 222 21% 91%;
+    --sidebar-ring: 224 42% 39%;
   }
 
   .dark {
-    --background: 228 15% 10%;
-    --foreground: 228 20% 92%;
+    /* Guide: Ink Navy ground, #232F42 surfaces, Periwinkle as the pop
+       accent against dark. Primary flips to Periwinkle with Ink Navy text —
+       higher contrast than white-on-periwinkle, and it keeps CTAs loud. */
+    --background: 216 32% 15%;
+    --foreground: 222 30% 94%;
 
-    --card: 228 14% 14%;
-    --card-foreground: 228 20% 92%;
+    --card: 217 31% 20%;
+    --card-foreground: 222 30% 94%;
 
-    --popover: 228 14% 14%;
-    --popover-foreground: 228 20% 92%;
+    --popover: 217 31% 20%;
+    --popover-foreground: 222 30% 94%;
 
-    --primary: 224 70% 58%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 227 43% 61%;
+    --primary-foreground: 216 32% 12%;
 
-    --secondary: 228 12% 32%;
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 222 30% 94%;
+    --secondary-foreground: 216 32% 15%;
 
-    --accent: 36 85% 55%;
-    --accent-foreground: 228 15% 10%;
+    --accent: 30 70% 58%;
+    --accent-foreground: 216 32% 12%;
 
-    --muted: 228 12% 18%;
-    --muted-foreground: 228 15% 70%;
+    --periwinkle: 227 43% 66%;
 
-    --border: 228 12% 20%;
-    --input: 228 12% 20%;
-    --ring: 224 70% 58%;
+    --muted: 217 28% 24%;
+    --muted-foreground: 220 18% 72%;
 
-    --success: 152 45% 45%;
-    --success-foreground: 0 0% 100%;
+    --border: 217 25% 27%;
+    --input: 217 25% 27%;
+    --ring: 227 43% 61%;
+
+    --destructive: 1 50% 58%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 150 40% 52%;
+    --success-foreground: 216 32% 12%;
+
+    --olive: 227 43% 61%;
+    --desert-red: 227 43% 61%;
+    --card-cream: 217 31% 20%;
+
+    --sidebar-background: 217 31% 18%;
+    --sidebar-foreground: 222 30% 94%;
+    --sidebar-primary: 227 43% 61%;
+    --sidebar-primary-foreground: 216 32% 12%;
+    --sidebar-accent: 217 28% 24%;
+    --sidebar-accent-foreground: 222 30% 94%;
+    --sidebar-border: 217 25% 27%;
+    --sidebar-ring: 227 43% 61%;
   }
 }
 
@@ -125,7 +150,7 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: 'Cairo', 'Noto Sans Arabic', 'Open Sans', sans-serif;
+    font-family: 'IBM Plex Sans Arabic', 'Inter', sans-serif;
     font-size: 1rem;
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
@@ -137,9 +162,9 @@
     touch-action: manipulation;
   }
 
-  /* Locked heading rhythm — Montserrat, tight tracking, no competing weights */
+  /* Locked heading rhythm — one dual-script family, no competing weights */
   h1, h2, h3, h4 {
-    font-family: 'Cairo', 'Montserrat', 'Noto Sans Arabic', sans-serif;
+    font-family: 'IBM Plex Sans Arabic', 'Inter', sans-serif;
     font-weight: 700;
     color: hsl(var(--foreground));
   }
@@ -153,16 +178,26 @@
 
 @layer utilities {
   .font-sans {
-    font-family: 'Cairo', 'Noto Sans Arabic', 'Open Sans', sans-serif;
+    font-family: 'IBM Plex Sans Arabic', 'Inter', sans-serif;
   }
 
   .font-heading {
-    font-family: 'Cairo', 'Montserrat', 'Noto Sans Arabic', sans-serif;
+    font-family: 'IBM Plex Sans Arabic', 'Inter', sans-serif;
   }
 
   .font-arabic {
-    font-family: 'Noto Sans Arabic', 'Open Sans', sans-serif;
+    font-family: 'IBM Plex Sans Arabic', 'Inter', sans-serif;
     line-height: 1.7;
+  }
+
+  /* Display accent — the wordmark's voice. Latin-only (Archivo Black has no
+     Arabic), so it appears where Latin naturally does: the logo lockup and
+     level-up/streak numerals. Sparingly, per the brand guide. */
+  .font-display {
+    font-family: 'Archivo Black', 'Inter', sans-serif;
+    font-style: italic;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
   }
 
   /* English CONTENT block — the studied language. The class was a semantic
@@ -173,7 +208,7 @@
      default `start` resolve to left, while deliberately centered or inherited
      alignments still win. */
   .font-english {
-    font-family: 'Open Sans', 'Noto Sans Arabic', sans-serif;
+    font-family: 'Inter', 'IBM Plex Sans Arabic', sans-serif;
     direction: ltr;
     unicode-bidi: isolate;
   }
@@ -221,13 +256,13 @@
 
   /* Arabic-first display — used for vocabulary and titles in Arabic */
   .text-arabic-display {
-    font-family: 'Noto Sans Arabic', 'Open Sans', sans-serif;
+    font-family: 'IBM Plex Sans Arabic', 'Inter', sans-serif;
     font-weight: 700;
     line-height: 1.4;
     letter-spacing: 0;
   }
   .text-arabic-body {
-    font-family: 'Noto Sans Arabic', 'Open Sans', sans-serif;
+    font-family: 'IBM Plex Sans Arabic', 'Inter', sans-serif;
     font-weight: 500;
     line-height: 1.75;
   }
@@ -237,7 +272,7 @@
     @apply text-arabic-display;
   }
   .text-english-secondary {
-    font-family: 'Cairo', 'Noto Sans Arabic', 'Open Sans', sans-serif;
+    font-family: 'Inter', 'IBM Plex Sans Arabic', sans-serif;
     font-weight: 500;
     color: hsl(var(--muted-foreground));
   }
@@ -262,6 +297,25 @@
     50% {
       transform: translateY(-4px);
     }
+  }
+
+  /* Ingleezy mark pulse — the signature loading state: the bar breathes,
+     the ya-dot ticks. Subtle by design (guide §5). */
+  .animate-mark-bar {
+    animation: mark-bar 1.4s ease-in-out infinite;
+    transform-origin: center 40%;
+  }
+  .animate-mark-dot {
+    animation: mark-dot 1.4s ease-in-out infinite;
+    transform-origin: center 80%;
+  }
+  @keyframes mark-bar {
+    0%, 100% { transform: scaleY(1); opacity: 1; }
+    50% { transform: scaleY(0.86); opacity: 0.75; }
+  }
+  @keyframes mark-dot {
+    0%, 100% { transform: translateY(0); opacity: 0.75; }
+    50% { transform: translateY(6%); opacity: 1; }
   }
 
   /* Pop animation for tap feedback */
@@ -335,36 +389,36 @@
 
   /* Background gradients - for large areas only */
   .bg-gradient-warm {
-    background: linear-gradient(180deg, hsl(38 45% 90%) 0%, hsl(38 40% 86%) 100%);
+    background: linear-gradient(180deg, hsl(225 30% 96%) 0%, hsl(226 32% 92%) 100%);
   }
 
   .bg-gradient-subtle {
-    background: linear-gradient(180deg, hsl(38 45% 92%) 0%, hsl(38 40% 88%) 100%);
+    background: linear-gradient(180deg, hsl(225 28% 97%) 0%, hsl(225 28% 94%) 100%);
   }
 
   /* Topic accent colors - for small accent stripes only */
   .bg-gradient-green {
-    background: hsl(8 45% 38%);
+    background: hsl(228 45% 31%);
   }
 
   .bg-gradient-sand {
-    background: hsl(38 45% 65%);
+    background: hsl(227 43% 61%);
   }
 
   .bg-gradient-olive {
-    background: hsl(8 40% 42%);
+    background: hsl(224 42% 39%);
   }
 
   .bg-gradient-indigo {
-    background: hsl(150 10% 25%);
+    background: hsl(224 42% 39%);
   }
 
   .bg-gradient-charcoal {
-    background: hsl(150 7% 21%);
+    background: hsl(216 32% 15%);
   }
 
   .bg-gradient-red {
-    background: hsl(8 45% 38%);
+    background: hsl(30 67% 55%);
   }
 
   /* Slow drift for parallax backdrop layers */
@@ -423,8 +477,8 @@
     animation: correct-pulse 0.7s ease-out;
   }
   @keyframes correct-pulse {
-    0% { box-shadow: 0 0 0 0 hsl(142 71% 45% / 0.55); }
-    100% { box-shadow: 0 0 0 14px hsl(142 71% 45% / 0); }
+    0% { box-shadow: 0 0 0 0 hsl(var(--success) / 0.55); }
+    100% { box-shadow: 0 0 0 14px hsl(var(--success) / 0); }
   }
 
   /* Single sparkle dot fade-out (tracer trail) */

@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
+import { getThemePreference, setThemePreference, type ThemePreference } from '@/lib/theme';
 import { toast } from 'sonner';
 import { IconBack } from '@/components/shared/DirectionalIcon';
 import { Loader2, Check, User, Globe2, Target, Eye, Heart, Camera, AlertTriangle, Info, Compass, Bell } from 'lucide-react';
@@ -58,6 +59,11 @@ const Settings = () => {
   const [loading, setLoading] = useState(true);
   const { enabled: leechEnabled, setEnabled: setLeechEnabled } = useLeechPrefs();
   const { enabled: rootFamiliesEnabled, setEnabled: setRootFamiliesEnabled } = useRootFamilyPrefs();
+  const [themePref, setThemePref] = useState<ThemePreference>(() => getThemePreference());
+  const chooseTheme = (pref: ThemePreference) => {
+    setThemePref(pref);
+    setThemePreference(pref);
+  };
   const { enabled: hintsEnabled, setEnabled: setHintsEnabled } = useFeatureHints();
   const { subscribed, tier, openCustomerPortal } = useSubscription();
   const [clearingLeeches, setClearingLeeches] = useState(false);
@@ -502,6 +508,42 @@ const Settings = () => {
                 </p>
               </div>
               <Switch checked={hintsEnabled} onCheckedChange={setHintsEnabled} />
+            </div>
+          </section>
+
+          {/* Appearance */}
+          <section className="space-y-3">
+            <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+              المظهر
+            </div>
+            <div className="p-3 rounded-xl bg-card border border-border">
+              <p className="font-medium text-foreground text-sm">الوضع الليلي</p>
+              <p className="text-xs text-muted-foreground mb-2">
+                «النظام» يتبع إعداد جهازك تلقائياً.
+              </p>
+              <div className="flex gap-2" role="radiogroup" aria-label="الوضع الليلي">
+                {([
+                  { value: 'light', label: 'فاتح' },
+                  { value: 'dark', label: 'غامق' },
+                  { value: 'system', label: 'النظام' },
+                ] as const).map(({ value, label }) => (
+                  <button
+                    key={value}
+                    type="button"
+                    role="radio"
+                    aria-checked={themePref === value}
+                    onClick={() => chooseTheme(value)}
+                    className={cn(
+                      'flex-1 rounded-lg border px-3 py-2 text-sm font-medium transition-colors',
+                      themePref === value
+                        ? 'border-primary bg-primary text-primary-foreground'
+                        : 'border-border bg-card text-muted-foreground hover:border-primary/40',
+                    )}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
             </div>
           </section>
 

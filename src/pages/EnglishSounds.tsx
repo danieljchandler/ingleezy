@@ -58,7 +58,7 @@ const EnglishSounds = () => {
       <MilestoneBanner masteredCount={masteredCount} />
 
       <header className="mb-6 text-center">
-        <h1 className="text-2xl font-bold text-foreground flex items-center justify-center gap-2" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+        <h1 className="text-2xl font-bold text-foreground flex items-center justify-center gap-2">
           رحلة أصوات الإنجليزية 🐪
           <InfoHint
             title="رحلة أصوات الإنجليزية"
@@ -79,7 +79,7 @@ const EnglishSounds = () => {
           className="absolute left-1/2 top-6 bottom-6 -translate-x-1/2 w-px"
           style={{
             backgroundImage:
-              "repeating-linear-gradient(to bottom, #5C3A46 0 6px, transparent 6px 12px)",
+              "repeating-linear-gradient(to bottom, #2C3B74 0 6px, transparent 6px 12px)",
             opacity: 0.35,
           }}
         />
@@ -116,11 +116,11 @@ const EnglishSounds = () => {
                       "flex-1 px-3 py-2 rounded-xl border backdrop-blur-sm transition-colors",
                       isLeft ? "text-right" : "text-left",
                       unlocked
-                        ? "bg-[#F9F7F2]/75 border-[#5C3A46]/25"
+                        ? "bg-[#F7F8FC]/75 border-[#2C3B74]/25"
                         : "bg-muted/40 border-muted-foreground/15",
                     )}
                   >
-                    <p className="text-[10px] font-semibold uppercase tracking-wider text-[#5C3A46]/70">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-[#2C3B74]/70">
                       محطة {sound.order_index + 1}
                     </p>
                     <p className="font-english text-sm font-medium text-foreground" dir="ltr">
@@ -139,10 +139,10 @@ const EnglishSounds = () => {
                     className={cn(
                       "relative h-16 w-16 rounded-full border-2 flex items-center justify-center shrink-0 transition-all",
                       mastered &&
-                        "bg-gradient-to-br from-[#F1E3C6] to-[#E2C892] border-[#CFA44E] shadow-[0_4px_14px_-4px_rgba(207,164,78,0.6)] animate-master-bounce",
+                        "bg-gradient-to-br from-[#F1E3C6] to-[#E2C892] border-[#D98A3D] shadow-[0_4px_14px_-4px_rgba(207,164,78,0.6)] animate-master-bounce",
                       !mastered &&
                         unlocked &&
-                        "bg-gradient-to-br from-[#FBF6EC] to-[#EFE2CC] border-[#5C3A46] shadow-[0_4px_12px_-4px_rgba(92,58,70,0.35)] hover:shadow-[0_6px_18px_-4px_rgba(92,58,70,0.5)] active:scale-95 animate-unlock-bounce",
+                        "bg-gradient-to-br from-[#F2F4FB] to-[#DCE2F5] border-[#2C3B74] shadow-[0_4px_12px_-4px_rgba(27,37,52,0.35)] hover:shadow-[0_6px_18px_-4px_rgba(27,37,52,0.5)] active:scale-95 animate-unlock-bounce",
                       !unlocked && "bg-muted border-muted-foreground/25 opacity-60",
                     )}
                   >
@@ -156,7 +156,7 @@ const EnglishSounds = () => {
                     {unlocked && (
                       <div
                         className="absolute inset-1 rounded-full border border-dashed pointer-events-none"
-                        style={{ borderColor: mastered ? "#CFA44E" : "#5C3A46", opacity: 0.35 }}
+                        style={{ borderColor: mastered ? "#D98A3D" : "#2C3B74", opacity: 0.35 }}
                       />
                     )}
                     {/* Shine sweep for mastered stops */}
@@ -174,7 +174,7 @@ const EnglishSounds = () => {
                       <span
                         className={cn(
                           "font-english text-2xl relative",
-                          mastered ? "text-[#7A5320]" : "text-[#5C3A46]",
+                          mastered ? "text-[#8F5A24]" : "text-[#2C3B74]",
                         )}
                         style={{ lineHeight: 1 }}
                         dir="ltr"
@@ -219,8 +219,8 @@ const EnglishSounds = () => {
                       "mt-3 w-full p-4 rounded-2xl border-2 flex items-center justify-center gap-3 transition-all relative overflow-hidden",
                       mastered
                         ? checkpoints[checkpointIdx]
-                          ? "border-[#CFA44E] bg-gradient-to-r from-[#F4E3B8]/80 via-[#F9F0D4]/80 to-[#F4E3B8]/80"
-                          : "border-[#CFA44E] bg-gradient-to-r from-[#F9F0D4]/70 to-[#F4E3B8]/70 hover:from-[#F4E3B8] hover:to-[#EED9A0] animate-pulse"
+                          ? "border-[#D98A3D] bg-gradient-to-r from-[#F4E3B8]/80 via-[#F9F0D4]/80 to-[#F4E3B8]/80"
+                          : "border-[#D98A3D] bg-gradient-to-r from-[#F9F0D4]/70 to-[#F4E3B8]/70 hover:from-[#F4E3B8] hover:to-[#EED9A0] animate-pulse"
                         : "border-muted bg-muted/30 opacity-60",
                     )}
                   >
@@ -250,7 +250,7 @@ const EnglishSounds = () => {
                     ) : (
                       <Flag className="h-5 w-5 text-[#A57B1F] relative" />
                     )}
-                    <span className="font-bold text-[#5C3A46] relative">
+                    <span className="font-bold text-[#2C3B74] relative">
                       نقطة تفتيش الواحة {checkpointIdx + 1}
                     </span>
                     {checkpoints[checkpointIdx] && (

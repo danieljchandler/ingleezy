@@ -19,10 +19,16 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["Open Sans", "Noto Sans Arabic", "sans-serif"],
-        heading: ["Montserrat", "Noto Sans Arabic", "sans-serif"],
-        arabic: ["Noto Sans Arabic", "Open Sans", "sans-serif"],
-        cairo: ["Noto Naskh Arabic", "Noto Sans Arabic", "serif"],
+        // IBM Plex Sans Arabic is a dual-script family — its Latin was drawn
+        // to harmonise with the Arabic, so one stack carries the whole chrome.
+        // Inter is for English CONTENT; Archivo Black for display accents.
+        sans: ["IBM Plex Sans Arabic", "Inter", "sans-serif"],
+        heading: ["IBM Plex Sans Arabic", "Inter", "sans-serif"],
+        arabic: ["IBM Plex Sans Arabic", "Inter", "sans-serif"],
+        english: ["Inter", "IBM Plex Sans Arabic", "sans-serif"],
+        display: ["Archivo Black", "Inter", "sans-serif"],
+        // Legacy alias (transcript surfaces) — folded into the chrome family.
+        cairo: ["IBM Plex Sans Arabic", "Inter", "sans-serif"],
       },
       fontSize: {
         // Locked typographic scale — 1.25 ratio, Lahja rhythm
@@ -61,6 +67,7 @@ export default {
           DEFAULT: "hsl(var(--muted))",
           foreground: "hsl(var(--muted-foreground))",
         },
+        periwinkle: "hsl(var(--periwinkle))",
         accent: {
           DEFAULT: "hsl(var(--accent))",
           foreground: "hsl(var(--accent-foreground))",

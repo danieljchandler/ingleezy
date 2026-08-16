@@ -55,8 +55,8 @@ export const TaskRow = ({
       className={cn(
         "group relative w-full flex cursor-pointer items-stretch gap-3 pe-4 ps-0 py-3.5 rounded-2xl text-left overflow-hidden",
         "bg-card-cream border-2 transition-all duration-300",
-        "shadow-[0_1px_0_rgba(92,58,70,0.04),0_4px_12px_-6px_rgba(92,58,70,0.12)]",
-        "hover:shadow-[0_2px_0_rgba(92,58,70,0.06),0_10px_20px_-8px_rgba(92,58,70,0.2)] hover:-translate-y-px active:translate-y-0",
+        "shadow-[0_1px_0_rgba(27,37,52,0.04),0_4px_12px_-6px_rgba(27,37,52,0.12)]",
+        "hover:shadow-[0_2px_0_rgba(27,37,52,0.06),0_10px_20px_-8px_rgba(27,37,52,0.2)] hover:-translate-y-px active:translate-y-0",
         done
           ? "border-desert-red/70 opacity-90"
           : "border-desert-red/15 hover:border-desert-red/35"

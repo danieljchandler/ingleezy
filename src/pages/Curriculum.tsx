@@ -123,7 +123,6 @@ const Curriculum = () => {
             <div className="flex items-baseline justify-between gap-3 mb-1 px-1">
               <h2
                 className="text-lg font-bold text-foreground"
-                style={{ fontFamily: "'Montserrat', sans-serif" }}
               >
                 {stage.name}
               </h2>

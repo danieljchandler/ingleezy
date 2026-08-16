@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!--
+    The Ingleezy mark: a stacked speech-bubble card (Indigo Deep backing,
+    Periwinkle front) with a clipped bottom-left corner and a short tail,
+    holding an exclamation mark whose dot curls into the ya/hamza —
+    punctuation and Arabic letterform in one glyph.
+    Hand-recreated from the master lockup; swap for the designer's vector
+    if a source SVG ever arrives.
+  -->
+  <defs>
+    <path id="bubble" d="M 160 44 L 376 44 A 76 76 0 0 1 452 120 L 452 288 A 76 76 0 0 1 376 364 L 268 364 L 190 412 L 208 364 L 156 364 L 84 292 L 84 120 A 76 76 0 0 1 160 44 Z"/>
+  </defs>
+  <use href="#bubble" transform="translate(-28 28)" fill="#2C3B74"/>
+  <use href="#bubble" fill="#7184C6"/>
+  <rect x="241" y="102" width="54" height="150" rx="27" fill="#FFFFFF"/>
+  <path d="M 297 287 C 286 273, 260 272, 248 287 C 239 299, 245 314, 258 318 C 254 326, 246 331, 236 330" fill="none" stroke="#FFFFFF" stroke-width="25" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

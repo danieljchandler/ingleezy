@@ -69,9 +69,51 @@ generation conditioning.
 ### Identity — FLIP (first commit series)
 - [~] package name, index.html meta/OG, manifest (name, `lang: "ar"`,
       `dir: "rtl"`), README rewrite
-- [ ] Theme tokens → placeholder cobalt palette; fonts: keep Noto Sans Arabic
-      (now the *UI* face), add Cairo for Arabic headings; Latin face for
-      English content
+- [x] **Theme tokens → the real brand, DONE.** The brand guide landed (Ink
+      Navy `#1B2534` / Indigo Deep `#2C3B74` / Indigo Core `#3A508E` /
+      Periwinkle `#7184C6`, amber `#D98A3D` as the single warm note) and the
+      placeholder cobalt is gone. What the implementation added on top of the
+      guide, from research on what a young, video-first audience expects:
+      *Dark mode is real now.* The `.dark` token block existed with nothing
+      ever applying the class — dead CSS. `src/lib/theme.ts` applies an
+      explicit choice (`ingleezy:theme`) or follows `prefers-color-scheme`
+      live, initialised before first paint so a dark device never flashes
+      light; a three-way toggle sits in Settings. Dark ground is Ink Navy,
+      surfaces `#232F42`, and primary flips to Periwinkle-with-navy-text —
+      the guide's "pop accent against dark".
+      *Fonts:* IBM Plex Sans Arabic for the whole chrome — it is a
+      dual-script family whose Latin was drawn to harmonise with the Arabic,
+      which matters in a UI where English content sits inside Arabic chrome
+      constantly. Inter for English CONTENT (`.font-english`), Archivo Black
+      italic for display accents (`.font-display` — the wordmark's voice,
+      used sparingly). Montserrat/Open Sans/Noto/Amiri/Naskh all swept,
+      including ~35 files of inline `fontFamily` styles that predated the
+      token system and would have silently overridden it.
+      *The mark:* `public/brand/ingleezy-icon.svg` is a hand-drawn vector
+      recreation of the lockup's icon (stacked speech-bubble, clipped
+      corner, tail, !/ي glyph), rasterised to the manifest PNG set by
+      `scripts/render-brand-icons.mjs` through Chromium so the PNGs match
+      what browsers draw. `IngleezyLogo` renders the lockup as live text —
+      Archivo Black wordmark, تعلّم tagline — pinned `dir="ltr"` because the
+      lockup is a fixed composition whatever direction the page runs.
+      `IngleezyMark` is the signature loading state (bar breathes, ya-dot
+      ticks) and replaces the generic spinner at the auth gates.
+      *The sweep that mattered:* Hakiya's warm identity was still hardcoded
+      everywhere the tokens couldn't reach — maroon `#5C3A46` across
+      BottomNav/HubGrid/tour/cloze/sounds, the warm-paper `#F9F7F2`, the
+      kilim photograph wrapping every page from AppShell, five components
+      loading logos from Lovable's CDN (`/__l5e/...` — broken images
+      outside that platform), and the desert journey's midday-sand palette.
+      The desert kept its caravan metaphor and moved to blue hour: dunes in
+      periwinkle tints, sun and camel in the amber family, oasis in the
+      brand green. The Sadu watermark survives, recolored periwinkle — the
+      cultural motif at a whisper on the cool ground. Dialect accents
+      collapsed from three hues (teal/amber/red) to three tints of one
+      indigo — the brand is deliberately restrained, and the flag glyph
+      already names the dialect.
+      Verified by screenshotting the running app light and dark through
+      Playwright and reading the images, which is how the kilim wrap and
+      the CDN logos were caught — neither shows up in any test.
 - [ ] `src/config.ts`: `DIALECTS` becomes the learner's *native dialect*
       (onboarding choice, drives scaffold rendering), not the studied target
 

@@ -197,17 +197,18 @@ describe("the streak", () => {
     const flame = await screen.findByTitle("5-day streak");
     expect(flame.textContent).toContain("5d");
     // Warm when it is alive: the flame is the reward, and a grey one on day
-    // five would read as broken.
-    expect(flame.className).toContain("border-orange-500/40");
+    // five would read as broken. Amber is the palette's one warm note, and
+    // the streak is exactly what the brand guide reserves it for.
+    expect(flame.className).toContain("border-[#D98A3D]/40");
   });
 
   it("shows a cold zero rather than hiding when the streak is broken", async () => {
     render({ streak: 0 });
 
     const flame = await screen.findByTitle("0-day streak");
-    expect(flame.className).toContain("bg-[#5C3A46]/5");
+    expect(flame.className).toContain("bg-[#2C3B74]/5");
     expect(flame.querySelector(".lucide-flame")!.getAttribute("class")).toContain(
-      "text-[#5C3A46]/40",
+      "text-[#2C3B74]/40",
     );
   });
 

@@ -411,7 +411,6 @@ const Review = () => {
                  produce, so it stays hidden until they've committed. */
               <p
                 className="text-3xl font-bold text-foreground mb-6 break-words max-w-full"
-                style={{ fontFamily: "'Amiri', 'Traditional Arabic', serif" }}
               >
                 {currentWord.word_arabic}
               </p>
@@ -455,7 +454,6 @@ const Review = () => {
                 ) : (
                   <p
                     className="text-xl text-muted-foreground"
-                    style={{ fontFamily: "'Amiri', 'Traditional Arabic', serif" }}
                   >
                     {currentWord.word_arabic}
                   </p>

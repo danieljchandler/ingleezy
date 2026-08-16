@@ -17,9 +17,8 @@ import {
 } from 'lucide-react';
 import { getTopicCategories } from '@/data/listenTopics';
 import { LEARNING_REASONS, reasonLabel } from '@/data/learningReasons';
-import ingleezyIconAsset from '@/assets/ingleezy-icon.png.asset.json';
 import { ChevronBack, ChevronOpen } from '@/components/shared/DirectionalIcon';
-const lahjaIcon = ingleezyIconAsset.url;
+const lahjaIcon = "/brand/ingleezy-icon.svg";
 
 type Step = 'welcome' | 'dialect' | 'level' | 'purpose' | 'goal';
 
@@ -171,7 +170,7 @@ const Onboarding = () => {
         {/* ─── WELCOME ─────────────────────────── */}
         {step === 'welcome' && (
           <div className="text-center space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-            <img src={lahjaIcon} alt="Ingleezy" className="h-20 w-20 mx-auto" />
+            <img src="/brand/ingleezy-icon.svg" alt="Ingleezy" className="h-20 w-20 mx-auto" />
             <div>
               <h1 className="text-3xl font-bold font-heading text-foreground mb-3">
                 أهلاً وسهلاً!

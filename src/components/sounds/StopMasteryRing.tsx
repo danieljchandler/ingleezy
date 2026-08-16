@@ -17,9 +17,9 @@ export const StopMasteryRing = ({ progress, state, size = 76 }: StopMasteryRingP
   const offset = c * (1 - pct);
 
   const trackColor =
-    state === "locked" ? "rgba(120,113,108,0.25)" : "rgba(92,58,70,0.18)";
+    state === "locked" ? "rgba(120,113,108,0.25)" : "rgba(27,37,52,0.18)";
   const arcColor =
-    state === "mastered" ? "#CFA44E" : state === "active" ? "#5C3A46" : "transparent";
+    state === "mastered" ? "#D98A3D" : state === "active" ? "#2C3B74" : "transparent";
 
   return (
     <svg

@@ -221,7 +221,6 @@ export const PhraseOfTheDay = () => {
           <p
             dir="rtl"
             className="text-base text-foreground font-medium font-arabic"
-            style={{ fontFamily: "'Noto Sans Arabic', sans-serif" }}
           >
             {phrase.phrase_arabic}
           </p>

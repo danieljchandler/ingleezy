@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { IngleezyLogo } from "@/components/brand/IngleezyLogo";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useTopic } from "@/hooks/useTopic";
 import { useAllWords } from "@/hooks/useAllWords";
@@ -13,8 +14,6 @@ import { AppShell } from "@/components/layout/AppShell";
 import { cn } from "@/lib/utils";
 import { Loader2, Trophy, RotateCcw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import ingleezyLogoAsset from "@/assets/ingleezy-logo.png.asset.json";
-const lahjaLogo = ingleezyLogoAsset.url;
 import { recordContinue, clearContinue } from "@/lib/continueProgress";
 import { useDialect } from "@/contexts/DialectContext";
 import { SoundSpotlight } from "@/components/learn/SoundSpotlight";
@@ -372,7 +371,7 @@ const Learn = () => {
         <HomeButton />
         
         <Link to="/" className="flex items-center">
-          <img src={lahjaLogo} alt="Ingleezy" className="h-8" />
+          <IngleezyLogo className="text-xl" />
         </Link>
         
         <div className="w-11" />

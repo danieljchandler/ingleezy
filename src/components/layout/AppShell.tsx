@@ -1,7 +1,6 @@
 import { ReactNode } from "react";
 import { useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import borderFullPageImg from "@/assets/border-full-page.webp";
 import { BottomNav, shouldShowBottomNav } from "@/components/layout/BottomNav";
 import { OnboardingTour } from "@/components/onboarding/OnboardingTour";
 import { FeedbackWidget } from "@/components/feedback/FeedbackWidget";
@@ -31,7 +30,7 @@ export function AppShell({ children, className, compact = false }: AppShellProps
   return (
     <div
       className={cn(
-        "min-h-[100dvh] relative bg-white",
+        "min-h-[100dvh] relative bg-background",
         "transition-[padding] duration-300 ease-lahja motion-reduce:transition-none",
         // Only from lg: below that there isn't room to inset without squeezing
         // the text column, so the rail simply overlaps (still readable — no scrim).
@@ -43,17 +42,16 @@ export function AppShell({ children, className, compact = false }: AppShellProps
         paddingBottom: "env(safe-area-inset-bottom)",
       }}
     >
-      {/* Background image layer with reduced opacity */}
+      {/* Sadu watermark, recolored into the brand's periwinkle — the cultural
+          motif at a whisper, on the cool ground, in place of Hakiya's warm
+          kilim photograph. */}
       <div
+        aria-hidden
+        className="fixed inset-0 pointer-events-none opacity-[0.5] dark:opacity-[0.25]"
         style={{
-          position: "fixed",
-          inset: 0,
-          backgroundImage: `url(${borderFullPageImg})`,
-          backgroundSize: "cover",
-          backgroundPosition: "top center",
-          backgroundRepeat: "no-repeat",
-          opacity: 0.95,
-          pointerEvents: "none",
+          backgroundImage: "url(/assets/sadu-watermark.svg)",
+          backgroundSize: "44px 44px",
+          backgroundRepeat: "repeat",
         }}
       />
       <div className={cn(

@@ -274,7 +274,6 @@ export const TappableArabicText = ({
           className
         )}
         dir="rtl"
-        style={{ fontFamily: "'Noto Naskh Arabic', 'Noto Sans Arabic', serif" }}
       >
         {words.map((word, wIdx) => {
           const cleanWord = clean(word);
@@ -410,8 +409,8 @@ export const TappableArabicText = ({
                       );
                       if (!match?.msa_form) return null;
                       return (
-                        <div className="pt-1 border-t border-border bg-[#5C3A46]/5 -mx-3 px-3 py-2">
-                          <p className="text-[10px] font-medium uppercase tracking-wide text-[#5C3A46]">
+                        <div className="pt-1 border-t border-border bg-[#2C3B74]/5 -mx-3 px-3 py-2">
+                          <p className="text-[10px] font-medium uppercase tracking-wide text-[#2C3B74]">
                             MSA · الفصحى
                           </p>
                           <p className="font-arabic text-sm text-foreground" dir="rtl">

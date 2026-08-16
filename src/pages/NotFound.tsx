@@ -19,14 +19,12 @@ const NotFound = () => {
       <div className="min-h-[70vh] flex items-center justify-center">
         <div className="text-center max-w-md">
           <p
-            className="text-6xl font-bold mb-2 text-[#5C3A46]"
-            style={{ fontFamily: "'Montserrat', sans-serif" }}
+            className="text-6xl font-bold mb-2 text-[#2C3B74]"
           >
             404
           </p>
           <h1
             className="text-2xl font-semibold mb-3 text-foreground"
-            style={{ fontFamily: "'Montserrat', sans-serif" }}
           >
             ما لقينا هذي الصفحة
           </h1>

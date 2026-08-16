@@ -45,7 +45,7 @@ export const XPPopupHost = () => {
       {items.map((i) => (
         <span
           key={i.id}
-          className="animate-xp-float rounded-full bg-[#4A7A40] text-white text-sm font-bold px-3 py-1 shadow-lg"
+          className="animate-xp-float rounded-full bg-[#3F9C6D] text-white text-sm font-bold px-3 py-1 shadow-lg"
         >
           +{i.amount} XP
         </span>

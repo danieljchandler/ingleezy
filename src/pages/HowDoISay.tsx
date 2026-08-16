@@ -197,7 +197,6 @@ const HowDoISay = () => {
       <div className="mb-4 mt-4">
         <h1
           className="text-2xl font-bold text-foreground flex items-center gap-2"
-          style={{ fontFamily: "'Montserrat', sans-serif" }}
         >
           <MessageCircleQuestion className="h-7 w-7 text-primary" />
           كيف أقول…؟

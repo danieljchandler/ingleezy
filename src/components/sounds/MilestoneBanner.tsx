@@ -72,8 +72,8 @@ export const MilestoneBanner = ({ masteredCount }: Props) => {
   return (
     <div
       className={cn(
-        "relative mb-4 overflow-hidden rounded-2xl border-2 border-[#CFA44E]",
-        "bg-gradient-to-r from-[#F9F0D4] via-[#FBF6EC] to-[#F4E3B8]",
+        "relative mb-4 overflow-hidden rounded-2xl border-2 border-[#D98A3D]",
+        "bg-gradient-to-r from-[#EDF0F9] via-[#F2F4FB] to-[#DDE3F4]",
         "shadow-[0_6px_20px_-6px_rgba(207,164,78,0.45)]",
       )}
       role="status"
@@ -87,15 +87,15 @@ export const MilestoneBanner = ({ masteredCount }: Props) => {
         </div>
       )}
       <div className="relative flex items-center gap-3 p-4">
-        <div className="h-10 w-10 shrink-0 rounded-full bg-[#CFA44E]/25 flex items-center justify-center">
-          <Sparkles className="h-5 w-5 text-[#A57B1F]" />
+        <div className="h-10 w-10 shrink-0 rounded-full bg-[#D98A3D]/25 flex items-center justify-center">
+          <Sparkles className="h-5 w-5 text-[#8F5A24]" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-bold text-[#5C3A46]">
+          <p className="text-sm font-bold text-[#2C3B74]">
             أتقنت{" "}
             {arCount(active, { one: "صوتاً واحداً", two: "صوتين", few: "أصوات", many: "صوتاً" })}!
           </p>
-          <p className="text-xs text-[#5C3A46]/75">
+          <p className="text-xs text-[#2C3B74]/75">
             {active === 28
               ? "أنهيت رحلة القافلة كاملة 🐪"
               : "استمر — القافلة تواصل مسيرها."}
@@ -103,7 +103,7 @@ export const MilestoneBanner = ({ masteredCount }: Props) => {
         </div>
         <button
           onClick={dismiss}
-          className="p-1.5 rounded-full text-[#5C3A46]/70 hover:text-[#5C3A46] hover:bg-[#5C3A46]/10 transition-colors"
+          className="p-1.5 rounded-full text-[#2C3B74]/70 hover:text-[#2C3B74] hover:bg-[#2C3B74]/10 transition-colors"
           aria-label="إغلاق"
         >
           <X className="h-4 w-4" />

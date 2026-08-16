@@ -201,7 +201,6 @@ const Discover = () => {
 
       <h1
         className="text-2xl font-bold text-foreground mb-2 inline-flex items-center gap-2"
-        style={{ fontFamily: "'Montserrat', sans-serif" }}
       >
         اكتشف
         <InfoHint {...PAGE_HINTS["discover"]} size="md" />
