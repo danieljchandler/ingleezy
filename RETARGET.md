@@ -1030,5 +1030,16 @@ same bar as Hakiya's CI.
   and a rebuilt database silently lost the `learner-audio` storage bucket. The
   eighth had never worked outside a wrapping transaction: a `CREATE TEMP TABLE
   ... ON COMMIT DROP` whose table was gone by the time the next statement ran.
-  Cleared; five older duplicates remain pinned because each carries something
-  its twin does not.
+  Then cleared to the end: twelve of the fourteen are gone, and the pin is
+  down to the two that reference tables no migration creates at all — which
+  still needs a schema dump rather than a guess. The last three could not
+  simply be deleted, because they were *later* snapshots carrying schema the
+  authored original predates. Chief among it `lessons.dialect_module`, which
+  `useLessons` filters every learner's curriculum on and which a rebuilt
+  database therefore did not have — the lesson list would have failed outright
+  on a fresh environment. Recovered explicitly, then the duplicates deleted.
+  Worth remembering *why* nothing caught that: `migrationReplay` records
+  missing TABLES and no table was missing, while `schemaContract` reads the
+  app's queries against the committed types file, which describes the database
+  as it is rather than as the migrations rebuild it. A missing COLUMN falls
+  between the two.

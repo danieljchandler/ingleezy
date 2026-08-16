@@ -28,27 +28,29 @@ interface BuildResult {
 /**
  * Migrations that do not replay from scratch today.
  *
- * Five try to create something an earlier migration already created; two
- * reference tables that no migration creates at all. Recorded rather than
- * fixed, because fixing the last two means writing migrations for tables whose
- * real shape only production knows — that needs a schema dump, not a guess.
+ * Two left, and they are the hard two: both reference a table that no
+ * migration creates at all. Fixing them means writing migrations for tables
+ * whose real shape only production knows — a schema dump, not a guess.
  *
- * The five duplicates are the tail of a pattern that has now been cleared
- * everywhere else: the platform periodically re-emitted an already-authored
- * migration under a fresh hashed filename, so the repo carried two files
- * creating the same objects and the second one always failed. The clean
- * duplicates were deleted; these five are held back because each also carries
- * something the authored file does not (seed rows, an extra table), so working
- * out what would be lost is a per-file question rather than a sweep.
+ * The other twelve are gone. All were the same thing: the platform
+ * periodically re-emitted an already-authored migration under a fresh hashed
+ * filename, so two files created the same objects and whichever ran second
+ * always failed. Where the re-emission was byte-equivalent the extra file was
+ * deleted outright. Three were *later* snapshots carrying a little schema the
+ * authored original predates, and deleting those would have lost it — most
+ * sharply `lessons.dialect_module`, which `useLessons` filters every learner's
+ * curriculum on, and which a rebuilt database did not have because the
+ * snapshot died on its own first statement. Recovered in
+ * 20260816090000_recover_stranded_schema.sql and then deleted.
+ *
+ * That gap is worth remembering: this test records missing TABLES and no table
+ * was missing, while `schemaContract` reads the app's queries against the
+ * committed types file — which describes the database as it is, not as the
+ * migrations rebuild it. A missing COLUMN falls between the two.
  *
  * The list is pinned so it cannot grow. Shrinking it is the goal.
  */
 const KNOWN_REPLAY_FAILURES = [
-  "20260310162719_f1a34d54-03ec-4147-b0c7-3e05cb33bb72.sql",
-  "20260312221908_25061ea3-ebd3-4d38-88d2-93ecb71be95a.sql",
-  "20260320182853_6ba0bfc1-bcfb-4e7f-a3c8-99b9489e5084.sql",
-  "20260321143044_9fae3e9f-1f44-478b-895f-db560d3b03dc.sql",
-  "20260321182338_c12bdf4f-7518-40cb-bf1b-f02d1c61009e.sql",
   "20260529150401_dc0b25a8-3051-4445-a8be-cd323f128c64.sql",
   "20260529155315_a303684f-1e60-4e83-8c60-8f228e46c637.sql",
 ];
