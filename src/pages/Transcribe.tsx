@@ -190,7 +190,18 @@ const Transcribe = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [isSaved, setIsSaved] = useState(false);
+  /**
+   * The transcript text that is known to be in the library, or null.
+   *
+   * Stored rather than a boolean, because "is this saved?" is a question about
+   * *which* transcript is on screen, and a boolean cannot answer it. The flag
+   * used to be set true by the save handler and by the loader, and reset false
+   * by an effect keyed on the transcript text — and on the loader's path both
+   * happened in the same batch, so the reset always won. Opening something
+   * from the library offered to save it again, and pressing the button it
+   * offered added a second copy, every time.
+   */
+  const [savedTranscript, setSavedTranscript] = useState<string | null>(null);
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [saveTitle, setSaveTitle] = useState("");
   const [progress, setProgress] = useState(0);
@@ -245,7 +256,7 @@ const Transcribe = () => {
         lines: (Array.isArray(data.lines) ? data.lines : []) as any,
       } as TranscriptResult);
       if (data.audio_url) setAudioUrl(data.audio_url);
-      setIsSaved(true);
+      setSavedTranscript(data.raw_transcript_arabic ?? "");
       setSaveTitle(data.title ?? "");
       toast.success(`فُتح «${data.title}»`);
     })();
@@ -965,7 +976,7 @@ const Transcribe = () => {
         },
       } as never);
       if (error) throw error;
-      setIsSaved(true);
+      setSavedTranscript(transcriptResult?.rawTranscriptArabic ?? "");
       setShowSaveDialog(false);
       toast.success("حُفظ التفريغ!");
     } catch (error) {
@@ -1061,9 +1072,15 @@ const Transcribe = () => {
     }
   };
 
+  // Derived, so there is no ordering to get wrong: a freshly transcribed
+  // clip is unsaved because its text is not the saved text, and re-running
+  // the transcription un-saves it for the same reason.
+  const isSaved =
+    savedTranscript !== null &&
+    savedTranscript === (transcriptResult?.rawTranscriptArabic ?? null);
+
   useEffect(() => {
     if (transcriptResult) {
-      setIsSaved(false);
       const existingVocab = new Set(transcriptResult.vocabulary.map(v => v.arabic));
       setVocabSectionWords(existingVocab);
     }

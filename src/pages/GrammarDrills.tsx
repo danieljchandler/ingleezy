@@ -123,17 +123,28 @@ const GrammarDrills = () => {
 
   usePageAiContext(aiContext);
 
-  // Persist session state
+  // Persist session state, so a drill interrupted mid-way can be resumed.
   useEffect(() => {
     if (questions.length === 0) return;
+    // A *finished* drill has nothing to resume and its outcomes are already
+    // banked, so the entry is cleared rather than written. Left behind, it put
+    // a returning learner back on the final question with the score already
+    // counted and the answer cleared — and answering it again re-submitted
+    // every outcome, because `submittedRef` only guards within one mount. A
+    // three-question drill ended up sending four results to the mastery
+    // ladder, which counts the extra one.
     try {
+      if (showResult) {
+        localStorage.removeItem('session_grammar_drills');
+        return;
+      }
       const entry = {
         data: { category, difficulty, questions, currentIndex, score, outcomes },
         savedAt: Date.now(),
       };
       localStorage.setItem('session_grammar_drills', JSON.stringify(entry));
     } catch {}
-  }, [category, difficulty, questions, currentIndex, score, outcomes]);
+  }, [category, difficulty, questions, currentIndex, score, outcomes, showResult]);
 
   const fetchDrill = async (cat: string) => {
     setIsLoading(true);

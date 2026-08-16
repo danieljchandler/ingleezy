@@ -82,9 +82,12 @@ const RankBadge = ({ rank }: { rank: number }) => {
 const LeaderboardRow = ({
   entry,
   isCurrentUser,
+  tab,
 }: {
   entry: LeaderboardEntry;
   isCurrentUser: boolean;
+  /** Which board this row is in — it decides which XP the row is about. */
+  tab: Tab;
 }) => {
   const showInst = entry.show_institution && entry.institution_name;
 
@@ -131,9 +134,19 @@ const LeaderboardRow = ({
         </div>
       </div>
 
+      {/* The number the board is sorted by, and the label that says which one
+          it is. Both used to be fixed to the weekly figure, so the all-time
+          tab ranked by lifetime XP while showing this week's: Omar led on
+          8,000 lifetime and was displayed with 10 beside Layla's 900, which
+          reads as a broken sort. The data was right and only the column was
+          wrong, which is why it would never show up in the query. */}
       <div className="text-right shrink-0">
-        <p className="font-bold text-primary">{entry.xp_this_week.toLocaleString()}</p>
-        <p className="text-xs text-muted-foreground">نقاط هذا الأسبوع</p>
+        <p className="font-bold text-primary">
+          {(tab === "weekly" ? entry.xp_this_week : entry.total_xp).toLocaleString()}
+        </p>
+        <p className="text-xs text-muted-foreground">
+          {tab === "weekly" ? "نقاط هذا الأسبوع" : "كل النقاط"}
+        </p>
       </div>
     </div>
   );
@@ -384,6 +397,7 @@ const Leaderboard = () => {
                 key={entry.user_id}
                 entry={entry}
                 isCurrentUser={entry.user_id === user?.id}
+                tab={tab}
               />
             ))
           ) : (

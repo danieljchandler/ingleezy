@@ -293,7 +293,7 @@ test.describe("finding someone to follow", () => {
     await expect(page.getByText("تعذّر تحديث المتابعة")).toBeVisible();
   });
 
-  test("offers to follow someone already followed on a slow load", async ({ page, db }) => {
+  test("catches up on who is followed when the follow list loads late", async ({ page, db }) => {
     db.seed("user_follows", [aFollow(OTHER)]);
     db.seed("review_streaks", [aStreak(OTHER)]);
     db.delay("user_follows", 2500);
@@ -302,13 +302,14 @@ test.describe("finding someone to follow", () => {
     await page.getByPlaceholder("ابحث عن مستخدمين بالاسم...").fill("oma");
     await expect(page.getByText("Omar")).toBeVisible();
 
-    // A bug, pinned. `useSearchUsers` computes `is_following` from
-    // `useFollowing()`, which is neither in its query key nor a dependency —
-    // so whichever query resolves first decides, permanently. React Query has
-    // no reason to recompute, and pressing Follow here writes a duplicate row
-    // rather than doing nothing.
-    await expect(page.getByRole("button", { name: "متابعة", exact: true })).toBeVisible();
-    await expect(page.getByRole("button", { name: "إلغاء المتابعة" })).toHaveCount(0);
+    // `is_following` used to be computed inside the search `queryFn` from
+    // `useFollowing()`, which is neither in that query's key nor one of its
+    // dependencies — so whichever resolved first decided, permanently, and
+    // React Query had no reason to recompute. With the follow list slow, every
+    // result read "not following" and pressing Follow wrote a duplicate row.
+    // It is derived outside the query now, so it catches up.
+    await expect(page.getByRole("button", { name: "إلغاء المتابعة" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "متابعة", exact: true })).toHaveCount(0);
   });
 });
 

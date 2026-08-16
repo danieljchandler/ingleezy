@@ -663,31 +663,28 @@ test.describe("reopening a saved transcription", () => {
     await expect(page.getByText("فُتح «Souq haggling»")).toBeVisible();
   });
 
-  test("offers to save a transcription that is already saved", async ({ page }) => {
+  test("knows a transcription reopened from the library is already saved", async ({ page }) => {
     await page.goto(`/transcribe?saved=${SAVED_ID}`);
     await expect(page.getByText("How much is this")).toBeVisible();
 
-    // A bug, pinned. The loader sets `isSaved` (Transcribe.tsx:243) and an
-    // effect keyed on `transcriptResult?.rawTranscriptArabic` immediately sets
-    // it back to false (Transcribe.tsx:1059) — the loader populated the
-    // transcript in the same batch, so the effect always fires straight after
-    // and wins. The guard works on the path it was written for (saving what you
-    // just transcribed leaves the transcript unchanged) and not on this one.
-    await expect(page.getByRole("button", { name: "حفظ", exact: true })).toBeEnabled();
-    await expect(page.getByRole("button", { name: "محفوظ" })).toHaveCount(0);
+    // `isSaved` used to be a boolean written by two places and reset by a
+    // third: the loader set it true, and an effect keyed on the transcript
+    // text set it false. On this path both happened in the same batch and the
+    // reset won, so the page offered to save what it had just opened. It is
+    // derived from the saved text now, so there is no ordering to lose.
+    await expect(page.getByRole("button", { name: "محفوظ" }).first()).toBeVisible();
+    await expect(page.getByRole("button", { name: "حفظ", exact: true })).toHaveCount(0);
   });
 
-  test("saves a second copy of a transcription reopened from the library", async ({ page, db }) => {
+  test("does not grow the library by one every time it is reopened", async ({ page, db }) => {
     await page.goto(`/transcribe?saved=${SAVED_ID}`);
     await expect(page.getByText("How much is this")).toBeVisible();
 
-    await page.getByRole("button", { name: "حفظ", exact: true }).click();
-    await page.getByRole("button", { name: "حفظ", exact: true }).last().click();
-
-    // The consequence of the reset above. Nothing dedupes on the way in, so
-    // opening a saved transcription and pressing the button it offers grows the
-    // library by one every time.
-    await expect.poll(() => db.rows("saved_transcriptions").length).toBe(2);
+    // The consequence of the reset above, and the reason it was worth fixing:
+    // nothing dedupes on the way in, so every open-and-press added a copy.
+    // With the button correctly disabled there is nothing to press.
+    await expect(page.getByRole("button", { name: "محفوظ" }).first()).toBeDisabled();
+    await expect.poll(() => db.rows("saved_transcriptions").length).toBe(1);
   });
 
   test("will not open another learner's transcription", async ({ page, db }) => {

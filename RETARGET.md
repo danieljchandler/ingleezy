@@ -919,12 +919,26 @@ generation conditioning.
       with what it was always meant to assert — one question per word,
       Arabic prompt with English options, full marks at the end.
 
-### Inherited bugs the retarget did not cause — FIX
+### Inherited bugs the retarget did not cause — DONE
 The quiz crash above came from a test that pinned a bug rather than a
 behaviour, so the suite was swept for the rest of them (`grep` for
-"A bug, pinned"). Six, all from Hakiya, all still live. Ranked by what they
-cost a learner, the two worst share the quiz's shape exactly: a component
-acting on state that has not arrived yet.
+"A bug, pinned"). Six, all from Hakiya, all still live, now all fixed.
+
+Five of the six are one mistake wearing different clothes: **a value that
+should have been derived was stored instead**, and something wrote it at the
+wrong moment. A dialog seeded on open rather than from the profile; a
+subscription flag set false before the answer arrived; an `is_following`
+baked into a cache by whichever query resolved first; an `isSaved` set by a
+loader and cleared by an effect in the same batch; a shuffle written by an
+effect a render too late. Where a value has one true source, reading it
+beats mirroring it — none of these needed a guard, they needed to stop
+keeping a second copy.
+
+Every one of them was invisible in normal use, because each needs a
+particular order of arrival to show itself. That is also why they were
+pinned rather than fixed: the tests that caught them had to *cause* the
+race, and once a test asserts the broken behaviour it stops being pressure
+to fix it.
 - [x] **The leaderboard profile dialog silently wiped settings.** Seeding
       happened inline in `handleOpen`, guarded `if (isOpen && profile)` with
       no else branch and nothing to catch up when the query landed. Open it
@@ -945,10 +959,38 @@ acting on state that has not arrived yet.
       page rendered its default state with a live Subscribe button — a second
       charge for a plan already held. Now waits on `authLoading` before
       deciding, so `loading` means "no answer yet" rather than "no".
-- [ ] Four left, tracked separately: grammar-drill outcomes re-submitted on
-      reload, `useSearchUsers` computing `is_following` from a query it does
-      not depend on, the all-time leaderboard labelled with weekly XP, and a
-      Transcribe `isSaved` flag.
+- [x] **A grammar drill re-submitted its outcomes on reload.** The persisted
+      session carried questions, index, score and outcomes but not
+      `showResult`, and nothing cleared the entry when a drill ended — so
+      reloading dropped the learner back onto the final question with the
+      score already banked. Answering it again re-finished the round, and
+      `submittedRef` only guards within one mount, so a three-question drill
+      sent four results to the mastery ladder and it counted the extra one.
+      A finished drill has nothing to resume: its entry is cleared instead of
+      written.
+- [x] **`useSearchUsers` decided `is_following` by whichever query won.** It
+      was computed inside the search `queryFn` from `useFollowing()`, which
+      is in neither the query key nor any dependency — so a search that
+      resolved first baked "not following" into the cached rows and React
+      Query never revised them. The learner was offered Follow for someone
+      they already follow, and pressing it wrote a duplicate. Derived outside
+      the query now, so the order stops mattering. It looked fine in normal
+      use because the follow list is usually warm; a cold `/friends` with a
+      search is where it bit.
+- [x] **The all-time leaderboard was labelled with weekly XP.**
+      `LeaderboardRow` always rendered `xp_this_week` under a fixed weekly
+      label, so the all-time board sorted by a number it never showed: a
+      leader on 8,000 lifetime XP displayed with 10 beside someone else's
+      900, which reads as a broken sort. The data was right and only the
+      column was wrong, which is why it could never be found from the query.
+- [x] **Transcribe offered to save what it had just opened.** `isSaved` was a
+      boolean written by two places and reset by a third — the loader set it
+      true, an effect keyed on the transcript text set it false — and on the
+      reopen path both happened in the same batch, so the reset won. Nothing
+      dedupes on the way in, so pressing the button it offered added a copy
+      every time. It is derived from the saved transcript text now, so a
+      reopened transcription is saved and a re-transcribed one is not, with
+      no ordering to lose.
 
 ---
 

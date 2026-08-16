@@ -283,7 +283,7 @@ describe("finding someone to follow", () => {
     expect(result.current.data).toEqual([]);
   });
 
-  it("does not mark an already-followed account when the search wins the race", async () => {
+  it("marks an already-followed account even when the search wins the race", async () => {
     const { result } = render(() => useSearchUsers("lay"), (backend) => {
       seedSearchable(backend);
       backend.db.seed("user_follows", [follow(TEST_USER_ID, FRIEND)]);
@@ -291,18 +291,18 @@ describe("finding someone to follow", () => {
 
     await waitFor(() => expect(result.current.data).toHaveLength(1));
 
-    // Recording current behaviour. `is_following` is computed inside the search
-    // queryFn from `useFollowing()`, but the follow list is in neither the
-    // query key nor any dependency — so when the two queries start together and
-    // the search resolves first, the result is marked unfollowed and nothing
-    // ever revises it. The learner is then offered a Follow button for someone
-    // they already follow, and pressing it fails on the unique constraint.
+    // `is_following` used to be computed inside the search queryFn from
+    // `useFollowing()`, with the follow list in neither the query key nor any
+    // dependency. When the two queries started together and the search
+    // resolved first, the row was marked unfollowed and nothing ever revised
+    // it: React Query has no reason to re-run a query whose key did not
+    // change. The learner was offered a Follow button for someone they already
+    // follow, and pressing it failed on the unique constraint.
     //
-    // It usually looks fine because the follow list is normally cached by the
-    // time anyone types. A cold load of /friends with a search is where it bites.
-    //
-    // This test fails once the follow list is part of the search's key.
-    expect(result.current.data?.[0].is_following).toBe(false);
+    // It usually looked fine, because the follow list is normally cached by
+    // the time anyone types. A cold load of /friends with a search is where it
+    // bit. Derived outside the query now, so the order stops mattering.
+    await waitFor(() => expect(result.current.data?.[0].is_following).toBe(true));
   });
 
   it("marks an already-followed account once the follow list is already cached", async () => {

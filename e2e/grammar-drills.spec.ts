@@ -379,7 +379,7 @@ test.describe("a drill interrupted", () => {
     await expect(page.getByText("1 صحيحة")).toBeVisible();
   });
 
-  test("brings a finished drill back to its last question", async ({ page, backend }) => {
+  test("does not resurrect a drill that already finished", async ({ page, backend }) => {
     await page.goto("/grammar");
     await page.getByRole("button", { name: new RegExp("Verb Tenses") }).click();
     await expect(page.getByText("سؤال 1 من 3")).toBeVisible();
@@ -391,19 +391,16 @@ test.describe("a drill interrupted", () => {
 
     await page.reload();
 
-    // A bug, pinned. The saved session carries the questions, index, score and
-    // outcomes but not `showResult`, and nothing clears the entry when a drill
-    // ends. So reloading after finishing drops the learner back onto the final
-    // question with the score already banked and the answer cleared.
-    await expect(page.getByText("سؤال 3 من 3")).toBeVisible();
-    await expect(page.getByText("3 صحيحة")).toBeVisible();
+    // The saved session carried questions, index, score and outcomes but not
+    // `showResult`, and nothing cleared it when a drill ended — so reloading
+    // dropped the learner back onto the final question with the score already
+    // banked. Answering it again re-finished the round, and `submittedRef`
+    // only guards within one mount, so a three-question drill sent four
+    // results to the mastery ladder. A finished drill has nothing to resume,
+    // so its entry is cleared rather than written.
+    await expect(page.getByText("سؤال 3 من 3")).toHaveCount(0);
+    await expect(page.getByRole("button", { name: new RegExp("Verb Tenses") })).toBeVisible();
 
-    // Answering it again re-finishes the round. `submittedRef` is per-mount, so
-    // the outcomes are submitted a second time — now four entries for a
-    // three-question drill, and the mastery ladder counts the extra one.
-    await answerCorrectly(page);
-    await expect
-      .poll(() => backend.lastCallTo("record-grammar-outcome")?.body)
-      .toMatchObject({ outcomes: [true, true, true, true] });
+    await expect.poll(() => backend.callsTo("record-grammar-outcome").length).toBe(1);
   });
 });

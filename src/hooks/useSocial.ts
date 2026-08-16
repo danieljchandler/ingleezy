@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
@@ -140,7 +141,7 @@ export const useSearchUsers = (searchTerm: string) => {
   const { user } = useAuth();
   const { data: following } = useFollowing();
 
-  return useQuery({
+  const query = useQuery({
     queryKey: ["search-users", searchTerm, user?.id],
     queryFn: async (): Promise<FriendWithProfile[]> => {
       if (!user || searchTerm.length < 2) return [];
@@ -174,12 +175,36 @@ export const useSearchUsers = (searchTerm: string) => {
           total_xp: (xp as any).total_xp || 0,
           level: (xp as any).level || 1,
           current_streak: 0,
-          is_following: (following || []).includes(profile.user_id),
+          // Filled in below, not here — see the note on the memo.
+          is_following: false,
         };
       });
     },
     enabled: !!user && searchTerm.length >= 2,
   });
+
+  /**
+   * `is_following` comes from a *different* query, so it is derived here
+   * rather than computed inside `queryFn`.
+   *
+   * Inside, it was baked into the cached result at whatever moment the search
+   * happened to resolve. `useFollowing()` is neither in this query's key nor
+   * one of its dependencies, so if the follow list had not arrived yet every
+   * row read "not following" — and stayed that way, because React Query has no
+   * reason to re-run a query whose key did not change. The learner was offered
+   * a Follow button for someone they already follow, and pressing it wrote a
+   * duplicate row.
+   */
+  const data = useMemo(
+    () =>
+      query.data?.map((row) => ({
+        ...row,
+        is_following: (following || []).includes(row.user_id),
+      })),
+    [query.data, following],
+  );
+
+  return { ...query, data };
 };
 
 // Follow a user

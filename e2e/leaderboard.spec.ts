@@ -185,21 +185,20 @@ test.describe("the all-time board", () => {
     expect(names).toEqual(["Omar", "Layla"]);
   });
 
-  test("still labels every row with this week's XP", async ({ page }) => {
+  test("labels every row with the XP the board is sorted by", async ({ page }) => {
     await page.goto("/leaderboard");
     await page.getByRole("button", { name: "كل الأوقات" }).click();
     await expect(page.getByText("Omar")).toBeVisible();
 
-    // A bug, pinned. `LeaderboardRow` renders `entry.xp_this_week` under the
-    // fixed label "نقاط هذا الأسبوع" on both tabs, so the all-time board is sorted
-    // by a number it never shows. Omar leads on 8,000 lifetime XP and is
-    // displayed with 10 beside Layla's 900 — a board that reads as though the
-    // sort is broken. The data is right and only the column is wrong, which is
-    // why nobody would find this from the query.
-    await expect(page.getByText("10", { exact: true })).toBeVisible();
-    await expect(page.getByText("900")).toBeVisible();
-    await expect(page.getByText("8,000")).toHaveCount(0);
-    await expect(page.getByText("نقاط هذا الأسبوع").first()).toBeVisible();
+    // `LeaderboardRow` used to render `xp_this_week` under a fixed weekly
+    // label on both tabs, so the all-time board was sorted by a number it
+    // never showed: Omar led on 8,000 lifetime XP and was displayed with 10
+    // beside Layla's 900, which reads as a broken sort. The data was right and
+    // only the column was wrong, which is why nobody would find this from the
+    // query.
+    await expect(page.getByText("8,000")).toBeVisible();
+    await expect(page.getByText("كل النقاط").first()).toBeVisible();
+    await expect(page.getByText("نقاط هذا الأسبوع")).toHaveCount(0);
   });
 
   test("goes back to the weekly ordering", async ({ page }) => {
