@@ -18,6 +18,10 @@ import { logClientError } from "@/lib/errorLog";
 const lazyPage = <T extends ComponentType<any>>(loader: () => Promise<{ default: T }>) =>
   lazy(lazyRetry(loader));
 
+const Feed = lazyPage(() => import("./pages/Feed"));
+const Choose = lazyPage(() => import("./pages/Choose"));
+// The old dashboard home. Kept routable at /today for now: it still carries
+// the daily queue and streak, which the feed does not replace yet.
 const Index = lazyPage(() => import("./pages/Index"));
 const Learn = lazyPage(() => import("./pages/Learn"));
 const LearnHub = lazyPage(() => import("./pages/LearnHub"));
@@ -220,11 +224,15 @@ const App = () => {
           <Suspense fallback={<PageSkeleton />}>
           <Routes>
             {/* Public learning app */}
-            <Route path="/" element={<ErrorBoundary name="HomeRoute"><Index /></ErrorBoundary>} />
+            {/* Home is the feed: the app opens on content, not on a checklist.
+                The chooser sits one sideways swipe away — see useSwipeSurfaces
+                for why "forward" is leftward in an RTL app. */}
+            <Route path="/" element={<ErrorBoundary name="HomeRoute"><Feed /></ErrorBoundary>} />
+            <Route path="/choose" element={<ErrorBoundary name="ChooseRoute"><Choose /></ErrorBoundary>} />
             <Route path="/index" element={<Navigate to="/" replace />} />
-            {/* The daily queue now lives inline on "/" (see Index.tsx) instead
-                of a separate page — redirect old links/bookmarks. */}
-            <Route path="/today" element={<Navigate to="/" replace />} />
+            {/* The daily queue keeps its own address while the feed takes over
+                the front door. */}
+            <Route path="/today" element={<ErrorBoundary name="TodayRoute"><Index /></ErrorBoundary>} />
             <Route path="/auth" element={<ErrorBoundary name="AuthRoute"><Auth /></ErrorBoundary>} />
             <Route path="/reset-password" element={<ErrorBoundary name="ResetPasswordRoute"><ResetPassword /></ErrorBoundary>} />
             <Route path="/learn-hub" element={<ErrorBoundary name="LearnHubRoute"><LearnHub /></ErrorBoundary>} />

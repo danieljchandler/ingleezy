@@ -293,13 +293,18 @@ test.describe("badges", () => {
         description: "",
       })),
     );
+    // Stamped a minute apart, newest first, because the grid is ordered by
+    // earned_at. Seeding these with new Date() gives eight equal timestamps
+    // when the loop stays inside one millisecond and eight ascending ones when
+    // it does not — so which six survived the slice came down to how fast the
+    // machine happened to be that run. That is a flake, not a test.
     db.seed(
       "user_achievements",
       Array.from({ length: 8 }, (_, i) => ({
         id: `ua-${i}`,
         user_id: TEST_USER_ID,
         achievement_id: `ach-${i}`,
-        earned_at: new Date().toISOString(),
+        earned_at: new Date(Date.UTC(2025, 0, 1, 12, 8 - i)).toISOString(),
       })),
     );
 

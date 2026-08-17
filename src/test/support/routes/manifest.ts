@@ -65,10 +65,14 @@ const GENERIC_ID = "12345678-0000-4000-8000-000000000000";
 export const ROUTES: RouteSpec[] = [
   // ── Redirects ──────────────────────────────────────────────────────────────
   { path: "/index", gate: "public", redirectsTo: "/" },
-  { path: "/today", gate: "public", redirectsTo: "/" },
 
   // ── Public shell ───────────────────────────────────────────────────────────
+  // "/" is the video feed for a signed-in learner and the landing page for a
+  // visitor, so it stays public. The daily dashboard kept its content and moved
+  // to /today when the feed took the front door.
   { path: "/", gate: "public", boundary: "HomeRoute" },
+  { path: "/today", gate: "public", boundary: "TodayRoute" },
+  { path: "/choose", gate: "public", boundary: "ChooseRoute" },
   { path: "/auth", gate: "public", boundary: "AuthRoute" },
   { path: "/reset-password", gate: "public", boundary: "ResetPasswordRoute" },
   { path: "/onboarding", gate: "public", boundary: "OnboardingRoute" },

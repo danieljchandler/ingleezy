@@ -18,19 +18,22 @@ test.describe("signed out", () => {
     await expect(page.getByRole("heading", { name: /أهلاً بعودتك/ })).toBeVisible();
   });
 
-  test("/today still resolves after the page was merged into Home", async ({ page }) => {
+  test("keeps showing the landing page rather than an empty feed", async ({ page }) => {
     await stubSupabase(page);
-    await page.goto("/today");
+    await page.goto("/");
 
-    await expect(page).toHaveURL(/127\.0\.0\.1:\d+\/$/);
+    // "/" is the video feed now, but the recommender is keyed on a learner's
+    // history — a stranger has none. Dropping them into an empty feed would be
+    // the worst first impression of an app selling its content.
+    await expect(page.getByRole("heading", { name: /إنجليزي محكي حقيقي/ })).toBeVisible();
   });
 });
 
-test.describe("signed in — home", () => {
+test.describe("signed in — the daily dashboard", () => {
   test("shows the daily queue inline instead of linking to a separate page", async ({ page }) => {
     await signIn(page);
     await stubSupabase(page, { myWordsDue: 3 });
-    await page.goto("/");
+    await page.goto("/today");
 
     // The queue itself, not a "Start today" card that navigates elsewhere.
     await expect(page.getByRole("heading", { name: "اليوم", exact: true })).toBeVisible();
@@ -41,7 +44,7 @@ test.describe("signed in — home", () => {
   test("due banner counts every deck and routes into the session", async ({ page }) => {
     await signIn(page);
     await stubSupabase(page, { curriculumDue: 2, myWordsDue: 3 });
-    await page.goto("/");
+    await page.goto("/today");
 
     // 2 curriculum + 3 saved words — the banner used to show only one deck.
     const banner = page.getByRole("button", { name: /5 بطاقات مستحقة للمراجعة/ });
