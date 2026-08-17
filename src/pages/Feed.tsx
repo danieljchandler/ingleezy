@@ -68,8 +68,11 @@ const Feed = () => {
           <span className="border-b-2 border-white pb-0.5 font-semibold">لك</span>
           <Link to="/discover" className="text-white/60">تتابع</Link>
         </div>
+        {/* The streak opens your day, not your account. Tapping a number to
+            find out where that number came from is the only thing this chip
+            can mean, and /today is the page that answers it. */}
         <Link
-          to="/me"
+          to="/today"
           className="pointer-events-auto flex items-center gap-1 font-display text-sm not-italic text-accent"
         >
           <Flame className="h-4 w-4" />

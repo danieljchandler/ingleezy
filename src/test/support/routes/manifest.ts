@@ -79,8 +79,8 @@ export const ROUTES: RouteSpec[] = [
   { path: "/terms", gate: "public", boundary: "TermsRoute" },
   { path: "/privacy", gate: "public", boundary: "PrivacyRoute" },
   { path: "/pricing", gate: "public", boundary: "PricingRoute" },
-  { path: "/learn-hub", gate: "public", boundary: "LearnHubRoute" },
-  { path: "/practice", gate: "public", boundary: "PracticeHubRoute" },
+  { path: "/learn-hub", gate: "public", redirectsTo: "/choose" },
+  { path: "/practice", gate: "public", redirectsTo: "/choose" },
   { path: "/leaderboard", gate: "public", boundary: "LeaderboardRoute" },
 
   // ── Curriculum ─────────────────────────────────────────────────────────────

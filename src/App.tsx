@@ -25,10 +25,8 @@ const Choose = lazyPage(() => import("./pages/Choose"));
 // the daily queue and streak, which the feed does not replace yet.
 const Index = lazyPage(() => import("./pages/Index"));
 const Learn = lazyPage(() => import("./pages/Learn"));
-const LearnHub = lazyPage(() => import("./pages/LearnHub"));
 const Curriculum = lazyPage(() => import("./pages/Curriculum"));
 const Mistakes = lazyPage(() => import("./pages/Mistakes"));
-const PracticeHub = lazyPage(() => import("./pages/PracticeHub"));
 const MeHub = lazyPage(() => import("./pages/MeHub"));
 const NotFound = lazyPage(() => import("./pages/NotFound"));
 
@@ -236,8 +234,13 @@ const App = () => {
             <Route path="/today" element={<ErrorBoundary name="TodayRoute"><Index /></ErrorBoundary>} />
             <Route path="/auth" element={<ErrorBoundary name="AuthRoute"><Auth /></ErrorBoundary>} />
             <Route path="/reset-password" element={<ErrorBoundary name="ResetPasswordRoute"><ResetPassword /></ErrorBoundary>} />
-            <Route path="/learn-hub" element={<ErrorBoundary name="LearnHubRoute"><LearnHub /></ErrorBoundary>} />
-            <Route path="/practice" element={<ErrorBoundary name="PracticeHubRoute"><PracticeHub /></ErrorBoundary>} />
+            {/* The two hub screens the chooser replaced. Kept as redirects
+                rather than deleted: they were in the nav for the whole of
+                this app's life, so they are in bookmarks and in muscle
+                memory, and a 404 is a worse answer than the page that took
+                the job over. */}
+            <Route path="/learn-hub" element={<Navigate to="/choose" replace />} />
+            <Route path="/practice" element={<Navigate to="/choose" replace />} />
             <Route path="/me" element={<ErrorBoundary name="MeHubRoute"><ProtectedRoute><MeHub /></ProtectedRoute></ErrorBoundary>} />
             <Route path="/review" element={<ErrorBoundary name="ReviewRoute"><ProtectedRoute><Review /></ProtectedRoute></ErrorBoundary>} />
 

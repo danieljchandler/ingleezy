@@ -2,7 +2,8 @@ import { Link } from "react-router-dom";
 import {
   BookOpen, Languages, FileText, Heart, BarChart3, Trophy, Users, User, Settings,
   CreditCard, GraduationCap, Newspaper, Compass, MessageCircleQuestion, Laugh,
-  Twitter, Mic, BookOpenText, ChevronLeft, type LucideIcon,
+  Twitter, Mic, BookOpenText, ChevronLeft, CalendarCheck, MessagesSquare,
+  SpellCheck, Target, TriangleAlert, Headset, type LucideIcon,
 } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { useAuth } from "@/hooks/useAuth";
@@ -57,6 +58,23 @@ const tools = (signedIn: boolean): Item[] => [
   { label: "ماذا أفعل؟", icon: Compass, to: "/culture-guide" },
 ];
 
+/**
+ * Practice modes that had no door left.
+ *
+ * These were only ever linked from the two hub screens the chooser replaced,
+ * so deleting those hubs made five working features unreachable — the kind of
+ * hole a navigation rewrite leaves that nothing fails on, because an
+ * unreachable route still passes every test written about it.
+ */
+const practice = (signedIn: boolean): Item[] => [
+  { label: "يومك", icon: CalendarCheck, to: "/today" },
+  { label: "محادثة", icon: MessagesSquare, to: "/conversation" },
+  { label: "قواعد", icon: SpellCheck, to: "/grammar" },
+  { label: "تحدّي اليوم", icon: Target, to: "/daily-challenge" },
+  { label: "أخطاؤك", icon: TriangleAlert, to: "/mistakes", show: signedIn },
+  { label: "تصحيح من متحدث", icon: Headset, to: "/native-feedback", show: signedIn },
+];
+
 const progress = (signedIn: boolean): Item[] => [
   { label: "إحصاءاتك", icon: BarChart3, to: "/analytics", show: signedIn },
   { label: "لوحة الصدارة", icon: Trophy, to: "/leaderboard" },
@@ -108,6 +126,10 @@ const MeHub = () => {
             </Link>
           ))}
         </div>
+      </Section>
+
+      <Section title="تدرّب">
+        <Grid items={visible(practice(isAuthenticated))} />
       </Section>
 
       <Section title="أدواتك">
