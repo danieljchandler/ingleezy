@@ -368,8 +368,11 @@ test.describe("the Me hub", () => {
 
     await page.goto("/me");
 
+    // Links, not buttons: every one of these navigates, and a hub built from
+    // buttons loses middle-click, open-in-new-tab and the browser's own idea
+    // of what it is looking at.
     for (const tile of ["كلماتي", "ترجمات محفوظة", "نصوصي المفرّغة", "فيديوهات أعجبتني"]) {
-      await expect(page.getByRole("button", { name: new RegExp(tile) })).toBeVisible();
+      await expect(page.getByRole("link", { name: new RegExp(tile) })).toBeVisible();
     }
   });
 
@@ -390,12 +393,12 @@ test.describe("the Me hub", () => {
     await signInAs("free");
     seedProfile(db);
     await page.goto("/me");
-    await expect(page.getByRole("button", { name: /الإدارة/ })).toHaveCount(0);
+    await expect(page.getByRole("link", { name: /الإدارة/ })).toHaveCount(0);
 
     await signInAs("admin");
     seedProfile(db);
     await page.goto("/me");
 
-    await expect(page.getByRole("button", { name: /الإدارة/ })).toBeVisible();
+    await expect(page.getByRole("link", { name: /الإدارة/ })).toBeVisible();
   });
 });
