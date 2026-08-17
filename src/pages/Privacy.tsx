@@ -1,12 +1,12 @@
 import { AppShell } from "@/components/layout/AppShell";
-import { HomeButton } from "@/components/HomeButton";
+import { PageCorner } from "@/components/shell/PageCorner";
 import { Footer } from "@/components/Footer";
 
 const Privacy = () => {
   return (
     <AppShell>
       <div className="mb-6">
-        <HomeButton />
+        <PageCorner />
       </div>
       <article className="prose prose-sm sm:prose max-w-none">
         <h1>Privacy Policy</h1>

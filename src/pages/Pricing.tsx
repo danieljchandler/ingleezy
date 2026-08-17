@@ -8,7 +8,7 @@ import {
   type BillingCadence,
 } from '@/hooks/useSubscription';
 import { AppShell } from '@/components/layout/AppShell';
-import { HomeButton } from '@/components/HomeButton';
+import { PageCorner } from '@/components/shell/PageCorner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -62,7 +62,7 @@ const Pricing = () => {
   return (
     <AppShell>
       <div className="mb-8">
-        <HomeButton />
+        <PageCorner />
       </div>
 
       <div className="max-w-4xl mx-auto">

@@ -4,7 +4,7 @@ import { ENGLISH_SOUNDS, CHECKPOINT_INDICES, type EnglishSound } from "@/data/en
 import { useSoundProgress, useCheckpointProgress } from "@/hooks/useSoundProgress";
 
 import { AppShell } from "@/components/layout/AppShell";
-import { HomeButton } from "@/components/HomeButton";
+import { PageCorner } from "@/components/shell/PageCorner";
 import { SoundAudioButton } from "@/components/sounds/SoundAudioButton";
 import { Button } from "@/components/ui/button";
 import { tapFeedback, playSuccessChime } from "@/lib/tapFeedback";
@@ -93,7 +93,7 @@ const SoundsCheckpoint = () => {
   if (!isUnlocked(CHECKPOINT_INDICES[idx]) || !eligible) {
     return (
       <AppShell>
-        <HomeButton />
+        <PageCorner />
         <div className="mt-8 text-center space-y-3">
           <Trophy className="h-12 w-12 text-muted-foreground mx-auto" />
           <h1 className="text-xl font-bold">نقطة التفتيش مقفلة</h1>
@@ -108,7 +108,7 @@ const SoundsCheckpoint = () => {
     const previous = checkpoints[idx]?.score ?? 0;
     return (
       <AppShell>
-        <HomeButton />
+        <PageCorner />
         <div className="mt-12 text-center space-y-4">
           <div className="inline-flex h-24 w-24 rounded-full bg-amber-500/20 items-center justify-center">
             <Trophy className="h-12 w-12 text-amber-600" />
@@ -137,7 +137,7 @@ const SoundsCheckpoint = () => {
   return (
     <AppShell compact>
       <div className="flex items-center justify-between mb-4">
-        <HomeButton />
+        <PageCorner />
         <p className="text-xs text-muted-foreground">
           {roundIdx + 1} / {rounds.length}
         </p>

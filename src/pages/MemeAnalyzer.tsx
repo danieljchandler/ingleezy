@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Upload, Loader2, X, Sparkles, Languages, BookOpen, Image as ImageIcon, Video, Plus, Check, Laugh, GraduationCap } from "lucide-react";
 import { toast } from "sonner";
-import { HomeButton } from "@/components/HomeButton";
+import { PageCorner } from "@/components/shell/PageCorner";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
@@ -273,7 +273,7 @@ const MemeAnalyzer = () => {
 
   return (
     <AppShell>
-      <HomeButton />
+      <PageCorner />
 
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">

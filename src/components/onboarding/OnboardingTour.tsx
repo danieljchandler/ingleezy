@@ -21,40 +21,39 @@ interface Step {
 
 /**
  * The first thing a new learner sees, so it is also the first place the app
- * gets to be in their language. Each step names the tab it is pointing at,
- * using the same word the tab itself uses — a tour that calls it something
+ * gets to be in their language. Each step names the slot it is pointing at
+ * using the same word the slot itself uses — a tour that calls it something
  * else is describing a screen the reader cannot find.
+ *
+ * Four steps, not five. The old tour walked five tabs because the old nav had
+ * five places to explain; a feed you scroll needs no explaining, so the steps
+ * are only the things that are not obvious from looking: where the skills
+ * went, that upload takes your own video, and that the mark is your account.
  */
 const STEPS: Step[] = [
   {
-    selector: "[data-tour='nav-today']",
-    title: AR.nav.home,
-    body: "بيتك اليومي — المراجعات، السلسلة، وشنو تسوي بعدين. ابدأ من هنا كل يوم.",
+    selector: "[data-tour='nav-feed']",
+    title: "الرئيسية",
+    body: "مقاطع حقيقية بالإنجليزي، واحد ورا الثاني. مرّر لفوق للي بعده، واضغط أي مقطع عشان النص والترجمة.",
     placement: "top",
   },
   {
-    selector: "[data-tour='nav-learn']",
-    title: AR.nav.learn,
-    body: "المنهج، أصوات الإنجليزي، وتمارين القواعد. تبني الأساس خطوة خطوة.",
+    selector: "[data-tour='nav-choose']",
+    title: "المهارات",
+    body: "استماع، قراءة، تحدّث، وكتابة — كل وحدة لها صفحتها. تقدر توصلها من هنا أو تسحب الشاشة لجهة اليسار.",
     placement: "top",
   },
   {
-    selector: "[data-tour='nav-discover']",
-    title: AR.nav.discover,
-    body: "مقاطع حقيقية بالإنجليزي مع ترجمة تطلع بضغطة على الكلمة. من أحسن الطرق تسمع إنجليزي كما يُحكى فعلاً.",
+    selector: "[data-tour='nav-upload']",
+    title: "ارفع",
+    body: "عندك مقطع تحبه؟ ارفعه وإحنا نحوّله لدرس — نص، كلمات، وتمارين من نفس الفيديو.",
     placement: "top",
   },
   {
-    selector: "[data-tour='nav-practice']",
-    title: AR.nav.practice,
-    body: "مراجعة متباعدة، محادثة، استماع، وألعاب تثبّت اللي تعلّمته.",
-    placement: "top",
-  },
-  {
-    selector: "[data-tour='nav-me']",
-    title: AR.nav.me,
-    body: "مكتبتك، كلماتك المحفوظة، الأدوات، وإعدادات حسابك كلها هنا.",
-    placement: "top",
+    selector: "[data-tour='emblem']",
+    title: "حسابك",
+    body: "شعار إنجليزي فوق يوديك لحسابك: كلماتك المحفوظة، تقدّمك، والإعدادات. ولمّا يصير عندك جديد، تلقى حوله دايرة.",
+    placement: "bottom",
   },
 ];
 

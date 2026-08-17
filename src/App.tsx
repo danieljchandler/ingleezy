@@ -9,6 +9,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { DialectProvider } from "@/contexts/DialectContext";
 import { AiAssistantProvider } from "@/contexts/AiAssistantContext";
 import { AssistantMount } from "@/components/assistant/AssistantMount";
+import { OnboardingTour } from "@/components/onboarding/OnboardingTour";
 import { lazyRetry } from "@/lib/lazyRetry";
 import { PageSkeleton } from "@/components/ui/skeleton-page";
 import { logClientError } from "@/lib/errorLog";
@@ -474,6 +475,12 @@ const App = () => {
             <Route path="*" element={<NotFound />} />
           </Routes>
           </Suspense>
+          {/* App-wide chrome, not page chrome. The tour points at the dock,
+              and the dock now outlives any single layout — it is on the feed,
+              which does not use AppShell at all. Mounting it here is what
+              makes the first-run tour reachable from the front door. It gates
+              itself on a localStorage flag, so it costs nothing elsewhere. */}
+          <OnboardingTour />
           <AssistantMount />
           </AiAssistantProvider>
         </BrowserRouter>

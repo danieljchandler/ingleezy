@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppShell } from "@/components/layout/AppShell";
-import { HomeButton } from "@/components/HomeButton";
+import { PageCorner } from "@/components/shell/PageCorner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -316,7 +316,7 @@ const Leaderboard = () => {
 
   return (
     <AppShell>
-      <HomeButton />
+      <PageCorner />
 
       <div className="py-4 space-y-6">
         {/* Header */}

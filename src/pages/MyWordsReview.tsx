@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useUpdateUserVocabularyReview } from "@/hooks/useUserVocabulary";
 import { useDialect } from "@/contexts/DialectContext";
-import { HomeButton } from "@/components/HomeButton";
+import { PageCorner } from "@/components/shell/PageCorner";
 import { RatingButtons } from "@/components/review/RatingButtons";
 import { AppShell } from "@/components/layout/AppShell";
 import { Loader2, Trophy, LogIn, Eye, Volume2, Music, RefreshCw, Sparkles, Play, Brain, Mic2, Quote, Undo2, MessageSquarePlus } from "lucide-react";
@@ -631,7 +631,7 @@ const MyWordsReview = () => {
   if (!isAuthenticated) {
     return (
       <AppShell compact>
-        <div className="mb-6"><HomeButton /></div>
+        <div className="mb-6"><PageCorner /></div>
         <div className="text-center max-w-sm mx-auto py-12">
           <LogIn className="h-7 w-7 text-muted-foreground mx-auto mb-6" />
           <h1 className="text-xl font-bold text-foreground mb-3">تسجيل الدخول مطلوب</h1>
@@ -648,7 +648,7 @@ const MyWordsReview = () => {
     return (
       <AppShell compact>
         <div className="flex items-center justify-between mb-6">
-          <HomeButton />
+          <PageCorner />
           {sessionCount > 0 && (
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-card border border-border">
               <Trophy className="h-4 w-4 text-primary" />
@@ -679,7 +679,7 @@ const MyWordsReview = () => {
     <AppShell compact>
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <HomeButton />
+        <PageCorner />
         <div className="flex items-center gap-2">
           <Select
             value={String(newCap)}

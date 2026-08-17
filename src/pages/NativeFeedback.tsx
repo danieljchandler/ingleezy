@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { AppShell } from "@/components/layout/AppShell";
-import { HomeButton } from "@/components/HomeButton";
+import { PageCorner } from "@/components/shell/PageCorner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
@@ -109,7 +109,7 @@ const NativeFeedback = () => {
 
   return (
     <AppShell>
-      <HomeButton />
+      <PageCorner />
       <h1 className="mb-2 text-2xl font-bold text-foreground">ملاحظات متحدث أصلي</h1>
       <p className="mb-6 text-sm text-muted-foreground">
         Write something in {activeDialect} Arabic — a real native speaker corrects it, usually

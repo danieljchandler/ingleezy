@@ -8,7 +8,7 @@ import {
   type BattleQuestion,
 } from '@/hooks/useVocabBattles';
 import { AppShell } from '@/components/layout/AppShell';
-import { HomeButton } from '@/components/HomeButton';
+import { PageCorner } from '@/components/shell/PageCorner';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Loader2, Swords, Trophy, Clock, ArrowRight, RotateCcw, Check, X } from 'lucide-react';
@@ -145,7 +145,7 @@ const BattlePlay = () => {
   if (!battle) {
     return (
       <AppShell>
-        <div className="mb-6"><HomeButton /></div>
+        <div className="mb-6"><PageCorner /></div>
         <div className="text-center py-16">
           <p className="text-muted-foreground">لم نعثر على المعركة</p>
           <Button variant="outline" className="mt-4" onClick={() => navigate('/battles')}>
@@ -164,7 +164,7 @@ const BattlePlay = () => {
   if (!canPlay && gameState === 'ready') {
     return (
       <AppShell>
-        <div className="mb-6"><HomeButton /></div>
+        <div className="mb-6"><PageCorner /></div>
         <div className="max-w-md mx-auto text-center py-16">
           <Swords className="h-16 w-16 text-muted-foreground/30 mx-auto mb-4" />
           <h1 className="text-xl font-bold mb-2">لعبت هذه المعركة</h1>
@@ -185,7 +185,7 @@ const BattlePlay = () => {
   if (gameState === 'ready') {
     return (
       <AppShell>
-        <div className="mb-6"><HomeButton /></div>
+        <div className="mb-6"><PageCorner /></div>
         <div className="max-w-md mx-auto text-center">
           <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-primary/10 mb-6">
             <Swords className="h-10 w-10 text-primary" />
@@ -234,7 +234,7 @@ const BattlePlay = () => {
 
     return (
       <AppShell>
-        <div className="mb-6"><HomeButton /></div>
+        <div className="mb-6"><PageCorner /></div>
         <div className="max-w-md mx-auto text-center animate-in fade-in zoom-in-95 duration-500">
           <div className={cn(
             'inline-flex items-center justify-center w-24 h-24 rounded-full mb-6',

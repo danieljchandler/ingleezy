@@ -5,7 +5,7 @@ import { useDialect } from "@/contexts/DialectContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/layout/AppShell";
-import { HomeButton } from "@/components/HomeButton";
+import { PageCorner } from "@/components/shell/PageCorner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -226,7 +226,7 @@ const CultureGuide = () => {
     return (
       <AppShell compact>
         <div className="mb-6">
-          <HomeButton />
+          <PageCorner />
         </div>
         <div className="text-center max-w-sm mx-auto py-12">
           <LogIn className="h-7 w-7 text-muted-foreground mx-auto mb-6" />
@@ -246,7 +246,7 @@ const CultureGuide = () => {
   return (
     <AppShell compact>
       <div className="flex items-center justify-between mb-4">
-        <HomeButton />
+        <PageCorner />
         {canRequestHumanReview && messages.length >= 2 && (
           <Button
             variant="outline"

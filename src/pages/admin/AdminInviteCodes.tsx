@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { AppShell } from '@/components/layout/AppShell';
-import { HomeButton } from '@/components/HomeButton';
+import { PageCorner } from '@/components/shell/PageCorner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -105,7 +105,7 @@ const AdminInviteCodes = () => {
   return (
     <AppShell>
       <div className="mb-6 flex items-center justify-between">
-        <HomeButton />
+        <PageCorner />
         <Button variant="ghost" onClick={() => navigate('/admin')}>
           Back to admin
         </Button>

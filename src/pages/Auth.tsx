@@ -6,7 +6,7 @@ import { lovable } from "@/integrations/lovable/index";
 import { Button } from "@/components/design-system";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { HomeButton } from "@/components/HomeButton";
+import { PageCorner } from "@/components/shell/PageCorner";
 import { AppShell } from "@/components/layout/AppShell";
 import { IngleezyLogo } from "@/components/brand/IngleezyLogo";
 import { IngleezyLoading } from "@/components/brand/IngleezyMark";
@@ -167,7 +167,7 @@ const Auth = () => {
     <AppShell>
       {/* Header */}
       <div className="mb-8">
-        <HomeButton />
+        <PageCorner />
       </div>
 
       {/* Main Content - centered with generous spacing */}

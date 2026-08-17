@@ -13,7 +13,7 @@ import { PronunciationButton } from "@/components/review/PronunciationButton";
 import { RatingButtons } from "@/components/review/RatingButtons";
 import { SessionHandoff } from "@/components/review/SessionHandoff";
 import { SessionProgress } from "@/components/review/SessionProgress";
-import { HomeButton } from "@/components/HomeButton";
+import { PageCorner } from "@/components/shell/PageCorner";
 import { Button } from "@/components/ui/button";
 import { AppShell } from "@/components/layout/AppShell";
 import { useDialect } from "@/contexts/DialectContext";
@@ -162,7 +162,7 @@ const Review = () => {
     return (
       <AppShell compact>
         <div className="mb-6">
-          <HomeButton />
+          <PageCorner />
         </div>
         <div className="text-center max-w-sm mx-auto py-12">
           <div className="w-14 h-14 rounded-xl bg-muted flex items-center justify-center mx-auto mb-6">
@@ -206,7 +206,7 @@ const Review = () => {
     return (
       <AppShell compact>
         <div className="flex items-center justify-between mb-6">
-          <HomeButton />
+          <PageCorner />
           <div className="flex items-center gap-2">
             <button
               onClick={handleToggleMix}
@@ -286,7 +286,7 @@ const Review = () => {
     <AppShell compact>
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <HomeButton />
+        <PageCorner />
         <div className="flex items-center gap-2">
           <button
             onClick={handleToggleMix}

@@ -3,7 +3,7 @@ import { useDialect } from "@/contexts/DialectContext";
 import { useNavigate } from "react-router-dom";
 import { AppShell } from "@/components/layout/AppShell";
 import { LoadingPanel } from "@/components/loading/LoadingPanel";
-import { HomeButton } from "@/components/HomeButton";
+import { PageCorner } from "@/components/shell/PageCorner";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserLevel } from "@/hooks/useUserLevel";
@@ -254,7 +254,7 @@ const GrammarDrills = () => {
   if (!isAuthenticated) {
     return (
       <AppShell>
-        <HomeButton />
+        <PageCorner />
         <div className="py-12 text-center space-y-4">
           <BookOpen className="h-12 w-12 text-muted-foreground/30 mx-auto" />
           <p className="text-muted-foreground">سجّل الدخول للتدرب على القواعد</p>
@@ -269,7 +269,7 @@ const GrammarDrills = () => {
     const pct = Math.round((score / questions.length) * 100);
     return (
       <AppShell>
-        <HomeButton />
+        <PageCorner />
         <div className="py-8 space-y-6 text-center">
           <div className="w-20 h-20 mx-auto rounded-full bg-primary/10 flex items-center justify-center">
             <Zap className="h-10 w-10 text-primary" />
@@ -310,7 +310,7 @@ const GrammarDrills = () => {
     const q = questions[currentIndex];
     return (
       <AppShell>
-        <HomeButton />
+        <PageCorner />
         <div className="py-4 space-y-5">
           {/* Progress */}
           <div className="flex items-center justify-between">
@@ -412,7 +412,7 @@ const GrammarDrills = () => {
   // Category selection
   return (
     <AppShell>
-      <HomeButton />
+      <PageCorner />
       <div className="py-4 space-y-6">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">

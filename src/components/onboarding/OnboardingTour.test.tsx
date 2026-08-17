@@ -2,36 +2,31 @@ import { act, fireEvent, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithProviders } from "@/test/support/react/harness";
 import { markTourPending, OnboardingTour } from "./OnboardingTour";
-import { AR } from "@/lib/strings";
 
 /**
- * The five-step walkthrough of the bottom navigation.
+ * The four-step walkthrough of the app shell.
  *
- * The app's whole surface hangs off five tabs, and a learner who never finds
- * Discover or Practice sees a fraction of what they signed up for. So this runs
- * exactly once, immediately after onboarding, and highlights each tab in turn
- * against a dimmed page.
+ * It used to walk five tabs because the old nav had five places to explain.
+ * The dock carries actions instead, and a feed you scroll needs no explaining,
+ * so the steps are now only the parts that are not obvious from looking: where
+ * the four skills went, that upload takes your own video, and that the mark in
+ * the corner is your account.
  *
  * Two things make it delicate. It is armed by one flag and disarmed by another,
  * and getting that wrong means either never showing it or showing it on every
  * visit forever. And it measures a live DOM element to cut the hole in the
  * overlay — so it has to survive the target not being there, which is the
- * ordinary case on a page without the nav.
+ * ordinary case on a page with no dock.
  */
 
 const TOUR_KEY = "ingleezy:tourCompleted";
 const TRIGGER_KEY = "ingleezy:showTour";
 
-// The tour titles each tab with the word the tab itself uses, from AR.nav —
-// a tour that renames the thing it is pointing at is describing a screen the
-// reader cannot find.
-const STEP_TITLES = [
-  AR.nav.home,
-  AR.nav.learn,
-  AR.nav.discover,
-  AR.nav.practice,
-  AR.nav.me,
-];
+// The tour titles each slot with the word the slot itself uses — a tour that
+// renames the thing it is pointing at is describing a screen the reader cannot
+// find.
+const STEP_TITLES = ["الرئيسية", "المهارات", "ارفع", "حسابك"];
+const LAST = STEP_TITLES.length - 1;
 
 let cleanup: (() => void) | undefined;
 let nav: HTMLElement | undefined;
@@ -56,13 +51,13 @@ afterEach(async () => {
   vi.useRealTimers();
 });
 
-/** Stands in for the bottom navigation the tour points at. */
+/** Stands in for the dock and the profile emblem the tour points at. */
 function mountNav() {
   nav = document.createElement("div");
-  for (const tab of ["today", "learn", "discover", "practice", "me"]) {
+  for (const slot of ["nav-feed", "nav-choose", "nav-upload", "emblem"]) {
     const el = document.createElement("button");
-    el.setAttribute("data-tour", `nav-${tab}`);
-    el.textContent = tab;
+    el.setAttribute("data-tour", slot);
+    el.textContent = slot;
     nav.appendChild(el);
   }
   document.body.appendChild(nav);
@@ -129,28 +124,28 @@ describe("deciding whether to run", () => {
   });
 });
 
-describe("walking through the tabs", () => {
-  it("starts on Today and says where it is", () => {
+describe("walking through the shell", () => {
+  it("starts on the feed and says what it is", () => {
     render();
 
     openTour();
 
-    expect(screen.getByRole("heading", { name: AR.nav.home })).toBeInTheDocument();
-    expect(screen.getByText(/بيتك اليومي/)).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "الرئيسية" })).toBeInTheDocument();
+    expect(screen.getByText(/مقاطع حقيقية بالإنجليزي/)).toBeInTheDocument();
     // Interpolated, so the text arrives in several nodes.
-    expect(screen.getByText(/خطوة\s*1\s*من\s*5/)).toBeInTheDocument();
+    expect(screen.getByText(/خطوة\s*1\s*من\s*4/)).toBeInTheDocument();
   });
 
-  it("advances through every tab in nav order", () => {
+  it("advances through every slot in dock order", () => {
     render();
     openTour();
 
     for (const [index, title] of STEP_TITLES.entries()) {
-      // Reading in the same order as the tabs on screen is the point — a tour
+      // Reading in the same order as the slots on screen is the point — a tour
       // that jumps around teaches the learner nothing about where things are.
       expect(screen.getByRole("heading", { name: title })).toBeInTheDocument();
-      expect(screen.getByText(new RegExp(`خطوة\\s*${index + 1}\\s*من\\s*5`))).toBeInTheDocument();
-      if (index < STEP_TITLES.length - 1) next();
+      expect(screen.getByText(new RegExp(`خطوة\\s*${index + 1}\\s*من\\s*4`))).toBeInTheDocument();
+      if (index < LAST) next();
     }
   });
 
@@ -158,7 +153,7 @@ describe("walking through the tabs", () => {
     render();
     openTour();
 
-    expect(dots()).toHaveLength(5);
+    expect(dots()).toHaveLength(4);
     expect(dots()[0].className).toContain("w-5");
     next();
 
@@ -166,20 +161,20 @@ describe("walking through the tabs", () => {
     expect(dots()[1].className).toContain("w-5");
   });
 
-  it("offers خلصنا rather than التالي on the last tab", () => {
+  it("offers خلصنا rather than التالي on the last slot", () => {
     render();
     openTour();
-    for (let i = 0; i < 4; i++) next();
+    for (let i = 0; i < LAST; i++) next();
 
-    // "التالي" on the final step promises a sixth step that does not exist.
+    // "التالي" on the final step promises a step that does not exist.
     expect(screen.getByRole("button", { name: "خلصنا" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "التالي" })).toBeNull();
   });
 
-  it("closes for good once the last tab is acknowledged", () => {
+  it("closes for good once the last slot is acknowledged", () => {
     render();
     openTour();
-    for (let i = 0; i < 4; i++) next();
+    for (let i = 0; i < LAST; i++) next();
 
     next();
 
@@ -219,7 +214,7 @@ describe("leaving early", () => {
 });
 
 describe("highlighting the target", () => {
-  it("cuts a hole over the tab it is describing", () => {
+  it("cuts a hole over the slot it is describing", () => {
     render();
     openTour();
 
@@ -231,12 +226,12 @@ describe("highlighting the target", () => {
     expect(document.querySelector(".bg-black\\/65")).toBeNull();
   });
 
-  it("dims the whole page when the tab is not on screen", () => {
+  it("dims the whole page when the dock is not on screen", () => {
     render({ withNav: false });
 
     openTour();
 
-    // The tour is mounted app-wide and the nav is hidden on some routes. Falling
+    // The tour is mounted app-wide and the dock is hidden on some routes. Falling
     // back to a plain dim keeps the copy readable instead of highlighting the
     // top-left corner of the page.
     expect(tour()).not.toBeNull();
@@ -244,15 +239,15 @@ describe("highlighting the target", () => {
     expect(document.querySelector("[style*='box-shadow']")).toBeNull();
   });
 
-  it("still walks through all five steps with nothing to point at", () => {
+  it("still walks through all four steps with nothing to point at", () => {
     render({ withNav: false });
     openTour();
 
-    for (let i = 0; i < 4; i++) next();
+    for (let i = 0; i < LAST; i++) next();
 
-    // The text is the useful half; losing the whole tour because one nav is
+    // The text is the useful half; losing the whole tour because the dock is
     // hidden would be worse than losing the highlight.
-    expect(screen.getByRole("heading", { name: AR.nav.me })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: STEP_TITLES[LAST] })).toBeInTheDocument();
   });
 
   it("follows the page when it moves under the cutout", () => {

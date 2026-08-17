@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useMyBattles, usePendingBattles, type VocabBattle } from '@/hooks/useVocabBattles';
 import { AppShell } from '@/components/layout/AppShell';
-import { HomeButton } from '@/components/HomeButton';
+import { PageCorner } from '@/components/shell/PageCorner';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, Swords, Trophy, Clock, Users } from 'lucide-react';
@@ -37,7 +37,7 @@ const VocabBattles = () => {
   if (!user) {
     return (
       <AppShell>
-        <div className="mb-6"><HomeButton /></div>
+        <div className="mb-6"><PageCorner /></div>
         <div className="text-center py-16">
           <Swords className="h-16 w-16 text-muted-foreground/30 mx-auto mb-4" />
           <h1 className="text-2xl font-bold mb-2 font-heading">معارك المفردات</h1>
@@ -95,7 +95,7 @@ const VocabBattles = () => {
 
   return (
     <AppShell>
-      <div className="mb-6"><HomeButton /></div>
+      <div className="mb-6"><PageCorner /></div>
 
       <div className="max-w-lg mx-auto">
         {/* Header */}

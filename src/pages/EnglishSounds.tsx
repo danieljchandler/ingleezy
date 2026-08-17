@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { ENGLISH_SOUNDS, CHECKPOINT_INDICES } from "@/data/englishSounds";
 import { useSoundProgress, useCheckpointProgress } from "@/hooks/useSoundProgress";
 import { AppShell } from "@/components/layout/AppShell";
-import { HomeButton } from "@/components/HomeButton";
+import { PageCorner } from "@/components/shell/PageCorner";
 import { InfoHint } from "@/components/InfoHint";
 import { DesertBackdrop } from "@/components/sounds/DesertBackdrop";
 import { StopOrnament } from "@/components/sounds/StopOrnament";
@@ -39,7 +39,7 @@ const EnglishSounds = () => {
     <AppShell>
       <DesertBackdrop />
       <div className="flex items-center justify-between mb-4">
-        <HomeButton />
+        <PageCorner />
         <div className="flex items-center gap-3">
           <button
             onClick={() => setSoundOn(!soundOn)}

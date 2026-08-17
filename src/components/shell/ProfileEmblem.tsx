@@ -24,6 +24,7 @@ export function ProfileEmblem({
   return (
     <Link
       to="/me"
+      data-tour="emblem"
       aria-label={hasNews ? "حسابك — عندك جديد" : "حسابك"}
       className={cn(
         "relative grid h-10 w-10 shrink-0 place-items-center rounded-xl",

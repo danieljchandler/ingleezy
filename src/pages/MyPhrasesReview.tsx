@@ -6,7 +6,7 @@ import { useDueUserPhrases, useUpdateUserPhraseReview, useDeleteUserPhrase } fro
 import { useReviewSession } from "@/hooks/useReviewSession";
 import { SessionHandoff } from "@/components/review/SessionHandoff";
 import { SessionProgress } from "@/components/review/SessionProgress";
-import { HomeButton } from "@/components/HomeButton";
+import { PageCorner } from "@/components/shell/PageCorner";
 import { RatingButtons } from "@/components/review/RatingButtons";
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
@@ -271,7 +271,7 @@ const MyPhrasesReview = () => {
   if (!isAuthenticated) {
     return (
       <AppShell compact>
-        <div className="mb-6"><HomeButton /></div>
+        <div className="mb-6"><PageCorner /></div>
         <div className="text-center max-w-sm mx-auto py-12">
           <LogIn className="h-7 w-7 text-muted-foreground mx-auto mb-6" />
           <h1 className="text-xl font-bold mb-3">تسجيل الدخول مطلوب</h1>
@@ -288,7 +288,7 @@ const MyPhrasesReview = () => {
     return (
       <AppShell compact>
         <div className="flex items-center justify-between mb-6">
-          <HomeButton />
+          <PageCorner />
           {sessionCount > 0 && (
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-card border border-border">
               <Trophy className="h-4 w-4 text-primary" />
@@ -314,7 +314,7 @@ const MyPhrasesReview = () => {
     <AppShell compact>
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <HomeButton />
+        <PageCorner />
         <div className="flex items-center gap-2">
           <div className="px-3 py-1.5 rounded-lg bg-card border border-border flex items-center gap-1.5">
             <MessageCircleQuestion className="h-3.5 w-3.5 text-primary" />

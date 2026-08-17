@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { AppShell } from "@/components/layout/AppShell";
-import { HomeButton } from "@/components/HomeButton";
+import { PageCorner } from "@/components/shell/PageCorner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -75,7 +75,7 @@ const SavedChats = () => {
     <AppShell>
       <div className="space-y-4">
         <div className="flex items-center justify-between gap-3">
-          <HomeButton />
+          <PageCorner />
           <h1 className="flex items-center gap-2 text-xl font-bold">
             <Sparkles className="h-5 w-5 text-primary" />
             المحادثات المحفوظة

@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { AppShell } from "@/components/layout/AppShell";
 import { HubHeader } from "@/components/layout/HubGrid";
-import { HomeButton } from "@/components/HomeButton";
+import { PageCorner } from "@/components/shell/PageCorner";
 import { useStages } from "@/hooks/useStages";
 import { useAllLessons } from "@/hooks/useLessons";
 import { useLessonProgress } from "@/hooks/useLessonProgress";
@@ -82,7 +82,7 @@ const Curriculum = () => {
   return (
     <AppShell>
       <div className="mb-4">
-        <HomeButton />
+        <PageCorner />
       </div>
 
       <HubHeader

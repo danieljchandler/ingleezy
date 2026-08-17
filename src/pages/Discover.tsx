@@ -4,7 +4,7 @@ import { useDiscoverVideos } from "@/hooks/useDiscoverVideos";
 import { useDiscoverFeed, type FeedItem } from "@/hooks/useDiscoverFeed";
 import type { DiscoverVideo } from "@/hooks/useDiscoverVideos";
 import { AppShell } from "@/components/layout/AppShell";
-import { HomeButton } from "@/components/HomeButton";
+import { PageCorner } from "@/components/shell/PageCorner";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -197,7 +197,7 @@ const Discover = () => {
 
   return (
     <AppShell>
-      <HomeButton />
+      <PageCorner />
 
       <h1
         className="text-2xl font-bold text-foreground mb-2 inline-flex items-center gap-2"

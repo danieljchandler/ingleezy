@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useDialect } from "@/contexts/DialectContext";
 import { AppShell } from "@/components/layout/AppShell";
-import { HomeButton } from "@/components/HomeButton";
+import { PageCorner } from "@/components/shell/PageCorner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -91,7 +91,7 @@ export default function MyTranscriptions() {
   return (
     <AppShell>
       <div className="max-w-3xl mx-auto p-4 space-y-4">
-        <HomeButton />
+        <PageCorner />
         <div className="flex items-start justify-between gap-3 flex-wrap">
           <div>
             <h1 className="text-2xl font-bold inline-flex items-center gap-2">نصوصي المفرّغة <InfoHint {...PAGE_HINTS["my-transcriptions"]} size="md" /></h1>

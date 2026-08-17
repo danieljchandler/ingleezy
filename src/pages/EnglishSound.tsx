@@ -4,7 +4,7 @@ import { ENGLISH_SOUNDS, SOUNDS_BY_CODE, SOUND_STEPS, type SoundStepId } from "@
 import { useSoundProgress } from "@/hooks/useSoundProgress";
 
 import { AppShell } from "@/components/layout/AppShell";
-import { HomeButton } from "@/components/HomeButton";
+import { PageCorner } from "@/components/shell/PageCorner";
 import { SoundAudioButton } from "@/components/sounds/SoundAudioButton";
 import { MouthGuidePanel } from "@/components/sounds/MouthGuidePanel";
 import { SpellingPanel } from "@/components/sounds/SpellingPanel";
@@ -82,7 +82,7 @@ const EnglishSound = () => {
     <AppShell compact>
       <XPPopupHost />
       <div className="flex items-center justify-between mb-4">
-        <HomeButton />
+        <PageCorner />
         <Button variant="ghost" size="sm" onClick={() => navigate("/sounds")}>
           الخريطة
         </Button>

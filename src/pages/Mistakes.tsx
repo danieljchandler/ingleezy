@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { AppShell } from "@/components/layout/AppShell";
 import { HubHeader } from "@/components/layout/HubGrid";
-import { HomeButton } from "@/components/HomeButton";
+import { PageCorner } from "@/components/shell/PageCorner";
 import { Button } from "@/components/ui/button";
 import { useDialect } from "@/contexts/DialectContext";
 import { useAzureTTS } from "@/hooks/useAzureTTS";
@@ -30,7 +30,7 @@ const Mistakes = () => {
 
   return (
     <AppShell>
-      <HomeButton />
+      <PageCorner />
       <HubHeader
         title="أخطاؤك"
         subtitle="ما الذي يتكرر تعثرك فيه بالإنجليزية."

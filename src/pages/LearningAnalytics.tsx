@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { AppShell } from "@/components/layout/AppShell";
-import { HomeButton } from "@/components/HomeButton";
+import { PageCorner } from "@/components/shell/PageCorner";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/hooks/useAuth";
@@ -91,7 +91,7 @@ const LearningAnalytics = () => {
   if (!isAuthenticated) {
     return (
       <AppShell>
-        <HomeButton />
+        <PageCorner />
         <div className="py-12 text-center space-y-4">
           <BarChart3 className="h-12 w-12 text-muted-foreground/30 mx-auto" />
           <p className="text-muted-foreground">سجّل الدخول لرؤية إحصاءات تعلمك</p>
@@ -117,7 +117,7 @@ const LearningAnalytics = () => {
 
   return (
     <AppShell>
-      <HomeButton />
+      <PageCorner />
 
       <div className="py-4 space-y-6 pb-12">
         {/* Header */}

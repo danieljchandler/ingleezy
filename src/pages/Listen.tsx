@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Loader2, Sparkles, Mic, Headphones, Users, BookOpen, Play, Library, Plus } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
-import { HomeButton } from "@/components/HomeButton";
+import { PageCorner } from "@/components/shell/PageCorner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -75,7 +75,7 @@ const Listen = () => {
     <AppShell>
       <div className="space-y-6 pb-20">
         <header className="space-y-2">
-          <HomeButton />
+          <PageCorner />
           <h1 className="text-3xl font-bold tracking-tight text-foreground">استمع</h1>
           <p className="text-sm text-muted-foreground">
             بودكاست ومحاضرات ومقابلات وقصص إنجليزية مولّدة، بشرح بلهجة {activeDialect}.

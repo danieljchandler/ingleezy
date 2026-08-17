@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { usePublishedStories } from '@/hooks/useInteractiveStories';
 import { AppShell } from '@/components/layout/AppShell';
-import { HomeButton } from '@/components/HomeButton';
+import { PageCorner } from '@/components/shell/PageCorner';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, BookOpen } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -21,7 +21,7 @@ const Stories = () => {
 
   return (
     <AppShell>
-      <div className="mb-6"><HomeButton /></div>
+      <div className="mb-6"><PageCorner /></div>
 
       <div className="max-w-lg mx-auto">
         <div className="text-center mb-8">

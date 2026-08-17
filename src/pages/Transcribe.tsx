@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Upload, FileAudio, Download, Loader2, X, BookOpen, Languages, Sparkles, Save, Check, Plus, Link2, Type } from "lucide-react";
 import { toast } from "sonner";
 import { LoadingPanel } from "@/components/loading/LoadingPanel";
-import { HomeButton } from "@/components/HomeButton";
+import { PageCorner } from "@/components/shell/PageCorner";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
@@ -1104,7 +1104,7 @@ const Transcribe = () => {
     <div className="min-h-screen bg-background p-4 md:p-8">
       <div className="max-w-2xl mx-auto space-y-6">
         <div className="flex items-center gap-4">
-          <HomeButton />
+          <PageCorner />
           <div>
             <h1 className="text-2xl md:text-3xl font-bold text-foreground inline-flex items-center gap-2">تفريغ الصوت<InfoHint {...PAGE_HINTS["transcribe"]} size="md" />
             </h1>

@@ -1,17 +1,55 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Ingleezy">
   <!--
-    The Ingleezy mark: a stacked speech-bubble card (Indigo Deep backing,
-    Periwinkle front) with a clipped bottom-left corner and a short tail,
-    holding an exclamation mark whose dot curls into the ya/hamza —
-    punctuation and Arabic letterform in one glyph.
-    Hand-recreated from the master lockup; swap for the designer's vector
-    if a source SVG ever arrives.
+    The Ingleezy mark, redrawn to the supplied logo.
+
+    A chamfered indigo badge holding a periwinkle speech bubble, and inside it
+    an exclamation mark whose dot is a hamza. That last detail is the whole
+    idea in one glyph — an English punctuation mark finished with an Arabic
+    letter, which is exactly what the app is — so it is kept large enough to
+    survive being rasterised to 16px by scripts/render-brand-icons.mjs.
+
+    Flat fills with one shallow gradient each. Real shadows and inner glows
+    turn to mud at favicon size, and this file is the favicon.
   -->
   <defs>
-    <path id="bubble" d="M 160 44 L 376 44 A 76 76 0 0 1 452 120 L 452 288 A 76 76 0 0 1 376 364 L 268 364 L 190 412 L 208 364 L 156 364 L 84 292 L 84 120 A 76 76 0 0 1 160 44 Z"/>
+    <linearGradient id="badge" x1="0" y1="0" x2="0.55" y2="1">
+      <stop offset="0" stop-color="#3B4E96"/>
+      <stop offset="1" stop-color="#26336A"/>
+    </linearGradient>
+    <linearGradient id="bubble" x1="0.1" y1="0" x2="0.7" y2="1">
+      <stop offset="0" stop-color="#8394D2"/>
+      <stop offset="1" stop-color="#6678BE"/>
+    </linearGradient>
   </defs>
-  <use href="#bubble" transform="translate(-28 28)" fill="#2C3B74"/>
-  <use href="#bubble" fill="#7184C6"/>
-  <rect x="241" y="102" width="54" height="150" rx="27" fill="#FFFFFF"/>
-  <path d="M 297 287 C 286 273, 260 272, 248 287 C 239 299, 245 314, 258 318 C 254 326, 246 331, 236 330" fill="none" stroke="#FFFFFF" stroke-width="25" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- The badge: rounded on three corners, cut flat across the top end. That
+       one asymmetry is what keeps the silhouette recognisable at the size
+       where the bubble inside it has stopped being legible. -->
+  <path
+    fill="url(#badge)"
+    d="M144 40 H330 L472 182 V368 Q472 472 368 472 H144 Q40 472 40 368 V144 Q40 40 144 40 Z"
+  />
+
+  <!-- The speech bubble, inset toward the cut corner, its tail dropped from
+       the bottom start edge so it points back into the badge, not off it. -->
+  <path
+    fill="url(#bubble)"
+    d="M164 96 H384 Q420 96 420 132 V316 Q420 352 384 352 H282 L206 414 L222 352 H164
+       Q128 352 128 316 V132 Q128 96 164 96 Z"
+  />
+
+  <!-- The exclamation: tapered, so it reads as drawn rather than as a rule. -->
+  <path fill="#FFFFFF" d="M252 124 H304 L294 248 H262 Z"/>
+
+  <!-- The hamza standing in for the dot. Stroked rather than outlined: the
+       letter is a written gesture, and a stroke with round caps keeps an even
+       weight through the curve where a hand-built outline goes lumpy. -->
+  <path
+    fill="none"
+    stroke="#FFFFFF"
+    stroke-width="22"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    d="M242 296 C242 274 278 266 294 281 C307 293 300 311 282 313 L318 313"
+  />
 </svg>

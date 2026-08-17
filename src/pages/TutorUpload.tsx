@@ -1,7 +1,7 @@
 import { useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppShell } from "@/components/layout/AppShell";
-import { HomeButton } from "@/components/HomeButton";
+import { PageCorner } from "@/components/shell/PageCorner";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { LoadingPanel } from "@/components/loading/LoadingPanel";
@@ -66,7 +66,7 @@ const TutorUpload = () => {
   if (!isAuthenticated) {
     return (
       <AppShell>
-        <HomeButton />
+        <PageCorner />
         <div className="text-center mt-20">
           <p className="text-muted-foreground mb-4">سجّل الدخول لاستخدام رفع الدرس</p>
           <Button onClick={() => navigate("/auth")}>تسجيل الدخول</Button>
@@ -77,7 +77,7 @@ const TutorUpload = () => {
 
   return (
     <AppShell>
-      <HomeButton />
+      <PageCorner />
       <h1 className="text-2xl font-heading font-bold text-foreground mb-6 inline-flex items-center gap-2">رفع درس خصوصي <InfoHint {...PAGE_HINTS["tutor-upload"]} size="md" /></h1>
 
       {/* Upload Step */}
