@@ -36,7 +36,7 @@ export default defineConfig(({ mode }) => ({
   // Use public fallbacks so preview/build never crash if env injection is late.
   envDir: ".vite-env",
   server: {
-    host: "::",
+    host: "0.0.0.0",
     port: 8080,
     hmr: {
       protocol: "wss",
