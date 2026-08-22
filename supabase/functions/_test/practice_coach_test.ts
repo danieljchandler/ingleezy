@@ -1,20 +1,16 @@
 import { assert, assertEquals, assertStringIncludes } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import { jsonRequest, loadFunction, optionsRequest } from "./harness.ts";
-import { chatCompletion, json, sseCompletion, type UpstreamHandler } from "./upstreams.ts";
+import { chatCompletion, json, type UpstreamHandler } from "./upstreams.ts";
 
 /**
- * `conversation-practice` and `practice-sentence-coach` — the two functions
- * that answer a learner mid-practice.
- *
- * `conversation-practice` is the only function that buffers a stream back into
- * a single reply: the brain streams, the client expects `{ reply }`, so the SSE
- * frames are accumulated server-side. It also carries the app's only
- * multi-turn drift check, scanning its own last three replies for MSA leaks and
- * nudging itself back into dialect.
- *
- * `practice-sentence-coach` is a two-stage pipeline — Deepgram ASR (en), then the
+ * `practice-sentence-coach` — the function that answers a learner
+ * mid-practice: a two-stage pipeline — Deepgram ASR (en), then the
  * brain — with a retry between Munsit models and a learner-error write that
  * depends on the model's verdict rather than on any status code.
+ *
+ * (`conversation-practice` used to live beside it and was deleted: the page
+ * had moved to the streaming `free-chat`, which carries the same transfer
+ * detection and level guidance, and no client called the buffered twin.)
  */
 
 const USER = "00000000-0000-4000-8000-000000000001";
@@ -38,11 +34,6 @@ function caller(extra: Record<string, UpstreamHandler> = {}): Record<string, Ups
     ...extra,
   };
 }
-
-const streaming = (...pieces: string[]): Record<string, UpstreamHandler> => ({
-  "ai.gateway.lovable.dev": () => sseCompletion(...pieces),
-  "openrouter.ai": () => sseCompletion(...pieces),
-});
 
 const emitting = (payload: unknown): Record<string, UpstreamHandler> => ({
   "ai.gateway.lovable.dev": () => chatCompletion("", payload),
@@ -104,208 +95,6 @@ function gatewayPrompt(bodies: Array<string | null>, calls: string[]): string {
   const index = calls.findIndex((url) => url.includes("gateway") || url.includes("openrouter"));
   return bodies[index] ?? "";
 }
-
-// ── conversation-practice ────────────────────────────────────────────────────
-
-const turn = (content: string, role = "user") => ({ role, content });
-
-Deno.test("conversation-practice answers the preflight", async () => {
-  const fn = await loadFunction("conversation-practice", { upstreams: caller() });
-  try {
-    const response = await fn.handler(optionsRequest("conversation-practice"));
-    assertEquals(response.status, 200);
-    assert(response.headers.get("access-control-allow-origin"));
-  } finally {
-    fn.restore();
-  }
-});
-
-Deno.test("conversation-practice asks an anonymous caller to sign in", async () => {
-  const result = await call(
-    "conversation-practice",
-    { messages: [turn("مرحبا")] },
-    caller(),
-    { jwt: null },
-  );
-
-  assertEquals(result.status, 401);
-  assertEquals(result.body.error, "auth_required");
-});
-
-Deno.test("conversation-practice needs a conversation to continue", async () => {
-  const result = await call("conversation-practice", { messages: [] }, caller());
-
-  assertEquals(result.status, 400);
-  assertEquals(result.body.error, "messages array is required");
-});
-
-Deno.test("conversation-practice rejects messages that are not an array", async () => {
-  const result = await call("conversation-practice", { messages: "مرحبا" }, caller());
-
-  assertEquals(result.status, 400);
-});
-
-Deno.test("conversation-practice buffers the stream into one reply", async () => {
-  const result = await call(
-    "conversation-practice",
-    { messages: [turn("مرحبا")] },
-    caller(streaming("شلون", "ك ", "اليوم؟")),
-  );
-
-  assertEquals(result.status, 200);
-  // Three frames, one reply: the client never sees the stream.
-  assertEquals(result.body.reply, "شلونك اليوم؟");
-});
-
-Deno.test("conversation-practice reports a stream that carried nothing", async () => {
-  const result = await call(
-    "conversation-practice",
-    { messages: [turn("مرحبا")] },
-    caller(streaming()),
-  );
-
-  assertEquals(result.status, 500);
-  assertEquals(result.body.error, "AI service unavailable");
-});
-
-Deno.test("conversation-practice tunes the prompt to the stated level", async () => {
-  const advanced = await call(
-    "conversation-practice",
-    { messages: [turn("Hi")], difficulty: "advanced" },
-    caller(streaming("رد")),
-  );
-  assertStringIncludes(gatewayPrompt(advanced.bodies, advanced.calls), "advanced");
-
-  const beginner = await call(
-    "conversation-practice",
-    { messages: [turn("مرحبا")], difficulty: "beginner" },
-    caller(streaming("رد")),
-  );
-  assertStringIncludes(gatewayPrompt(beginner.bodies, beginner.calls), "very simple, short sentences");
-});
-
-Deno.test("conversation-practice treats an unknown level as beginner", async () => {
-  const result = await call(
-    "conversation-practice",
-    { messages: [turn("مرحبا")], difficulty: "wizard" },
-    caller(streaming("رد")),
-  );
-
-  assertStringIncludes(gatewayPrompt(result.bodies, result.calls), "Be encouraging and patient");
-});
-
-Deno.test("conversation-practice tells the partner to correct known transfer phrases", async () => {
-  const result = await call(
-    "conversation-practice",
-    {
-      dialect: "Gulf",
-      messages: [
-        turn("Hi!"),
-        turn("Hello! How was your day?", "assistant"),
-        // A learner turn carrying a known calque.
-        turn("Good! But please open the light."),
-      ],
-    },
-    caller(streaming("Sure")),
-  );
-
-  assertEquals(result.status, 200);
-  const prompt = gatewayPrompt(result.bodies, result.calls);
-  assertStringIncludes(prompt, "open the light");
-  assertStringIncludes(prompt, "turn on the light");
-  assertStringIncludes(prompt, "gentle correction");
-});
-
-Deno.test("conversation-practice adds no correction nudge to clean English", async () => {
-  const result = await call(
-    "conversation-practice",
-    {
-      dialect: "Gulf",
-      messages: [turn("Hi!"), turn("Hello!", "assistant"), turn("I went to the market.")],
-    },
-    caller(streaming("Nice")),
-  );
-
-  const prompt = gatewayPrompt(result.bodies, result.calls);
-  assertEquals(prompt.includes("gentle correction"), false);
-});
-
-Deno.test("conversation-practice only pays for the learner profile on the opening turns", async () => {
-  const opening = await call(
-    "conversation-practice",
-    { messages: [turn("مرحبا")] },
-    caller(streaming("رد")),
-  );
-  assert(
-    opening.calls.some((url) => url.includes("/rest/v1/user_vocabulary")),
-    "expected the learner profile to be read on the first turn",
-  );
-
-  const later = await call(
-    "conversation-practice",
-    {
-      messages: [turn("مرحبا"), turn("شلونك", "assistant"), turn("زين"), turn("حلو", "assistant")],
-    },
-    caller(streaming("رد")),
-  );
-  assertEquals(later.calls.some((url) => url.includes("/rest/v1/user_vocabulary")), false);
-});
-
-Deno.test("conversation-practice passes a paywall answer straight through", async () => {
-  const result = await call(
-    "conversation-practice",
-    { messages: [turn("مرحبا")] },
-    caller({
-      "ai.gateway.lovable.dev": () => json({ error: "payment required" }, 402),
-      "openrouter.ai": () => json({ error: "payment required" }, 402),
-    }),
-  );
-
-  assertEquals(result.status, 402);
-  assertStringIncludes(String(result.body.error), "credits");
-});
-
-Deno.test("conversation-practice passes a rate limit straight through", async () => {
-  const result = await call(
-    "conversation-practice",
-    { messages: [turn("مرحبا")] },
-    caller({
-      "ai.gateway.lovable.dev": () => json({ error: "slow down" }, 429),
-      "openrouter.ai": () => json({ error: "slow down" }, 429),
-    }),
-  );
-
-  assertEquals(result.status, 429);
-  assertStringIncludes(String(result.body.error), "Rate limit");
-});
-
-Deno.test("conversation-practice flattens any other model failure to a 500", async () => {
-  const result = await call(
-    "conversation-practice",
-    { messages: [turn("مرحبا")] },
-    caller({
-      "ai.gateway.lovable.dev": () => json({ error: "boom" }, 503),
-      "openrouter.ai": () => json({ error: "boom" }, 503),
-    }),
-  );
-
-  assertEquals(result.status, 500);
-  assertStringIncludes(String(result.body.error), "AI service error");
-});
-
-Deno.test("conversation-practice counts against the free-tier daily cap", async () => {
-  const result = await call(
-    "conversation-practice",
-    { messages: [turn("مرحبا")] },
-    caller({
-      "/rest/v1/subscribers": () => json({ subscribed: false, subscription_end: null }),
-      "/rest/v1/rpc/increment_usage_counter": () => json(51),
-    }),
-  );
-
-  assertEquals(result.status, 429);
-  assertEquals(result.body.error, "daily_limit_reached");
-});
 
 // ── practice-sentence-coach ──────────────────────────────────────────────────
 

@@ -210,9 +210,15 @@ export default function ConversationSimulator() {
         if (blob.size === 0) return;
         setTranscribing(true);
         try {
-          const b64 = await blobToBase64(blob);
-          const { data, error } = await supabase.functions.invoke("munsit-transcribe", {
-            body: { audioBase64: b64, mimeType: "audio/webm" },
+          // The learner speaks ENGLISH here. Munsit is the Arabic recogniser,
+          // and an Arabic ASR fed English does not error — it returns
+          // Arabic-script noise (the exact failure score-shadow-attempt was
+          // fixed for). Deepgram nova-3 EN is the same route shadowing takes.
+          const formData = new FormData();
+          formData.append("audio", blob, "take.webm");
+          formData.append("language", "en");
+          const { data, error } = await supabase.functions.invoke("deepgram-transcribe", {
+            body: formData,
           });
           if (showCapToastIfLimited(error, data)) return;
           if (error) throw error;
@@ -529,15 +535,4 @@ export default function ConversationSimulator() {
       )}
     </AppShell>
   );
-}
-
-async function blobToBase64(blob: Blob): Promise<string> {
-  const buf = await blob.arrayBuffer();
-  const bytes = new Uint8Array(buf);
-  let binary = "";
-  const chunk = 0x8000;
-  for (let i = 0; i < bytes.length; i += chunk) {
-    binary += String.fromCharCode.apply(null, Array.from(bytes.subarray(i, i + chunk)) as any);
-  }
-  return btoa(binary);
 }

@@ -381,7 +381,6 @@ export const defaultFunctions: Record<string, FunctionHandler> = {
   "classify-tutor-segments": () => ok({ segments: [] }),
   "backfill-literal-translations": () => ok({ updated: 0 }),
   "notify-due-reviews": () => ok({ sent: 0 }),
-  "conversation-practice": () => ok({ reply: "" }),
 };
 
 /** The 429 an over-quota free user gets, exactly as `_shared/usageCap.ts` sends it. */

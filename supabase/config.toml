@@ -81,9 +81,6 @@ verify_jwt = false
 [functions.discover-trending-videos]
 verify_jwt = false
 
-[functions.conversation-practice]
-verify_jwt = false
-
 [functions.azure-pronunciation]
 verify_jwt = false
 
@@ -200,6 +197,16 @@ verify_jwt = true
 # valid JWT, so verify_jwt = true does not block the scheduler); also
 # runnable by an admin. Guarded inside as well.
 [functions.pregenerate-daily]
+verify_jwt = true
+
+# Due-review web push. Run HOURLY on a schedule with the service-role key —
+# the function itself finds learners whose local time is in the evening
+# window (17:00–21:00), caps at one push per 20h, and skips under 5 due
+# cards, so an hourly tick is cheap and anything less frequent misses
+# whole timezones. This entry existed as a function with NO schedule
+# anywhere, which meant the entire push stack (subscriptions, Settings
+# toggle, VAPID plumbing) could never fire.
+[functions.notify-due-reviews]
 verify_jwt = true
 
 # Hakiya content bridge: admin-triggered snapshot sync of the sibling app's
