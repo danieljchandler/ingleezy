@@ -45,6 +45,13 @@ const ListenEpisode = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [playingLine, setPlayingLine] = useState<number | null>(null);
   const [isPlayingFull, setIsPlayingFull] = useState(false);
+  // Slow playback is a comprehension scaffold, and a listening surface with
+  // no rate control locks the learner at native speed exactly where they most
+  // need 0.75x. Applied to the full episode and to every line replay; changing
+  // it mid-play retunes the current audio element live.
+  const [playbackRate, setPlaybackRate] = useState(1.0);
+  const playbackRateRef = useRef(playbackRate);
+  playbackRateRef.current = playbackRate;
   const [addedVocab, setAddedVocab] = useState<Set<string>>(new Set());
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const incrementedRef = useRef(false);
@@ -68,6 +75,7 @@ const ListenEpisode = () => {
       const url = await lineAudio.mutateAsync({ episodeId: episode.id, lineIndex });
       if (audioRef.current) audioRef.current.pause();
       const a = new Audio(url);
+      a.playbackRate = playbackRateRef.current;
       audioRef.current = a;
       setPlayingLine(lineIndex);
       a.onended = () => setPlayingLine(null);
@@ -87,6 +95,7 @@ const ListenEpisode = () => {
       return;
     }
     const a = new Audio(episode.full_audio_url);
+    a.playbackRate = playbackRateRef.current;
     audioRef.current = a;
     a.onended = () => setIsPlayingFull(false);
     a.onerror = () => { setIsPlayingFull(false); toast.error("تعذّر التشغيل"); };
@@ -126,6 +135,11 @@ const ListenEpisode = () => {
 
   const isOwner = user?.id === episode.creator_id;
 
+  const changeRate = (rate: number) => {
+    setPlaybackRate(rate);
+    if (audioRef.current) audioRef.current.playbackRate = rate;
+  };
+
   return (
     <AppShell>
       <div className="space-y-5 pb-24">
@@ -157,6 +171,25 @@ const ListenEpisode = () => {
               )}
             </div>
           )}
+
+          <div className="flex items-center justify-between pt-1">
+            <span className="text-xs text-muted-foreground">سرعة التشغيل</span>
+            <div className="flex gap-1.5">
+              {[0.7, 0.85, 1.0].map((rate) => (
+                <button
+                  key={rate}
+                  onClick={() => changeRate(rate)}
+                  className={
+                    playbackRate === rate
+                      ? "px-2.5 py-1 rounded-md text-xs font-medium bg-primary text-primary-foreground"
+                      : "px-2.5 py-1 rounded-md text-xs font-medium bg-muted text-muted-foreground hover:bg-muted/80"
+                  }
+                >
+                  {rate === 1.0 ? "1x" : `${rate}x`}
+                </button>
+              ))}
+            </div>
+          </div>
         </header>
 
         <section className="space-y-3">

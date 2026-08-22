@@ -54,6 +54,13 @@ const SPEED_RATES = [
   { value: 1.5, label: "1.5x", xp: 20 },
 ];
 
+/** Slow-down scaffold for dictation/comprehension — no XP attached. */
+const SCAFFOLD_RATES = [
+  { value: 0.7, label: "0.7x" },
+  { value: 0.85, label: "0.85x" },
+  { value: 1.0, label: "1x" },
+];
+
 const ListeningPractice = () => {
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
@@ -114,6 +121,10 @@ const ListeningPractice = () => {
     setTotalAnswered(0);
     setShowResult(false);
     setAnswer("");
+    // Each mode starts at natural speed: the scaffold rates (dictation /
+    // comprehension) and the challenge rates (speed) are different sets, and
+    // a 1.5x left over from a speed run must not leak into a dictation.
+    setSpeedRate(1.0);
 
     try {
       // Try pre-approved content first
@@ -437,8 +448,11 @@ const ListeningPractice = () => {
       {/* Progress bar */}
       <Progress value={progress} className="h-2 mb-6" />
 
-      {/* Speed selector for speed mode */}
-      {mode === "speed" && (
+      {/* Speed selector. Two different jobs by mode: in speed mode faster is
+          the challenge and pays more XP; in dictation/comprehension SLOWER is
+          a comprehension scaffold — no XP attached, because slowing down to
+          hear is a technique, not a penalty. */}
+      {mode === "speed" ? (
         <div className="mb-6 space-y-2">
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">سرعة التشغيل</span>
@@ -451,6 +465,26 @@ const ListeningPractice = () => {
                 onClick={() => setSpeedRate(rate.value)}
                 className={cn(
                   "flex-1 py-2 rounded-lg text-sm font-medium transition-all",
+                  speedRate === rate.value
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-muted-foreground hover:bg-muted/80"
+                )}
+              >
+                {rate.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div className="mb-6 flex items-center justify-between gap-3">
+          <span className="text-sm text-muted-foreground">سرعة التشغيل</span>
+          <div className="flex gap-2">
+            {SCAFFOLD_RATES.map((rate) => (
+              <button
+                key={rate.value}
+                onClick={() => setSpeedRate(rate.value)}
+                className={cn(
+                  "px-3 py-1.5 rounded-lg text-sm font-medium transition-all",
                   speedRate === rate.value
                     ? "bg-primary text-primary-foreground"
                     : "bg-muted text-muted-foreground hover:bg-muted/80"
