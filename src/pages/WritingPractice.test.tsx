@@ -30,6 +30,12 @@ vi.mock("@/components/layout/AppShell", () => ({
 vi.mock("@/components/sounds/SoundAudioButton", () => ({
   SoundAudioButton: ({ label }: { label?: string }) => <button aria-label={label} />,
 }));
+// The review-landed XP award is gamification's concern, not this page's —
+// stub it so the test needs neither a QueryClient nor an auth session.
+const addXP = vi.hoisted(() => vi.fn());
+vi.mock("@/hooks/useGamification", () => ({
+  useAddXP: () => ({ mutate: addXP }),
+}));
 
 const prompt = {
   scenario_arabic: "صاحبك يرتب لنهاية الأسبوع.",

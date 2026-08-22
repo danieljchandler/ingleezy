@@ -4,6 +4,7 @@ import { useAuth } from "./useAuth";
 import { useDialect } from "@/contexts/DialectContext";
 import { calculateNextReview, elapsedDaysSince, type Rating } from "@/lib/spacedRepetition";
 import { useDesiredRetention } from "./useDesiredRetention";
+import { useAddXP } from "./useGamification";
 
 const sb = supabase as any;
 
@@ -160,6 +161,7 @@ export const useReviewPhrase = () => {
   const { user } = useAuth();
   const qc = useQueryClient();
   const desiredRetention = useDesiredRetention();
+  const addXP = useAddXP();
   return useMutation({
     mutationFn: async ({
       phraseId,
@@ -209,9 +211,15 @@ export const useReviewPhrase = () => {
         .upsert(row, { onConflict: "user_id,phrase_id" });
       if (error) throw error;
     },
-    onSuccess: () => {
+    onSuccess: (_data, { quality }) => {
       qc.invalidateQueries({ queryKey: ["user-set-phrases"] });
       qc.invalidateQueries({ queryKey: ["user-set-phrases-due"] });
+      // Same per-rating amounts as the word decks — this deck was the one
+      // review surface that paid nothing, while the queue promised due×3.
+      addXP.mutate({
+        amount: quality >= 5 ? 20 : quality >= 4 ? 15 : quality >= 3 ? 10 : 5,
+        reason: "set_phrases",
+      });
     },
   });
 };

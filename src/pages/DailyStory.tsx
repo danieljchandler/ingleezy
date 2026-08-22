@@ -10,6 +10,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useDailyStory, useGenerateDailyStory } from "@/hooks/useDailyStory";
 import { useDisplayPrefs } from "@/hooks/useDisplayPrefs";
 import { markTaskCompletedToday, isTaskCompletedToday } from "@/lib/todayCompletion";
+import { useAddXP } from "@/hooks/useGamification";
 import { toast } from "sonner";
 import { LoadingPanel } from "@/components/loading/LoadingPanel";
 
@@ -19,6 +20,7 @@ const DailyStoryPage = () => {
   const { data: story, isLoading } = useDailyStory();
   const generate = useGenerateDailyStory();
   const { prefs } = useDisplayPrefs();
+  const addXP = useAddXP();
   const showEnglish = prefs?.showEnglish ?? false;
 
   // Auto-trigger generation on first visit if none exists
@@ -28,11 +30,15 @@ const DailyStoryPage = () => {
     }
   }, [authLoading, user, isLoading, story, generate]);
 
-  // Mark task complete when story is shown
+  // Mark task complete when story is shown. The XP rides the same daily
+  // guard, so opening the story pays once — the queue's estimate promised 25
+  // and this page was one of the surfaces that paid nothing.
   useEffect(() => {
     if (story && !isTaskCompletedToday("daily-story")) {
       markTaskCompletedToday("daily-story");
+      addXP.mutate({ amount: 25, reason: "daily_story" });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [story]);
 
   /**

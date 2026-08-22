@@ -2,7 +2,8 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 
-import { useAzurePronunciation, scoreBand, type PronunciationResult, type WordResult } from "@/hooks/useAzurePronunciation";
+import { useAzurePronunciation, scoreBand, phonemeSubstitutions, type PronunciationResult, type WordResult } from "@/hooks/useAzurePronunciation";
+import { useAddXP } from "@/hooks/useGamification";
 import { AppShell } from "@/components/layout/AppShell";
 import { LoadingPanel } from "@/components/loading/LoadingPanel";
 import { PageCorner } from "@/components/shell/PageCorner";
@@ -36,6 +37,7 @@ const PronunciationPractice = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { assess, result, isLoading, error, reset } = useAzurePronunciation();
+  const addXP = useAddXP();
   const { activeDialect } = useDialect();
   // The studied language is English; the learner's dialect only buckets the
   // recorded errors. (Word/sentence modes assess English — shadow mode still
@@ -112,6 +114,9 @@ const PronunciationPractice = () => {
           const res = await assess(blob, referenceText, assessLocale, activeDialect);
           if (res) {
             setSessionScores((prev) => [...prev, res.overall]);
+            // A scored take is work; a good one is more. This page awarded
+            // nothing while the review decks paid per rating.
+            addXP.mutate({ amount: res.overall >= 75 ? 10 : 5, reason: "pronunciation" });
           }
         }
       };
@@ -353,12 +358,21 @@ const PronunciationPractice = () => {
               <p className={cn("text-lg font-semibold", band.color)}>{band.label}</p>
             </div>
 
-            {/* Sub-scores */}
-            <div className="grid grid-cols-3 gap-3 mb-5">
+            {/* Sub-scores — prosody (stress/rhythm/intonation) rides along when
+                Azure scored it: the one suprasegmental signal the app has. */}
+            <div
+              className={cn(
+                "grid gap-3 mb-5",
+                typeof result.prosody === "number" ? "grid-cols-4" : "grid-cols-3",
+              )}
+            >
               {[
                 { label: "الدقة", value: result.accuracy },
                 { label: "الطلاقة", value: result.fluency },
                 { label: "الاكتمال", value: result.completeness },
+                ...(typeof result.prosody === "number"
+                  ? [{ label: "النبرة والإيقاع", value: result.prosody }]
+                  : []),
               ].map(({ label, value }) => (
                 <div key={label} className="text-center">
                   <p className="text-xl font-bold text-foreground">{Math.round(value)}</p>
@@ -397,6 +411,36 @@ const PronunciationPractice = () => {
                 </div>
               </div>
             )}
+
+            {/* What we heard instead — per-phoneme nbest turned into the one
+                sentence that actually teaches: you said /b/ where /p/ goes.
+                For an Arabic speaker these swaps are the documented set
+                (p→b, v→f, vowel pairs), so naming them is the coaching. */}
+            {(() => {
+              const subs = phonemeSubstitutions(result.words);
+              if (subs.length === 0) return null;
+              return (
+                <div className="mb-5">
+                  <p className="text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider">
+                    ماذا سمعنا
+                  </p>
+                  <div className="flex flex-wrap justify-center gap-2">
+                    {subs.map((s, i) => (
+                      <div
+                        key={i}
+                        className="px-3 py-1.5 rounded-lg text-sm bg-muted border border-border text-foreground"
+                      >
+                        <span className="font-english font-semibold">/{s.heard}/</span>
+                        <span className="text-muted-foreground"> بدل </span>
+                        <span className="font-english font-semibold">/{s.target}/</span>
+                        <span className="text-muted-foreground"> في </span>
+                        <span className="font-english">{s.word}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
 
             {/* Action buttons */}
             <div className="flex gap-2">

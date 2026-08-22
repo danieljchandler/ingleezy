@@ -186,9 +186,20 @@ serve(async (req) => {
         continue;
       }
 
+      // Arabic, with Arabic number agreement (one/two/3-10/11+) — the app
+      // chrome speaks Arabic everywhere, and this English push was the one
+      // message the app sent to a learner's LOCK SCREEN in the language they
+      // came here not knowing.
+      const cards = total === 1
+        ? "بطاقة واحدة مستحقة"
+        : total === 2
+        ? "بطاقتان مستحقتان"
+        : total <= 10
+        ? `${total} بطاقات مستحقة`
+        : `${total} بطاقة مستحقة`;
       const payload = JSON.stringify({
-        title: "Your cards are waiting",
-        body: `${total} card${total === 1 ? "" : "s"} due — a few minutes keeps the streak.`,
+        title: "بطاقاتك تنتظرك",
+        body: `${cards} — دقائق قليلة تحفظ سلسلتك.`,
         url: "/review",
         tag: "ingleezy-due",
       });

@@ -308,9 +308,12 @@ Deno.test("notify-due-reviews sends a real notification and records the time", a
   assertEquals(sends.length, 1);
   assertEquals(sends[0].endpoint, "https://push.test/endpoint-1");
   // The payload names the count and points at the deck, so the notification is
-  // actionable from the lock screen rather than a prompt to go and look.
-  // 12 = four recognition + four production + four personal.
-  assertStringIncludes(sends[0].payload, "12 cards due");
+  // actionable from the lock screen rather than a prompt to go and look — and
+  // it is Arabic, because a lock-screen message in the language the learner
+  // came here NOT knowing is the one message they cannot decode.
+  // 12 = four recognition + four production + four personal; 11+ takes the
+  // Arabic many-form (singular noun after the numeral).
+  assertStringIncludes(sends[0].payload, "12 بطاقة مستحقة");
   assertStringIncludes(sends[0].payload, '"url":"/review"');
 
   const update = bodies[calls.findIndex((u, i) =>
@@ -321,7 +324,7 @@ Deno.test("notify-due-reviews sends a real notification and records the time", a
   assertStringIncludes(update, "last_sent_at");
 });
 
-Deno.test("notify-due-reviews can never use its singular wording", async () => {
+Deno.test("notify-due-reviews can never use its one/two wording", async () => {
   __reset();
   await call(
     {},
@@ -331,11 +334,11 @@ Deno.test("notify-due-reviews can never use its singular wording", async () => {
     }),
   );
 
-  // Pinned as dead code. The payload pluralises with
-  // `${total} card${total === 1 ? "" : "s"}`, but nothing is sent below five
-  // due cards — so `total` is never 1 and the singular branch cannot run. The
-  // smallest notification a learner can receive says "5 cards due".
-  assertStringIncludes(__sends()[0].payload, "5 cards due");
+  // Pinned as dead code. The payload carries full Arabic number agreement
+  // (one/two/3-10/11+), but nothing is sent below five due cards — so the
+  // one- and two-forms cannot run. The smallest notification a learner can
+  // receive uses the 3-10 few-form: "5 بطاقات مستحقة".
+  assertStringIncludes(__sends()[0].payload, "5 بطاقات مستحقة");
 });
 
 Deno.test("notify-due-reviews retires a subscription the browser dropped", async () => {

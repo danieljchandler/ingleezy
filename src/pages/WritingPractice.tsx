@@ -16,6 +16,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useDialect } from "@/contexts/DialectContext";
 import { labelForKind } from "@/lib/mistakes";
+import { useAddXP } from "@/hooks/useGamification";
 import { CheckCircle2, Ear, Loader2, PenLine, RefreshCw, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
@@ -65,6 +66,7 @@ const WriteTab = () => {
   const [text, setText] = useState("");
   const [review, setReview] = useState<WritingReview | null>(null);
   const [busy, setBusy] = useState(false);
+  const addXP = useAddXP();
 
   const loadPrompt = useCallback(async () => {
     setPromptLoading(true);
@@ -107,6 +109,9 @@ const WriteTab = () => {
       return;
     }
     setReview(data.review as WritingReview);
+    // Writing a reply and getting it reviewed is a full exercise, and this
+    // page was one of the surfaces that awarded nothing for it.
+    addXP.mutate({ amount: 15, reason: "writing" });
   };
 
   return (

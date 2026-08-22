@@ -3,7 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { Bookmark, MessageCircleQuestion, Captions, RotateCcw, Play, Flame } from "lucide-react";
 import { AppDock } from "@/components/shell/AppDock";
 import { ProfileEmblem } from "@/components/shell/ProfileEmblem";
-import { useDiscoverFeed } from "@/hooks/useDiscoverFeed";
+import { useDiscoverFeed, type FeedItem } from "@/hooks/useDiscoverFeed";
+import { useCurrentStreak } from "@/hooks/useGamification";
 import { useSwipeSurfaces } from "@/hooks/useSwipeSurfaces";
 import { useAuth } from "@/hooks/useAuth";
 import { IngleezyMark } from "@/components/brand/IngleezyMark";
@@ -34,6 +35,7 @@ const Feed = () => {
   const { isAuthenticated, loading: authLoading } = useAuth();
   const [seed] = useState(() => Math.floor(Math.random() * 100000));
   const { data: feed, isLoading } = useDiscoverFeed(seed);
+  const { data: streak } = useCurrentStreak();
   const swipe = useSwipeSurfaces({ onNext: () => navigate("/choose") });
 
   const items = useMemo(() => feed?.items ?? [], [feed]);
@@ -76,7 +78,7 @@ const Feed = () => {
           className="pointer-events-auto flex items-center gap-1 font-display text-sm not-italic text-accent"
         >
           <Flame className="h-4 w-4" />
-          <span className="tabular-nums">0</span>
+          <span className="tabular-nums">{streak ?? 0}</span>
         </Link>
       </header>
 
@@ -88,9 +90,9 @@ const Feed = () => {
         <EmptyFeed />
       ) : (
         <ul className="h-[100dvh] snap-y snap-mandatory overflow-y-auto overscroll-y-contain">
-          {items.map(({ video }) => (
-            <li key={video.id} className="relative h-[100dvh] snap-start snap-always">
-              <Clip video={video} />
+          {items.map((item) => (
+            <li key={item.video.id} className="relative h-[100dvh] snap-start snap-always">
+              <Clip video={item.video} feed={item} />
             </li>
           ))}
         </ul>
@@ -106,10 +108,17 @@ const Feed = () => {
  * an embed per card would burn data on a phone and is the single fastest way
  * to make a feed feel expensive to open.
  */
-function Clip({ video }: { video: { id: string; title: string; title_arabic: string | null; thumbnail_url: string | null; duration_seconds: number | null } }) {
+function Clip({ video, feed }: {
+  video: { id: string; title: string; title_arabic: string | null; thumbnail_url: string | null; duration_seconds: number | null };
+  feed?: FeedItem;
+}) {
   const mins = video.duration_seconds
     ? `${Math.floor(video.duration_seconds / 60)}:${String(video.duration_seconds % 60).padStart(2, "0")}`
     : null;
+  // The recommender computes a reason and a coverage number per item and the
+  // feed used to throw both away — the one page every learner sees showed
+  // none of its own personalisation. The chip is the recommender's voice.
+  const coverage = feed && feed.comprehension !== 0.5 ? Math.round(feed.comprehension * 100) : null;
 
   return (
     <>
@@ -148,10 +157,28 @@ function Clip({ video }: { video: { id: string; title: string; title_arabic: str
       </div>
 
       <div className="absolute inset-x-0 bottom-28 z-20 px-3.5">
-        {mins && (
-          <span className="mb-2 inline-block rounded bg-black/50 px-2 py-0.5 font-display text-[10px] not-italic tabular-nums">
-            {mins}
-          </span>
+        <div className="mb-2 flex items-center gap-1.5">
+          {mins && (
+            <span className="inline-block rounded bg-black/50 px-2 py-0.5 font-display text-[10px] not-italic tabular-nums">
+              {mins}
+            </span>
+          )}
+          {feed?.reason && (
+            <span className="inline-block rounded bg-black/50 px-2 py-0.5 text-[10px] text-white/90">
+              {feed.reason}
+            </span>
+          )}
+        </div>
+        {coverage !== null && (
+          <div className="mb-2 h-1 w-24 overflow-hidden rounded-full bg-white/20" title={`تعرف ${coverage}% من كلماته`}>
+            <div
+              className={cn(
+                "h-full rounded-full",
+                coverage >= 90 ? "bg-emerald-400" : coverage >= 70 ? "bg-amber-400" : "bg-rose-400",
+              )}
+              style={{ width: `${Math.max(6, coverage)}%` }}
+            />
+          </div>
         )}
         <p dir="ltr" className="font-english text-[19px] font-semibold leading-snug">
           {video.title}

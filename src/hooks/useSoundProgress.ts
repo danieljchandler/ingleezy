@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { ENGLISH_SOUNDS, SOUND_STEPS, type SoundStepId } from "@/data/englishSounds";
+import { useAddXP } from "@/hooks/useGamification";
 
 /**
  * Progress through the English Sounds journey, formerly the Arabic Alphabet
@@ -34,6 +35,7 @@ export interface CheckpointRow {
 export function useSoundProgress() {
   const { user } = useAuth();
   const qc = useQueryClient();
+  const addXP = useAddXP();
 
   const query = useQuery({
     queryKey: ["sound-progress", user?.id],
@@ -94,8 +96,11 @@ export function useSoundProgress() {
       if (error) throw error;
       return { mastered };
     },
-    onSuccess: () => {
+    onSuccess: ({ mastered }) => {
       qc.invalidateQueries({ queryKey: ["sound-progress", user?.id] });
+      // Mastering a stop is a real unit of work (six steps) and paid nothing.
+      // Guarded by `mastered`, which is true exactly once per sound.
+      if (mastered) addXP.mutate({ amount: 20, reason: "sound_mastered" });
     },
   });
 

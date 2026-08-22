@@ -107,10 +107,11 @@ Deno.test("the undeclared functions are listed, so the default is a choice", asy
   // Adjust deliberately, in the same commit that adds or declares a function.
   assertEquals(
     undeclared.length,
-    // 35 since the corpus-mining prune deleted `vet-corpus-sentences`
-    // (was undeclared); before that 36 when `sync-hakiya-videos` was
-    // declared explicitly.
-    35,
+    // 34 since `notify-due-reviews` was declared explicitly (with its
+    // scheduling note — the sender had no cron anywhere); before that 35
+    // since the corpus-mining prune deleted `vet-corpus-sentences`
+    // (was undeclared), and 36 when `sync-hakiya-videos` was declared.
+    34,
     `The number of functions with no config.toml entry changed (now ${undeclared.length}: ` +
       `${undeclared.join(", ")}). They inherit verify_jwt = true. If that is right, ` +
       `update this count; if not, add a block.`,

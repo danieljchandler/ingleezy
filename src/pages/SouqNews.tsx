@@ -10,7 +10,8 @@ import { Badge } from "@/components/ui/badge";
 import { ArticleQuiz } from "@/components/souq-news/ArticleQuiz";
 import { SentenceReader } from "@/components/shared/SentenceReader";
 import { useAddUserVocabulary } from "@/hooks/useUserVocabulary";
-import { markTaskCompletedToday } from "@/lib/todayCompletion";
+import { markTaskCompletedToday, isTaskCompletedToday } from "@/lib/todayCompletion";
+import { useAddXP } from "@/hooks/useGamification";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import {
@@ -59,6 +60,7 @@ const SouqNews = () => {
   const { user } = useAuth();
   const [expandedCards, setExpandedCards] = useState<Set<number>>(new Set());
   const addVocab = useAddUserVocabulary();
+  const addXP = useAddXP();
 
   const {
     data: articles,
@@ -92,8 +94,13 @@ const SouqNews = () => {
       if (opening) {
         next.add(i);
         // Reaching for the Arabic summary is the surest signal the page has
-        // that the learner actually worked through the English above it.
-        markTaskCompletedToday("souq");
+        // that the learner actually worked through the English above it. XP
+        // rides the same once-a-day transition — the queue promised 15 for
+        // this task and the page paid nothing.
+        if (!isTaskCompletedToday("souq")) {
+          markTaskCompletedToday("souq");
+          addXP.mutate({ amount: 15, reason: "souq_news" });
+        }
       } else {
         next.delete(i);
       }
