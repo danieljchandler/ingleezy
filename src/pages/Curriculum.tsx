@@ -13,8 +13,10 @@ import {
   indexProgress,
   lessonPathState,
   stageCompletion,
+  suggestedStageId,
   type PathLesson,
 } from "@/lib/lessonPath";
+import { useUserLevel } from "@/hooks/useUserLevel";
 import { cn } from "@/lib/utils";
 import { CheckCircle2, Loader2, PlayCircle, Circle } from "lucide-react";
 import { ChevronOpen } from "@/components/shared/DirectionalIcon";
@@ -40,8 +42,18 @@ const Curriculum = () => {
   const { data: stages, isLoading: stagesLoading } = useStages();
   const { data: lessons, isLoading: lessonsLoading } = useAllLessons();
   const { data: progressRows } = useLessonProgress();
+  const { placementLevel } = useUserLevel();
 
   const progress = useMemo(() => indexProgress(progressRows ?? []), [progressRows]);
+
+  // Placement wrote a CEFR band; until now this page never read it, so a B1
+  // learner opened on Foundations like everyone else. Suggestion only — the
+  // gating stays soft (see the header comment) — and it yields to actual
+  // progress: once anything is started, the learner has their own place.
+  const suggestedStage = useMemo(() => {
+    if ((progressRows ?? []).length > 0) return null;
+    return suggestedStageId(stages ?? [], placementLevel);
+  }, [stages, placementLevel, progressRows]);
 
   // Lessons carry stage_id; useLessons maps to a display shape, so group here.
   const lessonsByStage = useMemo(() => {
@@ -126,11 +138,18 @@ const Curriculum = () => {
               >
                 {stage.name}
               </h2>
-              {stage.cefr_level && (
-                <span className="shrink-0 text-[10px] font-semibold bg-muted text-muted-foreground px-1.5 py-0.5 rounded">
-                  {stage.cefr_level}
-                </span>
-              )}
+              <span className="flex items-center gap-1.5 shrink-0">
+                {stage.id === suggestedStage && (
+                  <span className="text-[10px] font-semibold bg-primary text-primary-foreground px-1.5 py-0.5 rounded">
+                    ابدأ من هنا — مستواك {placementLevel}
+                  </span>
+                )}
+                {stage.cefr_level && (
+                  <span className="text-[10px] font-semibold bg-muted text-muted-foreground px-1.5 py-0.5 rounded">
+                    {stage.cefr_level}
+                  </span>
+                )}
+              </span>
             </div>
 
             <div className="flex items-center gap-2 px-1 mb-3">

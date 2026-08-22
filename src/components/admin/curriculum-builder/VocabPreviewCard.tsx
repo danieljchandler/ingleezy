@@ -28,7 +28,7 @@ export const VocabPreviewCard = ({ data, onApprove }: VocabPreviewCardProps) => 
     new Set(vocabulary.map((_, i) => i)),
   );
   const [selectedLessonId, setSelectedLessonId] = useState<string>('');
-  const { data: allLessons } = useAllLessons();
+  const { data: allLessons } = useAllLessons({ includeDrafts: true });
 
   const toggleIndex = (idx: number) => {
     setSelectedIndices((prev) => {

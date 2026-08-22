@@ -23,12 +23,23 @@ export interface Lesson {
   unlock_condition: string | null;
 }
 
-/** Fetch lessons from the lessons table, filtered by active dialect module and optional stage */
-export const useLessons = (stageId?: string | undefined) => {
+/**
+ * Fetch lessons from the lessons table, filtered by active dialect module and
+ * optional stage. Published only by default — the curriculum builder writes
+ * drafts into the same table, and while RLS hides them from learners in
+ * production, an admin browsing /curriculum (and the test emulator, which has
+ * no RLS) would see half-written lessons mixed into the path. Admin surfaces
+ * that genuinely need drafts opt in.
+ */
+export const useLessons = (
+  stageId?: string | undefined,
+  opts?: { includeDrafts?: boolean },
+) => {
   const { activeDialect } = useDialect();
+  const includeDrafts = opts?.includeDrafts ?? false;
 
   return useQuery({
-    queryKey: ['lessons', stageId, activeDialect],
+    queryKey: ['lessons', stageId, activeDialect, includeDrafts],
     queryFn: async () => {
       let query = supabase
         .from('lessons')
@@ -36,6 +47,9 @@ export const useLessons = (stageId?: string | undefined) => {
         .eq('dialect_module', activeDialect)
         .order('display_order', { ascending: true });
 
+      if (!includeDrafts) {
+        query = query.eq('status', 'published');
+      }
       if (stageId) {
         query = query.eq('stage_id', stageId);
       }
@@ -64,4 +78,4 @@ export const useLessons = (stageId?: string | undefined) => {
 };
 
 /** Fetch all lessons across all stages (alias) */
-export const useAllLessons = () => useLessons();
+export const useAllLessons = (opts?: { includeDrafts?: boolean }) => useLessons(undefined, opts);

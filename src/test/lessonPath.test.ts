@@ -7,6 +7,7 @@ import {
   planRowText,
   planRows,
   stageCompletion,
+  suggestedStageId,
   type LessonProgressRow,
   type PathLesson,
 } from "@/lib/lessonPath";
@@ -248,5 +249,45 @@ describe("planRows", () => {
 
   it("returns an empty array for an empty section", () => {
     expect(planRows([])).toEqual([]);
+  });
+});
+
+describe("suggestedStageId", () => {
+  const stage = (id: string, order: number, cefr: string | null) => ({
+    id,
+    display_order: order,
+    cefr_level: cefr,
+  });
+  const STAGES = [
+    stage("s1", 1, "Pre-A1 → A1"),
+    stage("s2", 2, "A1 → A2"),
+    stage("s3", 3, "A2 → B1"),
+    stage("s4", 4, "B1 → B2"),
+  ];
+
+  it("routes a placed learner to the stage whose entry level they hold", () => {
+    expect(suggestedStageId(STAGES, "A2")).toBe("s3");
+    expect(suggestedStageId(STAGES, "B1")).toBe("s4");
+  });
+
+  it("caps at the highest stage for a level beyond every entry point", () => {
+    // A C1 learner still gets the top stage rather than nothing.
+    expect(suggestedStageId(STAGES, "C1")).toBe("s4");
+  });
+
+  it("starts an absolute beginner at the bottom", () => {
+    expect(suggestedStageId(STAGES, "Pre-A1")).toBe("s1");
+  });
+
+  it("suggests nothing without a placement", () => {
+    expect(suggestedStageId(STAGES, null)).toBeNull();
+    expect(suggestedStageId(STAGES, undefined)).toBeNull();
+  });
+
+  it("suggests nothing for an unparsable level or band", () => {
+    // No suggestion beats a wrong one.
+    expect(suggestedStageId(STAGES, "advanced")).toBeNull();
+    expect(suggestedStageId([stage("sX", 1, "later")], "B1")).toBeNull();
+    expect(suggestedStageId([stage("sX", 1, null)], "B1")).toBeNull();
   });
 });

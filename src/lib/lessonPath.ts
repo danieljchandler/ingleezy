@@ -182,3 +182,41 @@ export function planRowText(row: Record<string, string>): PlanRowText | null {
 export function planRows(rows: Record<string, string>[]): PlanRowText[] {
   return rows.map(planRowText).filter((r): r is PlanRowText => r !== null);
 }
+
+// ── Placement → suggested starting stage ────────────────────────────────────
+
+const CEFR_ORDER = ["Pre-A1", "A1", "A2", "B1", "B2", "C1", "C2"];
+
+/** A stage, narrowed to what the suggestion needs. */
+export interface PlacementStage {
+  id: string;
+  display_order: number;
+  /** Free text like "A2 → B1" or "Pre-A1 → A1"; the range's START names the
+   *  level a learner entering the stage is expected to hold. */
+  cefr_level: string | null;
+}
+
+/**
+ * The stage a placed learner should start from: the highest stage whose
+ * entry level they have reached. Placement wrote a CEFR band for months while
+ * the curriculum page never read it, so a B1 learner opened on "Foundations"
+ * like everyone else. Null when the learner has no placement or no stage
+ * carries a parsable band — no suggestion beats a wrong one.
+ */
+export function suggestedStageId(
+  stages: PlacementStage[],
+  placementLevel: string | null | undefined,
+): string | null {
+  if (!placementLevel) return null;
+  const learnerIdx = CEFR_ORDER.indexOf(placementLevel);
+  if (learnerIdx < 0) return null;
+
+  let best: { id: string; entryIdx: number } | null = null;
+  for (const stage of [...stages].sort((a, b) => a.display_order - b.display_order)) {
+    const entry = stage.cefr_level?.split("→")[0]?.trim() ?? "";
+    const entryIdx = CEFR_ORDER.indexOf(entry);
+    if (entryIdx < 0 || entryIdx > learnerIdx) continue;
+    if (!best || entryIdx >= best.entryIdx) best = { id: stage.id, entryIdx };
+  }
+  return best?.id ?? null;
+}

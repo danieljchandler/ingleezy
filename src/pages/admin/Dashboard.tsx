@@ -12,7 +12,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { activeDialect } = useDialect();
   const { user, isAdmin, isContentReviewer, isRecorder, role, signOut, loading: authLoading } = useAdminAuth();
-  const { data: lessons, isLoading: lessonsLoading } = useLessons();
+  const { data: lessons, isLoading: lessonsLoading } = useLessons(undefined, { includeDrafts: true });
 
   // Get total word count for the active dialect
   const { data: totalWords } = useQuery({
