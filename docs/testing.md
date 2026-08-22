@@ -135,19 +135,19 @@ is enough and the Supabase CLI is not needed.
 
 ### What it currently finds
 
-Both are recorded as pinned baselines rather than fixed, so they cannot get
-worse; shrinking them is the goal.
+Nothing — both pinned baselines reached empty in August 2026 and the tests now
+hold them there:
 
-- **7 of 137 migrations do not replay from scratch.** Five create something an
-  earlier migration already created; two reference tables nothing creates.
-- **Three tables exist in production but in no migration**: `processed_videos`,
-  `review_streaks` and `subscribers`. A rebuilt database would not have them.
-  `subscribers` is the significant one — `_shared/usageCap.ts` reads it to
-  decide whether a caller is a paying customer, so on a rebuilt database every
-  user would look free-tier. It is not in the generated types either.
+- **Every migration replays from scratch.** The duplicate-snapshot failures
+  were cleared first; the last two referenced tables no migration created.
+- **No table exists in production but in no migration.** `subscribers` got its
+  migration in 20260812103000; `review_streaks` and `processed_videos` got
+  theirs in the back-dated 20260529145900/150000 pair, created from the shape
+  the generated types record for production (`lessons.status` was back-filled
+  the same way for the May RLS policy that referenced it early).
 
-Fixing the last two means writing migrations for tables whose real shape only
-production knows, which needs a schema dump rather than a guess.
+A new entry appearing in either pin means a feature shipped against schema
+only production has — the exact debt these checks exist to stop.
 
 ## Time
 

@@ -23,20 +23,16 @@ const inventory = extractQueries();
 const schema = loadSchema();
 
 /**
- * Tables the app uses that no migration creates.
+ * Tables the app uses that no migration creates: none any more.
  *
- * Found by replaying supabase/migrations/ against a stock Postgres: these exist
- * in the production database but are not in the tracked migration history, so a
- * rebuilt environment would not have them. Listed rather than fixed because
- * writing the missing migrations means guessing at columns and constraints that
- * only production knows — that needs a schema dump, not a test.
- *
- * `subscribers` is the one that matters most: `_shared/usageCap.ts` reads it to
- * decide whether a caller is a paying customer, so it is the only thing
- * separating paid from free on every AI endpoint. It is not even in the
- * generated types.
+ * `subscribers` got its migration in 20260812103000; `review_streaks` and
+ * `processed_videos` got theirs in the back-dated 20260529145900/150000 pair,
+ * created from the shape the generated types record for production. The set
+ * stays (empty) so a new entry has an obvious place to land — and an obvious
+ * question to answer, because every table here is one a rebuilt database
+ * silently lacks.
  */
-const UNTRACKED_TABLES = new Set(["processed_videos", "review_streaks"]);
+const UNTRACKED_TABLES = new Set<string>([]);
 
 /**
  * Tables that migrations create but the generated types omit.
@@ -112,13 +108,13 @@ describe("tables", () => {
   });
 
   it("records the tables that exist in production but in no migration", () => {
-    // Pinned so the list cannot grow unnoticed. Shrinking it is the goal: each
-    // one is a table a rebuilt database would be missing.
+    // Pinned so the list cannot grow unnoticed. It reached empty when the
+    // last two untracked tables got real migrations; keep it that way.
     const referenced = [...UNTRACKED_TABLES].filter(
       (table) => inventory.tables.has(table) || schema.tables.has(table),
     );
 
-    expect(referenced.sort()).toEqual(["processed_videos", "review_streaks"]);
+    expect(referenced.sort()).toEqual([]);
   });
 });
 

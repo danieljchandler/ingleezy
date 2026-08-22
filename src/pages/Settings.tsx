@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { currentWeekStartKey } from '@/lib/localDate';
 import { AppShell } from '@/components/layout/AppShell';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -231,9 +232,9 @@ const Settings = () => {
       // Update weekly goal targets
       const selectedGoal = GOALS.find((g) => g.id === goal);
       if (selectedGoal) {
-        const weekStart = new Date();
-        weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-        const weekStartStr = weekStart.toISOString().split('T')[0];
+        // Monday, matching the server's date_trunc('week') and useWeeklyGoal —
+        // the Sunday key this used to write targeted a row nothing reads.
+        const weekStartStr = currentWeekStartKey();
 
         await supabase.from('weekly_goals').upsert({
           user_id: user.id,

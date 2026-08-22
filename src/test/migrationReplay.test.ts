@@ -26,45 +26,37 @@ interface BuildResult {
 }
 
 /**
- * Migrations that do not replay from scratch today.
+ * Migrations that do not replay from scratch today: none.
  *
- * Two left, and they are the hard two: both reference a table that no
- * migration creates at all. Fixing them means writing migrations for tables
- * whose real shape only production knows — a schema dump, not a guess.
+ * The last two were the hard two — both referenced tables no migration
+ * created (`review_streaks`, `processed_videos`), whose shapes existed only
+ * in production. The generated types file records production's columns, so
+ * the "needs a schema dump, not a guess" objection dissolved once someone
+ * read it: 20260529145900 and 20260529150000 create both tables from that
+ * shape (back-dated to sort before their readers, in the same
+ * no-real-project-linked window the semantic renames used), and
+ * 20260529150300 back-fills `lessons.status`, which the May RLS policy
+ * referenced three months before the recovery migration added it.
  *
- * The other twelve are gone. All were the same thing: the platform
- * periodically re-emitted an already-authored migration under a fresh hashed
- * filename, so two files created the same objects and whichever ran second
- * always failed. Where the re-emission was byte-equivalent the extra file was
- * deleted outright. Three were *later* snapshots carrying a little schema the
- * authored original predates, and deleting those would have lost it — most
- * sharply `lessons.dialect_module`, which `useLessons` filters every learner's
- * curriculum on, and which a rebuilt database did not have because the
- * snapshot died on its own first statement. Recovered in
- * 20260816090000_recover_stranded_schema.sql and then deleted.
- *
- * That gap is worth remembering: this test records missing TABLES and no table
- * was missing, while `schemaContract` reads the app's queries against the
+ * The gap that hid all this is worth remembering: this test records missing
+ * TABLES, while `schemaContract` reads the app's queries against the
  * committed types file — which describes the database as it is, not as the
  * migrations rebuild it. A missing COLUMN falls between the two.
  *
- * The list is pinned so it cannot grow. Shrinking it is the goal.
+ * The list is pinned so it cannot grow. It is finally empty; keep it that way.
  */
-const KNOWN_REPLAY_FAILURES = [
-  "20260529150401_dc0b25a8-3051-4445-a8be-cd323f128c64.sql",
-  "20260529155315_a303684f-1e60-4e83-8c60-8f228e46c637.sql",
-];
+const KNOWN_REPLAY_FAILURES: string[] = [];
 
 /**
- * Tables the app reads that replaying the migrations does not produce.
+ * Tables the app reads that replaying the migrations does not produce: none.
  *
- * `subscribers` used to be here and is not any more: it is created by
- * 20260812103000 and by the platform snapshot beside it, both with
- * IF NOT EXISTS, so a rebuilt database now gets it. That one mattered most —
- * `_shared/usageCap.ts` reads it to decide whether a caller is paying, so
- * without it every user looked free-tier on a fresh environment.
+ * `subscribers` came off this list when 20260812103000 gave it a migration;
+ * `review_streaks` and `processed_videos` came off with the two back-dated
+ * creations above. An entry reappearing here means someone shipped a feature
+ * against a table only production has — the exact debt this file exists to
+ * stop.
  */
-const KNOWN_MISSING_TABLES = ["processed_videos", "review_streaks"];
+const KNOWN_MISSING_TABLES: string[] = [];
 
 describe.skipIf(!DATABASE_URL)("migration replay", () => {
   let result: BuildResult;

@@ -12,12 +12,11 @@ import type { MemoryDb } from "../src/test/support/postgrest/store";
  * down, because every one of the four rethrows. Both are worth pinning, since
  * from the page they look nothing alike.
  *
- * The other thing this spec exists for is `review_streaks`. It is one of three
- * tables the app reads that no migration in the repo creates — it exists in
- * production and in the generated types, so the emulator and the typechecker
- * both believe in it, and only `src/test/migrationReplay.test.ts` knows it is
- * missing. Here it is a hard dependency: if that read fails, nobody has any
- * friends.
+ * The other thing this spec exists for is `review_streaks`. For a long time it
+ * was a table the app read that no migration created (it existed only in
+ * production, with award_xp writing it since 20260822); it has a real
+ * migration now, but it remains a hard dependency here: if that read fails,
+ * nobody has any friends.
  */
 
 const FRIEND = "00000000-0000-4000-8000-0000000000a1";
@@ -178,10 +177,9 @@ test.describe("the following list", () => {
 
     await page.goto("/friends");
 
-    // `review_streaks` is read by no migration in this repo — it exists only in
-    // production. The query rethrows rather than defaulting the streak to zero,
-    // so the decorative number is load-bearing: losing it empties the list and
-    // the page says the learner follows nobody.
+    // The query rethrows rather than defaulting the streak to zero, so the
+    // decorative number is load-bearing: losing it empties the list and the
+    // page says the learner follows nobody.
     await expect(page.getByText("لا تتابع أحداً بعد")).toBeVisible();
     await expect(page.getByText("Layla")).toHaveCount(0);
   });

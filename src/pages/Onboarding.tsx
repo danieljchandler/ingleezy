@@ -6,6 +6,7 @@ import { markTourPending } from '@/components/onboarding/OnboardingTour';
 import { AppShell } from '@/components/layout/AppShell';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { currentWeekStartKey } from '@/lib/localDate';
 import { toast } from 'sonner';
 import {
   Loader2,
@@ -118,9 +119,9 @@ const Onboarding = () => {
 
       // Set weekly goal based on selection
       if (selectedGoal) {
-        const weekStart = new Date();
-        weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-        const weekStartStr = weekStart.toISOString().split('T')[0];
+        // Monday, matching the server's date_trunc('week') and useWeeklyGoal —
+        // the Sunday key this used to write targeted a row nothing reads.
+        const weekStartStr = currentWeekStartKey();
 
         await supabase.from('weekly_goals').upsert({
           user_id: user.id,

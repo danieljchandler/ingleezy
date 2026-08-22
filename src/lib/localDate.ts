@@ -17,3 +17,18 @@ export function parseLocalDate(dateStr: string): Date {
   const [y, m, d] = dateStr.split("-").map(Number);
   return new Date(y, (m ?? 1) - 1, d ?? 1);
 }
+
+/**
+ * The current week's MONDAY as a local `YYYY-MM-DD` key — the one week
+ * boundary for weekly_goals rows. The server's award_xp uses
+ * date_trunc('week'), which is Monday; a client writing Sunday-keyed rows
+ * (as Onboarding and Settings once did) targets a row the server never
+ * increments, and the learner's chosen goal silently applies to nothing.
+ */
+export function currentWeekStartKey(date: Date = new Date()): string {
+  const dayOfWeek = date.getDay();
+  const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+  const monday = new Date(date);
+  monday.setDate(date.getDate() + mondayOffset);
+  return localDateKey(monday);
+}

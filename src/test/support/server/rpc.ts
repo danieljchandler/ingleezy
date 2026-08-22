@@ -120,6 +120,23 @@ export const defaultRpcs: Record<string, RpcHandler> = {
     // Mirrors the app's level curve: a level every 500 XP.
     record.current_level = Math.floor(Number(record.total_xp) / 500) + 1;
 
+    // Mirrors the streak upsert the real award_xp performs: same day is a
+    // no-op, yesterday extends, anything older restarts at one.
+    const streaks = db.raw("review_streaks");
+    let streak = streaks.find((row) => row.user_id === userId);
+    if (!streak) {
+      streak = { user_id: userId, current_streak: 0, longest_streak: 0, last_review_date: null };
+      streaks.push(streak);
+    }
+    const yesterday = new Date(Date.now() - 86_400_000).toISOString().slice(0, 10);
+    if (streak.last_review_date !== today) {
+      streak.current_streak = streak.last_review_date === yesterday
+        ? Number(streak.current_streak ?? 0) + 1
+        : 1;
+      streak.longest_streak = Math.max(Number(streak.longest_streak ?? 0), Number(streak.current_streak));
+      streak.last_review_date = today;
+    }
+
     return record.total_xp;
   },
 
@@ -140,14 +157,22 @@ export const defaultRpcs: Record<string, RpcHandler> = {
   },
 
   increment_review_count: ({ db, userId }) => {
-    const rows = db.raw("review_streaks");
-    let record = rows.find((row) => row.user_id === userId);
+    // Mirrors the real function: despite its name it counts reviews on the
+    // WEEK'S row, not the streak (award_xp owns the streak).
+    const rows = db.raw("weekly_goals");
+    const now = new Date();
+    const dayOfWeek = now.getUTCDay();
+    const monday = new Date(now);
+    monday.setUTCDate(now.getUTCDate() + (dayOfWeek === 0 ? -6 : 1 - dayOfWeek));
+    const weekStart = monday.toISOString().slice(0, 10);
+
+    let record = rows.find((row) => row.user_id === userId && row.week_start_date === weekStart);
     if (!record) {
-      record = { user_id: userId, current_streak: 0, longest_streak: 0, reviews_today: 0 };
+      record = { user_id: userId, week_start_date: weekStart, completed_reviews: 0, earned_xp: 0 };
       rows.push(record);
     }
-    record.reviews_today = Number(record.reviews_today ?? 0) + 1;
-    return record.reviews_today;
+    record.completed_reviews = Number(record.completed_reviews ?? 0) + 1;
+    return null;
   },
 
   increment_listen_play_count: ({ db, args }) => {

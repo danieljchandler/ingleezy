@@ -50,6 +50,11 @@ interface Challenge {
   questions: ChallengeQuestion[];
 }
 
+/** Mirror of daily-challenge/index.ts's streak bonus — one formula, two homes. */
+export function challengeStreakMultiplier(streakDays: number): number {
+  return streakDays >= 7 ? 2.0 : streakDays >= 3 ? 1.5 : 1.0;
+}
+
 const DailyChallenge = () => {
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
@@ -184,7 +189,10 @@ const DailyChallenge = () => {
           titleArabic: picked.title_arabic,
           questions: picked.questions as ChallengeQuestion[],
         });
-        setStreakMultiplier(1 + (streakData || 0) * 0.1);
+        // Same step function the server applies to generated challenges —
+        // two formulas for one bonus meant the multiplier changed depending
+        // on whether today's challenge was pre-approved or AI-generated.
+        setStreakMultiplier(challengeStreakMultiplier(streakData || 0));
         setBaseXP(15);
         setCurrentIndex(0);
         setScore(0);

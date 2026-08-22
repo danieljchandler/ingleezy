@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { localDateKey } from "@/lib/localDate";
+import { currentWeekStartKey, localDateKey } from "@/lib/localDate";
 
 export interface UserXP {
   id: string;
@@ -148,13 +148,8 @@ export function useWeeklyGoal() {
     queryFn: async () => {
       if (!user) return null;
 
-      // Get current week's Monday
-      const today = new Date();
-      const dayOfWeek = today.getDay();
-      const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-      const monday = new Date(today);
-      monday.setDate(today.getDate() + mondayOffset);
-      const weekStart = localDateKey(monday);
+      // Get current week's Monday — the shared boundary all writers use.
+      const weekStart = currentWeekStartKey();
 
       const { data, error } = await supabase
         .from("weekly_goals")
@@ -180,6 +175,26 @@ export function useWeeklyGoal() {
       }
 
       return data as WeeklyGoal;
+    },
+    enabled: !!user,
+  });
+}
+
+/** The learner's current daily streak, written server-side by award_xp. */
+export function useCurrentStreak() {
+  const { user } = useAuth();
+
+  return useQuery({
+    queryKey: ["current-streak", user?.id],
+    queryFn: async () => {
+      if (!user) return 0;
+      const { data, error } = await supabase
+        .from("review_streaks")
+        .select("current_streak")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (error) throw error;
+      return data?.current_streak ?? 0;
     },
     enabled: !!user,
   });
