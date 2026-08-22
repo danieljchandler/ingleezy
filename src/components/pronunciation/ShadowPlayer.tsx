@@ -217,6 +217,11 @@ export function ShadowPlayer({ clip, threshold, autoAdvance, showEnglish, onResu
               <p className={cn("text-base font-semibold", band.color)}>{band.label}</p>
               <p className="text-xs text-muted-foreground">
                 الدقة {Math.round(result.accuracy)} · الطلاقة {Math.round(result.fluency)} · الاكتمال {Math.round(result.completeness)}
+                {/* Prosody is THE shadowing signal — rhythm and stress are what
+                    echoing a native clip trains, so hide it nowhere it exists. */}
+                {typeof result.prosody === "number" && (
+                  <> · النبرة والإيقاع {Math.round(result.prosody)}</>
+                )}
               </p>
               {passed && autoAdvance && (
                 <p className="text-xs text-primary mt-1 flex items-center gap-1"><Gauge className="h-3 w-3" /> ننتقل…</p>

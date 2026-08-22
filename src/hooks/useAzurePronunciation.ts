@@ -30,6 +30,11 @@ export interface PhonemeResult {
   phoneme: string;
   /** 0–100 accuracy score for this phoneme */
   accuracy: number;
+  /**
+   * Top alternative phonemes Azure heard instead of the target (IPA) — what
+   * turns "accuracy 62" into "you said /b/ where /p/ goes".
+   */
+  nbest?: Array<{ phoneme: string; accuracy: number }>;
 }
 
 export interface WordResult {
@@ -52,12 +57,54 @@ export interface PronunciationResult {
   fluency: number;
   /** Fraction of reference words spoken 0–100 */
   completeness: number;
+  /**
+   * Prosody (stress/intonation/rhythm) 0–100 — present when Azure returns it.
+   * The one suprasegmental signal in the app; requested with
+   * EnableProsodyAssessment server-side.
+   */
+  prosody?: number;
   /** Per-word breakdown */
   words: WordResult[];
   /** What Azure actually recognised (may differ from referenceText) */
   recognizedText: string;
   /** BCP-47 locale used for assessment */
   locale: string;
+}
+
+export interface PhonemeSubstitution {
+  /** The word the substitution happened in (as recognised) */
+  word: string;
+  /** The phoneme the reference asked for (IPA) */
+  target: string;
+  /** The phoneme Azure actually heard (IPA) */
+  heard: string;
+}
+
+/**
+ * Extract "you said X where Y goes" pairs from the per-phoneme nbest data:
+ * a phoneme scored low whose top alternative is a DIFFERENT phoneme is a
+ * substitution Azure is confident about. Capped and deduped — three concrete
+ * swaps teach; a wall of them numbs.
+ */
+export function phonemeSubstitutions(
+  words: WordResult[],
+  { threshold = 60, limit = 3 }: { threshold?: number; limit?: number } = {},
+): PhonemeSubstitution[] {
+  const out: PhonemeSubstitution[] = [];
+  const seen = new Set<string>();
+  for (const w of words) {
+    for (const p of w.phonemes) {
+      if (p.accuracy >= threshold) continue;
+      const heard = p.nbest?.[0]?.phoneme;
+      if (!heard || !p.phoneme || heard === p.phoneme) continue;
+      const key = `${p.phoneme}→${heard}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push({ word: w.word, target: p.phoneme, heard });
+      if (out.length >= limit) return out;
+    }
+  }
+  return out;
 }
 
 /** Score band labels for UI display */
