@@ -107,4 +107,36 @@ const tables = execFileSync(
   .map((line) => line.trim())
   .filter(Boolean);
 
-console.log(JSON.stringify({ total: files.length, failures, tables }, null, 2));
+/**
+ * Every column on every one of them, keyed by table.
+ *
+ * Table names alone were not enough. A migration set can produce all the right
+ * tables and still be missing a column the app filters on — which is exactly
+ * what `lessons.status` and `lessons.dialect_module` both were, and neither
+ * this check nor the static one could see it: this one recorded tables, and
+ * the static one reads the app's queries against the committed types file,
+ * which describes the database as it *is* rather than as the migrations
+ * rebuild it. A missing column fell straight between the two.
+ *
+ * Views are included — `leaderboard_profiles` is one, and the app queries it
+ * like a table.
+ */
+const columns = {};
+for (const line of execFileSync(
+  "psql",
+  [
+    DATABASE_URL,
+    "-tAc",
+    "select table_name, column_name from information_schema.columns " +
+      "where table_schema = 'public' order by table_name, column_name",
+  ],
+  { encoding: "utf8" },
+)
+  .split("\n")
+  .map((line) => line.trim())
+  .filter(Boolean)) {
+  const [table, column] = line.split("|");
+  (columns[table] ??= []).push(column);
+}
+
+console.log(JSON.stringify({ total: files.length, failures, tables, columns }, null, 2));

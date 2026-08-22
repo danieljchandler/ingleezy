@@ -24,10 +24,11 @@ import type { SupabaseBackend } from "@/test/support/server/handler";
  * disappearing from the list, and one whose streak table row is absent must not
  * take the whole list down.
  *
- * `review_streaks` is one of the three tables that exist in production but in
- * no migration in this repo, which makes it the likeliest of the four to be
- * missing on a rebuilt database — so what happens when it fails is worth
- * pinning explicitly rather than discovering later.
+ * `review_streaks` spent months existing in production but in no migration in
+ * this repo, which made it the likeliest of the four to be missing on a rebuilt
+ * database. 20260529150400 authors it now, but what happens when it fails is
+ * still worth pinning: the table is read in six places and written in none, so
+ * an empty or erroring streak query is the normal case, not the edge one.
  */
 
 const FRIEND = "00000000-0000-4000-8000-0000000000f1";
