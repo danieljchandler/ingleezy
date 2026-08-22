@@ -152,6 +152,9 @@ test.describe("signed in — curriculum", () => {
         dialect_module: "Gulf",
         cefr_target: "A1",
         duration_minutes: 15,
+        // The learner path lists published lessons only — a fixture without
+        // this is a draft, which is exactly what the filter exists to hide.
+        status: "published",
         unlock_condition: null,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
@@ -167,6 +170,7 @@ test.describe("signed in — curriculum", () => {
         dialect_module: "Gulf",
         cefr_target: "A1",
         duration_minutes: 15,
+        status: "published",
         // Deliberately does not contain either lesson title — the specs locate
         // lesson rows by their name, and this text is part of the same link.
         unlock_condition: "Finish the previous lesson first",

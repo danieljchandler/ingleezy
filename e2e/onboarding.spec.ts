@@ -139,13 +139,19 @@ test.describe("onboarding", () => {
     await page.getByRole("button", { name: /ابدأ التعلم/ }).click();
     await expect(page).toHaveURL(/\/$/);
 
-    // Upserted on (user_id, week_start_date), so a wrong date silently creates a
-    // second goal row every time onboarding is repeated.
-    const expected = new Date();
-    expected.setDate(expected.getDate() - expected.getDay());
-    expect(db.rows("weekly_goals")[0].week_start_date).toBe(
-      expected.toISOString().split("T")[0],
-    );
+    // Upserted on (user_id, week_start_date), so a wrong date silently creates
+    // a second goal row every time onboarding is repeated. MONDAY, matching
+    // the server's date_trunc('week') — the Sunday key this page used to
+    // write targeted a row nothing reads, which is how the chosen goal
+    // vanished every week.
+    const now = new Date();
+    const day = now.getDay();
+    const expected = new Date(now);
+    expected.setDate(now.getDate() + (day === 0 ? -6 : 1 - day));
+    const y = expected.getFullYear();
+    const m = String(expected.getMonth() + 1).padStart(2, "0");
+    const d = String(expected.getDate()).padStart(2, "0");
+    expect(db.rows("weekly_goals")[0].week_start_date).toBe(`${y}-${m}-${d}`);
   });
 
   test("records the topics picked, by id rather than by label", async ({ page, db }) => {
