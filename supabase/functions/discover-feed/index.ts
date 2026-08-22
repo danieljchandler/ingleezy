@@ -40,14 +40,27 @@ function normLemma(s: string): string {
   return (s || "")
     .toLowerCase()
     .trim()
-    // strip Arabic diacritics
+    // English contractions and possessives compare without the apostrophe
+    .replace(/[\u2019']/g, "")
+    // hyphens split compounds the way spaces do ("check-in" = "check in")
+    .replace(/-/g, " ")
+    // strip Arabic diacritics (bridged rows)
     .replace(/[\u064B-\u0652\u0670\u0640]/g, "")
     // unify alef forms
     .replace(/[إأآا]/g, "ا")
     .replace(/ى/g, "ي")
-    .replace(/ة/g, "ه");
+    .replace(/ة/g, "ه")
+    // punctuation contributes nothing to identity ("Check in." = "check in")
+    .replace(/[^\p{L}\p{N} ]/gu, "")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
+// The learner is acquiring ENGLISH, so overlap is measured on the English
+// side of a video's vocabulary. `vocabulary` is a JSON column written by
+// several generators over time, hence the shape ladder; Arabic-only keys are
+// the last resort for bridged Hakiya rows, whose lemmas will simply never
+// match an English known-set.
 function extractLemmas(vocabulary: unknown): Set<string> {
   const out = new Set<string>();
   if (!Array.isArray(vocabulary)) return out;
@@ -60,7 +73,8 @@ function extractLemmas(vocabulary: unknown): Set<string> {
     }
     if (typeof entry === "object") {
       const e = entry as Record<string, unknown>;
-      const cand = (e.word_arabic ?? e.arabic ?? e.lemma ?? e.word) as string | undefined;
+      const cand = (e.english ?? e.word_english ?? e.word ?? e.lemma ??
+        e.word_arabic ?? e.arabic) as string | undefined;
       if (typeof cand === "string") {
         const n = normLemma(cand);
         if (n) out.add(n);
@@ -128,7 +142,7 @@ Deno.serve(async (req) => {
         .maybeSingle(),
       supabase
         .from("user_vocabulary")
-        .select("word_arabic, dialect")
+        .select("word_english, dialect")
         .eq("user_id", userId)
         .order("created_at", { ascending: false })
         .limit(5000),
@@ -154,9 +168,12 @@ Deno.serve(async (req) => {
       (profile?.placement_level as string | null) ||
       null;
 
+    // Known set = the English the learner has saved. Post-flip word_arabic is
+    // the gloss they already speak natively; overlap against it would measure
+    // the wrong language for every video in the pool.
     const knownLemmas = new Set<string>();
     for (const r of vocabRes.data ?? []) {
-      const n = normLemma((r as any).word_arabic ?? "");
+      const n = normLemma((r as any).word_english ?? "");
       if (n) knownLemmas.add(n);
     }
 

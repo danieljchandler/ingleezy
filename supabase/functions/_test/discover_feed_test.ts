@@ -20,11 +20,11 @@ import { json, type UpstreamHandler } from "./upstreams.ts";
 
 const USER = "00000000-0000-4000-8000-000000000001";
 
-/** 25 known words: enough to clear the cold-start floor of 20. */
+/** 25 known ENGLISH words: enough to clear the cold-start floor of 20. */
 const knownVocabulary = (words: string[]) =>
-  words.map((word_arabic) => ({ word_arabic, dialect: "Gulf" }));
+  words.map((word_english) => ({ word_english, dialect: "Gulf" }));
 
-const MANY_WORDS = Array.from({ length: 25 }, (_, i) => `كلمة${i}`);
+const MANY_WORDS = Array.from({ length: 25 }, (_, i) => `word${i}`);
 
 function caller(extra: Record<string, UpstreamHandler> = {}): Record<string, UpstreamHandler> {
   return {
@@ -46,7 +46,7 @@ const aVideo = (over: Record<string, unknown> = {}) => ({
   difficulty: "Intermediate",
   cefr_level: "B1",
   created_at: daysAgo(3),
-  vocabulary: MANY_WORDS.slice(0, 10).map((word_arabic) => ({ word_arabic })),
+  vocabulary: MANY_WORDS.slice(0, 10).map((english) => ({ english })),
   title: "A clip",
   ...over,
 });
@@ -121,13 +121,13 @@ Deno.test("discover-feed ranks and explains every candidate", async () => {
 Deno.test("discover-feed prefers the comprehensible-input sweet spot over easier video", async () => {
   const order = await rank(
     // 10 words, all known → 100% overlap. Too easy.
-    { id: "too-easy", vocabulary: MANY_WORDS.slice(0, 10).map((w) => ({ word_arabic: w })) },
+    { id: "too-easy", vocabulary: MANY_WORDS.slice(0, 10).map((w) => ({ english: w })) },
     // 10 words, 9 known → 90% overlap. The sweet spot.
     {
       id: "sweet-spot",
       vocabulary: [
-        ...MANY_WORDS.slice(0, 9).map((w) => ({ word_arabic: w })),
-        { word_arabic: "جديدة" },
+        ...MANY_WORDS.slice(0, 9).map((w) => ({ english: w })),
+        { english: "novel" },
       ],
     },
   );
@@ -140,12 +140,12 @@ Deno.test("discover-feed prefers the comprehensible-input sweet spot over easier
 
 Deno.test("discover-feed prefers the sweet spot over something far too hard", async () => {
   const order = await rank(
-    { id: "too-hard", vocabulary: [{ word_arabic: "غريبة1" }, { word_arabic: "غريبة2" }] },
+    { id: "too-hard", vocabulary: [{ english: "strange1" }, { english: "strange2" }] },
     {
       id: "sweet-spot",
       vocabulary: [
-        ...MANY_WORDS.slice(0, 9).map((w) => ({ word_arabic: w })),
-        { word_arabic: "جديدة" },
+        ...MANY_WORDS.slice(0, 9).map((w) => ({ english: w })),
+        { english: "novel" },
       ],
     },
   );
@@ -161,8 +161,8 @@ Deno.test("discover-feed labels the sweet spot with the percentage known", async
         json([
           aVideo({
             vocabulary: [
-              ...MANY_WORDS.slice(0, 9).map((w) => ({ word_arabic: w })),
-              { word_arabic: "جديدة" },
+              ...MANY_WORDS.slice(0, 9).map((w) => ({ english: w })),
+              { english: "novel" },
             ],
           }),
         ]),
@@ -178,7 +178,7 @@ Deno.test("discover-feed calls a too-easy video a review rather than a match", a
     { seed: 1 },
     caller({
       "/rest/v1/discover_videos": () =>
-        json([aVideo({ vocabulary: MANY_WORDS.slice(0, 10).map((w) => ({ word_arabic: w })) })]),
+        json([aVideo({ vocabulary: MANY_WORDS.slice(0, 10).map((w) => ({ english: w })) })]),
     }),
   );
 
@@ -196,11 +196,11 @@ Deno.test("discover-feed calls a partly-known video a stretch", async () => {
         json([
           aVideo({
             vocabulary: [
-              ...MANY_WORDS.slice(0, 6).map((w) => ({ word_arabic: w })),
-              { word_arabic: "غريبة1" },
-              { word_arabic: "غريبة2" },
-              { word_arabic: "غريبة3" },
-              { word_arabic: "غريبة4" },
+              ...MANY_WORDS.slice(0, 6).map((w) => ({ english: w })),
+              { english: "strange1" },
+              { english: "strange2" },
+              { english: "strange3" },
+              { english: "strange4" },
             ],
           }),
         ]),
@@ -225,19 +225,19 @@ Deno.test("discover-feed says when it picked something because you liked it", as
   assertEquals(items[0].reason, "لأنك أعجبت به");
 });
 
-Deno.test("discover-feed folds Arabic spelling variants when matching vocabulary", async () => {
+Deno.test("discover-feed folds English case, hyphens and punctuation when matching", async () => {
   const { items } = await call(
     { seed: 1 },
     caller({
       "/rest/v1/user_vocabulary": () =>
-        json(knownVocabulary([...MANY_WORDS.slice(0, 24), "مدرسة"])),
+        json(knownVocabulary([...MANY_WORDS.slice(0, 24), "check in"])),
       "/rest/v1/discover_videos": () =>
         json([
           aVideo({
             vocabulary: [
-              ...MANY_WORDS.slice(0, 9).map((w) => ({ word_arabic: w })),
-              // Same word, ta marbuta written as ha.
-              { word_arabic: "مدرسه" },
+              ...MANY_WORDS.slice(0, 9).map((w) => ({ english: w })),
+              // Same phrase, written the other way it gets written.
+              { english: "Check-in." },
             ],
           }),
         ]),
@@ -258,11 +258,11 @@ Deno.test("discover-feed reads vocabulary in any of the shapes it is stored in",
         json([
           aVideo({
             vocabulary: [
-              "كلمة0",
-              { arabic: "كلمة1" },
-              { lemma: "كلمة2" },
-              { word: "كلمة3" },
-              { word_arabic: "كلمة4" },
+              "word0",
+              { english: "word1" },
+              { lemma: "word2" },
+              { word: "word3" },
+              { word_english: "word4" },
             ],
           }),
         ]),
@@ -424,7 +424,7 @@ Deno.test("discover-feed switches formula for a learner with nothing to go on", 
     { seed: 1 },
     caller({
       "/rest/v1/profiles": () => json({ preferred_dialect: "Gulf", placement_level: null }),
-      "/rest/v1/user_vocabulary": () => json(knownVocabulary(["كلمة0", "كلمة1"])),
+      "/rest/v1/user_vocabulary": () => json(knownVocabulary(["word0", "word1"])),
       "/rest/v1/discover_videos": () => json([aVideo({ id: "a" }), aVideo({ id: "b" })]),
     }),
   );
@@ -441,7 +441,7 @@ Deno.test("discover-feed is not cold-started by a placement level alone", async 
     { seed: 1 },
     caller({
       "/rest/v1/profiles": () => json({ preferred_dialect: "Gulf", placement_level: "A2" }),
-      "/rest/v1/user_vocabulary": () => json(knownVocabulary(["كلمة0"])),
+      "/rest/v1/user_vocabulary": () => json(knownVocabulary(["word0"])),
       "/rest/v1/discover_videos": () => json([aVideo()]),
     }),
   );

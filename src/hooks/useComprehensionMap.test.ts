@@ -4,15 +4,17 @@ import { useComprehensionMap } from "./useComprehensionMap";
 import { MIN_KNOWN_WORDS } from "@/lib/comprehension";
 
 /**
- * The glue between the decks in cache and the browse grid. The load-bearing
- * rule: a learner with a near-empty deck gets an EMPTY map — no bars, no
- * filter chip — because coverage computed from nothing reads as "everything
- * is impossibly hard" on day one.
+ * The glue between the decks in cache and the browse grid. Two load-bearing
+ * rules: the known set is the ENGLISH side of the decks (the language being
+ * acquired — the Arabic column is the gloss the learner already speaks), and
+ * a learner with a near-empty deck gets an EMPTY map — no bars, no filter
+ * chip — because coverage computed from nothing reads as "everything is
+ * impossibly hard" on day one.
  */
 
 const decks = vi.hoisted(() => ({
-  words: [] as Array<{ word_arabic: string }>,
-  phrases: [] as Array<{ phrase_arabic: string }>,
+  words: [] as Array<{ word_english: string }>,
+  phrases: [] as Array<{ phrase_english: string }>,
 }));
 
 vi.mock("@/hooks/useUserVocabulary", () => ({
@@ -23,17 +25,22 @@ vi.mock("@/hooks/useUserPhrases", () => ({
 }));
 
 /** Ten distinct known words, and a transcript long enough to score. */
-const KNOWN_WORDS = ["كبسه", "مطعم", "قهوه", "شاهي", "سياره", "مدرسه", "شغل", "بحر", "سوق", "عشا"];
+const KNOWN_WORDS = [
+  "coffee", "restaurant", "market", "school", "morning",
+  "weather", "family", "always", "street", "dinner",
+];
 
 const video = (id: string, over: Record<string, unknown> = {}) => ({
   id,
-  dialect: "Gulf",
-  transcript_lines: Array.from({ length: 12 }, () => ({ arabic: "كبسه مطعم قهوه" })),
+  transcript_lines: Array.from({ length: 12 }, () => ({
+    english: "coffee restaurant market",
+    arabic: "قهوة مطعم سوق",
+  })),
   ...over,
 });
 
 function fill(words: string[]) {
-  decks.words = words.map((w) => ({ word_arabic: w }));
+  decks.words = words.map((w) => ({ word_english: w }));
   decks.phrases = [];
 }
 
@@ -51,6 +58,16 @@ describe("useComprehensionMap", () => {
     expect(c).toBeDefined();
     expect(c!.coverage).toBe(1);
     expect(c!.band).toBe("comfortable");
+  });
+
+  it("leaves out a bridged clip whose lines have no English", () => {
+    fill(KNOWN_WORDS);
+    const bridged = video("v2", {
+      transcript_lines: Array.from({ length: 12 }, () => ({ arabic: "سطر عربي بدون إنجليزي" })),
+    });
+    const { result } = renderHook(() => useComprehensionMap([video("v1"), bridged]));
+    expect(result.current.has("v1")).toBe(true);
+    expect(result.current.has("v2")).toBe(false);
   });
 
   it("leaves out a video whose transcript can't be measured", () => {

@@ -1,13 +1,17 @@
 /**
- * Transcript-level comprehension: what fraction of a video's actual words does
- * this learner already know?
+ * Transcript-level comprehension: what fraction of a video's actual ENGLISH
+ * words does this learner already know?
  *
  * The research consensus behind comprehensible input is that learners progress
  * fastest on material where they know the large majority of the words. The
  * app is unusually well placed to compute that — it owns the transcripts and
- * knows the learner's vocabulary from real SRS state — but until now nothing
- * did: the feed's comprehension score samples only a video's 5–15 curated
- * highlight words, and the browse tab had no signal at all.
+ * knows the learner's vocabulary from real SRS state.
+ *
+ * The measured language is the English line (`line.english`) — the input the
+ * learner is acquiring. The Arabic on these transcripts is the scaffold
+ * translation, and a native Arabic speaker's coverage of it is always ~100%
+ * and means nothing. Bridged Hakiya clips have no English lines at all, so
+ * they get no bar rather than a bar built on the wrong language.
  *
  * Everything here is pure and runs client-side: transcripts arrive with the
  * Discover feed and the learner's decks are already in the react-query cache,
@@ -15,15 +19,12 @@
  * client-supplied "words I know" list — is about prompts to generators; this
  * is display, computed from the same rows the server would read.)
  *
- * Token matching reuses the dialect machinery's Arabic normalization and its
- * per-dialect function-word lists (ALWAYS_ALLOWED): a learner "knows"
- * particles like في and انا implicitly, and without that assumption every
- * beginner would see 5% on everything.
+ * Function words (the, of, is, …) count as known: they are acquired almost
+ * immediately and carry no lexical load, and without that assumption every
+ * beginner would see 5% on everything. Light suffix stripping lets a saved
+ * base form claim its inflections (want → wants/wanted/wanting) without
+ * pretending to be a lemmatiser.
  */
-import {
-  ALWAYS_ALLOWED,
-  normalizeArabic,
-} from "../../supabase/functions/_shared/msaLeakDetector";
 
 export type ComprehensionBand = "comfortable" | "stretch" | "challenge";
 
@@ -41,18 +42,44 @@ export const MIN_TOKENS = 20;
 /** A learner with fewer saved words than this has no meaningful "known" set. */
 export const MIN_KNOWN_WORDS = 10;
 
-// Arabic LETTERS only — the broad Arabic block also contains punctuation
-// (، ؟ ؛) and digits, which must split tokens, not ride along inside them.
-const ARABIC_LETTER = /[ء-يٱ-ۓ]/;
-const NON_LETTER = /[^ء-يٱ-ۓ]+/g;
+/**
+ * The English closed class: articles, pronouns, auxiliaries, prepositions,
+ * conjunctions, common adverbial particles. A learner "knows" these
+ * implicitly within their first weeks; counting them unknown would drown the
+ * signal for exactly the beginners the bands exist to protect.
+ */
+const FUNCTION_WORDS = new Set([
+  "a", "an", "the",
+  "i", "you", "he", "she", "it", "we", "they",
+  "me", "him", "her", "us", "them",
+  "my", "your", "his", "its", "our", "their", "mine", "yours",
+  "this", "that", "these", "those", "there", "here",
+  "am", "is", "are", "was", "were", "be", "been", "being",
+  "do", "does", "did", "have", "has", "had",
+  "will", "would", "can", "could", "shall", "should", "may", "might", "must",
+  "not", "no", "yes", "dont", "cant", "wont", "im", "its", "thats", "isnt",
+  "and", "or", "but", "so", "if", "then", "than", "because",
+  "of", "to", "in", "on", "at", "for", "with", "by", "from", "up", "down",
+  "out", "off", "over", "under", "into", "about", "as", "like",
+  "what", "who", "when", "where", "why", "how", "which",
+  "just", "very", "too", "also", "now", "well", "oh", "okay", "ok", "one",
+]);
 
-/** Split a run of text into normalized Arabic tokens worth counting. */
-export function tokenizeArabic(text: string): string[] {
+const LATIN_LETTER = /[a-z]/;
+
+/**
+ * Split a run of text into normalized English tokens worth counting.
+ * Apostrophes fold away rather than split ("don't" → "dont"), so a
+ * contraction stays one token and matches the stoplist's folded forms.
+ */
+export function tokenizeEnglish(text: string): string[] {
   if (!text) return [];
-  return normalizeArabic(text)
-    .split(NON_LETTER)
+  return text
+    .toLowerCase()
+    .replace(/[’']/g, "")
+    .split(/[^a-z]+/)
     .map((t) => t.trim())
-    .filter((t) => t.length > 1 && ARABIC_LETTER.test(t));
+    .filter((t) => t.length > 1 && LATIN_LETTER.test(t));
 }
 
 /**
@@ -64,50 +91,51 @@ export function buildKnownTokenSet(entries: Array<string | null | undefined>): S
   const known = new Set<string>();
   for (const entry of entries) {
     if (!entry) continue;
-    for (const token of tokenizeArabic(entry)) known.add(token);
+    for (const token of tokenizeEnglish(entry)) known.add(token);
   }
   return known;
 }
 
 /**
- * A token counts as known if the learner saved it, it's a dialect function
- * word, or it reduces to a known form once the definite article or the
- * و-conjunction prefix is stripped — the two clitics that most often hide a
- * known word (البيت vs بيت, وقال vs قال).
+ * A token counts as known if the learner saved it, it's a function word, or
+ * it reduces to a known base once a common suffix comes off — the inflections
+ * that most often hide a known word (wants/wanted/wanting vs want, makes vs
+ * make). Suffix stripping is deliberately shallow: guessing wrong here shows
+ * a learner an inflated bar, which is worse than a shy one.
  */
-function isKnown(token: string, known: Set<string>, functionWords: Set<string>): boolean {
-  if (known.has(token) || functionWords.has(token)) return true;
+function isKnown(token: string, known: Set<string>): boolean {
+  if (known.has(token) || FUNCTION_WORDS.has(token)) return true;
   const candidates: string[] = [];
-  if (token.startsWith("ال") && token.length > 3) candidates.push(token.slice(2));
-  if (token.startsWith("و") && token.length > 2) {
-    candidates.push(token.slice(1));
-    if (token.startsWith("وال") && token.length > 4) candidates.push(token.slice(3));
+  if (token.endsWith("s") && token.length > 3) candidates.push(token.slice(0, -1));
+  if (token.endsWith("es") && token.length > 4) candidates.push(token.slice(0, -2));
+  if (token.endsWith("ed") && token.length > 4) {
+    candidates.push(token.slice(0, -2), token.slice(0, -1)); // wanted→want, liked→like
   }
-  return candidates.some((c) => known.has(c) || functionWords.has(c));
+  if (token.endsWith("ing") && token.length > 5) {
+    candidates.push(token.slice(0, -3), token.slice(0, -3) + "e"); // going→go, making→make
+  }
+  return candidates.some((c) => known.has(c));
 }
 
 /**
- * Coverage of a video's transcript lines against a known-token set. Returns
- * null when there is no usable transcript — a card without a bar beats a bar
- * built on noise.
+ * Coverage of a video's ENGLISH transcript lines against a known-token set.
+ * Returns null when there is no usable English transcript — bridged Arabic
+ * clips and text-overlay-only videos get no bar rather than a wrong one.
  */
 export function transcriptComprehension(
   lines: unknown,
   known: Set<string>,
-  dialect: string | null | undefined,
 ): Comprehension | null {
   if (!Array.isArray(lines) || lines.length === 0) return null;
-  const functionWords: Set<string> =
-    ALWAYS_ALLOWED[dialect ?? ""] ?? ALWAYS_ALLOWED.Gulf;
 
   let total = 0;
   let unknown = 0;
   for (const raw of lines) {
-    const arabic = (raw as { arabic?: unknown } | null)?.arabic;
-    if (typeof arabic !== "string") continue;
-    for (const token of tokenizeArabic(arabic)) {
+    const english = (raw as { english?: unknown } | null)?.english;
+    if (typeof english !== "string") continue;
+    for (const token of tokenizeEnglish(english)) {
       total++;
-      if (!isKnown(token, known, functionWords)) unknown++;
+      if (!isKnown(token, known)) unknown++;
     }
   }
   if (total < MIN_TOKENS) return null;
