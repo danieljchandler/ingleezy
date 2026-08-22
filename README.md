@@ -49,28 +49,31 @@ learn English:
 
 ## Repositories
 
-This repo is the whole product. There is no separate marketing site.
+**This repo is canonical.** All development happens here.
 
-`danieljchandler/ingleezy-landing-page` was a Lovable scaffold spun up to hold
-a public landing page, and it never got past the placeholder stage: one route
-rendering the word "ingleezy" and nothing else. It is **archived rather than
-merged, because there was nothing in it to merge** —
+[`danieljchandler/ingleezy-landing-page`](https://github.com/danieljchandler/ingleezy-landing-page)
+is a **mirror** of this one, not a separate project. It exists for a single
+reason: the Lovable project at
+`lovable.dev/projects/e14d9316-75ef-45a5-ba69-84c5d53ca1e7` is wired to that
+repository and is the only Lovable project for Ingleezy, so pointing it at a
+copy of this app is what makes the app openable in Lovable.
 
-- its 46 shadcn components are a strict subset of this repo's 48, and its
-  `src/lib/utils.ts` is byte-identical to ours;
-- the rest was TanStack Start plumbing (`router.tsx`, `server.ts`,
-  `start.ts`, `routeTree.gen.ts`) that has no meaning in this Vite +
-  react-router app, and could not be carried over even in principle — that
-  repo ran React 19 / Vite 8 / Tailwind 4 against this one's React 18 /
-  Vite 5 / Tailwind 3;
-- its page title and favicon were Lovable defaults, whereas `index.html`
-  here already carries real Arabic OG/Twitter meta, JSON-LD, and the branded
-  icon set.
+That repo previously held a separate landing-page scaffold — a Lovable starter
+template whose only hand-written page rendered the word "ingleezy". It was
+replaced wholesale rather than merged: its shadcn components were a strict
+subset of this repo's, its `src/lib/utils.ts` was byte-identical, and the rest
+was TanStack Start plumbing that this Vite + react-router app cannot use. The
+stacks were incompatible anyway — React 19 / Vite 8 / Tailwind 4 there against
+React 18 / Vite 5 / Tailwind 3 here.
 
-The logged-out landing surface already lives in this app: both `/` (`Feed`)
-and `/today` (`Index`) render `<LandingHero />`
-(`src/components/LandingHero.tsx`) when the visitor isn't authenticated. That
-is the landing page — grow it there when the public page needs more.
+The logged-out landing surface lives in this app: both `/` (`Feed`) and
+`/today` (`Index`) render `<LandingHero />`
+(`src/components/LandingHero.tsx`) when the visitor isn't authenticated. Grow
+the public page there.
+
+**Keeping the mirror current:** it has no automatic sync. After a change here
+that you want visible in Lovable, re-copy this tree into that repo. The two
+will drift otherwise.
 
 ## Local development
 
