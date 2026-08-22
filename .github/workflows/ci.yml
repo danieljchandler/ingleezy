@@ -154,9 +154,10 @@ jobs:
   #
   # The unit job's schema-contract test compares the app's queries against the
   # generated types and needs no database. This one is the other half: it
-  # replays all 137 migrations against a stock Postgres to check the history
-  # still produces the schema. A migration set that only works against the one
-  # database it grew on is invisible until someone tries to recreate it.
+  # replays every migration in the repo against a stock Postgres to check the
+  # history still produces the schema — every table and every column the app
+  # queries. A migration set that only works against the one database it grew
+  # on is invisible until someone tries to recreate it.
   #
   # A service container rather than the Supabase CLI: the migrations need
   # `auth` and `storage` objects, which contract/prelude.sql supplies in ~120

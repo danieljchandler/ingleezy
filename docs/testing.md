@@ -133,21 +133,41 @@ DATABASE_URL=postgres://postgres@127.0.0.1:5432/postgres \
 reference but do not create — 233 uses of `auth.uid()` alone — so stock Postgres
 is enough and the Supabase CLI is not needed.
 
-### What it currently finds
+### What it finds now
 
-Both are recorded as pinned baselines rather than fixed, so they cannot get
-worse; shrinking them is the goal.
+Nothing, and the assertions are flat rather than pinned so it stays that way.
+Every migration replays from scratch, and the schema that comes out has every
+table and every column the app queries.
 
-- **7 of 137 migrations do not replay from scratch.** Five create something an
-  earlier migration already created; two reference tables nothing creates.
-- **Three tables exist in production but in no migration**: `processed_videos`,
-  `review_streaks` and `subscribers`. A rebuilt database would not have them.
-  `subscribers` is the significant one — `_shared/usageCap.ts` reads it to
-  decide whether a caller is a paying customer, so on a rebuilt database every
-  user would look free-tier. It is not in the generated types either.
+It took two rounds to get there, and the second is the one worth remembering.
+The first fixed what *failed*: duplicate migrations the platform re-emitted
+under fresh filenames, and two tables — `processed_videos`, `review_streaks` —
+that were clicked into existence in the dashboard and that later migrations
+then referenced. Because psql stops a file at its first error, each of those
+references aborted the rest of its migration, so a rebuilt database was also
+silently missing a `lessons` policy, three REVOKEs and every storage delete
+policy in the file below it.
 
-Fixing the last two means writing migrations for tables whose real shape only
-production knows, which needs a schema dump rather than a guess.
+The second round fixed what *didn't* fail. A table created outside the
+migrations raises no error during a replay — it simply is not there, and the
+run reports clean. Diffing the generated types against a real replay turned up
+three more untracked tables and ten missing columns, including
+`user_vocabulary.stage` and `user_vocabulary.review_count`, which the Anki
+importer and the save-a-word bar both write: on a rebuilt database, saving a
+word from a transcript failed outright.
+
+So the check no longer records table names alone. It compares every table
+*and column* the app queries against the schema the migrations actually
+produce, which is the gap `lessons.dialect_module` and `lessons.status` both
+fell into — this test used to record missing tables, and `schemaContract` reads
+the queries against the committed types file, which describes the database as
+it is rather than as the migrations rebuild it.
+
+Two relations are still absent from a replay, both deliberately.
+`content_embeddings` is guarded on the pgvector extension, so a stock Postgres
+should not have it. `learning_paths` exists in production and in the generated
+types and no line of code touches it, so it was left unauthored rather than
+invented from a type definition.
 
 ## Time
 

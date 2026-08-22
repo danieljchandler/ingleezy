@@ -13,6 +13,14 @@ This document is the master map. Every subsystem gets one of three fates:
 
 Status: `[ ]` todo · `[~]` in progress · `[x]` done
 
+**Every box below is now ticked.** That is worth stating plainly because for a
+while it was not true of the *document* rather than of the code: several boxes
+sat unticked or half-ticked long after the work landed, one whole section was
+never ticked at all because KEEP items need no work, and two "Remaining:" notes
+named blockers that had since been cleared. A map nobody trusts stops getting
+read. What is genuinely left is one item and it is not a retarget step — see
+step 10 under Sequencing.
+
 ---
 
 ## Product direction (agreed in planning)
@@ -28,6 +36,9 @@ Status: `[ ]` todo · `[~]` in progress · `[x]` done
 - Backend: **own Supabase project**, not shared with Hakiya. Code-first:
   everything builds and e2e-tests against the hermetic fake-Supabase harness
   until a real project is linked (`.env`).
+  **Not yet true, and for most of the retarget the opposite was true** — the
+  fork carried Hakiya's project ref as a hardcoded fallback and a `config.toml`
+  pin. That is removed (see Known risks); creating the project is step 10.
 - Hakiya content: **snapshot-sync bridge**, read-only, from Hakiya's public
   RLS-readable `discover_videos` (published rows only). Not a live runtime
   coupling.
@@ -58,17 +69,26 @@ generation conditioning.
 ## Subsystem map
 
 ### Infrastructure — KEEP
-- [ ] Vite/React/TS/shadcn/Tailwind shell, CI (typecheck + lint ratchet +
+
+A KEEP box means *checked and carried over*, not *built*. These were left
+unticked for months, which read as outstanding work and was not: nothing here
+needed doing beyond confirming the fork inherited it intact. Ticked now so the
+open boxes in this document all mean the same thing.
+
+- [x] Vite/React/TS/shadcn/Tailwind shell, CI (typecheck + lint ratchet +
       Vitest + Playwright + deno check), hermetic e2e harness
-- [ ] Supabase schema: auth, RBAC, billing/usage caps, FSRS tables,
-      `learner_errors`, `user_concept_mastery`, curriculum tables
-- [ ] Admin: curriculum builder, lesson xlsx import, feedback, invite codes,
+- [x] Supabase schema: auth, RBAC, billing/usage caps, FSRS tables,
+      `learner_errors`, `user_concept_mastery`, curriculum tables.
+      **Carried over, but not replayable** — see the migrations entry under
+      Known risks, which is where the real work here turned out to be.
+- [x] Admin: curriculum builder, lesson xlsx import, feedback, invite codes,
       metrics, roles
-- [ ] `modelRegistry.ts` central model IDs
+- [x] `modelRegistry.ts` central model IDs
 
 ### Identity — FLIP (first commit series)
-- [~] package name, index.html meta/OG, manifest (name, `lang: "ar"`,
-      `dir: "rtl"`), README rewrite
+- [x] package name, index.html meta/OG, manifest (name, `lang: "ar"`,
+      `dir: "rtl"`), README rewrite — all landed; the box was in-progress long
+      after the work was.
 - [x] **Theme tokens → the real brand, DONE.** The brand guide landed (Ink
       Navy `#1B2534` / Indigo Deep `#2C3B74` / Indigo Core `#3A508E` /
       Periwinkle `#7184C6`, amber `#D98A3D` as the single warm note) and the
@@ -114,8 +134,26 @@ generation conditioning.
       Verified by screenshotting the running app light and dark through
       Playwright and reading the images, which is how the kilim wrap and
       the CDN logos were caught — neither shows up in any test.
-- [ ] `src/config.ts`: `DIALECTS` becomes the learner's *native dialect*
-      (onboarding choice, drives scaffold rendering), not the studied target
+- [x] `src/config.ts`: `DIALECTS` is the learner's *native dialect* — the
+      onboarding choice that drives scaffold rendering, not the studied target.
+      The labels were the tell: they read "Gulf Arabic" in English, which is
+      Hakiya describing a course catalogue to an English speaker. They are
+      Arabic now (خليجي / مصري / يمني) with the transliteration beside them in
+      `DIALECT_LATIN`, because the app is naming the learner's own dialect back
+      to them. The one place a dialect still narrows *content* is
+      `DIALECT_MODULE_VALUES`, and only for bridged Hakiya clips; native English
+      content is unfiltered by it.
+      The same three strings had been written out in five places and had
+      already drifted apart. `Review` kept its own flag map, missing Yemeni
+      entirely and disagreeing with the switcher about Gulf, and rendered
+      `dialect_module` raw — so a Gulf clip the pipeline detected as Kuwaiti
+      showed an Arabic-speaking learner the Latin word "Kuwaiti" and no flag.
+      `dialectModuleOf()` maps a stored value back to its module; the ritual
+      switcher, the admin coverage heatmap and `DialectContext` all read the
+      shared list now, each keeping only what is genuinely local to it (the
+      switcher's cultural tags and wash colours stay with the switcher).
+      Gulf's flag is a map rather than 🇸🇦: it spans six countries, and picking
+      one names the wrong nationality for five sets of learners.
 
 ### The Brain — FLIP
 - [x] `_shared/aiBrain.ts`: `target: 'english'` mode on both entry points
@@ -230,7 +268,7 @@ generation conditioning.
       it now has no `root` left to accept.
 
 ### SRS / flashcards — FLIP (mostly renames)
-- [~] Decks: front = English word/phrase (clickable-word save flow KEEP),
+- [x] Decks: front = English word/phrase (clickable-word save flow KEEP),
       back = Arabic dialect + Fusha + audio.
       Curriculum deck (/review) DONE: recognition shows the English word
       and reveals the Arabic gloss; production prompts from the Arabic and
@@ -249,12 +287,25 @@ generation conditioning.
       The cloze card now blanks the ENGLISH word inside its English
       sentence (case-insensitive) with English distractors and masked
       English TTS; the Arabic translation sits behind the reveal.
-      Transcript-mined cloze fallback is parked until the English
-      transcription pipeline lands. ReviewQuizCard and
-      ReviewImageQuizCard had no consumers — pruned. Remaining:
-      scoreBand labels (flip with the pronunciation pages).
-- [ ] Clickable transcript words → save-as-flashcard: KEEP mechanism,
-      direction flips (tap English word, card scaffolds in Arabic)
+      ReviewQuizCard and ReviewImageQuizCard had no consumers — pruned.
+      scoreBand labels are Arabic (ممتاز / جيد / مقبول / يحتاج تدريباً).
+      **The transcript-mined cloze fallback is unparked.** It was disabled
+      rather than half-flipped, which was right: it mined the learner's saved
+      transcriptions for an ARABIC sentence containing the Arabic word, and
+      once the blank moved to the English word that stopped being a harder
+      version of the card and became a different card. `process-english-video`
+      put English lines in the database, so it mines those — and also the
+      published English library, without which a learner who has never opened
+      the transcriber would never see a cloze at all. Their own recordings
+      still win over the library before length decides, because a sentence
+      they recorded is one they have already heard. Bridged Hakiya rows need
+      no filter: their lines carry no `english` and fall out on the same test
+      as everything else. The inflection limit is pinned rather than fixed —
+      "markets" does not match "market", and stemming would start matching
+      words that merely share a prefix, which blanks the wrong word.
+- [x] Clickable transcript words → save-as-flashcard: mechanism KEPT, direction
+      flipped. `TappableEnglishText` taps an English word, shows its meaning in
+      the learner's dialect and saves the card scaffolded in Arabic.
 - [x] **Root-morphology sibling cards → English word families**. Same
       linking pattern, genuinely different linguistics: Arabic *generates*
       a vocabulary from a consonantal root, so ك-ت-ب is a real derivable
@@ -306,7 +357,7 @@ generation conditioning.
       failure, since that is its normal state until the env vars are
       set. Bridged rows carry a "Hakiya" badge in the list: editing one
       is pointless, because the next sync overwrites it. **DONE.**
-- [~] **English uploads** (YouTube/TikTok): `process-english-video` landed —
+- [x] **English uploads** (YouTube/TikTok): `process-english-video` landed —
       Deepgram nova-3 EN with utterance segmentation, batched Arabic-target
       Brain calls for the scaffold (dialect + fusha + literal gloss of the
       English, with the MSA-leak scan reading ONLY the dialect lines — fusha
@@ -315,7 +366,10 @@ generation conditioning.
       non-meme uploads to it. Learner transcript rendering DONE (EnglishLineCard,
       TappableEnglishText, translate-phrase en_to_ar). Home lead clip
       prefers native English over bridged; Discover badges bridged rows
-      as immersion. Remaining: Arabic pipeline prune once memes decided.
+      as immersion. The Arabic pipeline is **kept, not pruned**: the memes
+      decision resolved to FLIP rather than prune, and the bridge serves
+      Arabic-speech clips that still need the Arabic path to analyse them.
+      Pruning it would take the bridge with it.
 - [x] **Trending discovery → FLIPPED to the US and the UK.** The crawler
       searched six Gulf states for Arabic Shorts; it now searches `US`
       and `GB` for English ones — the accents an Arabic speaker actually
@@ -499,7 +553,10 @@ generation conditioning.
       see Arabic-only-surfaces) has its own minimal pairs per sound in
       `src/data/englishSounds.ts` — a ready source to pull from rather than
       re-authoring a second set from scratch.
-- [~] Shadowing, sentence coach, set phrases: KEEP loops, English targets.
+- [x] Shadowing, sentence coach, set phrases: KEEP loops, English targets.
+      Every sub-item below is marked DONE in its own paragraph; the box stayed
+      in-progress on the strength of one soft "revisit later", which is a
+      product decision rather than outstanding flip work.
       **Shadowing DONE, and it was broken rather than merely unflipped.**
       `useShadowQueue` had always worked out the right language per line —
       `en-US` for a native English clip, `ar-*` for a Hakiya-bridged one —
@@ -793,7 +850,7 @@ generation conditioning.
       RTL page — that one rule is what made the root flip safe. Full e2e
       sweep: 1764/1767 on first run; the three failures were two stale pins
       from earlier flips plus one selector colliding with the now-RTL root.
-- [~] Strings module landed (`src/lib/strings.ts`, plain module — one UI
+- [x] Strings module landed (`src/lib/strings.ts`, plain module — one UI
       language, no i18n framework) with the bottom-nav labels in Arabic
       (الرئيسية / تعلّم / اكتشف / تدرّب / أنا). Pages migrate onto it
       incrementally — Home's daily-queue loop is the first migrated page
@@ -960,6 +1017,24 @@ generation conditioning.
       render where one exists and the other does not, and the test replaced
       with what it was always meant to assert — one question per word,
       Arabic prompt with English options, full marks at the end.
+- [x] **Sixth sweep: the streak, which all five previous ones walked past.**
+      `StreakDisplay` renders in the header on *every* screen and was still
+      entirely English — "day streak", "Best", and a hand-rolled
+      `day{s}` plural. English plurals split on one-vs-many; Arabic does not,
+      so no amount of `!== 1` could have produced correct copy. `arCount`
+      does it properly (يوم واحد / يومان / 5 أيام / 12 يوماً), and the strings
+      live in `strings.ts` because `MajlisWelcome`'s streak chip needs the same
+      ones — its tooltip read "5-day streak" and its suffix was a Latin "d",
+      where the review intervals had long since settled on ي.
+      The reason five sweeps missed it is worth keeping: each audited *pages*,
+      or the chrome *around* pages, and this is a component rendered inside
+      the top bar by a layout the page never mentions.
+      **And a finding, not fixed here:** nothing anywhere writes
+      `review_streaks`. Six components read it and no code path in the app or
+      the edge functions inserts or updates a row, so every learner's streak is
+      permanently zero — which also means `grant_achievement`'s `streak_days`
+      branch can never be satisfied. That is a missing feature rather than a
+      missed flip, so it is recorded rather than patched.
 
 ### Inherited bugs the retarget did not cause — DONE
 The quiz crash above came from a test that pinned a bug rather than a
@@ -1048,6 +1123,15 @@ to fix it.
 8. **Arabic-first UI pass** (big, mechanical, best done once features settle)
 9. **English Sounds journey** — DONE
 
+All nine are done. What is left is not a retarget step:
+
+10. **Ingleezy's own Supabase project** — create it, push these migrations to
+    it, regenerate `types.ts` against it. The migrations replay cleanly from
+    scratch now, which is what makes this a task rather than an excavation,
+    and `typesDrift.ts` shrinks to nothing the moment the types are
+    regenerated. This is the only thing standing between the app and a real
+    backend.
+
 Each step keeps `npm run typecheck && npm test && npm run test:e2e` green —
 same bar as Hakiya's CI.
 
@@ -1072,16 +1156,60 @@ same bar as Hakiya's CI.
   and a rebuilt database silently lost the `learner-audio` storage bucket. The
   eighth had never worked outside a wrapping transaction: a `CREATE TEMP TABLE
   ... ON COMMIT DROP` whose table was gone by the time the next statement ran.
-  Then cleared to the end: twelve of the fourteen are gone, and the pin is
-  down to the two that reference tables no migration creates at all — which
-  still needs a schema dump rather than a guess. The last three could not
-  simply be deleted, because they were *later* snapshots carrying schema the
-  authored original predates. Chief among it `lessons.dialect_module`, which
-  `useLessons` filters every learner's curriculum on and which a rebuilt
-  database therefore did not have — the lesson list would have failed outright
-  on a fresh environment. Recovered explicitly, then the duplicates deleted.
-  Worth remembering *why* nothing caught that: `migrationReplay` records
-  missing TABLES and no table was missing, while `schemaContract` reads the
-  app's queries against the committed types file, which describes the database
-  as it is rather than as the migrations rebuild it. A missing COLUMN falls
-  between the two.
+  Then cleared to the end. Twelve of the fourteen went first; the last three
+  could not simply be deleted, because they were *later* snapshots carrying
+  schema the authored original predates. Chief among it
+  `lessons.dialect_module`, which `useLessons` filters every learner's
+  curriculum on and which a rebuilt database therefore did not have — the
+  lesson list would have failed outright on a fresh environment. Recovered
+  explicitly, then the duplicates deleted.
+
+  **Now closed, and the closing found more than the pin did.** The last two
+  failures referenced `processed_videos` and `review_streaks`, tables the
+  platform dashboard created and no migration ever did; they are authored in
+  `20260529150400_recover_untracked_schema.sql`, dated to land just before the
+  migrations that need them. Because psql stops a file at its first error,
+  those two references had been aborting their migrations partway, so a
+  rebuilt database was *also* missing a `lessons` policy that hides drafts
+  from non-admins, three REVOKEs on the role-check helpers, and every
+  `storage.objects` delete policy in the file below the reference. None of
+  that was visible while the failure was pinned. Fixing it immediately
+  exposed a third failure hiding behind the first: with section 8 no longer
+  aborting, section 9 ran for the first time and died on `lessons.status`, a
+  column nothing created until three months later.
+
+  Then the harder half — schema whose absence errors *nothing*. A table
+  created outside the migrations raises no error during a replay; it simply is
+  not there, and the run reports clean. Diffing the generated types against a
+  real replay turned up three more untracked tables and ten missing columns,
+  among them `user_vocabulary.stage` and `review_count`, which the Anki
+  importer and the save-a-word bar both write — so on a rebuilt database,
+  saving a word from a transcript failed outright.
+  `20260822090000_recover_untracked_platform_schema.sql` authors the lot.
+
+  Worth remembering *why* nothing caught the column cases: `migrationReplay`
+  recorded missing TABLES and no table was missing, while `schemaContract`
+  reads the app's queries against the committed types file, which describes
+  the database as it is rather than as the migrations rebuild it. A missing
+  COLUMN fell straight between the two. `contract/build.mjs` dumps columns now
+  and `migrationReplay` checks every table *and column* the app queries
+  against the schema the migrations actually produce. Both allowance lists are
+  gone and the assertions are flat, so they cannot come back as pins.
+
+- **The fork was still pointed at Hakiya's backend.** Not a risk any more, but
+  it was live for the whole retarget and nothing about it was loud. Project
+  `ovscskaijvclaxelkdyf` — anon key stamped 22 January 2026, the day before
+  this repo's first migration and seven months before the fork — was hardcoded
+  in `vite.config.ts` as a fallback for late env injection, and pinned in
+  `supabase/config.toml`. Since `envDir` points at an empty directory, a root
+  `.env` was not read either: a developer who followed the README and made one
+  got the fallback instead, and an Ingleezy dev server read and wrote Hakiya's
+  production data while looking entirely healthy. `supabase db push` from an
+  Ingleezy checkout would have pushed *these* migrations into Hakiya's
+  database. There is no hardcoded fallback now — with nothing injected,
+  `client.ts` throws by name, which is the honest state until Ingleezy has its
+  own project — and `envGuard` pins the absence of any project ref or JWT in
+  the build config, matched by shape rather than by that one string.
+  **Still outstanding: creating and linking Ingleezy's own Supabase project.**
+  Everything above makes the wrong answer loud; none of it supplies the right
+  one.

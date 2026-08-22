@@ -1,39 +1,77 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
+import { readFileSync } from "fs";
 import { componentTagger } from "lovable-tagger";
 
-const FALLBACK_SUPABASE_PROJECT_ID = "ovscskaijvclaxelkdyf";
-const FALLBACK_SUPABASE_URL = `https://${FALLBACK_SUPABASE_PROJECT_ID}.supabase.co`;
-const FALLBACK_SUPABASE_PUBLISHABLE_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92c2Nza2FpanZjbGF4ZWxrZHlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkxMjM5NzAsImV4cCI6MjA4NDY5OTk3MH0.8fH3gVx8ft5KvHbeD0ngNs1-ZClg2R7a_juQ0_dwMW0";
+/**
+ * There is no hardcoded Supabase fallback here, and there must not be one.
+ *
+ * There used to be: project `ovscskaijvclaxelkdyf` and its live anon key, so
+ * that a preview whose env injection arrived late still booted. That was safe
+ * in Hakiya, where it pointed at Hakiya's own backend. Ingleezy inherited it in
+ * the fork — the project's anon key is stamped 22 January 2026, the day before
+ * this repo's first migration and seven months before the fork — so the same
+ * three lines meant something entirely different here: an Ingleezy dev server
+ * started without env vars read and wrote *Hakiya's production database*, and
+ * the app looked like it was working the whole time.
+ *
+ * `RETARGET.md` is explicit that Ingleezy runs its own Supabase project. Until
+ * one is linked the correct behaviour is no backend at all: with nothing
+ * injected, `src/integrations/supabase/client.ts` throws by name on first
+ * import, which is a better preview than a working app attached to someone
+ * else's data.
+ */
+const ROOT_ENV = (() => {
+  // Read explicitly rather than through Vite: `envDir` points at an empty
+  // directory (see below), so a root .env — the file README tells developers to
+  // create, and the one .env.example is a template for — is otherwise ignored.
+  // A plain read does not join Vite's config-watch set, so this does not
+  // reintroduce the restart loop that `envDir` exists to avoid.
+  try {
+    return Object.fromEntries(
+      readFileSync(path.resolve(__dirname, ".env"), "utf8")
+        .split("\n")
+        .map((line) => line.trim())
+        .filter((line) => line && !line.startsWith("#"))
+        .map((line) => {
+          const at = line.indexOf("=");
+          return at === -1
+            ? []
+            : [line.slice(0, at).trim(), line.slice(at + 1).trim().replace(/^["']|["']$/g, "")];
+        })
+        .filter((pair) => pair.length === 2),
+    ) as Record<string, string>;
+  } catch {
+    return {} as Record<string, string>; // no .env is the normal case in CI
+  }
+})();
 
-const supabaseProjectId =
-  process.env.VITE_SUPABASE_PROJECT_ID ??
-  process.env.SUPABASE_PROJECT_ID ??
-  FALLBACK_SUPABASE_PROJECT_ID;
+/** process.env first, so Playwright's fake-host overrides and CI always win. */
+const fromEnv = (...names: string[]) =>
+  names.map((name) => process.env[name] ?? ROOT_ENV[name]).find((value) => value) ?? undefined;
+
+const supabaseProjectId = fromEnv("VITE_SUPABASE_PROJECT_ID", "SUPABASE_PROJECT_ID");
 
 const supabaseUrl =
-  process.env.VITE_SUPABASE_URL ??
-  process.env.SUPABASE_URL ??
-  (supabaseProjectId ? `https://${supabaseProjectId}.supabase.co` : FALLBACK_SUPABASE_URL);
+  fromEnv("VITE_SUPABASE_URL", "SUPABASE_URL") ??
+  (supabaseProjectId ? `https://${supabaseProjectId}.supabase.co` : undefined);
 
-const supabasePublishableKey =
-  process.env.VITE_SUPABASE_PUBLISHABLE_KEY ??
-  process.env.SUPABASE_PUBLISHABLE_KEY ??
-  process.env.VITE_SUPABASE_ANON_KEY ??
-  process.env.SUPABASE_ANON_KEY ??
-  FALLBACK_SUPABASE_PUBLISHABLE_KEY;
+const supabasePublishableKey = fromEnv(
+  "VITE_SUPABASE_PUBLISHABLE_KEY",
+  "SUPABASE_PUBLISHABLE_KEY",
+  "VITE_SUPABASE_ANON_KEY",
+  "SUPABASE_ANON_KEY",
+);
 
-const vapidPublicKey =
-  process.env.VITE_VAPID_PUBLIC_KEY ?? process.env.VAPID_PUBLIC_KEY ?? "";
+const vapidPublicKey = fromEnv("VITE_VAPID_PUBLIC_KEY", "VAPID_PUBLIC_KEY") ?? "";
 
 // https://vitejs.dev/config/ — cache bust v5
 export default defineConfig(({ mode }) => ({
   // Lovable Cloud can rewrite the root .env after backend changes, which makes
   // Vite restart the preview server. Keep Vite env discovery on an isolated
-  // directory and inject the required client vars from process.env instead.
-  // Use public fallbacks so preview/build never crash if env injection is late.
+  // directory and inject the required client vars ourselves instead — from
+  // process.env, then from a root .env read by hand above.
   envDir: ".vite-env",
   server: {
     host: "0.0.0.0",
@@ -49,7 +87,9 @@ export default defineConfig(({ mode }) => ({
   },
   define: {
     // Backend env vars MUST be available at build time. Accept both the
-    // Vite-prefixed names and Lovable Cloud's standard secret names.
+    // Vite-prefixed names and Lovable Cloud's standard secret names. Each is
+    // injected only when it has a value: an absent var must stay absent so
+    // client.ts can say so, rather than being defined as something wrong.
     ...(supabaseProjectId
       ? { 'import.meta.env.VITE_SUPABASE_PROJECT_ID': JSON.stringify(supabaseProjectId) }
       : {}),

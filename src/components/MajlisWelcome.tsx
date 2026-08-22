@@ -5,6 +5,7 @@ import { useDialect } from "@/contexts/DialectContext";
 import { useWeeklyGoal } from "@/hooks/useGamification";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { AR } from "@/lib/strings";
 
 /**
  * A — Majlis welcome panel
@@ -145,7 +146,7 @@ export function MajlisWelcome() {
                     ? "bg-gradient-to-r from-[#D98A3D]/20 to-[#D98A3D]/5 border-[#D98A3D]/40 text-[#8F5A24] dark:text-accent"
                     : "bg-[#2C3B74]/5 border-[#2C3B74]/15 text-[#2C3B74]/60 dark:bg-white/5 dark:border-white/10 dark:text-muted-foreground"
                 )}
-                title={`${streak?.current_streak ?? 0}-day streak`}
+                title={`${AR.streak.label} ${AR.streak.days(streak?.current_streak ?? 0)}`}
               >
                 <Flame
                   className={cn(
@@ -153,7 +154,7 @@ export function MajlisWelcome() {
                     (streak?.current_streak ?? 0) > 0 ? "text-accent" : "text-[#2C3B74]/40 dark:text-muted-foreground/60"
                   )}
                 />
-                {streak?.current_streak ?? 0}d
+                {streak?.current_streak ?? 0} ي
               </span>
             )}
           </div>

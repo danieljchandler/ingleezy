@@ -1,6 +1,10 @@
 // generate-story-video-full — After admin approves the preview slideshow,
-// generate the full multi-scene slideshow: N scene images + N Arabic
+// generate the full multi-scene slideshow: N scene images + N ENGLISH
 // narration clips, saved as ordered segments on story_video_segments.
+//
+// English because the story's text is English post-flip and hearing it read is
+// the point; narrating the dialect scaffold would be reading the learner the
+// translation. Same reasoning as the story audio and the preview slideshow.
 // Each segment: { image_url, audio_url, narration_text, story_beat,
 // duration_seconds, prompt, index }.
 
@@ -40,9 +44,9 @@ type Plan = {
 };
 
 function hasLatin(text: string): boolean { return /[A-Za-z]/.test(text); }
-function normalizeArabicText(text: string): string { return text.replace(/\s+/g, " ").trim(); }
+function normalizeWhitespace(text: string): string { return text.replace(/\s+/g, " ").trim(); }
 function firstWords(text: string, maxWords: number): string {
-  return normalizeArabicText(text).split(/\s+/).slice(0, maxWords).join(" ");
+  return normalizeWhitespace(text).split(/\s+/).slice(0, maxWords).join(" ");
 }
 /**
  * Inverted from the Arabic era, and kept rather than dropped: the story beats
@@ -51,7 +55,7 @@ function firstWords(text: string, maxWords: number): string {
  * flip exists to prevent.
  */
 function validateEnglishOnly(label: string, text: string): string {
-  const normalized = normalizeArabicText(text);
+  const normalized = normalizeWhitespace(text);
   if (!normalized) throw new Error(`${label} is empty`);
   if (!hasLatin(normalized)) throw new Error(`${label} contains no English text`);
   return normalized;
@@ -176,9 +180,9 @@ async function synthesizeSceneNarration(
   admin: ReturnType<typeof createClient>,
   story: Story,
   sceneIndex: number,
-  arabicBeat: string,
+  storyBeat: string,
 ): Promise<{ audio_url: string; narration_text: string; duration_seconds: number }> {
-  const narration = validateEnglishOnly(`scene ${sceneIndex + 1} narration`, firstWords(arabicBeat, 40));
+  const narration = validateEnglishOnly(`scene ${sceneIndex + 1} narration`, firstWords(storyBeat, 40));
   const providerPlan = planEnglishProvider();
   const bytes = await synthesizeLine(narration, "narrator", sceneIndex, providerPlan);
   const path = `authentic-stories/${story.id}/full-${sceneIndex}-narration-${Date.now()}.${providerPlan.ext}`;

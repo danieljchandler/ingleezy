@@ -23,22 +23,6 @@ const inventory = extractQueries();
 const schema = loadSchema();
 
 /**
- * Tables the app uses that no migration creates.
- *
- * Found by replaying supabase/migrations/ against a stock Postgres: these exist
- * in the production database but are not in the tracked migration history, so a
- * rebuilt environment would not have them. Listed rather than fixed because
- * writing the missing migrations means guessing at columns and constraints that
- * only production knows — that needs a schema dump, not a test.
- *
- * `subscribers` is the one that matters most: `_shared/usageCap.ts` reads it to
- * decide whether a caller is a paying customer, so it is the only thing
- * separating paid from free on every AI endpoint. It is not even in the
- * generated types.
- */
-const UNTRACKED_TABLES = new Set(["processed_videos", "review_streaks"]);
-
-/**
  * Tables that migrations create but the generated types omit.
  *
  * Both are written only by edge functions under the service role and carry no
@@ -53,8 +37,8 @@ const SERVICE_ROLE_ONLY_TABLES = new Set([
   "fanar_usage",
   "llm_usage_logs",
   "voice_usage",
-  // Promoted out of UNTRACKED_TABLES when 20260812103000 finally gave it a
-  // migration — the "rebuilt database makes everyone look free-tier" debt.
+  // Was itself untracked until 20260812103000 gave it a migration — the
+  // "rebuilt database makes everyone look free-tier" debt.
   "subscribers",
   // The training-data flywheel's canonical store: written by edge functions
   // and a DB trigger, read by admins and the export script.
@@ -84,12 +68,7 @@ describe("tables", () => {
 
   it("every table the app queries exists in the schema", () => {
     const missing = [...inventory.tables.values()]
-      .filter(
-        (usage) =>
-          !schema.tables.has(usage.table) &&
-          !UNTRACKED_TABLES.has(usage.table) &&
-          !SERVICE_ROLE_ONLY_TABLES.has(usage.table),
-      )
+      .filter((usage) => !schema.tables.has(usage.table) && !SERVICE_ROLE_ONLY_TABLES.has(usage.table))
       .map((usage) => `${usage.table} (from ${[...usage.locations].slice(0, 2).join(", ")})`);
 
     expect(missing).toEqual([]);
@@ -111,14 +90,41 @@ describe("tables", () => {
     }
   });
 
-  it("records the tables that exist in production but in no migration", () => {
-    // Pinned so the list cannot grow unnoticed. Shrinking it is the goal: each
-    // one is a table a rebuilt database would be missing.
-    const referenced = [...UNTRACKED_TABLES].filter(
-      (table) => inventory.tables.has(table) || schema.tables.has(table),
-    );
+  it("every table the app queries is created by a migration, not just present in the types", () => {
+    // There used to be an allowance list here — tables that existed in
+    // production but in no migration, recorded because writing the missing
+    // migrations meant guessing at columns only production knew. It is gone:
+    // the shapes came off the generated types, and 20260529150400 and
+    // 20260822090000 author all five.
+    //
+    // This test is what stops the list coming back. The types file describes
+    // the database as it *is*, so a table someone adds through the dashboard
+    // passes every other check in this file while a rebuilt environment has
+    // nothing. `migrationReplay` proves the same thing far more precisely, by
+    // building the schema and looking — but it needs a Postgres, and this runs
+    // in the fast job on every push.
+    const migrations = readdirSync(resolve(REPO_ROOT, "supabase/migrations"))
+      .filter((file) => file.endsWith(".sql"))
+      .map((file) => readFileSync(resolve(REPO_ROOT, "supabase/migrations", file), "utf8"))
+      .join("\n");
 
-    expect(referenced.sort()).toEqual(["processed_videos", "review_streaks"]);
+    const untracked = [...inventory.tables.keys()]
+      .filter((table) => schema.tables.has(table))
+      .filter((table) => !new RegExp(`create table[^;]*\\b${table}\\b`, "is").test(migrations))
+      // Views are declared, not created as tables; `leaderboard_profiles` is
+      // the one the app reads.
+      .filter((table) => !new RegExp(`create (or replace )?view[^;]*\\b${table}\\b`, "is").test(migrations))
+      // And a table can arrive under one name and be renamed later —
+      // `user_sound_progress` was `user_letter_progress` until the semantic
+      // renames, so its CREATE never mentions the name the app uses.
+      .filter((table) => !new RegExp(`rename to\\s+${table}\\b`, "i").test(migrations));
+
+    expect(
+      untracked.sort(),
+      `These tables are in the generated types and in the app's queries, but no ` +
+        `migration creates them — so they exist only in the database they were ` +
+        `clicked into, and a rebuilt environment would not have them.`,
+    ).toEqual([]);
   });
 });
 

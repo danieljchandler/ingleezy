@@ -36,6 +36,20 @@ export const AR = {
     me: "أنا",
   },
 
+  /**
+   * The streak, which every sweep walked past: `StreakDisplay` renders in the
+   * header on every screen and was still entirely English ("day streak",
+   * "Best", and a hand-rolled `day{s}` plural), as was the streak tooltip in
+   * `MajlisWelcome`. Two components, so the strings live here.
+   */
+  streak: {
+    label: "سلسلة",
+    best: "الأطول",
+    consecutive: "أيام متتالية",
+    days: (n: number) =>
+      arCount(n, { one: "يوم واحد", two: "يومان", few: "أيام", many: "يوماً" }),
+  },
+
   common: {
     save: "حفظ",
     login: "تسجيل الدخول",

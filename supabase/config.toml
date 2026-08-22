@@ -1,4 +1,10 @@
-project_id = "ovscskaijvclaxelkdyf"
+# Deliberately a local name, not a project ref. This line said
+# `ovscskaijvclaxelkdyf` — Hakiya's project, inherited whole in the fork — which
+# made `supabase db push` from an Ingleezy checkout a push into Hakiya's
+# production database. RETARGET.md is explicit that Ingleezy runs its own
+# project; when one exists, link it with `supabase link --project-ref <ref>`
+# rather than by editing this back to a ref that is not ours.
+project_id = "ingleezy"
 
 # ─── Functions that require JWT authentication ────────────────────────────────
 # Payment / subscription functions — MUST verify JWT

@@ -1,6 +1,7 @@
 import { beforeAll, describe, expect, it } from "vitest";
 import { execFileSync } from "node:child_process";
 import { resolve } from "node:path";
+import { extractQueries } from "./support/contract/extractQueries";
 
 /**
  * Can the database be rebuilt from the migrations in this repo?
@@ -23,48 +24,59 @@ interface BuildResult {
   total: number;
   failures: Array<{ file: string; error: string }>;
   tables: string[];
+  columns: Record<string, string[]>;
 }
 
 /**
- * Migrations that do not replay from scratch today.
+ * There is no allowance list any more, and that is the point.
  *
- * Two left, and they are the hard two: both reference a table that no
- * migration creates at all. Fixing them means writing migrations for tables
- * whose real shape only production knows — a schema dump, not a guess.
+ * There used to be two: migrations that were permitted to fail, and tables a
+ * rebuilt database was permitted to be missing. Both are now empty, so the
+ * assertions below are flat — every migration replays, and every table and
+ * column the app names is there afterwards.
  *
- * The other twelve are gone. All were the same thing: the platform
- * periodically re-emitted an already-authored migration under a fresh hashed
- * filename, so two files created the same objects and whichever ran second
- * always failed. Where the re-emission was byte-equivalent the extra file was
- * deleted outright. Three were *later* snapshots carrying a little schema the
- * authored original predates, and deleting those would have lost it — most
- * sharply `lessons.dialect_module`, which `useLessons` filters every learner's
- * curriculum on, and which a rebuilt database did not have because the
- * snapshot died on its own first statement. Recovered in
- * 20260816090000_recover_stranded_schema.sql and then deleted.
+ * How the last of it went, because the shape of the bug is worth keeping:
  *
- * That gap is worth remembering: this test records missing TABLES and no table
- * was missing, while `schemaContract` reads the app's queries against the
- * committed types file — which describes the database as it is, not as the
- * migrations rebuild it. A missing COLUMN falls between the two.
+ * - Fourteen failures were the platform re-emitting an already-authored
+ *   migration under a fresh hashed filename. Two files created the same
+ *   objects and whichever ran second always failed. Byte-equivalent
+ *   re-emissions were deleted; three were *later* snapshots carrying schema
+ *   the authored original predates, so that schema was recovered explicitly in
+ *   20260816090000_recover_stranded_schema.sql before the duplicates went.
  *
- * The list is pinned so it cannot grow. Shrinking it is the goal.
+ * - The last two referenced `processed_videos` and `review_streaks`, tables
+ *   the platform dashboard created and no migration ever did. They are now
+ *   authored in 20260529150400_recover_untracked_schema.sql, dated to land
+ *   just before the migrations that need them.
+ *
+ * - Which immediately exposed a third: with those two no longer aborting
+ *   20260529150401 at section 8, section 9 could run for the first time and
+ *   failed on `lessons.status`, a column that did not exist until three months
+ *   later in the recovery migration. Hoisted into the same new file.
+ *
+ * That last one is why this test now checks columns as well as tables. It used
+ * to record missing TABLES, while `schemaContract` reads the app's queries
+ * against the committed types file — which describes the database as it *is*,
+ * not as the migrations rebuild it. A missing COLUMN fell between the two, and
+ * `lessons.dialect_module` and `lessons.status` both landed in that gap.
  */
-const KNOWN_REPLAY_FAILURES = [
-  "20260529150401_dc0b25a8-3051-4445-a8be-cd323f128c64.sql",
-  "20260529155315_a303684f-1e60-4e83-8c60-8f228e46c637.sql",
-];
+const inventory = extractQueries();
 
 /**
- * Tables the app reads that replaying the migrations does not produce.
- *
- * `subscribers` used to be here and is not any more: it is created by
- * 20260812103000 and by the platform snapshot beside it, both with
- * IF NOT EXISTS, so a rebuilt database now gets it. That one mattered most —
- * `_shared/usageCap.ts` reads it to decide whether a caller is paying, so
- * without it every user looked free-tier on a fresh environment.
+ * Identifiers PostgREST accepts where a column goes but which are not columns —
+ * aggregate syntax and the `count` pseudo-column on an embed. Same list as
+ * `schemaContract`, for the same reason.
  */
-const KNOWN_MISSING_TABLES = ["processed_videos", "review_streaks"];
+const NOT_COLUMNS = new Set(["count", "sum", "avg", "min", "max"]);
+
+/**
+ * The one relation a correct replay is allowed not to have.
+ *
+ * 20260812160000 creates `content_embeddings` inside a guard on the pgvector
+ * extension, which a stock Postgres does not carry. Absent here means the guard
+ * worked; it is not the same thing as schema that was never migrated.
+ */
+const EXTENSION_GUARDED = new Set(["content_embeddings"]);
 
 describe.skipIf(!DATABASE_URL)("migration replay", () => {
   let result: BuildResult;
@@ -85,47 +97,70 @@ describe.skipIf(!DATABASE_URL)("migration replay", () => {
   it("builds the schema the app expects", () => {
     // The bulk of the work does replay: this is a floor on how much of the
     // schema a rebuilt database actually gets.
-    expect(result.tables.length).toBeGreaterThan(70);
+    expect(result.tables.length).toBeGreaterThan(90);
     expect(result.tables).toContain("profiles");
     expect(result.tables).toContain("user_vocabulary");
     expect(result.tables).toContain("word_reviews");
   });
 
-  it("has no replay failures beyond the known ones", () => {
-    const unexpected = result.failures
-      .map((failure) => failure.file)
-      .filter((file) => !KNOWN_REPLAY_FAILURES.includes(file));
-
+  it("replays every migration without a failure", () => {
     expect(
-      unexpected,
-      `New migrations fail to replay from scratch:\n` +
-        result.failures
-          .filter((failure) => unexpected.includes(failure.file))
-          .map((failure) => `  ${failure.file}: ${failure.error}`)
-          .join("\n"),
+      result.failures,
+      `Migrations that do not replay from scratch:\n` +
+        result.failures.map((failure) => `  ${failure.file}: ${failure.error}`).join("\n") +
+        `\n\nThere is no allowance list. A migration that only applies to the ` +
+        `database it grew on is the bug, not the pin.`,
     ).toEqual([]);
   });
 
-  it("records which known failures have since been fixed", () => {
-    // Fails when the list shrinks, so the pin gets tightened rather than
-    // hiding progress.
-    const stillFailing = result.failures.map((failure) => failure.file);
-    const fixed = KNOWN_REPLAY_FAILURES.filter((file) => !stillFailing.includes(file));
+  it("creates every table the app queries", () => {
+    // Keyed off the column map rather than `result.tables`, because that comes
+    // from pg_tables and the app queries views too — `leaderboard_profiles` is
+    // one, and it reads like any other table from the client.
+    const present = new Set(Object.keys(result.columns));
+    const missing = [...inventory.tables.values()]
+      .filter((usage) => !present.has(usage.table) && !EXTENSION_GUARDED.has(usage.table))
+      .map((usage) => `${usage.table} (from ${[...usage.locations].slice(0, 2).join(", ")})`);
 
     expect(
-      fixed,
-      `These migrations replay cleanly now. Remove them from ` +
-        `KNOWN_REPLAY_FAILURES so the list keeps meaning something.`,
+      missing,
+      `The app queries these tables and a rebuilt database would not have them.`,
     ).toEqual([]);
   });
 
-  it("records the tables a rebuilt database would be missing", () => {
-    const missing = KNOWN_MISSING_TABLES.filter((table) => !result.tables.includes(table));
+  it("creates every column the app names", () => {
+    // The check the table list could not make. `lessons.status` was absent from
+    // a rebuilt database for three months without anything noticing, because
+    // the table it belongs to was there all along.
+    const problems: string[] = [];
 
-    // Equality, not containment: a pinned table that starts appearing fails
-    // here too, so the list has to be trimmed rather than left overstating the
-    // damage. That is how `subscribers` came off it.
-    expect(missing.sort()).toEqual([...KNOWN_MISSING_TABLES].sort());
+    for (const usage of inventory.tables.values()) {
+      const columns = result.columns[usage.table];
+      if (!columns) continue; // absent tables are the previous test's business
+      const has = new Set(columns);
+
+      for (const column of usage.columns) {
+        if (NOT_COLUMNS.has(column) || has.has(column)) continue;
+
+        // An embed's columns are attributed to the embedded table, so a name
+        // that belongs to one of them is not a problem here.
+        const belongsToEmbed = [...usage.embeds].some((embed) =>
+          result.columns[embed]?.includes(column),
+        );
+        if (belongsToEmbed) continue;
+
+        problems.push(
+          `${usage.table}.${column} — used in ${[...usage.locations].slice(0, 2).join(", ")}`,
+        );
+      }
+    }
+
+    expect(
+      problems,
+      `These columns are queried but replaying the migrations does not produce ` +
+        `them. PostgREST answers 400 and the page renders an empty state, so on ` +
+        `a rebuilt environment this is invisible until a learner reports it.`,
+    ).toEqual([]);
   });
 });
 

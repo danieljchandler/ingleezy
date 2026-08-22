@@ -10,11 +10,13 @@ import globalSetup from "../../e2e/support/globalSetup";
  * Guards the one mistake in this repo that is both easy to make and expensive:
  * running a test suite against the production Supabase project.
  *
- * vite.config.ts sets `envDir: ".vite-env"` — an empty directory — so root .env
- * files are ignored, and it injects the Supabase client vars through `define`
- * from process.env with **hardcoded production fallbacks**. Anything that boots
- * the app without overriding those vars talks to live data. Nothing about the
- * failure is loud: the tests still pass.
+ * vite.config.ts sets `envDir: ".vite-env"` — an empty directory — so Vite's own
+ * env loading finds nothing, and the Supabase client vars are injected through
+ * `define` instead. That used to come with **hardcoded production fallbacks**,
+ * which in a fork meant the previous app's production database: anything that
+ * booted without overriding those vars talked to live data, and nothing about
+ * the failure was loud. The fallbacks are gone and the assertions below keep
+ * them gone.
  *
  * These assertions are deliberately textual. They are checking that the
  * safeguards are still present in the config files, which is not something a
@@ -116,17 +118,49 @@ describe("production-traffic safeguards", () => {
   describe("vite", () => {
     const config = read("vite.config.ts");
 
-    it("still reads the client vars from process.env", () => {
+    it("still reads the client vars from process.env, and reads it first", () => {
       // If this stops being true, the overrides above stop working and every
-      // other assertion here becomes theatre.
-      expect(config).toContain("process.env.VITE_SUPABASE_URL");
+      // other assertion here becomes theatre. Precedence matters as much as
+      // presence: Playwright passes the fake host through the environment, so
+      // process.env has to beat anything read from a file.
+      expect(config).toContain("VITE_SUPABASE_URL");
+      expect(config).toMatch(/process\.env\[/);
+      expect(config.indexOf("process.env[")).toBeLessThan(config.indexOf("ROOT_ENV["));
     });
 
     it("keeps env loading pinned to the empty .vite-env directory", () => {
-      // Documented here because it is the surprising half of the hazard: a
-      // developer who writes a root .env expecting it to apply will not get one,
-      // and will silently get the production fallback instead.
+      // The surprising half of the hazard: Vite's own env discovery finds
+      // nothing here, so every client var has to be injected deliberately.
       expect(config).toMatch(/envDir:\s*["'.]/);
+    });
+
+    it("still reads a root .env, which is the workflow the README documents", () => {
+      // The other half of the same hazard. `envDir` means Vite will not read
+      // it, so the config reads it by hand — without that, a developer who
+      // copies .env.example to .env as instructed gets no backend at all and no
+      // explanation, which is how the production fallback justified itself in
+      // the first place.
+      expect(config).toContain(".env");
+      expect(config).toMatch(/readFileSync/);
+    });
+
+    it("carries no hardcoded project ref or anon key", () => {
+      // The fork hazard, pinned. `ovscskaijvclaxelkdyf` is Hakiya's project —
+      // its anon key predates this repo's first migration — and it sat here as
+      // a fallback, so an Ingleezy dev server started without env vars read and
+      // wrote Hakiya's production data while looking entirely healthy.
+      //
+      // Matched by shape, not by that one string: any Supabase project ref or
+      // JWT hardcoded into the build config is the same bug wearing different
+      // characters.
+      const withoutComments = config.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+
+      expect(withoutComments, "a JWT is hardcoded in vite.config.ts").not.toMatch(
+        /["']eyJ[A-Za-z0-9_-]{10,}/,
+      );
+      expect(withoutComments, "a Supabase project URL is hardcoded in vite.config.ts").not.toMatch(
+        /["'`]https:\/\/[a-z]{20}\.supabase\.co/,
+      );
     });
   });
 });

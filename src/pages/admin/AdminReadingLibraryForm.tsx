@@ -533,7 +533,7 @@ const AdminReadingLibraryForm = () => {
               {/* Preview Scene (image + narration audio) */}
               {story.story_video_url && (
                 <div className="mt-4">
-                  <Label>Preview Scene with Arabic Narration (for approval)</Label>
+                  <Label>Preview Scene with English Narration (for approval)</Label>
                   <div className="mt-1 rounded-lg overflow-hidden bg-muted relative">
                     <img
                       src={story.story_video_url}
@@ -615,8 +615,12 @@ const AdminReadingLibraryForm = () => {
                         </div>
                       )}
                     </div>
+                    {/* The narration is English post-flip — it is quoted from the
+                        story's own text. This rendered it in the Arabic face and
+                        right-to-left, so the admin approving a scene read the
+                        line backwards in the wrong typeface. */}
                     {active?.narration_text && (
-                      <p className="mt-2 text-sm font-arabic" dir="rtl">{active.narration_text}</p>
+                      <p className="mt-2 text-sm font-english" dir="ltr">{active.narration_text}</p>
                     )}
 
                     {/* Per-scene image editing */}
