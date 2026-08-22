@@ -55,9 +55,15 @@ npm run dev
 ```
 
 Copy `.env.example` to `.env` and fill in `VITE_SUPABASE_URL` and
-`VITE_SUPABASE_PUBLISHABLE_KEY` once a Supabase project is linked. The e2e
-suite needs **no Supabase credentials** — it runs against a hermetic fake
-(`e2e/support/supabase.ts`).
+`VITE_SUPABASE_PUBLISHABLE_KEY`. **No Supabase project is linked yet**, so
+without those two values the app builds and serves but throws on first import
+of the Supabase client, by name. That is deliberate: the fork inherited
+Hakiya's project ref as a hardcoded fallback, which meant an Ingleezy dev
+server with no `.env` read and wrote Hakiya's production database while looking
+perfectly healthy. No backend is the honest state until Ingleezy has its own.
+
+The e2e suite needs **no Supabase credentials** — it runs against a hermetic
+fake (`e2e/support/supabase.ts`), and `npm test` likewise.
 
 ## Useful scripts
 
