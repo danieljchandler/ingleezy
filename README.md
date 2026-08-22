@@ -47,6 +47,31 @@ learn English:
   with English + Fusha transcript lines) are snapshot-synced in as secondary
   content, alongside Ingleezy's own English uploads (YouTube/TikTok)
 
+## Repositories
+
+This repo is the whole product. There is no separate marketing site.
+
+`danieljchandler/ingleezy-landing-page` was a Lovable scaffold spun up to hold
+a public landing page, and it never got past the placeholder stage: one route
+rendering the word "ingleezy" and nothing else. It is **archived rather than
+merged, because there was nothing in it to merge** —
+
+- its 46 shadcn components are a strict subset of this repo's 48, and its
+  `src/lib/utils.ts` is byte-identical to ours;
+- the rest was TanStack Start plumbing (`router.tsx`, `server.ts`,
+  `start.ts`, `routeTree.gen.ts`) that has no meaning in this Vite +
+  react-router app, and could not be carried over even in principle — that
+  repo ran React 19 / Vite 8 / Tailwind 4 against this one's React 18 /
+  Vite 5 / Tailwind 3;
+- its page title and favicon were Lovable defaults, whereas `index.html`
+  here already carries real Arabic OG/Twitter meta, JSON-LD, and the branded
+  icon set.
+
+The logged-out landing surface already lives in this app: both `/` (`Feed`)
+and `/today` (`Index`) render `<LandingHero />`
+(`src/components/LandingHero.tsx`) when the visitor isn't authenticated. That
+is the landing page — grow it there when the public page needs more.
+
 ## Local development
 
 ```sh
