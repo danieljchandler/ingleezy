@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Flame } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { AR } from "@/lib/strings";
 
 interface StreakDisplayProps {
   compact?: boolean;
@@ -51,7 +52,7 @@ export function StreakDisplay({ compact = false, className }: StreakDisplayProps
             alive ? "text-orange-600 dark:text-orange-400" : "text-muted-foreground",
           )}
         >
-          {streak.current_streak} day{streak.current_streak !== 1 ? "s" : ""}
+          {AR.streak.days(streak.current_streak)}
         </span>
       </div>
     );
@@ -74,12 +75,12 @@ export function StreakDisplay({ compact = false, className }: StreakDisplayProps
           </div>
           <div>
             <p className="text-2xl font-bold text-foreground">{streak.current_streak}</p>
-            <p className="text-sm text-muted-foreground">day streak</p>
+            <p className="text-sm text-muted-foreground">{AR.streak.consecutive}</p>
           </div>
         </div>
         <div className="text-right">
-          <p className="text-sm text-muted-foreground">Best</p>
-          <p className="text-lg font-semibold text-foreground">{streak.longest_streak} days</p>
+          <p className="text-sm text-muted-foreground">{AR.streak.best}</p>
+          <p className="text-lg font-semibold text-foreground">{AR.streak.days(streak.longest_streak)}</p>
         </div>
       </div>
     </div>

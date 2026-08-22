@@ -66,12 +66,18 @@ describe("the chip", () => {
     expect(chip()).toHaveTextContent("Masri");
   });
 
-  it("names the current dialect to a screen reader", () => {
+  it("names the current dialect to a screen reader in Arabic", () => {
     render();
 
+    // The visible chip carries both scripts, but the label is one Arabic
+    // sentence and the dialect belongs in the same language as the rest of it.
+    // It used to interpolate the transliteration, so a screen reader announced
+    // "لهجتك الحالية: Khaleeji" — an Arabic sentence with a Latin word dropped
+    // into the middle, which is a language switch mid-utterance for exactly the
+    // user who cannot see the chip that justifies it.
     expect(chip()).toHaveAttribute(
       "aria-label",
-      "لهجتك الحالية: Khaleeji. اضغط للتغيير.",
+      "لهجتك الحالية: خليجي. اضغط للتغيير.",
     );
   });
 

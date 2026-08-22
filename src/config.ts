@@ -5,24 +5,62 @@
  * live here so they can be found and changed in one place.
  */
 
-// ─── Dialects ────────────────────────────────────────────────────────────────
+// ─── The learner's native dialect ─────────────────────────────────────────────
 
+/**
+ * Which Arabic the learner already speaks — chosen at onboarding, switchable
+ * afterwards, and read by everything that renders a scaffold.
+ *
+ * The identifiers are Hakiya's and the values in the database are unchanged,
+ * but the meaning is inverted. In Hakiya this was the dialect being *studied*:
+ * picking Egyptian asked for Egyptian content to learn. In Ingleezy the studied
+ * language is English and this is the language it gets explained in, so picking
+ * Egyptian asks for glosses, translations, grammar notes and coaching in
+ * Egyptian. Nothing here selects content any more; it selects voice.
+ *
+ * Which is why the labels are Arabic. They are the app naming the learner's own
+ * dialect back to them, in it — "Gulf Arabic" was Hakiya describing a course
+ * catalogue to an English speaker.
+ */
 export const DIALECTS = ['Gulf', 'Egyptian', 'Yemeni'] as const;
 export type Dialect = (typeof DIALECTS)[number];
 
+export const DIALECT_LABELS: Record<Dialect, string> = {
+  Gulf: 'خليجي',
+  Egyptian: 'مصري',
+  Yemeni: 'يمني',
+};
+
+/**
+ * The same three in Latin script.
+ *
+ * Not a translation — a transliteration, which is what the dialect is actually
+ * called by the people who speak it. It exists so a chip can carry two scripts
+ * without repeating itself: label both fields from `DIALECT_LABELS` and the
+ * dialect switcher renders "خليجي · خليجي".
+ */
+export const DIALECT_LATIN: Record<Dialect, string> = {
+  Gulf: 'Khaleeji',
+  Egyptian: 'Masri',
+  Yemeni: 'Yamani',
+};
+
+/**
+ * Gulf gets a map rather than a flag on purpose: it spans six countries, and
+ * picking one of them names the wrong nationality for five sets of learners.
+ * Egyptian and Yemeni each map to exactly one, so they keep theirs.
+ */
 export const DIALECT_FLAGS: Record<Dialect, string> = {
-  Gulf: '🇸🇦',
+  Gulf: '🗺️',
   Egyptian: '🇪🇬',
   Yemeni: '🇾🇪',
 };
 
-export const DIALECT_LABELS: Record<Dialect, string> = {
-  Gulf: 'Gulf Arabic',
-  Egyptian: 'Egyptian Arabic',
-  Yemeni: 'Yemeni Arabic',
-};
-
 /**
+ * Still content-facing, and the one place the dialect narrows what a learner is
+ * shown: Hakiya-bridged clips carry a dialect, so a Gulf learner's immersion
+ * feed prefers Gulf ones. Native English content is unfiltered by this.
+ *
  * `discover_videos.dialect` is written by the AI analysis pipeline, which for
  * the Gulf module stores the specific country it detected (Saudi, Kuwaiti,
  * UAE, Bahraini, Qatari, Omani) rather than the bare module name — Egyptian
@@ -36,6 +74,23 @@ export const DIALECT_MODULE_VALUES: Record<Dialect, readonly string[]> = {
   Egyptian: ['Egyptian'],
   Yemeni: ['Yemeni'],
 };
+
+/**
+ * The reverse: a raw stored value back to the module it belongs to.
+ *
+ * Anything that *displays* a dialect needs this rather than the raw column,
+ * because "Kuwaiti" has no entry in `DIALECT_LABELS` and rendering the column
+ * directly puts a Latin-script identifier in front of an Arabic-speaking
+ * learner. Unrecognised values fall back to Gulf, matching the default
+ * everywhere else.
+ */
+export function dialectModuleOf(raw: string | null | undefined): Dialect {
+  if (!raw) return 'Gulf';
+  const match = DIALECTS.find((dialect) =>
+    DIALECT_MODULE_VALUES[dialect].some((value) => value.toLowerCase() === raw.toLowerCase()),
+  );
+  return match ?? 'Gulf';
+}
 
 // ─── Difficulty levels ───────────────────────────────────────────────────────
 

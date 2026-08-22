@@ -3,14 +3,19 @@ import { createPortal } from "react-dom";
 import { ChevronDown, X } from "lucide-react";
 import { useDialect, DialectModule } from "@/contexts/DialectContext";
 import { cn } from "@/lib/utils";
+import { DIALECT_FLAGS, DIALECT_LABELS, DIALECT_LATIN } from "@/config";
 
+/**
+ * The name, transliteration and flag come from config — they are the same three
+ * facts every other dialect surface renders, and this component had its own
+ * copy. What stays here is what only this screen uses: the cultural tag, the
+ * greeting, the one-line sketch and the wash colour. Per the strings-module
+ * doctrine, single-use copy lives with its component.
+ */
 type Meta = {
   id: DialectModule;
-  arabic: string;
-  english: string;
-  flag: string;
-  tag: string;          // short cultural tag (English)
-  tagArabic: string;    // poetic Arabic phrase
+  tag: string;          // short cultural tag
+  tagArabic: string;    // poetic Arabic greeting
   vibe: string;         // one-line cultural sketch
   /** HSL string used purely for the ritual wash + card accent */
   hsl: string;
@@ -19,9 +24,6 @@ type Meta = {
 const DIALECTS: Meta[] = [
   {
     id: "Gulf",
-    arabic: "خليجي",
-    english: "Khaleeji",
-    flag: "🗺️",
     tag: "مجلس · لؤلؤ · تجارة السواحل",
     tagArabic: "مرحبا بالمعازيب",
     vibe: "إيقاع المجلس على مهله — قهوة وعود وهوا الخليج.",
@@ -29,9 +31,6 @@ const DIALECTS: Meta[] = [
   },
   {
     id: "Egyptian",
-    arabic: "مصري",
-    english: "Masri",
-    flag: "🇪🇬",
     tag: "شوارع القاهرة · سينما · إفيهات",
     tagArabic: "أهلاً يا باشا",
     vibe: "سريع ودافي ومسرحي — لغة السينما العربية.",
@@ -39,9 +38,6 @@ const DIALECTS: Meta[] = [
   },
   {
     id: "Yemeni",
-    arabic: "يمني",
-    english: "Yamani",
-    flag: "🇾🇪",
     tag: "مرتفعات · عسل · شعر قديم",
     tagArabic: "حياك الله",
     vibe: "عربي الجبال — حروف قديمة وكرم عميق وشعر على مهله.",
@@ -204,7 +200,7 @@ export const DialectRitualSwitcher = ({ className }: Props) => {
                         {d.id === "Gulf" ? (
                           <img src="/brand/ingleezy-icon.svg" alt="" className="w-8 h-8 object-contain" />
                         ) : (
-                          d.flag
+                          DIALECT_FLAGS[d.id]
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
@@ -214,7 +210,7 @@ export const DialectRitualSwitcher = ({ className }: Props) => {
                             dir="rtl"
                             style={{ color: `hsl(${d.hsl})` }}
                           >
-                            {d.arabic}
+                            {DIALECT_LABELS[d.id]}
                           </span>
                           <span
                             className="font-arabic text-sm text-muted-foreground"
@@ -224,7 +220,7 @@ export const DialectRitualSwitcher = ({ className }: Props) => {
                           </span>
                         </div>
                         <div className="mt-1 text-sm font-semibold text-foreground">
-                          {d.english}
+                          {DIALECT_LATIN[d.id]}
                         </div>
                         <div className="mt-1 text-[11px] uppercase tracking-wider text-muted-foreground font-medium">
                           {d.tag}
@@ -254,7 +250,7 @@ export const DialectRitualSwitcher = ({ className }: Props) => {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        aria-label={`لهجتك الحالية: ${current.english}. اضغط للتغيير.`}
+        aria-label={`لهجتك الحالية: ${DIALECT_LABELS[current.id]}. اضغط للتغيير.`}
         className={cn(
           "group w-full flex items-center justify-between gap-3",
           "px-4 py-3 rounded-2xl",
@@ -280,7 +276,7 @@ export const DialectRitualSwitcher = ({ className }: Props) => {
             {current.id === "Gulf" ? (
               <img src="/brand/ingleezy-icon.svg" alt="" className="w-5 h-5 object-contain" />
             ) : (
-              current.flag
+              DIALECT_FLAGS[current.id]
             )}
           </span>
           <span className="flex flex-col items-start min-w-0">
@@ -293,12 +289,12 @@ export const DialectRitualSwitcher = ({ className }: Props) => {
                 dir="rtl"
                 style={{ color: `hsl(${current.hsl})` }}
               >
-                {current.arabic}
+                {DIALECT_LABELS[current.id]}
               </span>
               {/* Latin spelling of the same name — the two scripts together
                   are how a learner recognises their dialect at a glance. */}
               <span className="font-english text-sm font-medium text-muted-foreground truncate">
-                {current.english}
+                {DIALECT_LATIN[current.id]}
               </span>
             </span>
           </span>

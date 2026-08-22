@@ -200,7 +200,7 @@ export default function PlacementQuiz() {
         .update(updates as any)
         .eq("user_id", user.id);
       if (error) throw error;
-      toast.success(`${DIALECT_LABELS[activeDialect]} level set to ${results.cefr_level}!`);
+      toast.success(`تم ضبط مستواك على ${results.cefr_level} — الشرح بالـ${DIALECT_LABELS[activeDialect]}`);
       navigate("/");
     } catch (e) {
       console.error(e);
@@ -227,10 +227,11 @@ export default function PlacementQuiz() {
                 اختبار تحديد المستوى
               </h1>
               <p className="text-muted-foreground leading-relaxed max-w-sm">
-                No matter where you are in your English journey, we'll get you to the right test to show you exactly where you stand right now.
+                مهما كان مستواك في الإنجليزي، الاختبار يوصلك للمكان الصح ويوريك وين أنت بالضبط الحين.
               </p>
               <p className="text-sm text-muted-foreground leading-relaxed max-w-sm mt-3">
-                Answer 20 adaptive questions to find your CEFR level, with <span className="font-semibold">{DIALECT_LABELS[activeDialect]}</span> support a toggle away.
+                ٢٠ سؤالاً تتأقلم مع إجاباتك لتحديد مستواك على مقياس CEFR، والشرح بالـ
+                <span className="font-semibold">{DIALECT_LABELS[activeDialect]}</span> على بُعد ضغطة.
               </p>
             </div>
             <div className="grid grid-cols-2 gap-3 w-full max-w-xs">
@@ -239,7 +240,7 @@ export default function PlacementQuiz() {
                 <p className="text-xs text-muted-foreground">أسئلة</p>
               </div>
               <div className="bg-card border border-border rounded-xl p-3 text-center">
-                <p className="text-2xl font-bold text-primary">~5 min</p>
+                <p className="text-2xl font-bold text-primary">~5 دقائق</p>
                 <p className="text-xs text-muted-foreground">المدة</p>
               </div>
             </div>

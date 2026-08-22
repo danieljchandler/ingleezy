@@ -59,9 +59,9 @@ describe("StreakDisplay — the full card", () => {
   it("shows the current run and the personal best", async () => {
     await render({ seed: withStreak(5, 12) });
     expect(await screen.findByText("5")).toBeInTheDocument();
-    expect(screen.getByText("day streak")).toBeInTheDocument();
-    expect(screen.getByText("12 days")).toBeInTheDocument();
-    expect(screen.getByText("Best")).toBeInTheDocument();
+    expect(screen.getByText("أيام متتالية")).toBeInTheDocument();
+    expect(screen.getByText("12 يوماً")).toBeInTheDocument();
+    expect(screen.getByText("الأطول")).toBeInTheDocument();
   });
 
   it("lights the flame while the streak is alive", async () => {
@@ -82,36 +82,44 @@ describe("StreakDisplay — the full card", () => {
   it("shows a best equal to the current run on a personal record", async () => {
     await render({ seed: withStreak(30, 30) });
     expect(await screen.findByText("30")).toBeInTheDocument();
-    expect(screen.getByText("30 days")).toBeInTheDocument();
+    expect(screen.getByText("30 يوماً")).toBeInTheDocument();
   });
 });
 
 describe("StreakDisplay — the compact pill", () => {
   it("fits the streak into one line", async () => {
     await render({ compact: true, seed: withStreak(5) });
-    expect(await screen.findByText("5 days")).toBeInTheDocument();
+    expect(await screen.findByText("5 أيام")).toBeInTheDocument();
   });
 
-  it("says one day rather than one days", async () => {
+  it("agrees the number the way Arabic does, not the way English does", async () => {
+    // Arabic does not split on one-vs-many: one and two have their own forms,
+    // 3-10 takes the plural, 11+ goes back to the singular. The old English
+    // `day{s}` could not express that, and `arCount` is what does.
     await render({ compact: true, seed: withStreak(1) });
-    expect(await screen.findByText("1 day")).toBeInTheDocument();
+    expect(await screen.findByText("يوم واحد")).toBeInTheDocument();
+  });
+
+  it("uses the dual form for two, which no English plural has", async () => {
+    await render({ compact: true, seed: withStreak(2) });
+    expect(await screen.findByText("يومان")).toBeInTheDocument();
   });
 
   it("leaves the personal best to the full card", async () => {
     // The pill lives in a crowded header; two numbers there read as a score.
     await render({ compact: true, seed: withStreak(5, 12) });
-    await screen.findByText("5 days");
-    expect(screen.queryByText("Best")).not.toBeInTheDocument();
+    await screen.findByText("5 أيام");
+    expect(screen.queryByText("الأطول")).not.toBeInTheDocument();
   });
 
   it("greys the flame on a streak of zero", async () => {
-    // The full card already greys at zero; the pill rendered "0 days" on the
+    // The full card already greys at zero; the pill rendered a zero streak on the
     // same orange background, with the same orange flame, as a thirty-day run.
     // It is the version that sits in the header on every screen, so the state a
     // learner saw most often was the one that could not tell "you are on a
     // streak" from "you lost it".
     const { container } = await render({ compact: true, seed: withStreak(0, 12) });
-    await screen.findByText("0 days");
+    await screen.findByText("0 يوماً");
     expect(container.querySelector(".bg-orange-100")).toBeNull();
     expect(container.querySelector(".text-orange-500")).toBeNull();
     expect(container.querySelector(".bg-muted")).toBeInTheDocument();
@@ -119,7 +127,7 @@ describe("StreakDisplay — the compact pill", () => {
 
   it("keeps the orange while the streak is alive", async () => {
     const { container } = await render({ compact: true, seed: withStreak(1) });
-    await screen.findByText("1 day");
+    await screen.findByText("يوم واحد");
     expect(container.querySelector(".bg-orange-100")).toBeInTheDocument();
     expect(container.querySelector(".text-orange-500")).toBeInTheDocument();
   });

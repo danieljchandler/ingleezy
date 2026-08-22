@@ -9,9 +9,9 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-const DIALECTS = ["Gulf", "Egyptian", "Yemeni"] as const;
-type Dialect = (typeof DIALECTS)[number];
+// From config rather than another copy of the same three strings. Admin is
+// English by design, so this surface reads the identifiers, not the labels.
+import { DIALECTS, type Dialect } from "@/config";
 
 interface Cell {
   stageId: string;

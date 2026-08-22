@@ -17,6 +17,7 @@ import { PageCorner } from "@/components/shell/PageCorner";
 import { Button } from "@/components/ui/button";
 import { AppShell } from "@/components/layout/AppShell";
 import { useDialect } from "@/contexts/DialectContext";
+import { DIALECT_FLAGS, DIALECT_LABELS, dialectModuleOf } from "@/config";
 import { Rating, calculateNextReview, elapsedDaysSince } from "@/lib/spacedRepetition";
 import { scheduleDirectionFor } from "@/lib/reviewOrder";
 import { ReviewAudioCard } from "@/components/review/ReviewAudioCard";
@@ -27,10 +28,6 @@ import { GenerateImageDialog } from "@/components/mywords/GenerateImageDialog";
 import { useReviewKeyboard } from "@/hooks/useKeyboardShortcuts";
 
 
-const DIALECT_FLAGS: Record<string, string> = {
-  Gulf: "🇦🇪",
-  Egyptian: "🇪🇬",
-};
 
 const Review = () => {
   const navigate = useNavigate();
@@ -263,8 +260,12 @@ const Review = () => {
   const currentWord = dueWords[safeIndex];
   if (!currentWord) return null;
 
-  const dialectFlag = DIALECT_FLAGS[currentWord.dialect_module || "Gulf"] || "";
-  const dialectLabel = currentWord.dialect_module || "Gulf";
+  // Via the module rather than the raw column: it stores the detected country
+  // for Gulf clips ("Kuwaiti", "Omani"), which has no label and no flag of its
+  // own, and rendering it raw showed the learner a Latin-script identifier.
+  const dialectModule = dialectModuleOf(currentWord.dialect_module);
+  const dialectFlag = DIALECT_FLAGS[dialectModule];
+  const dialectLabel = DIALECT_LABELS[dialectModule];
 
   // Which schedule this card is being rated against. Audio and recognition
   // share one (see scheduleDirectionFor); production has its own, so the

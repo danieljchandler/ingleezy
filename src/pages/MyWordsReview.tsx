@@ -377,19 +377,20 @@ const MyWordsReview = () => {
     !!currentWord?.sentence_english &&
     !!currentEnglish &&
     currentWord.sentence_english.toLowerCase().includes(currentEnglish.toLowerCase());
-  // Transcript-mined cloze sentences are Arabic-era material — re-enable when
-  // the English transcription pipeline lands (see RETARGET media pipeline).
+  // The card's own example sentence wins when it has one; this is the fallback
+  // that finds a real English sentence elsewhere. Only asked for when the card
+  // cannot supply its own, so a word saved with context costs no extra query.
   const { data: transcriptCloze } = useTranscriptCloze({
-    wordArabic: undefined,
+    wordEnglish: currentEnglish,
     dialect: activeDialect,
-    enabled: false,
+    enabled: !isProduction && !sentenceHasOwnWord,
   });
   const clozeSentenceText = sentenceHasOwnWord
     ? currentWord!.sentence_english!
-    : null;
+    : transcriptCloze?.english ?? null;
   const clozeSentenceArabic = sentenceHasOwnWord
     ? currentWord?.sentence_text ?? null
-    : null;
+    : transcriptCloze?.arabic ?? null;
   const clozeFromTranscript = !sentenceHasOwnWord && !!transcriptCloze;
   const useCloze =
     !isProduction &&
@@ -752,7 +753,8 @@ const MyWordsReview = () => {
               />
               {clozeFromTranscript && transcriptCloze && (
                 <p className="mt-2 text-center text-[11px] uppercase tracking-wide text-muted-foreground">
-                  من تفريغك الصوتي · {transcriptCloze.transcriptionTitle}
+                  {transcriptCloze.origin === "upload" ? "من تفريغك الصوتي" : "من فيديو شاهدته"} ·{" "}
+                  <span className="font-english" dir="ltr">{transcriptCloze.sourceTitle}</span>
                 </p>
               )}
             </div>

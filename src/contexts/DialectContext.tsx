@@ -2,8 +2,15 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import type { Dialect } from '@/config';
 
-export type DialectModule = 'Gulf' | 'Egyptian' | 'Yemeni';
+/**
+ * An alias for `Dialect`, kept because most of the app imports the name from
+ * here. It used to be its own union of the same three strings, which meant the
+ * list of dialects the app supports was written out in five places and could
+ * disagree with itself; `src/config.ts` is the one that decides now.
+ */
+export type DialectModule = Dialect;
 
 interface DialectContextType {
   activeDialect: DialectModule;
