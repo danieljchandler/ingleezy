@@ -228,19 +228,20 @@ const Settings = () => {
 
       if (error) throw error;
 
-      // Update weekly goal targets
+      // Update weekly goal targets.
+      //
+      // Through the RPC for the reasons given in Onboarding: the direct upsert
+      // this replaces had no RLS policy to permit it and built a Sunday week
+      // start where the reader builds a Monday. It was awaited without checking
+      // `error`, so the toast below said the settings were saved while the
+      // targets were rejected.
       const selectedGoal = GOALS.find((g) => g.id === goal);
       if (selectedGoal) {
-        const weekStart = new Date();
-        weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-        const weekStartStr = weekStart.toISOString().split('T')[0];
-
-        await supabase.from('weekly_goals').upsert({
-          user_id: user.id,
-          week_start_date: weekStartStr,
-          target_reviews: selectedGoal.reviewTarget,
-          target_xp: selectedGoal.xpTarget,
-        } as any, { onConflict: 'user_id,week_start_date' });
+        const { error: goalError } = await supabase.rpc('set_weekly_goal', {
+          _target_reviews: selectedGoal.reviewTarget,
+          _target_xp: selectedGoal.xpTarget,
+        });
+        if (goalError) throw goalError;
       }
 
       toast.success('تم حفظ الإعدادات!');

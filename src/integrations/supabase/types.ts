@@ -4691,7 +4691,15 @@ export type Database = {
         Args: { _index: number; _score: number }
         Returns: undefined
       }
+      record_review_day: {
+        Args: { _local_date?: string }
+        Returns: Database["public"]["Tables"]["review_streaks"]["Row"]
+      }
       redeem_invite_code: { Args: { _code: string }; Returns: Json }
+      set_weekly_goal: {
+        Args: { _target_reviews: number; _target_xp: number }
+        Returns: Database["public"]["Tables"]["weekly_goals"]["Row"]
+      }
       user_has_bible_access: { Args: { _user_id: string }; Returns: boolean }
       verify_invite_code: { Args: { _code: string }; Returns: boolean }
     }
