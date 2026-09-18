@@ -21,6 +21,21 @@ const STEP_HEADINGS = {
   goal: /حدد هدفك الأسبوعي/,
 } as const;
 
+/**
+ * The Monday that starts this UTC week — what `date_trunc('week', now() AT TIME
+ * ZONE 'utc')::date` produces, and so the only week start the app agrees on.
+ *
+ * Spelled out here rather than imported from `src/lib/localDate.ts`: this is
+ * the expectation, and a test that computes it with the same helper the code
+ * uses would pass whatever that helper did.
+ */
+function utcMonday(now: Date = new Date()): string {
+  const date = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  const weekday = date.getUTCDay(); // 0 = Sunday, and ISO weeks put it last
+  date.setUTCDate(date.getUTCDate() - (weekday === 0 ? 6 : weekday - 1));
+  return date.toISOString().slice(0, 10);
+}
+
 /** Walk from the welcome screen to a named step, taking the defaults. */
 async function advanceTo(page: Page, target: keyof typeof STEP_HEADINGS) {
   const order = ["welcome", "dialect", "level", "purpose", "goal"] as const;
@@ -133,19 +148,33 @@ test.describe("onboarding", () => {
     expect(Number(goal.target_xp)).toBe(100);
   });
 
-  test("dates the weekly goal from the start of this week", async ({ page, db }) => {
+  test("dates the weekly goal from the Monday the rest of the app counts from", async ({
+    page,
+    db,
+  }) => {
     await page.goto("/onboarding");
     await advanceTo(page, "goal");
     await page.getByRole("button", { name: /ابدأ التعلم/ }).click();
     await expect(page).toHaveURL(/\/$/);
 
-    // Upserted on (user_id, week_start_date), so a wrong date silently creates a
-    // second goal row every time onboarding is repeated.
-    const expected = new Date();
-    expected.setDate(expected.getDate() - expected.getDay());
-    expect(db.rows("weekly_goals")[0].week_start_date).toBe(
-      expected.toISOString().split("T")[0],
-    );
+    // This test used to pin a SUNDAY start, computed the same wrong way the page
+    // computed it: `getDate() - getDay()`. It agreed with the code and neither
+    // agreed with anything else. `increment_review_count` keys the row on
+    // `date_trunc('week', now() AT TIME ZONE 'utc')` — a Monday — and
+    // `useWeeklyGoal` looks one up to render the goal ring, so the targets a
+    // learner chose here landed on a row nothing ever read. The write was also
+    // failing against RLS at the time, which is the only reason the wrong date
+    // was not the visible half of the bug.
+    //
+    // Both are fixed by `set_weekly_goal`, which computes the week server-side,
+    // so there is one definition of it and this is the expectation of what it
+    // produces. The old comment's other worry — upserted on (user_id,
+    // week_start_date), so a wrong date makes a second row rather than an error
+    // — is checked where it is enforced, against a real Postgres in
+    // `src/test/migrationReplay.test.ts`. It cannot be checked from here:
+    // completing onboarding sets `onboarding_completed`, so the page redirects
+    // away rather than letting a learner run it twice.
+    expect(db.rows("weekly_goals")[0].week_start_date).toBe(utcMonday());
   });
 
   test("records the topics picked, by id rather than by label", async ({ page, db }) => {
