@@ -1,0 +1,149 @@
+name: Mirror to Lovable repo
+
+# `danieljchandler/ingleezy-landing-page` is a copy of this tree, and it exists
+# for exactly one reason: the Lovable project at e14d9316 is wired to that
+# repository, so pointing it at a copy of this app is what makes the app
+# openable in Lovable. This repo stays canonical.
+#
+# It had no automatic sync, and the README said so — "re-copy this tree into
+# that repo after a change here, or the two will drift". They drifted. The
+# mirror sat at 3a7ef26 for three weeks while main moved twice, so Lovable was
+# serving the blue-on-blue icon that PR #4 replaced precisely because it was
+# illegible at favicon size. A sync that depends on someone remembering is not
+# a sync.
+on:
+  push:
+    branches: [main]
+  # So a failed or skipped run can be replayed without an empty commit, and so
+  # the first run after the token is added does not have to wait for a push.
+  workflow_dispatch:
+
+# Two pushes to main in quick succession would otherwise race each other into
+# the mirror, and the loser would push a tree older than the winner's. No
+# cancel-in-progress: a sync that is already running should finish.
+concurrency:
+  group: mirror-to-lovable
+
+permissions:
+  contents: read
+
+jobs:
+  mirror:
+    name: Copy main into the Lovable repo
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # The workflow file itself is part of the tree being copied, so it lands in
+    # the mirror too. This stops it running there and trying to mirror the
+    # mirror into itself.
+    if: github.repository == 'danieljchandler/ingleezy'
+    steps:
+      - name: Check the token is configured
+        id: token
+        env:
+          MIRROR_PUSH_TOKEN: ${{ secrets.MIRROR_PUSH_TOKEN }}
+        run: |
+          if [ -z "$MIRROR_PUSH_TOKEN" ]; then
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            {
+              echo "### Mirror not synced"
+              echo
+              echo "\`MIRROR_PUSH_TOKEN\` is not set, so this run did nothing."
+              echo
+              echo "To enable it: create a fine-grained personal access token with"
+              echo "**Contents: read and write** on \`danieljchandler/ingleezy-landing-page\`"
+              echo "only, and add it to this repository as an Actions secret named"
+              echo "\`MIRROR_PUSH_TOKEN\`."
+            } >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Deliberately a skip rather than a failure. A red X on every push to main
+      # for a missing optional secret trains people to ignore CI, and the job
+      # summary above says what to do. The rest of the steps are gated on this.
+      - uses: actions/checkout@v4
+        if: steps.token.outputs.configured == 'true'
+        with:
+          path: source
+
+      - name: Clone the mirror
+        if: steps.token.outputs.configured == 'true'
+        env:
+          MIRROR_PUSH_TOKEN: ${{ secrets.MIRROR_PUSH_TOKEN }}
+        run: |
+          git clone --depth 1 \
+            "https://x-access-token:${MIRROR_PUSH_TOKEN}@github.com/danieljchandler/ingleezy-landing-page.git" \
+            mirror
+
+      - name: Replace the mirror's tree with this one
+        if: steps.token.outputs.configured == 'true'
+        run: |
+          set -euo pipefail
+
+          # AGENTS.md is the mirror's own, not a copy of anything here: it
+          # warns against rewriting published history, which matters more in
+          # the Lovable-connected repo than anywhere else. Kept across the
+          # sync rather than deleted and not replaced.
+          if [ -f mirror/AGENTS.md ]; then
+            cp mirror/AGENTS.md /tmp/AGENTS.md
+          fi
+
+          # Everything except .git goes, so a file deleted here is deleted
+          # there. A copy that only ever adds is how two trees diverge while
+          # both look synced.
+          find mirror -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+
+          # tar rather than rsync or `cp -r`: it is present everywhere, it
+          # preserves modes, and it copies dotfiles without the globbing
+          # special cases `cp` needs. `.git` is excluded so the mirror keeps
+          # its own history instead of inheriting this repo's.
+          tar -C source --exclude=.git -cf - . | tar -C mirror -xf -
+
+          if [ -f /tmp/AGENTS.md ]; then
+            cp /tmp/AGENTS.md mirror/AGENTS.md
+          fi
+
+          # The mirror's README is this one with a notice on the front, built
+          # here rather than preserved, so it cannot go stale the way the
+          # mirror itself did.
+          {
+            cat <<'NOTICE'
+          > **This repository is a mirror.**
+          >
+          > The canonical repository is
+          > [`danieljchandler/ingleezy`](https://github.com/danieljchandler/ingleezy)
+          > and all development happens there. This copy exists so the Lovable
+          > project wired to it can build and serve the app.
+          >
+          > **Do not edit this repository directly.** It is overwritten by the
+          > `Mirror to Lovable repo` workflow on every push to the canonical
+          > repo's `main`, and anything committed here is lost on the next sync.
+
+          ---
+
+          NOTICE
+            cat source/README.md
+          } > mirror/README.md
+
+      - name: Commit and push if anything changed
+        if: steps.token.outputs.configured == 'true'
+        working-directory: mirror
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+
+          if git diff --cached --quiet; then
+            echo "Mirror already matches ${GITHUB_SHA}." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          git commit -m "Sync from danieljchandler/ingleezy@${GITHUB_SHA::7}
+
+          Automated copy of the canonical repo's main. Do not edit this
+          repository directly — the next sync overwrites it.
+
+          Source: https://github.com/danieljchandler/ingleezy/commit/${GITHUB_SHA}"
+          git push origin HEAD
+          echo "Mirrored ${GITHUB_SHA::7}." >> "$GITHUB_STEP_SUMMARY"

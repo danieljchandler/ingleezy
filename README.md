@@ -71,9 +71,18 @@ The logged-out landing surface lives in this app: both `/` (`Feed`) and
 (`src/components/LandingHero.tsx`) when the visitor isn't authenticated. Grow
 the public page there.
 
-**Keeping the mirror current:** it has no automatic sync. After a change here
-that you want visible in Lovable, re-copy this tree into that repo. The two
-will drift otherwise.
+**Keeping the mirror current:** automatic, since it turned out that "re-copy
+it after a change here" is not a sync. The mirror sat three weeks behind while
+main moved twice, so Lovable was serving the illegible icon that PR #4 had
+already replaced. `.github/workflows/mirror.yml` now copies this tree into that
+repo on every push to `main`, preserving its `AGENTS.md` and rebuilding its
+README notice from this file.
+
+It needs one secret, `MIRROR_PUSH_TOKEN` — a fine-grained personal access token
+with **Contents: read and write** on the mirror and nothing else. Until that is
+set the job skips with a summary saying so, rather than failing every push to
+main over an optional secret. Nothing should be committed to the mirror
+directly: the next sync overwrites it.
 
 ## Local development
 
@@ -90,6 +99,14 @@ Hakiya's project ref as a hardcoded fallback, which meant an Ingleezy dev
 server with no `.env` read and wrote Hakiya's production database while looking
 perfectly healthy. No backend is the honest state until Ingleezy has its own.
 
+`VITE_PUBLIC_SITE_URL` is the other one worth setting before a real deploy: it
+is the public origin (`https://ingleezy.app`, whatever the domain turns out to
+be), and `robots.txt` and `sitemap.xml` are generated from it at build time
+(`scripts/seo.ts`). Unset, robots.txt still ships with its Disallow rules and
+the sitemap is omitted — which is the honest answer, because the committed
+files it replaces spent eight months pointing every URL at Hakiya's domain.
+Whatever it is set to also belongs in the edge functions' `ALLOWED_ORIGINS`.
+
 The e2e suite needs **no Supabase credentials** — it runs against a hermetic
 fake (`e2e/support/supabase.ts`), and `npm test` likewise.
 
@@ -102,13 +119,14 @@ fake (`e2e/support/supabase.ts`), and `npm test` likewise.
 | `npm run lint:ratchet` | Fail only if lint errors increased (what CI runs) |
 | `npm test` | Run the Vitest suite |
 | `npm run test:e2e` | Run the Playwright end-to-end suite |
-| `npm run typecheck` | `tsc` over app + e2e configs |
+| `npm run typecheck` | `tsc` over app + e2e + node (build config) tsconfigs |
 | `npm run check:edge` | Typecheck the Deno edge functions (needs `deno`) |
 
 CI (`.github/workflows/ci.yml`) runs typecheck + lint ratchet + Vitest +
-build, `deno check` over the edge functions, and Playwright — inherited
-unchanged from Hakiya, and the same bar applies: every retarget step keeps
-all three jobs green.
+build, `deno check` over the edge functions, a migration replay against a stock
+Postgres, and Playwright — inherited from Hakiya, and the same bar applies:
+every step keeps all of them green. `.github/workflows/mirror.yml` is separate
+and not a gate; see **Repositories** above.
 
 ## Branding
 
