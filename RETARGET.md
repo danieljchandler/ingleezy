@@ -1029,12 +1029,21 @@ open boxes in this document all mean the same thing.
       The reason five sweeps missed it is worth keeping: each audited *pages*,
       or the chrome *around* pages, and this is a component rendered inside
       the top bar by a layout the page never mentions.
-      **And a finding, not fixed here:** nothing anywhere writes
-      `review_streaks`. Six components read it and no code path in the app or
-      the edge functions inserts or updates a row, so every learner's streak is
-      permanently zero — which also means `grant_achievement`'s `streak_days`
-      branch can never be satisfied. That is a missing feature rather than a
-      missed flip, so it is recorded rather than patched.
+      **And a finding, since fixed:** nothing anywhere wrote `review_streaks`.
+      Six components read it and no code path in the app or the edge functions
+      inserted or updated a row, so every learner's streak was permanently
+      zero — which also meant `grant_achievement`'s `streak_days` branch could
+      never be satisfied. Recorded rather than patched at the time, because it
+      was a missing feature rather than a missed flip. Built in
+      `20260918120000_record_review_day_and_weekly_goal.sql`:
+      `record_review_day` rolls the streak for one LOCAL day from
+      `useIncrementReviews`, the choke point both review paths already called.
+      Building it exposed the same hole in `weekly_goals` — 20260529150401
+      dropped the client write policies and Onboarding and Settings never
+      stopped upserting, unchecked, against a Sunday week start the reader
+      never looks at — and the fact that the in-memory backend's
+      `increment_review_count` had been writing `review_streaks` with an
+      invented column, which is why no test ever saw the streak missing.
 
 ### Inherited bugs the retarget did not cause — DONE
 The quiz crash above came from a test that pinned a bug rather than a
@@ -1132,6 +1141,16 @@ All nine are done. What is left is not a retarget step:
     regenerated. This is the only thing standing between the app and a real
     backend.
 
+    **It is a checklist now, not a paragraph:
+    [`docs/backend-bootstrap.md`](docs/backend-bootstrap.md).** Writing it out
+    turned up two things this entry did not know. The Brain is gated on
+    `LOVABLE_API_KEY` unconditionally, so a project not backed by Lovable
+    Cloud has no AI at all until `routeForModel` gains another destination —
+    see Known risks. And nobody can sign up until an invite code is inserted
+    by hand: signup requires one, invite codes are created by admins, and no
+    admin exists until someone has signed up. Both are cheap to handle in
+    advance and expensive to meet halfway through.
+
 Each step keeps `npm run typecheck && npm test && npm run test:e2e` green —
 same bar as Hakiya's CI.
 
@@ -1212,4 +1231,31 @@ same bar as Hakiya's CI.
   the build config, matched by shape rather than by that one string.
   **Still outstanding: creating and linking Ingleezy's own Supabase project.**
   Everything above makes the wrong answer loud; none of it supplies the right
-  one.
+  one. [`docs/backend-bootstrap.md`](docs/backend-bootstrap.md) is the
+  checklist for supplying it.
+
+- **The Brain is gated on a key Lovable Cloud issues.** `askBrain` opens with
+  `if (!apiKey) throw new BrainHttpError(500, 'LOVABLE_API_KEY not configured')`
+  — before it looks at which model the task wants, so a task routed entirely
+  through OpenRouter fails for want of a key it would never have used. And
+  `routeForModel` sends everything outside
+  `anthropic|qwen|meta-llama|mistralai|deepseek|x-ai` to the Lovable gateway,
+  which is all of `google/*` — half of both named lineups in
+  `modelRegistry.ts`. Twenty-seven edge functions read the key.
+
+  This has never bitten because there is no backend to run the functions
+  against. It bites on the day there is one, and it decides the shape of step
+  10: either Ingleezy's project is backed by Lovable Cloud and the key is
+  injected, or the guard and the routing both need another destination before
+  a single generator works. Cheap to settle first, expensive to discover as a
+  500 from whichever generator someone tries.
+
+- **The public surface pointed at Hakiya's domain for eight months.** Fixed,
+  and worth keeping as a shape: `robots.txt` and `sitemap.xml` were static
+  files nothing imported, so nothing tested them and nothing could drift-check
+  them. Every URL said `laha-arabic.lovable.app`, several of them routes this
+  app had pruned. They are generated from the route manifest now
+  (`scripts/seo.ts`), so the paths cannot go stale, and a public route nobody
+  has classified fails the unit suite by name. The general form of the risk —
+  an inert file that only a machine ever reads — has no other instances left
+  that I can find, but it is the class to watch for.

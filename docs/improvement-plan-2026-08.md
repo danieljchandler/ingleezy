@@ -1,3 +1,24 @@
+> **This document is about Hakiya, not Ingleezy.**
+>
+> Written in August 2026 for `arabic-buddy`, before the fork. The sequencing
+> and the flywheel design carry over; the target language does not — everywhere
+> this says dialect Arabic is what the learner is acquiring, Ingleezy's target
+> is English. See [`../RETARGET.md`](../RETARGET.md).
+>
+> **Sprints 1 and 2 are done.** Voice minutes, tier-aware caps, cost telemetry,
+> prompt caching and the annual plan all shipped, as did the flywheel in Part 2
+> (`training_examples`, `_shared/trainingExampleLogger.ts`,
+> `scripts/export-training-data.mjs`, `scripts/seed-eval-from-flywheel.mjs`)
+> and referrals (`referral_codes`, `referral_redemptions`, the `referral`
+> function). Sprint 3+ is still a reasonable reading of what to build next,
+> read with the direction flipped.
+>
+> What is *not* in here, because it postdates the fork: standing up Ingleezy's
+> own backend, which is the actual next step. That is
+> [`backend-bootstrap.md`](backend-bootstrap.md).
+
+---
+
 # Implementation plan & training-data flywheel — August 2026
 
 Companion to `docs/product-audit-2026-08.md`. Two parts:
