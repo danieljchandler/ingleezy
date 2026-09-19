@@ -51,8 +51,9 @@ async function render(seed: (backend: SupabaseBackend) => void = () => {}) {
 /** Run the mutation and wait for it to settle, failing loudly if it rejects. */
 async function recordReview(
   harness: Awaited<ReturnType<typeof render>>,
+  options: { localDate?: string } = {},
 ): Promise<void> {
-  await harness.result.current.record.mutateAsync();
+  await harness.result.current.record.mutateAsync(options);
 }
 
 /** Today, as the server's UTC date — what the RPC records when unprompted. */
@@ -135,6 +136,23 @@ describe("recording a completed review", () => {
     // The number the learner is proud of survives the miss. Resetting it too
     // would make one bad week erase a year.
     expect(streakRow(harness.backend)?.longest_streak).toBe(12);
+  });
+
+  it("credits a rating to the day it was taken, not the day it syncs", async () => {
+    // An offline rating sits in `reviewQueue` until the connection returns. If
+    // that spans local midnight, dating it "now" would fold two offline
+    // evenings into a single streak day — so the queue flush passes the day the
+    // learner actually reviewed, taken from the item's own `queuedAt`.
+    const harness = await render();
+
+    await recordReview(harness, { localDate: dayOffset(-1) });
+
+    expect(streakRow(harness.backend)?.last_review_date).toBe(dayOffset(-1));
+
+    // And today's rating then extends it, rather than restarting at one.
+    await recordReview(harness);
+
+    expect(streakRow(harness.backend)?.current_streak).toBe(2);
   });
 
   it("counts the review toward this week's goal", async () => {

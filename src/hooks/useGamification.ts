@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { localDateKey, utcWeekStart } from "@/lib/localDate";
+import { effectiveStreak } from "@/lib/streak";
 
 export interface UserXP {
   id: string;
@@ -267,19 +268,28 @@ export function useAddXP() {
  * early for every learner west of Greenwich, which is precisely when a streak
  * breaks that shouldn't. The function clamps what it is given to a day either
  * side of its own, so a wrong clock cannot mint a streak.
+ *
+ * `localDate` is the day the REVIEW happened, which is not always the day this
+ * runs. A rating taken offline sits in `reviewQueue` until the connection comes
+ * back, and if that spans local midnight, defaulting to "now" would credit the
+ * streak to the flush rather than to the session — two offline evenings in a
+ * row collapsing into one streak day. `useReviewQueue` passes the queued item's
+ * own timestamp instead. The clamp still applies, so a rating that sat queued
+ * for a week lands on the earliest day the server will accept rather than its
+ * true one; that is the honest limit of letting a client name the date at all.
  */
 export function useIncrementReviews() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
 
   return useMutation({
-    mutationFn: async () => {
+    mutationFn: async (options?: { localDate?: string }) => {
       if (!user) throw new Error("Not authenticated");
       const { error } = await supabase.rpc("increment_review_count");
       if (error) throw error;
 
       const { error: streakError } = await supabase.rpc("record_review_day", {
-        _local_date: localDateKey(),
+        _local_date: options?.localDate ?? localDateKey(),
       });
       if (streakError) throw streakError;
     },
@@ -327,7 +337,9 @@ export function useCheckAchievements() {
         .eq("user_id", user.id)
         .gte("repetitions", 1);
 
-      const currentStreak = streak?.current_streak || 0;
+      // The same derivation the display uses, so an achievement cannot be
+      // awarded off a run that ended days ago and was never written down.
+      const currentStreak = effectiveStreak(streak);
 
       for (const achievement of achievements) {
         if (earnedIds.has(achievement.id)) continue;
