@@ -229,7 +229,7 @@ describe("rippling into the neighbours", () => {
     // unreachable by dragging.
     expect(startAfter).toBe(1);
     expect(endAfter).toBe(6);
-    expect(container.querySelector(".bg-orange-500")).toBeNull();
+    expect(container.querySelector(".bg-accent")).toBeNull();
     expect(screen.queryByText(/ripple active/)).toBeNull();
   });
 
@@ -241,7 +241,7 @@ describe("rippling into the neighbours", () => {
 
     drag(handles(container)[0], 0, { release: false });
 
-    expect(container.querySelector(".bg-orange-500")).not.toBeNull();
+    expect(container.querySelector(".bg-accent")).not.toBeNull();
     expect(screen.getByText(/ripple active — neighbors will shift/)).toBeInTheDocument();
   });
 

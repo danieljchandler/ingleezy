@@ -122,7 +122,7 @@ function Clip({ video }: { video: { id: string; title: string; title_arabic: str
           className="absolute inset-0 h-full w-full object-cover"
         />
       ) : (
-        <div className="absolute inset-0 bg-gradient-to-br from-[#2C3B74] via-[#3A508E] to-[#7184C6]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-periwinkle" />
       )}
       <div
         aria-hidden

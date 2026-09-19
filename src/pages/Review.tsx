@@ -310,7 +310,7 @@ const Review = () => {
               className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-medium ${
                 isOnline
                   ? "bg-card border-border text-muted-foreground"
-                  : "bg-amber-500/10 border-amber-500/30 text-amber-700 dark:text-amber-400"
+                  : "bg-accent/10 border-accent/30 text-accent"
               }`}
               title={isOnline ? "جارٍ حفظ التقييمات…" : "غير متصل — سنعيد المحاولة عند عودة الاتصال"}
             >

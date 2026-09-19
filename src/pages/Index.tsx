@@ -337,15 +337,15 @@ const Index = () => {
               {srsStats && srsStats.totalDueNow > 0 && (
                 <button
                   onClick={() => navigate("/review")}
-                  className="w-full p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-between"
+                  className="w-full p-3 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-between"
                 >
                   <div className="flex items-center gap-2">
-                    <Brain className="h-4 w-4 text-amber-600" />
+                    <Brain className="h-4 w-4 text-accent" />
                     <span className="text-sm font-medium text-foreground">
                       {AR.home.cardsDue(srsStats.totalDueNow)}
                     </span>
                   </div>
-                  <span className="text-xs text-amber-600 font-semibold">{AR.home.reviewNow} ←</span>
+                  <span className="text-xs text-accent font-semibold">{AR.home.reviewNow} ←</span>
                 </button>
               )}
 

@@ -54,9 +54,9 @@ function difficultyColor(d: string) {
 }
 
 function comprehensionTone(c: number) {
-  if (c >= 0.8) return "bg-emerald-500";
-  if (c >= 0.5) return "bg-amber-500";
-  return "bg-rose-500";
+  if (c >= 0.8) return "bg-success";
+  if (c >= 0.5) return "bg-accent";
+  return "bg-destructive";
 }
 
 interface CardProps {

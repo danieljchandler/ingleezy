@@ -29,10 +29,10 @@ export function AchievementBadge({
     )}>
       <div className={cn(
         "rounded-full flex items-center justify-center",
-        "bg-gradient-to-br from-amber-100 to-amber-200 dark:from-amber-900/40 dark:to-amber-800/40",
+        "bg-gradient-to-br from-accent/15 to-accent/15 dark:from-accent/40 dark:to-accent/40",
         "border-2",
         earned 
-          ? "border-amber-400 shadow-lg shadow-amber-200/50 dark:shadow-amber-900/30" 
+          ? "border-accent shadow-lg shadow-amber-200/50 dark:shadow-amber-900/30" 
           : "border-muted",
         sizeClasses[size]
       )}>

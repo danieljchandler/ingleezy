@@ -55,13 +55,13 @@ export default function DiffPreview({
         <h3 className="font-semibold text-sm">AI Suggested Boundaries</h3>
         <div className="flex gap-2">
           <button
-            className="px-3 py-1 text-xs rounded bg-green-600 text-white hover:bg-green-700 transition-colors"
+            className="px-3 py-1 text-xs rounded bg-success text-white hover:bg-success transition-colors"
             onClick={onAcceptAll}
           >
             Accept All
           </button>
           <button
-            className="px-3 py-1 text-xs rounded bg-red-600 text-white hover:bg-red-700 transition-colors"
+            className="px-3 py-1 text-xs rounded bg-destructive text-white hover:bg-destructive transition-colors"
             onClick={onRejectAll}
           >
             Reject All
@@ -80,7 +80,7 @@ export default function DiffPreview({
               dir="rtl"
               className={`flex items-start gap-2 rounded p-2 text-sm ${
                 isNew
-                  ? 'bg-green-50 dark:bg-green-900/20 border-l-2 border-green-500'
+                  ? 'bg-success/15 dark:bg-success/20 border-l-2 border-success'
                   : 'bg-gray-50 dark:bg-gray-800/50'
               }`}
             >
@@ -103,13 +103,13 @@ export default function DiffPreview({
               {isNew && (
                 <div className="flex flex-col gap-1" dir="ltr">
                   <button
-                    className="text-xs px-2 py-0.5 rounded bg-green-100 hover:bg-green-200 text-green-800 transition-colors"
+                    className="text-xs px-2 py-0.5 rounded bg-success/15 hover:bg-success/15 text-success transition-colors"
                     onClick={() => onAcceptOne(i)}
                   >
                     ✓
                   </button>
                   <button
-                    className="text-xs px-2 py-0.5 rounded bg-red-100 hover:bg-red-200 text-red-800 transition-colors"
+                    className="text-xs px-2 py-0.5 rounded bg-destructive/15 hover:bg-destructive/15 text-destructive transition-colors"
                     onClick={() => onRejectOne(i)}
                   >
                     ✗
@@ -128,7 +128,7 @@ export default function DiffPreview({
             <div
               key={`removed-${index}`}
               dir="rtl"
-              className="flex items-start gap-2 rounded p-2 text-sm bg-red-50 dark:bg-red-900/20 border-l-2 border-red-500 opacity-60"
+              className="flex items-start gap-2 rounded p-2 text-sm bg-destructive/15 dark:bg-destructive/20 border-l-2 border-destructive opacity-60"
             >
               <div className="flex-1 text-right font-cairo line-through">
                 <span className="text-muted-foreground text-xs font-mono ltr:inline-block" dir="ltr">
@@ -139,7 +139,7 @@ export default function DiffPreview({
               {onKeepOne && (
                 <div className="flex flex-col gap-1" dir="ltr">
                   <button
-                    className="text-xs px-2 py-0.5 rounded bg-amber-100 hover:bg-amber-200 text-amber-900 transition-colors"
+                    className="text-xs px-2 py-0.5 rounded bg-accent/15 hover:bg-accent/15 text-accent transition-colors"
                     onClick={() => onKeepOne(index)}
                     title="Keep this boundary"
                   >

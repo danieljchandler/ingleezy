@@ -691,7 +691,7 @@ const MyWordsReview = () => {
               aria-label="بطاقات جديدة لكل جلسة"
               title="بطاقات جديدة لكل جلسة"
             >
-              <Sparkles className="h-3.5 w-3.5 text-amber-500" />
+              <Sparkles className="h-3.5 w-3.5 text-accent" />
               <SelectValue>{formatCap(newCap)}/اليوم</SelectValue>
             </SelectTrigger>
             <SelectContent align="end">
@@ -725,7 +725,7 @@ const MyWordsReview = () => {
       >
         <div className="flex items-center justify-center gap-3 text-xs text-muted-foreground mt-1">
           <span className="inline-flex items-center gap-1">
-            <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+            <span className="h-1.5 w-1.5 rounded-full bg-accent" />
             {newRemaining} جديدة
           </span>
           <span className="inline-flex items-center gap-1">

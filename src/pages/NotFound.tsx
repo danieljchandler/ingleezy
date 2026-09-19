@@ -19,7 +19,7 @@ const NotFound = () => {
       <div className="min-h-[70vh] flex items-center justify-center">
         <div className="text-center max-w-md">
           <p
-            className="text-6xl font-bold mb-2 text-[#2C3B74]"
+            className="text-6xl font-bold mb-2 text-primary"
           >
             404
           </p>

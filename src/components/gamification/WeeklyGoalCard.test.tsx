@@ -49,8 +49,8 @@ function renderCard(over: Partial<Goal> = {}) {
  */
 const bars = (container: HTMLElement) =>
   [...container.querySelectorAll<HTMLElement>("[role='progressbar'] > div")].map((el) => {
-    const shift = /translateX\(-(.+)%\)/.exec(el.style.transform)?.[1];
-    return shift === undefined ? null : 100 - Number(shift);
+    const scale = /scaleX\(([\d.]+)\)/.exec(el.style.transform)?.[1];
+    return scale === undefined ? null : Math.round(Number(scale) * 100);
   });
 
 describe("WeeklyGoalCard — when there is nothing to show", () => {
@@ -122,12 +122,12 @@ describe("WeeklyGoalCard — finishing a goal", () => {
 
   it("turns the finished count green", () => {
     renderCard({ completed_reviews: 50 });
-    expect(screen.getByText(/^50\/50/).className).toContain("text-green-600");
+    expect(screen.getByText(/^50\/50/).className).toContain("text-success");
   });
 
   it("leaves an unfinished count in the default colour", () => {
     renderCard();
-    expect(screen.getByText("20/50").className).not.toContain("text-green-600");
+    expect(screen.getByText("20/50").className).not.toContain("text-success");
   });
 
   it("caps an overshot bar at full", () => {

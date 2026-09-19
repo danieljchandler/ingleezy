@@ -13,9 +13,9 @@ import { formatDistanceToNow } from 'date-fns';
 import { ChevronOpen } from '@/components/shared/DirectionalIcon';
 
 const statusColors: Record<string, string> = {
-  pending: 'bg-yellow-500/10 text-yellow-700 border-yellow-500/20',
+  pending: 'bg-accent/10 text-accent border-accent/20',
   in_progress: 'bg-blue-500/10 text-blue-700 border-blue-500/20',
-  completed: 'bg-green-500/10 text-green-700 border-green-500/20',
+  completed: 'bg-success/10 text-success border-success/20',
 };
 
 const VocabBattles = () => {
@@ -64,9 +64,9 @@ const VocabBattles = () => {
     const isChallenger = battle.challenger_id === user.id;
 
     if (battle.status === 'completed') {
-      if (battle.winner_id === user.id) return { text: 'فزت! 🎉', color: 'text-green-600' };
-      if (battle.winner_id === null) return { text: 'تعادل', color: 'text-yellow-600' };
-      return { text: 'خسرت', color: 'text-red-600' };
+      if (battle.winner_id === user.id) return { text: 'فزت! 🎉', color: 'text-success' };
+      if (battle.winner_id === null) return { text: 'تعادل', color: 'text-accent' };
+      return { text: 'خسرت', color: 'text-destructive' };
     }
 
     if (battle.status === 'pending') {
@@ -191,7 +191,7 @@ const VocabBattles = () => {
                       <ChevronOpen className="h-5 w-5 text-primary shrink-0" />
                     )}
                     {battle.status === 'completed' && battle.winner_id === user.id && (
-                      <Trophy className="h-5 w-5 text-yellow-500 shrink-0" />
+                      <Trophy className="h-5 w-5 text-accent shrink-0" />
                     )}
                   </div>
                 </button>

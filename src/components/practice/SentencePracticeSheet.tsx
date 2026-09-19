@@ -199,7 +199,7 @@ export function SentencePracticeSheet({ open, onOpenChange, targetEnglish, targe
                   <div className="flex items-center gap-3 text-sm">
                     <span className="inline-flex items-center gap-1.5">
                       {feedback.used_target_word ? (
-                        <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                        <CheckCircle2 className="h-4 w-4 text-success" />
                       ) : (
                         <XCircle className="h-4 w-4 text-muted-foreground" />
                       )}
@@ -207,7 +207,7 @@ export function SentencePracticeSheet({ open, onOpenChange, targetEnglish, targe
                     </span>
                     <span className="inline-flex items-center gap-1.5">
                       {feedback.understandable ? (
-                        <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                        <CheckCircle2 className="h-4 w-4 text-success" />
                       ) : (
                         <XCircle className="h-4 w-4 text-muted-foreground" />
                       )}

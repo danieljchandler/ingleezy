@@ -78,7 +78,7 @@ const NaturalnessStars = ({ value }: { value: number }) => (
         key={i}
         className={cn(
           "h-3 w-3",
-          i <= value ? "text-amber-400 fill-amber-400" : "text-muted-foreground/30",
+          i <= value ? "text-accent fill-accent" : "text-muted-foreground/30",
         )}
       />
     ))}

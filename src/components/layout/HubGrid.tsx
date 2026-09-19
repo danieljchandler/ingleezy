@@ -10,7 +10,7 @@ export interface HubTile {
   description?: string;
   icon: LucideIcon;
   to: string;
-  /** Optional accent class on the icon bubble, e.g. "bg-amber-500/10 text-amber-600". */
+  /** Optional accent class on the icon bubble, e.g. "bg-accent/10 text-accent". */
   accent?: string;
   /** Render only if true. Use to hide entitlement-gated tiles. */
   show?: boolean;
@@ -31,13 +31,13 @@ export function HubSection({ title, subtitle, tiles }: HubSectionProps) {
   return (
     <section className="mb-7">
       <div className="px-1 mb-3 flex items-baseline gap-3">
-        <span className="h-px flex-1 bg-[#2C3B74]/15" aria-hidden />
+        <span className="h-px flex-1 bg-primary/15" aria-hidden />
         <h2
-          className="text-[10px] font-bold text-[#2C3B74]/65 uppercase tracking-[0.18em]"
+          className="text-[10px] font-bold text-primary/65 uppercase tracking-[0.18em]"
         >
           {title}
         </h2>
-        <span className="h-px flex-1 bg-[#2C3B74]/15" aria-hidden />
+        <span className="h-px flex-1 bg-primary/15" aria-hidden />
       </div>
       {subtitle && (
         <p className="text-[11px] text-muted-foreground mb-2 px-1 text-center">{subtitle}</p>
@@ -50,10 +50,10 @@ export function HubSection({ title, subtitle, tiles }: HubSectionProps) {
               key={t.id}
               onClick={() => navigate(t.to)}
               className={cn(
-                "group w-full p-4 rounded-2xl bg-card border border-[#2C3B74]/12",
+                "group w-full p-4 rounded-2xl bg-card border border-primary/15",
                 "flex items-center gap-3.5 text-left shadow-card-soft",
                 "transition-all duration-200",
-                "hover:border-[#2C3B74]/30 hover:shadow-elegant hover:-translate-y-px",
+                "hover:border-primary/30 hover:shadow-elegant hover:-translate-y-px",
                 "active:scale-[0.99] active:translate-y-0",
               )}
             >
@@ -61,7 +61,7 @@ export function HubSection({ title, subtitle, tiles }: HubSectionProps) {
                 className={cn(
                   "w-11 h-11 rounded-xl flex items-center justify-center shrink-0",
                   "transition-transform group-hover:scale-105",
-                  t.accent ?? "bg-primary/12 text-primary",
+                  t.accent ?? "bg-primary/15 text-primary",
                 )}
               >
                 <Icon className="h-[18px] w-[18px]" strokeWidth={2.2} />
@@ -75,7 +75,7 @@ export function HubSection({ title, subtitle, tiles }: HubSectionProps) {
                   <p className="text-xs text-muted-foreground mt-1 leading-snug">{t.description}</p>
                 )}
               </div>
-              <ChevronOpen className="h-4 w-4 text-[#2C3B74]/40 shrink-0 transition-transform group-hover:-translate-x-0.5 group-hover:text-[#2C3B74]/70" />
+              <ChevronOpen className="h-4 w-4 text-primary/40 shrink-0 transition-transform group-hover:-translate-x-0.5 group-hover:text-primary/70" />
             </button>
           );
         })}
@@ -93,7 +93,7 @@ export function HubHeader({ title, subtitle }: HubHeaderProps) {
   return (
     <header className="mb-6 pt-1">
       <h1
-        className="text-3xl font-bold text-[#2C3B74] tracking-tight"
+        className="text-3xl font-bold text-primary tracking-tight"
       >
         {title}
       </h1>

@@ -53,7 +53,7 @@ describe("DiffPreview — deciding what changed", () => {
       original: [aSegment({ start: 0, end: 2 })],
       suggested: [aSegment({ start: 0, end: 1, text: "first half" })],
     });
-    expect(container.querySelector(".border-green-500")).toBeInTheDocument();
+    expect(container.querySelector(".border-success")).toBeInTheDocument();
   });
 
   it("leaves an unchanged line unmarked", () => {
@@ -61,7 +61,7 @@ describe("DiffPreview — deciding what changed", () => {
       original: [aSegment({ start: 0, end: 2 })],
       suggested: [aSegment({ start: 0, end: 2 })],
     });
-    expect(container.querySelector(".border-green-500")).toBeNull();
+    expect(container.querySelector(".border-success")).toBeNull();
   });
 
   it("strikes through a boundary the proposal drops", () => {
@@ -81,7 +81,7 @@ describe("DiffPreview — deciding what changed", () => {
       original: [aSegment({ start: 0, end: 2, text: "before" })],
       suggested: [aSegment({ start: 0, end: 2, text: "after" })],
     });
-    expect(container.querySelector(".border-green-500")).toBeNull();
+    expect(container.querySelector(".border-success")).toBeNull();
     expect(container.querySelector(".line-through")).toBeNull();
   });
 
@@ -93,7 +93,7 @@ describe("DiffPreview — deciding what changed", () => {
         aSegment({ start: 1, end: 2, text: "second" }),
       ],
     });
-    expect(container.querySelectorAll(".border-green-500")).toHaveLength(2);
+    expect(container.querySelectorAll(".border-success")).toHaveLength(2);
     expect(container.querySelectorAll(".line-through")).toHaveLength(1);
   });
 
@@ -119,7 +119,7 @@ describe("DiffPreview — deciding what changed", () => {
       // 0.1 + 0.2 is 0.30000000000000004.
       suggested: [aSegment({ start: 0, end: 0.1 + 0.2, text: "same line" })],
     });
-    expect(container.querySelector(".border-green-500")).toBeNull();
+    expect(container.querySelector(".border-success")).toBeNull();
     expect(container.querySelector(".line-through")).toBeNull();
   });
 
@@ -131,7 +131,7 @@ describe("DiffPreview — deciding what changed", () => {
       original: [aSegment({ start: 0, end: 0.3, text: "same line" })],
       suggested: [aSegment({ start: 0, end: 0.32, text: "same line" })],
     });
-    expect(container.querySelector(".border-green-500")).toBeInTheDocument();
+    expect(container.querySelector(".border-success")).toBeInTheDocument();
     expect(container.querySelector(".line-through")).toBeInTheDocument();
   });
 });

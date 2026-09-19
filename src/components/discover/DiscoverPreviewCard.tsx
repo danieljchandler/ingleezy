@@ -47,7 +47,7 @@ export const DiscoverPreviewCard = memo(function DiscoverPreviewCard({ video, on
       onClick={onClick}
       aria-label={label}
       className={cn(
-        "w-full rounded-2xl overflow-hidden border-2 border-primary/20 bg-card",
+        "w-full rounded-3xl overflow-hidden bg-card shadow-card",
         "text-left transition-all duration-200",
         "hover:shadow-xl hover:border-primary/40 active:scale-[0.99]",
         "shadow-lg"

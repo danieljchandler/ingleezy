@@ -238,10 +238,10 @@ const BattlePlay = () => {
         <div className="max-w-md mx-auto text-center animate-in fade-in zoom-in-95 duration-500">
           <div className={cn(
             'inline-flex items-center justify-center w-24 h-24 rounded-full mb-6',
-            isWinner ? 'bg-yellow-500/10' : isDraw ? 'bg-blue-500/10' : 'bg-muted'
+            isWinner ? 'bg-accent/10' : isDraw ? 'bg-blue-500/10' : 'bg-muted'
           )}>
             {isWinner ? (
-              <Trophy className="h-12 w-12 text-yellow-500" />
+              <Trophy className="h-12 w-12 text-accent" />
             ) : (
               <Swords className="h-12 w-12 text-muted-foreground" />
             )}
@@ -353,9 +353,9 @@ const BattlePlay = () => {
                       'w-full text-left rounded-xl border-2 p-4 transition-all duration-200',
                       'flex items-center justify-between',
                       showCorrect
-                        ? 'border-green-500 bg-green-500/10'
+                        ? 'border-success bg-success/10'
                         : showWrong
-                        ? 'border-red-500 bg-red-500/10'
+                        ? 'border-destructive bg-destructive/10'
                         : isSelected
                         ? 'border-primary bg-primary/5'
                         : 'border-border bg-card hover:border-primary/40',
@@ -363,8 +363,8 @@ const BattlePlay = () => {
                     )}
                   >
                     <span className="font-english font-medium">{choice}</span>
-                    {showCorrect && <Check className="h-5 w-5 text-green-500" />}
-                    {showWrong && <X className="h-5 w-5 text-red-500" />}
+                    {showCorrect && <Check className="h-5 w-5 text-success" />}
+                    {showWrong && <X className="h-5 w-5 text-destructive" />}
                   </button>
                 );
               })}

@@ -338,7 +338,7 @@ const MyPhrasesReview = () => {
       {/* Card */}
       <div className="py-4">
         <div className="max-w-sm mx-auto">
-          <div className="rounded-3xl bg-card border border-[#2C3B74]/15 p-7 text-center space-y-5 shadow-elegant">
+          <div className="rounded-3xl bg-card border border-primary/15 p-7 text-center space-y-5 shadow-elegant">
             <p className="text-[10px] uppercase tracking-[0.18em] font-semibold text-muted-foreground">
               قلها بالإنجليزية
             </p>
@@ -350,7 +350,7 @@ const MyPhrasesReview = () => {
 
             {showAnswer ? (
               <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 space-y-4 pt-2">
-                <p className="font-english text-4xl font-bold text-[#2C3B74] leading-snug">
+                <p className="font-english text-4xl font-bold text-primary leading-snug">
                   {current.phrase_english}
                 </p>
                 {/* transliteration carries phonetic_ar — the English phrase in
@@ -475,7 +475,7 @@ const MyPhrasesReview = () => {
                   setShowAnswer(true);
                   if (effectiveAudio) playAudio(effectiveAudio);
                 }}
-                className="gap-2 w-full rounded-full border-2 border-primary/30 text-primary hover:bg-primary/8 hover:border-primary/50"
+                className="gap-2 w-full rounded-full border-2 border-primary/30 text-primary hover:bg-primary/10 hover:border-primary/50"
               >
                 <Eye className="h-4 w-4" />
                 أظهر الإنجليزية

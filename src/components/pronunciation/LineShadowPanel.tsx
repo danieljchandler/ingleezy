@@ -206,12 +206,12 @@ export function LineShadowPanel({ clip, nativeClipWav, externalYouTubeController
               className={cn(
                 "inline-flex items-center justify-center w-16 h-16 rounded-full border-4",
                 result.overall >= 90
-                  ? "border-green-500"
+                  ? "border-success"
                   : result.overall >= 75
                     ? "border-blue-500"
                     : result.overall >= 60
-                      ? "border-yellow-500"
-                      : "border-red-500",
+                      ? "border-accent"
+                      : "border-destructive",
               )}
             >
               <span className={cn("text-xl font-bold", band.color)}>{Math.round(result.overall)}</span>

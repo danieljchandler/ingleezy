@@ -266,7 +266,7 @@ const TranscriptRow = ({
       className={cn(
         "px-4 py-3 rounded-lg transition-all duration-300 border border-transparent",
         isActive
-          ? "bg-primary/8 border-primary/30 scale-[1.01]"
+          ? "bg-primary/10 border-primary/30 scale-[1.01]"
           : "hover:bg-muted/40",
       )}
       onClick={() => line.startMs !== undefined && onSeek?.(line.startMs)}

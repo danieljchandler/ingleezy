@@ -37,15 +37,15 @@ export function StopOrnament({ index, side, active }: Props) {
   );
 }
 
-const PRIMARY = "#2C3B74"; // Desert Red
-const GOLD = "#D98A3D";
-const GREEN = "#3F9C6D";
-const SAND = "#7184C6";
+const PRIMARY = "#4A1D45"; // Plum
+const GOLD = "#E8A93A";
+const GREEN = "#2E7D55";
+const SAND = "#8A3E80"; // Plum Mid
 
 function Palm() {
   return (
     <g>
-      <path d="M20,60 Q18,40 22,18" stroke="#1B2534" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+      <path d="M20,60 Q18,40 22,18" stroke="#1F1420" strokeWidth="2.2" fill="none" strokeLinecap="round" />
       <g transform="translate(22,18)">
         {[0, 50, 100, 150, 200, 250, 300].map((a) => (
           <path

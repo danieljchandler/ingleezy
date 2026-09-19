@@ -10,9 +10,9 @@ import { PAGE_HINTS } from '@/lib/pageHints';
 import { ChevronOpen } from '@/components/shared/DirectionalIcon';
 
 const DIFFICULTY_COLORS: Record<string, string> = {
-  Beginner: 'bg-green-500/10 text-green-700 border-green-500/20',
-  Intermediate: 'bg-yellow-500/10 text-yellow-700 border-yellow-500/20',
-  Advanced: 'bg-red-500/10 text-red-700 border-red-500/20',
+  Beginner: 'bg-success/10 text-success border-success/20',
+  Intermediate: 'bg-accent/10 text-accent border-accent/20',
+  Advanced: 'bg-destructive/10 text-destructive border-destructive/20',
 };
 
 const Stories = () => {

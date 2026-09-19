@@ -19,14 +19,18 @@ export default {
     },
     extend: {
       fontFamily: {
-        // IBM Plex Sans Arabic is a dual-script family — its Latin was drawn
-        // to harmonise with the Arabic, so one stack carries the whole chrome.
-        // Inter is for English CONTENT; Archivo Black for display accents.
+        // Two dual-script families, split by job. Baloo Bhaijaan 2 is a rounded
+        // display face drawn for Arabic AND Latin: it carries headings and the
+        // wordmark in one voice across both scripts, which a Latin-only display
+        // face (the old Archivo Black) could never do in an Arabic-first UI.
+        // IBM Plex Sans Arabic is the reading face — quieter, and better at the
+        // long Arabic paragraphs the lessons are made of. Inter for English
+        // CONTENT, which is the studied language and wants to look separate.
         sans: ["IBM Plex Sans Arabic", "Inter", "sans-serif"],
-        heading: ["IBM Plex Sans Arabic", "Inter", "sans-serif"],
+        heading: ["Baloo Bhaijaan 2", "IBM Plex Sans Arabic", "sans-serif"],
         arabic: ["IBM Plex Sans Arabic", "Inter", "sans-serif"],
         english: ["Inter", "IBM Plex Sans Arabic", "sans-serif"],
-        display: ["Archivo Black", "Inter", "sans-serif"],
+        display: ["Baloo Bhaijaan 2", "Inter", "sans-serif"],
         // Legacy alias (transcript surfaces) — folded into the chrome family.
         cairo: ["IBM Plex Sans Arabic", "Inter", "sans-serif"],
       },

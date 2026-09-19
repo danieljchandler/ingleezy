@@ -239,7 +239,7 @@ describe("answering", () => {
     // learner reads back something that does not mean anything.
     const blank = container.querySelector("span.border-dashed, span.border-solid")!;
     expect(blank.textContent).toBe("house");
-    expect(blank.className).toContain("border-red");
+    expect(blank.className).toContain("border-destructive");
   });
 
   it("reports a right answer", () => {
@@ -265,7 +265,7 @@ describe("answering", () => {
 
     // Being told you were wrong without being shown the answer teaches nothing.
     const target = choices().find((b) => b.textContent?.trim() === WORD)!;
-    expect(target.className).toContain("border-green");
+    expect(target.className).toContain("border-success");
   });
 
   it("stops taking answers once one is given", () => {

@@ -44,14 +44,14 @@ interface SouqArticle {
 
 const DIALECT_COLORS: Record<string, string> = {
   Gulf: "from-teal-500/10 to-cyan-500/10 border-teal-500/20",
-  Egyptian: "from-amber-500/10 to-orange-500/10 border-amber-500/20",
-  Yemeni: "from-red-500/10 to-rose-500/10 border-red-500/20",
+  Egyptian: "from-accent/10 to-accent/10 border-accent/20",
+  Yemeni: "from-destructive/10 to-destructive/10 border-destructive/20",
 };
 
 const DIALECT_ACCENT: Record<string, string> = {
   Gulf: "text-teal-600 dark:text-teal-400",
-  Egyptian: "text-amber-600 dark:text-amber-400",
-  Yemeni: "text-red-600 dark:text-red-400",
+  Egyptian: "text-accent",
+  Yemeni: "text-destructive",
 };
 
 const SouqNews = () => {

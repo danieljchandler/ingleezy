@@ -27,10 +27,10 @@ const ICONS = {
 
 /** Tints, not hues: four steps through the indigo system, no rainbow. */
 const TILE_BG = [
-  "bg-[#2C3B74]",
-  "bg-[#1D2740]",
-  "bg-[#3A508E]",
-  "bg-[#212C48]",
+  "bg-[#6B2A63]",
+  "bg-[#2A1428]",
+  "bg-[#6B2A63]",
+  "bg-[#33192F]",
 ];
 
 const Choose = () => {
@@ -44,7 +44,7 @@ const Choose = () => {
   return (
     <div
       {...swipe}
-      className="dark min-h-[100dvh] bg-[#0B111C] pb-24 text-white"
+      className="dark min-h-[100dvh] bg-[#130B12] pb-24 text-white"
       style={{ paddingTop: "env(safe-area-inset-top)" }}
     >
       <header className="flex items-center justify-between px-4 pt-4">
@@ -58,7 +58,7 @@ const Choose = () => {
         </Link>
       </header>
 
-      {/* Not .font-display: Archivo Black has no Arabic glyphs, so Arabic set
+      {/* Not .font-display: the Latin display face has no Arabic glyphs, so Arabic set
           in it falls back to Inter and inherits the italic, uppercase and
           negative tracking meant for Latin — which renders as faint, wrongly
           spaced text. The display face is for Latin and numerals only. */}

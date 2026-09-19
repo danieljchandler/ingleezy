@@ -28,7 +28,7 @@ export function CaravanMarker({ size = 36 }: { size?: number }) {
           strokeLinejoin="round"
         />
         {/* eye */}
-        <circle cx="53.5" cy="15.5" r="0.9" fill="#1B2534" />
+        <circle cx="53.5" cy="15.5" r="0.9" fill="#1F1420" />
         {/* tail */}
         <path d="M8,28 Q4,28 4,32" stroke="#8F5A24" strokeWidth="1.4" fill="none" strokeLinecap="round" />
         {/* ground shadow */}

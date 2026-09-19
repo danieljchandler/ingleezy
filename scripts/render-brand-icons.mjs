@@ -9,16 +9,20 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const svgPath = resolve(root, "public/brand/ingleezy-icon.svg");
 const svg = readFileSync(svgPath, "utf8");
 
-// [file, size, background] — transparent for the plain icons; Indigo Deep
+// [file, size, background] — transparent for the plain icons; Plum
 // full-bleed for the maskable one, which must survive a circular crop.
 const OUT = [
   ["public/favicon.png", 256, null],
   ["public/brand/icon-192.png", 192, null],
   ["public/brand/icon-512.png", 512, null],
-  ["public/brand/icon-maskable-512.png", 512, "#2C3B74"],
+  ["public/brand/icon-maskable-512.png", 512, "#4A1D45"],
 ];
 
-const browser = await chromium.launch();
+const browser = await chromium.launch(
+  // The sandbox image ships Chromium outside node_modules; CHROMIUM_PATH lets
+  // a container point at it instead of failing on a missing download.
+  process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {},
+);
 const page = await browser.newPage();
 
 // The icon reaches browsers through `<img src>`, which parses it as XML — far

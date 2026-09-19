@@ -22,9 +22,9 @@ const DIALECT_GLYPH: Record<string, string> = {
 // One chip style for every dialect — the brand is a restrained indigo system,
 // not a rainbow, and the flag glyph already says which dialect this is.
 const DIALECT_ACCENT: Record<string, string> = {
-  Gulf: "from-[#7184C6]/20 to-[#3A508E]/5 border-[#3A508E]/30 text-[#2C3B74] dark:text-periwinkle",
-  Egyptian: "from-[#7184C6]/20 to-[#3A508E]/5 border-[#3A508E]/30 text-[#2C3B74] dark:text-periwinkle",
-  Yemeni: "from-[#7184C6]/20 to-[#3A508E]/5 border-[#3A508E]/30 text-[#2C3B74] dark:text-periwinkle",
+  Gulf: "from-periwinkle/20 to-primary/5 border-primary/30 text-primary dark:text-periwinkle",
+  Egyptian: "from-periwinkle/20 to-primary/5 border-primary/30 text-primary dark:text-periwinkle",
+  Yemeni: "from-periwinkle/20 to-primary/5 border-primary/30 text-primary dark:text-periwinkle",
 };
 
 function greetingFor(hour: number): { ar: string; en: string } {
@@ -86,7 +86,7 @@ export function MajlisWelcome() {
     <div
       className={cn(
         "relative overflow-hidden rounded-3xl mb-4",
-        "bg-[#F7F8FC] border border-[#2C3B74]/20 dark:bg-card dark:border-border",
+        "bg-[#F7F8FC] border border-primary/20 dark:bg-card dark:border-border",
         "px-4 py-4 sm:px-5 sm:py-5",
         "shadow-[0_1px_0_0_rgba(27,37,52,0.04),0_8px_24px_-12px_rgba(27,37,52,0.18)]"
       )}
@@ -104,20 +104,20 @@ export function MajlisWelcome() {
       {/* Warm radial highlight */}
       <div
         aria-hidden
-        className="absolute -top-16 -right-16 w-56 h-56 rounded-full bg-[#7184C6]/15 blur-3xl pointer-events-none"
+        className="absolute -top-16 -right-16 w-56 h-56 rounded-full bg-periwinkle/15 blur-3xl pointer-events-none"
       />
 
       <div className="relative flex items-start gap-4">
         {/* Left: greeting */}
         <div className="flex-1 min-w-0">
           <p
-            className="text-2xl sm:text-3xl leading-tight text-[#2C3B74] dark:text-periwinkle font-arabic"
+            className="text-2xl sm:text-3xl leading-tight text-primary dark:text-periwinkle font-arabic"
             dir="rtl"
           >
             {greeting.ar}
           </p>
           <p
-            className="mt-1 text-sm text-[#2C3B74]/70 dark:text-muted-foreground"
+            className="mt-1 text-sm text-primary/70 dark:text-muted-foreground"
           >
             {greeting.en}
             {isAuthenticated && name ? `, ${name}` : ""}
@@ -143,15 +143,15 @@ export function MajlisWelcome() {
                   "inline-flex items-center gap-1 px-2.5 py-1 rounded-full",
                   "text-[11px] font-semibold border",
                   (streak?.current_streak ?? 0) > 0
-                    ? "bg-gradient-to-r from-[#D98A3D]/20 to-[#D98A3D]/5 border-[#D98A3D]/40 text-[#8F5A24] dark:text-accent"
-                    : "bg-[#2C3B74]/5 border-[#2C3B74]/15 text-[#2C3B74]/60 dark:bg-white/5 dark:border-white/10 dark:text-muted-foreground"
+                    ? "bg-gradient-to-r from-accent/20 to-accent/5 border-accent/40 text-[#8F5A24] dark:text-accent"
+                    : "bg-primary/5 border-primary/15 text-primary/60 dark:bg-white/5 dark:border-white/10 dark:text-muted-foreground"
                 )}
                 title={`${AR.streak.label} ${AR.streak.days(streak?.current_streak ?? 0)}`}
               >
                 <Flame
                   className={cn(
                     "h-3 w-3",
-                    (streak?.current_streak ?? 0) > 0 ? "text-accent" : "text-[#2C3B74]/40 dark:text-muted-foreground/60"
+                    (streak?.current_streak ?? 0) > 0 ? "text-accent" : "text-primary/40 dark:text-muted-foreground/60"
                   )}
                 />
                 {streak?.current_streak ?? 0} ي
@@ -168,7 +168,7 @@ export function MajlisWelcome() {
                 cx="32"
                 cy="32"
                 r={R}
-                stroke="#2C3B74"
+                stroke="#4A1D45"
                 strokeOpacity={0.12}
                 strokeWidth="5"
                 fill="none"
@@ -177,7 +177,7 @@ export function MajlisWelcome() {
                 cx="32"
                 cy="32"
                 r={R}
-                stroke="#2C3B74"
+                stroke="#4A1D45"
                 strokeWidth="5"
                 fill="none"
                 strokeLinecap="round"
@@ -187,11 +187,11 @@ export function MajlisWelcome() {
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center leading-none">
               <span
-                className="text-[15px] font-bold text-[#2C3B74]"
+                className="text-[15px] font-bold text-primary"
               >
                 {earned}
               </span>
-              <span className="text-[9px] uppercase tracking-wider text-[#2C3B74]/60 mt-0.5">
+              <span className="text-[9px] uppercase tracking-wider text-primary/60 mt-0.5">
                 XP
               </span>
             </div>

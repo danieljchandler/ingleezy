@@ -67,7 +67,7 @@ describe("StreakDisplay — the full card", () => {
   it("lights the flame while the streak is alive", async () => {
     const { container } = await render({ seed: withStreak(5) });
     await screen.findByText("5");
-    expect(container.querySelector(".from-orange-400")).toBeInTheDocument();
+    expect(container.querySelector(".from-accent")).toBeInTheDocument();
   });
 
   it("greys the flame out once the streak breaks", async () => {
@@ -75,7 +75,7 @@ describe("StreakDisplay — the full card", () => {
     // claiming a run that has ended.
     const { container } = await render({ seed: withStreak(0, 12) });
     await screen.findByText("0");
-    expect(container.querySelector(".from-orange-400")).toBeNull();
+    expect(container.querySelector(".from-accent")).toBeNull();
     expect(container.querySelector(".bg-muted")).toBeInTheDocument();
   });
 
@@ -120,16 +120,16 @@ describe("StreakDisplay — the compact pill", () => {
     // streak" from "you lost it".
     const { container } = await render({ compact: true, seed: withStreak(0, 12) });
     await screen.findByText("0 يوماً");
-    expect(container.querySelector(".bg-orange-100")).toBeNull();
-    expect(container.querySelector(".text-orange-500")).toBeNull();
+    expect(container.querySelector(".bg-accent\\/15")).toBeNull();
+    expect(container.querySelector(".text-accent")).toBeNull();
     expect(container.querySelector(".bg-muted")).toBeInTheDocument();
   });
 
   it("keeps the orange while the streak is alive", async () => {
     const { container } = await render({ compact: true, seed: withStreak(1) });
     await screen.findByText("يوم واحد");
-    expect(container.querySelector(".bg-orange-100")).toBeInTheDocument();
-    expect(container.querySelector(".text-orange-500")).toBeInTheDocument();
+    expect(container.querySelector(".bg-accent\\/15")).toBeInTheDocument();
+    expect(container.querySelector(".text-accent")).toBeInTheDocument();
   });
 });
 
