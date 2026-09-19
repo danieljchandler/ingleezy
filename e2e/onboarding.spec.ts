@@ -304,7 +304,7 @@ test.describe("the placement quiz", () => {
     // The wrong choice is marked, and so is the right one — feedback that only
     // said "wrong" would teach nothing.
     await expect(page.getByRole("button", { name: /wrong 1/ })).toHaveClass(/border-destructive/);
-    await expect(page.getByRole("button", { name: /right 1/ })).toHaveClass(/border-green-500/);
+    await expect(page.getByRole("button", { name: /right 1/ })).toHaveClass(/border-success/);
   });
 
   test("ignores a second click on the same question", async ({ page, backend }) => {

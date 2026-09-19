@@ -164,7 +164,9 @@ test.describe("the following list", () => {
     await page.goto("/friends");
     await expect(page.getByText("Layla")).toBeVisible();
 
-    await expect(page.locator(".text-orange-500")).toHaveCount(0);
+    // The icon, not its colour: keyed to the palette this passes for the wrong
+    // reason the moment the token is renamed.
+    await expect(page.locator(".lucide-flame")).toHaveCount(0);
   });
 
   test("loses every friend when the streak table cannot be read", async ({
