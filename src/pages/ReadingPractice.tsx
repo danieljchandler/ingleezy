@@ -120,7 +120,7 @@ const withTimeout = <T,>(promise: PromiseLike<T>, ms: number): Promise<T> => {
 
 const DIFFICULTY_CONFIG = {
   beginner: { label: "مبتدئ", color: "bg-success/20 text-success", xp: 10 },
-  intermediate: { label: "متوسط", color: "bg-accent/20 text-accent", xp: 15 },
+  intermediate: { label: "متوسط", color: "bg-accent/20 text-accent-ink", xp: 15 },
   advanced: { label: "متقدّم", color: "bg-destructive/20 text-destructive", xp: 20 },
 };
 

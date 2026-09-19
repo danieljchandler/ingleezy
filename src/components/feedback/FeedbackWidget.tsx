@@ -17,7 +17,7 @@ type FeedbackType = "bug" | "idea" | "confusing" | "praise" | "other";
 
 const TYPES: { value: FeedbackType; label: string; icon: typeof Bug; color: string }[] = [
   { value: "bug", label: "خلل", icon: Bug, color: "bg-destructive/10 text-destructive border-destructive/30" },
-  { value: "idea", label: "فكرة", icon: Lightbulb, color: "bg-accent/10 text-accent border-accent/30" },
+  { value: "idea", label: "فكرة", icon: Lightbulb, color: "bg-accent/10 text-accent-ink border-accent/30" },
   { value: "confusing", label: "مربك", icon: HelpCircle, color: "bg-blue-500/10 text-blue-600 border-blue-500/30" },
   { value: "praise", label: "إطراء", icon: Heart, color: "bg-pink-500/10 text-pink-600 border-pink-500/30" },
   { value: "other", label: "غير ذلك", icon: MoreHorizontal, color: "bg-muted text-muted-foreground border-border" },

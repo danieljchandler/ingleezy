@@ -43,7 +43,7 @@ export const RatingButtons = ({
       rating: 'hard',
       label: 'صعب',
       icon: <ThumbsDown className="w-4 h-4" />,
-      color: 'bg-accent/10 border-accent/25 text-accent hover:bg-accent/15 hover:border-accent/45',
+      color: 'bg-accent/10 border-accent/25 text-accent-ink hover:bg-accent/15 hover:border-accent/45',
     },
     {
       rating: 'good',

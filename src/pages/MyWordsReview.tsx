@@ -684,10 +684,34 @@ const MyWordsReview = () => {
         position={safeIndex + 1}
         total={dueWords.length}
         trailing={
-          <span className="inline-flex items-center gap-1.5 text-body-sm font-bold text-primary">
-            <Trophy className="h-4 w-4" />
-            {sessionCount}
-          </span>
+          <div className="flex items-center gap-2">
+            {/* How many unseen cards this session may introduce. Nothing else
+                in the app calls setNewCap, so losing this control locks every
+                learner to whatever value happens to be persisted — the default
+                ten for a new one, and no way back from "unlimited" for anyone
+                who had set it. It sat in the header this frame replaced. */}
+            <Select value={String(newCap)} onValueChange={(v) => setNewCap(Number(v) as never)}>
+              <SelectTrigger
+                className="h-8 w-auto gap-1 px-2.5 text-xs font-medium"
+                aria-label="بطاقات جديدة لكل جلسة"
+                title="بطاقات جديدة لكل جلسة"
+              >
+                <Sparkles className="h-3.5 w-3.5 text-accent" />
+                <SelectValue>{formatCap(newCap)}/اليوم</SelectValue>
+              </SelectTrigger>
+              <SelectContent align="end">
+                {NEW_CAP_OPTIONS.map((n) => (
+                  <SelectItem key={n} value={String(n)} className="text-xs">
+                    {formatCap(n)} جديدة / جلسة
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <span className="inline-flex items-center gap-1.5 text-body-sm font-bold text-primary">
+              <Trophy className="h-4 w-4" />
+              {sessionCount}
+            </span>
+          </div>
         }
         meta={
           <SessionMeta

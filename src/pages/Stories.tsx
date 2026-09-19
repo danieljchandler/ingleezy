@@ -12,7 +12,7 @@ import { EmptyState } from "@/components/layout/EmptyState";
 
 const DIFFICULTY_COLORS: Record<string, string> = {
   Beginner: 'bg-success/10 text-success border-success/20',
-  Intermediate: 'bg-accent/10 text-accent border-accent/20',
+  Intermediate: 'bg-accent/10 text-accent-ink border-accent/20',
   Advanced: 'bg-destructive/10 text-destructive border-destructive/20',
 };
 

@@ -402,7 +402,7 @@ export default function PlacementQuiz() {
                     {results.weaknesses.map((w) => (
                       <span
                         key={w}
-                        className="bg-accent/15 text-accent dark:bg-accent/30 dark:text-accent text-xs px-2.5 py-1 rounded-full capitalize"
+                        className="bg-accent/15 text-accent-ink dark:bg-accent/30 dark:text-accent-ink text-xs px-2.5 py-1 rounded-full capitalize"
                       >
                         {w.replace("_", " ")}
                       </span>

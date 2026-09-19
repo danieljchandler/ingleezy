@@ -141,7 +141,7 @@ function MistakeCard({ group, onDismiss, dismissing }: MistakeCardProps) {
         {group.kinds.map((kind) => (
           <span
             key={kind}
-            className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-accent/15 text-accent"
+            className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-accent/15 text-accent-ink"
           >
             {labelForKind(kind)}
           </span>

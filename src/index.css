@@ -46,6 +46,11 @@
     --accent: 42 82% 52%;
     --accent-foreground: 190 28% 10%;
 
+    /* Accent-coloured TEXT, on a light ground. `--accent` is a fill; at 52%
+       lightness it fails contrast as body copy on the pale gold it sits on.
+       Flips light in dark mode, where the ground is the dark thing. */
+    --accent-ink: 38 74% 28%;
+
     /* Firoza Mid — hovers, chips, icon tints.
        (Legacy token name kept: ~200 call sites across the app.) */
     --periwinkle: 186 64% 44%;
@@ -128,6 +133,7 @@
 
     --accent: 42 85% 60%;
     --accent-foreground: 190 40% 8%;
+    --accent-ink: 42 88% 72%;
 
     --periwinkle: 186 44% 64%;
 

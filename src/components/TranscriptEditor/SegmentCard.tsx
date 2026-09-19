@@ -26,7 +26,7 @@ interface SegmentCardProps {
 
 function confidenceBadgeColor(confidence: number): string {
   if (confidence >= 0.85) return 'bg-success/15 text-success dark:bg-success/30 dark:text-success';
-  if (confidence >= 0.65) return 'bg-accent/15 text-accent dark:bg-accent/30 dark:text-accent';
+  if (confidence >= 0.65) return 'bg-accent/15 text-accent-ink dark:bg-accent/30 dark:text-accent-ink';
   return 'bg-destructive/15 text-destructive dark:bg-destructive/30 dark:text-destructive';
 }
 
@@ -156,7 +156,7 @@ export default function SegmentCard({
           )}
           {onFixArabic && segment.confidence < 0.85 && (
             <button
-              className="text-[10px] px-2 py-0.5 rounded bg-accent/15 hover:bg-accent/15 text-accent transition-colors"
+              className="text-[10px] px-2 py-0.5 rounded bg-accent/15 hover:bg-accent/15 text-accent-ink transition-colors"
               onClick={() => onFixArabic(segment.id)}
               title="AI Fix Arabic"
             >

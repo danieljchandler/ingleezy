@@ -10,7 +10,7 @@ export interface HubTile {
   description?: string;
   icon: LucideIcon;
   to: string;
-  /** Optional accent class on the icon bubble, e.g. "bg-accent/10 text-accent". */
+  /** Optional accent class on the icon bubble, e.g. "bg-accent/10 text-accent-ink". */
   accent?: string;
   /** Render only if true. Use to hide entitlement-gated tiles. */
   show?: boolean;

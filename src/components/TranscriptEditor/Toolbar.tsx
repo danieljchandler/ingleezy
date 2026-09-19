@@ -125,7 +125,7 @@ export default function Toolbar({
           errors.length > 0
             ? 'bg-destructive/15 text-destructive hover:bg-destructive/15'
             : warnings.length > 0
-              ? 'bg-accent/15 text-accent hover:bg-accent/15'
+              ? 'bg-accent/15 text-accent-ink hover:bg-accent/15'
               : 'bg-success/15 text-success hover:bg-success/15'
         }`}
         onClick={() => setShowWarnings(!showWarnings)}
@@ -170,7 +170,7 @@ export default function Toolbar({
           {warnings.map((w, i) => (
             <div
               key={i}
-              className={`px-2 py-1 rounded ${w.severity === 'error' ? 'bg-destructive/15 text-destructive' : 'bg-accent/15 text-accent'}`}
+              className={`px-2 py-1 rounded ${w.severity === 'error' ? 'bg-destructive/15 text-destructive' : 'bg-accent/15 text-accent-ink'}`}
             >
               {w.message}
             </div>

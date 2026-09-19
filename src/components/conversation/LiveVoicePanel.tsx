@@ -99,7 +99,7 @@ export function LiveVoicePanel({
               <div className="text-[10px] uppercase tracking-wide text-muted-foreground mb-0.5 flex items-center gap-1.5">
                 <span>{t.role === "user" ? "أنت" : "المعلّم"}</span>
                 {t.role === "assistant" && t.hasDialectDrift && (
-                  <span className="rounded bg-accent/15 px-1.5 py-0.5 text-[9px] font-semibold text-accent normal-case tracking-normal">
+                  <span className="rounded bg-accent/15 px-1.5 py-0.5 text-[9px] font-semibold text-accent-ink normal-case tracking-normal">
                     خرج عن الإنجليزي
                   </span>
                 )}

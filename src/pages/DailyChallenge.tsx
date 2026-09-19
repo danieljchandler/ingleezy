@@ -294,7 +294,7 @@ const DailyChallenge = () => {
               </div>
               <p className="text-sm text-muted-foreground">يوم متتالي</p>
               {(streakData || 0) >= 3 && (
-                <Badge className="mt-2 bg-accent/20 text-accent">
+                <Badge className="mt-2 bg-accent/20 text-accent-ink">
                   {(streakData || 0) >= 7 ? "2x XP Bonus! 🔥" : "1.5x XP Bonus! ⚡"}
                 </Badge>
               )}

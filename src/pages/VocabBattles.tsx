@@ -13,7 +13,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { ChevronOpen } from '@/components/shared/DirectionalIcon';
 
 const statusColors: Record<string, string> = {
-  pending: 'bg-accent/10 text-accent border-accent/20',
+  pending: 'bg-accent/10 text-accent-ink border-accent/20',
   in_progress: 'bg-blue-500/10 text-blue-700 border-blue-500/20',
   completed: 'bg-success/10 text-success border-success/20',
 };

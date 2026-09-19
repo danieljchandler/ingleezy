@@ -22,7 +22,7 @@ interface TaskRowProps {
 // ignored dark mode, and clashed with every other colour on the screen.
 const DIALECT_ICON_TINT: Record<string, string> = {
   Gulf: "bg-primary/10 text-primary",
-  Egyptian: "bg-accent/15 text-accent-foreground dark:text-accent",
+  Egyptian: "bg-accent/15 text-accent-foreground dark:text-accent-ink",
   Yemeni: "bg-success/15 text-success",
 };
 

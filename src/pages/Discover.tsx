@@ -48,7 +48,7 @@ const DIFFICULTY_LABELS: Record<string, string> = {
 function difficultyColor(d: string) {
   switch (d) {
     case "Beginner": return "bg-primary/10 text-primary border-primary/20";
-    case "Intermediate": return "bg-accent/10 text-accent border-accent/20";
+    case "Intermediate": return "bg-accent/10 text-accent-ink border-accent/20";
     case "Advanced": return "bg-secondary/10 text-secondary border-secondary/20";
     case "Expert": return "bg-destructive/10 text-destructive border-destructive/20";
     default: return "bg-muted text-muted-foreground";

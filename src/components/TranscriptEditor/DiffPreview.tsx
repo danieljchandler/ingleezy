@@ -139,7 +139,7 @@ export default function DiffPreview({
               {onKeepOne && (
                 <div className="flex flex-col gap-1" dir="ltr">
                   <button
-                    className="text-xs px-2 py-0.5 rounded bg-accent/15 hover:bg-accent/15 text-accent transition-colors"
+                    className="text-xs px-2 py-0.5 rounded bg-accent/15 hover:bg-accent/15 text-accent-ink transition-colors"
                     onClick={() => onKeepOne(index)}
                     title="Keep this boundary"
                   >

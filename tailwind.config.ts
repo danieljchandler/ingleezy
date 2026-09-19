@@ -75,6 +75,9 @@ export default {
         accent: {
           DEFAULT: "hsl(var(--accent))",
           foreground: "hsl(var(--accent-foreground))",
+          // For accent-coloured text. The DEFAULT is a fill: as body copy on
+          // the pale gold it usually sits on, it is about 2:1.
+          ink: "hsl(var(--accent-ink))",
         },
         popover: {
           DEFAULT: "hsl(var(--popover))",

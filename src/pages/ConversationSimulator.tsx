@@ -435,7 +435,7 @@ export default function ConversationSimulator() {
             <div key={i} className="flex flex-col items-start gap-1.5">
               {m.correction && (
                 <div className={cn(
-                  "max-w-[90%] rounded-lg px-3 py-2 border border-accent bg-accent/15 text-accent text-xs flex items-start gap-1.5",
+                  "max-w-[90%] rounded-lg px-3 py-2 border border-accent bg-accent/15 text-accent-ink text-xs flex items-start gap-1.5",
                 )}>
                   <AlertCircle className="h-3.5 w-3.5 mt-0.5 shrink-0" />
                   <span>{m.correction}</span>
