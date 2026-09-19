@@ -11,8 +11,9 @@ import { ProgressDots } from "@/components/ProgressDots";
 import { PageCorner } from "@/components/shell/PageCorner";
 import { Button } from "@/components/design-system";
 import { AppShell } from "@/components/layout/AppShell";
+import { EmptyState } from "@/components/layout/EmptyState";
 import { cn } from "@/lib/utils";
-import { Loader2, Trophy, RotateCcw } from "lucide-react";
+import { Loader2, Trophy, RotateCcw, BookOpen } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { recordContinue, clearContinue } from "@/lib/continueProgress";
 import { useDialect } from "@/contexts/DialectContext";
@@ -275,17 +276,12 @@ const Learn = () => {
         <div className="mb-6">
           <PageCorner />
         </div>
-        <div className="flex items-center justify-center py-16">
-          <div className="text-center">
-            <p className="text-lg text-muted-foreground mb-2">
-              {isMixedMode ? "ما فيه كلمات جديدة" : "ما فيه كلمات بعد"}
-            </p>
-            <p className="text-sm text-muted-foreground mb-6">
-              {isMixedMode ? "شفت كل الكلمات المتاحة. جرّب المراجعة!" : "أضف مفردات من لوحة الإدارة."}
-            </p>
-            <Button onClick={() => navigate("/")}>رجوع للرئيسية</Button>
-          </div>
-        </div>
+        <EmptyState
+          icon={BookOpen}
+          title={isMixedMode ? "ما فيه كلمات جديدة" : "ما فيه كلمات بعد"}
+          body={isMixedMode ? "شفت كل الكلمات المتاحة. جرّب المراجعة!" : "أضف مفردات من لوحة الإدارة."}
+          action={<Button onClick={() => navigate("/")}>رجوع للرئيسية</Button>}
+        />
       </AppShell>
     );
   }

@@ -84,22 +84,3 @@ export function HubSection({ title, subtitle, tiles }: HubSectionProps) {
   );
 }
 
-interface HubHeaderProps {
-  title: string;
-  subtitle?: string;
-}
-
-export function HubHeader({ title, subtitle }: HubHeaderProps) {
-  return (
-    <header className="mb-6 pt-1">
-      <h1
-        className="text-3xl font-bold text-primary tracking-tight"
-      >
-        {title}
-      </h1>
-      {subtitle && (
-        <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">{subtitle}</p>
-      )}
-    </header>
-  );
-}

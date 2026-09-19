@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { AppShell } from "@/components/layout/AppShell";
-import { HubHeader } from "@/components/layout/HubGrid";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { PageCorner } from "@/components/shell/PageCorner";
 import { Button } from "@/components/ui/button";
 import { useDialect } from "@/contexts/DialectContext";
@@ -31,7 +31,7 @@ const Mistakes = () => {
   return (
     <AppShell>
       <PageCorner />
-      <HubHeader
+      <PageHeader
         title="أخطاؤك"
         subtitle="ما الذي يتكرر تعثرك فيه بالإنجليزية."
       />

@@ -4,6 +4,7 @@ import { useDiscoverVideos } from "@/hooks/useDiscoverVideos";
 import { useDiscoverFeed, type FeedItem } from "@/hooks/useDiscoverFeed";
 import type { DiscoverVideo } from "@/hooks/useDiscoverVideos";
 import { AppShell } from "@/components/layout/AppShell";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { PageCorner } from "@/components/shell/PageCorner";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -199,15 +200,11 @@ const Discover = () => {
     <AppShell>
       <PageCorner />
 
-      <h1
-        className="text-2xl font-bold text-foreground mb-2 inline-flex items-center gap-2"
-      >
-        اكتشف
-        <InfoHint {...PAGE_HINTS["discover"]} size="md" />
-      </h1>
-      <p className="text-sm text-muted-foreground mb-6">
-        شاهد فيديوهات بالإنجليزية مع ترجمة عربية متزامنة
-      </p>
+      <PageHeader
+        title="اكتشف"
+        icon={<InfoHint {...PAGE_HINTS["discover"]} size="md" />}
+        subtitle="شاهد فيديوهات بالإنجليزية مع ترجمة عربية متزامنة"
+      />
 
       <div className="mb-6">
         <ContentRequestBar />
