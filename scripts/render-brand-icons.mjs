@@ -9,13 +9,13 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const svgPath = resolve(root, "public/brand/ingleezy-icon.svg");
 const svg = readFileSync(svgPath, "utf8");
 
-// [file, size, background] — transparent for the plain icons; Plum
+// [file, size, background] — transparent for the plain icons; Firoza
 // full-bleed for the maskable one, which must survive a circular crop.
 const OUT = [
   ["public/favicon.png", 256, null],
   ["public/brand/icon-192.png", 192, null],
   ["public/brand/icon-512.png", 512, null],
-  ["public/brand/icon-maskable-512.png", 512, "#4A1D45"],
+  ["public/brand/icon-maskable-512.png", 512, "#135F68"],
 ];
 
 const browser = await chromium.launch(

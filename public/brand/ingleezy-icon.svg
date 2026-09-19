@@ -18,9 +18,9 @@
     standing in for the dot) was invisible below about 64px.
 
     Three flat fills and no gradients. This file is the favicon, and a gradient
-    at 16px is just mud. The colours are Gold (#E8A93A), Plum (#4A1D45) and the
-    overlap (#2B0F28), matching the accent, primary and olive tokens in
-    src/index.css.
+    at 16px is just mud. The colours are Gold (#E5A917), Firoza (#135F68) and the overlap
+    (#09474E), matching the accent, primary and olive tokens in
+    src/index.css.css.
 
     Keep comment text free of doubled hyphens, which XML forbids inside a
     comment: browsers parse this file as XML when it is loaded through an img
@@ -33,13 +33,13 @@
   </defs>
 
   <!-- English bubble, tail down and to the left. -->
-  <path fill="#E8A83B" d="M112 56 H248 A56 56 0 0 1 304 112 V208 A56 56 0 0 1 248 264 H112 A56 56 0 0 1 56 208 V112 A56 56 0 0 1 112 56 Z M104 250 L54 336 L150 250 Z"/>
+  <path fill="#E5A917" d="M112 56 H248 A56 56 0 0 1 304 112 V208 A56 56 0 0 1 248 264 H112 A56 56 0 0 1 56 208 V112 A56 56 0 0 1 112 56 Z M104 250 L54 336 L150 250 Z"/>
 
   <!-- Arabic bubble, tail down and to the right. -->
-  <path fill="#491D45" d="M264 192 H400 A56 56 0 0 1 456 248 V344 A56 56 0 0 1 400 400 H264 A56 56 0 0 1 208 344 V248 A56 56 0 0 1 264 192 Z M362 386 L412 472 L316 386 Z"/>
+  <path fill="#135F68" d="M264 192 H400 A56 56 0 0 1 456 248 V344 A56 56 0 0 1 400 400 H264 A56 56 0 0 1 208 344 V248 A56 56 0 0 1 264 192 Z M362 386 L412 472 L316 386 Z"/>
 
   <!-- Where they overlap. -->
   <g clip-path="url(#ingleezy-english)">
-    <path fill="#2F0E2C" d="M264 192 H400 A56 56 0 0 1 456 248 V344 A56 56 0 0 1 400 400 H264 A56 56 0 0 1 208 344 V248 A56 56 0 0 1 264 192 Z"/>
+    <path fill="#09474E" d="M264 192 H400 A56 56 0 0 1 456 248 V344 A56 56 0 0 1 400 400 H264 A56 56 0 0 1 208 344 V248 A56 56 0 0 1 264 192 Z"/>
   </g>
 </svg>

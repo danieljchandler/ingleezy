@@ -168,7 +168,7 @@ export function MajlisWelcome() {
                 cx="32"
                 cy="32"
                 r={R}
-                stroke="#4A1D45"
+                stroke="#135F68"
                 strokeOpacity={0.12}
                 strokeWidth="5"
                 fill="none"
@@ -177,7 +177,7 @@ export function MajlisWelcome() {
                 cx="32"
                 cy="32"
                 r={R}
-                stroke="#4A1D45"
+                stroke="#135F68"
                 strokeWidth="5"
                 fill="none"
                 strokeLinecap="round"

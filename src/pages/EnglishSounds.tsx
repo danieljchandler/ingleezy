@@ -79,7 +79,7 @@ const EnglishSounds = () => {
           className="absolute left-1/2 top-6 bottom-6 -translate-x-1/2 w-px"
           style={{
             backgroundImage:
-              "repeating-linear-gradient(to bottom, #4A1D45 0 6px, transparent 6px 12px)",
+              "repeating-linear-gradient(to bottom, #135F68 0 6px, transparent 6px 12px)",
             opacity: 0.35,
           }}
         />
@@ -156,7 +156,7 @@ const EnglishSounds = () => {
                     {unlocked && (
                       <div
                         className="absolute inset-1 rounded-full border border-dashed pointer-events-none"
-                        style={{ borderColor: mastered ? "#E8A93A" : "#4A1D45", opacity: 0.35 }}
+                        style={{ borderColor: mastered ? "#E5A917" : "#135F68", opacity: 0.35 }}
                       />
                     )}
                     {/* Shine sweep for mastered stops */}

@@ -27,10 +27,10 @@ const ICONS = {
 
 /** Tints, not hues: four steps through the indigo system, no rainbow. */
 const TILE_BG = [
-  "bg-[#6B2A63]",
-  "bg-[#2A1428]",
-  "bg-[#6B2A63]",
-  "bg-[#33192F]",
+  "bg-[#17727D]",
+  "bg-[#10292D]",
+  "bg-[#17727D]",
+  "bg-[#143238]",
 ];
 
 const Choose = () => {
@@ -44,7 +44,7 @@ const Choose = () => {
   return (
     <div
       {...swipe}
-      className="dark min-h-[100dvh] bg-[#130B12] pb-24 text-white"
+      className="dark min-h-[100dvh] bg-[#0A1416] pb-24 text-white"
       style={{ paddingTop: "env(safe-area-inset-top)" }}
     >
       <header className="flex items-center justify-between px-4 pt-4">

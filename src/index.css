@@ -6,101 +6,163 @@
 
 @layer base {
   :root {
-    /* ── Ingleezy brand — Plum & Gold ──
-       One dominant colour carrying the interface on a white canvas, a light
-       tint of it for fills, and a single warm accent reserved for streaks, XP
-       and mastery. Structured after Memrise; the hue is what makes it ours. */
-    --background: 328 27% 97%;
-    --foreground: 296 23% 10%;
+    /* ── Ingleezy brand — Firoza & Gold ────────────────────────────────────
+       Firoza (فيروز) is the turquoise of Islamic tilework — the glaze on the
+       domes, and the stone held to ward off the evil eye. Paired with the gold
+       of manuscript illumination, on a warm sandstone ground. The three have
+       sat together in Arab visual culture for a thousand years, which is the
+       argument for them: this is a palette an Arabic speaker recognises before
+       they read a word of the interface.
+
+       Structured after Memrise: one dominant colour carries the whole
+       interface, a light tint of it fills, and a single warm accent is
+       reserved for streaks, XP and mastery. Nothing else is allowed to be loud.
+
+       Hex sources:
+       Firoza #135F68 · Firoza Mid #28AAB8 · Firoza Deep #09474E ·
+       Gold #E5A917 · Ink #121E21 · Sandstone #FAF7F0 ·
+       Clay #BA3F36 · Sage #2F7F59 */
+
+    /* Warm sandstone ground. A pure-white card lifts off it without needing a
+       border to say so, and it keeps the teal from reading as clinical. */
+    --background: 45 35% 97%;
+    --foreground: 190 28% 10%;
+
     --card: 0 0% 100%;
-    --card-foreground: 296 23% 10%;
+    --card-foreground: 190 28% 10%;
+
     --popover: 0 0% 100%;
-    --popover-foreground: 296 23% 10%;
-    --primary: 306 44% 20%;
+    --popover-foreground: 190 28% 10%;
+
+    /* Firoza — every primary action, every filled surface, the app's voice */
+    --primary: 186 70% 25%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 296 23% 10%;
+
+    /* Ink secondary */
+    --secondary: 190 28% 10%;
     --secondary-foreground: 0 0% 100%;
-    --accent: 38 79% 57%;
-    --accent-foreground: 296 23% 10%;
-    --periwinkle: 306 38% 39%;
-    --muted: 318 20% 95%;
-    --muted-foreground: 318 8% 38%;
-    --destructive: 4 52% 49%;
+
+    /* Gold — streaks, XP, mastery, celebration. Nothing else. */
+    --accent: 42 82% 52%;
+    --accent-foreground: 190 28% 10%;
+
+    /* Firoza Mid — hovers, chips, icon tints.
+       (Legacy token name kept: ~200 call sites across the app.) */
+    --periwinkle: 186 64% 44%;
+
+    /* Neutrals are warmed to the sandstone, not neutral grey: a cool grey
+       against this ground is what made the old chrome look like a dashboard. */
+    --muted: 35 20% 95%;
+    --muted-foreground: 35 8% 38%;
+
+    /* Clay — a warm red, so a wrong answer never feels like a system error */
+    --destructive: 4 55% 47%;
     --destructive-foreground: 0 0% 100%;
-    --success: 150 46% 34%;
+
+    /* Sage — far enough from firoza that "correct" never reads as "primary" */
+    --success: 152 46% 34%;
     --success-foreground: 0 0% 100%;
-    --border: 318 20% 91%;
-    --input: 318 20% 93%;
-    --ring: 306 44% 30%;
+
+    --border: 35 20% 91%;
+    --input: 35 20% 93%;
+    --ring: 186 70% 35%;
+
+    /* Memrise-chunky. 16px base puts cards at 24px and chips at full round. */
     --radius: 1rem;
-    --olive: 306 47% 15%;
-    --topic-colors: 306 44% 20%;
-    --topic-animals: 306 38% 39%;
-    --topic-household: 306 47% 15%;
-    --topic-tools: 296 23% 10%;
-    --topic-food: 38 79% 57%;
-    --topic-nature: 150 46% 34%;
-    --desert-red: 306 44% 20%;
+
+    /* Firoza Deep for scaffold accents (legacy token name kept: heavy usage) */
+    --olive: 186 73% 20%;
+
+    /* Topic accent stripes — steps of the one hue, plus the gold note */
+    --topic-colors: 186 70% 25%;
+    --topic-animals: 186 64% 44%;
+    --topic-household: 186 73% 20%;
+    --topic-tools: 190 28% 10%;
+    --topic-food: 42 82% 52%;
+    --topic-nature: 152 46% 34%;
+
+    /* Firoza border colour (legacy token name kept: heavy usage) */
+    --desert-red: 186 70% 25%;
+
+    /* Card white (legacy token name kept: heavy usage) */
     --card-cream: 0 0% 100%;
-    --shadow-soft: 0 1px 2px hsl(296 23% 12% / 0.04), 0 2px 8px -3px hsl(296 23% 12% / 0.08);
-    --shadow-card: 0 1px 2px hsl(296 23% 12% / 0.05), 0 6px 18px -8px hsl(306 44% 20% / 0.14);
-    --shadow-elegant: 0 1px 2px hsl(296 23% 12% / 0.05), 0 14px 34px -14px hsl(306 44% 20% / 0.26);
-    --shadow-button: 0 1px 2px hsl(306 44% 14% / 0.18), 0 6px 16px -6px hsl(306 44% 20% / 0.34);
-    --shadow-topic: 0 1px 2px hsl(296 23% 12% / 0.05), 0 6px 18px -8px hsl(306 44% 20% / 0.16);
-    --shadow-topic-hover: 0 2px 4px hsl(296 23% 12% / 0.06), 0 14px 28px -10px hsl(306 44% 20% / 0.26);
-    --sidebar-background: 328 27% 96%;
-    --sidebar-foreground: 296 23% 10%;
-    --sidebar-primary: 306 44% 20%;
+
+    /* Tinted and layered, so elevation does the structural work the old 1px
+       borders were doing badly. */
+    --shadow-soft: 0 1px 2px hsl(190 28% 12% / 0.04), 0 2px 8px -3px hsl(190 28% 12% / 0.08);
+    --shadow-card: 0 1px 2px hsl(190 28% 12% / 0.05), 0 6px 18px -8px hsl(186 70% 25% / 0.14);
+    --shadow-elegant: 0 1px 2px hsl(190 28% 12% / 0.05), 0 14px 34px -14px hsl(186 70% 25% / 0.26);
+    --shadow-button: 0 1px 2px hsl(186 70% 14% / 0.18), 0 6px 16px -6px hsl(186 70% 25% / 0.34);
+    --shadow-topic: 0 1px 2px hsl(190 28% 12% / 0.05), 0 6px 18px -8px hsl(186 70% 25% / 0.16);
+    --shadow-topic-hover: 0 2px 4px hsl(190 28% 12% / 0.06), 0 14px 28px -10px hsl(186 70% 25% / 0.26);
+
+    --sidebar-background: 45 32% 96%;
+    --sidebar-foreground: 190 28% 10%;
+    --sidebar-primary: 186 70% 25%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 318 20% 93%;
-    --sidebar-accent-foreground: 296 23% 10%;
-    --sidebar-border: 318 20% 91%;
-    --sidebar-ring: 306 44% 30%;
+    --sidebar-accent: 35 20% 93%;
+    --sidebar-accent-foreground: 190 28% 10%;
+    --sidebar-border: 35 20% 91%;
+    --sidebar-ring: 186 70% 35%;
   }
 
   .dark {
-    /* A ground tinted by the same hue, so dark mode is recognisably the brand
-       rather than a generic midnight. The deep primary cannot carry a fill
-       here, so a lighter, desaturated step takes over. */
-    --background: 306 22% 8%;
-    --foreground: 318 16% 94%;
-    --card: 306 18% 13%;
-    --card-foreground: 318 16% 94%;
-    --popover: 306 18% 13%;
-    --popover-foreground: 318 16% 94%;
-    --primary: 306 38% 58%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 318 16% 94%;
-    --secondary-foreground: 296 23% 10%;
-    --accent: 38 85% 62%;
-    --accent-foreground: 306 30% 10%;
-    --periwinkle: 306 34% 68%;
-    --muted: 306 14% 18%;
-    --muted-foreground: 318 10% 72%;
-    --border: 306 12% 22%;
-    --input: 306 12% 22%;
-    --ring: 306 38% 58%;
+    /* A teal-black ground rather than a generic midnight, so dark mode is
+       recognisably the same brand. The deep firoza cannot carry a fill here,
+       so a lighter, desaturated step takes over: bright enough to read as
+       text, muted enough that a large surface of it is not neon. */
+    --background: 190 30% 8%;
+    --foreground: 40 16% 94%;
+
+    --card: 190 24% 12%;
+    --card-foreground: 40 16% 94%;
+
+    --popover: 190 24% 12%;
+    --popover-foreground: 40 16% 94%;
+
+    --primary: 186 48% 52%;
+    --primary-foreground: 190 40% 8%;
+
+    --secondary: 40 16% 94%;
+    --secondary-foreground: 190 28% 10%;
+
+    --accent: 42 85% 60%;
+    --accent-foreground: 190 40% 8%;
+
+    --periwinkle: 186 44% 64%;
+
+    --muted: 190 18% 18%;
+    --muted-foreground: 40 10% 72%;
+
+    --border: 190 15% 22%;
+    --input: 190 15% 22%;
+    --ring: 186 48% 52%;
+
     --destructive: 4 62% 60%;
-    --destructive-foreground: 306 30% 10%;
-    --success: 150 44% 50%;
-    --success-foreground: 306 30% 10%;
-    --olive: 306 38% 58%;
-    --desert-red: 306 40% 66%;
-    --card-cream: 306 18% 13%;
-    --shadow-soft: 0 1px 2px hsl(306 40% 3% / 0.4), 0 2px 8px -3px hsl(306 40% 3% / 0.5);
-    --shadow-card: 0 1px 2px hsl(306 40% 3% / 0.45), 0 6px 18px -8px hsl(306 40% 3% / 0.6);
-    --shadow-elegant: 0 1px 2px hsl(306 40% 3% / 0.5), 0 14px 34px -14px hsl(306 40% 2% / 0.7);
-    --shadow-button: 0 1px 2px hsl(306 40% 3% / 0.5), 0 6px 16px -6px hsl(306 40% 20% / 0.5);
-    --shadow-topic: 0 1px 2px hsl(306 40% 3% / 0.45), 0 6px 18px -8px hsl(306 40% 3% / 0.55);
-    --shadow-topic-hover: 0 2px 4px hsl(306 40% 3% / 0.5), 0 14px 28px -10px hsl(306 40% 3% / 0.65);
-    --sidebar-background: 306 22% 10%;
-    --sidebar-foreground: 318 16% 94%;
-    --sidebar-primary: 306 38% 58%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 306 14% 18%;
-    --sidebar-accent-foreground: 318 16% 94%;
-    --sidebar-border: 306 12% 22%;
-    --sidebar-ring: 306 38% 58%;
+    --destructive-foreground: 190 40% 8%;
+
+    --success: 152 44% 50%;
+    --success-foreground: 190 40% 8%;
+
+    --olive: 186 48% 52%;
+    --desert-red: 186 44% 60%;
+    --card-cream: 190 24% 12%;
+
+    --shadow-soft: 0 1px 2px hsl(190 45% 3% / 0.4), 0 2px 8px -3px hsl(190 45% 3% / 0.5);
+    --shadow-card: 0 1px 2px hsl(190 45% 3% / 0.45), 0 6px 18px -8px hsl(190 45% 3% / 0.6);
+    --shadow-elegant: 0 1px 2px hsl(190 45% 3% / 0.5), 0 14px 34px -14px hsl(190 45% 2% / 0.7);
+    --shadow-button: 0 1px 2px hsl(190 45% 3% / 0.5), 0 6px 16px -6px hsl(186 45% 20% / 0.5);
+    --shadow-topic: 0 1px 2px hsl(190 45% 3% / 0.45), 0 6px 18px -8px hsl(190 45% 3% / 0.55);
+    --shadow-topic-hover: 0 2px 4px hsl(190 45% 3% / 0.5), 0 14px 28px -10px hsl(190 45% 3% / 0.65);
+
+    --sidebar-background: 190 30% 10%;
+    --sidebar-foreground: 40 16% 94%;
+    --sidebar-primary: 186 48% 52%;
+    --sidebar-primary-foreground: 190 40% 8%;
+    --sidebar-accent: 190 18% 18%;
+    --sidebar-accent-foreground: 40 16% 94%;
+    --sidebar-border: 190 15% 22%;
+    --sidebar-ring: 186 48% 52%;
   }
 }
 
@@ -354,36 +416,36 @@
 
   /* Background gradients - for large areas only */
   .bg-gradient-warm {
-    background: linear-gradient(180deg, hsl(328 30% 97%) 0%, hsl(320 24% 93%) 100%);
+    background: linear-gradient(180deg, hsl(45 36% 97%) 0%, hsl(42 28% 93%) 100%);
   }
 
   .bg-gradient-subtle {
-    background: linear-gradient(180deg, hsl(328 27% 98%) 0%, hsl(322 22% 95%) 100%);
+    background: linear-gradient(180deg, hsl(45 35% 98%) 0%, hsl(43 26% 95%) 100%);
   }
 
   /* Topic accent colors - for small accent stripes only */
   .bg-gradient-green {
-    background: hsl(306 44% 20%);
+    background: hsl(186 70% 25%);
   }
 
   .bg-gradient-sand {
-    background: hsl(38 79% 57%);
+    background: hsl(42 82% 52%);
   }
 
   .bg-gradient-olive {
-    background: hsl(306 38% 39%);
+    background: hsl(186 64% 44%);
   }
 
   .bg-gradient-indigo {
-    background: hsl(306 46% 15%);
+    background: hsl(186 73% 20%);
   }
 
   .bg-gradient-charcoal {
-    background: hsl(296 23% 10%);
+    background: hsl(190 28% 10%);
   }
 
   .bg-gradient-red {
-    background: hsl(4 52% 49%);
+    background: hsl(4 55% 47%);
   }
 
   /* Slow drift for parallax backdrop layers */
