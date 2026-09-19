@@ -12,7 +12,9 @@ import { RootChip } from "@/components/vocab/RootChip";
 import { PronunciationButton } from "@/components/review/PronunciationButton";
 import { RatingButtons } from "@/components/review/RatingButtons";
 import { SessionHandoff } from "@/components/review/SessionHandoff";
-import { SessionProgress } from "@/components/review/SessionProgress";
+import { cn } from "@/lib/utils";
+import { SessionMeta } from "@/components/session/SessionMeta";
+import { SessionFrame } from "@/components/session/SessionFrame";
 import { PageCorner } from "@/components/shell/PageCorner";
 import { Button } from "@/components/ui/button";
 import { AppShell } from "@/components/layout/AppShell";
@@ -285,70 +287,70 @@ const Review = () => {
 
   return (
     <AppShell compact>
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <PageCorner />
-        <div className="flex items-center gap-2">
-          <button
-            onClick={handleToggleMix}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-sm font-medium transition-colors ${
-              mixAll
-                ? "bg-primary/10 border-primary/30 text-primary"
-                : "bg-card border-border text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            <Shuffle className="h-3.5 w-3.5" />
-            خلط الكل
-          </button>
-          <div className="px-3 py-1.5 rounded-lg bg-card border border-border">
-            <span className="text-sm font-medium text-foreground">
-              {currentWord.topic?.name || "المراجعة"}
-            </span>
-          </div>
-          {pendingCount > 0 && (
-            <div
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-medium ${
-                isOnline
-                  ? "bg-card border-border text-muted-foreground"
-                  : "bg-accent/10 border-accent/30 text-accent"
-              }`}
-              title={isOnline ? "جارٍ حفظ التقييمات…" : "غير متصل — سنعيد المحاولة عند عودة الاتصال"}
-            >
-              {isOnline ? (
-                <CloudUpload className={`h-3.5 w-3.5 ${isFlushing ? "animate-pulse" : ""}`} />
-              ) : (
-                <WifiOff className="h-3.5 w-3.5" />
-              )}
-              {isOnline ? `جارٍ حفظ ${pendingCount}` : `${pendingCount} بانتظار الحفظ`}
-            </div>
-          )}
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-card border border-border">
-            <Trophy className="h-4 w-4 text-primary" />
-            <span className="text-sm font-medium text-foreground">{sessionCount}</span>
-          </div>
-
-        </div>
-      </div>
-
-      {/* Dialect tag */}
-      {mixAll && (
-        <div className="flex justify-center mb-4">
-          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-muted text-muted-foreground">
-            {dialectFlag} {dialectLabel}
-          </span>
-        </div>
-      )}
-
-      {/* Progress bar */}
-      <SessionProgress
-        deckId="curriculum"
-        session={session}
+      <SessionFrame
+        onExit={() => navigate("/")}
         position={safeIndex + 1}
         total={dueWords.length}
-      />
-
-      {/* Card */}
-      <div className="py-4">
+        trailing={
+          <span className="inline-flex items-center gap-1.5 text-body-sm font-bold text-primary">
+            <Trophy className="h-4 w-4" />
+            {sessionCount}
+          </span>
+        }
+        meta={
+          <SessionMeta
+            deckId="curriculum"
+            session={session}
+            position={safeIndex + 1}
+            total={dueWords.length}
+          >
+            {mixAll && (
+              <span className="ms-1.5">
+                · {dialectFlag} {dialectLabel}
+              </span>
+            )}
+            {pendingCount > 0 && (
+              <span className={cn("ms-1.5", isOnline ? "" : "text-accent")}>
+                · {isOnline ? `جارٍ حفظ ${pendingCount}` : `${pendingCount} بانتظار الحفظ`}
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={handleToggleMix}
+              className={cn(
+                "ms-2 underline underline-offset-2 transition-colors hover:text-foreground",
+                mixAll && "text-primary",
+              )}
+            >
+              {mixAll ? "إلغاء الخلط" : "خلط الكل"}
+            </button>
+          </SessionMeta>
+        }
+        action={
+          showAnswer ? (
+            <RatingButtons
+              onRate={handleRate}
+              stability={stability}
+              difficulty={difficulty}
+              intervalDays={intervalDays}
+              repetitions={repetitions}
+              elapsedDays={elapsedDays}
+              disabled={false}
+            />
+          ) : (
+            <div className="mx-auto w-full max-w-sm">
+              <Button
+                size="lg"
+                onClick={() => setShowAnswer(true)}
+                className="h-14 w-full gap-2 rounded-2xl text-base font-bold shadow-button"
+              >
+                <Eye className="h-5 w-5" />
+                {isProduction ? "أظهر الإنجليزية" : "أظهر المعنى"}
+              </Button>
+            </div>
+          )
+        }
+      >
         <div className="max-w-sm mx-auto">
           {isAudio ? (
             <ReviewAudioCard
@@ -483,45 +485,7 @@ const Review = () => {
             />
           )}
         </div>
-
-        {/* One action at a time, in the thumb zone.
-
-            The rating buttons used to render unconditionally — the comment
-            here said "always visible" — so a learner could grade a card
-            before seeing its answer. That is not a cosmetic problem: every
-            such tap writes a real interval, so the deck's whole schedule
-            drifts towards intervals nobody earned. ReviewAudioCard's own test
-            already asserted that "the review page gates rating on having
-            revealed"; it simply was not true.
-
-            Revealing is now the single primary action until it happens, which
-            also moves the most important control on the screen out of a grey
-            ghost link and into the bottom of the screen, where a thumb is. */}
-        <div className="mt-8">
-          {showAnswer ? (
-            <RatingButtons
-              onRate={handleRate}
-              stability={stability}
-              difficulty={difficulty}
-              intervalDays={intervalDays}
-              repetitions={repetitions}
-              elapsedDays={elapsedDays}
-              disabled={false}
-            />
-          ) : (
-            <div className="w-full max-w-sm mx-auto">
-              <Button
-                size="lg"
-                onClick={() => setShowAnswer(true)}
-                className="w-full gap-2 h-14 text-base font-bold rounded-2xl shadow-button"
-              >
-                <Eye className="h-5 w-5" />
-                {isProduction ? "أظهر الإنجليزية" : "أظهر المعنى"}
-              </Button>
-            </div>
-          )}
-        </div>
-      </div>
+      </SessionFrame>
 
       <GenerateImageDialog
         word={currentWord}

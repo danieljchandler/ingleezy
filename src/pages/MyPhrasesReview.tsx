@@ -5,7 +5,8 @@ import { useDialect } from "@/contexts/DialectContext";
 import { useDueUserPhrases, useUpdateUserPhraseReview, useDeleteUserPhrase } from "@/hooks/useUserPhrases";
 import { useReviewSession } from "@/hooks/useReviewSession";
 import { SessionHandoff } from "@/components/review/SessionHandoff";
-import { SessionProgress } from "@/components/review/SessionProgress";
+import { SessionMeta } from "@/components/session/SessionMeta";
+import { SessionFrame } from "@/components/session/SessionFrame";
 import { PageCorner } from "@/components/shell/PageCorner";
 import { RatingButtons } from "@/components/review/RatingButtons";
 import { AppShell } from "@/components/layout/AppShell";
@@ -312,28 +313,25 @@ const MyPhrasesReview = () => {
 
   return (
     <AppShell compact>
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <PageCorner />
-        <div className="flex items-center gap-2">
-          <div className="px-3 py-1.5 rounded-lg bg-card border border-border flex items-center gap-1.5">
-            <MessageCircleQuestion className="h-3.5 w-3.5 text-primary" />
-            <span className="text-sm font-medium">عبارة</span>
-          </div>
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-card border border-border">
-            <Trophy className="h-4 w-4 text-primary" />
-            <span className="text-sm font-medium">{sessionCount}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Progress */}
-      <SessionProgress
-        deckId="my-phrases"
-        session={session}
+      <SessionFrame
+        onExit={() => navigate("/")}
         position={safeIndex + 1}
         total={duePhrases.length}
-      />
+        trailing={
+          <span className="inline-flex items-center gap-1.5 text-body-sm font-bold text-primary">
+            <Trophy className="h-4 w-4" />
+            {sessionCount}
+          </span>
+        }
+        meta={
+          <SessionMeta
+            deckId="my-phrases"
+            session={session}
+            position={safeIndex + 1}
+            total={duePhrases.length}
+          />
+        }
+      >
 
       {/* Card */}
       <div className="py-4">
@@ -575,6 +573,7 @@ const MyPhrasesReview = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      </SessionFrame>
     </AppShell>
   );
 };

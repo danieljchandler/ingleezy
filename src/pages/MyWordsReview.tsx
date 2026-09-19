@@ -33,7 +33,8 @@ import { useNewCardCap, NEW_CAP_OPTIONS, formatCap } from "@/hooks/useNewCardCap
 import { useRemainingNewCardBudget, useClaimNewCard } from "@/hooks/useNewCardBudget";
 import { useReviewSession } from "@/hooks/useReviewSession";
 import { SessionHandoff } from "@/components/review/SessionHandoff";
-import { SessionProgress } from "@/components/review/SessionProgress";
+import { SessionMeta } from "@/components/session/SessionMeta";
+import { SessionFrame } from "@/components/session/SessionFrame";
 import { createPlayableJingleAudio, createPlayableJingleAudioFromUrl } from "@/lib/jingleAudio";
 import {
   Select,
@@ -678,62 +679,36 @@ const MyWordsReview = () => {
 
   return (
     <AppShell compact>
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <PageCorner />
-        <div className="flex items-center gap-2">
-          <Select
-            value={String(newCap)}
-            onValueChange={(v) => setNewCap(Number(v) as never)}
-          >
-            <SelectTrigger
-              className="h-8 w-auto gap-1 px-2.5 text-xs font-medium"
-              aria-label="بطاقات جديدة لكل جلسة"
-              title="بطاقات جديدة لكل جلسة"
-            >
-              <Sparkles className="h-3.5 w-3.5 text-accent" />
-              <SelectValue>{formatCap(newCap)}/اليوم</SelectValue>
-            </SelectTrigger>
-            <SelectContent align="end">
-              {NEW_CAP_OPTIONS.map((n) => (
-                <SelectItem key={n} value={String(n)} className="text-xs">
-                  {formatCap(n)} جديدة / جلسة
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <div className="px-3 py-1.5 rounded-lg bg-card border border-border flex items-center gap-1.5">
-
-            {isProduction ? <Mic2 className="h-3.5 w-3.5 text-primary" /> : <Brain className="h-3.5 w-3.5 text-primary" />}
-            <span className="text-sm font-medium text-foreground">
-              {isProduction ? "أنتِج" : "تعرّف"}
-            </span>
-          </div>
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-card border border-border">
-            <Trophy className="h-4 w-4 text-primary" />
-            <span className="text-sm font-medium text-foreground">{sessionCount}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Progress */}
-      <SessionProgress
-        deckId="my-words"
-        session={session}
+      <SessionFrame
+        onExit={() => navigate("/")}
         position={safeIndex + 1}
         total={dueWords.length}
+        trailing={
+          <span className="inline-flex items-center gap-1.5 text-body-sm font-bold text-primary">
+            <Trophy className="h-4 w-4" />
+            {sessionCount}
+          </span>
+        }
+        meta={
+          <SessionMeta
+            deckId="my-words"
+            session={session}
+            position={safeIndex + 1}
+            total={dueWords.length}
+          >
+          <div className="flex items-center justify-center gap-3 text-xs text-muted-foreground mt-1">
+          <span className="inline-flex items-center gap-1">
+          <span className="h-1.5 w-1.5 rounded-full bg-accent" />
+          {newRemaining} جديدة
+          </span>
+          <span className="inline-flex items-center gap-1">
+          <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+          {reviewRemaining} مراجعة
+          </span>
+          </div>
+          </SessionMeta>
+        }
       >
-        <div className="flex items-center justify-center gap-3 text-xs text-muted-foreground mt-1">
-          <span className="inline-flex items-center gap-1">
-            <span className="h-1.5 w-1.5 rounded-full bg-accent" />
-            {newRemaining} جديدة
-          </span>
-          <span className="inline-flex items-center gap-1">
-            <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-            {reviewRemaining} مراجعة
-          </span>
-        </div>
-      </SessionProgress>
 
       {/* Card */}
       <div className="py-4">
@@ -1103,6 +1078,7 @@ const MyWordsReview = () => {
         onOpenChange={(open) => !open && setFamilyKey(null)}
         onPlayAudio={playAudio}
       />
+      </SessionFrame>
     </AppShell>
   );
 };
