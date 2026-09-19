@@ -357,7 +357,6 @@ const Review = () => {
               audioUrl={currentWord.audio_url}
               dialect={currentWord.dialect_module ?? activeDialect}
               showAnswer={showAnswer}
-              onReveal={() => setShowAnswer(true)}
               onAudioGenerated={persistCurriculumAudio}
             />
           ) : (
@@ -465,17 +464,7 @@ const Review = () => {
                 <RootChip root={currentWord.word_family} className="mt-2" />
               </div>
             )}
-            {!showAnswer && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowAnswer(true)}
-                className="gap-1.5 text-muted-foreground"
-              >
-                <Eye className="h-4 w-4" />
-                {isProduction ? "أظهر الإنجليزية" : "أظهر المعنى"}
-              </Button>
-            )}
+
           </div>
           )}
 
@@ -495,17 +484,42 @@ const Review = () => {
           )}
         </div>
 
-        {/* Self-rating always visible */}
-        <div className="mt-10">
-          <RatingButtons
-            onRate={handleRate}
-            stability={stability}
-            difficulty={difficulty}
-            intervalDays={intervalDays}
-            repetitions={repetitions}
-            elapsedDays={elapsedDays}
-            disabled={false}
-          />
+        {/* One action at a time, in the thumb zone.
+
+            The rating buttons used to render unconditionally — the comment
+            here said "always visible" — so a learner could grade a card
+            before seeing its answer. That is not a cosmetic problem: every
+            such tap writes a real interval, so the deck's whole schedule
+            drifts towards intervals nobody earned. ReviewAudioCard's own test
+            already asserted that "the review page gates rating on having
+            revealed"; it simply was not true.
+
+            Revealing is now the single primary action until it happens, which
+            also moves the most important control on the screen out of a grey
+            ghost link and into the bottom of the screen, where a thumb is. */}
+        <div className="mt-8">
+          {showAnswer ? (
+            <RatingButtons
+              onRate={handleRate}
+              stability={stability}
+              difficulty={difficulty}
+              intervalDays={intervalDays}
+              repetitions={repetitions}
+              elapsedDays={elapsedDays}
+              disabled={false}
+            />
+          ) : (
+            <div className="w-full max-w-sm mx-auto">
+              <Button
+                size="lg"
+                onClick={() => setShowAnswer(true)}
+                className="w-full gap-2 h-14 text-base font-bold rounded-2xl shadow-button"
+              >
+                <Eye className="h-5 w-5" />
+                {isProduction ? "أظهر الإنجليزية" : "أظهر المعنى"}
+              </Button>
+            </div>
+          )}
         </div>
       </div>
 

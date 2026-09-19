@@ -44,9 +44,9 @@ const STEPS: Step[] = [
     placement: "top",
   },
   {
-    selector: "[data-tour='nav-upload']",
-    title: "ارفع",
-    body: "عندك مقطع تحبه؟ ارفعه وإحنا نحوّله لدرس — نص، كلمات، وتمارين من نفس الفيديو.",
+    selector: "[data-tour='nav-today']",
+    title: "اليوم",
+    body: "مهامك اليومية وسلسلتك في مكان واحد. ابدأ من هنا كل يوم — وإذا عندك مقطع تحبه، ارفعه من المهارات وإحنا نحوّله لدرس.",
     placement: "top",
   },
   {

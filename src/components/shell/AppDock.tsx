@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Home, LayoutGrid, Plus, MessageCircleQuestion, Gamepad2 } from "lucide-react";
+import { Home, LayoutGrid, Play, MessageCircleQuestion, Gamepad2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /**
@@ -23,7 +23,16 @@ import { cn } from "@/lib/utils";
 const SLOTS = [
   { to: "/", label: "الرئيسية", icon: Home, exact: true, tourId: "nav-feed" },
   { to: "/choose", label: "المهارات", icon: LayoutGrid, tourId: "nav-choose" },
-  { to: "/tutor-upload", label: "ارفع", icon: Plus, primary: true, tourId: "nav-upload" },
+  // The centre slot is the easiest pixel on the screen to hit, so it holds the
+  // thing a learner opens the app to do. It used to hold ارفع, which is a
+  // thing you do occasionally with a clip you found — and meanwhile the daily
+  // queue was reachable from nowhere in the dock at all. Upload did not lose a
+  // home: المهارات carries a tile for it.
+  //
+  // /today is transitional (see App.tsx: the feed has taken over / and has not
+  // absorbed the queue yet). When it does, this slot follows the queue to
+  // wherever it lands rather than being removed.
+  { to: "/today", label: "اليوم", icon: Play, primary: true, tourId: "nav-today" },
   { to: "/how-do-i-say", label: "اسأل", icon: MessageCircleQuestion, tourId: "nav-ask" },
   { to: "/vocab-games", label: "ألعاب", icon: Gamepad2, tourId: "nav-games" },
 ];

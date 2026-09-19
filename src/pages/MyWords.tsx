@@ -356,7 +356,7 @@ const MyWords = () => {
           className="w-full mb-6 gap-2"
           size="lg"
         >
-          Review {stats.dueCount} due words
+          راجع {stats.dueCount} كلمة مستحقة
           <ChevronOpen className="h-4 w-4" />
         </Button>
       )}
@@ -378,7 +378,7 @@ const MyWords = () => {
               onClick={() => navigate("/review/my-phrases")}
               className="gap-1.5"
             >
-              Review {phraseStats.dueCount}
+              راجع {phraseStats.dueCount}
               <ChevronOpen className="h-4 w-4" />
             </Button>
           )}
@@ -386,14 +386,14 @@ const MyWords = () => {
 
         {(!phrases || phrases.length === 0) ? (
           <div className="p-6 text-center text-sm text-muted-foreground">
-            Save phrases from{" "}
+            احفظ عبارات من{" "}
             <button
               className="text-primary underline underline-offset-2"
               onClick={() => navigate("/how-do-i-say")}
             >
               كيف أقول…؟
             </button>{" "}
-            to start practicing them here.
+            عشان تتدرب عليها هنا.
           </div>
         ) : (
           <>
@@ -782,9 +782,15 @@ const MyWords = () => {
                       <Sparkles className="h-4 w-4 text-muted-foreground/50" />
                     </div>
                   )}
-                  <div>
+                  <div className="min-w-0">
                     <span
-                      className="text-lg font-bold text-foreground block"
+                      className="font-english text-lg font-bold text-foreground block truncate"
+                      dir="ltr"
+                    >
+                      {word.word_english}
+                    </span>
+                    <span
+                      className="text-sm text-muted-foreground block truncate"
                       dir="rtl"
                     >
                       {word.word_arabic}
@@ -818,10 +824,7 @@ const MyWords = () => {
                     )}
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground hidden sm:inline">
-                    {word.word_english}
-                  </span>
+                <div className="flex items-center gap-2 shrink-0">
                   {hasContext && (
                     <Button
                       variant="ghost"

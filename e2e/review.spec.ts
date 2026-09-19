@@ -79,6 +79,34 @@ async function waitForWrite(db: MemoryDb, table: string, count = 1) {
     .toBeGreaterThanOrEqual(count);
 }
 
+test.describe("revealing before rating", () => {
+  test.beforeEach(async ({ signInAs, db }) => {
+    await signInAs("free");
+    seedCurriculum(db, 3);
+  });
+
+  test("offers no rating until the answer is showing", async ({ page }) => {
+    await page.goto("/review");
+    await expect(page.getByRole("button", { name: /أظهر/ })).toBeVisible();
+
+    // The rating buttons used to render unconditionally, so a learner could
+    // grade a card they had not seen — and every such tap writes a real
+    // interval, which drags the whole deck's schedule towards intervals
+    // nobody earned. Revealing is the only thing on offer until it happens.
+    for (const label of ["من جديد", "صعب", "جيد", "سهل"]) {
+      await expect(page.getByRole("button", { name: new RegExp(`^${label}`) })).toHaveCount(0);
+    }
+
+    await page.getByRole("button", { name: /أظهر/ }).click();
+
+    for (const label of ["من جديد", "صعب", "جيد", "سهل"]) {
+      await expect(page.getByRole("button", { name: new RegExp(`^${label}`) })).toBeVisible();
+    }
+    // And the reveal gives way rather than sitting alongside what it unlocked.
+    await expect(page.getByRole("button", { name: /أظهر/ })).toHaveCount(0);
+  });
+});
+
 test.describe("rating a curriculum card", () => {
   test.beforeEach(async ({ signInAs, db }) => {
     await signInAs("free");
