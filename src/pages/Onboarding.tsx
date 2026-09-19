@@ -116,18 +116,20 @@ const Onboarding = () => {
 
       if (error) throw error;
 
-      // Set weekly goal based on selection
+      // Set weekly goal based on selection.
+      //
+      // Through the RPC, not a direct upsert: 20260529150401 dropped the
+      // client's INSERT and UPDATE policies on weekly_goals, so the upsert this
+      // replaces had been failing against RLS — unchecked, so the goal a
+      // learner chose in onboarding was silently discarded. The week start is
+      // the server's too; this built a SUNDAY one while the card that reads it
+      // builds a Monday, so even a permitted write landed on the wrong row.
       if (selectedGoal) {
-        const weekStart = new Date();
-        weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-        const weekStartStr = weekStart.toISOString().split('T')[0];
-
-        await supabase.from('weekly_goals').upsert({
-          user_id: user.id,
-          week_start_date: weekStartStr,
-          target_reviews: selectedGoal.reviewTarget,
-          target_xp: selectedGoal.xpTarget,
-        } as any, { onConflict: 'user_id,week_start_date' });
+        const { error: goalError } = await supabase.rpc('set_weekly_goal', {
+          _target_reviews: selectedGoal.reviewTarget,
+          _target_xp: selectedGoal.xpTarget,
+        });
+        if (goalError) throw goalError;
       }
 
       markTourPending();

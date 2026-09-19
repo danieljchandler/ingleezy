@@ -12,6 +12,7 @@ import { IconBack } from "@/components/shared/DirectionalIcon";
 import { cn } from "@/lib/utils";
 import { ReferralCard } from "@/components/social/ReferralCard";
 import { LevelJourneyCard } from "@/components/social/LevelJourneyCard";
+import { effectiveStreak, STREAK_COLUMNS } from "@/lib/streak";
 
 interface DialectStudy {
   dialect: string;
@@ -62,7 +63,7 @@ const Profile = () => {
           .select("dialect, interval_days")
           .eq("user_id", user.id),
         (supabase.from("review_streaks" as never) as any)
-          .select("current_streak, longest_streak")
+          .select(STREAK_COLUMNS)
           .eq("user_id", user.id)
           .maybeSingle(),
       ]);
@@ -79,7 +80,7 @@ const Profile = () => {
       setDialectStudy(Object.values(buckets).sort((a, b) => b.wordCount - a.wordCount));
 
       setStreak({
-        current: streakRow?.current_streak ?? 0,
+        current: effectiveStreak(streakRow),
         longest: streakRow?.longest_streak ?? 0,
       });
     } catch (e) {

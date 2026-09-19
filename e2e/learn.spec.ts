@@ -73,28 +73,6 @@ async function answer(page: Page, english: string) {
 /** Answer the card at `index` correctly. */
 const answerCorrectly = (page: Page, index: number) => answer(page, `word ${index + 1}`);
 
-/**
- * The first rating of a never-seen word throws, and the throw is visible.
- *
- * `submitRatingToServer` inserts the review row, then calls
- * `supabase.rpc(...).catch(() => {})` to claim daily new-card budget. A
- * PostgrestFilterBuilder is a thenable, not a Promise — it implements `then`
- * and nothing else — so `.catch` is undefined and the call throws a TypeError
- * synchronously, before the function returns. The comment above it says
- * "best-effort — never blocks the review submission"; it blocks it every time.
- *
- * The row still lands, because the insert is awaited first. What is lost is
- * everything downstream of the mutation succeeding: XP, the review counter, the
- * achievement check, and the new-card budget the RPC existed to claim.
- *
- * Only new cards are affected, which is why the review suite never saw it —
- * those fixtures all seed an existing row and take the update path.
- */
-const NEW_CARD_RPC_BUG = [
-  /supabase\.rpc\(\.\.\.\)\.catch is not a function/,
-  /Failed to submit review/,
-];
-
 /** Miss the current card, then acknowledge the correction. */
 async function answerWrongly(page: Page, wrongEnglish: string) {
   await answer(page, wrongEnglish);
@@ -184,9 +162,7 @@ test.describe("working through a lesson", () => {
     await expect(page.getByText("كلمة1")).toBeVisible();
   });
 
-  test("advances to the next word after a correct answer", async ({ page, expectConsoleErrors }) => {
-    expectConsoleErrors(NEW_CARD_RPC_BUG);
-
+  test("advances to the next word after a correct answer", async ({ page }) => {
     await page.goto(`/learn/${LESSON}`);
     await answerCorrectly(page, 0);
 
@@ -204,9 +180,7 @@ test.describe("working through a lesson", () => {
     await atCard(page, 0, 4);
   });
 
-  test("finishes with a score once every word is answered", async ({ page, expectConsoleErrors }) => {
-    expectConsoleErrors(NEW_CARD_RPC_BUG);
-
+  test("finishes with a score once every word is answered", async ({ page }) => {
     await page.goto(`/learn/${LESSON}`);
     for (let index = 0; index < 4; index++) await answerCorrectly(page, index);
 
@@ -215,9 +189,7 @@ test.describe("working through a lesson", () => {
     await expect(page.getByText("4 / 4 correct")).toBeVisible();
   });
 
-  test("scores a mixed session honestly", async ({ page, expectConsoleErrors }) => {
-    expectConsoleErrors(NEW_CARD_RPC_BUG);
-
+  test("scores a mixed session honestly", async ({ page }) => {
     await page.goto(`/learn/${LESSON}`);
 
     await answerWrongly(page, "word 2");
@@ -227,9 +199,7 @@ test.describe("working through a lesson", () => {
     await expect(page.getByRole("heading", { name: /مجهود طيب/ })).toBeVisible();
   });
 
-  test("restarting clears the score rather than adding to it", async ({ page, expectConsoleErrors }) => {
-    expectConsoleErrors(NEW_CARD_RPC_BUG);
-
+  test("restarting clears the score rather than adding to it", async ({ page }) => {
     await page.goto(`/learn/${LESSON}`);
     for (let index = 0; index < 4; index++) await answerCorrectly(page, index);
     await expect(page.getByText("100%")).toBeVisible();
@@ -247,9 +217,7 @@ test.describe("what a lesson answer records", () => {
     seedLesson(db, 4);
   });
 
-  test("schedules the word that was actually asked", async ({ page, db, expectConsoleErrors }) => {
-    expectConsoleErrors(NEW_CARD_RPC_BUG);
-
+  test("schedules the word that was actually asked", async ({ page, db }) => {
     await page.goto(`/learn/${LESSON}`);
     await answerCorrectly(page, 0);
     await atCard(page, 1, 4);
@@ -263,9 +231,7 @@ test.describe("what a lesson answer records", () => {
     expect(new Date(String(review.next_review_at)).getTime()).toBeGreaterThan(Date.now());
   });
 
-  test("a miss brings the word back soon rather than being dropped", async ({ page, db, expectConsoleErrors }) => {
-    expectConsoleErrors(NEW_CARD_RPC_BUG);
-
+  test("a miss brings the word back soon rather than being dropped", async ({ page, db }) => {
     await page.goto(`/learn/${LESSON}`);
     await answerWrongly(page, "word 2");
     await atCard(page, 1, 4);
@@ -301,24 +267,22 @@ test.describe("what a lesson answer records", () => {
     expect(db.rows("word_reviews")).toHaveLength(1);
   });
 
-  test("awards no XP for a new card, because the submission throws first", async ({
-    page,
-    db,
-    expectConsoleErrors,
-  }) => {
-    expectConsoleErrors(NEW_CARD_RPC_BUG);
-
+  test("awards XP for a new card, like any other", async ({ page, db }) => {
     await page.goto(`/learn/${LESSON}`);
     await answerCorrectly(page, 0);
     await expect.poll(() => db.rows("word_reviews").length, { timeout: 10_000 }).toBe(1);
-    await page.waitForTimeout(1000);
 
-    // The visible consequence of the bug above: the card is scheduled, but the
-    // mutation rejects, so onSuccess never runs and the learner is paid nothing
-    // for a word they just learned. Rating an already-seen card does award XP —
-    // see "builds on an existing review" — which is what makes this so easy to
-    // miss by hand.
-    expect(Number(db.rows("user_xp")[0]?.total_xp ?? 0)).toBe(250);
+    // This used to assert the opposite, and said so: the card was scheduled and
+    // the learner was paid nothing for a word they had just learned, because
+    // `submitRatingToServer` threw on the way out and `onSuccess` never ran.
+    // Rating an already-seen card did award XP — see "builds on an existing
+    // review" — which is what made it so easy to miss by hand.
+    //
+    // The whole tail of the rating is back with it: the weekly goal, the
+    // streak, and the achievement check all hang off the same `onSuccess`.
+    await expect
+      .poll(() => Number(db.rows("user_xp")[0]?.total_xp ?? 0), { timeout: 10_000 })
+      .toBeGreaterThan(250);
   });
 
   test("awards XP for a card that already has a review row", async ({ page, db }) => {
@@ -363,9 +327,7 @@ test.describe("picking up where the learner left off", () => {
     seedLesson(db, 4);
   });
 
-  test("saves how far through the lesson got", async ({ page, db, expectConsoleErrors }) => {
-    expectConsoleErrors(NEW_CARD_RPC_BUG);
-
+  test("saves how far through the lesson got", async ({ page, db }) => {
     await page.goto(`/learn/${LESSON}`);
     await answerCorrectly(page, 0);
     await atCard(page, 1, 4);
@@ -434,9 +396,7 @@ test.describe("picking up where the learner left off", () => {
     await atCard(page, 0, 4);
   });
 
-  test("marks the lesson completed with its score", async ({ page, db, expectConsoleErrors }) => {
-    expectConsoleErrors(NEW_CARD_RPC_BUG);
-
+  test("marks the lesson completed with its score", async ({ page, db }) => {
     await page.goto(`/learn/${LESSON}`);
     for (let index = 0; index < 4; index++) await answerCorrectly(page, index);
     await expect(page.getByText("100%")).toBeVisible();
@@ -447,9 +407,7 @@ test.describe("picking up where the learner left off", () => {
     expect(Number(db.rows("lesson_progress")[0].best_score)).toBe(100);
   });
 
-  test("keeps the better of two scores", async ({ page, db, expectConsoleErrors }) => {
-    expectConsoleErrors(NEW_CARD_RPC_BUG);
-
+  test("keeps the better of two scores", async ({ page, db }) => {
     db.seed("lesson_progress", [
       aLessonProgress({
         lesson_id: LESSON,

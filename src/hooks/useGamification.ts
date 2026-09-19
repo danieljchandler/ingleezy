@@ -2,7 +2,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { localDateKey } from "@/lib/localDate";
+import { localDateKey, utcWeekStart } from "@/lib/localDate";
+import { effectiveStreak } from "@/lib/streak";
 
 export interface UserXP {
   id: string;
@@ -148,13 +149,21 @@ export function useWeeklyGoal() {
     queryFn: async () => {
       if (!user) return null;
 
-      // Get current week's Monday
-      const today = new Date();
-      const dayOfWeek = today.getDay();
-      const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-      const monday = new Date(today);
-      monday.setDate(today.getDate() + mondayOffset);
-      const weekStart = localDateKey(monday);
+      // The Monday that starts this week, in UTC.
+      //
+      // UTC rather than local, because this row is only ever written by
+      // `increment_review_count` and `set_weekly_goal`, and both key it on
+      // `date_trunc('week', now() AT TIME ZONE 'utc')`. A security-definer
+      // function cannot know the caller's timezone, so the week has to be the
+      // server's, and the reader has to agree with it: a learner in a positive
+      // offset, early on a Monday morning, is still in Sunday by UTC, and a
+      // local Monday here would have looked for a row neither writer had
+      // created and rendered the zero state over a week's real progress.
+      //
+      // The streak is the opposite case and stays local — see
+      // `useIncrementReviews`. A day boundary is something the learner feels;
+      // a week boundary on a goal card is not.
+      const weekStart = utcWeekStart();
 
       const { data, error } = await supabase
         .from("weekly_goals")
@@ -239,18 +248,58 @@ export function useAddXP() {
   });
 }
 
+/**
+ * Record that a review happened: one toward the weekly goal, and one day on
+ * the streak.
+ *
+ * Both review paths — the curriculum deck (`useSubmitReview`) and the personal
+ * deck (`useReviewQueue`) — already called this after every rating, which is
+ * why the streak is recorded here rather than at either call site. There is no
+ * third place a review can complete.
+ *
+ * The streak had no writer at all until now. Six surfaces read `review_streaks`
+ * — the header pill on every screen, the Majlis welcome, achievements, social,
+ * analytics and notifications — and nothing in the app or the edge functions
+ * ever inserted a row, so every learner's streak read zero permanently and the
+ * `streak_days` achievement branch could not be satisfied.
+ *
+ * The date is the learner's LOCAL day, not the server's. `record_review_day`
+ * takes it as an argument for that reason: a UTC `current_date` ends the day
+ * early for every learner west of Greenwich, which is precisely when a streak
+ * breaks that shouldn't. The function clamps what it is given to a day either
+ * side of its own, so a wrong clock cannot mint a streak.
+ *
+ * `localDate` is the day the REVIEW happened, which is not always the day this
+ * runs. A rating taken offline sits in `reviewQueue` until the connection comes
+ * back, and if that spans local midnight, defaulting to "now" would credit the
+ * streak to the flush rather than to the session — two offline evenings in a
+ * row collapsing into one streak day. `useReviewQueue` passes the queued item's
+ * own timestamp instead. The clamp still applies, so a rating that sat queued
+ * for a week lands on the earliest day the server will accept rather than its
+ * true one; that is the honest limit of letting a client name the date at all.
+ */
 export function useIncrementReviews() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
 
   return useMutation({
-    mutationFn: async () => {
+    mutationFn: async (options?: { localDate?: string }) => {
       if (!user) throw new Error("Not authenticated");
       const { error } = await supabase.rpc("increment_review_count");
       if (error) throw error;
+
+      const { error: streakError } = await supabase.rpc("record_review_day", {
+        _local_date: options?.localDate ?? localDateKey(),
+      });
+      if (streakError) throw streakError;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["weekly-goal"] });
+      // The header pill and the Majlis welcome share this key, so the streak
+      // moves the moment the day's first review lands rather than on the next
+      // full page load.
+      queryClient.invalidateQueries({ queryKey: ["review-streak"] });
+      queryClient.invalidateQueries({ queryKey: ["learning-analytics"] });
     },
   });
 }
@@ -288,7 +337,9 @@ export function useCheckAchievements() {
         .eq("user_id", user.id)
         .gte("repetitions", 1);
 
-      const currentStreak = streak?.current_streak || 0;
+      // The same derivation the display uses, so an achievement cannot be
+      // awarded off a run that ended days ago and was never written down.
+      const currentStreak = effectiveStreak(streak);
 
       for (const achievement of achievements) {
         if (earnedIds.has(achievement.id)) continue;

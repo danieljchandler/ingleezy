@@ -1,3 +1,4 @@
+import { utcWeekStart } from "../../../lib/localDate";
 import {
   MANAGED_ROLES,
   type AppRole,
@@ -45,6 +46,17 @@ const rolesFor = (db: MemoryDb, userId: string | null): AppRole[] =>
 /** Read an arg under either its bare or underscore-prefixed name. */
 const arg = (args: Record<string, unknown>, name: string): unknown =>
   args[`_${name}`] ?? args[name];
+
+/** `YYYY-MM-DD` in UTC, matching how Postgres casts a timestamp to a date. */
+const isoDate = (date: Date): string => date.toISOString().slice(0, 10);
+
+/** The day before a `YYYY-MM-DD`, as another `YYYY-MM-DD`. */
+function dayBefore(day: string): string {
+  const date = new Date(`${day}T00:00:00Z`);
+  date.setUTCDate(date.getUTCDate() - 1);
+  return isoDate(date);
+}
+
 
 export const defaultRpcs: Record<string, RpcHandler> = {
   has_role: ({ db, userId, args }) => {
@@ -139,15 +151,90 @@ export const defaultRpcs: Record<string, RpcHandler> = {
     return true;
   },
 
+  // One toward this week's goal. The real function (20260529150401 section 5)
+  // writes `weekly_goals`, keyed on the Monday of the current UTC week.
+  //
+  // This mirror used to write `review_streaks` instead, inventing a
+  // `reviews_today` column that exists in no migration and no generated type —
+  // `db.raw` hands back the table's array without the column checking the rest
+  // of the emulator does, so nothing objected. It mattered more than a wrong
+  // table usually would: it meant every test saw a `review_streaks` row appear
+  // after a review, which is exactly the behaviour the app did NOT have, and
+  // the missing streak writer stayed invisible behind it.
   increment_review_count: ({ db, userId }) => {
-    const rows = db.raw("review_streaks");
-    let record = rows.find((row) => row.user_id === userId);
+    const rows = db.raw("weekly_goals");
+    const weekStart = utcWeekStart();
+    let record = rows.find(
+      (row) => row.user_id === userId && row.week_start_date === weekStart,
+    );
     if (!record) {
-      record = { user_id: userId, current_streak: 0, longest_streak: 0, reviews_today: 0 };
+      record = {
+        user_id: userId,
+        week_start_date: weekStart,
+        target_reviews: 0,
+        target_xp: 0,
+        completed_reviews: 0,
+        earned_xp: 0,
+      };
       rows.push(record);
     }
-    record.reviews_today = Number(record.reviews_today ?? 0) + 1;
-    return record.reviews_today;
+    record.completed_reviews = Number(record.completed_reviews ?? 0) + 1;
+    return null;
+  },
+
+  // Rolls the caller's streak for one local day. Mirrors
+  // `record_review_day(_local_date date)`: idempotent within a day, extends on
+  // the day after the one on record, restarts otherwise, and never moves the
+  // recorded day backwards.
+  //
+  // The clamp the real function applies to the incoming date is deliberately
+  // NOT mirrored. It exists to stop a client minting a streak, and a test that
+  // wants to stand on a particular day should be able to say so; asserting the
+  // clamp against the real Postgres is migrationReplay's job.
+  record_review_day: ({ db, userId, args }) => {
+    const rows = db.raw("review_streaks");
+    const day = (arg(args, "local_date") as string | undefined) ?? isoDate(new Date());
+
+    let record = rows.find((row) => row.user_id === userId);
+    if (!record) {
+      record = { user_id: userId, current_streak: 0, longest_streak: 0, last_review_date: null };
+      rows.push(record);
+    }
+
+    const last = record.last_review_date as string | null;
+    const next =
+      last === day
+        ? Number(record.current_streak ?? 0)
+        : last === dayBefore(day)
+          ? Number(record.current_streak ?? 0) + 1
+          : 1;
+
+    record.current_streak = next;
+    record.longest_streak = Math.max(Number(record.longest_streak ?? 0), next);
+    record.last_review_date = last !== null && last > day ? last : day;
+    return { ...record };
+  },
+
+  // Targets only — `completed_reviews` and `earned_xp` are the server's to
+  // move, and the real function leaves them alone on conflict.
+  set_weekly_goal: ({ db, userId, args }) => {
+    const rows = db.raw("weekly_goals");
+    const weekStart = utcWeekStart();
+    let record = rows.find(
+      (row) => row.user_id === userId && row.week_start_date === weekStart,
+    );
+    if (!record) {
+      record = {
+        user_id: userId,
+        week_start_date: weekStart,
+        completed_reviews: 0,
+        earned_xp: 0,
+      };
+      rows.push(record);
+    }
+    record.target_reviews = Number(arg(args, "target_reviews") ?? 0);
+    record.target_xp = Number(arg(args, "target_xp") ?? 0);
+    return { ...record };
   },
 
   increment_listen_play_count: ({ db, args }) => {

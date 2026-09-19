@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { getSRSStageByStability } from "@/lib/srsStats";
+import { effectiveStreak, STREAK_COLUMNS } from "@/lib/streak";
 
 export interface AnalyticsData {
   totalWords: number;
@@ -62,7 +63,7 @@ export function useLearningAnalytics() {
           .eq("user_id", user.id),
         supabase
           .from("review_streaks")
-          .select("current_streak, longest_streak")
+          .select(STREAK_COLUMNS)
           .eq("user_id", user.id)
           .maybeSingle(),
         supabase
@@ -261,7 +262,7 @@ export function useLearningAnalytics() {
         newWords,
         totalReviews,
         accuracy,
-        currentStreak: streakRes.data?.current_streak || 0,
+        currentStreak: effectiveStreak(streakRes.data),
         longestStreak: streakRes.data?.longest_streak || 0,
         totalXP: xpRes.data?.total_xp || 0,
         level: xpRes.data?.level || 1,

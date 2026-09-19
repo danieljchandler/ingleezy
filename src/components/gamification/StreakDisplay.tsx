@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Flame } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AR } from "@/lib/strings";
+import { effectiveStreak, STREAK_COLUMNS } from "@/lib/streak";
 
 interface StreakDisplayProps {
   compact?: boolean;
@@ -19,7 +20,7 @@ export function StreakDisplay({ compact = false, className }: StreakDisplayProps
       if (!user) return null;
       const { data } = await supabase
         .from("review_streaks")
-        .select("*")
+        .select(STREAK_COLUMNS)
         .eq("user_id", user.id)
         .maybeSingle();
       return data;
@@ -29,7 +30,10 @@ export function StreakDisplay({ compact = false, className }: StreakDisplayProps
 
   if (!streak) return null;
 
-  const alive = streak.current_streak > 0;
+  // Derived, not read: the row is only written by a review, so a run that ended
+  // yesterday still says so until the next one. See src/lib/streak.ts.
+  const days = effectiveStreak(streak);
+  const alive = days > 0;
 
   if (compact) {
     // Greyed once the run is over, as the full card already does. The pill kept
@@ -52,7 +56,7 @@ export function StreakDisplay({ compact = false, className }: StreakDisplayProps
             alive ? "text-orange-600 dark:text-orange-400" : "text-muted-foreground",
           )}
         >
-          {AR.streak.days(streak.current_streak)}
+          {AR.streak.days(days)}
         </span>
       </div>
     );
@@ -64,17 +68,17 @@ export function StreakDisplay({ compact = false, className }: StreakDisplayProps
         <div className="flex items-center gap-3">
           <div className={cn(
             "w-12 h-12 rounded-full flex items-center justify-center",
-            streak.current_streak > 0 
-              ? "bg-gradient-to-br from-orange-400 to-red-500" 
+            alive
+              ? "bg-gradient-to-br from-orange-400 to-red-500"
               : "bg-muted"
           )}>
             <Flame className={cn(
               "h-6 w-6",
-              streak.current_streak > 0 ? "text-white" : "text-muted-foreground"
+              alive ? "text-white" : "text-muted-foreground"
             )} />
           </div>
           <div>
-            <p className="text-2xl font-bold text-foreground">{streak.current_streak}</p>
+            <p className="text-2xl font-bold text-foreground">{days}</p>
             <p className="text-sm text-muted-foreground">{AR.streak.consecutive}</p>
           </div>
         </div>
