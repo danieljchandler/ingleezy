@@ -27,6 +27,7 @@
 
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { getCorsHeaders } from "../_shared/cors.ts";
+import { isServiceRoleCall } from "../_shared/requireRole.ts";
 import { askBrain } from "../_shared/aiBrain.ts";
 import type { Dialect } from "../_shared/dialectHelpers.ts";
 import { MODEL_IDS } from "../_shared/modelRegistry.ts";
@@ -184,19 +185,30 @@ Deno.serve(async (req) => {
   const sb = admin();
   let videoId = "";
   try {
-    // ── Admin only ──────────────────────────────────────────────────────────
+    // ── Admin, or the pipeline calling itself ──────────────────────────────
+    // ingest-from-library (the content-library bridge) kicks this function
+    // server-to-server under the service-role key, the way Hakiya's
+    // ingest-shared-video kicks its pipeline: there is no user session on
+    // that door. `isServiceRoleCall` is true for that key only, never for the
+    // anon key that ships in the browser bundle.
+    // Forwarded verbatim to download-media further down, which recognises a
+    // service-role bearer as an internal call — so the bridge's own header is
+    // the right thing to pass on, not a user's.
     const auth = req.headers.get("authorization") ?? "";
-    const token = auth.startsWith("Bearer ") ? auth.slice(7) : null;
-    if (!token) return json({ error: "auth_required" }, 401, cors);
-    const { data: userData, error: userErr } = await sb.auth.getUser(token);
-    const userId = userData?.user?.id;
-    if (userErr || !userId) return json({ error: "auth_required" }, 401, cors);
-    const { data: roles } = await sb
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", userId)
-      .eq("role", "admin");
-    if (!roles?.length) return json({ error: "forbidden" }, 403, cors);
+
+    if (!(await isServiceRoleCall(req))) {
+      const token = auth.startsWith("Bearer ") ? auth.slice(7) : null;
+      if (!token) return json({ error: "auth_required" }, 401, cors);
+      const { data: userData, error: userErr } = await sb.auth.getUser(token);
+      const userId = userData?.user?.id;
+      if (userErr || !userId) return json({ error: "auth_required" }, 401, cors);
+      const { data: roles } = await sb
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId)
+        .eq("role", "admin");
+      if (!roles?.length) return json({ error: "forbidden" }, 403, cors);
+    }
 
     const body = await req.json().catch(() => ({}));
     videoId = typeof body.videoId === "string" ? body.videoId : "";
