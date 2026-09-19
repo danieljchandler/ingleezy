@@ -23,6 +23,7 @@ import {
 import { useAiAssistant } from "@/contexts/AiAssistantContext";
 import { toast } from "sonner";
 import { Check, Loader2, MessageSquare, Pencil, Sparkles, Trash2, X } from "lucide-react";
+import { EmptyState } from "@/components/layout/EmptyState";
 
 /**
  * The saved Ask AI conversations. Opening one loads it back into the global
@@ -89,13 +90,13 @@ const SavedChats = () => {
           </div>
         ) : !conversations || conversations.length === 0 ? (
           <Card>
-            <CardContent className="flex flex-col items-center gap-2 py-10 text-center">
-              <MessageSquare className="h-6 w-6 text-muted-foreground" />
-              <p className="text-sm font-medium">ما فيه محادثات محفوظة</p>
-              <p className="max-w-xs text-xs text-muted-foreground">
-                When an Ask AI conversation is worth keeping, tap Save in the chat panel and it
-                will show up here.
-              </p>
+            <CardContent className="p-0">
+              <EmptyState
+                variant="inline"
+                icon={MessageSquare}
+                title="ما فيه محادثات محفوظة"
+                body="لمّا تلقى محادثة مع الذكاء تستاهل الحفظ، المس «احفظ» في لوحة المحادثة وبتلقاها هنا."
+              />
             </CardContent>
           </Card>
         ) : (

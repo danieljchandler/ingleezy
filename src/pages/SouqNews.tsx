@@ -23,6 +23,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { InfoHint } from "@/components/InfoHint";
 import { PAGE_HINTS } from "@/lib/pageHints";
+import { EmptyState } from "@/components/layout/EmptyState";
 
 /**
  * Souq News, flipped: the day's news from the learner's own region, retold in
@@ -162,15 +163,12 @@ const SouqNews = () => {
           ))}
         </div>
       ) : error ? (
-        <div className="text-center py-12">
-          <p className="text-muted-foreground mb-4">تعذّر تحميل الأخبار</p>
-          <Button onClick={() => refetch()}>جرّب مرة ثانية</Button>
-        </div>
+        <EmptyState
+          title="تعذّر تحميل الأخبار"
+          action={<Button onClick={() => refetch()}>جرّب مرة ثانية</Button>}
+        />
       ) : articles && articles.length === 0 ? (
-        <div className="text-center py-12">
-          <Newspaper className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
-          <p className="text-muted-foreground">ما فيه أخبار اليوم. ارجع لنا بعدين!</p>
-        </div>
+        <EmptyState icon={Newspaper} title="ما فيه أخبار اليوم" body="ارجع لنا بعدين!" />
       ) : (
         <div className="space-y-4">
           {articles?.map((article, i) => {

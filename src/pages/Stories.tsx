@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils';
 import { InfoHint } from '@/components/InfoHint';
 import { PAGE_HINTS } from '@/lib/pageHints';
 import { ChevronOpen } from '@/components/shared/DirectionalIcon';
+import { EmptyState } from "@/components/layout/EmptyState";
 
 const DIFFICULTY_COLORS: Record<string, string> = {
   Beginner: 'bg-success/10 text-success border-success/20',
@@ -76,10 +77,7 @@ const Stories = () => {
             ))}
           </div>
         ) : (
-          <div className="text-center py-16">
-            <BookOpen className="h-16 w-16 text-muted-foreground/20 mx-auto mb-4" />
-            <p className="text-muted-foreground">ما فيه قصص بعد. ارجع لنا قريباً!</p>
-          </div>
+          <EmptyState icon={BookOpen} title="ما فيه قصص بعد" body="ارجع لنا قريباً!" />
         )}
       </div>
     </AppShell>

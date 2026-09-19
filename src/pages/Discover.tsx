@@ -4,6 +4,7 @@ import { useDiscoverVideos } from "@/hooks/useDiscoverVideos";
 import { useDiscoverFeed, type FeedItem } from "@/hooks/useDiscoverFeed";
 import type { DiscoverVideo } from "@/hooks/useDiscoverVideos";
 import { AppShell } from "@/components/layout/AppShell";
+import { EmptyState } from "@/components/layout/EmptyState";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { PageCorner } from "@/components/shell/PageCorner";
 import { Input } from "@/components/ui/input";
@@ -253,13 +254,11 @@ const Discover = () => {
               ))}
             </div>
           ) : (
-            <div className="text-center py-16">
-              <Sparkles className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
-              <p className="text-muted-foreground">لا توجد اختيارات مخصصة بعد</p>
-              <p className="text-sm text-muted-foreground/70 mt-1">
-                شاهد بعض الفيديوهات واحفظ مفردات لتشغيل صفحتك المخصصة.
-              </p>
-            </div>
+            <EmptyState
+              icon={Sparkles}
+              title="لا توجد اختيارات مخصصة بعد"
+              body="شاهد بعض الفيديوهات واحفظ مفردات لتشغيل صفحتك المخصصة."
+            />
           )}
         </TabsContent>
 
@@ -327,17 +326,15 @@ const Discover = () => {
               ))}
             </div>
           ) : (
-            <div className="text-center py-16">
-              <Play className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
-              <p className="text-muted-foreground">
-                {justRightOnly ? "لا شيء في نطاقك المريح بعد" : "لم يتم العثور على فيديوهات"}
-              </p>
-              <p className="text-sm text-muted-foreground/70 mt-1">
-                {justRightOnly
+            <EmptyState
+              icon={Play}
+              title={justRightOnly ? "لا شيء في نطاقك المريح بعد" : "لم يتم العثور على فيديوهات"}
+              body={
+                justRightOnly
                   ? "احفظ مزيداً من الكلمات، أو أوقف الفلتر لتتصفح كل شيء."
-                  : "عد لاحقاً لمحتوى جديد"}
-              </p>
-            </div>
+                  : "عد لاحقاً لمحتوى جديد"
+              }
+            />
           )}
         </TabsContent>
       </Tabs>
