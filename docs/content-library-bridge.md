@@ -1,6 +1,8 @@
 # The content library bridge — Ingleezy side
 
-**Status:** design, not built. Written 2026-09-19.
+**Status:** built. Written 2026-09-19; this repo's half is
+`supabase/functions/ingest-from-library`, tested in
+`supabase/functions/_test/ingest_from_library_test.ts`.
 
 A third app (working name **Maktaba**, مكتبة) is planned: a standalone content
 library holding researched and forwarded material — TikToks, YouTube links, X
@@ -31,9 +33,29 @@ Maktaba ──dispatch-item──▶ ingest-from-library ──▶ discover_vide
 Maktaba ◀──dispatch-callback───────────────────── pg_net trigger
 ```
 
-## What Ingleezy needs
+## What shipped
 
-### 1. Port `_shared/requireRole.ts` from Hikaya — this is the blocker
+| Piece | Where |
+| --- | --- |
+| Shared-secret auth | `_shared/requireRole.ts`, ported wholesale from Hakiya |
+| The bridge | `supabase/functions/ingest-from-library` (`verify_jwt = false`) |
+| Pipeline door | `process-english-video` now also accepts a service-role call |
+| Schema | `supabase/migrations/20260919120000_library_bridge.sql` |
+| Tests | `supabase/functions/_test/ingest_from_library_test.ts` |
+
+Two things to do before the button works end to end:
+
+1. **Apply `20260919120000_library_bridge.sql` to the live project** — see the
+   warning below. `typesDrift` pins the three columns as known drift until a
+   regeneration picks them up.
+2. **Set the secrets**: `LIBRARY_BRIDGE_SECRET` (the same value the library
+   holds as `INGLEEZY_BRIDGE_SECRET`) and `LIBRARY_BRIDGE_USER_ID`, the
+   account new rows are attributed to. Without the latter the bridge answers
+   503 rather than attributing content to an id that does not exist.
+
+## What it needed
+
+### 1. Port `_shared/requireRole.ts` from Hikaya — this was the blocker
 
 Ingleezy has **no `_shared/requireRole.ts`**. Its content-writing functions do
 inline `user_roles` lookups (see `sync-hakiya-videos`), which works for a user
@@ -54,7 +76,7 @@ Port the module wholesale rather than writing a one-off check. Hikaya's
 `SOCIAL_HARVEST_SECRET`), so it is proven, and porting it also gives Ingleezy
 `requireContentManager` for the inline checks it currently repeats.
 
-### 2. `ingest-from-library` (new function)
+### 2. `ingest-from-library`
 
 ```ts
 // POST /functions/v1/ingest-from-library
@@ -112,19 +134,26 @@ made it.
 > `supabase db push` with a token) and let the regeneration carry the columns
 > — and while you are there, apply the `source` one too.
 
-### 4. `dispatch-callback` trigger
+### 4. Status: polled, not pushed
 
-A trigger on `discover_videos.transcription_status` that, for rows carrying a
-`library_item_id`, `pg_net`-POSTs `{ library_item_id, target: 'ingleezy',
-remote_id, status, error }` to the library's callback with the same
-`x-library-secret`. No pipeline code changes.
+The design sketched a `pg_net` trigger POSTing to a callback in the library.
+What shipped is the other direction: the library's `dispatch-status` asks
+`ingest-from-library` with `{ action: "status", remote_id }`, and gets back
+the transcription status plus, once complete, the transcript's **English**
+lines for the library's own search index.
+
+Polling won because it keeps this app ignorant of the library's address:
+nothing here needs a `MAKTABA_CALLBACK_URL`, a second secret, or the `pg_net`
+extension, and a library that is down is a stale row rather than a failed
+trigger nobody sees. A trigger can be added later without changing this
+function — the status action stays useful either way.
 
 ### 5. Secrets
 
 | Secret | Used by |
 | --- | --- |
-| `LIBRARY_BRIDGE_SECRET` | `ingest-from-library` inbound, and the callback trigger outbound. Same value both directions. |
-| `MAKTABA_CALLBACK_URL` | the trigger's destination |
+| `LIBRARY_BRIDGE_SECRET` | `ingest-from-library`, both the ingest and status actions. Same value as the library's `INGLEEZY_BRIDGE_SECRET`. |
+| `LIBRARY_BRIDGE_USER_ID` | the account bridged rows are attributed to (`created_by`) |
 
 ## Why English content routes here at all
 
