@@ -20,6 +20,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
+import { EmptyState } from "@/components/layout/EmptyState";
 
 const FORMAT_META: Record<ListenFormat, { label: string; icon: any; blurb: string }> = {
   podcast: { label: "بودكاست", icon: Headphones, blurb: "حوار بين مقدّمين" },
@@ -93,9 +94,12 @@ const Listen = () => {
               <div className="flex justify-center py-10"><Loader2 className="h-5 w-5 animate-spin text-primary" /></div>
             )}
             {!isLoading && (!episodes || episodes.length === 0) && (
-              <Card className="p-6 text-center space-y-2">
-                <p className="text-sm text-muted-foreground">ما فيه حلقات بعد لـ{activeDialect}.</p>
-                <p className="text-xs text-muted-foreground">كن أول واحد — افتح تبويب «أنشئ».</p>
+              <Card>
+                <EmptyState
+                  variant="inline"
+                  title={`ما فيه حلقات بعد لـ${activeDialect}`}
+                  body="كن أول واحد — افتح تبويب «أنشئ»."
+                />
               </Card>
             )}
             <div className="space-y-2">

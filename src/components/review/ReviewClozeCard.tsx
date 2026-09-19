@@ -118,7 +118,7 @@ export const ReviewClozeCard = ({
   };
 
   return (
-    <div className="rounded-3xl bg-card border border-[#2C3B74]/15 p-7 text-center shadow-elegant">
+    <div className="rounded-3xl bg-card border border-primary/15 p-7 text-center shadow-elegant">
       <div className="flex items-center justify-center gap-2 mb-6">
         <span className="text-[10px] uppercase tracking-[0.18em] font-semibold text-muted-foreground">
           أكمل الكلمة الناقصة
@@ -131,9 +131,9 @@ export const ReviewClozeCard = ({
         <span
           className={cn(
             "inline-block min-w-[5.5rem] mx-1.5 px-3 py-1 rounded-lg border-2 border-dashed align-middle transition-colors",
-            selected == null && "border-primary/50 bg-primary/8 text-primary/60",
-            selected != null && selected === wordArabic && "border-green-600 bg-green-500/15 text-green-700 border-solid",
-            selected != null && selected !== wordArabic && "border-red-600 bg-red-500/15 text-red-700 border-solid"
+            selected == null && "border-primary/50 bg-primary/10 text-primary/60",
+            selected != null && selected === wordArabic && "border-success bg-success/15 text-success border-solid",
+            selected != null && selected !== wordArabic && "border-destructive bg-destructive/15 text-destructive border-solid"
           )}
         >
           {selected ?? "___"}
@@ -174,18 +174,18 @@ export const ReviewClozeCard = ({
               onClick={() => handleSelect(opt)}
               disabled={selected != null}
               className={cn(
-                "font-english rounded-xl border-2 border-[#2C3B74]/15 bg-card px-3 min-h-[56px] text-xl transition-all",
+                "font-english rounded-xl border-2 border-primary/15 bg-card px-3 min-h-[56px] text-xl transition-all",
                 "hover:border-primary/40 hover:bg-primary/5 hover:-translate-y-0.5",
                 "disabled:hover:translate-y-0",
-                reveal && isTarget && "border-green-600 bg-green-500/12",
-                reveal && isPicked && !isTarget && "border-red-600 bg-red-500/12",
+                reveal && isTarget && "border-success bg-success/15",
+                reveal && isPicked && !isTarget && "border-destructive bg-destructive/15",
                 reveal && !isTarget && !isPicked && "opacity-50",
               )}
             >
               <span className="inline-flex items-center gap-1.5">
                 {opt}
-                {reveal && isTarget && <Check className="h-4 w-4 text-green-600" />}
-                {reveal && isPicked && !isTarget && <X className="h-4 w-4 text-red-600" />}
+                {reveal && isTarget && <Check className="h-4 w-4 text-success" />}
+                {reveal && isPicked && !isTarget && <X className="h-4 w-4 text-destructive" />}
               </span>
             </button>
           );

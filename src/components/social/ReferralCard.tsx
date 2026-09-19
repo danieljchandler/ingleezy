@@ -137,7 +137,7 @@ export function ReferralCard() {
               {info.code}
             </code>
             <Button size="icon" variant="outline" onClick={copy} aria-label="انسخ الدعوة">
-              {copied ? <Check className="h-4 w-4 text-emerald-500" /> : <Copy className="h-4 w-4" />}
+              {copied ? <Check className="h-4 w-4 text-success" /> : <Copy className="h-4 w-4" />}
             </Button>
             <Button size="icon" variant="outline" onClick={share} aria-label="شارك الدعوة">
               <Share2 className="h-4 w-4" />

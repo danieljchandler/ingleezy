@@ -151,7 +151,7 @@ describe("DailySoundGoalRing — once the goal is met", () => {
   it("turns the border amber", () => {
     masteredToday(3);
     const { container } = render(<DailySoundGoalRing />);
-    expect((container.firstChild as HTMLElement).className).toContain("border-amber-500/60");
+    expect((container.firstChild as HTMLElement).className).toContain("border-accent/60");
   });
 
   it("stays complete when the goal is beaten", () => {

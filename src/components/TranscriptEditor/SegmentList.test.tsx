@@ -225,11 +225,11 @@ describe("SegmentList — the gap between two segments", () => {
 
   it("colours an overlap red and a long gap amber", () => {
     const { container, unmount } = gapBetween(2, 1.4);
-    expect(container.querySelector(".text-red-600")).toBeInTheDocument();
+    expect(container.querySelector(".text-destructive")).toBeInTheDocument();
     unmount();
 
     const second = gapBetween(1, 4);
-    expect(second.container.querySelector(".text-amber-600")).toBeInTheDocument();
+    expect(second.container.querySelector(".text-accent")).toBeInTheDocument();
   });
 
   it("says nothing about an overlap of zero", () => {
@@ -241,7 +241,7 @@ describe("SegmentList — the gap between two segments", () => {
     const { container } = gapBetween(0.1 + 0.2, 0.3);
     expect(screen.queryByText(/overlap/)).not.toBeInTheDocument();
     expect(screen.getByText("gap 0.00s")).toBeInTheDocument();
-    expect(container.querySelector(".text-red-600")).toBeNull();
+    expect(container.querySelector(".text-destructive")).toBeNull();
   });
 
   it("still reports an overlap big enough to hear", () => {
@@ -249,7 +249,7 @@ describe("SegmentList — the gap between two segments", () => {
     // second is a real defect and still has to show.
     const { container } = gapBetween(1.0, 0.9);
     expect(screen.getByText("⚠ overlap 0.10s")).toBeInTheDocument();
-    expect(container.querySelector(".text-red-600")).toBeInTheDocument();
+    expect(container.querySelector(".text-destructive")).toBeInTheDocument();
   });
 });
 

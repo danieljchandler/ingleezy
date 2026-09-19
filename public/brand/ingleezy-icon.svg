@@ -2,32 +2,44 @@
   <!--
     The Ingleezy mark.
 
-    A speech bubble on an Indigo Deep badge, and inside the bubble an
-    exclamation mark whose dot is a hamza. That detail is the whole idea in one
-    glyph: an English punctuation mark finished with an Arabic letter, which is
-    exactly what the app is. So it is drawn large enough to survive being
-    rasterised to 16px by scripts/render-brand-icons.mjs.
+    Two speech bubbles that overlap, tails pointing opposite ways: one down and
+    to the left for English, one down and to the right for Arabic. The app in
+    one shape. Where the two overlap the colour deepens, which is the point of
+    the whole product: the two languages are not side by side, they are on top
+    of each other.
 
-    Two flat fills and no gradients. This file is the favicon, and a gradient
-    at 16px is just mud. The colour is Indigo Deep (#2C3B74), the primary token
-    in src/index.css.
+    The tails are what make it a conversation rather than a stack of cards, so
+    they are drawn long and wide enough to survive being rasterised to 16px by
+    scripts/render-brand-icons.mjs. Check any edit at that size before shipping
+    it; a tail that reads at 512 can vanish at 16.
 
-    Keep the badge inset at 40px in the 512 box: it sets the mark's optical
-    size everywhere IngleezyLogo renders it, so changing it resizes the logo
-    app-wide. Keep comment text free of doubled hyphens too, which XML forbids
-    inside a comment: browsers parse this file as XML when it is loaded through
-    an img tag, and one stray pair makes the whole logo fail to render.
+    What this replaces: a white circle holding an exclamation mark, which read
+    as an error badge at every size, and whose one meaningful detail (a hamza
+    standing in for the dot) was invisible below about 64px.
+
+    Three flat fills and no gradients. This file is the favicon, and a gradient
+    at 16px is just mud. The colours are Gold (#E5A917), Firoza (#135F68) and the overlap
+    (#09474E), matching the accent, primary and olive tokens in
+    src/index.css.css.
+
+    Keep comment text free of doubled hyphens, which XML forbids inside a
+    comment: browsers parse this file as XML when it is loaded through an img
+    tag, and one stray pair makes the whole logo fail to render.
   -->
-  <!-- The badge. -->
-  <path fill="#2C3B74" d="M122.2 471.6C101.3 469.5 82 460.2 66.5 444.7C52.9 431.1 44.4 414.8 41.2 395.8C40.1 389.2 40.1 394.1 40.1 255.6C40.1 130.4 40.2 123.3 40.6 120.2C43.2 101.9 49.7 86.8 60.9 73.3C64 69.6 70.2 63.5 74 60.4C87.5 49.6 101.9 43.3 119.7 40.6C122.5 40.2 130.9 40.1 254.3 40.1C399.4 40 389.2 39.9 398 41.6C411.6 44.3 424.5 50 435.7 58.5C443.2 64.1 451.2 72.6 456.4 80.2C465.2 93.1 470.5 108.3 471.7 124C471.9 126.6 472 165.3 471.9 258.6C471.9 381.4 471.8 389.8 471.4 392.7C470.2 400.7 468.5 407.7 466.2 413.4C461.2 425.8 454.9 435.3 445.6 444.6C431.7 458.5 415.2 467.3 396.6 470.7C388.8 472.1 395.7 472 255.5 472C151.5 471.9 124.9 471.9 122.2 471.6Z"/>
+  <defs>
+    <clipPath id="ingleezy-english">
+      <path d="M112 56 H248 A56 56 0 0 1 304 112 V208 A56 56 0 0 1 248 264 H112 A56 56 0 0 1 56 208 V112 A56 56 0 0 1 112 56 Z M104 250 L54 336 L150 250 Z"/>
+    </clipPath>
+  </defs>
 
-  <!-- The bubble: a near circle with the tail dropped from the bottom start
-       edge, so it points back into the badge rather than off it. -->
-  <path fill="#FFFFFF" d="M173.7 397.5L173.7 364.2L171.8 362.9C159.9 355.1 146.7 342.4 137.1 329.7C121.7 309.2 111.9 284.9 109 260.2C108 251.8 107.7 241.1 108.3 233.6C109.9 212.7 115.7 192.7 125 175.4C135.3 156.4 149.1 140.3 166.2 127.4C196.7 104.4 235 94 272.9 98.3C303.1 101.7 330.8 113.9 354 134C358.3 137.7 366.3 145.9 369.9 150.2C388 171.9 399.1 197 402.8 224.5C403.7 231.7 404 235.7 404 243.6C404 253.3 403.3 260.8 401.6 269.8C394.3 308.2 371.2 342.6 337.9 364.5C317.6 377.9 295.2 386 271.2 388.5C265.8 389.1 252.2 389.3 246.7 388.9C242.2 388.6 235 387.8 232.6 387.4L231.2 387.1L222.9 393.3C218.4 396.8 211 402.4 206.4 405.9C201.8 409.4 193.3 416 187.4 420.4C181.6 424.9 176.1 429.1 175.2 429.7L173.7 430.9L173.7 397.5Z"/>
+  <!-- English bubble, tail down and to the left. -->
+  <path fill="#E5A917" d="M112 56 H248 A56 56 0 0 1 304 112 V208 A56 56 0 0 1 248 264 H112 A56 56 0 0 1 56 208 V112 A56 56 0 0 1 112 56 Z M104 250 L54 336 L150 250 Z"/>
 
-  <!-- The exclamation, tapered so it reads as drawn rather than as a rule. -->
-  <path fill="#2C3B74" d="M243.5 259.4C243.3 258.3 242.3 243.2 240.3 214.6C239.4 201.7 238.6 190.2 237.1 170.2C236.8 165.2 236.2 157.2 235.8 152.2C235.5 147.3 235.1 142.7 235 142L234.9 140.7L256 140.7L277.1 140.7L277 142.3C276.6 145.5 270.6 229.1 269.3 248.6C268.9 254.2 268.6 259.2 268.5 259.6L268.4 260.5L256 260.5L243.6 260.5L243.5 259.4Z"/>
+  <!-- Arabic bubble, tail down and to the right. -->
+  <path fill="#135F68" d="M264 192 H400 A56 56 0 0 1 456 248 V344 A56 56 0 0 1 400 400 H264 A56 56 0 0 1 208 344 V248 A56 56 0 0 1 264 192 Z M362 386 L412 472 L316 386 Z"/>
 
-  <!-- The hamza standing in for the dot. -->
-  <path fill="#2C3B74" d="M229.4 341.4C229.7 336.9 230.6 333.7 232.6 330.5C233.8 328.4 236.3 325.7 238.7 324.1C239.8 323.3 240.7 322.5 240.7 322.5C240.7 322.4 239.9 321.9 238.9 321.3C234.8 319.1 232.4 316.8 230.8 313.5C230 311.8 230 311.7 230 308.2C230 304.9 230.1 304.5 230.9 302.2C233.6 294.2 239.5 286.5 245.9 282.2C246.6 281.7 248.3 280.8 249.5 280.3C254.9 277.7 260.4 277.5 264.5 279.7C267.1 281.1 269.6 284.3 270.5 287.3C270.8 288.2 270.8 288.5 270.2 289.5C269 292 264.6 299.6 264 300.3L263.5 300.9L262.2 299.1C260.8 296.8 259 295.2 257.4 294.4C256.3 293.9 255.7 293.8 253.2 293.9C250.7 293.9 250.1 294 248.4 294.6C247.3 295 245.8 295.7 245.1 296.2C243.5 297.2 241.8 299 241.6 299.9C241.3 301 242.4 302.8 244.5 304.7C245.9 306 247.1 306.8 249.3 307.8C251 308.7 253.3 309.5 254.7 309.9C259.6 311.1 258.9 311.2 267.9 308.3C276.4 305.5 282.3 303.8 282.5 304.1C282.6 304.2 281.5 307.7 280.1 311.9L277.6 319.5L272.3 321.3C264.5 323.8 256.4 327.1 250.1 330.2C242.1 334.2 237.2 337.4 232.3 341.7C230.9 343 229.7 344.1 229.5 344.1C229.4 344.1 229.4 342.9 229.4 341.4Z"/>
+  <!-- Where they overlap. -->
+  <g clip-path="url(#ingleezy-english)">
+    <path fill="#09474E" d="M264 192 H400 A56 56 0 0 1 456 248 V344 A56 56 0 0 1 400 400 H264 A56 56 0 0 1 208 344 V248 A56 56 0 0 1 264 192 Z"/>
+  </g>
 </svg>

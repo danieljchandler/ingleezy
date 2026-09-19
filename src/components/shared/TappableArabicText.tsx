@@ -306,8 +306,8 @@ export const TappableArabicText = ({
                 className={cn(
                   "cursor-pointer rounded px-0.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
                   marked
-                    ? "bg-yellow-300/70 text-foreground dark:bg-yellow-500/40"
-                    : "hover:bg-yellow-200/40"
+                    ? "bg-accent/70 text-foreground dark:bg-accent/40"
+                    : "hover:bg-accent/40"
                 )}
               >
                 {word}
@@ -409,8 +409,8 @@ export const TappableArabicText = ({
                       );
                       if (!match?.msa_form) return null;
                       return (
-                        <div className="pt-1 border-t border-border bg-[#2C3B74]/5 -mx-3 px-3 py-2">
-                          <p className="text-[10px] font-medium uppercase tracking-wide text-[#2C3B74]">
+                        <div className="pt-1 border-t border-border bg-primary/5 -mx-3 px-3 py-2">
+                          <p className="text-[10px] font-medium uppercase tracking-wide text-primary">
                             MSA · الفصحى
                           </p>
                           <p className="font-arabic text-sm text-foreground" dir="rtl">

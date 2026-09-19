@@ -309,8 +309,8 @@ export default function PlacementQuiz() {
                     const isCorrect = idx === currentQuestion.correct_index;
                     let borderClass = "border-border bg-card hover:border-primary/40";
                     if (showFeedback) {
-                      if (isCorrect) borderClass = "border-green-500 bg-green-50 dark:bg-green-950/30";
-                      else if (isSelected && !isCorrect) borderClass = "border-destructive bg-red-50 dark:bg-red-950/30";
+                      if (isCorrect) borderClass = "border-success bg-success/15 dark:bg-success/30";
+                      else if (isSelected && !isCorrect) borderClass = "border-destructive bg-destructive/15 dark:bg-destructive/30";
                       else borderClass = "border-border bg-card opacity-50";
                     } else if (isSelected) {
                       borderClass = "border-primary bg-primary/5";
@@ -338,7 +338,7 @@ export default function PlacementQuiz() {
                           )}
                         </div>
                         {showFeedback && isCorrect && (
-                          <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" />
+                          <CheckCircle2 className="h-5 w-5 text-success shrink-0" />
                         )}
                         {showFeedback && isSelected && !isCorrect && (
                           <XCircle className="h-5 w-5 text-destructive shrink-0" />
@@ -386,7 +386,7 @@ export default function PlacementQuiz() {
                     {results.strengths.map((s) => (
                       <span
                         key={s}
-                        className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 text-xs px-2.5 py-1 rounded-full capitalize"
+                        className="bg-success/15 text-success dark:bg-success/30 dark:text-success text-xs px-2.5 py-1 rounded-full capitalize"
                       >
                         {s.replace("_", " ")}
                       </span>
@@ -402,7 +402,7 @@ export default function PlacementQuiz() {
                     {results.weaknesses.map((w) => (
                       <span
                         key={w}
-                        className="bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300 text-xs px-2.5 py-1 rounded-full capitalize"
+                        className="bg-accent/15 text-accent-ink dark:bg-accent/30 dark:text-accent-ink text-xs px-2.5 py-1 rounded-full capitalize"
                       >
                         {w.replace("_", " ")}
                       </span>

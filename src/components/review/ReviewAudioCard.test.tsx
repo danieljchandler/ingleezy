@@ -72,19 +72,17 @@ type Props = Partial<Parameters<typeof ReviewAudioCard>[0]>;
  */
 function render(over: Props = {}) {
   localStorage.setItem("ingleezy_dialect_module", "Gulf");
-  const onReveal = vi.fn();
   const harness = renderWithProviders(
     <ReviewAudioCard
       wordArabic={WORD}
       wordEnglish="market"
       showAnswer={false}
-      onReveal={onReveal}
       {...over}
     />,
     { persona: "free" },
   );
   cleanup = harness.cleanup;
-  return { ...harness, onReveal };
+  return harness;
 }
 
 const speaker = () => screen.getByRole("button", { name: "أعد تشغيل الكلمة" });
@@ -102,7 +100,6 @@ describe("posing the question", () => {
     // A written word on screen turns a listening card into a reading card.
     expect(screen.queryByText(WORD)).toBeNull();
     expect(screen.queryByText("market")).toBeNull();
-    expect(screen.getByRole("button", { name: "أظهر الإجابة" })).toBeInTheDocument();
   });
 
   it("shows both halves once the learner reveals", () => {
@@ -111,16 +108,16 @@ describe("posing the question", () => {
     // The English word the learner just heard leads; the Arabic gloss follows.
     expect(screen.getByText("market")).toHaveClass("font-english");
     expect(screen.getByText(WORD)).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "أظهر الإجابة" })).toBeNull();
   });
 
-  it("asks the page to reveal rather than deciding itself", () => {
-    const { onReveal } = render();
+  it("offers no way to reveal itself", () => {
+    render();
 
-    fireEvent.click(screen.getByRole("button", { name: "أظهر الإجابة" }));
-
-    // The review page gates rating on having revealed, so it owns the state.
-    expect(onReveal).toHaveBeenCalled();
+    // Revealing is the review page's single primary action now, sitting in the
+    // thumb zone next to the rating it unlocks. This card takes `showAnswer`
+    // and renders it; a second reveal control in here would be a second way to
+    // do the one thing the session is gated on.
+    expect(screen.queryByRole("button", { name: /أظهر/ })).toBeNull();
   });
 });
 
@@ -154,7 +151,6 @@ describe("the audio", () => {
         wordEnglish="market"
         audioUrl={RECORDING}
         showAnswer
-        onReveal={vi.fn()}
       />,
     );
 
@@ -172,7 +168,6 @@ describe("the audio", () => {
         wordEnglish="house"
         audioUrl="https://audio.test/bayt.mp3"
         showAnswer={false}
-        onReveal={vi.fn()}
       />,
     );
 
@@ -190,7 +185,6 @@ describe("the audio", () => {
         audioUrl="https://audio.test/souq-eg.mp3"
         dialect="Egyptian"
         showAnswer={false}
-        onReveal={vi.fn()}
       />,
     );
 
@@ -265,11 +259,15 @@ describe("when there is nothing to hear", () => {
     expect(screen.getByText("لا يتوفر صوت لهذه الكلمة")).toBeInTheDocument();
   });
 
-  it("can still be revealed, so the learner is not stuck", () => {
-    const { onReveal } = render();
+  it("still shows the answer once the page reveals it, so the learner is not stuck", () => {
+    render({ audioUrl: "", showAnswer: true });
 
-    fireEvent.click(screen.getByRole("button", { name: "أظهر الإجابة" }));
-
-    expect(onReveal).toHaveBeenCalled();
+    // A card with nothing to play must not be a dead end. The reveal control
+    // lives on the review page and is rendered whatever the card is, so the
+    // guarantee that it is reachable is asserted there, in review.spec.ts;
+    // what this card owes is to render the answer when told to, even when the
+    // audio it is built around never arrived.
+    expect(screen.getByText("market")).toBeInTheDocument();
+    expect(screen.getByText(WORD)).toBeInTheDocument();
   });
 });

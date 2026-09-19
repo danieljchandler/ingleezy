@@ -169,7 +169,7 @@ const SavedTranslations = () => {
                     )}
                   </div>
                   {s.note && (
-                    <div className="rounded-md bg-amber-50 border border-amber-200 p-2.5 flex gap-2 text-xs text-amber-900 dark:bg-amber-950/30 dark:border-amber-900/40 dark:text-amber-200">
+                    <div className="rounded-md bg-accent/15 border border-accent/15 p-2.5 flex gap-2 text-xs text-accent-ink dark:bg-accent/30 dark:border-accent/40 dark:text-accent-ink/15">
                       <Info className="h-3.5 w-3.5 mt-0.5 shrink-0" />
                       <p dir="rtl" className="font-arabic flex-1">{s.note}</p>
                     </div>

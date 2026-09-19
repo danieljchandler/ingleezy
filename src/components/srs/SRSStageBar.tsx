@@ -17,9 +17,9 @@ const STAGE_META: Array<{ key: keyof SRSStageBarProps["stages"]; label: string; 
   { key: "new", label: "New", color: "bg-muted-foreground/30" },
   { key: "learning", label: "Learning", color: "bg-blue-500" },
   { key: "familiar", label: "Familiar", color: "bg-cyan-500" },
-  { key: "practiced", label: "Practiced", color: "bg-emerald-500" },
-  { key: "strong", label: "Strong", color: "bg-lime-500" },
-  { key: "mastered", label: "Mastered", color: "bg-yellow-500" },
+  { key: "practiced", label: "Practiced", color: "bg-success" },
+  { key: "strong", label: "Strong", color: "bg-success" },
+  { key: "mastered", label: "Mastered", color: "bg-accent" },
 ];
 
 export const SRSStageBar = ({ stages, total, className }: SRSStageBarProps) => {

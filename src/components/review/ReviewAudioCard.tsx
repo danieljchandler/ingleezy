@@ -19,7 +19,6 @@ interface Props {
   dialect?: string | null;
   /** Revealed state is owned by the review page so rating can gate on it. */
   showAnswer: boolean;
-  onReveal: () => void;
   /**
    * Called once with the synthesised blob the first time TTS runs, so the
    * caller can persist it and skip the synthesis on later reviews.
@@ -41,7 +40,6 @@ export const ReviewAudioCard = ({
   audioUrl,
   dialect,
   showAnswer,
-  onReveal,
   onAudioGenerated,
 }: Props) => {
   const { activeDialect } = useDialect();
@@ -132,12 +130,7 @@ export const ReviewAudioCard = ({
             {wordArabic}
           </p>
         </div>
-      ) : (
-        <Button variant="ghost" size="sm" onClick={onReveal} className="gap-1.5 text-muted-foreground">
-          <Eye className="h-4 w-4" />
-          أظهر الإجابة
-        </Button>
-      )}
+      ) : null}
 
       {/* Without a recorded clip and without TTS there is nothing to hear, so
           offer a retry rather than stranding the learner on a silent card. */}

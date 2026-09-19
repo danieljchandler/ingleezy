@@ -154,7 +154,7 @@ const FriendCard = ({
             {friend.current_streak > 0 && (
               <>
                 <span>·</span>
-                <span className="flex items-center gap-0.5 text-orange-500">
+                <span className="flex items-center gap-0.5 text-accent">
                   <Flame className="h-3 w-3" />
                   {friend.current_streak}
                 </span>
@@ -468,7 +468,7 @@ const CreateChallengeDialog = ({
                   : "border-border hover:border-primary/40"
               )}
             >
-              <Zap className="h-5 w-5 text-yellow-500 mb-1" />
+              <Zap className="h-5 w-5 text-accent mb-1" />
               <p className="font-semibold text-sm">سباق النقاط</p>
               <p className="text-xs text-muted-foreground">من يبلغ النقاط أولاً يفوز</p>
             </button>

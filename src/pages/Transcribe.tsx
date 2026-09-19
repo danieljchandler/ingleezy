@@ -1307,10 +1307,10 @@ const Transcribe = () => {
                       <Badge
                         variant="outline"
                         className={`text-xs ${
-                          transcriptResult.difficulty === 'Beginner' ? 'border-green-500 text-green-600' :
-                          transcriptResult.difficulty === 'Intermediate' ? 'border-yellow-500 text-yellow-600' :
-                          transcriptResult.difficulty === 'Advanced' ? 'border-orange-500 text-orange-600' :
-                          'border-red-500 text-red-600'
+                          transcriptResult.difficulty === 'Beginner' ? 'border-success text-success' :
+                          transcriptResult.difficulty === 'Intermediate' ? 'border-accent text-accent' :
+                          transcriptResult.difficulty === 'Advanced' ? 'border-accent text-accent' :
+                          'border-destructive text-destructive'
                         }`}
                       >
                         {transcriptResult.difficulty}

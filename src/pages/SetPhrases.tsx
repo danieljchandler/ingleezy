@@ -21,10 +21,10 @@ const SetPhrases = () => {
       <PageCorner />
       <h1 className="text-2xl font-bold mt-4 mb-4 inline-flex items-center gap-2">عبارات جاهزة <InfoHint {...PAGE_HINTS["set-phrases"]} size="md" /></h1>
       <div className="space-y-4">
-        <Card className="p-4 bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border-emerald-500/30">
+        <Card className="p-4 bg-gradient-to-br from-success/10 to-teal-500/10 border-success/30">
           <div className="flex items-start gap-3">
-            <div className="w-10 h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center shrink-0">
-              <MessageCircle className="h-5 w-5 text-emerald-700 dark:text-emerald-300" />
+            <div className="w-10 h-10 rounded-lg bg-success/20 flex items-center justify-center shrink-0">
+              <MessageCircle className="h-5 w-5 text-success" />
             </div>
             <div className="flex-1">
               <h2 className="font-semibold">تمرّن على عبارات إنجليزية لمواقف حقيقية</h2>
@@ -69,13 +69,13 @@ const SetPhrases = () => {
                 <button
                   key={o.id}
                   onClick={() => navigate(`/set-phrases/practice?occasion=${o.id}`)}
-                  className="p-4 rounded-xl bg-card border border-border text-left hover:border-emerald-500/40 active:scale-[0.98] transition"
+                  className="p-4 rounded-xl bg-card border border-border text-left hover:border-success/40 active:scale-[0.98] transition"
                 >
                   <p className="font-semibold text-sm">{o.name}</p>
                   {o.name_arabic && (
                     <p className="text-xs text-muted-foreground mt-1" dir="rtl">{o.name_arabic}</p>
                   )}
-                  <div className="flex items-center justify-end mt-2 text-xs text-emerald-600">
+                  <div className="flex items-center justify-end mt-2 text-xs text-success">
                     Practice <ArrowRight className="h-3 w-3 ms-1" />
                   </div>
                 </button>

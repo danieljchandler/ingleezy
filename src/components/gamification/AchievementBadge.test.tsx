@@ -56,12 +56,12 @@ describe("AchievementBadge — earned and unearned", () => {
 
   it("gives an earned one a gold rim", () => {
     const { container } = render(<AchievementBadge achievement={anAchievement()} earned />);
-    expect(container.querySelector(".border-amber-400")).toBeInTheDocument();
+    expect(container.querySelector(".border-accent")).toBeInTheDocument();
   });
 
   it("leaves an unearned one a plain rim", () => {
     const { container } = render(<AchievementBadge achievement={anAchievement()} />);
-    expect(container.querySelector(".border-amber-400")).toBeNull();
+    expect(container.querySelector(".border-accent")).toBeNull();
     expect(container.querySelector(".border-muted")).toBeInTheDocument();
   });
 
@@ -132,7 +132,7 @@ describe("AchievementBadge — when it was earned", () => {
     // silently dropping the XP line, making an earned achievement look worth
     // nothing.
     const { container } = render(<AchievementBadge achievement={anAchievement()} earned />);
-    expect(container.querySelector(".border-amber-400")).toBeInTheDocument();
+    expect(container.querySelector(".border-accent")).toBeInTheDocument();
     expect(screen.getByText("+50 XP")).toBeInTheDocument();
   });
 

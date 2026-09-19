@@ -166,7 +166,7 @@ const NativeFeedback = () => {
           <div key={request.id} className="rounded-xl border border-border bg-card p-4">
             <div className="mb-2 flex items-center gap-2">
               {request.status === "answered" ? (
-                <Badge className="gap-1 bg-emerald-600 text-white"><CheckCircle2 className="h-3 w-3" />مُجاب</Badge>
+                <Badge className="gap-1 bg-success text-white"><CheckCircle2 className="h-3 w-3" />مُجاب</Badge>
               ) : request.status === "declined" ? (
                 <Badge variant="outline" className="gap-1"><Undo2 className="h-3 w-3" />مُسترد</Badge>
               ) : (
@@ -178,8 +178,8 @@ const NativeFeedback = () => {
             </div>
             <p dir="auto" className="text-sm">{request.text}</p>
             {request.response_text && (
-              <div className="mt-3 rounded-lg bg-emerald-500/10 p-3">
-                <p className="mb-1 text-xs font-medium text-emerald-700 dark:text-emerald-400">
+              <div className="mt-3 rounded-lg bg-success/10 p-3">
+                <p className="mb-1 text-xs font-medium text-success">
                   صيغة الناطق الأصلي
                 </p>
                 <p dir="auto" className="text-sm">{request.response_text}</p>

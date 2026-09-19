@@ -166,13 +166,13 @@ const WriteTab = () => {
         <div className="space-y-3 rounded-xl border border-border bg-card p-4">
           <p className="text-sm font-medium">{review.verdict_arabic}</p>
 
-          <div className="rounded-lg bg-emerald-500/10 px-4 py-3">
+          <div className="rounded-lg bg-success/10 px-4 py-3">
             <p className="font-english text-lg leading-relaxed">{review.corrected_english}</p>
             <p className="mt-1 text-sm text-muted-foreground">{review.corrected_arabic}</p>
           </div>
 
           {review.corrections.length === 0 ? (
-            <p className="flex items-center gap-1.5 text-sm text-emerald-600">
+            <p className="flex items-center gap-1.5 text-sm text-success">
               <CheckCircle2 className="h-4 w-4" /> ما فيه شي نصلحه — كتابتك طبيعية.
             </p>
           ) : (
@@ -180,9 +180,9 @@ const WriteTab = () => {
               {review.corrections.map((c, i) => (
                 <li key={i} className="rounded-lg border border-border/60 p-3 text-sm">
                   <div className="font-english">
-                    <span className="text-red-600 line-through decoration-red-400/60">{c.original}</span>
+                    <span className="text-destructive line-through decoration-destructive/60">{c.original}</span>
                     <span className="mx-2 text-muted-foreground">←</span>
-                    <span className="text-emerald-700 dark:text-emerald-400">{c.corrected}</span>
+                    <span className="text-success">{c.corrected}</span>
                   </div>
                   <div className="mt-1 flex items-start gap-2">
                     <Badge variant="outline" className="shrink-0 text-[10px]">{labelForKind(c.kind)}</Badge>
@@ -343,7 +343,7 @@ const SpellingTab = () => {
 
       {done ? (
         <div className="rounded-xl border border-border bg-card p-6 text-center">
-          <CheckCircle2 className="mx-auto h-8 w-8 text-emerald-500" />
+          <CheckCircle2 className="mx-auto h-8 w-8 text-success" />
           <p className="mt-2 text-lg font-semibold">دقة {score.accuracy}%</p>
           <p className="text-sm text-muted-foreground">
             {score.typed} حرف، {score.errors} أخطاء.
@@ -359,7 +359,7 @@ const SpellingTab = () => {
         </div>
       ) : item ? (
         <div
-          className={`rounded-xl border bg-card p-6 text-center transition-colors ${flash ? "border-red-400" : "border-border"}`}
+          className={`rounded-xl border bg-card p-6 text-center transition-colors ${flash ? "border-destructive" : "border-border"}`}
         >
           <p className="text-xs text-muted-foreground">
             {itemIndex + 1} / {drill.length} · {score.accuracy}%

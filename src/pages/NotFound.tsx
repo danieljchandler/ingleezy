@@ -19,7 +19,7 @@ const NotFound = () => {
       <div className="min-h-[70vh] flex items-center justify-center">
         <div className="text-center max-w-md">
           <p
-            className="text-6xl font-bold mb-2 text-[#2C3B74]"
+            className="text-6xl font-bold mb-2 text-primary"
           >
             404
           </p>
@@ -29,8 +29,7 @@ const NotFound = () => {
             ما لقينا هذي الصفحة
           </h1>
           <p className="text-muted-foreground mb-6">
-            The link may be broken, or the page may have moved. Try heading back
-            home and starting again.
+            يمكن الرابط مكسور، أو الصفحة انتقلت. ارجع للرئيسية وابدأ من جديد.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Button onClick={() => navigate(-1)} variant="outline" className="h-11">
@@ -39,7 +38,7 @@ const NotFound = () => {
             </Button>
             <Button onClick={() => navigate("/")} className="h-11">
               <Home className="h-4 w-4 me-2" />
-              Home
+              الرئيسية
             </Button>
           </div>
         </div>

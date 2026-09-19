@@ -110,8 +110,8 @@ const SoundsCheckpoint = () => {
       <AppShell>
         <PageCorner />
         <div className="mt-12 text-center space-y-4">
-          <div className="inline-flex h-24 w-24 rounded-full bg-amber-500/20 items-center justify-center">
-            <Trophy className="h-12 w-12 text-amber-600" />
+          <div className="inline-flex h-24 w-24 rounded-full bg-accent/20 items-center justify-center">
+            <Trophy className="h-12 w-12 text-accent" />
           </div>
           <h1 className="text-3xl font-bold">نقطة التفتيش {idx + 1}</h1>
           <p className="text-6xl font-bold text-primary">{finalScore}%</p>
@@ -119,7 +119,7 @@ const SoundsCheckpoint = () => {
             {finalScore >= 90 ? "أسطوري." : finalScore >= 70 ? "أداء قوي." : "واصل التدرّب — حاول مرة أخرى."}
           </p>
           {finalScore > previous && previous > 0 && (
-            <p className="text-sm text-green-600 font-semibold">رقم قياسي جديد!</p>
+            <p className="text-sm text-success font-semibold">رقم قياسي جديد!</p>
           )}
           <div className="flex gap-2 justify-center mt-4">
             <Button variant="outline" onClick={(e) => { tapFeedback(e.currentTarget); setRoundIdx(0); setPicks([]); setFinalScore(null); }}>
@@ -144,11 +144,11 @@ const SoundsCheckpoint = () => {
       </div>
 
       <header className="text-center mb-6">
-        <p className="text-xs font-semibold uppercase tracking-wider text-amber-600">
+        <p className="text-xs font-semibold uppercase tracking-wider text-accent">
           نقطة تفتيش القافلة {idx + 1}
         </p>
         <h1 className="text-xl font-bold text-foreground flex items-center justify-center gap-2 mt-1">
-          <Sparkles className="h-5 w-5 text-amber-500" /> جولة تمييز الأصوات
+          <Sparkles className="h-5 w-5 text-accent" /> جولة تمييز الأصوات
         </h1>
       </header>
 
@@ -188,7 +188,7 @@ const SoundsCheckpoint = () => {
         {/* Progress bar */}
         <div className="h-1.5 rounded-full bg-muted overflow-hidden">
           <div
-            className="h-full bg-amber-500 transition-all duration-300"
+            className="h-full bg-accent transition-all duration-300"
             style={{ width: `${((roundIdx) / rounds.length) * 100}%` }}
           />
         </div>

@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { arCount } from "@/lib/strings";
 import { toast } from "sonner";
 import { AppShell } from "@/components/layout/AppShell";
+import { EmptyState } from "@/components/layout/EmptyState";
 import { GenerateImageDialog } from "@/components/mywords/GenerateImageDialog";
 import { SuggestFlashcardsDialog } from "@/components/mywords/SuggestFlashcardsDialog";
 // Lazy + mounted only while open: keeps the heavy Anki parsers (sql.js, fflate)
@@ -280,14 +281,12 @@ const MyWords = () => {
   if (!isAuthenticated) {
     return (
       <AppShell>
-        <div className="flex flex-col items-center justify-center py-24 text-center">
-          <BookOpen className="h-12 w-12 text-muted-foreground mb-4" />
-          <h2 className="text-xl font-semibold mb-2">سجّل الدخول لعرض كلماتك</h2>
-          <p className="text-muted-foreground mb-6">
-            Save vocabulary from transcriptions and review them with spaced repetition.
-          </p>
-          <Button onClick={() => navigate("/auth")}>تسجيل الدخول</Button>
-        </div>
+        <EmptyState
+          icon={BookOpen}
+          title="سجّل الدخول لعرض كلماتك"
+          body="احفظ كلمات إنجليزية من الدروس والمقاطع، وراجعها ببطاقات متباعدة."
+          action={<Button onClick={() => navigate("/auth")}>تسجيل الدخول</Button>}
+        />
       </AppShell>
     );
   }
@@ -356,7 +355,7 @@ const MyWords = () => {
           className="w-full mb-6 gap-2"
           size="lg"
         >
-          Review {stats.dueCount} due words
+          راجع {stats.dueCount} كلمة مستحقة
           <ChevronOpen className="h-4 w-4" />
         </Button>
       )}
@@ -378,7 +377,7 @@ const MyWords = () => {
               onClick={() => navigate("/review/my-phrases")}
               className="gap-1.5"
             >
-              Review {phraseStats.dueCount}
+              راجع {phraseStats.dueCount}
               <ChevronOpen className="h-4 w-4" />
             </Button>
           )}
@@ -386,14 +385,14 @@ const MyWords = () => {
 
         {(!phrases || phrases.length === 0) ? (
           <div className="p-6 text-center text-sm text-muted-foreground">
-            Save phrases from{" "}
+            احفظ عبارات من{" "}
             <button
               className="text-primary underline underline-offset-2"
               onClick={() => navigate("/how-do-i-say")}
             >
               كيف أقول…؟
             </button>{" "}
-            to start practicing them here.
+            عشان تتدرب عليها هنا.
           </div>
         ) : (
           <>
@@ -447,17 +446,17 @@ const MyWords = () => {
         )}
       </div>
       {(!words || words.length === 0) && (
-        <div className="flex flex-col items-center justify-center py-16 text-center px-4">
-          <BookOpen className="h-12 w-12 text-muted-foreground mb-4" />
-          <h2 className="text-lg font-semibold mb-2">لا كلمات محفوظة بعد</h2>
-          <p className="text-muted-foreground mb-6 max-w-sm">
-            Start a lesson or watch a clip in Discover — tap any Arabic word to save it here, then review it with flashcards.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3 w-full max-w-sm">
-            <Button className="flex-1 h-11" onClick={() => navigate("/learn")}>ابدأ درساً</Button>
-            <Button variant="outline" className="flex-1 h-11" onClick={() => navigate("/discover")}>تصفح اكتشف</Button>
-          </div>
-        </div>
+        <EmptyState
+          icon={BookOpen}
+          title="لا كلمات محفوظة بعد"
+          body="ابدأ درساً أو شاهد مقطعاً في اكتشف — المس أي كلمة إنجليزية عشان تحفظها هنا، وبعدين راجعها ببطاقات."
+          action={
+            <div className="flex w-full max-w-sm flex-col gap-3 sm:flex-row">
+              <Button className="h-11 flex-1" onClick={() => navigate("/learn")}>ابدأ درساً</Button>
+              <Button variant="outline" className="h-11 flex-1" onClick={() => navigate("/discover")}>تصفح اكتشف</Button>
+            </div>
+          }
+        />
       )}
 
       {/* Source + Category + Deck + Tag filters */}
@@ -782,9 +781,15 @@ const MyWords = () => {
                       <Sparkles className="h-4 w-4 text-muted-foreground/50" />
                     </div>
                   )}
-                  <div>
+                  <div className="min-w-0">
                     <span
-                      className="text-lg font-bold text-foreground block"
+                      className="font-english text-lg font-bold text-foreground block truncate"
+                      dir="ltr"
+                    >
+                      {word.word_english}
+                    </span>
+                    <span
+                      className="text-sm text-muted-foreground block truncate"
                       dir="rtl"
                     >
                       {word.word_arabic}
@@ -818,10 +823,7 @@ const MyWords = () => {
                     )}
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground hidden sm:inline">
-                    {word.word_english}
-                  </span>
+                <div className="flex items-center gap-2 shrink-0">
                   {hasContext && (
                     <Button
                       variant="ghost"

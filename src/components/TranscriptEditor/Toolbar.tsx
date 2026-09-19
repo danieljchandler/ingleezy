@@ -80,7 +80,7 @@ export default function Toolbar({
         <div className="flex items-center gap-1">
           <span className="text-xs text-blue-600 animate-pulse">AI rethinking timing…</span>
           <button
-            className="px-2 py-1 text-xs rounded bg-red-100 hover:bg-red-200 text-red-700 transition-colors"
+            className="px-2 py-1 text-xs rounded bg-destructive/15 hover:bg-destructive/15 text-destructive transition-colors"
             onClick={onCancelAI}
           >
             Cancel
@@ -123,10 +123,10 @@ export default function Toolbar({
       <button
         className={`px-2 py-1 text-xs rounded transition-colors ${
           errors.length > 0
-            ? 'bg-red-100 text-red-800 hover:bg-red-200'
+            ? 'bg-destructive/15 text-destructive hover:bg-destructive/15'
             : warnings.length > 0
-              ? 'bg-amber-100 text-amber-800 hover:bg-amber-200'
-              : 'bg-green-100 text-green-800 hover:bg-green-200'
+              ? 'bg-accent/15 text-accent-ink hover:bg-accent/15'
+              : 'bg-success/15 text-success hover:bg-success/15'
         }`}
         onClick={() => setShowWarnings(!showWarnings)}
       >
@@ -170,7 +170,7 @@ export default function Toolbar({
           {warnings.map((w, i) => (
             <div
               key={i}
-              className={`px-2 py-1 rounded ${w.severity === 'error' ? 'bg-red-50 text-red-700' : 'bg-amber-50 text-amber-700'}`}
+              className={`px-2 py-1 rounded ${w.severity === 'error' ? 'bg-destructive/15 text-destructive' : 'bg-accent/15 text-accent-ink'}`}
             >
               {w.message}
             </div>
@@ -183,7 +183,7 @@ export default function Toolbar({
         <div className="basis-full mt-1 rounded border border-gray-200 dark:border-gray-700 p-2 text-xs space-y-1">
           {checklist.map((item, i) => (
             <div key={i} className="flex items-center gap-2">
-              <span className={item.passed ? 'text-green-600' : 'text-red-600'}>
+              <span className={item.passed ? 'text-success' : 'text-destructive'}>
                 {item.passed ? '✓' : '✗'}
               </span>
               <span>{item.label}</span>

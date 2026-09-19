@@ -342,9 +342,9 @@ const PronunciationPractice = () => {
             <div className="text-center mb-4">
               <div className={cn(
                 "inline-flex items-center justify-center w-24 h-24 rounded-full border-4 mb-2",
-                result.overall >= 90 ? "border-green-500" :
+                result.overall >= 90 ? "border-success" :
                 result.overall >= 75 ? "border-blue-500" :
-                result.overall >= 60 ? "border-yellow-500" : "border-red-500"
+                result.overall >= 60 ? "border-accent" : "border-destructive"
               )}>
                 <span className={cn("text-3xl font-bold", band.color)}>
                   {Math.round(result.overall)}

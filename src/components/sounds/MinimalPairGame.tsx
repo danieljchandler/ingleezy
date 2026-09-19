@@ -79,10 +79,10 @@ export const MinimalPairGame = ({ sound, onComplete }: MinimalPairGameProps) => 
               className={cn(
                 "font-english p-6 rounded-2xl border-2 transition-all active:scale-95 text-2xl",
                 !picked && "border-border bg-card hover:border-primary/40",
-                showResult && correct && "border-green-500 bg-green-500/10 animate-correct-pulse",
-                showResult && !correct && "border-red-500 bg-red-500/10",
+                showResult && correct && "border-success bg-success/10 animate-correct-pulse",
+                showResult && !correct && "border-destructive bg-destructive/10",
                 showResult && !correct && shakeWrong && "animate-shake",
-                done && !isPicked && word === round.spoken && "border-green-500/60 bg-green-500/5",
+                done && !isPicked && word === round.spoken && "border-success/60 bg-success/5",
               )}
               dir="ltr"
             >
@@ -95,7 +95,7 @@ export const MinimalPairGame = ({ sound, onComplete }: MinimalPairGameProps) => 
       {done && (
         <p className="text-center text-sm">
           {correct ? (
-            <span className="text-green-600 font-semibold">صحيح! 🎉</span>
+            <span className="text-success font-semibold">صحيح! 🎉</span>
           ) : (
             <span className="text-muted-foreground">
               الكلمة كانت{" "}

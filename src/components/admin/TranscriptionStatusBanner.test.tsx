@@ -87,7 +87,7 @@ describe("TranscriptionStatusBanner — while a job is running", () => {
   it("shows how far along it is", () => {
     const { container } = renderBanner(aJob({ progress: 42 }));
     const indicator = container.querySelector<HTMLElement>("[role='progressbar'] > div")!;
-    expect(indicator.style.transform).toBe("translateX(-58%)");
+    expect(indicator.style.transform).toBe("scaleX(0.42)");
   });
 
   it("spins while it works", () => {
