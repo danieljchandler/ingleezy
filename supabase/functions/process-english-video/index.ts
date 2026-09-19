@@ -191,8 +191,12 @@ Deno.serve(async (req) => {
     // ingest-shared-video kicks its pipeline: there is no user session on
     // that door. `isServiceRoleCall` is true for that key only, never for the
     // anon key that ships in the browser bundle.
+    // Forwarded verbatim to download-media further down, which recognises a
+    // service-role bearer as an internal call — so the bridge's own header is
+    // the right thing to pass on, not a user's.
+    const auth = req.headers.get("authorization") ?? "";
+
     if (!(await isServiceRoleCall(req))) {
-      const auth = req.headers.get("authorization") ?? "";
       const token = auth.startsWith("Bearer ") ? auth.slice(7) : null;
       if (!token) return json({ error: "auth_required" }, 401, cors);
       const { data: userData, error: userErr } = await sb.auth.getUser(token);
