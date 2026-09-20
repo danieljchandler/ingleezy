@@ -1,7 +1,7 @@
 import { act, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import { renderHookWithProviders, TEST_USER_ID } from "@/test/support/react/harness";
-import { aProfile, aUserXp } from "@/test/support/factories";
+import { aProfile, aReviewStreak, aUserXp } from "@/test/support/factories";
 import { useAuth } from "./useAuth";
 import {
   useFollowUser,
@@ -125,7 +125,12 @@ describe("the friends list", () => {
       "user_xp",
       aUserXp({ user_id: FRIEND, xp_this_week: 120, total_xp: 900, level: 4 }),
     );
-    backend.db.seed("review_streaks", [{ user_id: FRIEND, current_streak: 12 }]);
+    // Through the factory, which carries `last_review_date`. A hand-rolled row
+    // without one now reads as a streak of zero, because `effectiveStreak`
+    // derives the live number from the date rather than trusting the count —
+    // and a fixture that omits the column is describing a learner who has never
+    // reviewed, whatever number it puts beside them.
+    backend.db.seed("review_streaks", [aReviewStreak({ user_id: FRIEND, current_streak: 12 })]);
     Object.assign(backend, over);
   };
 
@@ -141,6 +146,26 @@ describe("the friends list", () => {
       level: 4,
       current_streak: 12,
     });
+  });
+
+  it("shows a friend's lapsed streak as over, not as it last stood", async () => {
+    // `review_streaks` is only written by a review, so a run that ended has no
+    // event to record its ending — the row keeps saying 12 until that learner
+    // next reviews. Rendering it would tell everyone who follows them that they
+    // are still going.
+    const { result } = render(() => useFriendsActivity(), (backend) => {
+      seedFriend(backend);
+      backend.db.seed("review_streaks", [
+        aReviewStreak({
+          user_id: FRIEND,
+          current_streak: 12,
+          last_review_date: "2026-01-02",
+        }),
+      ]);
+    });
+
+    await waitFor(() => expect(result.current.data).toHaveLength(1));
+    expect(result.current.data?.[0].current_streak).toBe(0);
   });
 
   it("is empty when nobody is followed", async () => {

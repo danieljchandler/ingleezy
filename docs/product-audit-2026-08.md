@@ -1,3 +1,21 @@
+> **This document is about Hakiya, not Ingleezy.**
+>
+> Written in August 2026 for `arabic-buddy`, before the fork, and carried
+> across whole. The machinery it analyses is shared — same SRS engine, same
+> learner model, same Brain, same cost structure — so the reasoning holds. The
+> *direction of learning* does not: everywhere this says the target language is
+> dialect Arabic, Ingleezy's target is English and Arabic is the scaffold. See
+> [`../RETARGET.md`](../RETARGET.md).
+>
+> **Track A has since been implemented here, all four.** A1 voice metering
+> (`voice_usage`, `_shared/voiceBudget.ts`), A2 tier-aware caps
+> (`_shared/usageCap.ts` returns a tier rather than a boolean), A3 cost
+> telemetry (`llm_usage_logs` carries `prompt_tokens`, `completion_tokens`,
+> `cached_tokens`, `provider`, `cost_usd`, `units`, `unit_kind`), A4 prompt
+> caching. Read Track A as the rationale for what exists, not as a to-do list.
+
+---
+
 # Product & AI stack review — August 2026
 
 A code-grounded review of where Hakiya should invest next. Scope: 65 learner

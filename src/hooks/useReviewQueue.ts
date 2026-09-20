@@ -11,6 +11,7 @@ import { submitRatingToServer } from "@/hooks/useReview";
 import { useDesiredRetention } from "@/hooks/useDesiredRetention";
 import type { Rating } from "@/lib/spacedRepetition";
 import type { ScheduleDirection } from "@/lib/reviewOrder";
+import { localDateKey } from "@/lib/localDate";
 import {
   all,
   bumpAttempts,
@@ -99,7 +100,22 @@ export function useReviewQueue() {
 
           // Side effects on confirmed server save
           addXP.mutate({ amount: XP_AMOUNTS[item.rating], reason: "review" });
-          incrementReviews.mutate();
+
+          // The day the learner REVIEWED, not the day the queue drained. A
+          // rating taken offline can sit here across local midnight, and
+          // crediting it to the flush would fold two offline evenings into one
+          // streak day. `queuedAt` is stamped when the rating is taken, which
+          // is the only record of when it actually happened.
+          //
+          // Awaited before the achievement check because that check reads the
+          // streak row this writes — see the same ordering in useReview.
+          try {
+            await incrementReviews.mutateAsync({
+              localDate: localDateKey(new Date(item.queuedAt)),
+            });
+          } catch {
+            // Bookkeeping is not the rating. The rating is already saved.
+          }
           checkAchievements.mutate();
           queryClient.invalidateQueries({ queryKey: ["review-stats"] });
         } catch (err) {

@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
+import { effectiveStreak, STREAK_COLUMNS } from "@/lib/streak";
 
 export interface UserFollow {
   id: string;
@@ -111,7 +112,7 @@ export const useFriendsActivity = () => {
       // Get streaks
       const { data: streakData, error: streakError } = await supabase
         .from("review_streaks")
-        .select("user_id, current_streak")
+        .select(`user_id, ${STREAK_COLUMNS}`)
         .in("user_id", followingIds);
       if (streakError) throw streakError;
 
@@ -127,7 +128,7 @@ export const useFriendsActivity = () => {
           xp_this_week: (xp as any).xp_this_week || 0,
           total_xp: (xp as any).total_xp || 0,
           level: (xp as any).level || 1,
-          current_streak: (streak as any).current_streak || 0,
+          current_streak: effectiveStreak(streak as never),
           is_following: true,
         };
       }).sort((a, b) => b.xp_this_week - a.xp_this_week);

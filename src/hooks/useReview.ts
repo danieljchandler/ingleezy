@@ -394,7 +394,21 @@ export async function submitRatingToServer(
     // First-ever rating of this word: claim daily new-card budget (shared
     // with the personal-vocab review path). Best-effort — never blocks the
     // review submission.
-    (supabase.rpc as any)('increment_new_card_count', { _amount: 1 }).catch(() => {});
+    //
+    // Awaited in a try rather than `.catch()`ed. `rpc()` returns postgrest-js's
+    // builder, which is a *thenable* — it implements `then` and nothing else —
+    // so `.catch` on it is undefined and calling it threw a TypeError on every
+    // first rating of a word. The insert above had already succeeded by then,
+    // so the card was saved while the rating's whole tail was skipped: no XP,
+    // no weekly goal, no streak, no achievement check. Down the offline queue
+    // it read as a permanent failure, which dropped the item and told the
+    // learner their rating could not be saved, after it had been.
+    try {
+      await supabase.rpc('increment_new_card_count', { _amount: 1 });
+    } catch {
+      // The budget is not the rating. A card the learner has now seen is worth
+      // more than an accurate count of how many new ones they saw today.
+    }
   }
 
   return { result, rating };
@@ -434,8 +448,24 @@ export const useSubmitReview = () => {
       };
 
       addXP.mutate({ amount: xpAmounts[rating], reason: 'review' });
-      incrementReviews.mutate();
-      checkAchievements.mutate();
+
+      // Ordered, not fired together. `checkAchievements` reads
+      // `review_streaks` to decide whether a `streak_days` badge is earned, and
+      // `incrementReviews` is what writes that row — so racing them means the
+      // review that reaches a threshold reads yesterday's streak and skips the
+      // award, which then waits for the next review to be noticed. Nothing
+      // failed, which is what would have made it hard to find.
+      //
+      // The check still runs if the bookkeeping fails: the other two
+      // requirement types, reviews_completed and words_learned, count rows that
+      // are already saved by this point.
+      void incrementReviews
+        // `{}` rather than nothing: the mutation takes an optional local date
+        // (the queue flush passes one), and react-query still wants the
+        // argument slot filled. The default is today, which is right here.
+        .mutateAsync({})
+        .catch(() => {})
+        .then(() => checkAchievements.mutate());
     },
   });
 };
