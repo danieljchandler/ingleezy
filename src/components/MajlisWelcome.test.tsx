@@ -7,7 +7,7 @@ import {
   aWeeklyGoal,
   TEST_USER_ID,
 } from "@/test/support/factories";
-import { localDateKey } from "@/lib/localDate";
+import { utcWeekStart } from "@/lib/localDate";
 import type { SupabaseBackend } from "@/test/support/server/handler";
 import { MajlisWelcome } from "./MajlisWelcome";
 
@@ -24,13 +24,20 @@ import { MajlisWelcome } from "./MajlisWelcome";
 /** A Wednesday, mid-morning. The week's Monday is the 12th of August 2026. */
 const WEDNESDAY_MORNING = new Date(2026, 7, 12, 9, 30);
 
-/** The Monday `useWeeklyGoal` derives from the pinned clock, via the app's own helper. */
-const weekStart = () => {
-  const today = new Date();
-  const monday = new Date(today);
-  monday.setDate(today.getDate() + (today.getDay() === 0 ? -6 : 1 - today.getDay()));
-  return localDateKey(monday);
-};
+/**
+ * The Monday `useWeeklyGoal` derives from the pinned clock, via the app's own
+ * helper — this is a fixture the hook has to find, not an assertion about how
+ * the week is computed, so sharing the helper is the point.
+ *
+ * It is a UTC Monday now, not a local one. `weekly_goals` rows are written only
+ * by `increment_review_count` and `set_weekly_goal`, both of which key them on
+ * `date_trunc('week', now() AT TIME ZONE 'utc')`, so the reader had to agree
+ * with them. Hand-rolling the local version here happened to keep passing,
+ * because the clock above is pinned to a Wednesday morning and no real UTC
+ * offset moves a midweek date across a week boundary — a coincidence of the
+ * fixture rather than a property of the code.
+ */
+const weekStart = () => utcWeekStart();
 
 let cleanup: (() => void) | undefined;
 

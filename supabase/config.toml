@@ -218,3 +218,10 @@ verify_jwt = true
 # generation for admin-uploaded English videos. Admin re-checked inside.
 [functions.process-english-video]
 verify_jwt = true
+
+# The content-library bridge (docs/content-library-bridge.md). The caller is
+# Maktaba, another app with its own auth, so the gate is the x-library-secret
+# header checked inside against LIBRARY_BRIDGE_SECRET — verify_jwt would
+# refuse it at the door.
+[functions.ingest-from-library]
+verify_jwt = false

@@ -1,3 +1,23 @@
+> **This document is about Hakiya, not Ingleezy.**
+>
+> Written in August 2026 for `arabic-buddy`, before the fork, and already a
+> historical record when it was written — its own Part 3 proposal was not
+> built, and the update at the end says what shipped instead. Kept for that
+> record.
+>
+> The pipeline it inventories is the one this app inherited, so the service
+> list and the routing are still broadly accurate. The *direction* is not: the
+> Brain runs in `target: 'english'` mode here, the dialect rulebook became an
+> L1-interference rulebook, and the MSA-leak detector became a transfer-error
+> detector. See [`../RETARGET.md`](../RETARGET.md).
+>
+> One thing in here has become load-bearing since: everything routed through
+> the Lovable AI gateway depends on `LOVABLE_API_KEY`, which `askBrain` requires
+> unconditionally. That is a live constraint on giving Ingleezy its own backend
+> — see §0 of [`backend-bootstrap.md`](backend-bootstrap.md).
+
+---
+
 # AI Pipeline Audit + ALLaM/Fanar Proposal
 
 **Project:** Hakiya (repo `arabic-buddy`). There is no separate "Lahja" project — `Lahja`

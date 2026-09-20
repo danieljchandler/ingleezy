@@ -98,6 +98,15 @@ export const COLUMNS_MISSING_FROM_TYPES: DriftedColumn[] = [
       migration: "20260813150000_interference_rules",
     }),
   ),
+
+  // The content-library bridge (ingest-from-library). Merged from a branch,
+  // so absent from the live project until applied there. Delete these once a
+  // types regeneration carries the columns.
+  ...["library_item_id", "creator_name", "creator_handle"].map((column) => ({
+    table: "discover_videos",
+    column,
+    migration: "20260919120000_library_bridge",
+  })),
 ];
 
 

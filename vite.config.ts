@@ -1,8 +1,15 @@
-import { defineConfig } from "vite";
+import { defineConfig, type Plugin } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { readFileSync } from "fs";
 import { componentTagger } from "lovable-tagger";
+import { buildRobots, buildSitemap, indexablePaths } from "./scripts/seo";
+// The route manifest lives under src/test because that is what diffs it against
+// App.tsx, but it is the app's list of routes rather than a fixture — which is
+// exactly what a sitemap needs, and why a page added later ends up in the
+// sitemap without anyone maintaining a second list. Build-time only; nothing
+// here reaches the bundle.
+import { ROUTES } from "./src/test/support/routes/manifest";
 
 /**
  * There is no hardcoded Supabase fallback here, and there must not be one.
@@ -66,6 +73,52 @@ const supabasePublishableKey = fromEnv(
 
 const vapidPublicKey = fromEnv("VITE_VAPID_PUBLIC_KEY", "VAPID_PUBLIC_KEY") ?? "";
 
+/**
+ * The public origin this deployment answers on, e.g. `https://ingleezy.app`.
+ *
+ * Only robots.txt and sitemap.xml use it, and both degrade honestly without it
+ * (see scripts/seo.mjs). It is read here rather than injected into the bundle
+ * because nothing in the app needs to know its own hostname.
+ */
+const publicSiteUrl = fromEnv("VITE_PUBLIC_SITE_URL", "PUBLIC_SITE_URL");
+
+/**
+ * Emits robots.txt, and sitemap.xml when there is an origin to put in it.
+ *
+ * These were static files in `public/` until now, still carrying Hakiya's
+ * domain on every line eight months after the fork — the kind of thing that is
+ * only ever noticed by whoever finds the wrong site in a search result. A
+ * generated pair cannot drift from the routes, and the domain is one variable.
+ */
+function seoFiles(): Plugin {
+  return {
+    name: "ingleezy-seo-files",
+    apply: "build",
+    generateBundle() {
+      this.emitFile({
+        type: "asset",
+        fileName: "robots.txt",
+        source: buildRobots(publicSiteUrl),
+      });
+
+      if (!publicSiteUrl) {
+        this.warn(
+          "VITE_PUBLIC_SITE_URL is not set, so no sitemap.xml was written and " +
+            "robots.txt carries no Sitemap: line. Set it to the public origin " +
+            "(e.g. https://ingleezy.app) when the domain is decided.",
+        );
+        return;
+      }
+
+      this.emitFile({
+        type: "asset",
+        fileName: "sitemap.xml",
+        source: buildSitemap(publicSiteUrl, indexablePaths(ROUTES)),
+      });
+    },
+  };
+}
+
 // https://vitejs.dev/config/ — cache bust v5
 export default defineConfig(({ mode }) => ({
   // Lovable Cloud can rewrite the root .env after backend changes, which makes
@@ -109,7 +162,7 @@ export default defineConfig(({ mode }) => ({
     // toggle hides rather than offering something that can't work.
     'import.meta.env.VITE_VAPID_PUBLIC_KEY': JSON.stringify(vapidPublicKey),
   },
-  plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
+  plugins: [react(), mode === "development" && componentTagger(), seoFiles()].filter(Boolean),
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

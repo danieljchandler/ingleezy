@@ -6,6 +6,7 @@ import { useWeeklyGoal } from "@/hooks/useGamification";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { AR } from "@/lib/strings";
+import { effectiveStreak, STREAK_COLUMNS } from "@/lib/streak";
 
 /**
  * A — Majlis welcome panel
@@ -46,7 +47,7 @@ export function MajlisWelcome() {
       if (!user) return null;
       const { data } = await supabase
         .from("review_streaks")
-        .select("current_streak")
+        .select(STREAK_COLUMNS)
         .eq("user_id", user.id)
         .maybeSingle();
       return data;
@@ -142,19 +143,19 @@ export function MajlisWelcome() {
                 className={cn(
                   "inline-flex items-center gap-1 px-2.5 py-1 rounded-full",
                   "text-[11px] font-semibold border",
-                  (streak?.current_streak ?? 0) > 0
-                    ? "bg-gradient-to-r from-accent/20 to-accent/5 border-accent/40 text-[#8F5A24] dark:text-accent"
+                  effectiveStreak(streak) > 0
+                    ? "bg-gradient-to-r from-accent/20 to-accent/5 border-accent/40 text-accent-ink dark:text-accent"
                     : "bg-primary/5 border-primary/15 text-primary/60 dark:bg-white/5 dark:border-white/10 dark:text-muted-foreground"
                 )}
-                title={`${AR.streak.label} ${AR.streak.days(streak?.current_streak ?? 0)}`}
+                title={`${AR.streak.label} ${AR.streak.days(effectiveStreak(streak))}`}
               >
                 <Flame
                   className={cn(
                     "h-3 w-3",
-                    (streak?.current_streak ?? 0) > 0 ? "text-accent" : "text-primary/40 dark:text-muted-foreground/60"
+                    effectiveStreak(streak) > 0 ? "text-accent" : "text-primary/40 dark:text-muted-foreground/60"
                   )}
                 />
-                {streak?.current_streak ?? 0} ي
+                {effectiveStreak(streak)} ي
               </span>
             )}
           </div>
