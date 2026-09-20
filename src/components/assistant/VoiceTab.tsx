@@ -58,7 +58,7 @@ export function VoiceTab() {
   if (!subscribed) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-3 p-6 text-center">
-        <Crown className="h-6 w-6 text-amber-500" />
+        <Crown className="h-6 w-6 text-accent" />
         <p className="text-sm font-medium">المكالمة المباشرة ميزة مدفوعة</p>
         <p className="max-w-xs text-xs text-muted-foreground">
           تكلّم إنجليزي مع المدرّب عن أي شي على شاشتك — محادثة حقيقية بدون كتابة، ويشرح لك
@@ -159,7 +159,7 @@ export function VoiceTab() {
         <p className="text-center text-[11px] text-muted-foreground">
           {typeof remainingSeconds === "number" && (
             <>
-              <span className={cn(remainingSeconds < 300 && "font-medium text-amber-600 dark:text-amber-500")}>
+              <span className={cn(remainingSeconds < 300 && "font-medium text-accent")}>
                 باقي لك {Math.floor(remainingSeconds / 60)} دقيقة هذا الشهر
               </span>
               {" · "}

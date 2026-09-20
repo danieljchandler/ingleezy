@@ -167,16 +167,15 @@ export const PhraseOfTheDay = () => {
   return (
     <div
       className={cn(
-        "w-full mb-6 p-5 rounded-2xl",
-        "bg-gradient-to-br from-accent/15 via-primary/10 to-accent/5",
-        "border-2 border-accent/30 relative overflow-hidden",
+        "w-full mb-6 p-5 rounded-3xl",
+        "bg-card border border-border shadow-card relative overflow-hidden",
       )}
     >
-      <div className="absolute top-0 right-0 w-32 h-32 bg-accent/5 rounded-full -translate-y-1/2 translate-x-1/2" />
+      
 
       <div className="flex items-center justify-between mb-3 relative z-10">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-accent/20 flex items-center justify-center">
+          <div className="w-9 h-9 rounded-xl bg-accent/20 flex items-center justify-center">
             <Sparkles className="h-4 w-4 text-accent-foreground" />
           </div>
           <div>
@@ -211,7 +210,7 @@ export const PhraseOfTheDay = () => {
             <button
               onClick={() => setShowEnglish(true)}
               aria-label="اكشف العبارة بالإنجليزي"
-              className="w-full py-3 rounded-lg border-2 border-dashed border-accent/40 bg-card/40 text-sm text-muted-foreground hover:bg-card/60 transition flex items-center justify-center gap-2"
+              className="w-full py-3.5 rounded-2xl bg-muted text-sm font-semibold text-foreground hover:bg-accent/20 transition flex items-center justify-center gap-2"
             >
               <Eye className="h-4 w-4" />
               اضغط تشوف الإنجليزي
@@ -232,7 +231,7 @@ export const PhraseOfTheDay = () => {
           )}
 
           {phrase.notes && (
-            <p dir="rtl" className="text-xs text-muted-foreground leading-relaxed border-r-2 border-accent/40 pe-3 font-arabic">
+            <p dir="rtl" className="text-xs text-muted-foreground leading-relaxed border-e-2 border-accent/50 pe-3 font-arabic">
               {phrase.notes}
             </p>
           )}

@@ -78,8 +78,8 @@ export const SpotTheSoundGame = ({ sound, onComplete }: SpotTheSoundGameProps) =
                 "font-english p-3 rounded-xl border-2 text-xl text-center transition-all active:scale-95",
                 !showResult && isPicked && "border-primary bg-primary/10",
                 !showResult && !isPicked && "border-border bg-card",
-                correct && "border-green-500 bg-green-500/10 animate-correct-pulse",
-                wrong && "border-red-500 bg-red-500/10 animate-shake",
+                correct && "border-success bg-success/10 animate-correct-pulse",
+                wrong && "border-destructive bg-destructive/10 animate-shake",
               )}
               dir="ltr"
             >
@@ -87,7 +87,7 @@ export const SpotTheSoundGame = ({ sound, onComplete }: SpotTheSoundGameProps) =
               {showResult && (
                 <span className="ms-2 inline-flex">
                   {w.hasSound ? (
-                    <Check className="h-4 w-4 text-green-600" />
+                    <Check className="h-4 w-4 text-success" />
                   ) : (
                     <X className="h-4 w-4 text-muted-foreground" />
                   )}

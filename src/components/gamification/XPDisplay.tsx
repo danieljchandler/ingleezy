@@ -22,8 +22,8 @@ export function XPDisplay({ compact = false, className }: XPDisplayProps) {
           <Sparkles className="h-3 w-3 text-primary" />
           <span className="text-xs font-semibold text-primary">{userXP.total_xp} XP</span>
         </div>
-        <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-amber-100 dark:bg-amber-900/30">
-          <span className="text-xs font-bold text-amber-600 dark:text-amber-400">Lv.{userXP.level}</span>
+        <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-accent/15 dark:bg-accent/30">
+          <span className="text-xs font-bold text-accent">Lv.{userXP.level}</span>
         </div>
       </div>
     );

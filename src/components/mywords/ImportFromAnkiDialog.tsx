@@ -356,7 +356,7 @@ export function ImportFromAnkiDialog({ open, onOpenChange }: Props) {
               <p className="text-xs text-muted-foreground">
                 .apkg, .colpkg, .txt, .csv · up to 2 GB · {ANKI_IMPORT_LIMIT.toLocaleString()} cards max
                 <br />
-                <span className="text-amber-700">Large files (&gt; 200 MB) may run out of memory — use desktop Chrome and close other tabs.</span>
+                <span className="text-accent">Large files (&gt; 200 MB) may run out of memory — use desktop Chrome and close other tabs.</span>
               </p>
             </button>
             <input
@@ -378,12 +378,12 @@ export function ImportFromAnkiDialog({ open, onOpenChange }: Props) {
                 {progress.message}
               </div>
             )}
-            <div className="rounded-lg border border-amber-500/30 bg-amber-50/50 dark:bg-amber-950/20 p-3 text-xs text-muted-foreground leading-relaxed space-y-1">
+            <div className="rounded-lg border border-accent/30 bg-accent/50 dark:bg-accent/20 p-3 text-xs text-muted-foreground leading-relaxed space-y-1">
               <p className="font-medium text-foreground">في Anki: File ← Export</p>
               <ul className="list-disc list-inside space-y-0.5">
                 <li>الصيغة: <span className="font-medium">Anki Deck Package (.apkg)</span></li>
                 <li>✅ Support older Anki versions</li>
-                <li>✅ <span className="font-medium text-amber-700 dark:text-amber-500">Include scheduling information</span> — لازم عشان يبقى تقدّمك في المراجعة</li>
+                <li>✅ <span className="font-medium text-accent">Include scheduling information</span> — لازم عشان يبقى تقدّمك في المراجعة</li>
                 <li>✅ Include media</li>
               </ul>
             </div>
@@ -452,8 +452,8 @@ export function ImportFromAnkiDialog({ open, onOpenChange }: Props) {
             </div>
 
             {deck.truncated && (
-              <div className="flex gap-2 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-sm">
-                <AlertTriangle className="h-4 w-4 text-yellow-600 shrink-0 mt-0.5" />
+              <div className="flex gap-2 p-3 rounded-lg bg-accent/10 border border-accent/30 text-sm">
+                <AlertTriangle className="h-4 w-4 text-accent shrink-0 mt-0.5" />
                 <span>
                   Your deck has more than {ANKI_IMPORT_LIMIT.toLocaleString()} notes.
                   Only the first {ANKI_IMPORT_LIMIT.toLocaleString()} will be imported.
@@ -578,7 +578,7 @@ export function ImportFromAnkiDialog({ open, onOpenChange }: Props) {
         {step === "done" && result && (
           <div className="space-y-4 py-2">
             <div className="flex flex-col items-center gap-3 py-4">
-              <CheckCircle2 className="h-12 w-12 text-green-500" />
+              <CheckCircle2 className="h-12 w-12 text-success" />
               <p className="font-semibold text-lg">خلص الاستيراد</p>
               <div className="text-sm text-muted-foreground text-center space-y-1">
                 <p>{result.inserted.toLocaleString()} new cards added</p>

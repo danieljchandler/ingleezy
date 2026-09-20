@@ -97,14 +97,14 @@ export default function SegmentList({
                 <div
                   className={cn(
                     'flex-1 h-px',
-                    isOverlap ? 'bg-red-300 dark:bg-red-700' : isLargeGap ? 'bg-amber-300 dark:bg-amber-700' : 'bg-gray-200 dark:bg-gray-700',
+                    isOverlap ? 'bg-destructive' : isLargeGap ? 'bg-accent' : 'bg-gray-200 dark:bg-gray-700',
                   )}
                 />
                 <div className="flex items-center gap-1.5 flex-shrink-0">
                   <span
                     className={cn(
                       'text-[9px] font-mono tabular-nums',
-                      isOverlap ? 'text-red-600 dark:text-red-400' : isLargeGap ? 'text-amber-600 dark:text-amber-400' : 'text-muted-foreground/70',
+                      isOverlap ? 'text-destructive' : isLargeGap ? 'text-accent' : 'text-muted-foreground/70',
                     )}
                   >
                     {gapLabel}
@@ -120,7 +120,7 @@ export default function SegmentList({
                 <div
                   className={cn(
                     'flex-1 h-px',
-                    isOverlap ? 'bg-red-300 dark:bg-red-700' : isLargeGap ? 'bg-amber-300 dark:bg-amber-700' : 'bg-gray-200 dark:bg-gray-700',
+                    isOverlap ? 'bg-destructive' : isLargeGap ? 'bg-accent' : 'bg-gray-200 dark:bg-gray-700',
                   )}
                 />
               </div>

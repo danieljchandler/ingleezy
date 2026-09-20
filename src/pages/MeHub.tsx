@@ -104,7 +104,7 @@ const MeHub = () => {
       {/* Where you are, before what you can do. Numerals are set in the
           display face, which has no Arabic glyphs — Latin digits only, which
           is exactly what this is. */}
-      <div className="mb-7 grid grid-cols-3 overflow-hidden rounded-2xl bg-[#2C3B74] text-white">
+      <div className="mb-7 grid grid-cols-3 overflow-hidden rounded-2xl bg-primary text-white">
         <Stat value={xp?.level ?? 1} label="مستواك" />
         <Stat value={srs?.totalCards ?? 0} label="كلماتك" divided />
         <Stat value={srs?.totalDueNow ?? 0} label="مستحقة الآن" divided />

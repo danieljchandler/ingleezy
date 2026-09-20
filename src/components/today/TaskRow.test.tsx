@@ -71,7 +71,8 @@ function render({
 }
 
 const row = () => screen.getByRole("button", { name: /دقائق$/ });
-const rail = (container: HTMLElement) => container.querySelector("[aria-hidden]")!;
+// The icon tile carries the dialect hue; it replaced a separate colour rail.
+const tile = (container: HTMLElement) => container.querySelector(".h-12")!;
 
 describe("what the row says", () => {
   it("names the task and what it will cost", () => {
@@ -164,10 +165,10 @@ describe("once the task is done", () => {
     expect(screen.queryByText("12")).toBeNull();
   });
 
-  it("fades the dialect rail", () => {
+  it("drops the dialect tint from the icon tile", () => {
     const { container } = render({ done: true });
 
-    expect(rail(container).className).toContain("opacity-40");
+    expect(tile(container).className).toContain("bg-muted");
   });
 
   it("can still be opened", () => {
@@ -180,11 +181,11 @@ describe("once the task is done", () => {
   });
 });
 
-describe("the dialect rail", () => {
+describe("the dialect tint", () => {
   it.each([
-    ["Gulf", "teal"],
-    ["Egyptian", "amber"],
-    ["Yemeni", "red"],
+    ["Gulf", "bg-primary/10"],
+    ["Egyptian", "bg-accent/15"],
+    ["Yemeni", "bg-success/15"],
   ])("colours the row for %s", async (dialect, hue) => {
     const { container } = render({ dialect });
     await act(async () => {
@@ -193,7 +194,7 @@ describe("the dialect rail", () => {
 
     // Today looks the same in every dialect apart from this. It is the only
     // ambient cue that a learner switching modules is where they think they are.
-    expect(rail(container).className).toContain(hue);
+    expect(tile(container).className).toContain(hue);
   });
 
   it("falls back to the Gulf colours for an unknown dialect", async () => {
@@ -204,7 +205,7 @@ describe("the dialect rail", () => {
 
     // A dialect added to the data before the palette would otherwise render an
     // uncoloured rail.
-    expect(rail(container).className).toContain("teal");
+    expect(tile(container).className).toContain("bg-primary/10");
   });
 });
 

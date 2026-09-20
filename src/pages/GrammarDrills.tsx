@@ -48,9 +48,9 @@ interface DrillQuestion {
 }
 
 const DIFFICULTIES = [
-  { id: "beginner", label: "مبتدئ", color: "text-green-600 dark:text-green-400" },
-  { id: "intermediate", label: "متوسط", color: "text-yellow-600 dark:text-yellow-400" },
-  { id: "advanced", label: "متقدم", color: "text-red-600 dark:text-red-400" },
+  { id: "beginner", label: "مبتدئ", color: "text-success" },
+  { id: "intermediate", label: "متوسط", color: "text-accent" },
+  { id: "advanced", label: "متقدم", color: "text-destructive" },
 ];
 
 const GrammarDrills = () => {
@@ -279,9 +279,9 @@ const GrammarDrills = () => {
           <p className="text-muted-foreground">
             {score} / {questions.length} صحيحة
           </p>
-          {pct >= 80 && <p className="text-sm text-green-600 dark:text-green-400">ممتاز! 🎉</p>}
-          {pct >= 50 && pct < 80 && <p className="text-sm text-yellow-600 dark:text-yellow-400">جهد طيب! واصل التدريب 💪</p>}
-          {pct < 50 && <p className="text-sm text-red-600 dark:text-red-400">واصل — بالتدريب يأتي الإتقان! 📚</p>}
+          {pct >= 80 && <p className="text-sm text-success">ممتاز! 🎉</p>}
+          {pct >= 50 && pct < 80 && <p className="text-sm text-accent">جهد طيب! واصل التدريب 💪</p>}
+          {pct < 50 && <p className="text-sm text-destructive">واصل — بالتدريب يأتي الإتقان! 📚</p>}
 
           {/* The round's standing after this attempt, not just this attempt.
               Shown only once the write has landed — claiming a new strength
@@ -370,14 +370,14 @@ const GrammarDrills = () => {
                     "flex items-center gap-3 transition-all duration-200",
                     !answered && "hover:border-primary/40 active:scale-[0.99] cursor-pointer",
                     !answered && "bg-card border-border",
-                    answered && isCorrect && "bg-green-500/10 border-green-500/40",
-                    answered && isSelected && !isCorrect && "bg-red-500/10 border-red-500/40",
+                    answered && isCorrect && "bg-success/10 border-success/40",
+                    answered && isSelected && !isCorrect && "bg-destructive/10 border-destructive/40",
                     answered && !isSelected && !isCorrect && "opacity-50"
                   )}
                 >
                   <div className="w-8 h-8 rounded-full border border-border flex items-center justify-center shrink-0">
-                    {answered && isCorrect && <Check className="h-4 w-4 text-green-600 dark:text-green-400" />}
-                    {answered && isSelected && !isCorrect && <X className="h-4 w-4 text-red-600 dark:text-red-400" />}
+                    {answered && isCorrect && <Check className="h-4 w-4 text-success" />}
+                    {answered && isSelected && !isCorrect && <X className="h-4 w-4 text-destructive" />}
                     {!answered && <span className="text-xs text-muted-foreground">{String.fromCharCode(65 + i)}</span>}
                   </div>
                   <div className="flex-1 text-left">

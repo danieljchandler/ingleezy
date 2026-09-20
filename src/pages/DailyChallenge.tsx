@@ -287,14 +287,14 @@ const DailyChallenge = () => {
 
           {/* Streak display */}
           {isAuthenticated && (
-            <div className="bg-gradient-to-r from-orange-500/10 to-yellow-500/10 border border-orange-500/20 rounded-2xl p-4 text-center">
+            <div className="bg-gradient-to-r from-accent/10 to-accent/10 border border-accent/20 rounded-2xl p-4 text-center">
               <div className="flex items-center justify-center gap-2 mb-1">
-                <Flame className="h-6 w-6 text-orange-500" />
+                <Flame className="h-6 w-6 text-accent" />
                 <span className="text-3xl font-bold text-foreground">{streakData || 0}</span>
               </div>
               <p className="text-sm text-muted-foreground">يوم متتالي</p>
               {(streakData || 0) >= 3 && (
-                <Badge className="mt-2 bg-orange-500/20 text-orange-700 dark:text-orange-400">
+                <Badge className="mt-2 bg-accent/20 text-accent-ink">
                   {(streakData || 0) >= 7 ? "2x XP Bonus! 🔥" : "1.5x XP Bonus! ⚡"}
                 </Badge>
               )}
@@ -317,7 +317,7 @@ const DailyChallenge = () => {
               ) : (
                 <Zap className="h-5 w-5 me-2" />
               )}
-              Start Today's Challenge
+              ابدأ تحدي اليوم
             </Button>
           )}
 
@@ -360,7 +360,7 @@ const DailyChallenge = () => {
           <div className="space-y-1">
             <p className="text-lg font-semibold text-foreground">حصّلت {totalXP} نقطة خبرة</p>
             {streakMultiplier > 1 && (
-              <p className="text-sm text-orange-600 dark:text-orange-400">
+              <p className="text-sm text-accent">
                 مكافأة السلسلة ×{streakMultiplier} 🔥
               </p>
             )}
@@ -467,7 +467,7 @@ const DailyChallenge = () => {
                       }}
                       className={cn(
                         "w-full p-3 rounded-xl border-2 text-center font-arabic text-lg transition-all",
-                        isMatched ? "border-green-500 bg-green-500/10 opacity-60" :
+                        isMatched ? "border-success bg-success/10 opacity-60" :
                         isSelected ? "border-primary bg-primary/10" : "border-border hover:border-primary/50"
                       )}
                     >
@@ -516,7 +516,7 @@ const DailyChallenge = () => {
                       }}
                       className={cn(
                         "w-full p-3 rounded-xl border-2 text-center text-sm transition-all",
-                        isMatched ? "border-green-500 bg-green-500/10 opacity-60" :
+                        isMatched ? "border-success bg-success/10 opacity-60" :
                         isSelected ? "border-primary bg-primary/10" : "border-border hover:border-primary/50"
                       )}
                     >
@@ -545,9 +545,9 @@ const DailyChallenge = () => {
                     "w-full p-4 rounded-xl text-center transition-all border-2",
                     showResult
                       ? isAnswer
-                        ? "border-green-500 bg-green-500/10"
+                        ? "border-success bg-success/10"
                         : isSelected
-                        ? "border-red-500 bg-red-500/10"
+                        ? "border-destructive bg-destructive/10"
                         : "border-border bg-muted/50"
                       : "border-border hover:border-primary/50 bg-card"
                   )}
@@ -564,15 +564,15 @@ const DailyChallenge = () => {
           <div className="space-y-3">
             <div className={cn(
               "p-3 rounded-xl text-center",
-              isCorrect ? "bg-green-500/10" : "bg-red-500/10"
+              isCorrect ? "bg-success/10" : "bg-destructive/10"
             )}>
               <div className="flex items-center justify-center gap-2">
                 {isCorrect ? (
-                  <Check className="h-5 w-5 text-green-600" />
+                  <Check className="h-5 w-5 text-success" />
                 ) : (
-                  <X className="h-5 w-5 text-red-600" />
+                  <X className="h-5 w-5 text-destructive" />
                 )}
-                <span className={isCorrect ? "text-green-600 font-medium" : "text-red-600 font-medium"}>
+                <span className={isCorrect ? "text-success font-medium" : "text-destructive font-medium"}>
                   {isCorrect ? "صح!" : `الجواب: ${currentQuestion.answer}`}
                 </span>
               </div>

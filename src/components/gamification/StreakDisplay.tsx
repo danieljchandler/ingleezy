@@ -45,15 +45,15 @@ export function StreakDisplay({ compact = false, className }: StreakDisplayProps
       <div
         className={cn(
           "flex items-center gap-1 px-2 py-1 rounded-full",
-          alive ? "bg-orange-100 dark:bg-orange-900/30" : "bg-muted",
+          alive ? "bg-accent/15 dark:bg-accent/30" : "bg-muted",
           className,
         )}
       >
-        <Flame className={cn("h-3 w-3", alive ? "text-orange-500" : "text-muted-foreground")} />
+        <Flame className={cn("h-3 w-3", alive ? "text-accent" : "text-muted-foreground")} />
         <span
           className={cn(
             "text-xs font-semibold",
-            alive ? "text-orange-600 dark:text-orange-400" : "text-muted-foreground",
+            alive ? "text-accent" : "text-muted-foreground",
           )}
         >
           {AR.streak.days(days)}
@@ -69,7 +69,7 @@ export function StreakDisplay({ compact = false, className }: StreakDisplayProps
           <div className={cn(
             "w-12 h-12 rounded-full flex items-center justify-center",
             alive
-              ? "bg-gradient-to-br from-orange-400 to-red-500"
+              ? "bg-gradient-to-br from-accent to-destructive"
               : "bg-muted"
           )}>
             <Flame className={cn(

@@ -312,15 +312,15 @@ test.describe("comprehension", () => {
     // picked correctly and one who did not see the same green border in the
     // same place, and colour is the only thing distinguishing their answer
     // from the truth.
-    await expect(page.getByRole("button", { name: "بخير" })).toHaveClass(/border-green-500/);
+    await expect(page.getByRole("button", { name: "بخير" })).toHaveClass(/border-success/);
     await expect(page.getByText(/صحيح!|ليس تماماً/)).toHaveCount(0);
   });
 
   test("highlights the right option after a wrong choice too", async ({ page }) => {
     await page.getByRole("button", { name: "مع السلامة" }).click();
 
-    await expect(page.getByRole("button", { name: "بخير" })).toHaveClass(/border-green-500/);
-    await expect(page.getByRole("button", { name: "مع السلامة" })).not.toHaveClass(/border-green-500/);
+    await expect(page.getByRole("button", { name: "بخير" })).toHaveClass(/border-success/);
+    await expect(page.getByRole("button", { name: "مع السلامة" })).not.toHaveClass(/border-success/);
   });
 
   test("takes no second answer", async ({ page }) => {

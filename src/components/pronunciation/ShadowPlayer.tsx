@@ -207,9 +207,9 @@ export function ShadowPlayer({ clip, threshold, autoAdvance, showEnglish, onResu
           <div className="flex items-center justify-center gap-4 mb-4">
             <div className={cn(
               "inline-flex items-center justify-center w-20 h-20 rounded-full border-4",
-              result.overall >= 90 ? "border-green-500" :
+              result.overall >= 90 ? "border-success" :
               result.overall >= 75 ? "border-blue-500" :
-              result.overall >= 60 ? "border-yellow-500" : "border-red-500"
+              result.overall >= 60 ? "border-accent" : "border-destructive"
             )}>
               <span className={cn("text-2xl font-bold", band.color)}>{Math.round(result.overall)}</span>
             </div>

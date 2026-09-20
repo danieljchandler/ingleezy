@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppShell } from "@/components/layout/AppShell";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { PageCorner } from "@/components/shell/PageCorner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -319,21 +320,13 @@ const Leaderboard = () => {
       <PageCorner />
 
       <div className="py-4 space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
-              <Trophy className="h-6 w-6 text-primary" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-foreground inline-flex items-center gap-2">لوحة الصدارة <InfoHint {...PAGE_HINTS["leaderboard"]} /></h1>
-              <p className="text-sm text-muted-foreground">
-                نافس متعلمين آخرين
-              </p>
-            </div>
-          </div>
-          {isAuthenticated && <ProfileEditDialog />}
-        </div>
+        <PageHeader
+          title="لوحة الصدارة"
+          icon={<InfoHint {...PAGE_HINTS["leaderboard"]} />}
+          subtitle="نافس متعلمين آخرين"
+          action={isAuthenticated ? <ProfileEditDialog /> : undefined}
+          className="mb-0"
+        />
 
         {/* My Rank Card */}
         {isAuthenticated && myRank && (

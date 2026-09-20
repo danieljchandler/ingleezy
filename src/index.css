@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@500;600;700;800&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,140 +6,169 @@
 
 @layer base {
   :root {
-    /* ── Ingleezy brand — Ink Navy / Indigo / Periwinkle system ──
-       From the brand guide: a cool, restrained navy-indigo palette with one
-       warm note (amber) reserved for streaks and mastery. No new saturated
-       hues — restraint is the identity. Hex sources:
-       Ink Navy #1B2534 · Indigo Deep #2C3B74 · Indigo Core #3A508E ·
-       Periwinkle #7184C6 · amber #D98A3D · success #3F9C6D · error #B94A48 */
+    /* ── Ingleezy brand — Firoza & Gold ────────────────────────────────────
+       Firoza (فيروز) is the turquoise of Islamic tilework — the glaze on the
+       domes, and the stone held to ward off the evil eye. Paired with the gold
+       of manuscript illumination, on a warm sandstone ground. The three have
+       sat together in Arab visual culture for a thousand years, which is the
+       argument for them: this is a palette an Arabic speaker recognises before
+       they read a word of the interface.
 
-    /* Background: barely-cool white; cards sit on it in pure white with
-       borders doing the structural work (guide: white ground, #E2E5EC lines) */
-    --background: 225 25% 98%;
-    --foreground: 216 32% 15%;
+       Structured after Memrise: one dominant colour carries the whole
+       interface, a light tint of it fills, and a single warm accent is
+       reserved for streaks, XP and mastery. Nothing else is allowed to be loud.
+
+       Hex sources:
+       Firoza #135F68 · Firoza Mid #28AAB8 · Firoza Deep #09474E ·
+       Gold #E5A917 · Ink #121E21 · Sandstone #FAF7F0 ·
+       Clay #BA3F36 · Sage #2F7F59 */
+
+    /* Warm sandstone ground. A pure-white card lifts off it without needing a
+       border to say so, and it keeps the teal from reading as clinical. */
+    --background: 45 35% 97%;
+    --foreground: 190 28% 10%;
 
     --card: 0 0% 100%;
-    --card-foreground: 216 32% 15%;
+    --card-foreground: 190 28% 10%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 216 32% 15%;
+    --popover-foreground: 190 28% 10%;
 
-    /* Indigo Deep — primary actions, CTAs */
-    --primary: 228 45% 31%;
+    /* Firoza — every primary action, every filled surface, the app's voice */
+    --primary: 186 70% 25%;
     --primary-foreground: 0 0% 100%;
 
-    /* Ink Navy secondary */
-    --secondary: 216 32% 15%;
+    /* Ink secondary */
+    --secondary: 190 28% 10%;
     --secondary-foreground: 0 0% 100%;
 
-    /* Amber — the one warm note: streaks, mastery, celebration. Sparingly. */
-    --accent: 30 67% 55%;
-    --accent-foreground: 216 32% 15%;
+    /* Gold — streaks, XP, mastery, celebration. Nothing else. */
+    --accent: 42 82% 52%;
+    --accent-foreground: 190 28% 10%;
 
-    /* Periwinkle — hovers, chips, light accents */
-    --periwinkle: 227 43% 61%;
+    /* Accent-coloured TEXT, on a light ground. `--accent` is a fill; at 52%
+       lightness it fails contrast as body copy on the pale gold it sits on.
+       Flips light in dark mode, where the ground is the dark thing. */
+    --accent-ink: 38 74% 28%;
 
-    --muted: 224 24% 95%;
-    --muted-foreground: 216 16% 35%;
+    /* Firoza Mid — hovers, chips, icon tints.
+       (Legacy token name kept: ~200 call sites across the app.) */
+    --periwinkle: 186 64% 44%;
 
-    --destructive: 1 44% 50%;
+    /* Neutrals are warmed to the sandstone, not neutral grey: a cool grey
+       against this ground is what made the old chrome look like a dashboard. */
+    --muted: 35 20% 95%;
+    --muted-foreground: 35 8% 38%;
+
+    /* Clay — a warm red, so a wrong answer never feels like a system error */
+    --destructive: 4 55% 47%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 150 42% 43%;
+    /* Sage — far enough from firoza that "correct" never reads as "primary" */
+    --success: 152 46% 34%;
     --success-foreground: 0 0% 100%;
 
-    --border: 222 21% 91%;
-    --input: 223 22% 93%;
-    --ring: 224 42% 39%;
+    --border: 35 20% 91%;
+    --input: 35 20% 93%;
+    --ring: 186 70% 35%;
 
-    /* Guide: soft radii (8–12px) against the wordmark's angularity */
-    --radius: 0.75rem;
+    /* Memrise-chunky. 16px base puts cards at 24px and chips at full round. */
+    --radius: 1rem;
 
-    /* Indigo Core for scaffold accents (legacy token name kept: heavy usage) */
-    --olive: 224 42% 39%;
+    /* Firoza Deep for scaffold accents (legacy token name kept: heavy usage) */
+    --olive: 186 73% 20%;
 
-    /* Topic accent stripes — tints of the system plus the amber note */
-    --topic-colors: 228 45% 31%;
-    --topic-animals: 227 43% 61%;
-    --topic-household: 224 42% 39%;
-    --topic-tools: 216 32% 15%;
-    --topic-food: 30 67% 55%;
-    --topic-nature: 150 42% 43%;
+    /* Topic accent stripes — steps of the one hue, plus the gold note */
+    --topic-colors: 186 70% 25%;
+    --topic-animals: 186 64% 44%;
+    --topic-household: 186 73% 20%;
+    --topic-tools: 190 28% 10%;
+    --topic-food: 42 82% 52%;
+    --topic-nature: 152 46% 34%;
 
-    /* Indigo Deep border color (legacy token name kept: heavy usage) */
-    --desert-red: 228 45% 31%;
+    /* Firoza border colour (legacy token name kept: heavy usage) */
+    --desert-red: 186 70% 25%;
 
     /* Card white (legacy token name kept: heavy usage) */
     --card-cream: 0 0% 100%;
 
-    /* Shadows: ink-navy tinted, very subtle — borders do the work */
-    --shadow-soft: 0 2px 8px -2px hsl(216 32% 30% / 0.08);
-    --shadow-card: 0 2px 12px -4px hsl(216 32% 25% / 0.1);
-    --shadow-elegant: 0 1px 2px hsl(216 32% 25% / 0.05), 0 8px 24px -10px hsl(228 45% 31% / 0.15);
-    --shadow-button: 0 4px 12px -4px hsl(228 45% 31% / 0.25);
-    --shadow-topic: 0 2px 8px -2px hsl(228 45% 31% / 0.08), 0 4px 16px -4px hsl(216 32% 25% / 0.06);
-    --shadow-topic-hover: 0 4px 12px -2px hsl(228 45% 31% / 0.12), 0 8px 24px -6px hsl(216 32% 25% / 0.1);
+    /* Tinted and layered, so elevation does the structural work the old 1px
+       borders were doing badly. */
+    --shadow-soft: 0 1px 2px hsl(190 28% 12% / 0.04), 0 2px 8px -3px hsl(190 28% 12% / 0.08);
+    --shadow-card: 0 1px 2px hsl(190 28% 12% / 0.05), 0 6px 18px -8px hsl(186 70% 25% / 0.14);
+    --shadow-elegant: 0 1px 2px hsl(190 28% 12% / 0.05), 0 14px 34px -14px hsl(186 70% 25% / 0.26);
+    --shadow-button: 0 1px 2px hsl(186 70% 14% / 0.18), 0 6px 16px -6px hsl(186 70% 25% / 0.34);
+    --shadow-topic: 0 1px 2px hsl(190 28% 12% / 0.05), 0 6px 18px -8px hsl(186 70% 25% / 0.16);
+    --shadow-topic-hover: 0 2px 4px hsl(190 28% 12% / 0.06), 0 14px 28px -10px hsl(186 70% 25% / 0.26);
 
-
-    --sidebar-background: 225 25% 97%;
-    --sidebar-foreground: 216 32% 15%;
-    --sidebar-primary: 228 45% 31%;
+    --sidebar-background: 45 32% 96%;
+    --sidebar-foreground: 190 28% 10%;
+    --sidebar-primary: 186 70% 25%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 224 24% 93%;
-    --sidebar-accent-foreground: 216 32% 15%;
-    --sidebar-border: 222 21% 91%;
-    --sidebar-ring: 224 42% 39%;
+    --sidebar-accent: 35 20% 93%;
+    --sidebar-accent-foreground: 190 28% 10%;
+    --sidebar-border: 35 20% 91%;
+    --sidebar-ring: 186 70% 35%;
   }
 
   .dark {
-    /* Guide: Ink Navy ground, #232F42 surfaces, Periwinkle as the pop
-       accent against dark. Primary flips to Periwinkle with Ink Navy text —
-       higher contrast than white-on-periwinkle, and it keeps CTAs loud. */
-    --background: 216 32% 15%;
-    --foreground: 222 30% 94%;
+    /* A teal-black ground rather than a generic midnight, so dark mode is
+       recognisably the same brand. The deep firoza cannot carry a fill here,
+       so a lighter, desaturated step takes over: bright enough to read as
+       text, muted enough that a large surface of it is not neon. */
+    --background: 190 30% 8%;
+    --foreground: 40 16% 94%;
 
-    --card: 217 31% 20%;
-    --card-foreground: 222 30% 94%;
+    --card: 190 24% 12%;
+    --card-foreground: 40 16% 94%;
 
-    --popover: 217 31% 20%;
-    --popover-foreground: 222 30% 94%;
+    --popover: 190 24% 12%;
+    --popover-foreground: 40 16% 94%;
 
-    --primary: 227 43% 61%;
-    --primary-foreground: 216 32% 12%;
+    --primary: 186 48% 52%;
+    --primary-foreground: 190 40% 8%;
 
-    --secondary: 222 30% 94%;
-    --secondary-foreground: 216 32% 15%;
+    --secondary: 40 16% 94%;
+    --secondary-foreground: 190 28% 10%;
 
-    --accent: 30 70% 58%;
-    --accent-foreground: 216 32% 12%;
+    --accent: 42 85% 60%;
+    --accent-foreground: 190 40% 8%;
+    --accent-ink: 42 88% 72%;
 
-    --periwinkle: 227 43% 66%;
+    --periwinkle: 186 44% 64%;
 
-    --muted: 217 28% 24%;
-    --muted-foreground: 220 18% 72%;
+    --muted: 190 18% 18%;
+    --muted-foreground: 40 10% 72%;
 
-    --border: 217 25% 27%;
-    --input: 217 25% 27%;
-    --ring: 227 43% 61%;
+    --border: 190 15% 22%;
+    --input: 190 15% 22%;
+    --ring: 186 48% 52%;
 
-    --destructive: 1 50% 58%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive: 4 62% 60%;
+    --destructive-foreground: 190 40% 8%;
 
-    --success: 150 40% 52%;
-    --success-foreground: 216 32% 12%;
+    --success: 152 44% 50%;
+    --success-foreground: 190 40% 8%;
 
-    --olive: 227 43% 61%;
-    --desert-red: 227 43% 61%;
-    --card-cream: 217 31% 20%;
+    --olive: 186 48% 52%;
+    --desert-red: 186 44% 60%;
+    --card-cream: 190 24% 12%;
 
-    --sidebar-background: 217 31% 18%;
-    --sidebar-foreground: 222 30% 94%;
-    --sidebar-primary: 227 43% 61%;
-    --sidebar-primary-foreground: 216 32% 12%;
-    --sidebar-accent: 217 28% 24%;
-    --sidebar-accent-foreground: 222 30% 94%;
-    --sidebar-border: 217 25% 27%;
-    --sidebar-ring: 227 43% 61%;
+    --shadow-soft: 0 1px 2px hsl(190 45% 3% / 0.4), 0 2px 8px -3px hsl(190 45% 3% / 0.5);
+    --shadow-card: 0 1px 2px hsl(190 45% 3% / 0.45), 0 6px 18px -8px hsl(190 45% 3% / 0.6);
+    --shadow-elegant: 0 1px 2px hsl(190 45% 3% / 0.5), 0 14px 34px -14px hsl(190 45% 2% / 0.7);
+    --shadow-button: 0 1px 2px hsl(190 45% 3% / 0.5), 0 6px 16px -6px hsl(186 45% 20% / 0.5);
+    --shadow-topic: 0 1px 2px hsl(190 45% 3% / 0.45), 0 6px 18px -8px hsl(190 45% 3% / 0.55);
+    --shadow-topic-hover: 0 2px 4px hsl(190 45% 3% / 0.5), 0 14px 28px -10px hsl(190 45% 3% / 0.65);
+
+    --sidebar-background: 190 30% 10%;
+    --sidebar-foreground: 40 16% 94%;
+    --sidebar-primary: 186 48% 52%;
+    --sidebar-primary-foreground: 190 40% 8%;
+    --sidebar-accent: 190 18% 18%;
+    --sidebar-accent-foreground: 40 16% 94%;
+    --sidebar-border: 190 15% 22%;
+    --sidebar-ring: 186 48% 52%;
   }
 }
 
@@ -164,8 +193,10 @@
 
   /* Locked heading rhythm — one dual-script family, no competing weights */
   h1, h2, h3, h4 {
-    font-family: 'IBM Plex Sans Arabic', 'Inter', sans-serif;
+    font-family: 'Baloo Bhaijaan 2', 'IBM Plex Sans Arabic', 'Inter', sans-serif;
     font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
     color: hsl(var(--foreground));
   }
   h1 { @apply text-headline md:text-display; }
@@ -182,7 +213,8 @@
   }
 
   .font-heading {
-    font-family: 'IBM Plex Sans Arabic', 'Inter', sans-serif;
+    font-family: 'Baloo Bhaijaan 2', 'IBM Plex Sans Arabic', 'Inter', sans-serif;
+    line-height: 1.3;
   }
 
   .font-arabic {
@@ -194,10 +226,11 @@
      Arabic), so it appears where Latin naturally does: the logo lockup and
      level-up/streak numerals. Sparingly, per the brand guide. */
   .font-display {
-    font-family: 'Archivo Black', 'Inter', sans-serif;
-    font-style: italic;
-    letter-spacing: -0.02em;
-    text-transform: uppercase;
+    font-family: 'Baloo Bhaijaan 2', 'Inter', sans-serif;
+    font-weight: 800;
+    font-style: normal;
+    letter-spacing: -0.01em;
+    line-height: 1.25;
   }
 
   /* English CONTENT block — the studied language. The class was a semantic
@@ -389,36 +422,36 @@
 
   /* Background gradients - for large areas only */
   .bg-gradient-warm {
-    background: linear-gradient(180deg, hsl(225 30% 96%) 0%, hsl(226 32% 92%) 100%);
+    background: linear-gradient(180deg, hsl(45 36% 97%) 0%, hsl(42 28% 93%) 100%);
   }
 
   .bg-gradient-subtle {
-    background: linear-gradient(180deg, hsl(225 28% 97%) 0%, hsl(225 28% 94%) 100%);
+    background: linear-gradient(180deg, hsl(45 35% 98%) 0%, hsl(43 26% 95%) 100%);
   }
 
   /* Topic accent colors - for small accent stripes only */
   .bg-gradient-green {
-    background: hsl(228 45% 31%);
+    background: hsl(186 70% 25%);
   }
 
   .bg-gradient-sand {
-    background: hsl(227 43% 61%);
+    background: hsl(42 82% 52%);
   }
 
   .bg-gradient-olive {
-    background: hsl(224 42% 39%);
+    background: hsl(186 64% 44%);
   }
 
   .bg-gradient-indigo {
-    background: hsl(224 42% 39%);
+    background: hsl(186 73% 20%);
   }
 
   .bg-gradient-charcoal {
-    background: hsl(216 32% 15%);
+    background: hsl(190 28% 10%);
   }
 
   .bg-gradient-red {
-    background: hsl(30 67% 55%);
+    background: hsl(4 55% 47%);
   }
 
   /* Slow drift for parallax backdrop layers */

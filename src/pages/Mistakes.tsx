@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { AppShell } from "@/components/layout/AppShell";
-import { HubHeader } from "@/components/layout/HubGrid";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { PageCorner } from "@/components/shell/PageCorner";
 import { Button } from "@/components/ui/button";
 import { useDialect } from "@/contexts/DialectContext";
@@ -31,7 +31,7 @@ const Mistakes = () => {
   return (
     <AppShell>
       <PageCorner />
-      <HubHeader
+      <PageHeader
         title="أخطاؤك"
         subtitle="ما الذي يتكرر تعثرك فيه بالإنجليزية."
       />
@@ -141,7 +141,7 @@ function MistakeCard({ group, onDismiss, dismissing }: MistakeCardProps) {
         {group.kinds.map((kind) => (
           <span
             key={kind}
-            className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300"
+            className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-accent/15 text-accent-ink"
           >
             {labelForKind(kind)}
           </span>

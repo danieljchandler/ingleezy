@@ -153,7 +153,10 @@ test.describe("the library", () => {
 
     await page.goto("/listen");
 
-    await expect(page.getByText("ما فيه حلقات بعد لـGulf.")).toBeVisible();
+    // The dialect is named in the heading, so an empty Gulf library cannot be
+    // mistaken for an empty app. It lost its trailing full stop moving into
+    // EmptyState's heading, which is where headings belong.
+    await expect(page.getByRole("heading", { name: "ما فيه حلقات بعد لـGulf" })).toBeVisible();
     await expect(page.getByText("كن أول واحد — افتح تبويب «أنشئ».")).toBeVisible();
   });
 

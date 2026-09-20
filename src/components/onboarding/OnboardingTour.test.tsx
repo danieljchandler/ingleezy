@@ -25,7 +25,7 @@ const TRIGGER_KEY = "ingleezy:showTour";
 // The tour titles each slot with the word the slot itself uses — a tour that
 // renames the thing it is pointing at is describing a screen the reader cannot
 // find.
-const STEP_TITLES = ["الرئيسية", "المهارات", "ارفع", "حسابك"];
+const STEP_TITLES = ["الرئيسية", "المهارات", "اليوم", "حسابك"];
 const LAST = STEP_TITLES.length - 1;
 
 let cleanup: (() => void) | undefined;
@@ -54,7 +54,7 @@ afterEach(async () => {
 /** Stands in for the dock and the profile emblem the tour points at. */
 function mountNav() {
   nav = document.createElement("div");
-  for (const slot of ["nav-feed", "nav-choose", "nav-upload", "emblem"]) {
+  for (const slot of ["nav-feed", "nav-choose", "nav-today", "emblem"]) {
     const el = document.createElement("button");
     el.setAttribute("data-tour", slot);
     el.textContent = slot;

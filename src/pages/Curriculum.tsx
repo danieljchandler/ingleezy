@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { AppShell } from "@/components/layout/AppShell";
-import { HubHeader } from "@/components/layout/HubGrid";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { PageCorner } from "@/components/shell/PageCorner";
 import { useStages } from "@/hooks/useStages";
 import { useAllLessons } from "@/hooks/useLessons";
@@ -85,7 +85,7 @@ const Curriculum = () => {
         <PageCorner />
       </div>
 
-      <HubHeader
+      <PageHeader
         title="Curriculum"
         subtitle={`مسارك بشرح ${activeDialect}، مرحلة مرحلة.`}
       />

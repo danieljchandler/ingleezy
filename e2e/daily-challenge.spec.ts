@@ -31,7 +31,7 @@ function isoDate(daysAgo: number): string {
   return d.toISOString().slice(0, 10);
 }
 
-const startButton = (page: Page) => page.getByRole("button", { name: "Start Today's Challenge" });
+const startButton = (page: Page) => page.getByRole("button", { name: "ابدأ تحدي اليوم" });
 const options = (page: Page) => page.locator("button.rounded-xl.border-2");
 
 const aGeneratedChallenge = (over: Record<string, unknown> = {}) => ({

@@ -41,7 +41,7 @@ export const DailySoundGoalRing = ({ goal = 3, className }: DailySoundGoalRingPr
     <div
       className={cn(
         "flex items-center gap-2.5 px-3 py-2 rounded-xl border-2 bg-card",
-        complete ? "border-amber-500/60" : "border-border",
+        complete ? "border-accent/60" : "border-border",
         className,
       )}
       title={`${masteredToday} من ${goal} أصوات اليوم`}
@@ -70,7 +70,7 @@ export const DailySoundGoalRing = ({ goal = 3, className }: DailySoundGoalRingPr
         </svg>
         <div className="absolute inset-0 flex items-center justify-center">
           {complete ? (
-            <Flame className="h-5 w-5 text-amber-500" />
+            <Flame className="h-5 w-5 text-accent" />
           ) : (
             <span className="text-xs font-bold text-foreground tabular-nums">
               {masteredToday}/{goal}

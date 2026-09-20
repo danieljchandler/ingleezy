@@ -281,7 +281,7 @@ test.describe("a stop's mini-lesson", () => {
     // from the row rather than from this session — a learner returning to a
     // half-finished stop should see where they got to. (The current step's dot
     // is always primary, so a completed *current* step shows nothing here.)
-    await expect(page.locator("button.bg-green-500")).toHaveCount(1);
+    await expect(page.locator("button.bg-success")).toHaveCount(1);
   });
 
   test("sends an unknown sound code back to the map", async ({ page }) => {
@@ -314,7 +314,7 @@ test.describe("when the step cannot be saved", () => {
     // sounds, collect the XP animation every time, and have nothing saved,
     // with no prompt to sign in anywhere on the page.
     await expect(page.getByText("الخطوة 2 من 6")).toBeVisible();
-    await expect(page.locator("button.bg-green-500")).toHaveCount(1);
+    await expect(page.locator("button.bg-success")).toHaveCount(1);
   });
 
   test("shows the step as done even when the write fails", async ({
@@ -335,7 +335,7 @@ test.describe("when the step cannot be saved", () => {
     // Same shape with a signed-in learner and a failing write: the tick is a
     // claim about the request having been made, not about anything having been
     // stored. Reloading loses the step silently.
-    await expect(page.locator("button.bg-green-500")).toHaveCount(1);
+    await expect(page.locator("button.bg-success")).toHaveCount(1);
     expect(db.rows("user_sound_progress")).toHaveLength(0);
   });
 });

@@ -37,19 +37,19 @@ export const RatingButtons = ({
       rating: 'again',
       label: 'من جديد',
       icon: <RotateCcw className="w-4 h-4" />,
-      color: 'bg-destructive/8 border-destructive/25 text-destructive hover:bg-destructive/12 hover:border-destructive/45',
+      color: 'bg-destructive/10 border-destructive/25 text-destructive hover:bg-destructive/15 hover:border-destructive/45',
     },
     {
       rating: 'hard',
       label: 'صعب',
       icon: <ThumbsDown className="w-4 h-4" />,
-      color: 'bg-amber-500/8 border-amber-500/25 text-amber-700 hover:bg-amber-500/12 hover:border-amber-500/45',
+      color: 'bg-accent/10 border-accent/25 text-accent-ink hover:bg-accent/15 hover:border-accent/45',
     },
     {
       rating: 'good',
       label: 'جيد',
       icon: <ThumbsUp className="w-4 h-4" />,
-      color: 'bg-primary/8 border-primary/25 text-primary hover:bg-primary/12 hover:border-primary/45',
+      color: 'bg-primary/10 border-primary/25 text-primary hover:bg-primary/15 hover:border-primary/45',
     },
     {
       rating: 'easy',

@@ -549,17 +549,17 @@ interface TranscriptLineCardProps {
          "rounded-xl border p-4 transition-all duration-200",
          "hover:shadow-md",
          isOverlay
-           ? "bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800/50"
+           ? "bg-accent/15 dark:bg-accent/20 border-accent/15 dark:border-accent/50"
            : "bg-card border-border",
          isActive && !isOverlay && "ring-2 ring-primary/50 border-primary bg-primary/5",
-         isActive && isOverlay && "ring-2 ring-amber-400/50"
+         isActive && isOverlay && "ring-2 ring-accent/50"
        )}
      >
        {/* On-screen text badge */}
        {isOverlay && (
          <div className="flex items-center gap-1.5 mb-2">
-           <MonitorPlay className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
-           <span className="text-xs font-medium text-amber-600 dark:text-amber-400 uppercase tracking-wide">
+           <MonitorPlay className="h-3.5 w-3.5 text-accent" />
+           <span className="text-xs font-medium text-accent uppercase tracking-wide">
              على الشاشة
            </span>
          </div>

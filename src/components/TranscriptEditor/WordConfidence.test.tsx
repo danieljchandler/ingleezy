@@ -59,24 +59,24 @@ describe("WordConfidence — colouring by confidence", () => {
 
   it("leaves a confident word green", () => {
     renderWords();
-    expect(screen.getByText("مرحبا").className).toContain("text-green-700");
+    expect(screen.getByText("مرحبا").className).toContain("text-success");
   });
 
   it("marks the middle band amber", () => {
     renderWords();
-    expect(screen.getByText("بك").className).toContain("text-amber-600");
+    expect(screen.getByText("بك").className).toContain("text-accent");
   });
 
   it("marks a doubtful word red", () => {
     renderWords();
-    expect(screen.getByText("هنا").className).toContain("text-red-600");
+    expect(screen.getByText("هنا").className).toContain("text-destructive");
   });
 
   it.each([
-    [0.85, "text-green-700"],
-    [0.849, "text-amber-600"],
-    [0.65, "text-amber-600"],
-    [0.649, "text-red-600"],
+    [0.85, "text-success"],
+    [0.849, "text-accent"],
+    [0.65, "text-accent"],
+    [0.649, "text-destructive"],
   ])("puts %s in the %s band", (confidence, expected) => {
     renderWords({ words: [aWord("كلمة", confidence)] });
     expect(screen.getByText("كلمة").className).toContain(expected);
@@ -86,7 +86,7 @@ describe("WordConfidence — colouring by confidence", () => {
     // ASR engines omit the field rather than sending zero, and an unscored word
     // is exactly the one an editor should look at.
     renderWords({ words: [{ word: "كلمة", start: 0, end: 1 } as Word] });
-    expect(screen.getByText("كلمة").className).toContain("text-red-600");
+    expect(screen.getByText("كلمة").className).toContain("text-destructive");
   });
 
   it("lays the words out right to left", () => {
@@ -120,7 +120,7 @@ describe("WordConfidence — the playhead", () => {
     // The two are orthogonal: an editor scrubbing through playback still needs
     // to see which words were uncertain.
     renderWords({ activeWordIndex: 2 });
-    expect(screen.getByText("هنا").className).toContain("text-red-600");
+    expect(screen.getByText("هنا").className).toContain("text-destructive");
     expect(screen.getByText("هنا").className).toContain("bg-blue-200");
   });
 });

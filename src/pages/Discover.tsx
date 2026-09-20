@@ -4,6 +4,8 @@ import { useDiscoverVideos } from "@/hooks/useDiscoverVideos";
 import { useDiscoverFeed, type FeedItem } from "@/hooks/useDiscoverFeed";
 import type { DiscoverVideo } from "@/hooks/useDiscoverVideos";
 import { AppShell } from "@/components/layout/AppShell";
+import { EmptyState } from "@/components/layout/EmptyState";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { PageCorner } from "@/components/shell/PageCorner";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -46,7 +48,7 @@ const DIFFICULTY_LABELS: Record<string, string> = {
 function difficultyColor(d: string) {
   switch (d) {
     case "Beginner": return "bg-primary/10 text-primary border-primary/20";
-    case "Intermediate": return "bg-accent/10 text-accent border-accent/20";
+    case "Intermediate": return "bg-accent/10 text-accent-ink border-accent/20";
     case "Advanced": return "bg-secondary/10 text-secondary border-secondary/20";
     case "Expert": return "bg-destructive/10 text-destructive border-destructive/20";
     default: return "bg-muted text-muted-foreground";
@@ -54,9 +56,9 @@ function difficultyColor(d: string) {
 }
 
 function comprehensionTone(c: number) {
-  if (c >= 0.8) return "bg-emerald-500";
-  if (c >= 0.5) return "bg-amber-500";
-  return "bg-rose-500";
+  if (c >= 0.8) return "bg-success";
+  if (c >= 0.5) return "bg-accent";
+  return "bg-destructive";
 }
 
 interface CardProps {
@@ -199,15 +201,11 @@ const Discover = () => {
     <AppShell>
       <PageCorner />
 
-      <h1
-        className="text-2xl font-bold text-foreground mb-2 inline-flex items-center gap-2"
-      >
-        اكتشف
-        <InfoHint {...PAGE_HINTS["discover"]} size="md" />
-      </h1>
-      <p className="text-sm text-muted-foreground mb-6">
-        شاهد فيديوهات بالإنجليزية مع ترجمة عربية متزامنة
-      </p>
+      <PageHeader
+        title="اكتشف"
+        icon={<InfoHint {...PAGE_HINTS["discover"]} size="md" />}
+        subtitle="شاهد فيديوهات بالإنجليزية مع ترجمة عربية متزامنة"
+      />
 
       <div className="mb-6">
         <ContentRequestBar />
@@ -256,13 +254,11 @@ const Discover = () => {
               ))}
             </div>
           ) : (
-            <div className="text-center py-16">
-              <Sparkles className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
-              <p className="text-muted-foreground">لا توجد اختيارات مخصصة بعد</p>
-              <p className="text-sm text-muted-foreground/70 mt-1">
-                شاهد بعض الفيديوهات واحفظ مفردات لتشغيل صفحتك المخصصة.
-              </p>
-            </div>
+            <EmptyState
+              icon={Sparkles}
+              title="لا توجد اختيارات مخصصة بعد"
+              body="شاهد بعض الفيديوهات واحفظ مفردات لتشغيل صفحتك المخصصة."
+            />
           )}
         </TabsContent>
 
@@ -330,17 +326,15 @@ const Discover = () => {
               ))}
             </div>
           ) : (
-            <div className="text-center py-16">
-              <Play className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
-              <p className="text-muted-foreground">
-                {justRightOnly ? "لا شيء في نطاقك المريح بعد" : "لم يتم العثور على فيديوهات"}
-              </p>
-              <p className="text-sm text-muted-foreground/70 mt-1">
-                {justRightOnly
+            <EmptyState
+              icon={Play}
+              title={justRightOnly ? "لا شيء في نطاقك المريح بعد" : "لم يتم العثور على فيديوهات"}
+              body={
+                justRightOnly
                   ? "احفظ مزيداً من الكلمات، أو أوقف الفلتر لتتصفح كل شيء."
-                  : "عد لاحقاً لمحتوى جديد"}
-              </p>
-            </div>
+                  : "عد لاحقاً لمحتوى جديد"
+              }
+            />
           )}
         </TabsContent>
       </Tabs>

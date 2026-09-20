@@ -119,9 +119,9 @@ const withTimeout = <T,>(promise: PromiseLike<T>, ms: number): Promise<T> => {
 };
 
 const DIFFICULTY_CONFIG = {
-  beginner: { label: "مبتدئ", color: "bg-green-500/20 text-green-700 dark:text-green-400", xp: 10 },
-  intermediate: { label: "متوسط", color: "bg-yellow-500/20 text-yellow-700 dark:text-yellow-400", xp: 15 },
-  advanced: { label: "متقدّم", color: "bg-red-500/20 text-red-700 dark:text-red-400", xp: 20 },
+  beginner: { label: "مبتدئ", color: "bg-success/20 text-success", xp: 10 },
+  intermediate: { label: "متوسط", color: "bg-accent/20 text-accent-ink", xp: 15 },
+  advanced: { label: "متقدّم", color: "bg-destructive/20 text-destructive", xp: 20 },
 };
 
 // ─── English line with tappable words + Arabic scaffold ───
@@ -987,9 +987,9 @@ const ReadingPractice = () => {
                       "w-full p-4 rounded-xl text-left transition-all border-2",
                       isAnswered
                         ? isCorrect
-                          ? "border-green-500 bg-green-500/10"
+                          ? "border-success bg-success/10"
                           : isSelected
-                          ? "border-red-500 bg-red-500/10"
+                          ? "border-destructive bg-destructive/10"
                           : "border-border bg-muted/50"
                         : "border-border hover:border-primary/50 bg-card"
                     )}

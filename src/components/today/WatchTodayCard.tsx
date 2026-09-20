@@ -37,7 +37,7 @@ export function WatchTodayCard({ done = false, className }: WatchTodayCardProps)
   if (!video) {
     return isLoading ? (
       <div
-        className={cn("rounded-2xl border-2 border-primary/10 bg-card animate-pulse", className)}
+        className={cn("rounded-3xl bg-muted animate-pulse", className)}
         style={{ aspectRatio: "4 / 3" }}
         aria-hidden
       />
@@ -59,7 +59,7 @@ export function WatchTodayCard({ done = false, className }: WatchTodayCardProps)
           <Play className="h-4 w-4 text-primary fill-primary" aria-hidden />
         </div>
         <h2
-          className="text-lg font-bold text-foreground flex items-center gap-1.5"
+          className="text-xl font-bold text-foreground flex items-center gap-1.5"
         >
           {AR.queue.watchVideo}
           <InfoHint

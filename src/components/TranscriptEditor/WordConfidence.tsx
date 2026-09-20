@@ -22,9 +22,9 @@ interface WordConfidenceProps {
 
 /** Colour class based on confidence threshold. */
 function confidenceColor(confidence: number): string {
-  if (confidence >= 0.85) return 'text-green-700 dark:text-green-400';
-  if (confidence >= 0.65) return 'text-amber-600 dark:text-amber-400';
-  return 'text-red-600 dark:text-red-400';
+  if (confidence >= 0.85) return 'text-success';
+  if (confidence >= 0.65) return 'text-accent';
+  return 'text-destructive';
 }
 
 /**
@@ -81,7 +81,7 @@ export default function WordConfidence({
             >
               {hoveredBoundary === i && (
                 <button
-                  className="absolute -top-3 left-1/2 -translate-x-1/2 text-xs text-gray-500 hover:text-red-500 transition-colors"
+                  className="absolute -top-3 left-1/2 -translate-x-1/2 text-xs text-gray-500 hover:text-destructive transition-colors"
                   title="Split here"
                   onClick={e => {
                     e.stopPropagation();

@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Loader2, BookOpen, Clock, Headphones } from 'lucide-react';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import type { Database } from '@/integrations/supabase/types';
+import { EmptyState } from "@/components/layout/EmptyState";
 
 type AuthenticStory = Database['public']['Tables']['authentic_stories']['Row'];
 
@@ -140,11 +141,11 @@ const ReadingLibrary = () => {
             ))}
           </div>
         ) : (
-          <div className="text-center py-16">
-            <BookOpen className="h-16 w-16 text-muted-foreground/30 mx-auto mb-4" />
-            <h2 className="text-xl font-bold mb-2">ما فيه قصص</h2>
-            <p className="text-muted-foreground">ارجع لنا قريباً، بننزل نصوصاً إنجليزية أصلية</p>
-          </div>
+          <EmptyState
+            icon={BookOpen}
+            title="ما فيه قصص"
+            body="ارجع لنا قريباً، بننزل نصوصاً إنجليزية أصلية"
+          />
         )}
       </div>
     </AppShell>

@@ -99,7 +99,7 @@ const EnglishSound = () => {
             }}
             className={cn(
               "h-2 rounded-full transition-all",
-              i === stepIdx ? "w-8 bg-primary" : done[s] ? "w-2 bg-green-500" : "w-2 bg-muted-foreground/30",
+              i === stepIdx ? "w-8 bg-primary" : done[s] ? "w-2 bg-success" : "w-2 bg-muted-foreground/30",
             )}
             aria-label={`الخطوة ${i + 1}: ${STEP_LABELS[s]}`}
           />
@@ -208,8 +208,8 @@ const EnglishSound = () => {
             {done.contrast && (
               <div className="space-y-3">
                 {allDone && (
-                  <div className="p-4 rounded-2xl bg-green-500/10 border-2 border-green-500/30 text-center">
-                    <Sparkles className="h-6 w-6 text-green-600 mx-auto mb-1" />
+                  <div className="p-4 rounded-2xl bg-success/10 border-2 border-success/30 text-center">
+                    <Sparkles className="h-6 w-6 text-success mx-auto mb-1" />
                     <p className="font-bold text-foreground">أتقنت الصوت!</p>
                     <p className="text-xs text-muted-foreground">+30 XP</p>
                   </div>
@@ -252,7 +252,7 @@ const EnglishSound = () => {
         >
           <ChevronBack className="h-4 w-4 me-1" /> رجوع
         </Button>
-        {done[step] && <Check className="h-4 w-4 text-green-600" />}
+        {done[step] && <Check className="h-4 w-4 text-success" />}
         <Button
           variant="ghost"
           size="sm"

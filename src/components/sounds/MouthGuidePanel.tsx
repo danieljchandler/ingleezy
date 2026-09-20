@@ -43,8 +43,8 @@ export const MouthGuidePanel = ({ sound }: MouthGuidePanelProps) => {
         </div>
       )}
 
-      <div className="p-5 rounded-2xl border-2 border-amber-500/30 bg-amber-500/5 space-y-2">
-        <p className="text-xs font-semibold uppercase tracking-wider text-amber-700">
+      <div className="p-5 rounded-2xl border-2 border-accent/30 bg-accent/5 space-y-2">
+        <p className="text-xs font-semibold uppercase tracking-wider text-accent">
           فخ شائع لمتحدثي العربية
         </p>
         <p className="text-base text-foreground leading-relaxed">{sound.interference_ar}</p>

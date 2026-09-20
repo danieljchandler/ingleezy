@@ -46,7 +46,7 @@ export function WeeklyGoalCard({ className }: WeeklyGoalCardProps) {
             <span className="text-sm text-muted-foreground">مراجعات</span>
             <span className={cn(
               "text-sm font-medium",
-              reviewComplete ? "text-green-600 dark:text-green-400" : "text-foreground"
+              reviewComplete ? "text-success" : "text-foreground"
             )}>
               {goal.completed_reviews}/{goal.target_reviews}
               {reviewComplete && " ✓"}
@@ -54,7 +54,7 @@ export function WeeklyGoalCard({ className }: WeeklyGoalCardProps) {
           </div>
           <Progress 
             value={reviewPercent} 
-            className={cn("h-2", reviewComplete && "[&>div]:bg-green-500")}
+            className={cn("h-2", reviewComplete && "[&>div]:bg-success")}
           />
         </div>
 
@@ -62,12 +62,12 @@ export function WeeklyGoalCard({ className }: WeeklyGoalCardProps) {
         <div>
           <div className="flex items-center justify-between mb-1.5">
             <div className="flex items-center gap-1">
-              <Zap className="h-3.5 w-3.5 text-amber-500" />
+              <Zap className="h-3.5 w-3.5 text-accent" />
               <span className="text-sm text-muted-foreground">نقاط مكتسبة</span>
             </div>
             <span className={cn(
               "text-sm font-medium",
-              xpComplete ? "text-green-600 dark:text-green-400" : "text-foreground"
+              xpComplete ? "text-success" : "text-foreground"
             )}>
               {goal.earned_xp}/{goal.target_xp}
               {xpComplete && " ✓"}
@@ -75,14 +75,14 @@ export function WeeklyGoalCard({ className }: WeeklyGoalCardProps) {
           </div>
           <Progress 
             value={xpPercent} 
-            className={cn("h-2", xpComplete && "[&>div]:bg-green-500")}
+            className={cn("h-2", xpComplete && "[&>div]:bg-success")}
           />
         </div>
       </div>
 
       {reviewComplete && xpComplete && (
-        <div className="mt-4 p-2 rounded-lg bg-green-50 dark:bg-green-900/20 text-center">
-          <span className="text-sm font-medium text-green-700 dark:text-green-400">
+        <div className="mt-4 p-2 rounded-lg bg-success/15 dark:bg-success/20 text-center">
+          <span className="text-sm font-medium text-success">
             🎉 Weekly goals complete!
           </span>
         </div>

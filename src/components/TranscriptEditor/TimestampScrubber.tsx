@@ -95,7 +95,7 @@ export default function TimestampScrubber({
   const duration = (end - start).toFixed(2);
 
   const handleColor = isRippling
-    ? 'bg-orange-500 hover:bg-orange-600'
+    ? 'bg-accent hover:bg-accent'
     : 'bg-blue-600 hover:bg-blue-700';
 
   return (
@@ -104,7 +104,7 @@ export default function TimestampScrubber({
       <div className="flex justify-between text-[10px] text-muted-foreground mb-0.5 font-mono">
         <span>{formatTime(start)}</span>
         {dragLabel ? (
-          <span className={isRippling ? 'text-orange-600 font-semibold' : 'text-blue-600 font-semibold'}>
+          <span className={isRippling ? 'text-accent font-semibold' : 'text-blue-600 font-semibold'}>
             {dragLabel}
             {isRippling && ' ↯'}
           </span>
@@ -147,7 +147,7 @@ export default function TimestampScrubber({
 
       {/* Ripple hint */}
       {allowRipple && isRippling && (
-        <div className="text-[9px] text-orange-600 text-center mt-0.5">
+        <div className="text-[9px] text-accent text-center mt-0.5">
           ripple active — neighbors will shift
         </div>
       )}

@@ -346,15 +346,15 @@ const ListeningPractice = () => {
               disabled={loading}
               className={cn(
                 "w-full p-4 rounded-xl text-left",
-                "bg-gradient-to-r from-orange-500/10 to-yellow-500/10 border border-orange-500/20",
+                "bg-gradient-to-r from-accent/10 to-accent/10 border border-accent/20",
                 "flex items-center gap-4",
                 "transition-all duration-200",
-                "hover:border-orange-500/40 active:scale-[0.99]",
+                "hover:border-accent/40 active:scale-[0.99]",
                 "disabled:opacity-50"
               )}
             >
-              <div className="w-12 h-12 rounded-xl bg-orange-500/20 flex items-center justify-center shrink-0">
-                <Zap className="h-6 w-6 text-orange-600 dark:text-orange-400" />
+              <div className="w-12 h-12 rounded-xl bg-accent/20 flex items-center justify-center shrink-0">
+                <Zap className="h-6 w-6 text-accent" />
               </div>
               <div className="flex-1">
                 <p className="font-bold text-foreground">تمرين السرعة</p>
@@ -523,16 +523,16 @@ const ListeningPractice = () => {
                 <div
                   className={cn(
                     "p-4 rounded-xl text-center",
-                    isCorrect ? "bg-green-500/10 border border-green-500/30" : "bg-red-500/10 border border-red-500/30"
+                    isCorrect ? "bg-success/10 border border-success/30" : "bg-destructive/10 border border-destructive/30"
                   )}
                 >
                   <div className="flex items-center justify-center gap-2 mb-2">
                     {isCorrect ? (
-                      <Check className="h-5 w-5 text-green-600" />
+                      <Check className="h-5 w-5 text-success" />
                     ) : (
-                      <X className="h-5 w-5 text-red-600" />
+                      <X className="h-5 w-5 text-destructive" />
                     )}
-                    <span className={isCorrect ? "text-green-600" : "text-red-600"}>
+                    <span className={isCorrect ? "text-success" : "text-destructive"}>
                       {isCorrect ? "صحيح!" : "ليس تماماً"}
                     </span>
                   </div>
@@ -575,7 +575,7 @@ const ListeningPractice = () => {
                   "border-2",
                   showResult
                     ? option.correct
-                      ? "border-green-500 bg-green-500/10"
+                      ? "border-success bg-success/10"
                       : "border-border bg-muted/50"
                     : "border-border hover:border-primary/50 bg-card"
                 )}

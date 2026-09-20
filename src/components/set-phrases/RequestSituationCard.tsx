@@ -95,10 +95,10 @@ export const RequestSituationCard = () => {
   };
 
   return (
-    <Card className="p-4 bg-gradient-to-br from-amber-500/10 to-orange-500/10 border-amber-500/30">
+    <Card className="p-4 bg-gradient-to-br from-accent/10 to-accent/10 border-accent/30">
       <div className="flex items-start gap-3">
-        <div className="w-10 h-10 rounded-lg bg-amber-500/20 flex items-center justify-center shrink-0">
-          <Wand2 className="h-5 w-5 text-amber-700 dark:text-amber-300" />
+        <div className="w-10 h-10 rounded-lg bg-accent/20 flex items-center justify-center shrink-0">
+          <Wand2 className="h-5 w-5 text-accent" />
         </div>
         <div className="flex-1">
           <h2 className="font-semibold">تبي عبارات لموقف معيّن؟</h2>
@@ -124,7 +124,7 @@ export const RequestSituationCard = () => {
             type="button"
             onClick={() => setSituation(s)}
             disabled={loading}
-            className="text-[11px] px-2 py-1 rounded-full bg-background border border-border hover:border-amber-500/40 text-muted-foreground"
+            className="text-[11px] px-2 py-1 rounded-full bg-background border border-border hover:border-accent/40 text-muted-foreground"
           >
             {s}
           </button>
@@ -171,7 +171,7 @@ export const RequestSituationCard = () => {
               {p.notes && <p className="text-[11px] text-muted-foreground mt-1 font-arabic" dir="rtl">{p.notes}</p>}
               <div className="flex justify-end mt-2">
                 {saved.has(i) ? (
-                  <Button size="sm" variant="ghost" disabled className="text-emerald-600">
+                  <Button size="sm" variant="ghost" disabled className="text-success">
                     <Check className="h-3.5 w-3.5 me-1" /> محفوظة
                   </Button>
                 ) : (

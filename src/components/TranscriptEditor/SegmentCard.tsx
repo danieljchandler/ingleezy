@@ -25,9 +25,9 @@ interface SegmentCardProps {
 }
 
 function confidenceBadgeColor(confidence: number): string {
-  if (confidence >= 0.85) return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300';
-  if (confidence >= 0.65) return 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300';
-  return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300';
+  if (confidence >= 0.85) return 'bg-success/15 text-success dark:bg-success/30 dark:text-success';
+  if (confidence >= 0.65) return 'bg-accent/15 text-accent-ink dark:bg-accent/30 dark:text-accent-ink';
+  return 'bg-destructive/15 text-destructive dark:bg-destructive/30 dark:text-destructive';
 }
 
 /**
@@ -156,7 +156,7 @@ export default function SegmentCard({
           )}
           {onFixArabic && segment.confidence < 0.85 && (
             <button
-              className="text-[10px] px-2 py-0.5 rounded bg-amber-100 hover:bg-amber-200 text-amber-800 transition-colors"
+              className="text-[10px] px-2 py-0.5 rounded bg-accent/15 hover:bg-accent/15 text-accent-ink transition-colors"
               onClick={() => onFixArabic(segment.id)}
               title="AI Fix Arabic"
             >
@@ -215,7 +215,7 @@ export default function SegmentCard({
       {/* Translation (click to edit) */}
       <div className="mt-1 text-sm text-muted-foreground flex items-start gap-1">
         {isStaleTranslation && (
-          <span className="inline-block w-2 h-2 mt-1.5 rounded-full bg-amber-500 flex-shrink-0" title="Translation may be stale" />
+          <span className="inline-block w-2 h-2 mt-1.5 rounded-full bg-accent flex-shrink-0" title="Translation may be stale" />
         )}
         {editingTranslation ? (
           <textarea

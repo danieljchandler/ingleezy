@@ -149,7 +149,7 @@ const DailyStoryPage = () => {
                   </Badge>
                 )}
                 {isTaskCompletedToday("daily-story") && (
-                  <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 gap-1">
+                  <Badge className="bg-success/15 text-success border-success/15 gap-1">
                     <Check className="h-3 w-3" /> خلّصنا اليوم
                   </Badge>
                 )}

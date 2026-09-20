@@ -234,7 +234,7 @@ export const PronunciationButton = ({
           {tips.length > 0 && (
             <div className="mt-3 text-left bg-muted/50 rounded-lg p-3 animate-in fade-in slide-in-from-bottom-2 duration-500">
               <div className="flex items-center gap-1.5 mb-2">
-                <Lightbulb className="h-3.5 w-3.5 text-yellow-500" />
+                <Lightbulb className="h-3.5 w-3.5 text-accent" />
                 <span className="text-xs font-medium text-muted-foreground">نصائح</span>
               </div>
               <ul className="space-y-1.5">

@@ -27,7 +27,7 @@ export function DesertBackdrop() {
         </defs>
         <rect width="400" height="800" fill="url(#sky)" />
         <circle cx="320" cy="90" r="140" fill="url(#sun)" />
-        <circle cx="320" cy="90" r="28" fill="#D98A3D" opacity="0.55" />
+        <circle cx="320" cy="90" r="28" fill="#E5A917" opacity="0.55" />
         <path
           d="M0,210 L60,170 L110,200 L170,160 L230,205 L290,175 L360,210 L400,195 L400,260 L0,260 Z"
           fill="#8A97C9"
@@ -60,11 +60,11 @@ export function DesertBackdrop() {
         <defs>
           <linearGradient id="dune1" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="#AAB5DE" />
-            <stop offset="100%" stopColor="#7184C6" />
+            <stop offset="100%" stopColor="#28AAB8" />
           </linearGradient>
           <linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="#6FB394" />
-            <stop offset="100%" stopColor="#3F9C6D" />
+            <stop offset="100%" stopColor="#2F7F59" />
           </linearGradient>
         </defs>
 
@@ -77,8 +77,8 @@ export function DesertBackdrop() {
         <g transform="translate(40,470)" opacity="0.75">
           <ellipse cx="40" cy="40" rx="55" ry="14" fill="url(#water)" />
           <ellipse cx="40" cy="38" rx="40" ry="6" fill="#A9D8C0" opacity="0.5" />
-          <path d="M20,40 Q18,10 22,-30" stroke="#1B2534" strokeWidth="3" fill="none" strokeLinecap="round" />
-          <path d="M55,40 Q60,5 56,-40" stroke="#1B2534" strokeWidth="3" fill="none" strokeLinecap="round" />
+          <path d="M20,40 Q18,10 22,-30" stroke="#121E21" strokeWidth="3" fill="none" strokeLinecap="round" />
+          <path d="M55,40 Q60,5 56,-40" stroke="#121E21" strokeWidth="3" fill="none" strokeLinecap="round" />
           <g transform="translate(22,-30)">
             {[0, 45, 90, 135, 180, 225, 270, 315].map((a) => (
               <path key={a} d="M0,0 Q14,-4 26,2" stroke="#35835B" strokeWidth="2.5" fill="none" strokeLinecap="round" transform={`rotate(${a})`} />
@@ -86,7 +86,7 @@ export function DesertBackdrop() {
           </g>
           <g transform="translate(56,-40)">
             {[20, 65, 110, 155, 200, 245, 290, 335].map((a) => (
-              <path key={a} d="M0,0 Q16,-3 30,3" stroke="#3F9C6D" strokeWidth="2.5" fill="none" strokeLinecap="round" transform={`rotate(${a})`} />
+              <path key={a} d="M0,0 Q16,-3 30,3" stroke="#2F7F59" strokeWidth="2.5" fill="none" strokeLinecap="round" transform={`rotate(${a})`} />
             ))}
           </g>
         </g>
@@ -106,7 +106,7 @@ export function DesertBackdrop() {
           </linearGradient>
           <linearGradient id="water2" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="#6FB394" />
-            <stop offset="100%" stopColor="#3F9C6D" />
+            <stop offset="100%" stopColor="#2F7F59" />
           </linearGradient>
         </defs>
 
@@ -117,7 +117,7 @@ export function DesertBackdrop() {
 
         <g transform="translate(290,640)" opacity="0.8">
           <ellipse cx="30" cy="20" rx="38" ry="8" fill="url(#water2)" />
-          <path d="M15,20 Q12,-5 18,-35" stroke="#1B2534" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+          <path d="M15,20 Q12,-5 18,-35" stroke="#121E21" strokeWidth="2.5" fill="none" strokeLinecap="round" />
           <g transform="translate(18,-35)">
             {[10, 55, 100, 145, 190, 235, 280, 325].map((a) => (
               <path key={a} d="M0,0 Q12,-3 22,2" stroke="#35835B" strokeWidth="2" fill="none" strokeLinecap="round" transform={`rotate(${a})`} />

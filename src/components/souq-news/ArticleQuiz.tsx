@@ -171,9 +171,9 @@ export const ArticleQuiz = ({ article }: ArticleQuizProps) => {
               className={cn(
                 "w-full text-left rounded-lg border p-3 transition-all text-sm",
                 showResult && isCorrect
-                  ? "border-green-500 bg-green-500/10"
+                  ? "border-success bg-success/10"
                   : showResult && isSelected && !isCorrect
-                  ? "border-red-500 bg-red-500/10"
+                  ? "border-destructive bg-destructive/10"
                   : !showResult
                   ? "border-border hover:border-primary/40 bg-background"
                   : "border-border bg-background opacity-60"
@@ -181,10 +181,10 @@ export const ArticleQuiz = ({ article }: ArticleQuizProps) => {
             >
               <div className="flex items-start gap-2">
                 {showResult && isCorrect && (
-                  <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
+                  <CheckCircle2 className="h-4 w-4 text-success mt-0.5 shrink-0" />
                 )}
                 {showResult && isSelected && !isCorrect && (
-                  <XCircle className="h-4 w-4 text-red-500 mt-0.5 shrink-0" />
+                  <XCircle className="h-4 w-4 text-destructive mt-0.5 shrink-0" />
                 )}
                 <div className="flex-1 min-w-0">
                   <p className="font-english">{choice.english}</p>
