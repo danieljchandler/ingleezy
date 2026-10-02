@@ -248,6 +248,7 @@ const EditableLineCard = ({
               e.stopPropagation();
               onPlay();
             }}
+            aria-label={isActive && isPlaying ? "Pause line" : "Play line"}
           >
             {isActive && isPlaying ? (
               <Pause className="h-4 w-4" />

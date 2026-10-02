@@ -57,11 +57,11 @@ test.describe("the corner control", () => {
   test("does not offer the same destination twice", async ({ page }) => {
     await page.goto("/reading");
 
-    // The dock owns "home" now. A second home control in the corner is the
-    // duplication this swap exists to remove.
+    // The dock owns "home" now — its اليوم tab is the front door. A second home
+    // control in the corner is the duplication this swap exists to remove.
     await expect(page.getByRole("button", { name: "الرئيسية" })).toHaveCount(0);
     await expect(
-      page.getByRole("navigation", { name: "التنقل الرئيسي" }).getByRole("link", { name: "الرئيسية" }),
-    ).toBeVisible();
+      page.getByRole("navigation", { name: "التنقل الرئيسي" }).getByRole("link", { name: "اليوم" }),
+    ).toHaveAttribute("href", "/");
   });
 });

@@ -23,7 +23,7 @@ export interface HomeSectionMeta {
 /** Default order — matches the historical layout. */
 export const HOME_SECTIONS: HomeSectionMeta[] = [
   { id: "placement-banner", label: "تنبيه اختبار المستوى", description: "يظهر حتى تكمل الاختبار", alwaysOn: true },
-  { id: "daily-queue", label: "مهام اليوم", description: "مهامك اليومية وحلقة الهدف والسلسلة والإحصاءات", alwaysOn: true },
+  { id: "daily-queue", label: "خطة اليوم", description: "سلسلتك وخطة اليوم بخطواتها الثلاث", alwaysOn: true },
   { id: "phrase-of-the-day", label: "عبارة اليوم", description: "عبارة إنجليزية جديدة كل يوم" },
 ];
 

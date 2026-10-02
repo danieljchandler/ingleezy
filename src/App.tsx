@@ -19,11 +19,11 @@ import { logClientError } from "@/lib/errorLog";
 const lazyPage = <T extends ComponentType<any>>(loader: () => Promise<{ default: T }>) =>
   lazy(lazyRetry(loader));
 
-const Feed = lazyPage(() => import("./pages/Feed"));
-const Choose = lazyPage(() => import("./pages/Choose"));
-// The old dashboard home. Kept routable at /today for now: it still carries
-// the daily queue and streak, which the feed does not replace yet.
+// Today — the daily plan, and the front door.
 const Index = lazyPage(() => import("./pages/Index"));
+const Feed = lazyPage(() => import("./pages/Feed"));
+const Library = lazyPage(() => import("./pages/Library"));
+const Talk = lazyPage(() => import("./pages/Talk"));
 const Learn = lazyPage(() => import("./pages/Learn"));
 const Curriculum = lazyPage(() => import("./pages/Curriculum"));
 const Mistakes = lazyPage(() => import("./pages/Mistakes"));
@@ -223,24 +223,27 @@ const App = () => {
           <Suspense fallback={<PageSkeleton />}>
           <Routes>
             {/* Public learning app */}
-            {/* Home is the feed: the app opens on content, not on a checklist.
-                The chooser sits one sideways swipe away — see useSwipeSurfaces
-                for why "forward" is leftward in an RTL app. */}
-            <Route path="/" element={<ErrorBoundary name="HomeRoute"><Feed /></ErrorBoundary>} />
-            <Route path="/choose" element={<ErrorBoundary name="ChooseRoute"><Choose /></ErrorBoundary>} />
+            {/* Home is Today: one plan for the day, then the four tabs —
+                اليوم · المكتبة · تكلّم · كلماتي (see AppDock). The clips feed
+                that used to be home is the first shelf of the library. */}
+            <Route path="/" element={<ErrorBoundary name="TodayRoute"><Index /></ErrorBoundary>} />
             <Route path="/index" element={<Navigate to="/" replace />} />
-            {/* The daily queue keeps its own address while the feed takes over
-                the front door. */}
-            <Route path="/today" element={<ErrorBoundary name="TodayRoute"><Index /></ErrorBoundary>} />
+            <Route path="/today" element={<Navigate to="/" replace />} />
+            <Route path="/feed" element={<ErrorBoundary name="FeedRoute"><Feed /></ErrorBoundary>} />
+            <Route path="/library" element={<ErrorBoundary name="LibraryRoute"><Library /></ErrorBoundary>} />
+            <Route path="/talk" element={<ErrorBoundary name="TalkRoute"><Talk /></ErrorBoundary>} />
+            {/* The chooser became the library. Kept as a redirect: it was a
+                dock tab, so it is in bookmarks and muscle memory. */}
+            <Route path="/choose" element={<Navigate to="/library" replace />} />
             <Route path="/auth" element={<ErrorBoundary name="AuthRoute"><Auth /></ErrorBoundary>} />
             <Route path="/reset-password" element={<ErrorBoundary name="ResetPasswordRoute"><ResetPassword /></ErrorBoundary>} />
-            {/* The two hub screens the chooser replaced. Kept as redirects
+            {/* The two hub screens the chooser (now the library) replaced. Kept as redirects
                 rather than deleted: they were in the nav for the whole of
                 this app's life, so they are in bookmarks and in muscle
                 memory, and a 404 is a worse answer than the page that took
                 the job over. */}
-            <Route path="/learn-hub" element={<Navigate to="/choose" replace />} />
-            <Route path="/practice" element={<Navigate to="/choose" replace />} />
+            <Route path="/learn-hub" element={<Navigate to="/library" replace />} />
+            <Route path="/practice" element={<Navigate to="/library" replace />} />
             <Route path="/me" element={<ErrorBoundary name="MeHubRoute"><ProtectedRoute><MeHub /></ProtectedRoute></ErrorBoundary>} />
             <Route path="/review" element={<ErrorBoundary name="ReviewRoute"><ProtectedRoute><Review /></ProtectedRoute></ErrorBoundary>} />
 

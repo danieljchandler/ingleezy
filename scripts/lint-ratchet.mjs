@@ -20,9 +20,9 @@ import { execFileSync } from "node:child_process";
 
 /**
  * Maximum tolerated ESLint errors. Only ever goes down.
- * Last lowered: 532 → 531, when the set-phrase surfaces were flipped.
+ * Last lowered: 524 → 520, when Today was rebuilt with a typed profile row.
  */
-const BASELINE = 524;
+const BASELINE = 520;
 
 function runEslint() {
   try {

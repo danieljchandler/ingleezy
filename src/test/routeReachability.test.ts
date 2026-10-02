@@ -29,11 +29,13 @@ const NO_LINK_NEEDED: Record<string, string> = {
   "/index": "a redirect kept for old bookmarks",
   "/learn-hub": "a redirect kept for old bookmarks",
   "/practice": "a redirect kept for old bookmarks",
+  "/today": "a redirect kept for old bookmarks: Today is the front door now",
+  "/choose": "a redirect kept for old bookmarks: the chooser became the library",
   "/auth": "reached by the guard on every protected route, not by a link",
   "/onboarding": "entered once, straight after sign-up",
   "/reset-password": "arrived at from a link in an email",
   "/quiz/:lessonId": "opened from inside a lesson, which builds the path from data",
-  "/today/story": "opened from the daily dashboard, which builds the path from data",
+  "/today/story": "opened from the Today plan, which builds the path from data",
 };
 
 // Resolved from the working directory rather than import.meta.url: under the

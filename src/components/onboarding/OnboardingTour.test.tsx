@@ -6,11 +6,9 @@ import { markTourPending, OnboardingTour } from "./OnboardingTour";
 /**
  * The four-step walkthrough of the app shell.
  *
- * It used to walk five tabs because the old nav had five places to explain.
- * The dock carries actions instead, and a feed you scroll needs no explaining,
- * so the steps are now only the parts that are not obvious from looking: where
- * the four skills went, that upload takes your own video, and that the mark in
- * the corner is your account.
+ * The steps are only the parts that are not obvious from looking: that Today
+ * is a plan with one button, where everything to learn from went, where the
+ * speaking tools live, and that the mark in the corner is your account.
  *
  * Two things make it delicate. It is armed by one flag and disarmed by another,
  * and getting that wrong means either never showing it or showing it on every
@@ -25,7 +23,7 @@ const TRIGGER_KEY = "ingleezy:showTour";
 // The tour titles each slot with the word the slot itself uses — a tour that
 // renames the thing it is pointing at is describing a screen the reader cannot
 // find.
-const STEP_TITLES = ["الرئيسية", "المهارات", "اليوم", "حسابك"];
+const STEP_TITLES = ["اليوم", "المكتبة", "تكلّم", "حسابك"];
 const LAST = STEP_TITLES.length - 1;
 
 let cleanup: (() => void) | undefined;
@@ -54,7 +52,7 @@ afterEach(async () => {
 /** Stands in for the dock and the profile emblem the tour points at. */
 function mountNav() {
   nav = document.createElement("div");
-  for (const slot of ["nav-feed", "nav-choose", "nav-today", "emblem"]) {
+  for (const slot of ["nav-today", "nav-library", "nav-talk", "emblem"]) {
     const el = document.createElement("button");
     el.setAttribute("data-tour", slot);
     el.textContent = slot;
@@ -125,13 +123,13 @@ describe("deciding whether to run", () => {
 });
 
 describe("walking through the shell", () => {
-  it("starts on the feed and says what it is", () => {
+  it("starts on Today and says what it is", () => {
     render();
 
     openTour();
 
-    expect(screen.getByRole("heading", { name: "الرئيسية" })).toBeInTheDocument();
-    expect(screen.getByText(/مقاطع حقيقية بالإنجليزي/)).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "اليوم" })).toBeInTheDocument();
+    expect(screen.getByText(/خطتك لليوم في مكان واحد/)).toBeInTheDocument();
     // Interpolated, so the text arrives in several nodes.
     expect(screen.getByText(/خطوة\s*1\s*من\s*4/)).toBeInTheDocument();
   });

@@ -47,11 +47,65 @@ export function effectiveStreak(
   return row.last_review_date >= dayBefore(today) ? current : 0;
 }
 
+/** A `YYYY-MM-DD` key moved by `offset` days, as another key. */
+function shiftDay(day: string, offset: number): string {
+  const [y, m, d] = day.split("-").map(Number);
+  const date = new Date(y, (m ?? 1) - 1, (d ?? 1) + offset);
+  return localDateKey(date);
+}
+
 /** The day before a `YYYY-MM-DD` key, as another `YYYY-MM-DD` key. */
 function dayBefore(day: string): string {
-  const [y, m, d] = day.split("-").map(Number);
-  const date = new Date(y, (m ?? 1) - 1, (d ?? 1) - 1);
-  return localDateKey(date);
+  return shiftDay(day, -1);
+}
+
+/** One-letter Arabic weekday abbreviations, indexed by `Date#getDay()` (Sunday = 0). */
+const WEEKDAY_INITIALS = ["ح", "ن", "ث", "ر", "خ", "ج", "س"] as const;
+
+export interface StreakDay {
+  /** `YYYY-MM-DD`, local. */
+  date: string;
+  /** The weekday's one-letter Arabic abbreviation. */
+  label: string;
+  /** Part of the current run. */
+  done: boolean;
+  isToday: boolean;
+}
+
+/**
+ * The last seven days, oldest first, marked with which belong to the current
+ * run — what the Today screen draws under the streak count.
+ *
+ * Derived from the same single row as `effectiveStreak`, because that row is
+ * all there is: `review_streaks` keeps the latest run, not a history. That is
+ * enough. A run of N days ending on `last_review_date` covers exactly those N
+ * days, and the day before it began was by definition missed. Days earlier
+ * than that are unknown, and they are drawn as not done — the honest reading
+ * of "not part of the run you are on".
+ *
+ * A rolling seven days rather than a calendar week, so the question of whether
+ * a week starts on Saturday (Egypt), Sunday (the Gulf) or Monday (the server's
+ * weekly goal) never arises: today is always the last cell.
+ */
+export function lastSevenDays(
+  row: { current_streak?: number | null; last_review_date?: string | null } | null | undefined,
+  today: string = localDateKey(),
+): StreakDay[] {
+  const length = effectiveStreak(row, today);
+  const runEnd = length > 0 ? (row?.last_review_date ?? null) : null;
+  const runStart = runEnd ? shiftDay(runEnd, -(length - 1)) : null;
+
+  return Array.from({ length: 7 }, (_, index) => {
+    const date = shiftDay(today, index - 6);
+    const [y, m, d] = date.split("-").map(Number);
+    const weekday = new Date(y, (m ?? 1) - 1, d ?? 1).getDay();
+    return {
+      date,
+      label: WEEKDAY_INITIALS[weekday],
+      done: runStart !== null && runEnd !== null && date >= runStart && date <= runEnd,
+      isToday: date === today,
+    };
+  });
 }
 
 /** The columns every caller of `effectiveStreak` has to select. */

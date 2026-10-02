@@ -19,31 +19,33 @@ export default {
     },
     extend: {
       fontFamily: {
-        // Two dual-script families, split by job. Baloo Bhaijaan 2 is a rounded
-        // display face drawn for Arabic AND Latin: it carries headings and the
-        // wordmark in one voice across both scripts, which a Latin-only display
-        // face (the old Archivo Black) could never do in an Arabic-first UI.
-        // IBM Plex Sans Arabic is the reading face — quieter, and better at the
-        // long Arabic paragraphs the lessons are made of. Inter for English
-        // CONTENT, which is the studied language and wants to look separate.
-        sans: ["IBM Plex Sans Arabic", "Inter", "sans-serif"],
-        heading: ["Baloo Bhaijaan 2", "IBM Plex Sans Arabic", "sans-serif"],
-        arabic: ["IBM Plex Sans Arabic", "Inter", "sans-serif"],
-        english: ["Inter", "IBM Plex Sans Arabic", "sans-serif"],
-        display: ["Baloo Bhaijaan 2", "Inter", "sans-serif"],
+        // Two families, split by script and job. Readex Pro is one modern
+        // family drawn for Arabic AND Latin as a pair (built on Lexend's
+        // readability research), so headings, chrome and Arabic paragraphs share
+        // one voice. Atkinson Hyperlegible Next is for English CONTENT, the
+        // studied language: it is drawn so I, l and 1 cannot be confused, and it
+        // looks deliberately separate from the chrome around it.
+        sans: ["Readex Pro", "system-ui", "sans-serif"],
+        heading: ["Readex Pro", "system-ui", "sans-serif"],
+        arabic: ["Readex Pro", "system-ui", "sans-serif"],
+        english: ["Atkinson Hyperlegible Next", "Readex Pro", "system-ui", "sans-serif"],
+        display: ["Readex Pro", "system-ui", "sans-serif"],
         // Legacy alias (transcript surfaces) — folded into the chrome family.
-        cairo: ["IBM Plex Sans Arabic", "Inter", "sans-serif"],
+        cairo: ["Readex Pro", "system-ui", "sans-serif"],
       },
       fontSize: {
-        // Locked typographic scale — 1.25 ratio, Lahja rhythm
-        "caption": ["0.75rem", { lineHeight: "1rem", letterSpacing: "0.02em" }],
-        "overline": ["0.6875rem", { lineHeight: "0.875rem", letterSpacing: "0.12em" }],
+        // Locked typographic scale — 1.25 ratio. No letter-spacing anywhere in
+        // it: these sizes carry Arabic most of the time, and tracking breaks
+        // the joins between Arabic letters. Line heights are set for Arabic,
+        // which needs more room than Latin for its ascenders and dots.
+        "caption": ["0.75rem", { lineHeight: "1.15rem" }],
+        "overline": ["0.6875rem", { lineHeight: "1rem" }],
         "body-sm": ["0.875rem", { lineHeight: "1.4rem" }],
         "body": ["1rem", { lineHeight: "1.6rem" }],
-        "subtitle": ["1.125rem", { lineHeight: "1.65rem", letterSpacing: "-0.005em" }],
-        "title": ["1.5rem", { lineHeight: "1.9rem", letterSpacing: "-0.015em" }],
-        "headline": ["2rem", { lineHeight: "2.35rem", letterSpacing: "-0.02em" }],
-        "display": ["2.75rem", { lineHeight: "3rem", letterSpacing: "-0.025em" }],
+        "subtitle": ["1.125rem", { lineHeight: "1.75rem" }],
+        "title": ["1.5rem", { lineHeight: "2.15rem" }],
+        "headline": ["2rem", { lineHeight: "2.75rem" }],
+        "display": ["2.75rem", { lineHeight: "3.6rem" }],
       },
       colors: {
         border: "hsl(var(--border))",

@@ -1,11 +1,12 @@
 import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Bookmark, MessageCircleQuestion, Captions, RotateCcw, Play, Flame } from "lucide-react";
+import { Bookmark, MessageCircleQuestion, Captions, RotateCcw, Play, Zap } from "lucide-react";
 import { AppDock } from "@/components/shell/AppDock";
 import { ProfileEmblem } from "@/components/shell/ProfileEmblem";
 import { useDiscoverFeed } from "@/hooks/useDiscoverFeed";
 import { useSwipeSurfaces } from "@/hooks/useSwipeSurfaces";
 import { useAuth } from "@/hooks/useAuth";
+import { useReviewStreak } from "@/hooks/useReviewStreak";
 import { IngleezyMark } from "@/components/brand/IngleezyMark";
 import { AppShell } from "@/components/layout/AppShell";
 import { LandingHero } from "@/components/LandingHero";
@@ -13,16 +14,17 @@ import { Footer } from "@/components/Footer";
 import { cn } from "@/lib/utils";
 
 /**
- * The home screen: real English, one clip at a time.
+ * The clips shelf: real English, one clip at a time.
  *
- * The app used to open on a checklist — a greeting, a goal ring, and four
- * task rows. That is a fine dashboard and a poor front door for something
- * people are meant to open out of habit. This opens on content, the way every
- * app this audience already uses does, and the tasks move to the chooser.
+ * This was the front door for a while. It moved to /feed, as the first shelf
+ * of the library, when Today took the front door back: "what should I do
+ * today" is the question an app opened out of habit has to answer first, and a
+ * feed answers "what can I watch". It is still a full-screen, dark player,
+ * because that is what video is in every app this audience uses.
  *
- * Vertical scroll moves through clips. A horizontal swipe toward the start
- * edge opens the chooser — see useSwipeSurfaces for why that direction is the
- * forward one in an RTL app.
+ * Vertical scroll moves through clips. A horizontal swipe toward the end edge
+ * (rightward, backward in an RTL app — see useSwipeSurfaces) returns to the
+ * library.
  *
  * The action rail is where the old hub lists went. "Transcribe" and "Ask" were
  * destinations you navigated to and then had to feed with content; here they
@@ -34,7 +36,8 @@ const Feed = () => {
   const { isAuthenticated, loading: authLoading } = useAuth();
   const [seed] = useState(() => Math.floor(Math.random() * 100000));
   const { data: feed, isLoading } = useDiscoverFeed(seed);
-  const swipe = useSwipeSurfaces({ onNext: () => navigate("/choose") });
+  const swipe = useSwipeSurfaces({ onPrev: () => navigate("/library") });
+  const { days: streakDays } = useReviewStreak();
 
   const items = useMemo(() => feed?.items ?? [], [feed]);
 
@@ -70,13 +73,15 @@ const Feed = () => {
         </div>
         {/* The streak opens your day, not your account. Tapping a number to
             find out where that number came from is the only thing this chip
-            can mean, and /today is the page that answers it. */}
+            can mean, and Today is the page that answers it. It was a literal
+            0 until it shared Today's streak hook. */}
         <Link
-          to="/today"
+          to="/"
+          aria-label={`سلسلتك: ${streakDays}`}
           className="pointer-events-auto flex items-center gap-1 font-display text-sm not-italic text-accent"
         >
-          <Flame className="h-4 w-4" />
-          <span className="tabular-nums">0</span>
+          <Zap className="h-4 w-4 fill-current" />
+          <span className="tabular-nums">{streakDays}</span>
         </Link>
       </header>
 
@@ -206,7 +211,7 @@ function EmptyFeed() {
           ارفع مقطعاً
         </Link>
         <Link
-          to="/choose"
+          to="/library"
           className={cn(
             "rounded-xl border border-white/20 px-4 py-2.5 text-sm font-semibold",
             "transition-colors active:bg-white/10",

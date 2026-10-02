@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { effectiveStreak } from "@/lib/streak";
+import { effectiveStreak, lastSevenDays } from "@/lib/streak";
 
 /**
  * The number on every screen, derived rather than trusted.
@@ -64,5 +64,62 @@ describe("what a streak is worth right now", () => {
   it("does not report a negative or absent count", () => {
     expect(effectiveStreak({ current_streak: 0, last_review_date: TODAY }, TODAY)).toBe(0);
     expect(effectiveStreak({ last_review_date: TODAY }, TODAY)).toBe(0);
+  });
+});
+
+/**
+ * The seven cells under the streak count on Today.
+ *
+ * Drawn from the same single row, which records only the latest run — so the
+ * one thing these can get wrong is claiming a day that run does not cover.
+ */
+describe("the last seven days", () => {
+  const done = (row: Parameters<typeof lastSevenDays>[0], today = TODAY) =>
+    lastSevenDays(row, today).filter((day) => day.done).map((day) => day.date);
+
+  it("is seven days ending today, oldest first", () => {
+    const days = lastSevenDays(null, TODAY);
+    expect(days.map((day) => day.date)).toEqual([
+      "2026-09-13", "2026-09-14", "2026-09-15", "2026-09-16", "2026-09-17", "2026-09-18", "2026-09-19",
+    ]);
+    expect(days.map((day) => day.isToday)).toEqual([false, false, false, false, false, false, true]);
+  });
+
+  it("labels each day with its Arabic weekday initial", () => {
+    // 2026-09-13 is a Sunday, 2026-09-19 the Saturday under test.
+    expect(lastSevenDays(null, TODAY).map((day) => day.label)).toEqual(["ح", "ن", "ث", "ر", "خ", "ج", "س"]);
+  });
+
+  it("marks a run that reaches today", () => {
+    expect(done({ current_streak: 3, last_review_date: TODAY })).toEqual([
+      "2026-09-17", "2026-09-18", "2026-09-19",
+    ]);
+  });
+
+  it("leaves today open when the run ended yesterday", () => {
+    // Not reviewed yet today is not a break, and not a done day either.
+    expect(done({ current_streak: 2, last_review_date: "2026-09-18" })).toEqual([
+      "2026-09-17", "2026-09-18",
+    ]);
+  });
+
+  it("fills every cell for a run longer than a week", () => {
+    expect(done({ current_streak: 40, last_review_date: TODAY })).toHaveLength(7);
+  });
+
+  it("marks nothing once the run has ended", () => {
+    // The row still says 11, but a whole day went by: the run is over, so no
+    // cell may claim to belong to it.
+    expect(done({ current_streak: 11, last_review_date: "2026-09-17" })).toEqual([]);
+  });
+
+  it("marks nothing for a learner who has never reviewed", () => {
+    expect(done(null)).toEqual([]);
+  });
+
+  it("crosses a month boundary", () => {
+    expect(done({ current_streak: 3, last_review_date: "2026-09-01" }, "2026-09-01")).toEqual([
+      "2026-08-30", "2026-08-31", "2026-09-01",
+    ]);
   });
 });
