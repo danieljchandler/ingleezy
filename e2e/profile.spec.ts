@@ -371,8 +371,11 @@ test.describe("the Me hub", () => {
     // Links, not buttons: every one of these navigates, and a hub built from
     // buttons loses middle-click, open-in-new-tab and the browser's own idea
     // of what it is looking at.
+    // Outside the dock: it carries a كلماتي tab of its own, and these are the
+    // hub's tiles.
+    const outsideDock = page.locator("a:not(nav a)");
     for (const tile of ["كلماتي", "ترجمات محفوظة", "نصوصي المفرّغة", "فيديوهات أعجبتني"]) {
-      await expect(page.getByRole("link", { name: new RegExp(tile) })).toBeVisible();
+      await expect(page.getByRole("link", { name: new RegExp(tile) }).and(outsideDock)).toBeVisible();
     }
   });
 
