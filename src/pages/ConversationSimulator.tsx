@@ -1,17 +1,18 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { Fragment, useState, useRef, useEffect, useCallback } from "react";
+import { Link } from "react-router-dom";
 import { useDialect } from "@/contexts/DialectContext";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserLevel } from "@/hooks/useUserLevel";
 import { useAddUserPhrase } from "@/hooks/useUserPhrases";
-import { AppShell } from "@/components/layout/AppShell";
-import { PageCorner } from "@/components/shell/PageCorner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { TappableEnglishText } from "@/components/shared/TappableEnglishText";
 import { AskAISentence } from "@/components/shared/AskAISentence";
+import { IconBack } from "@/components/shared/DirectionalIcon";
 import { InfoHint } from "@/components/InfoHint";
 import { PAGE_HINTS } from "@/lib/pageHints";
+import { dialectName, hasArabic } from "@/lib/watch";
+import { splitLatinRuns } from "@/lib/latinRuns";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { showCapToastIfLimited } from "@/lib/handleCapResponse";
@@ -20,12 +21,12 @@ import {
   Loader2,
   Send,
   Mic,
-  MicOff,
+  Phone,
   Volume2,
   RotateCcw,
   BookmarkPlus,
   Sparkles,
-  AlertCircle,
+  Lightbulb,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LiveVoicePanel } from "@/components/conversation/LiveVoicePanel";
@@ -54,6 +55,8 @@ const TOPIC_SEEDS = [
   { key: "food", label: "الطعام 🍽️", hint: "favourite foods and dishes" },
 ] as const;
 
+const DEFAULT_TOPIC = TOPIC_SEEDS[0].label;
+
 /** Strip a leading [[CORRECTION]] line, returning {correction, body}. */
 function splitCorrection(text: string): { correction?: string; body: string } {
   const match = text.match(/^\s*\[\[CORRECTION\]\]\s*(.+?)\s*\n+([\s\S]*)$/);
@@ -76,11 +79,15 @@ export default function ConversationSimulator() {
   const [playingIdx, setPlayingIdx] = useState<number | null>(null);
   const [liveMode, setLiveMode] = useState(true);
   const [liveTopic, setLiveTopic] = useState<string | undefined>(undefined);
+  /** The topic the learner picked, for the header. Kept with the thread. */
+  const [topic, setTopic] = useState<string>(DEFAULT_TOPIC);
+  /** Play the tutor's replies at 0.75×. */
+  const [slow, setSlow] = useState(false);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const endRef = useRef<HTMLDivElement | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const ttsCache = useRef<Map<string, string>>(new Map());
 
@@ -95,6 +102,7 @@ export default function ConversationSimulator() {
       if (parsed?.dialect !== activeDialect) return;
       if (Date.now() - (parsed.savedAt ?? 0) > STORAGE_TTL_MS) return;
       if (Array.isArray(parsed.messages)) setMessages(parsed.messages);
+      if (typeof parsed.topic === "string") setTopic(parsed.topic);
     } catch {/* ignore */}
      
   }, [activeDialect]);
@@ -103,13 +111,14 @@ export default function ConversationSimulator() {
     try {
       localStorage.setItem(
         STORAGE_KEY,
-        JSON.stringify({ dialect: activeDialect, savedAt: Date.now(), messages }),
+        JSON.stringify({ dialect: activeDialect, savedAt: Date.now(), messages, topic }),
       );
     } catch {/* ignore */}
-  }, [messages, activeDialect]);
+  }, [messages, activeDialect, topic]);
 
+  // The page scrolls, not a box inside it, so follow the newest message down.
   useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+    endRef.current?.scrollIntoView?.({ behavior: "smooth", block: "end" });
   }, [messages]);
 
   // ── Streaming chat ───────────────────────────────────────────────────────
@@ -186,12 +195,13 @@ export default function ConversationSimulator() {
   );
 
   const startConversation = useCallback(
-    (topicHint?: string) => {
+    (seed: (typeof TOPIC_SEEDS)[number]) => {
       audioRef.current?.pause();
       ttsCache.current.clear();
       setMessages([]);
+      setTopic(seed.label);
       // Send an empty history so the AI opens the conversation.
-      streamReply([], topicHint);
+      streamReply([], seed.hint);
     },
     [streamReply],
   );
@@ -292,13 +302,16 @@ export default function ConversationSimulator() {
           ttsCache.current.set(cacheKey, url);
         }
         audio.src = url;
+        // Both: loading a source resets playbackRate to defaultPlaybackRate.
+        audio.defaultPlaybackRate = slow ? 0.75 : 1;
+        audio.playbackRate = slow ? 0.75 : 1;
         await audio.play();
       } catch (err) {
         console.error("TTS error:", err);
         setPlayingIdx(null);
       }
     },
-    [activeDialect],
+    [activeDialect, slow],
   );
 
 
@@ -330,46 +343,53 @@ export default function ConversationSimulator() {
     [user, addPhrase, toast],
   );
 
+  const hasThread = messages.length > 0;
+  const clearThread = () => {
+    audioRef.current?.pause();
+    setMessages([]);
+    setTopic(DEFAULT_TOPIC);
+    try { localStorage.removeItem(STORAGE_KEY); } catch {/* ignore */}
+  };
+
   return (
-    <AppShell compact>
-      <div className="flex items-center justify-between mb-3">
-        <PageCorner />
-        <div className="flex items-center gap-2">
-          <Badge variant="outline" className="text-xs">{activeDialect}</Badge>
-          <Badge variant="outline" className="text-xs">{cefr}</Badge>
-        </div>
-      </div>
-
-      <div className="flex items-center justify-between mb-3">
-        <h1 className="text-lg font-semibold inline-flex items-center gap-2">حديث حر <InfoHint {...PAGE_HINTS["conversation"]} /></h1>
-        <div className="flex items-center gap-2">
-          <Button
-            variant={liveMode ? "default" : "outline"}
-            size="sm"
-            onClick={() => setLiveMode((v) => !v)}
-            disabled={sending}
-            title="مكالمة صوتية مباشرة مع المعلّم"
+    <div
+      className="flex min-h-[100dvh] flex-col bg-background"
+      style={{ paddingTop: "env(safe-area-inset-top)" }}
+    >
+      {/* A session screen, like Watch: its own header, no dock. The way out is
+          the back arrow, to the Talk tab this page is opened from. */}
+      <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur">
+        <div className="mx-auto flex max-w-2xl items-center gap-2 px-3 py-2">
+          <Link
+            to="/talk"
+            aria-label="رجوع"
+            className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-foreground hover:bg-muted"
           >
-            <Mic className="h-4 w-4 me-1" />
-            {liveMode ? "إغلاق المباشر" : "🎙️ مكالمة صوتية"}
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => {
-              audioRef.current?.pause();
-              setMessages([]);
-              try { localStorage.removeItem(STORAGE_KEY); } catch {/* ignore */}
-            }}
-            disabled={messages.length === 0 || sending}
+            <IconBack className="h-6 w-6" />
+          </Link>
+          <div className="min-w-0 flex-1 text-center">
+            <h1 className="inline-flex items-center gap-1.5 text-[17px] font-semibold leading-[26px]">
+              {liveMode ? "مكالمة مع المعلّم" : topic}
+              <InfoHint {...PAGE_HINTS["conversation"]} />
+            </h1>
+            <p className="text-[13px] leading-5 text-muted-foreground">
+              التصحيح بال{dialectName(activeDialect)} · المستوى <bdi>{cefr}</bdi>
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={clearThread}
+            disabled={!hasThread || sending}
+            aria-label="محادثة جديدة"
+            className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-foreground hover:bg-muted disabled:opacity-30"
           >
-            <RotateCcw className="h-4 w-4 me-1" /> جديد
-          </Button>
+            <RotateCcw className="h-5 w-5" />
+          </button>
         </div>
-      </div>
+      </header>
 
-      {liveMode && (
-        <div className="mb-4">
+      <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-3 pb-4 pt-4">
+        {liveMode ? (
           <LiveVoicePanel
             dialect={activeDialect}
             difficulty={cefr === "A1" || cefr === "A2" ? "beginner" : cefr === "B1" || cefr === "B2" ? "intermediate" : "advanced"}
@@ -379,155 +399,250 @@ export default function ConversationSimulator() {
             }}
             onExitLive={() => setLiveMode(false)}
           />
-        </div>
-      )}
-
-      {/* The English / Tashkil switches lived here. Nothing on this page ever
-          read them — the chat renders English unconditionally — and post-flip
-          there is no Arabic in the conversation to vocalise. The same global
-          preferences are still editable in Settings → تفضيلات العرض. */}
-
-      {/* Topic seeds — only show when chat is empty */}
-      {messages.length === 0 && (
-        <div className="rounded-xl border border-border bg-card/50 p-4 mb-4">
-          <p className="text-sm font-medium mb-2 flex items-center gap-1.5">
-            <Sparkles className="h-4 w-4" /> اختر موضوعاً للبدء
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {TOPIC_SEEDS.map((t) => (
-              <Button
-                key={t.key}
-                variant="outline"
-                size="sm"
-                onClick={() => startConversation(t.hint)}
-                disabled={sending}
-              >
-                {t.label}
-              </Button>
-            ))}
-          </div>
-          <p className="text-xs text-muted-foreground mt-3">
-            يرد عليك شريكك بالإنجليزية على مستواك ({cefr})، وتأتيك التصحيحات بلهجتك.
-            المس أي كلمة لحفظها، أو احفظ الرد كاملاً كعبارة.
-          </p>
-        </div>
-      )}
-
-      {/* Messages */}
-      <div
-        ref={scrollRef}
-        className="space-y-3 mb-4 max-h-[55vh] overflow-y-auto pe-1"
-      >
-        {messages.map((m, i) => {
-          if (m.role === "user") {
-            return (
-              <div key={i} className="flex justify-end">
-                <div className="max-w-[85%] rounded-2xl rounded-tr-sm px-3 py-2 bg-primary text-primary-foreground">
-                  <p dir="auto" className="font-english text-base leading-relaxed">
-                    {m.content}
-                  </p>
-                </div>
+        ) : !hasThread ? (
+          <>
+            {/* A blank chat box in a language the learner cannot yet write is a
+                dead start; the tutor opens the conversation instead. */}
+            <section
+              aria-labelledby="chat-topics"
+              className="rounded-[28px] border border-border bg-card p-5 shadow-card"
+            >
+              <p className="flex items-center gap-1.5 text-[13px] font-semibold text-primary">
+                <Sparkles className="h-4 w-4" aria-hidden /> المعلّم يبدأ، وأنت ترد
+              </p>
+              <h2 id="chat-topics" className="mt-1 text-[22px] leading-8">
+                اختر موضوعاً للبدء
+              </h2>
+              <p className="mt-1 text-[15px] leading-6 text-muted-foreground">
+                يرد عليك شريكك بالإنجليزية على مستواك (<bdi>{cefr}</bdi>)، وتأتيك التصحيحات بلهجتك.
+                المس أي كلمة لحفظها، أو احفظ الرد كاملاً كعبارة.
+              </p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                {TOPIC_SEEDS.map((t) => (
+                  <Button
+                    key={t.key}
+                    variant="outline"
+                    onClick={() => startConversation(t)}
+                    disabled={sending}
+                  >
+                    {t.label}
+                  </Button>
+                ))}
               </div>
-            );
-          }
-          // assistant
-          return (
-            <div key={i} className="flex flex-col items-start gap-1.5">
-              {m.correction && (
-                <div className={cn(
-                  "max-w-[90%] rounded-lg px-3 py-2 border border-accent bg-accent/15 text-accent-ink text-xs flex items-start gap-1.5",
-                )}>
-                  <AlertCircle className="h-3.5 w-3.5 mt-0.5 shrink-0" />
-                  <span>{m.correction}</span>
-                </div>
-              )}
-              <div className="max-w-[90%] rounded-2xl rounded-tl-sm px-3 py-2 bg-muted">
-                {m.content ? (
-                  <p className="text-base leading-relaxed">
-                    <TappableEnglishText text={m.content} source="free-chat" />
-                  </p>
-                ) : (
-                  <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                )}
-                {!m.streaming && m.content && (
-                  <div className="flex items-center gap-1 mt-2 pt-2 border-t border-border">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-7 px-2 text-xs"
-                      onClick={() => playMessage(m.content, i)}
-                      disabled={playingIdx === i}
-                    >
-                      {playingIdx === i ? (
-                        <Loader2 className="h-3 w-3 me-1 animate-spin" />
-                      ) : (
-                        <Volume2 className="h-3 w-3 me-1" />
+            </section>
+
+            <button
+              type="button"
+              onClick={() => setLiveMode(true)}
+              className="mt-3 flex w-full items-center gap-3.5 rounded-3xl border border-border bg-card px-4 py-4 text-start transition-colors hover:bg-muted"
+            >
+              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
+                <Phone className="h-5 w-5" aria-hidden />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-base font-semibold leading-6">مكالمة صوتية مع المعلّم</span>
+                <span className="block text-sm leading-6 text-muted-foreground">تكلّم وهو يسمعك، بدون ما تضغط أي زر.</span>
+              </span>
+            </button>
+          </>
+        ) : (
+          <div className="flex flex-col gap-3.5">
+            {messages.map((m, i) => {
+              if (m.role === "user") {
+                // The tutor's correction is about this line, so it sits under
+                // it rather than on top of the reply that carried it.
+                const next = messages[i + 1];
+                const correction = next?.role === "assistant" ? next.correction : undefined;
+                return (
+                  <Fragment key={i}>
+                    <p
+                      dir="auto"
+                      className={cn(
+                        "max-w-[85%] self-end rounded-[22px] rounded-se-md bg-primary px-4 py-3 text-base leading-6 text-primary-foreground",
+                        !hasArabic(m.content) && "font-english",
                       )}
-                      تشغيل
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-7 px-2 text-xs"
-                      onClick={() => savePhrase(m.content)}
                     >
-                      <BookmarkPlus className="h-3 w-3 me-1" /> احفظ العبارة
-                    </Button>
-                    <AskAISentence arabic={m.content} variant="chip" />
+                      {m.content}
+                    </p>
+                    {correction && <CorrectionCard text={correction} />}
+                  </Fragment>
+                );
+              }
+              const correctedAbove = messages[i - 1]?.role === "user";
+              return (
+                <Fragment key={i}>
+                  {m.correction && !correctedAbove && <CorrectionCard text={m.correction} />}
+                  <div className="flex max-w-[90%] flex-col items-start gap-1 self-start">
+                    <div className="rounded-[22px] rounded-ss-md border border-border bg-card px-4 py-3">
+                      {m.content ? (
+                        <p lang="en" className="font-english text-base leading-7">
+                          <TappableEnglishText text={m.content} source="free-chat" />
+                        </p>
+                      ) : (
+                        <span role="status" aria-label="المعلّم يكتب…" className="flex h-7 items-center gap-1">
+                          {[0, 150, 300].map((delay) => (
+                            <span
+                              key={delay}
+                              className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground/60"
+                              style={{ animationDelay: `${delay}ms` }}
+                            />
+                          ))}
+                        </span>
+                      )}
+                    </div>
+                    {!m.streaming && m.content && (
+                      <div className="flex flex-wrap items-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="gap-1.5 text-primary hover:text-primary"
+                          onClick={() => playMessage(m.content, i)}
+                          disabled={playingIdx === i}
+                        >
+                          {playingIdx === i ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Volume2 className="h-4 w-4" />
+                          )}
+                          اسمع
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="gap-1.5 text-muted-foreground"
+                          onClick={() => savePhrase(m.content)}
+                        >
+                          <BookmarkPlus className="h-4 w-4" /> احفظ العبارة
+                        </Button>
+                        <AskAISentence arabic={m.content} variant="chip" />
+                      </div>
+                    )}
                   </div>
-                )}
+                </Fragment>
+              );
+            })}
+            <div ref={endRef} />
+          </div>
+        )}
+      </main>
+
+      {/* Composer: once the tutor has spoken. Speaking is the point, so the mic
+          is the big button; typing is there for when speaking isn't possible,
+          and the mic turns into send as soon as there is text to send. */}
+      {!liveMode && hasThread && (
+        <footer
+          className="sticky bottom-0 z-30 border-t border-border bg-card px-3 pt-2"
+          style={{ paddingBottom: "calc(0.75rem + env(safe-area-inset-bottom))" }}
+        >
+          <div className="mx-auto max-w-2xl">
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <p aria-live="polite" className="min-w-0 truncate text-[13px] leading-5 text-muted-foreground">
+                {recording
+                  ? "أسمعك… اترك الزر لما تخلص"
+                  : transcribing
+                  ? "نكتب اللي قلته…"
+                  : "اضغط مطولاً وتكلّم"}
+              </p>
+              <div className="flex shrink-0 items-center gap-1.5">
+                <button
+                  type="button"
+                  aria-pressed={slow}
+                  onClick={() => setSlow((v) => !v)}
+                  className={cn(
+                    "flex h-9 items-center gap-1 rounded-full border px-3 text-[13px] font-semibold transition-colors",
+                    slow ? "border-primary bg-primary/10 text-primary" : "border-border text-foreground hover:bg-muted",
+                  )}
+                >
+                  أبطأ
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLiveMode(true)}
+                  disabled={sending}
+                  className="flex h-9 items-center gap-1.5 rounded-full border border-border px-3 text-[13px] font-semibold text-foreground transition-colors hover:bg-muted disabled:opacity-40"
+                >
+                  <Phone className="h-4 w-4" aria-hidden />
+                  مكالمة صوتية
+                </button>
               </div>
             </div>
-          );
-        })}
-      </div>
-
-      {/* Composer */}
-      {messages.length > 0 && (
-        <div className="flex items-end gap-2 sticky bottom-2">
-          <Input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                handleSend();
-              }
-            }}
-            placeholder="اكتب بالإنجليزي…"
-            dir="auto"
-            disabled={sending || recording || transcribing}
-            className="font-english"
-          />
-          <Button
-            type="button"
-            variant={recording ? "destructive" : "outline"}
-            size="icon"
-            onPointerDown={startRecording}
-            onPointerUp={stopRecording}
-            onPointerLeave={stopRecording}
-            disabled={sending || transcribing}
-            title="اضغط مطولاً للتحدث"
-          >
-            {transcribing ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : recording ? (
-              <MicOff className="h-4 w-4" />
-            ) : (
-              <Mic className="h-4 w-4" />
-            )}
-          </Button>
-          <Button
-            type="button"
-            size="icon"
-            onClick={() => handleSend()}
-            disabled={!input.trim() || sending}
-          >
-            {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-          </Button>
-        </div>
+            <div className="flex items-center gap-2">
+              <Input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSend();
+                  }
+                }}
+                placeholder="اكتب بالإنجليزي…"
+                dir="auto"
+                disabled={sending || recording || transcribing}
+                className={cn("h-12 flex-1 rounded-full px-5 text-base", input && !hasArabic(input) && "font-english")}
+              />
+              {input.trim() ? (
+                <Button
+                  type="button"
+                  size="icon"
+                  aria-label="أرسل"
+                  className="h-14 w-14 shrink-0"
+                  onClick={() => handleSend()}
+                  disabled={sending}
+                >
+                  {sending ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
+                </Button>
+              ) : (
+                <button
+                  type="button"
+                  aria-label="اضغط مطولاً وتكلّم"
+                  onPointerDown={startRecording}
+                  onPointerUp={stopRecording}
+                  onPointerLeave={stopRecording}
+                  onContextMenu={(e) => e.preventDefault()}
+                  disabled={sending || transcribing}
+                  className={cn(
+                    "grid h-14 w-14 shrink-0 touch-none select-none place-items-center rounded-full text-primary-foreground transition-colors disabled:opacity-50",
+                    recording ? "bg-destructive ring-4 ring-destructive/15" : "bg-primary ring-4 ring-primary/10",
+                  )}
+                >
+                  {transcribing ? <Loader2 className="h-6 w-6 animate-spin" /> : <Mic className="h-6 w-6" />}
+                </button>
+              )}
+            </div>
+          </div>
+        </footer>
       )}
-    </AppShell>
+    </div>
+  );
+}
+
+/**
+ * The tutor's fix for the learner's last line: an Arabic sentence with the
+ * English inside it. The English runs are isolated and set in the English
+ * face, highlighted like everything else being studied.
+ */
+function CorrectionCard({ text }: { text: string }) {
+  return (
+    <section
+      aria-label="تصحيح"
+      className="w-full max-w-[85%] self-end rounded-[22px] border border-border bg-card px-4 pb-4 pt-3 shadow-card"
+    >
+      <p className="mb-1 flex items-center gap-1.5 text-[13px] font-semibold leading-5 text-primary">
+        <Lightbulb className="h-4 w-4" aria-hidden /> تصحيح
+      </p>
+      <p dir="auto" className="text-[15px] leading-7 text-foreground">
+        {splitLatinRuns(text).map((run, i) =>
+          run.latin ? (
+            <bdi key={i} className="rounded-md bg-accent/25 px-1 font-english font-semibold">
+              {run.text}
+            </bdi>
+          ) : (
+            <Fragment key={i}>{run.text}</Fragment>
+          ),
+        )}
+      </p>
+    </section>
   );
 }
 

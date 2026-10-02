@@ -89,6 +89,9 @@ describe("where the dock steps aside", () => {
   it("hides over full-screen flows and shows elsewhere", () => {
     expect(shouldShowDock("/review")).toBe(false);
     expect(shouldShowDock("/discover/abc")).toBe(false);
+    // The tutor chat has its own way out and a microphone where the dock sits.
+    expect(shouldShowDock("/conversation")).toBe(false);
+    expect(shouldShowDock("/talk")).toBe(true);
     expect(shouldShowDock("/library")).toBe(true);
     expect(shouldShowDock("/")).toBe(true);
   });

@@ -273,9 +273,7 @@ describe("the transcript", () => {
 
     // Partial text changes under the learner's eyes; showing it at full weight
     // makes a half-heard sentence look like a finished one.
-    expect(screen.getByText("أنا أريد").closest("div.rounded-lg")!.className).toContain(
-      "opacity-70",
-    );
+    expect(screen.getByText("أنا أريد").closest("[data-turn]")!.className).toContain("opacity-70");
   });
 
   it("marks the tutor's turn when it slipped out of English", async () => {

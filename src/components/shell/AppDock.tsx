@@ -71,11 +71,13 @@ export function slotOwns(owns: string[], pathname: string): boolean {
 }
 
 /**
- * Routes that take the whole screen: playback, review, quizzes, auth, admin.
- * A dock over a video is four taps waiting to be hit by mistake.
+ * Routes that take the whole screen: playback, review, quizzes, the tutor
+ * chat, auth, admin. A dock over a video is four taps waiting to be hit by
+ * mistake, and under the tutor chat it would sit on top of the microphone.
  */
 const HIDE_PATTERNS: RegExp[] = [
   /^\/discover\/[^/]+/,
+  /^\/conversation$/,
   /^\/review(\/|$)/,
   /^\/quiz(\/|$)/,
   /^\/stories\/[^/]+/,

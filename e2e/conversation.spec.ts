@@ -68,21 +68,23 @@ async function expectSaid(page: Page, sentence: string) {
  *
  * Needed after *every* navigation to this page, not just the first: `liveMode`
  * is component state initialised to `true`, so it comes back on with every
- * fresh mount and the panel covers the typed conversation underneath. Tolerant
- * of already being out, so a reload path and a cold path can share one helper.
+ * fresh mount and the call panel takes the place of the typed conversation.
+ * Tolerant of already being out, so a reload path and a cold path can share
+ * one helper.
  */
 async function exitLive(page: Page) {
-  // Wait for the toggle before reading it. `count()` resolves immediately
-  // rather than waiting, so checking it on a page that has not finished
-  // hydrating reports zero and silently skips the click — leaving the live
-  // panel mounted over everything the test then looks for.
-  const toggle = page.getByRole("button", { name: /إغلاق المباشر|مكالمة صوتية/ });
-  await expect(toggle).toBeVisible();
-  if ((await toggle.textContent())?.includes("إغلاق المباشر")) await toggle.click();
+  // Wait for one of the two states before reading which it is. `isVisible()`
+  // resolves immediately rather than waiting, so checking it on a page that has
+  // not finished hydrating reports false and silently skips the click — leaving
+  // the call panel mounted over everything the test then looks for.
+  const endCall = page.getByRole("button", { name: "إنهاء المكالمة" });
+  const startCall = page.getByRole("button", { name: /مكالمة صوتية/ }).first();
+  await expect(endCall.or(startCall)).toBeVisible();
+  if (await endCall.isVisible()) await endCall.click();
   // Assert on the panel unmounting rather than on the topic picker, which is
   // only there when the conversation is empty — this helper is also used on the
   // reload path, where a stored thread is what comes back.
-  await expect(page.getByRole("button", { name: /إغلاق المباشر/ })).toHaveCount(0);
+  await expect(endCall).toHaveCount(0);
 }
 
 async function startTopic(page: Page, label = "حديث حر") {
@@ -258,8 +260,8 @@ test.describe("the streamed reply", () => {
 
     // The correction arrives inline in the same stream and is only separable
     // once the stream has finished — splitting per-frame would cut it in half.
-    // It renders as its own bubble so feedback is not buried inside the reply.
-    await expect(page.getByText("Say أنا بخير, not أنا بخيرة.")).toBeVisible();
+    // It renders as its own card so feedback is not buried inside the reply.
+    await expect(page.getByRole("region", { name: "تصحيح" })).toContainText("Say أنا بخير, not أنا بخيرة.");
     await expectSaid(page, "طيب! وش سويت اليوم؟");
     await expect(page.getByText(/\[\[CORRECTION\]\]/)).toHaveCount(0);
   });
@@ -272,7 +274,7 @@ test.describe("the streamed reply", () => {
     await startTopic(page);
 
     await expectSaid(page, OPENER);
-    await expect(page.locator("svg.lucide-circle-alert")).toHaveCount(0);
+    await expect(page.getByRole("region", { name: "تصحيح" })).toHaveCount(0);
   });
 
   test("ignores frames that carry no content", async ({ page, backend }) => {
@@ -449,7 +451,7 @@ test.describe("what a learner can keep", () => {
     await startTopic(page);
     await expectSaid(page, OPENER);
 
-    await page.getByRole("button", { name: /تشغيل/ }).click();
+    await page.getByRole("button", { name: /اسمع/ }).click();
 
     // Replies are English now, so the dialect-routed Arabic voices are gone:
     // one multilingual provider covers the reply and any Arabic aside in a
@@ -473,7 +475,7 @@ test.describe("what a learner can keep", () => {
     await startTopic(page);
     await expectSaid(page, OPENER);
 
-    await page.getByRole("button", { name: /تشغيل/ }).click();
+    await page.getByRole("button", { name: /اسمع/ }).click();
 
     await expect.poll(() => backend.callsTo("elevenlabs-tts").length).toBe(1);
     expect(backend.callsTo("azure-tts")).toHaveLength(0);
@@ -494,7 +496,7 @@ test.describe("what a learner can keep", () => {
     await startTopic(page);
     await expectSaid(page, OPENER);
 
-    await page.getByRole("button", { name: /تشغيل/ }).click();
+    await page.getByRole("button", { name: /اسمع/ }).click();
 
     await expect.poll(() => backend.callsTo("elevenlabs-tts").length).toBe(1);
   });
@@ -621,7 +623,7 @@ test.describe("live voice", () => {
     await page.goto("/conversation");
     await expect(page.getByText(/انقطع الاتصال|جارٍ الاتصال/)).toBeVisible({ timeout: 15_000 });
 
-    await page.getByRole("button", { name: /إغلاق المباشر/ }).click();
+    await page.getByRole("button", { name: "إنهاء المكالمة" }).click();
 
     await expect(page.getByText("اختر موضوعاً للبدء")).toBeVisible();
     await expect(page.getByRole("button", { name: /مكالمة صوتية/ })).toBeVisible();

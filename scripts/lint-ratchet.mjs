@@ -20,9 +20,9 @@ import { execFileSync } from "node:child_process";
 
 /**
  * Maximum tolerated ESLint errors. Only ever goes down.
- * Last lowered: 524 → 520, when Today was rebuilt with a typed profile row.
+ * Last lowered: 520 → 519, when Watch stopped reading the dialect through `as any`.
  */
-const BASELINE = 520;
+const BASELINE = 519;
 
 function runEslint() {
   try {
