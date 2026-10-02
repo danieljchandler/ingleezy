@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { Phone, MessageCircleQuestion, Mic, AudioLines, MessagesSquare, type LucideIcon } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
@@ -22,7 +23,7 @@ import { cn } from "@/lib/utils";
 interface Tool {
   to: string;
   title: string;
-  body: string;
+  body: ReactNode;
   icon: LucideIcon;
 }
 
@@ -42,7 +43,13 @@ const TOOLS: Tool[] = [
   {
     to: "/sounds",
     title: "أصوات الإنجليزي",
-    body: "الأصوات اللي ما فيها العربي، مثل p و v، صوت صوت.",
+    // The Latin letters are isolated: bare, they pull the Arabic comma and
+    // full stop around them to the wrong side of the line.
+    body: (
+      <>
+        الأصوات اللي ما فيها العربي، صوت صوت، مثل <bdi dir="ltr">p</bdi> و<bdi dir="ltr">v</bdi>.
+      </>
+    ),
     icon: AudioLines,
   },
   {
