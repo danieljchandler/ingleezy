@@ -1,25 +1,27 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 
-import { useAzurePronunciation, scoreBand, type PronunciationResult, type WordResult } from "@/hooks/useAzurePronunciation";
+import { useAzurePronunciation, scoreBand } from "@/hooks/useAzurePronunciation";
 import { AppShell } from "@/components/layout/AppShell";
 import { LoadingPanel } from "@/components/loading/LoadingPanel";
 import { PageCorner } from "@/components/shell/PageCorner";
+import { SessionFrame } from "@/components/session/SessionFrame";
+import { PronunciationResultCard } from "@/components/pronunciation/PronunciationResultCard";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Mic, MicOff, RotateCcw, Loader2, Trophy, Target, ArrowRight, Languages, Headphones } from "lucide-react";
+import { Mic, MicOff, RotateCcw, Loader2, Trophy, Headphones } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { InfoHint } from "@/components/InfoHint";
 import { PAGE_HINTS } from "@/lib/pageHints";
-import { useRef } from "react";
+import { englishSpeechUrl } from "@/lib/englishSpeech";
+import { arCount } from "@/lib/strings";
 import { ShadowPlayer } from "@/components/pronunciation/ShadowPlayer";
 import { useShadowQueue } from "@/hooks/useShadowQueue";
 import { useDialect } from "@/contexts/DialectContext";
-import { ChevronBack, ChevronOpen } from "@/components/shared/DirectionalIcon";
+import { ChevronBack, ChevronOpen, IconNext } from "@/components/shared/DirectionalIcon";
 
 const MAX_DURATION_MS = 5000;
 
@@ -49,6 +51,11 @@ const PronunciationPractice = () => {
   const [sessionScores, setSessionScores] = useState<number[]>([]);
   const [wordsLoading, setWordsLoading] = useState(true);
   const [showMeaning, setShowMeaning] = useState(false);
+
+  // The learner's last take, to play back beside the model.
+  const [takeUrl, setTakeUrl] = useState<string | null>(null);
+  const [modelLoading, setModelLoading] = useState(false);
+  const playerRef = useRef<HTMLAudioElement | null>(null);
 
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -109,6 +116,10 @@ const PronunciationPractice = () => {
         stream.getTracks().forEach((t) => t.stop());
         const blob = new Blob(chunksRef.current, { type: mimeType });
         if (blob.size > 0) {
+          setTakeUrl((prev) => {
+            if (prev) URL.revokeObjectURL(prev);
+            return URL.createObjectURL(blob);
+          });
           const res = await assess(blob, referenceText, assessLocale, activeDialect);
           if (res) {
             setSessionScores((prev) => [...prev, res.overall]);
@@ -129,6 +140,35 @@ const PronunciationPractice = () => {
       console.error("Microphone access denied");
     }
   }, [referenceText, assess, reset, assessLocale, activeDialect]);
+
+  const play = (url: string) => {
+    playerRef.current?.pause();
+    const audio = new Audio(url);
+    playerRef.current = audio;
+    audio.play().catch(() => {/* a blocked or failed play just stays silent */});
+  };
+
+  const playModel = async () => {
+    setModelLoading(true);
+    try {
+      play(await englishSpeechUrl(referenceText));
+    } catch (err) {
+      console.warn("Model pronunciation unavailable:", err);
+    } finally {
+      setModelLoading(false);
+    }
+  };
+
+  // Stop playback when leaving the page. The ref is read at unmount on
+  // purpose: the player playing then is the one to stop, not the one (if any)
+  // that existed when this effect ran.
+  useEffect(
+    () => () => {
+      playerRef.current?.pause();
+    },
+    [],
+  );
+  useEffect(() => () => { if (takeUrl) URL.revokeObjectURL(takeUrl); }, [takeUrl]);
 
   const goToNext = () => {
     reset();
@@ -198,248 +238,180 @@ const PronunciationPractice = () => {
     );
   }
 
-  return (
-    <AppShell>
-      <div className="mb-6"><PageCorner /></div>
+  const switchMode = (next: typeof mode) => {
+    setMode(next);
+    reset();
+  };
 
-      <div className="max-w-md mx-auto">
-        {/* Header */}
-        <div className="text-center mb-6">
-          <div className="flex items-center justify-between mb-1">
-            <div />
-            <h1 className="text-2xl font-bold font-heading inline-flex items-center gap-2">تمرين النطق <InfoHint {...PAGE_HINTS["pronunciation"]} size="md" /></h1>
-            <div className="flex items-center gap-1.5">
-              <Languages className="h-3.5 w-3.5 text-muted-foreground" />
-              <span className="text-xs text-muted-foreground">ع</span>
-              <Switch checked={showMeaning} onCheckedChange={setShowMeaning} className="h-5 w-9 data-[state=checked]:bg-primary data-[state=unchecked]:bg-input [&>span]:h-4 [&>span]:w-4 [&>span]:data-[state=checked]:translate-x-4" />
-            </div>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            كلمة {currentIndex + 1} من {words.length}
-          </p>
-        </div>
-
-        {/* Session stats bar */}
-        {sessionScores.length > 0 && (
-          <div className="flex items-center justify-between bg-card border border-border rounded-lg px-4 py-2 mb-6">
-            <div className="flex items-center gap-2 text-sm">
-              <Trophy className="h-4 w-4 text-primary" />
-              <span className="text-muted-foreground">متوسط الجلسة:</span>
-              <span className={cn("font-bold", scoreBand(sessionAverage).color)}>
-                {sessionAverage}
-              </span>
-            </div>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Target className="h-4 w-4" />
-              {sessionScores.length} attempts
-            </div>
-          </div>
+  const recordControl = (
+    <div className="flex flex-col items-center gap-2.5">
+      <button
+        type="button"
+        onClick={isRecording ? stopRecording : startRecording}
+        aria-label={isRecording ? "أوقف التسجيل" : "سجّل نطقك"}
+        className={cn(
+          "grid h-[76px] w-[76px] place-items-center rounded-full text-primary-foreground transition-all duration-200",
+          isRecording
+            ? "scale-105 animate-pulse bg-destructive ring-8 ring-destructive/15"
+            : "bg-primary ring-8 ring-primary/10 hover:scale-105",
         )}
+      >
+        {isRecording ? <MicOff className="h-8 w-8" /> : <Mic className="h-8 w-8" />}
+      </button>
+      <p className="text-sm text-muted-foreground">
+        {isRecording ? "المس لإيقاف التسجيل" : "المس لتسجيل نطقك"}
+      </p>
+    </div>
+  );
 
-        {/* Progress */}
-        <Progress value={((currentIndex + 1) / words.length) * 100} className="mb-6 h-1.5" />
-
-        {/* Mode toggle */}
-        <div className="flex justify-center gap-2 mb-6">
-          <Button
-            variant={mode === "word" ? "default" : "outline"}
-            size="sm"
-            onClick={() => { setMode("word"); reset(); }}
-          >
-            كلمة
+  // The bottom slot: the mic until there is a score, then what to do next.
+  const action =
+    mode === "shadow" ? undefined : isLoading ? (
+      <LoadingPanel task="pronunciation" variant="inline" size="sm" />
+    ) : result ? (
+      <div className="mx-auto flex w-full max-w-md gap-2">
+        <Button variant="outline" size="lg" className="flex-1 gap-1.5" onClick={reset}>
+          <RotateCcw className="h-4 w-4" />
+          حاول من جديد
+        </Button>
+        {currentIndex < words.length - 1 && (
+          <Button size="lg" className="flex-1 gap-1.5" onClick={goToNext}>
+            الكلمة التالية
+            <IconNext className="h-4 w-4" />
           </Button>
-          <Button
-            variant={mode === "sentence" ? "default" : "outline"}
-            size="sm"
-            onClick={() => { setMode("sentence"); reset(); }}
-            disabled={!currentWord?.sentence_english}
-          >
-            جملة
-          </Button>
-          <Button
-            variant={mode === "shadow" ? "default" : "outline"}
-            size="sm"
-            onClick={() => { setMode("shadow"); reset(); }}
-            className="gap-1.5"
-          >
-            <Headphones className="h-3.5 w-3.5" />
-            محاكاة
-          </Button>
-        </div>
-
-        {mode === "shadow" && (
-          <ShadowMode showEnglish={showMeaning} onScore={(s) => setSessionScores((prev) => [...prev, s])} />
-        )}
-        {mode !== "shadow" && (
-        <>
-
-
-        {/* Word card */}
-        <div className="bg-card border-2 border-border rounded-2xl p-8 text-center mb-6">
-          {/* The English to pronounce */}
-          <p className="text-4xl font-bold mb-3 leading-relaxed font-english">
-            {referenceText}
-          </p>
-
-          {/* Arabic meaning behind the reveal */}
-          {showMeaning && (
-            <p dir="rtl" className="text-muted-foreground text-lg mb-4 animate-in fade-in duration-200 font-arabic">
-              {mode === "sentence" && currentWord?.sentence_text
-                ? currentWord.sentence_text
-                : currentWord?.word_arabic}
-            </p>
-          )}
-
-          {/* Deck audio is Arabic-era (the saved word's Arabic pronunciation),
-              so no "listen first" here until English card audio exists. */}
-        </div>
-
-        {/* Recording area */}
-        <div className="flex flex-col items-center gap-4 mb-6">
-          {!result && !isLoading && (
-            <button
-              onClick={isRecording ? stopRecording : startRecording}
-              className={cn(
-                "w-20 h-20 rounded-full flex items-center justify-center transition-all duration-200",
-                isRecording
-                  ? "bg-destructive text-destructive-foreground animate-pulse scale-110 shadow-lg shadow-destructive/30"
-                  : "bg-primary text-primary-foreground hover:scale-105 shadow-lg shadow-primary/30"
-              )}
-            >
-              {isRecording ? (
-                <MicOff className="h-8 w-8" />
-              ) : (
-                <Mic className="h-8 w-8" />
-              )}
-            </button>
-          )}
-
-          {!result && !isLoading && (
-            <p className="text-sm text-muted-foreground">
-              {isRecording ? "المس لإيقاف التسجيل" : "المس لتسجيل نطقك"}
-            </p>
-          )}
-
-          {isLoading && (
-            <LoadingPanel task="pronunciation" variant="inline" size="sm" />
-          )}
-
-          {error && (
-            <div className="text-sm text-destructive text-center">
-              {error}
-              <Button variant="ghost" size="sm" onClick={reset} className="ms-2">
-                <RotateCcw className="h-3.5 w-3.5 me-1" />
-                أعد المحاولة
-              </Button>
-            </div>
-          )}
-        </div>
-
-        {/* Results */}
-        {result && band && (
-          <div className="bg-card border-2 border-border rounded-2xl p-6 mb-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-            {/* Score circle */}
-            <div className="text-center mb-4">
-              <div className={cn(
-                "inline-flex items-center justify-center w-24 h-24 rounded-full border-4 mb-2",
-                result.overall >= 90 ? "border-success" :
-                result.overall >= 75 ? "border-blue-500" :
-                result.overall >= 60 ? "border-accent" : "border-destructive"
-              )}>
-                <span className={cn("text-3xl font-bold", band.color)}>
-                  {Math.round(result.overall)}
-                </span>
-              </div>
-              <p className={cn("text-lg font-semibold", band.color)}>{band.label}</p>
-            </div>
-
-            {/* Sub-scores */}
-            <div className="grid grid-cols-3 gap-3 mb-5">
-              {[
-                { label: "الدقة", value: result.accuracy },
-                { label: "الطلاقة", value: result.fluency },
-                { label: "الاكتمال", value: result.completeness },
-              ].map(({ label, value }) => (
-                <div key={label} className="text-center">
-                  <p className="text-xl font-bold text-foreground">{Math.round(value)}</p>
-                  <p className="text-xs text-muted-foreground">{label}</p>
-                </div>
-              ))}
-            </div>
-
-            {/* Per-word breakdown */}
-            {result.words.length > 0 && (
-              <div className="mb-5">
-                <p className="text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider">
-                  تفكيك الكلمة
-                </p>
-                <div className="flex flex-wrap justify-center gap-2">
-                  {result.words.map((w: WordResult, i: number) => {
-                    const wb = scoreBand(w.accuracy);
-                    return (
-                      <div
-                        key={i}
-                        className={cn(
-                          "px-3 py-1.5 rounded-lg text-sm font-medium bg-muted border border-border",
-                          wb.color
-                        )}
-                      >
-                        <span>{w.word}</span>
-                        <span className="text-xs ms-1 opacity-70">{Math.round(w.accuracy)}</span>
-                        {w.errorType !== "None" && (
-                          <Badge variant="destructive" className="ms-1 text-[10px] px-1 py-0">
-                            {w.errorType}
-                          </Badge>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* Action buttons */}
-            <div className="flex gap-2">
-              <Button variant="outline" className="flex-1 gap-1.5" onClick={reset}>
-                <RotateCcw className="h-4 w-4" />
-                حاول من جديد
-              </Button>
-              {currentIndex < words.length - 1 && (
-                <Button className="flex-1 gap-1.5" onClick={goToNext}>
-                  الكلمة التالية
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Navigation */}
-        {!result && (
-          <div className="flex justify-between">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={goToPrev}
-              disabled={currentIndex === 0}
-            >
-              <ChevronBack className="h-4 w-4 me-1" />
-              السابق
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={goToNext}
-              disabled={currentIndex === words.length - 1}
-            >
-              التالي
-              <ChevronOpen className="h-4 w-4 ms-1" />
-            </Button>
-          </div>
-        )}
-        </>
         )}
       </div>
+    ) : (
+      recordControl
+    );
+
+  return (
+    <AppShell compact>
+      <SessionFrame
+        onExit={() => navigate("/talk")}
+        position={currentIndex + 1}
+        total={mode === "shadow" ? 0 : words.length}
+        trailing={
+          mode !== "shadow" && (
+            <span className="text-sm text-muted-foreground">
+              كلمة {currentIndex + 1} من {words.length}
+            </span>
+          )
+        }
+        meta={
+          sessionScores.length > 0 && (
+            <span className="inline-flex items-center gap-1.5">
+              <Trophy className="h-3.5 w-3.5 text-primary" aria-hidden />
+              <span>متوسط الجلسة:</span>
+              <span className={cn("font-bold", scoreBand(sessionAverage).color)}>{sessionAverage}</span>
+              <span>·</span>
+              <span>{arCount(sessionScores.length, { one: "محاولة واحدة", two: "محاولتين", few: "محاولات", many: "محاولة" })}</span>
+            </span>
+          )
+        }
+        action={action}
+      >
+        <div className="mx-auto w-full max-w-md space-y-4">
+          <div className="flex items-center justify-between gap-3">
+            <h1 className="inline-flex items-center gap-2 text-[22px] font-bold leading-8">
+              تمرين النطق <InfoHint {...PAGE_HINTS["pronunciation"]} size="md" />
+            </h1>
+            <label className="flex min-h-11 cursor-pointer items-center gap-2 text-sm text-muted-foreground">
+              <Switch checked={showMeaning} onCheckedChange={setShowMeaning} />
+              المعنى
+            </label>
+          </div>
+
+          {/* What to practise: one word, its saved sentence, or native clips. */}
+          <div className="grid grid-cols-3 gap-1 rounded-full bg-muted p-1">
+            {(
+              [
+                { key: "word", label: "كلمة", disabled: false },
+                { key: "sentence", label: "جملة", disabled: !currentWord?.sentence_english },
+                { key: "shadow", label: "محاكاة", disabled: false },
+              ] as const
+            ).map(({ key, label, disabled }) => (
+              <button
+                key={key}
+                type="button"
+                aria-pressed={mode === key}
+                disabled={disabled}
+                onClick={() => switchMode(key)}
+                className={cn(
+                  "flex h-10 items-center justify-center gap-1.5 rounded-full text-sm font-semibold transition-colors disabled:opacity-40",
+                  mode === key ? "bg-card text-primary shadow-sm" : "text-muted-foreground hover:text-foreground",
+                )}
+              >
+                {key === "shadow" && <Headphones className="h-3.5 w-3.5" />}
+                {label}
+              </button>
+            ))}
+          </div>
+
+          {mode === "shadow" ? (
+            <ShadowMode showEnglish={showMeaning} onScore={(s) => setSessionScores((prev) => [...prev, s])} />
+          ) : (
+            <>
+              {/* The English to say, big; its meaning behind the switch. */}
+              <section aria-label="قل هذا" className="rounded-[28px] bg-card px-6 py-8 text-center shadow-card">
+                <p
+                  className={cn(
+                    "break-words font-english font-bold",
+                    mode === "sentence" ? "text-[28px] leading-10" : "text-[44px] leading-[52px]",
+                  )}
+                >
+                  {referenceText}
+                </p>
+                {showMeaning && (
+                  <p dir="rtl" className="mt-3 text-lg text-muted-foreground animate-in fade-in duration-200">
+                    {mode === "sentence" && currentWord?.sentence_text
+                      ? currentWord.sentence_text
+                      : currentWord?.word_arabic}
+                  </p>
+                )}
+              </section>
+
+              {error && (
+                <div className="flex items-center justify-center gap-2 rounded-2xl bg-destructive/10 px-4 py-3 text-sm text-destructive">
+                  <span>{error}</span>
+                  <Button variant="ghost" size="sm" onClick={reset}>
+                    <RotateCcw className="me-1 h-3.5 w-3.5" />
+                    أعد المحاولة
+                  </Button>
+                </div>
+              )}
+
+              {result && (
+                <PronunciationResultCard
+                  result={result}
+                  referenceText={referenceText}
+                  onPlayModel={playModel}
+                  modelLoading={modelLoading}
+                  onPlayTake={takeUrl ? () => play(takeUrl) : undefined}
+                />
+              )}
+
+              {!result && (
+                <div className="flex justify-between">
+                  <Button variant="ghost" size="sm" onClick={goToPrev} disabled={currentIndex === 0}>
+                    <ChevronBack className="me-1 h-4 w-4" />
+                    السابق
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={goToNext}
+                    disabled={currentIndex === words.length - 1}
+                  >
+                    التالي
+                    <ChevronOpen className="ms-1 h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </SessionFrame>
     </AppShell>
   );
 };
@@ -475,13 +447,13 @@ const ShadowMode = ({ showEnglish, onScore }: ShadowModeProps) => {
 
   if (clips.length === 0) {
     return (
-      <div className="text-center py-12 bg-card border border-border rounded-2xl">
-        <Headphones className="h-12 w-12 text-muted-foreground/30 mx-auto mb-3" />
-        <h3 className="font-semibold mb-2">لا توجد مقاطع أصلية بعد</h3>
-        <p className="text-sm text-muted-foreground mb-4 px-6">
+      <div className="rounded-[28px] bg-card px-6 py-10 text-center shadow-card">
+        <Headphones className="mx-auto mb-3 h-12 w-12 text-muted-foreground/30" />
+        <h3 className="mb-2 font-semibold">لا توجد مقاطع أصلية بعد</h3>
+        <p className="mb-4 text-sm text-muted-foreground">
           تشغّل المحاكاة مقاطع بأصوات متحدثين أصليين. تصفح الفيديوهات أو ارفع صوتاً لبناء قائمة.
         </p>
-        <div className="flex gap-2 justify-center">
+        <div className="flex justify-center gap-2">
           <Button size="sm" onClick={() => navigate("/discover")}>تصفح الفيديوهات</Button>
           <Button size="sm" variant="outline" onClick={() => navigate("/transcribe")}>ارفع صوتاً</Button>
         </div>
@@ -491,10 +463,12 @@ const ShadowMode = ({ showEnglish, onScore }: ShadowModeProps) => {
 
   if (index >= clips.length) {
     return (
-      <div className="text-center py-10 bg-card border-2 border-border rounded-2xl">
-        <Trophy className="h-12 w-12 text-primary mx-auto mb-3" />
-        <h3 className="font-semibold text-lg mb-1">انتهت الجلسة</h3>
-        <p className="text-sm text-muted-foreground mb-4">{clips.length} clips shadowed</p>
+      <div className="rounded-[28px] bg-card px-6 py-10 text-center shadow-card">
+        <Trophy className="mx-auto mb-3 h-12 w-12 text-primary" />
+        <h3 className="mb-1 text-lg font-semibold">انتهت الجلسة</h3>
+        <p className="mb-4 text-sm text-muted-foreground">
+          قلّدت {arCount(clips.length, { one: "مقطعاً واحداً", two: "مقطعين", few: "مقاطع", many: "مقطعاً" })}
+        </p>
         <Button onClick={() => { setIndex(0); refresh(); }}>جلسة جديدة</Button>
       </div>
     );
@@ -504,14 +478,16 @@ const ShadowMode = ({ showEnglish, onScore }: ShadowModeProps) => {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between text-xs">
-        <span className="text-muted-foreground">Clip {index + 1} / {clips.length}</span>
-        <label className="flex items-center gap-2">
+      <div className="flex items-center justify-between text-sm">
+        <span className="text-muted-foreground">
+          مقطع {index + 1} من {clips.length}
+        </span>
+        <label className="flex min-h-11 cursor-pointer items-center gap-2">
           <span className="text-muted-foreground">تقدّم تلقائي</span>
-          <Switch checked={autoAdvance} onCheckedChange={setAutoAdvance} className="h-5 w-9 data-[state=checked]:bg-primary data-[state=unchecked]:bg-input [&>span]:h-4 [&>span]:w-4 [&>span]:data-[state=checked]:translate-x-4" />
+          <Switch checked={autoAdvance} onCheckedChange={setAutoAdvance} />
         </label>
       </div>
-      <Progress value={(index / clips.length) * 100} className="h-1.5" />
+      <Progress value={(index / clips.length) * 100} className="h-2" />
       <ShadowPlayer
         key={clip.id}
         clip={clip}
@@ -521,8 +497,8 @@ const ShadowMode = ({ showEnglish, onScore }: ShadowModeProps) => {
         onResult={onScore}
         onNext={() => setIndex((i) => i + 1)}
       />
-      <p className="text-[10px] text-center text-muted-foreground/70">
-        Tip: headphones improve scoring by preventing the source audio from leaking into your mic.
+      <p className="text-center text-xs text-muted-foreground">
+        نصيحة: السماعات تحسّن التقييم، لأنها تمنع صوت المقطع من الوصول للمايك.
       </p>
     </div>
   );

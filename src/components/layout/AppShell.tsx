@@ -54,7 +54,10 @@ export function AppShell({ children, className, compact = false }: AppShellProps
         // bottom of a page underneath it. The old five-tab bar happened to be
         // 47px and cleared it by one pixel, so nothing showed until the bar
         // was replaced.
-        showNav && "pb-24 md:pb-24",
+        // pb-36 rather than pb-24 on a phone: the Ask AI button sits above
+        // the dock (bottom-20), and the last card has to be able to scroll
+        // clear of both.
+        showNav && "pb-36 md:pb-24",
         // Let the page scroll clear of the bottom sheet, or its lower half is
         // unreachable while the panel is open.
         aiOpen && "max-sm:pb-[60dvh]",

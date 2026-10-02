@@ -55,16 +55,19 @@ export function AskAiFab({ className }: { className?: string }) {
       data-feedback-ignore="true"
       onClick={() => openChat()}
       className={cn(
-        "fixed right-3 z-40 flex items-center gap-1.5 rounded-full",
+        "fixed right-3 z-40 flex items-center justify-center gap-1.5 rounded-full",
         "bg-primary text-primary-foreground shadow-lg transition-transform hover:scale-105",
         "md:right-6",
         ownsItsBottom ? "bottom-36 md:bottom-24" : "bottom-20 md:bottom-6",
-        "h-10 pe-3 ps-2.5",
+        // A 44px circle on a phone, the labelled pill from md up. The pill was
+        // 150px of button floating over whatever card sat under it — a plan
+        // step, a pronunciation result — on every page at phone width.
+        "h-11 w-11 md:w-auto md:pe-3 md:ps-2.5",
         className,
       )}
     >
-      <Sparkles className="h-4 w-4 shrink-0" />
-      <span className="text-[13px] font-semibold leading-none tracking-tight">اسأل الذكاء</span>
+      <Sparkles className="h-5 w-5 shrink-0 md:h-4 md:w-4" />
+      <span className="hidden text-[13px] font-semibold leading-none md:inline">اسأل الذكاء</span>
     </button>
   );
 }

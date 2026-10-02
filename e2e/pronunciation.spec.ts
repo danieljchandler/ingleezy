@@ -184,14 +184,14 @@ test.describe("scoring a word", () => {
 
     // The per-word breakdown is the only actionable part of the result — an
     // overall 82 does not tell a learner which sound to fix.
-    await expect(page.getByText("Mispronunciation")).toBeVisible();
+    await expect(page.getByText("نطق غير صحيح")).toBeVisible();
   });
 
   test("keeps a running average across takes", async ({ page, backend }) => {
     await page.goto("/pronunciation");
     await recordTake(page, backend);
     await expect(page.getByText("متوسط الجلسة:")).toBeVisible();
-    await expect(page.getByText("1 attempts")).toBeVisible();
+    await expect(page.getByText("محاولة واحدة")).toBeVisible();
 
     backend.stubFunction("azure-pronunciation", aScore({ overall: 62 }));
     await page.getByRole("button", { name: "حاول من جديد" }).click();
@@ -199,7 +199,7 @@ test.describe("scoring a word", () => {
 
     // (82 + 62) / 2 = 72, rounded. The average is the session's only record —
     // nothing here is persisted, so leaving the page discards it.
-    await expect(page.getByText("2 attempts")).toBeVisible();
+    await expect(page.getByText("محاولتين")).toBeVisible();
     await expect(page.getByText("72", { exact: true })).toBeVisible();
   });
 
@@ -424,7 +424,7 @@ test.describe("shadow mode", () => {
     await page.getByRole("button", { name: "محاكاة" }).click();
 
     await expect(page.getByText("كيف حالك اليوم")).toBeVisible();
-    await expect(page.getByText("Clip 1 / 1")).toBeVisible();
+    await expect(page.getByText("مقطع 1 من 1")).toBeVisible();
   });
 
   test("skips lines that are too short or too long to shadow", async ({ page, db }) => {
@@ -446,7 +446,7 @@ test.describe("shadow mode", () => {
     await page.goto("/pronunciation");
     await page.getByRole("button", { name: "محاكاة" }).click();
 
-    await expect(page.getByText("Clip 1 / 1")).toBeVisible();
+    await expect(page.getByText("مقطع 1 من 1")).toBeVisible();
     await expect(page.getByText("هذا يصلح تماما")).toBeVisible();
   });
 

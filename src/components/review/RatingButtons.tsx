@@ -1,7 +1,6 @@
 import { cn } from "@/lib/utils";
 import { Rating, estimateNextInterval } from "@/lib/spacedRepetition";
 import { useDesiredRetention } from "@/hooks/useDesiredRetention";
-import { RotateCcw, ThumbsDown, ThumbsUp, Sparkles } from "lucide-react";
 
 interface RatingButtonsProps {
   onRate: (rating: Rating) => void;
@@ -15,9 +14,9 @@ interface RatingButtonsProps {
 }
 
 /**
- * RatingButtons - Spaced repetition rating interface
- * 
- * Clean, minimal design that doesn't overwhelm the learner.
+ * The four spaced-repetition ratings, each with the interval it would
+ * schedule, so the choice is about when to see the card again rather than
+ * about grading oneself.
  */
 export const RatingButtons = ({
   onRate,
@@ -32,40 +31,20 @@ export const RatingButtons = ({
   // deliberately not previewed: like Anki, the label shows the base interval
   // and the ±5% load balancing lands silently on the stored schedule.
   const desiredRetention = useDesiredRetention();
-  const buttons: { rating: Rating; label: string; icon: React.ReactNode; color: string }[] = [
-    {
-      rating: 'again',
-      label: 'من جديد',
-      icon: <RotateCcw className="w-4 h-4" />,
-      color: 'bg-destructive/10 border-destructive/25 text-destructive hover:bg-destructive/15 hover:border-destructive/45',
-    },
-    {
-      rating: 'hard',
-      label: 'صعب',
-      icon: <ThumbsDown className="w-4 h-4" />,
-      color: 'bg-accent/10 border-accent/25 text-accent-ink hover:bg-accent/15 hover:border-accent/45',
-    },
-    {
-      rating: 'good',
-      label: 'جيد',
-      icon: <ThumbsUp className="w-4 h-4" />,
-      color: 'bg-primary/10 border-primary/25 text-primary hover:bg-primary/15 hover:border-primary/45',
-    },
-    {
-      rating: 'easy',
-      label: 'سهل',
-      icon: <Sparkles className="w-4 h-4" />,
-      color: 'bg-success/10 border-success/30 text-success hover:bg-success/15 hover:border-success/50',
-    },
+  // Four pills under the thumb. "Good" is the filled one: it is the answer
+  // to most cards, and the one a learner should not have to look for.
+  const buttons: { rating: Rating; label: string; color: string }[] = [
+    { rating: "again", label: "من جديد", color: "bg-destructive/10 text-destructive hover:bg-destructive/15" },
+    { rating: "hard", label: "صعب", color: "bg-accent/15 text-accent-ink hover:bg-accent/25" },
+    { rating: "good", label: "جيد", color: "bg-primary text-primary-foreground hover:bg-primary/90" },
+    { rating: "easy", label: "سهل", color: "bg-success/10 text-success hover:bg-success/15" },
   ];
 
   return (
-    <div className="w-full max-w-sm mx-auto">
-      <p className="text-center text-muted-foreground mb-3 text-xs uppercase tracking-wider font-medium">
-        ما مدى تذكّرك لها؟
-      </p>
+    <div className="mx-auto w-full max-w-md">
+      <p className="mb-2.5 text-center text-sm text-muted-foreground">ما مدى تذكّرك لها؟</p>
       <div className="grid grid-cols-4 gap-2">
-        {buttons.map(({ rating, label, icon, color }) => {
+        {buttons.map(({ rating, label, color }) => {
           const nextInterval = estimateNextInterval(rating, stability, difficulty, intervalDays, repetitions, elapsedDays, {
             desiredRetention,
           });
@@ -73,20 +52,18 @@ export const RatingButtons = ({
           return (
             <button
               key={rating}
+              type="button"
               onClick={() => onRate(rating)}
               disabled={disabled}
               className={cn(
-                "flex flex-col items-center justify-center gap-1",
-                "py-3 px-2 rounded-xl border-2",
+                "flex h-16 flex-col items-center justify-center gap-0.5 rounded-full px-1",
                 color,
-                "transition-all duration-200",
-                "hover:scale-[1.03] hover:-translate-y-0.5 active:scale-[0.97] active:translate-y-0",
-                "disabled:opacity-50 disabled:cursor-not-allowed"
+                "transition-[transform,background-color] duration-150 active:scale-[0.97]",
+                "disabled:cursor-not-allowed disabled:opacity-50",
               )}
             >
-              {icon}
-              <span className="text-xs font-semibold leading-none">{label}</span>
-              <span className="text-[10px] opacity-70 leading-none mt-0.5">{nextInterval}</span>
+              <span className="text-[15px] font-semibold leading-5">{label}</span>
+              <span className="text-xs leading-4 opacity-80">{nextInterval}</span>
             </button>
           );
         })}
@@ -94,4 +71,3 @@ export const RatingButtons = ({
     </div>
   );
 };
-

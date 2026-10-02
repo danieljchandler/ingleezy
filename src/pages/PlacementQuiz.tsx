@@ -5,7 +5,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { useDialect } from "@/contexts/DialectContext";
 import { DIALECT_LABELS } from "@/config";
 import { AppShell } from "@/components/layout/AppShell";
-import { CaravanMedallion } from "@/components/design-system";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Switch } from "@/components/ui/switch";
@@ -34,6 +33,9 @@ type Question = {
   correct_index: number;
 };
 type AnswerRecord = { correct: boolean; difficulty: string; skill_type: string };
+
+/** The six CEFR levels, as the steps drawn on the intro. */
+const CEFR_STEPS = ["A1", "A2", "B1", "B2", "C1", "C2"] as const;
 
 const SKILL_ICONS: Record<string, typeof Brain> = {
   vocabulary: BookOpen,
@@ -220,8 +222,20 @@ export default function PlacementQuiz() {
         {/* ─── INTRO ─── */}
         {phase === "intro" && (
           <div className="flex-1 flex flex-col items-center justify-center text-center space-y-6 animate-in fade-in duration-300">
-            {/* The caravan: this screen is the one about where you are on the road. */}
-            <CaravanMedallion className="max-w-[200px] sm:max-w-[240px]" />
+            {/* The scale itself: this screen is the one about where you are on
+                it. It replaced a looping camel-caravan clip — heritage
+                ornament the brand has dropped. */}
+            <ol aria-hidden dir="ltr" className="flex items-end gap-1.5">
+              {CEFR_STEPS.map((level, i) => (
+                <li key={level} className="flex w-10 flex-col items-center gap-1.5">
+                  <span
+                    className="w-full rounded-t-xl bg-primary"
+                    style={{ height: 16 + i * 12, opacity: 0.3 + i * 0.14 }}
+                  />
+                  <span className="font-english text-xs font-bold text-muted-foreground">{level}</span>
+                </li>
+              ))}
+            </ol>
             <div>
               <h1 className="text-3xl font-bold font-heading text-foreground mb-3">
                 اختبار تحديد المستوى

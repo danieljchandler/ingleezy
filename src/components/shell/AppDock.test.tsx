@@ -91,6 +91,9 @@ describe("where the dock steps aside", () => {
     expect(shouldShowDock("/discover/abc")).toBe(false);
     // The tutor chat has its own way out and a microphone where the dock sits.
     expect(shouldShowDock("/conversation")).toBe(false);
+    // So does the pronunciation drill: a session, with its own exit and its
+    // mic at the bottom.
+    expect(shouldShowDock("/pronunciation")).toBe(false);
     expect(shouldShowDock("/talk")).toBe(true);
     expect(shouldShowDock("/library")).toBe(true);
     expect(shouldShowDock("/")).toBe(true);
