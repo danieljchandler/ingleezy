@@ -25,28 +25,28 @@ interface Step {
  * using the same word the slot itself uses — a tour that calls it something
  * else is describing a screen the reader cannot find.
  *
- * Four steps, not five. The old tour walked five tabs because the old nav had
- * five places to explain; a feed you scroll needs no explaining, so the steps
- * are only the things that are not obvious from looking: where the skills
- * went, that upload takes your own video, and that the mark is your account.
+ * Four steps for four things that are not obvious from looking: that Today is
+ * a plan with one button, where everything to learn from went, where the
+ * speaking tools live, and that the mark is your account. كلماتي explains
+ * itself, so it does not get a step.
  */
 const STEPS: Step[] = [
   {
-    selector: "[data-tour='nav-feed']",
-    title: "الرئيسية",
-    body: "مقاطع حقيقية بالإنجليزي، واحد ورا الثاني. مرّر لفوق للي بعده، واضغط أي مقطع عشان النص والترجمة.",
-    placement: "top",
-  },
-  {
-    selector: "[data-tour='nav-choose']",
-    title: "المهارات",
-    body: "استماع، قراءة، تحدّث، وكتابة — كل وحدة لها صفحتها. تقدر توصلها من هنا أو تسحب الشاشة لجهة اليسار.",
-    placement: "top",
-  },
-  {
     selector: "[data-tour='nav-today']",
     title: "اليوم",
-    body: "مهامك اليومية وسلسلتك في مكان واحد. ابدأ من هنا كل يوم — وإذا عندك مقطع تحبه، ارفعه من المهارات وإحنا نحوّله لدرس.",
+    body: "خطتك لليوم في مكان واحد. اضغط «كمّل» كل مرة وإحنا نوديك للخطوة اللي بعدها.",
+    placement: "top",
+  },
+  {
+    selector: "[data-tour='nav-library']",
+    title: "المكتبة",
+    body: "مقاطع حقيقية بالإنجليزي، والمهارات الأربع، والقصص والألعاب. وإذا عندك مقطع تحبه، ارفعه من هنا وإحنا نحوّله لدرس.",
+    placement: "top",
+  },
+  {
+    selector: "[data-tour='nav-talk']",
+    title: "تكلّم",
+    body: "كلّم المعلّم، اسأل كيف تقول أي شي بالإنجليزي، وتدرّب على النطق.",
     placement: "top",
   },
   {

@@ -103,7 +103,7 @@ export function buildRobots(origin: string | undefined): string {
  */
 function hintsFor(path: string): { changefreq: string; priority: string } {
   if (path === "/") return { changefreq: "weekly", priority: "1.0" };
-  if (["/discover", "/learn", "/curriculum", "/today"].includes(path)) {
+  if (["/discover", "/learn", "/curriculum", "/library", "/feed"].includes(path)) {
     return { changefreq: "weekly", priority: "0.8" };
   }
   return { changefreq: "monthly", priority: "0.6" };

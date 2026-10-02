@@ -64,13 +64,13 @@ export function SessionFrame({
             type="button"
             onClick={onExit}
             aria-label="إغلاق الجلسة"
-            className="-m-2 flex items-center rounded-lg p-2 text-muted-foreground transition-colors hover:text-foreground"
+            className="-ms-2 grid h-11 w-11 shrink-0 place-items-center rounded-full text-foreground transition-colors hover:bg-muted"
           >
-            <X className="h-5 w-5" />
+            <X className="h-6 w-6" />
           </button>
           {total > 0 && (
             <div
-              className="h-2.5 flex-grow overflow-hidden rounded-full bg-muted"
+              className="h-2 flex-grow overflow-hidden rounded-full bg-muted"
               role="progressbar"
               aria-valuenow={position}
               aria-valuemin={0}
@@ -86,7 +86,7 @@ export function SessionFrame({
           {trailing && <div className="flex flex-shrink-0 items-center">{trailing}</div>}
         </div>
         {meta && (
-          <p className="mt-2 text-center text-caption text-muted-foreground">{meta}</p>
+          <p className="mt-1 text-center text-[13px] leading-5 text-muted-foreground">{meta}</p>
         )}
       </header>
 

@@ -2,10 +2,11 @@ import { Link } from "react-router-dom";
 import {
   BookOpen, Languages, FileText, Heart, BarChart3, Trophy, Users, User, Settings,
   CreditCard, GraduationCap, Newspaper, Compass, MessageCircleQuestion, Laugh,
-  Twitter, Mic, BookOpenText, ChevronLeft, CalendarCheck, MessagesSquare,
+  Twitter, Mic, BookOpenText, MessagesSquare,
   SpellCheck, Target, TriangleAlert, Headset, type LucideIcon,
 } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
+import { ChevronOpen } from "@/components/shared/DirectionalIcon";
 import { useAuth } from "@/hooks/useAuth";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { useUserXP } from "@/hooks/useGamification";
@@ -65,9 +66,11 @@ const tools = (signedIn: boolean): Item[] => [
  * so deleting those hubs made five working features unreachable — the kind of
  * hole a navigation rewrite leaves that nothing fails on, because an
  * unreachable route still passes every test written about it.
+ *
+ * "Your day" used to lead this list. Today is the front door and a dock tab
+ * now, so a second door here would only be a duplicate.
  */
 const practice = (signedIn: boolean): Item[] => [
-  { label: "يومك", icon: CalendarCheck, to: "/today" },
   { label: "محادثة", icon: MessagesSquare, to: "/conversation" },
   { label: "قواعد", icon: SpellCheck, to: "/grammar" },
   { label: "تحدّي اليوم", icon: Target, to: "/daily-challenge" },
@@ -149,7 +152,7 @@ const MeHub = () => {
               <Link to={to} className="flex items-center gap-3 px-4 py-3.5 text-sm">
                 <Icon className="h-4 w-4 text-muted-foreground" />
                 <span className="flex-1">{label}</span>
-                <ChevronLeft className="h-4 w-4 text-muted-foreground rtl:rotate-180" />
+                <ChevronOpen className="h-4 w-4 text-muted-foreground" />
               </Link>
             </li>
           ))}

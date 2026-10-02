@@ -67,20 +67,24 @@ export const ROUTES: RouteSpec[] = [
   { path: "/index", gate: "public", redirectsTo: "/" },
 
   // ── Public shell ───────────────────────────────────────────────────────────
-  // "/" is the video feed for a signed-in learner and the landing page for a
-  // visitor, so it stays public. The daily dashboard kept its content and moved
-  // to /today when the feed took the front door.
-  { path: "/", gate: "public", boundary: "HomeRoute" },
-  { path: "/today", gate: "public", boundary: "TodayRoute" },
-  { path: "/choose", gate: "public", boundary: "ChooseRoute" },
+  // "/" is Today for a signed-in learner and the landing page for a visitor,
+  // so it stays public. The four dock tabs are "/", /library, /talk and
+  // /my-words; the clips feed that used to be "/" moved to /feed, and the old
+  // addresses of Today and the chooser redirect.
+  { path: "/", gate: "public", boundary: "TodayRoute" },
+  { path: "/today", gate: "public", redirectsTo: "/" },
+  { path: "/feed", gate: "public", boundary: "FeedRoute" },
+  { path: "/library", gate: "public", boundary: "LibraryRoute" },
+  { path: "/talk", gate: "public", boundary: "TalkRoute" },
+  { path: "/choose", gate: "public", redirectsTo: "/library" },
   { path: "/auth", gate: "public", boundary: "AuthRoute" },
   { path: "/reset-password", gate: "public", boundary: "ResetPasswordRoute" },
   { path: "/onboarding", gate: "public", boundary: "OnboardingRoute" },
   { path: "/terms", gate: "public", boundary: "TermsRoute" },
   { path: "/privacy", gate: "public", boundary: "PrivacyRoute" },
   { path: "/pricing", gate: "public", boundary: "PricingRoute" },
-  { path: "/learn-hub", gate: "public", redirectsTo: "/choose" },
-  { path: "/practice", gate: "public", redirectsTo: "/choose" },
+  { path: "/learn-hub", gate: "public", redirectsTo: "/library" },
+  { path: "/practice", gate: "public", redirectsTo: "/library" },
   { path: "/leaderboard", gate: "public", boundary: "LeaderboardRoute" },
 
   // ── Curriculum ─────────────────────────────────────────────────────────────

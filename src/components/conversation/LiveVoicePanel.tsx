@@ -52,32 +52,46 @@ export function LiveVoicePanel({
   };
 
   return (
-    <div className="flex flex-col gap-4 rounded-2xl border-2 border-primary/30 bg-card p-4 shadow-md">
-      {/* Status bar */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
+    <section
+      aria-label="مكالمة مع المعلّم"
+      className="flex flex-col gap-4 rounded-[28px] border border-border bg-card p-5 shadow-card"
+    >
+      {/* Status: what the call is doing, large enough to read at arm's length
+          while talking. */}
+      <div className="flex items-center gap-3">
+        <span
+          aria-hidden
+          className={cn(
+            "grid h-14 w-14 shrink-0 place-items-center rounded-full",
+            status === "error" ? "bg-destructive/10 text-destructive" : "bg-primary/10 text-primary",
+          )}
+        >
           {status === "connecting" ? (
-            <Loader2 className="h-4 w-4 animate-spin text-primary" />
+            <Loader2 className="h-6 w-6 animate-spin" />
           ) : status === "live" ? (
-            <Radio className={cn("h-4 w-4", muted ? "text-muted-foreground" : "text-primary animate-pulse")} />
+            <Radio className={cn("h-6 w-6", muted ? "text-muted-foreground" : "animate-pulse")} />
           ) : status === "error" ? (
-            <AlertCircle className="h-4 w-4 text-destructive" />
-          ) : null}
-          <span className="text-sm font-medium">{statusLabel}</span>
+            <AlertCircle className="h-6 w-6" />
+          ) : (
+            <Mic className="h-6 w-6" />
+          )}
+        </span>
+        <div className="min-w-0">
+          <p className="text-lg font-semibold leading-7">{statusLabel}</p>
+          <p className="text-[13px] leading-5 text-muted-foreground">مكالمة مباشرة • {dialect}</p>
         </div>
-        <span className="text-xs text-muted-foreground">مكالمة مباشرة • {dialect}</span>
       </div>
 
       {error && (
-        <div className="rounded-md bg-destructive/10 px-3 py-2 text-xs text-destructive">
+        <div className="rounded-2xl bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {error}
         </div>
       )}
 
       {/* Transcript */}
-      <div className="min-h-[180px] max-h-[40vh] overflow-y-auto space-y-2 rounded-lg bg-muted/30 p-3 text-sm">
+      <div className="flex min-h-[180px] max-h-[45dvh] flex-col gap-2 overflow-y-auto rounded-3xl bg-background p-3">
         {turns.length === 0 ? (
-          <p className="text-center text-xs text-muted-foreground py-8">
+          <p className="m-auto py-8 text-center text-sm text-muted-foreground">
             {status === "live"
               ? "ابدأ الكلام بالإنجليزية…"
               : status === "connecting"
@@ -88,26 +102,27 @@ export function LiveVoicePanel({
           turns.map((t, i) => (
             <div
               key={i}
+              data-turn={t.role}
               className={cn(
-                "rounded-lg px-3 py-2",
+                "max-w-[85%] rounded-[20px] px-3.5 py-2.5",
                 t.role === "user"
-                  ? "bg-primary/10 ms-auto max-w-[85%]"
-                  : "bg-background border border-border max-w-[85%]",
+                  ? "self-end rounded-se-md bg-primary/10"
+                  : "self-start rounded-ss-md border border-border bg-card",
                 t.partial && "opacity-70",
               )}
             >
-              <div className="text-[10px] uppercase tracking-wide text-muted-foreground mb-0.5 flex items-center gap-1.5">
+              <div className="mb-0.5 flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground">
                 <span>{t.role === "user" ? "أنت" : "المعلّم"}</span>
                 {t.role === "assistant" && t.hasDialectDrift && (
-                  <span className="rounded bg-accent/15 px-1.5 py-0.5 text-[9px] font-semibold text-accent-ink normal-case tracking-normal">
+                  <span className="rounded-full bg-accent/15 px-1.5 py-0.5 text-[10px] font-semibold text-accent-ink">
                     خرج عن الإنجليزي
                   </span>
                 )}
               </div>
               {t.role === "assistant" ? (
-                <TappableEnglishText text={t.text} source="conversation-live" />
+                <TappableEnglishText text={t.text} source="conversation-live" className="text-base leading-6" />
               ) : (
-                <div dir="auto" className="font-english leading-snug">{t.text}</div>
+                <div dir="auto" className="font-english text-base leading-6">{t.text}</div>
               )}
             </div>
           ))
@@ -119,25 +134,26 @@ export function LiveVoicePanel({
         <Button
           variant={muted ? "default" : "outline"}
           size="icon"
+          className="h-14 w-14"
           onClick={() => setMuted(!muted)}
           disabled={status !== "live"}
           aria-label={muted ? "إلغاء الكتم" : "كتم الميكروفون"}
         >
-          {muted ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
+          {muted ? <MicOff className="h-6 w-6" /> : <Mic className="h-6 w-6" />}
         </Button>
         <Button
           variant="destructive"
           onClick={handleEnd}
-          className="gap-2"
+          className="h-14 flex-1 gap-2 text-base font-semibold sm:flex-none sm:px-8"
         >
-          <PhoneOff className="h-4 w-4" />
+          <PhoneOff className="h-5 w-5" />
           إنهاء المكالمة
         </Button>
       </div>
 
-      <p className="text-[11px] text-center text-muted-foreground">
+      <p className="text-center text-xs text-muted-foreground">
         الصوت عبر ChatGPT Realtime. الأفضل على Chrome أو Edge.
       </p>
-    </div>
+    </section>
   );
 }

@@ -98,9 +98,8 @@ export const useTodayQueue = (): TodayTask[] => {
     {
       // Kept as "listening" because that is the key completions are stored
       // under in localStorage; renaming the id would silently un-tick the task
-      // for everyone who had already done it today. The home page renders this
-      // one as the WatchTodayCard hero rather than as a queue row, so it still
-      // counts towards "n of m tasks done" without appearing twice.
+      // for everyone who had already done it today. Today's plan puts it first
+      // and shows the clip's own title under it.
       id: "listening",
       title: AR.queue.watchVideo,
       subtitle: AR.queue.discover,

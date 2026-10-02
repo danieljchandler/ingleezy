@@ -2,12 +2,12 @@ import { expect, test, type Page } from "./support/fixtures";
 import {
   aDiscoverVideo,
   aProfile,
+  aReviewStreak,
   aSetPhrase,
   aUserSetPhrase,
   aUserVocabulary,
-  aUserXp,
-  aWordReview,
   aVocabularyWord,
+  aWordReview,
   daysAgo,
   many,
   reviewId,
@@ -20,20 +20,15 @@ import {
 import type { MemoryDb } from "../src/test/support/postgrest/store";
 
 /**
- * The daily dashboard. It was the app's front door until the feed took that
- * job; it keeps its content and moves to /today, because a checklist is still
- * the right surface for "what does today look like" — just not the right first
- * thing to see on opening the app.
- */
-/**
- * The home page — the daily queue.
+ * Today — the front door.
  *
- * Home is the only screen most learners see every day, and its job is to answer
- * one question: what should I do now? The queue is assembled from four
- * independent sources (three SRS decks, the set-phrase deck, the Discover feed,
- * and localStorage completions), and a task that is wrongly hidden is invisible
- * — there is no error, no empty state, nothing to notice. That is the failure
- * mode these specs exist for.
+ * Today is the only screen most learners see every day, and its job is to
+ * answer one question: what should I do now? So it is a greeting, the streak, a
+ * three-step plan with one button, and a way to the tutor. The plan is built
+ * from the daily queue, which is assembled from independent sources (three SRS
+ * decks, the set-phrase deck, the Discover feed, and localStorage completions),
+ * and a task that is wrongly hidden is invisible — there is no error, no empty
+ * state, nothing to notice. That is the failure mode these specs exist for.
  *
  * Completions live in localStorage keyed by local date, so they are asserted
  * through the UI and through the storage key rather than the database.
@@ -86,33 +81,55 @@ function seedDuePhrases(db: MemoryDb, count: number) {
   );
 }
 
-test.describe("the daily queue", () => {
+/**
+ * A quiet day: no clip published, no card or phrase due. The plan is then the
+ * three always-available daily tasks, which makes its contents predictable.
+ */
+function seedQuietDay(db: MemoryDb) {
+  db.seed("discover_videos", []);
+  db.seed("word_reviews", []);
+  db.seed("user_vocabulary", []);
+  db.seed("user_set_phrases", []);
+}
+
+/** A plan step, by its accessible name ("<title> — تقريباً n دقائق"). */
+const step = (page: Page, title: string | RegExp) =>
+  page.getByRole("button", {
+    name: typeof title === "string" ? new RegExp(`^(مكتملة: )?${title} —`) : title,
+  });
+
+const showExtras = (page: Page) => page.getByRole("button", { name: /إذا عندك وقت/ }).click();
+
+test.describe("the plan", () => {
   test.beforeEach(async ({ signInAs, db }) => {
     await signInAs("free");
-    // A placement level, or the page renders the placement banner instead and
-    // the queue is not what is under test.
+    // A placement level, or the page leads with the placement prompt instead.
     db.seed("profiles", [aProfile({ placement_level_gulf: "A2" })]);
   });
 
-  test("shows the queue with a task count", async ({ page }) => {
-    await page.goto("/today");
+  test("is three steps with its progress", async ({ page, db }) => {
+    seedQuietDay(db);
+    await page.goto("/");
 
-    await expect(page.getByRole("heading", { name: "اليوم", exact: true })).toBeVisible();
-    await expect(page.getByText(/أنجزت \d+ من \d+ مهام/)).toBeVisible();
+    await expect(page.getByRole("heading", { name: "خطة اليوم" })).toBeVisible();
+    await expect(page.getByText(/· 0 من 3$/)).toBeVisible();
+    await expect(step(page, "تحدي اليوم")).toBeVisible();
+    await expect(step(page, "قصة اليوم")).toBeVisible();
+    await expect(step(page, "اقرأ نصاً قصيراً")).toBeVisible();
   });
 
-  test("lists the tasks that are always available", async ({ page }) => {
-    await page.goto("/today");
+  test("keeps the rest of the queue one tap away", async ({ page, db }) => {
+    seedQuietDay(db);
+    await page.goto("/");
 
-    // These four have no precondition — hiding one is how a learner ends up
-    // with an empty-looking day.
-    await expect(page.getByText("تحدي اليوم")).toBeVisible();
-    await expect(page.getByText("قصة اليوم")).toBeVisible();
-    await expect(page.getByText("اقرأ نصاً قصيراً")).toBeVisible();
-    await expect(page.getByText("مقال من أخبار السوق")).toBeVisible();
+    // The news article has no precondition, so it is always available — it is
+    // simply fourth in line. Hiding it would be how a learner loses it.
+    await expect(step(page, "مقال من أخبار السوق")).toHaveCount(0);
+    await showExtras(page);
+    await expect(step(page, "مقال من أخبار السوق")).toBeVisible();
   });
 
-  test("counts every deck in the flashcards task, not just one", async ({ page, db }) => {
+  test("counts every deck in the review step, not just one", async ({ page, db }) => {
     seedDueCurriculum(db, 2);
     db.seed("user_vocabulary", [
       aUserVocabulary({ id: vocabId(0), next_review_at: daysAgo(1) }),
@@ -121,101 +138,79 @@ test.describe("the daily queue", () => {
     // The task used to count only the personal deck, so curriculum cards due
     // never appeared in the queue at all.
     await expect(async () => {
-      await page.goto("/today");
-      await expect(page.getByText("راجع 3 كلمات")).toBeVisible();
+      await page.goto("/");
+      await expect(step(page, "راجع 3 كلمات")).toBeVisible();
     }).toPass();
   });
 
   test("says 'word' rather than 'words' for a single card", async ({ page, db }) => {
     seedDueCurriculum(db, 1);
-    await page.goto("/today");
+    await page.goto("/");
 
-    await expect(page.getByText("راجع كلمة واحدة", { exact: true })).toBeVisible();
+    await expect(step(page, "راجع كلمة واحدة")).toBeVisible();
   });
 
-  test("hides the flashcards task when no card is due and none was reviewed", async ({
-    page,
-    db,
-  }) => {
-    db.seed("word_reviews", []);
-    db.seed("user_vocabulary", []);
+  test("leaves review out when no card is due and none was reviewed", async ({ page, db }) => {
+    seedQuietDay(db);
+    await page.goto("/");
+    await showExtras(page);
 
-    await page.goto("/today");
     await expect(page.getByText(/راجع .*(كلمة|كلمتين|كلمات)/)).toHaveCount(0);
     await expect(page.getByText("أنجزت مراجعة البطاقات")).toHaveCount(0);
   });
 
-  test("hides the video card when the feed is empty", async ({ page, db }) => {
-    db.seed("discover_videos", []);
-    await page.goto("/today");
+  test("leaves the clip out when the feed is empty", async ({ page, db }) => {
+    seedQuietDay(db);
+    await page.goto("/");
 
-    // Offering a video with nothing to watch sends the learner to an empty
-    // page.
-    await expect(page.getByRole("heading", { name: /شاهد فيديو اليوم/ })).toHaveCount(0);
+    // Offering a video with nothing to watch sends the learner to an empty page.
+    await expect(step(page, "شاهد فيديو اليوم")).toHaveCount(0);
   });
 
-  test("leads with the video once the feed has something in it", async ({ page, db }) => {
+  test("leads with today's clip once the feed has one", async ({ page, db }) => {
+    seedQuietDay(db);
     db.seed("discover_videos", [aDiscoverVideo({ id: videoId(0), dialect: "Gulf" })]);
-    await page.goto("/today");
+    await page.goto("/");
 
-    await expect(page.getByRole("heading", { name: /شاهد فيديو اليوم/ })).toBeVisible();
+    // Watching real English is the app's core loop, so it is the plan's first
+    // step, above the daily one-offs.
+    const clip = await step(page, "شاهد فيديو اليوم").boundingBox();
+    const challenge = await step(page, "تحدي اليوم").boundingBox();
+    expect(clip!.y).toBeLessThan(challenge!.y);
   });
 
-  test("puts the video above the rest of the day", async ({ page, db }) => {
-    db.seed("discover_videos", [aDiscoverVideo({ id: videoId(0), dialect: "Gulf" })]);
-    await page.goto("/today");
-
-    // Watching native video is the app's core loop and it used to sit at the
-    // bottom of the page, under the whole queue — reachable only by scrolling
-    // past everything else. It now deliberately follows the daily-goals
-    // header ("learners see their target first" — see Index.tsx), so the
-    // guard is: video below the goals, but above every queue row.
-    const video = await page.getByRole("heading", { name: /شاهد فيديو اليوم/ }).boundingBox();
-    const goals = await page.getByRole("heading", { name: "اليوم", exact: true }).boundingBox();
-    const firstQueueRow = await page
-      .getByRole("button", { name: /تقريباً \d+ دقائق/ })
-      .first()
-      .boundingBox();
-    expect(video!.y).toBeGreaterThan(goals!.y);
-    expect(video!.y).toBeLessThan(firstQueueRow!.y);
-  });
-
-  test("still counts the video in the day's total", async ({ page, db }) => {
+  test("counts the clip in the day's progress once watched", async ({ page, db }) => {
+    seedQuietDay(db);
     db.seed("discover_videos", [aDiscoverVideo({ id: videoId(0), dialect: "Gulf" })]);
     await completeTasks(page, "listening");
-    await page.goto("/today");
+    await page.goto("/");
 
-    // It renders as the card at the top rather than as a queue row, but it is
-    // still one of today's tasks — dropping it out of the count would make a
-    // finished day read as unfinished.
-    await expect(page.getByText(/أنجزت 1 من \d+ مهام/)).toBeVisible();
-    await expect(page.getByText("شاهدته")).toBeVisible();
+    await expect(page.getByText(/· 1 من 3$/)).toBeVisible();
+    await expect(page.getByRole("button", { name: /^مكتملة: شاهد فيديو اليوم/ })).toBeVisible();
   });
 
-  test("counts due set phrases", async ({ page, db }) => {
+  test("offers due set phrases among the extras", async ({ page, db }) => {
     seedDuePhrases(db, 4);
-    await page.goto("/today");
+    await page.goto("/");
+    await showExtras(page);
 
-    await expect(page.getByText("تدرّب على 4 عبارات")).toBeVisible();
+    await expect(step(page, "تدرّب على 4 عبارات")).toBeVisible();
   });
 
-  test("remembers what was finished earlier today", async ({ page }) => {
-    await completeTasks(page, "reading", "souq");
-    await page.goto("/today");
+  test("remembers what was finished earlier today", async ({ page, db }) => {
+    seedQuietDay(db);
+    await completeTasks(page, "daily-challenge", "daily-story");
+    await page.goto("/");
 
-    await expect(page.getByText(/أنجزت 2 من \d+ مهام/)).toBeVisible();
+    await expect(page.getByText(/· 2 من 3$/)).toBeVisible();
   });
 
-  test("congratulates a fully cleared queue", async ({ page, db }) => {
-    db.seed("word_reviews", []);
-    db.seed("user_vocabulary", []);
-    db.seed("user_set_phrases", []);
-    db.seed("discover_videos", []);
-    await completeTasks(page, "daily-challenge", "daily-story", "reading", "souq");
+  test("congratulates a finished plan", async ({ page, db }) => {
+    seedQuietDay(db);
+    await completeTasks(page, "daily-challenge", "daily-story", "reading");
+    await page.goto("/");
 
-    await page.goto("/today");
-
-    await expect(page.getByText("أكملت هدف اليوم")).toBeVisible();
+    await expect(page.getByText("خلّصت خطة اليوم")).toBeVisible();
   });
 });
 
@@ -225,27 +220,47 @@ test.describe("starting a task", () => {
     db.seed("profiles", [aProfile({ placement_level_gulf: "A2" })]);
   });
 
-  test("a task row opens its page", async ({ page }) => {
-    await page.goto("/today");
-    await page.getByText("مقال من أخبار السوق").click();
+  test("the button starts the first step", async ({ page, db }) => {
+    seedQuietDay(db);
+    await page.goto("/");
+    await page.getByRole("button", { name: /^ابدأ: تحدي اليوم/ }).click();
+
+    await expect(page).toHaveURL(/\/daily-challenge$/);
+  });
+
+  test("the button moves on to the first unfinished step", async ({ page, db }) => {
+    seedQuietDay(db);
+    await completeTasks(page, "daily-challenge");
+    await page.goto("/");
+    await page.getByRole("button", { name: /^كمّل: قصة اليوم/ }).click();
+
+    await expect(page).toHaveURL(/\/today\/story$/);
+  });
+
+  test("an extra opens its page", async ({ page, db }) => {
+    seedQuietDay(db);
+    await page.goto("/");
+    await showExtras(page);
+    await step(page, "مقال من أخبار السوق").click();
 
     await expect(page).toHaveURL(/\/souq-news$/);
   });
 
-  test("the flashcards task goes to the session that walks every deck", async ({ page, db }) => {
+  test("the review step goes to the session that walks every deck", async ({ page, db }) => {
     seedDueCurriculum(db, 2);
-    await page.goto("/today");
-    await page.getByText("راجع كلمتين").click();
+    await page.goto("/");
+    await step(page, "راجع كلمتين").click();
 
     // "/review" rather than a single deck — otherwise cards due elsewhere are
     // stranded until the learner remembers to visit that deck.
     await expect(page).toHaveURL(/\/review$/);
   });
 
-  test("the video card opens today's clip and completes on click", async ({ page, db }) => {
+  test("the clip step opens today's clip and completes on click", async ({ page, db }) => {
+    seedQuietDay(db);
     db.seed("discover_videos", [aDiscoverVideo({ id: videoId(0), dialect: "Gulf" })]);
-    await page.goto("/today");
-    await page.getByRole("button", { name: /^Watch video:/ }).click();
+    await page.goto("/");
+    await step(page, "شاهد فيديو اليوم").click();
 
     // Straight to the clip, not the browse list: the point of "today's video"
     // is that the choice has already been made.
@@ -259,73 +274,50 @@ test.describe("starting a task", () => {
 
   test("opening a task with its own completion event does not pre-complete it", async ({
     page,
+    db,
   }) => {
-    await page.goto("/today");
-    await page.getByText("اقرأ نصاً قصيراً").click();
+    seedQuietDay(db);
+    await page.goto("/");
+    await step(page, "اقرأ نصاً قصيراً").click();
     await expect(page).toHaveURL(/\/reading$/);
 
     // Reading marks itself done when a passage is actually finished. Marking it
-    // on click would let a learner clear the queue by tapping through it.
+    // on click would let a learner clear the plan by tapping through it.
     const stored = await page.evaluate((key) => window.localStorage.getItem(key), TODAY_KEY());
     expect(JSON.parse(stored ?? "[]")).not.toContain("reading");
   });
 });
 
-test.describe("the daily goal", () => {
+test.describe("the streak", () => {
   test.beforeEach(async ({ signInAs, db }) => {
     await signInAs("free");
     db.seed("profiles", [aProfile({ placement_level_gulf: "A2" })]);
   });
 
-  test("counts only XP earned today", async ({ page, db }) => {
-    db.seed("user_xp", [
-      aUserXp({ total_xp: 5000, xp_today: 40, xp_today_date: new Date().toISOString().slice(0, 10) }),
-    ]);
+  test("shows the live run from the learner's row", async ({ page, db }) => {
+    const today = new Date();
+    const key = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+    db.seed("review_streaks", [aReviewStreak({ current_streak: 4, last_review_date: key })]);
+    await page.goto("/");
 
-    await page.goto("/today");
-    await expect(page.getByText("40", { exact: true }).first()).toBeVisible();
+    await expect(page.getByText("سلسلة 4 أيام")).toBeVisible();
+    await expect(page.getByRole("list", { name: "آخر سبعة أيام" }).getByLabel("تم")).toHaveCount(4);
   });
 
-  test("ignores yesterday's total", async ({ page, db }) => {
-    db.seed("user_xp", [aUserXp({ xp_today: 90, xp_today_date: daysAgo(1).slice(0, 10) })]);
+  test("invites a learner with no run to start one", async ({ page, db }) => {
+    db.seed("review_streaks", []);
+    await page.goto("/");
 
-    await page.goto("/today");
-    // The ring resets at midnight; carrying yesterday's number over would show
-    // a goal already met before the learner has done anything.
-    await expect(page.getByText("0", { exact: true }).first()).toBeVisible();
-  });
-
-  test("saves a new goal and applies it without a reload", async ({ page }) => {
-    await page.goto("/today");
-
-    await page.getByRole("button", { name: /الهدف اليومي/ }).click();
-    await page.getByRole("spinbutton").fill("250");
-    await page.getByRole("button", { name: "حفظ", exact: true }).click();
-
-    const stored = await page.evaluate(() => window.localStorage.getItem("today.goal"));
-    expect(stored).toBe("250");
-  });
-
-  test("refuses a goal that is not a positive number", async ({ page }) => {
-    await page.goto("/today");
-
-    await page.getByRole("button", { name: /الهدف اليومي/ }).click();
-    await page.getByRole("spinbutton").fill("0");
-    await page.getByRole("button", { name: "حفظ", exact: true }).click();
-
-    // A zero goal would divide by zero in the ring; the input is left as-is
-    // rather than being stored.
-    const stored = await page.evaluate(() => window.localStorage.getItem("today.goal"));
-    expect(stored).toBeNull();
+    await expect(page.getByText("ابدأ سلسلتك اليوم")).toBeVisible();
   });
 });
 
-test.describe("prompts on the home page", () => {
+test.describe("prompts on Today", () => {
   test("asks an unplaced learner to take the placement quiz", async ({ page, signInAs, db }) => {
     await signInAs("free");
     db.seed("profiles", [aProfile({ placement_level: null, placement_level_gulf: null })]);
 
-    await page.goto("/today");
+    await page.goto("/");
     await expect(page.getByText(/اختبار تحديد المستوى/)).toBeVisible();
   });
 
@@ -337,7 +329,7 @@ test.describe("prompts on the home page", () => {
     await signInAs("free");
     db.seed("profiles", [aProfile({ placement_level_gulf: "B1" })]);
 
-    await page.goto("/today");
+    await page.goto("/");
     await expect(page.getByText(/اختبار تحديد المستوى/)).toHaveCount(0);
   });
 
@@ -348,7 +340,7 @@ test.describe("prompts on the home page", () => {
       [aProfile({ placement_level: null, placement_level_egyptian: "C1", placement_level_gulf: null })],
     );
 
-    await page.goto("/today");
+    await page.goto("/");
     // Placement is per dialect deliberately: fluency in Egyptian says nothing
     // about Gulf, and treating it as equivalent mis-levels the whole feed.
     await expect(page.getByText(/اختبار تحديد المستوى/)).toBeVisible();
@@ -362,27 +354,46 @@ test.describe("prompts on the home page", () => {
     await signInAs("free");
     db.seed("profiles", [aProfile({ onboarding_completed: false })]);
 
-    await page.goto("/today");
+    await page.goto("/");
     await expect(page).toHaveURL(/\/onboarding$/);
   });
 
-  test("shows the review shortcut only when cards are due", async ({ page, signInAs, db }) => {
+  test("greets the learner by name", async ({ page, signInAs, db }) => {
+    await signInAs("free");
+    db.seed("profiles", [aProfile({ display_name: "Sara Ahmed", placement_level_gulf: "A2" })]);
+
+    await page.goto("/");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(/(صباح|مساء) الخير، Sara$/);
+  });
+
+  test("puts the tutor one tap away", async ({ page, signInAs, db }) => {
     await signInAs("free");
     db.seed("profiles", [aProfile({ placement_level_gulf: "A2" })]);
-    seedDueCurriculum(db, 3);
 
-    await page.goto("/today");
-    await expect(page.getByText(/3 بطاقات مستحقة للمراجعة/)).toBeVisible();
+    await page.goto("/");
+    await page.getByRole("link", { name: "كيف أقول…؟" }).click();
+    await expect(page).toHaveURL(/\/how-do-i-say$/);
   });
 });
 
 test.describe("signed out", () => {
-  test("shows the landing page rather than an empty queue", async ({ page, signInAs }) => {
+  test("shows the landing page rather than an empty plan", async ({ page, signInAs }) => {
     await signInAs("anonymous");
-    await page.goto("/today");
+    await page.goto("/");
 
-    await expect(page.getByRole("heading", { name: "اليوم", exact: true })).toHaveCount(0);
+    await expect(page.getByRole("heading", { name: "خطة اليوم" })).toHaveCount(0);
     await expect(page.getByRole("button", { name: /انضم للتجربة/ })).toBeVisible();
+  });
+});
+
+test.describe("the old address", () => {
+  test("/today lands on Today, for old bookmarks", async ({ page, signInAs, db }) => {
+    await signInAs("free");
+    db.seed("profiles", [aProfile({ placement_level_gulf: "A2" })]);
+
+    await page.goto("/today");
+    await expect(page).toHaveURL(/127\.0\.0\.1:\d+\/$/);
+    await expect(page.getByRole("heading", { name: "خطة اليوم" })).toBeVisible();
   });
 });
 
@@ -395,7 +406,7 @@ test.describe("the header", () => {
     await signInAs("admin");
     db.seed("profiles", [aProfile({ placement_level_gulf: "A2" })]);
 
-    await page.goto("/today");
+    await page.goto("/");
     await expect(page.getByRole("button", { name: "الإدارة" })).toBeVisible();
   });
 
@@ -403,15 +414,28 @@ test.describe("the header", () => {
     await signInAs("free");
     db.seed("profiles", [aProfile({ placement_level_gulf: "A2" })]);
 
-    await page.goto("/today");
+    await page.goto("/");
     await expect(page.getByRole("button", { name: "الإدارة" })).toHaveCount(0);
   });
 
-  test("signing out returns the learner to the landing page", async ({ page, signInAs, db }) => {
+  test("reaches the account from the emblem", async ({ page, signInAs, db }) => {
     await signInAs("free");
     db.seed("profiles", [aProfile({ placement_level_gulf: "A2" })]);
 
-    await page.goto("/today");
+    await page.goto("/");
+    await page.getByRole("link", { name: /حسابك/ }).click();
+    await expect(page).toHaveURL(/\/me$/);
+  });
+});
+
+test.describe("signing out", () => {
+  test("from Settings returns the learner to the landing page", async ({ page, signInAs, db }) => {
+    await signInAs("free");
+    db.seed("profiles", [aProfile({ placement_level_gulf: "A2" })]);
+
+    // Sign-out lived in Today's header next to four other icons. It belongs
+    // with the account, and Settings already had it.
+    await page.goto("/settings");
     await page.getByRole("button", { name: "تسجيل الخروج" }).click();
 
     // The landing hero, not a signed-in shell with the data blanked out.

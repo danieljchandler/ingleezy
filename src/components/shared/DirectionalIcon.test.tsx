@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import {
@@ -12,40 +14,53 @@ import {
  * The whole point of this module is one decision: in an RTL page, back points
  * right and forward points left.
  *
- * It is worth a test precisely because it looks wrong when read. Someone
- * scanning `IconBack = ArrowRight` will eventually "fix" it, and nothing else
- * in the suite would notice — Playwright asserts on accessible names, not on
- * which way a glyph happens to point. So the assertion is on the rendered
- * icon's own class, which lucide stamps with its name.
+ * That decision is made in two places that have to agree. These wrappers pick
+ * the glyph an LTR page would use for each intent, and a `:dir(rtl)` rule in
+ * `src/index.css` mirrors every lucide arrow and chevron. Each half looks
+ * wrong read on its own, and the app once shipped with both halves flipping —
+ * the mirrors cancelled out and every "continue" arrow pointed backwards. jsdom
+ * cannot compute the final transform, so the test pins both halves instead:
+ * the glyph each wrapper renders, and the CSS rule that turns it round.
  */
 
 const iconName = (element: HTMLElement) =>
   element.querySelector("svg")?.getAttribute("class") ?? "";
 
-describe("navigation arrows point the way the learner reads", () => {
-  it("sends back to the right, because that is where an Arabic reader came from", () => {
-    const { container } = render(<IconBack />);
-    expect(iconName(container)).toContain("lucide-arrow-right");
-  });
+// Resolved from the working directory: vitest always runs from the repo root.
+const css = readFileSync(resolve(process.cwd(), "src/index.css"), "utf8");
 
-  it("sends next to the left", () => {
-    const { container } = render(<IconNext />);
+describe("navigation arrows point the way the learner reads", () => {
+  it("renders back as the LTR back glyph, for the stylesheet to mirror", () => {
+    const { container } = render(<IconBack />);
     expect(iconName(container)).toContain("lucide-arrow-left");
   });
 
-  it("mirrors the chevron forms the same way", () => {
+  it("renders next as the LTR next glyph", () => {
+    const { container } = render(<IconNext />);
+    expect(iconName(container)).toContain("lucide-arrow-right");
+  });
+
+  it("does the same for the chevron forms", () => {
     const back = render(<ChevronBack />);
     const next = render(<ChevronNext />);
 
-    expect(iconName(back.container)).toContain("lucide-chevron-right");
-    expect(iconName(next.container)).toContain("lucide-chevron-left");
+    expect(iconName(back.container)).toContain("lucide-chevron-left");
+    expect(iconName(next.container)).toContain("lucide-chevron-right");
   });
 
-  it("points a row's disclosure chevron at the end of the line, not the start", () => {
-    // A tappable row opens *forward*, so in RTL its chevron sits and points
-    // left — the same glyph as next, kept separate so the two can diverge.
+  it("gives a row's disclosure chevron the next glyph", () => {
+    // A tappable row opens *forward*, so once mirrored it points left, at the
+    // end of an RTL line.
     const { container } = render(<ChevronOpen />);
-    expect(iconName(container)).toContain("lucide-chevron-left");
+    expect(iconName(container)).toContain("lucide-chevron-right");
+  });
+
+  it("relies on exactly one mirror, in the stylesheet", () => {
+    // If this rule goes, every arrow above points the LTR way in an RTL page.
+    for (const glyph of ["arrow-left", "arrow-right", "chevron-left", "chevron-right"]) {
+      expect(css).toContain(`.lucide-${glyph}:dir(rtl)`);
+    }
+    expect(css).toMatch(/\.lucide-chevrons-right:dir\(rtl\)\s*\{\s*transform:\s*scaleX\(-1\)/);
   });
 });
 

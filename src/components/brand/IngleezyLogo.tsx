@@ -3,15 +3,14 @@ import { cn } from "@/lib/utils";
 /**
  * The primary lockup: mark + Ingleezy wordmark + تعلّم tagline.
  *
- * The wordmark is live text in the display face (Baloo Bhaijaan 2), not an
- * image — it scales, themes, and stays selectable. The mark rides in from the
- * shared SVG asset so the favicon and the in-app logo can never drift apart.
+ * The wordmark is live text in the display face (Readex Pro), not an image —
+ * it scales, themes, and stays selectable. The mark rides in from the shared
+ * SVG asset so the favicon and the in-app logo can never drift apart.
  *
- * The display face replaced Archivo Black here: set italic and uppercase, the
- * old face read as a sports badge and fought the Arabic sitting beside it.
- * Baloo is a rounded dual-script family, so the wordmark and the tagline are
- * finally drawn in one voice. Wordmark colour stays locked to the foreground:
- * never recoloured.
+ * Readex Pro is drawn for Arabic and Latin as a pair, so the wordmark and the
+ * tagline are in one voice. It replaced Baloo Bhaijaan 2, whose bouncy Arabic
+ * read young for an adult audience. Wordmark colour stays locked to the
+ * foreground: never recoloured.
  */
 export function IngleezyLogo({
   className,
@@ -32,7 +31,7 @@ export function IngleezyLogo({
       />
       {!iconOnly && (
         <span className="flex flex-col leading-none" dir="ltr">
-          <span className="font-display text-[1.28em] font-extrabold leading-none text-foreground">
+          <span className="font-display text-[1.28em] font-bold leading-none text-foreground">
             Ingleezy
           </span>
           {/* Sits on the wordmark's baseline rather than under a rule: the old

@@ -18,39 +18,37 @@ test.describe("signed out", () => {
     await expect(page.getByRole("heading", { name: /أهلاً بعودتك/ })).toBeVisible();
   });
 
-  test("keeps showing the landing page rather than an empty feed", async ({ page }) => {
+  test("keeps showing the landing page rather than an empty plan", async ({ page }) => {
     await stubSupabase(page);
     await page.goto("/");
 
-    // "/" is the video feed now, but the recommender is keyed on a learner's
-    // history — a stranger has none. Dropping them into an empty feed would be
-    // the worst first impression of an app selling its content.
+    // "/" is Today for a learner, but a stranger has no plan, no streak and no
+    // history to build one from — the landing page is the right first sight.
     await expect(page.getByRole("heading", { name: /إنجليزي محكي حقيقي/ })).toBeVisible();
   });
 });
 
-test.describe("signed in — the daily dashboard", () => {
-  test("shows the daily queue inline instead of linking to a separate page", async ({ page }) => {
+test.describe("signed in — Today", () => {
+  test("opens on the day's plan", async ({ page }) => {
     await signIn(page);
     await stubSupabase(page, { myWordsDue: 3 });
-    await page.goto("/today");
+    await page.goto("/");
 
-    // The queue itself, not a "Start today" card that navigates elsewhere.
-    await expect(page.getByRole("heading", { name: "اليوم", exact: true })).toBeVisible();
-    await expect(page.getByText(/أنجزت \d+ من \d+ مهام/)).toBeVisible();
-    await expect(page.getByRole("button", { name: /start today/i })).toHaveCount(0);
+    // The plan itself, with one button, not a dashboard of rings and rows.
+    await expect(page.getByRole("heading", { name: "خطة اليوم" })).toBeVisible();
+    await expect(page.getByRole("button", { name: /^(ابدأ|كمّل): / })).toBeVisible();
   });
 
-  test("due banner counts every deck and routes into the session", async ({ page }) => {
+  test("the review step counts every deck and routes into the session", async ({ page }) => {
     await signIn(page);
     await stubSupabase(page, { curriculumDue: 2, myWordsDue: 3 });
-    await page.goto("/today");
+    await page.goto("/");
 
-    // 2 curriculum + 3 saved words — the banner used to show only one deck.
-    const banner = page.getByRole("button", { name: /5 بطاقات مستحقة للمراجعة/ });
-    await expect(banner).toBeVisible();
+    // 2 curriculum + 3 saved words — the old banner used to show only one deck.
+    const review = page.getByRole("button", { name: /^راجع 5 كلمات —/ });
+    await expect(review).toBeVisible();
 
-    await banner.click();
+    await review.click();
     await expect(page).toHaveURL(/\/review$/);
   });
 });

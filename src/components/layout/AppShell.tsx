@@ -16,7 +16,7 @@ interface AppShellProps {
 /**
  * AppShell - Consistent layout wrapper for all pages
  *
- * Provides unified spacing with full-page Sadu border background.
+ * Provides unified spacing on the plain brand ground.
  * Use compact mode for immersive learning screens.
  */
 export function AppShell({ children, className, compact = false }: AppShellProps) {
@@ -41,18 +41,9 @@ export function AppShell({ children, className, compact = false }: AppShellProps
         paddingBottom: "env(safe-area-inset-bottom)",
       }}
     >
-      {/* Sadu watermark, recolored into the brand's periwinkle — the cultural
-          motif at a whisper, on the cool ground, in place of Hakiya's warm
-          kilim photograph. */}
-      <div
-        aria-hidden
-        className="fixed inset-0 pointer-events-none opacity-[0.5] dark:opacity-[0.25]"
-        style={{
-          backgroundImage: "url(/assets/sadu-watermark.svg)",
-          backgroundSize: "44px 44px",
-          backgroundRepeat: "repeat",
-        }}
-      />
+      {/* No page watermark. The all-page Sadu pattern that sat here was
+          heritage ornament doing no job, behind every line of text; the brand
+          now gets its appeal from copy and type rather than motifs. */}
       <div className={cn(
         "relative mx-auto w-full max-w-2xl animate-fade-up",
         compact ? "px-4 py-5 sm:px-5 sm:py-6" : "px-4 pt-4 pb-8 sm:px-6 md:pt-6 md:pb-12",
@@ -63,7 +54,10 @@ export function AppShell({ children, className, compact = false }: AppShellProps
         // bottom of a page underneath it. The old five-tab bar happened to be
         // 47px and cleared it by one pixel, so nothing showed until the bar
         // was replaced.
-        showNav && "pb-24 md:pb-24",
+        // pb-36 rather than pb-24 on a phone: the Ask AI button sits above
+        // the dock (bottom-20), and the last card has to be able to scroll
+        // clear of both.
+        showNav && "pb-36 md:pb-24",
         // Let the page scroll clear of the bottom sheet, or its lower half is
         // unreachable while the panel is open.
         aiOpen && "max-sm:pb-[60dvh]",

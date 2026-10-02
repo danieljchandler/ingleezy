@@ -235,13 +235,13 @@ const Review = () => {
           fallbackRoute="/"
         >
           {stats && (
-            <div className="grid grid-cols-2 gap-4 mb-8">
-              <div className="bg-card rounded-xl p-4 border border-border">
+            <div className="grid grid-cols-2 gap-3 mb-8">
+              <div className="rounded-3xl bg-card p-4 shadow-card">
                 <Brain className="h-6 w-6 text-primary mx-auto mb-2" />
                 <p className="text-xl font-bold text-foreground">{stats.learnedCount}</p>
                 <p className="text-xs text-muted-foreground">قيد التعلم</p>
               </div>
-              <div className="bg-card rounded-xl p-4 border border-border">
+              <div className="rounded-3xl bg-card p-4 shadow-card">
                 <Sparkles className="h-6 w-6 text-accent mx-auto mb-2" />
                 <p className="text-xl font-bold text-foreground">{stats.masteredCount}</p>
                 <p className="text-xs text-muted-foreground">متقنة</p>
@@ -342,7 +342,7 @@ const Review = () => {
               <Button
                 size="lg"
                 onClick={() => setShowAnswer(true)}
-                className="h-14 w-full gap-2 rounded-2xl text-base font-bold shadow-button"
+                className="h-14 w-full gap-2 rounded-full text-base font-bold"
               >
                 <Eye className="h-5 w-5" />
                 {isProduction ? "أظهر الإنجليزية" : "أظهر المعنى"}
@@ -362,10 +362,10 @@ const Review = () => {
               onAudioGenerated={persistCurriculumAudio}
             />
           ) : (
-          <div className="rounded-2xl bg-card border border-border p-8 text-center">
+          <section aria-label="بطاقة الكلمة" className="rounded-[28px] bg-card px-6 pb-6 pt-5 text-center shadow-card">
             {/* Direction label — without it, a production card looks like a
                 recognition card the learner has simply failed to read. */}
-            <div className="flex items-center justify-center gap-1.5 text-xs font-medium text-muted-foreground uppercase tracking-wider mb-6">
+            <div className="mb-5 inline-flex items-center justify-center gap-1.5 rounded-full bg-muted px-3 py-1 text-[13px] font-medium text-muted-foreground">
               {isProduction ? (
                 <>
                   <PenLine className="h-3.5 w-3.5" />
@@ -381,7 +381,7 @@ const Review = () => {
             {/* Image if available. Hidden on production cards — a picture of the
                 answer turns recall into recognition. */}
             {!isProduction && currentWord.image_url && (
-              <div className="mb-4 rounded-lg overflow-hidden bg-muted aspect-[4/3] flex items-center justify-center">
+              <div className="mb-4 rounded-2xl overflow-hidden bg-muted aspect-[4/3] flex items-center justify-center">
                 <img
                   src={currentWord.image_url}
                   alt=""
@@ -411,20 +411,18 @@ const Review = () => {
             {isProduction ? (
               /* Prompt in Arabic; the English is what the learner has to
                  produce, so it stays hidden until they've committed. */
-              <p
-                className="text-3xl font-bold text-foreground mb-6 break-words max-w-full"
-              >
+              <p className="mb-5 max-w-full break-words text-[32px] font-bold leading-[48px] text-foreground">
                 {currentWord.word_arabic}
               </p>
             ) : (
-              <p className="font-english text-4xl font-bold text-foreground mb-6 break-words max-w-full">
+              <p className="mb-5 max-w-full break-words font-english text-[44px] font-bold leading-[52px] text-foreground">
                 {currentWord.word_english}
               </p>
             )}
 
             {/* Audio button. Never before the answer on a production card — it
                 would simply read out the answer. */}
-            <div className="flex items-center justify-center gap-2 flex-wrap mb-8">
+            <div className="mb-6 flex flex-wrap items-center justify-center gap-2">
               {currentWord.audio_url && (!isProduction || showAnswer) && (
                 <Button
                   variant="outline"
@@ -448,15 +446,13 @@ const Review = () => {
 
             {/* Reveal the other side */}
             {showAnswer && (
-              <div className="animate-in fade-in duration-200 mb-4">
+              <div className="animate-in fade-in border-t border-dashed border-border pt-4 duration-200">
                 {isProduction ? (
-                  <p className="font-english text-3xl font-bold text-foreground break-words">
+                  <p className="break-words font-english text-[32px] font-bold leading-10 text-foreground">
                     {currentWord.word_english}
                   </p>
                 ) : (
-                  <p
-                    className="text-xl text-muted-foreground"
-                  >
+                  <p className="text-[26px] font-bold leading-10 text-foreground">
                     {currentWord.word_arabic}
                   </p>
                 )}
@@ -467,7 +463,7 @@ const Review = () => {
               </div>
             )}
 
-          </div>
+          </section>
           )}
 
           {/* Rescue for a card the learner keeps failing. The personal decks

@@ -111,8 +111,10 @@ function render(initial: TranscriptLine[] = [A_LINE], audioUrl?: string) {
 const cards = () => Array.from(root.querySelectorAll<HTMLElement>("div.rounded-xl"));
 
 const buttonsIn = (card: HTMLElement) => Array.from(card.querySelectorAll("button"));
+// By name rather than by shape: every button in the app is a pill now, so a
+// class like rounded-full no longer tells the play button from the others.
 const playButton = (card: HTMLElement) =>
-  buttonsIn(card).find((b) => b.className.includes("rounded-full"));
+  buttonsIn(card).find((b) => /^(Play|Pause) line$/.test(b.getAttribute("aria-label") ?? ""));
 const deleteButton = (card: HTMLElement) =>
   buttonsIn(card).find((b) => b.className.includes("text-destructive"))!;
 

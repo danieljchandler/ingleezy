@@ -1,48 +1,85 @@
-import { NavLink, useLocation } from "react-router-dom";
-import { Home, LayoutGrid, Play, MessageCircleQuestion, Gamepad2 } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
+import { Sun, BookOpen, MessageCircle, Layers, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /**
- * Five slots, because five is what a thumb can hit.
+ * Four tabs: what to do today, what to learn from, who to talk to, and what
+ * you have kept.
  *
- * The seven options the app offers do not all fit here — seven on a 390px
- * screen leaves 55px each, which takes an icon but crowds an Arabic label.
- * So the four skills live on the chooser (one tap away via المهارات, or a
- * sideways swipe) and the dock carries the things you reach for mid-session.
+ *   اليوم   — the daily plan. The app's front door.
+ *   المكتبة — everything you learn *from*: clips, the four skills, stories,
+ *             games. The video feed lives here now rather than at /.
+ *   تكلّم   — everything you *say*: the tutor, "how do I say…", pronunciation.
+ *   كلماتي  — everything you *keep*: saved words and phrases, review, mistakes.
+ *
+ * It replaced a five-slot dock (الرئيسية · المهارات · اليوم · اسأل · ألعاب)
+ * whose slots overlapped: "ask" had four entry points across the app, games
+ * sat both here and on the chooser, and the feed and the daily plan competed
+ * for "home". Four slots also leave each Arabic label room at 13px instead of
+ * 10px.
+ *
+ * Each slot owns a set of routes, so the tab stays lit on the pages it leads
+ * to (the feed lights المكتبة, /pronunciation lights تكلّم).
  *
  * Profile is absent on purpose: it lives in the emblem, top-start, where it
- * never moves. That frees the fifth slot for something you actually use.
- *
- * This is the app's only bottom bar. It replaced a five-tab nav whose tabs
- * were places (learn, discover, practice) rather than actions, which is why
- * three of them opened a list you then had to read. The colours here are
- * tokens rather than the literal darks the feed uses, because the same dock
- * has to sit under a black video and under a white reading page.
+ * never moves.
  */
 
-const SLOTS = [
-  { to: "/", label: "الرئيسية", icon: Home, exact: true, tourId: "nav-feed" },
-  { to: "/choose", label: "المهارات", icon: LayoutGrid, tourId: "nav-choose" },
-  // The centre slot is the easiest pixel on the screen to hit, so it holds the
-  // thing a learner opens the app to do. It used to hold ارفع, which is a
-  // thing you do occasionally with a clip you found — and meanwhile the daily
-  // queue was reachable from nowhere in the dock at all. Upload did not lose a
-  // home: المهارات carries a tile for it.
-  //
-  // /today is transitional (see App.tsx: the feed has taken over / and has not
-  // absorbed the queue yet). When it does, this slot follows the queue to
-  // wherever it lands rather than being removed.
-  { to: "/today", label: "اليوم", icon: Play, primary: true, tourId: "nav-today" },
-  { to: "/how-do-i-say", label: "اسأل", icon: MessageCircleQuestion, tourId: "nav-ask" },
-  { to: "/vocab-games", label: "ألعاب", icon: Gamepad2, tourId: "nav-games" },
+interface Slot {
+  to: string;
+  label: string;
+  icon: LucideIcon;
+  /** Path prefixes that light this tab. "/" only ever matches exactly. */
+  owns: string[];
+  tourId: string;
+}
+
+const SLOTS: Slot[] = [
+  { to: "/", label: "اليوم", icon: Sun, owns: ["/"], tourId: "nav-today" },
+  {
+    to: "/library",
+    label: "المكتبة",
+    icon: BookOpen,
+    owns: [
+      "/library", "/feed", "/discover", "/listening", "/listen", "/reading",
+      "/reading-library", "/stories", "/write", "/vocab-games", "/souq-news",
+      "/tutor-upload", "/curriculum", "/learn",
+    ],
+    tourId: "nav-library",
+  },
+  {
+    to: "/talk",
+    label: "تكلّم",
+    icon: MessageCircle,
+    owns: ["/talk", "/conversation", "/how-do-i-say", "/pronunciation", "/sounds", "/saved-chats"],
+    tourId: "nav-talk",
+  },
+  {
+    to: "/my-words",
+    label: "كلماتي",
+    icon: Layers,
+    owns: ["/my-words", "/set-phrases", "/mistakes", "/translate"],
+    tourId: "nav-words",
+  },
 ];
 
+/** Whether `pathname` belongs to a slot. Exported for the tests. */
+export function slotOwns(owns: string[], pathname: string): boolean {
+  return owns.some((prefix) =>
+    prefix === "/" ? pathname === "/" : pathname === prefix || pathname.startsWith(`${prefix}/`),
+  );
+}
+
 /**
- * Routes that take the whole screen: playback, review, quizzes, auth, admin.
- * A dock over a video is five taps waiting to be hit by mistake.
+ * Routes that take the whole screen: playback, review, quizzes, pronunciation
+ * drills, the tutor chat, auth, admin. A dock over a video is four taps
+ * waiting to be hit by mistake, and under the tutor chat or the pronunciation
+ * drill it would sit on top of the microphone.
  */
 const HIDE_PATTERNS: RegExp[] = [
   /^\/discover\/[^/]+/,
+  /^\/conversation$/,
+  /^\/pronunciation$/,
   /^\/review(\/|$)/,
   /^\/quiz(\/|$)/,
   /^\/stories\/[^/]+/,
@@ -71,38 +108,39 @@ export function AppDock({ className }: { className?: string }) {
     <nav
       aria-label="التنقل الرئيسي"
       className={cn(
-        "fixed inset-x-0 bottom-0 z-40 border-t border-border",
-        "bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/80",
+        "fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card",
         className,
       )}
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
-      <ul className="mx-auto flex max-w-2xl items-stretch justify-around px-2">
-        {SLOTS.map(({ to, label, icon: Icon, exact, primary, tourId }) => (
-          <li key={to} className="flex-1" data-tour={tourId}>
-            <NavLink
-              to={to}
-              end={exact}
-              className={({ isActive }) =>
-                cn(
-                  "flex flex-col items-center gap-0.5 py-2.5 text-[10px] font-medium transition-colors",
-                  isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground",
-                )
-              }
-            >
-              {primary ? (
-                // The upload slot is a button, not a tab: it starts something
-                // rather than going somewhere, and the shape says so.
-                <span className="grid h-7 w-11 place-items-center rounded-lg bg-periwinkle text-[#0E131C]">
-                  <Icon className="h-5 w-5" strokeWidth={2.6} />
+      <ul className="mx-auto grid max-w-2xl grid-cols-4 px-2 pb-1 pt-1.5">
+        {SLOTS.map(({ to, label, icon: Icon, owns, tourId }) => {
+          const active = slotOwns(owns, pathname);
+          return (
+            <li key={to} data-tour={tourId}>
+              <Link
+                to={to}
+                aria-current={active ? "page" : undefined}
+                className={cn(
+                  "flex min-h-[3.5rem] flex-col items-center justify-center gap-1 text-[13px] leading-[18px] transition-colors",
+                  active
+                    ? "font-semibold text-primary"
+                    : "font-medium text-muted-foreground hover:text-foreground",
+                )}
+              >
+                <span
+                  className={cn(
+                    "grid h-8 w-14 place-items-center rounded-full transition-colors",
+                    active && "bg-primary/10 dark:bg-primary/20",
+                  )}
+                >
+                  <Icon className="h-[22px] w-[22px]" strokeWidth={2} />
                 </span>
-              ) : (
-                <Icon className="h-5 w-5" />
-              )}
-              <span>{label}</span>
-            </NavLink>
-          </li>
-        ))}
+                <span>{label}</span>
+              </Link>
+            </li>
+          );
+        })}
       </ul>
     </nav>
   );

@@ -7,7 +7,7 @@ import { useReducedMotion } from "@/lib/uiPrefs";
  *
  * Autoplaying one of these reliably takes more than the `autoPlay` attribute,
  * and every workaround below is here for a specific browser. Shared by
- * LoadingEmblem and CaravanMedallion so the fixes live in one place.
+ * LoadingEmblem and LoopingMedallion so the fixes live in one place.
  *
  * The caller owns the framing and the markup; this owns when the clip runs and
  * when it should be swapped for a still.

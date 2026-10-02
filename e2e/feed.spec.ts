@@ -4,17 +4,14 @@ import type { MemoryDb } from "../src/test/support/postgrest/store";
 import type { SupabaseBackend } from "../src/test/support/server/handler";
 
 /**
- * The front door: a vertical feed of real English clips.
+ * The clips feed: a vertical feed of real English clips.
  *
- * The app used to open on a dashboard — greeting, goal ring, four task rows.
- * That is a good answer to "what does today look like" and a poor answer to
- * "why would I open this out of habit", so the dashboard moved to /today and
- * the content took the front door.
- *
- * What these tests hold in place is that the feed stays a feed: content first,
- * the tools applied to that content rather than listed somewhere else, and —
- * the failure mode that would actually sink this format — an empty state that
- * still gives the learner somewhere to go.
+ * It was the front door for a while; Today took that job back, and the feed
+ * moved to /feed as the first shelf of the library. What these tests hold in
+ * place is that the feed stays a feed: content first, the tools applied to that
+ * content rather than listed somewhere else, and — the failure mode that would
+ * actually sink this format — an empty state that still gives the learner
+ * somewhere to go.
  */
 
 function seedFeed(db: MemoryDb, backend: SupabaseBackend, count = 2) {
@@ -50,7 +47,7 @@ test.describe("the feed", () => {
   test("opens on the English, with the dialect underneath", async ({ page, db, backend }) => {
     seedFeed(db, backend);
 
-    await page.goto("/");
+    await page.goto("/feed");
 
     // The English is the material. The Arabic rides along as help, the same
     // contract every other surface in the app uses.
@@ -61,7 +58,7 @@ test.describe("the feed", () => {
   test("puts the tools on the clip rather than in a menu", async ({ page, db, backend }) => {
     seedFeed(db, backend, 1);
 
-    await page.goto("/");
+    await page.goto("/feed");
 
     // This rail is the whole reason three hub screens could go away: "ask" and
     // "transcript" stopped being destinations you navigate to and then have to
@@ -72,7 +69,7 @@ test.describe("the feed", () => {
   });
 
   test("offers a way out when there is nothing to watch", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/feed");
 
     // The real risk of betting the home screen on a feed: a video app with no
     // videos is worse than a list. An empty feed must still hand over the two
@@ -85,7 +82,7 @@ test.describe("the feed", () => {
   test("reaches the profile from the emblem, not a nav tab", async ({ page, db, backend }) => {
     seedFeed(db, backend, 1);
 
-    await page.goto("/");
+    await page.goto("/feed");
     await page.getByRole("link", { name: /حسابك/ }).click();
 
     // The emblem sits top-start on every surface and never moves, which is what
@@ -99,24 +96,29 @@ test.describe("the dock", () => {
     await signInAs("free");
   });
 
-  test("carries five slots, and profile is not one of them", async ({ page }) => {
-    await page.goto("/");
+  test("carries four tabs, and profile is not one of them", async ({ page }) => {
+    await page.goto("/feed");
 
     const dock = page.getByRole("navigation", { name: "التنقل الرئيسي" });
-    // Five, because that is what a thumb can hit. The seven options do not all
-    // fit — the four skills live on the chooser instead.
-    await expect(dock.getByRole("link")).toHaveCount(5);
-    await expect(dock.getByRole("link", { name: "المهارات" })).toBeVisible();
+    // اليوم · المكتبة · تكلّم · كلماتي. Profile lives in the emblem, which
+    // never moves.
+    await expect(dock.getByRole("link")).toHaveCount(4);
     await expect(dock.getByRole("link", { name: "أنا" })).toHaveCount(0);
   });
 
-  test("opens the chooser from the dock", async ({ page }) => {
-    await page.goto("/");
-    await page.getByRole("navigation", { name: "التنقل الرئيسي" })
-      .getByRole("link", { name: "المهارات" }).click();
+  test("lights the library, which the feed belongs to", async ({ page }) => {
+    await page.goto("/feed");
 
-    // A sideways swipe also gets here, but a swipe is undiscoverable — the
-    // dock slot is what makes the chooser findable at all.
-    await expect(page).toHaveURL(/\/choose$/);
+    await expect(
+      page.getByRole("navigation", { name: "التنقل الرئيسي" }).getByRole("link", { name: "المكتبة" }),
+    ).toHaveAttribute("aria-current", "page");
+  });
+
+  test("goes back to the library from the dock", async ({ page }) => {
+    await page.goto("/feed");
+    await page.getByRole("navigation", { name: "التنقل الرئيسي" })
+      .getByRole("link", { name: "المكتبة" }).click();
+
+    await expect(page).toHaveURL(/\/library$/);
   });
 });

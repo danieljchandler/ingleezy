@@ -92,7 +92,10 @@ export function TappableEnglishText({
               <button
                 type="button"
                 className={cn(
-                  "rounded px-0.5 transition-colors hover:bg-primary/10 focus:outline-none focus:ring-1 focus:ring-primary/40",
+                  // The negative margin cancels the padding's width: the
+                  // highlight gets room around the word without adding to the
+                  // space between words, which read as gaps in the sentence.
+                  "-mx-0.5 rounded px-0.5 transition-colors hover:bg-primary/10 focus:outline-none focus:ring-1 focus:ring-primary/40",
                   isSaved && "text-primary underline decoration-dotted underline-offset-4",
                 )}
               >

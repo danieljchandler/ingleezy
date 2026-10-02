@@ -40,7 +40,7 @@ export const AR = {
    * The streak, which every sweep walked past: `StreakDisplay` renders in the
    * header on every screen and was still entirely English ("day streak",
    * "Best", and a hand-rolled `day{s}` plural), as was the streak tooltip in
-   * `MajlisWelcome`. Two components, so the strings live here.
+   * the old home page's welcome panel. Shared, so the strings live here.
    */
   streak: {
     label: "سلسلة",
@@ -83,6 +83,31 @@ export const AR = {
     placementBody:
       "جاوب على 20 سؤالاً تكيفياً حتى نضبط الدروس والمفردات والتمارين على مستواك بدقة.",
     placementMinutes: "~5 دقائق",
+  },
+
+  /** The Today screen: greeting, streak, the day's plan, and the way to the tutor. */
+  today: {
+    greetingMorning: "صباح الخير",
+    greetingEvening: "مساء الخير",
+    streakAlive: (days: string) => `سلسلة ${days}`,
+    streakNone: "ابدأ سلسلتك اليوم",
+    lastSevenDays: "آخر سبعة أيام",
+    dayDone: "تم",
+    dayToday: "اليوم",
+    planTitle: "خطة اليوم",
+    planProgress: (done: number, total: number) => `${done} من ${total}`,
+    next: "التالي",
+    start: "ابدأ",
+    keepGoing: "كمّل",
+    extrasTitle: "إذا عندك وقت",
+    planDoneTitle: "خلّصت خطة اليوم",
+    planDoneBody: "ارجع بكرة عشان تحافظ على سلسلتك.",
+    minutes: (n: number) =>
+      arCount(n, { one: "دقيقة", two: "دقيقتين", few: "دقائق", many: "دقيقة" }),
+    talkTitle: "تكلّم مع المعلّم",
+    talkAll: "كل أدوات الكلام",
+    talkAsk: "كيف أقول…؟",
+    talkCall: "مكالمة مع المعلّم",
   },
 
   queue: {

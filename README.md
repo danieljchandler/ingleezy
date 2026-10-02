@@ -66,10 +66,14 @@ was TanStack Start plumbing that this Vite + react-router app cannot use. The
 stacks were incompatible anyway — React 19 / Vite 8 / Tailwind 4 there against
 React 18 / Vite 5 / Tailwind 3 here.
 
-The logged-out landing surface lives in this app: both `/` (`Feed`) and
-`/today` (`Index`) render `<LandingHero />`
+The logged-out landing surface lives in this app: `/` (Today, `Index`) and
+`/feed` (the clips feed) render `<LandingHero />`
 (`src/components/LandingHero.tsx`) when the visitor isn't authenticated. Grow
 the public page there.
+
+The signed-in app has four tabs (`src/components/shell/AppDock.tsx`): اليوم
+(`/`, the daily plan), المكتبة (`/library`), تكلّم (`/talk`) and كلماتي
+(`/my-words`).
 
 **Keeping the mirror current:** automatic, since it turned out that "re-copy
 it after a change here" is not a sync. The mirror sat three weeks behind while

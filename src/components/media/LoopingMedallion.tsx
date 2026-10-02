@@ -8,8 +8,8 @@ import { useLoopingVideo } from "@/hooks/useLoopingVideo";
  * This owns the *frame*: the rounded box, the ring, and the markup that gets a
  * decorative video to autoplay everywhere and degrade to a still where it
  * can't. `useLoopingVideo` owns *when* it runs. Callers supply the clip and its
- * aspect ratio, and are expected to be thin named wrappers (CaravanMedallion,
- * CampfireMedallion) rather than to spell the paths out at the call site.
+ * aspect ratio, and are expected to be thin named wrappers rather than to
+ * spell the paths out at the call site.
  *
  * Decorative only: `aria-hidden`. The copy beside it carries the meaning.
  */

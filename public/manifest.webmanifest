@@ -6,8 +6,8 @@
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#FFFFFF",
-  "theme_color": "#2C3B74",
+  "background_color": "#FAF9F5",
+  "theme_color": "#135F68",
   "lang": "ar",
   "dir": "rtl",
   "categories": [
@@ -41,10 +41,10 @@
       "description": "ابدأ جلسة المراجعة اليومية"
     },
     {
-      "name": "تدريب",
-      "short_name": "تدريب",
-      "url": "/practice",
-      "description": "تدريب على المحادثة والاستماع والقراءة"
+      "name": "المكتبة",
+      "short_name": "المكتبة",
+      "url": "/library",
+      "description": "استماع وقراءة وتحدّث وكتابة"
     }
   ]
 }

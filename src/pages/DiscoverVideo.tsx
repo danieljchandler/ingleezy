@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo, type ReactNode } from "react";
 import { usePageAiContext } from "@/contexts/AiAssistantContext";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useDiscoverVideo, type DiscoverVideo as DiscoverVideoType } from "@/hooks/useDiscoverVideos";
 import { useAuth } from "@/hooks/useAuth";
 import { useAddUserVocabulary } from "@/hooks/useUserVocabulary";
@@ -13,15 +13,9 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { IconBack } from "@/components/shared/DirectionalIcon";
-import { Loader2, BookOpen, Check, Eye, EyeOff, ChevronDown, ChevronLeft, ChevronRight, List, Pause, Play, SkipBack, SkipForward, Gauge, Heart } from "lucide-react";
+import { Loader2, BookOpen, Check, ChevronDown, Pause, Play, Heart, SlidersHorizontal } from "lucide-react";
 import { useVideoLikeCount, useIsVideoLiked, useLikeVideo, useUnlikeVideo } from "@/hooks/useVideoLikes";
 import { useRecordVideoView } from "@/hooks/useDiscoverFeed";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { extractTikTokVideoId, getTikTokEmbedUrl } from "@/lib/videoEmbed";
@@ -42,7 +36,18 @@ import { LineShadowPanel } from "@/components/pronunciation/LineShadowPanel";
 import type { ExternalYouTubeController } from "@/components/pronunciation/ClipSourcePlayer";
 import { DIALECT_LOCALE, extractYouTubeId, type ShadowClip } from "@/hooks/useShadowQueue";
 import { loadYouTubeIframeAPI } from "@/lib/youtubeIframeApi";
-import { Mic } from "lucide-react";
+import { TappableEnglishText } from "@/components/shared/TappableEnglishText";
+import { WatchToolbar } from "@/components/watch/WatchToolbar";
+import {
+  dialectName,
+  formatClock,
+  hasArabic,
+  lineStopStep,
+  lineView,
+  nextSpeed,
+  supportLabel,
+  videoLevel,
+} from "@/lib/watch";
 import { supabase } from "@/integrations/supabase/client";
 import { recordContinue } from "@/lib/continueProgress";
 import { useUserLevel } from "@/hooks/useUserLevel";
@@ -198,16 +203,19 @@ const buildShadowClipForLine = (
   const isYouTube = video?.platform === "youtube";
   const youtubeId = isYouTube ? extractYouTubeId(video?.embed_url ?? null, video?.source_url ?? null) : null;
 
-  if (!video || !line.arabic || !hasTiming) return null;
+  // Shadowing repeats what was heard, so the text and the locale it is scored
+  // against follow the clip: English on an English video, not its scaffold.
+  const view = lineView(line);
+  if (!video || !view.spoken || !hasTiming) return null;
 
   const base = {
     id: `line-${line.id}`,
-    text: line.arabic,
-    translation: line.translation,
+    text: view.spoken,
+    translation: view.support,
     startSec: startMs / 1000,
     endSec: endMs / 1000,
     dialect: video.dialect,
-    locale: DIALECT_LOCALE[video.dialect] ?? "ar-SA",
+    locale: view.spokenLang === "en" ? "en-US" : (DIALECT_LOCALE[video.dialect] ?? "ar-SA"),
     sourceTitle: video.title,
   };
 
@@ -226,136 +234,145 @@ const buildShadowClipForLine = (
   return null;
 };
 
+/**
+ * One line of the transcript.
+ *
+ * The line as spoken is the big text: English on this app's own uploads, the
+ * Arabic speech on bridged Hakiya videos (see `lineView`). Its words are the
+ * tap targets — a tap explains the word — so a tap anywhere else on the row,
+ * or on its timestamp, plays the line.
+ */
 const TranscriptRow = ({
   line,
-  isActive,
-  showTranslation,
+  isCurrent,
+  showSupport,
   showLiteral,
   fusha,
-  onSave,
+  onSaveArabicWord,
+  onSaveEnglishWord,
   savedWords,
   lineRef,
-  onSeek,
-  video,
-  shadowAudioUrl,
-  isShadowing,
-  onToggleShadow,
-  externalYouTubeController,
+  onPlay,
+  children,
 }: {
   line: TranscriptLine;
-  isActive: boolean;
-  showTranslation: boolean;
+  /** The line the toolbar acts on: highlighted, and the one that shows its tools. */
+  isCurrent: boolean;
+  showSupport: boolean;
   showLiteral?: boolean;
   /** The line in Modern Standard Arabic, when the Fusha row is on and one exists. */
   fusha?: string;
-  onSave?: (word: VocabItem) => void;
+  onSaveArabicWord?: (word: VocabItem) => void;
+  onSaveEnglishWord?: (word: VocabItem) => void;
   savedWords?: Set<string>;
-  lineRef?: React.Ref<HTMLDivElement>;
-  onSeek?: (ms: number) => void;
-  video?: DiscoverVideoType;
-  shadowAudioUrl?: string | null;
-  isShadowing?: boolean;
-  onToggleShadow?: (lineId: string) => void;
-  externalYouTubeController?: ExternalYouTubeController | null;
+  lineRef?: React.Ref<HTMLLIElement>;
+  onPlay: () => void;
+  /** Extra controls for the current line (Ask AI, the imitation panel). */
+  children?: ReactNode;
 }) => {
-  const shadowClip = buildShadowClipForLine(line, video, shadowAudioUrl);
+  const view = lineView(line);
+  const isEnglish = view.spokenLang === "en";
+  const hasTiming = typeof line.startMs === "number";
 
   return (
-    <div
+    <li
       ref={lineRef}
+      aria-current={isCurrent ? "true" : undefined}
+      onClick={(e) => {
+        // Words, chips and the imitation panel are controls of their own.
+        if ((e.target as HTMLElement).closest("button, [role='button'], a, input, [role='dialog']")) return;
+        onPlay();
+      }}
       className={cn(
-        "px-4 py-3 rounded-lg transition-all duration-300 border border-transparent",
-        isActive
-          ? "bg-primary/10 border-primary/30 scale-[1.01]"
-          : "hover:bg-muted/40",
+        "flex cursor-pointer flex-col gap-1 rounded-[18px] px-3 py-2.5 transition-colors",
+        isCurrent ? "bg-primary/10" : "hover:bg-muted/60",
       )}
-      onClick={() => line.startMs !== undefined && onSeek?.(line.startMs)}
-      role={line.startMs !== undefined ? "button" : undefined}
-      style={{ cursor: line.startMs !== undefined ? "pointer" : "default" }}
     >
-      {/* Arabic text */}
-      <p
-        className={cn(
-          "text-lg leading-[2] transition-colors",
-          isActive ? "text-foreground font-medium" : "text-foreground/80",
+      <div className="flex items-start gap-2">
+        {hasTiming && (
+          <button
+            type="button"
+            onClick={onPlay}
+            aria-label={`شغّل من ${formatClock(line.startMs!)}`}
+            className="mt-0.5 shrink-0 rounded-full px-1.5 py-0.5 font-english text-xs tabular-nums leading-5 text-muted-foreground hover:bg-muted"
+          >
+            {formatClock(line.startMs!)}
+          </button>
         )}
-        dir="rtl"
-      >
-        {line.tokens && line.tokens.length > 0
-          ? line.tokens.map((token, i) => (
-              <span key={token.id} className="inline">
-                <ClickableWord
-                  token={token}
-                  parentLine={line}
-                  onSave={onSave}
-                  isSaved={savedWords?.has(token.surface)}
-                />
-                {i < line.tokens.length - 1 && !/^[،؟.!:؛]+$/.test(token.surface) && " "}
-              </span>
-            ))
-          : line.arabic}
-      </p>
-
-      {/* Fusha row — the same sentence in MSA, next to the dialect rather than
-          down with the translation, because it is not what the line means. */}
-      {fusha && <FushaLine dialect={line.arabic} fusha={fusha} className="mt-1" />}
-
-      {line.arabic && (
-        <div className="mt-2 flex flex-wrap items-center gap-2" onClick={(e) => e.stopPropagation()}>
-          <AskAISentence
-            arabic={line.arabic}
-            english={line.translation}
-            variant="chip"
-            className="h-8 px-3 bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary"
-          />
-          {shadowClip && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onToggleShadow?.(line.id)}
-              className={cn(
-                "h-8 px-3 gap-1.5 rounded-full text-xs font-medium",
-                isShadowing
-                  ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                  : "bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary",
-              )}
-            >
-              <Mic className="h-3.5 w-3.5" />
-              {isShadowing ? "إغلاق" : "تدرّب بالمحاكاة"}
-            </Button>
-          )}
-        </div>
-      )}
-
-      {/* Inline shadowing panel */}
-      {isShadowing && shadowClip && (
-        <div onClick={(e) => e.stopPropagation()}>
-          <InlineLineShadow
-            clip={shadowClip}
-            audioUrl={shadowAudioUrl ?? null}
-            startMs={line.startMs}
-            endMs={line.endMs}
-            externalYouTubeController={externalYouTubeController}
-            onClose={() => onToggleShadow?.(line.id)}
-          />
-        </div>
-      )}
-
-      {/* English translation */}
-      <div
-        className={cn(
-          "overflow-hidden transition-all duration-200",
-          showTranslation ? "max-h-64 opacity-100 mt-1" : "max-h-0 opacity-0",
+        {isEnglish ? (
+          <p
+            lang="en"
+            className={cn(
+              "min-w-0 flex-1 font-english",
+              isCurrent ? "text-lg font-semibold leading-7 text-foreground" : "text-base leading-6 text-foreground/85",
+            )}
+          >
+            <TappableEnglishText
+              text={view.spoken}
+              sentenceArabic={view.support}
+              source="discover"
+              savedWords={savedWords}
+              onSaveWord={
+                onSaveEnglishWord
+                  ? (word) => onSaveEnglishWord({ ...word, startMs: line.startMs, endMs: line.endMs })
+                  : undefined
+              }
+            />
+          </p>
+        ) : (
+          <p
+            dir="rtl"
+            lang="ar"
+            className={cn(
+              "min-w-0 flex-1",
+              isCurrent ? "text-lg font-medium leading-8 text-foreground" : "text-base leading-8 text-foreground/85",
+            )}
+          >
+            {line.tokens && line.tokens.length > 0
+              ? line.tokens.map((token, i) => (
+                  <span key={token.id} className="inline">
+                    <ClickableWord
+                      token={token}
+                      parentLine={line}
+                      onSave={onSaveArabicWord}
+                      isSaved={savedWords?.has(token.surface)}
+                    />
+                    {i < line.tokens.length - 1 && !/^[،؟.!:؛]+$/.test(token.surface) && " "}
+                  </span>
+                ))
+              : view.spoken}
+          </p>
         )}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <TranslationPair
-          variant="compact"
-          literal={showLiteral ? line.literal : undefined}
-          natural={line.translation}
-        />
       </div>
-    </div>
+
+      {/* Fusha row — the dialect sentence in MSA. Next to the line rather than
+          down with the translation, because it is not what the line means. */}
+      {fusha && <FushaLine dialect={line.arabic} fusha={fusha} />}
+
+      {showSupport && view.support && (
+        isEnglish ? (
+          <>
+            <p dir="rtl" lang="ar" className="text-sm leading-6 text-muted-foreground">
+              {view.support}
+            </p>
+            {showLiteral && line.literal && (
+              <p dir="rtl" lang="ar" className="text-xs leading-5 text-muted-foreground/80">
+                <span className="me-1.5 text-[11px] font-semibold">حرفي</span>
+                {line.literal}
+              </p>
+            )}
+          </>
+        ) : (
+          <TranslationPair
+            variant="compact"
+            literal={showLiteral ? line.literal : undefined}
+            natural={view.support}
+          />
+        )
+      )}
+
+      {children}
+    </li>
   );
 };
 
@@ -432,20 +449,19 @@ const LikeButton = ({ videoId, isAuthenticated }: { videoId: string; isAuthentic
 
   return (
     <button
+      type="button"
       onClick={handleToggle}
       disabled={isPending}
+      aria-pressed={isLiked}
+      aria-label="أعجبني"
       className={cn(
-        "flex items-center gap-1.5 px-3 py-2 rounded-xl transition-all shrink-0",
-        isLiked
-          ? "bg-primary/10 text-primary"
-          : "bg-muted text-muted-foreground hover:text-foreground hover:bg-muted/80"
+        "flex h-11 min-w-11 shrink-0 items-center justify-center gap-1 rounded-full px-2.5 transition-colors",
+        isLiked ? "bg-primary/10 text-primary" : "text-foreground hover:bg-muted",
       )}
     >
-      <Heart
-        className={cn("h-5 w-5 transition-all", isLiked && "fill-primary")}
-      />
+      <Heart className={cn("h-[22px] w-[22px]", isLiked && "fill-primary")} aria-hidden />
       {likeCount > 0 && (
-        <span className="text-sm font-semibold">{likeCount}</span>
+        <span className="font-english text-sm font-semibold tabular-nums">{likeCount}</span>
       )}
     </button>
   );
@@ -593,6 +609,13 @@ const GrammarNotesSection = ({
 const DiscoverVideo = () => {
   const { videoId } = useParams<{ videoId: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+  // Back to wherever the learner came from (the feed, Today, the library); a
+  // deep link with no history goes to the library, which owns every video.
+  const goBack = useCallback(() => {
+    if (location.key !== "default") navigate(-1);
+    else navigate("/library");
+  }, [location.key, navigate]);
   const { data: video, isLoading } = useDiscoverVideo(videoId);
   const { user, isAuthenticated } = useAuth();
   const addUserVocabulary = useAddUserVocabulary();
@@ -600,7 +623,8 @@ const DiscoverVideo = () => {
 
   const [currentTimeMs, setCurrentTimeMs] = useState(0);
   const [savedWords, setSavedWords] = useState<Set<string>>(new Set());
-  const [showTranslations, setShowTranslations] = useState(false);
+  // On by default: the support line is how a learner new to a clip follows it.
+  const [showTranslations, setShowTranslations] = useState(true);
   const [showLiteral, setShowLiteral] = useState(false);
   // Unlike its neighbours, the Fusha switch is the global "Formal Arabic (MSA)"
   // preference rather than page state: a learner who asked for MSA in Settings
@@ -613,7 +637,6 @@ const DiscoverVideo = () => {
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const playbackSpeedRef = useRef(playbackSpeed);
   playbackSpeedRef.current = playbackSpeed;
-  const [showFullTranscript, setShowFullTranscript] = useState(false);
   const [manualLineIndex, setManualLineIndex] = useState(0);
   // Timer-based sync for non-YouTube
   const [timerPlaying, setTimerPlaying] = useState(false);
@@ -641,10 +664,13 @@ const DiscoverVideo = () => {
   const tiktokAudioRef = useRef<HTMLAudioElement | null>(null);
   const phraseEndMsRef = useRef<number | null>(null);
   const phraseStartMsRef = useRef<number | null>(null);
+  // Set when "pause after each line" stopped the clip at a line's end, so that
+  // playing on moves to the next line instead of stopping again.
+  const stoppedAtEndRef = useRef(false);
   const isSeekingRef = useRef(false);
   const shadowPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const lineRefs = useRef<Map<string, HTMLDivElement>>(new Map());
-  const transcriptContainerRef = useRef<HTMLDivElement>(null);
+  const lineRefs = useRef<Map<string, HTMLLIElement>>(new Map());
+  const transcriptContainerRef = useRef<HTMLOListElement>(null);
 
   // Record "continue where you left off" entry, throttled internally to 5s
   useEffect(() => {
@@ -814,12 +840,20 @@ const DiscoverVideo = () => {
     };
   }, [timerPlaying, playbackSpeed]);
 
-  const handleSaveToMyWords = useCallback(
-    async (word: VocabItem) => {
+  /**
+   * Save a tapped word to My Words. `studied` is the language of the word
+   * itself: English on this app's own videos, Arabic on bridged ones. It
+   * decides what the flashcard's fallback audio reads out and in which voice —
+   * an English word read by the dialect voice, or its Arabic scaffold read in
+   * place of the English line, would teach the wrong sound.
+   */
+  const saveWord = useCallback(
+    async (word: VocabItem, studied: "en" | "ar") => {
       if (!isAuthenticated || !user) {
         toast.error("سجّل الدخول لحفظ الكلمات");
         return;
       }
+      const savedKey = studied === "en" ? word.english.toLowerCase() : word.arabic;
       try {
         // Best-effort: clip the sentence audio from the source video so the
         // flashcard plays with native audio. If native audio isn't available
@@ -850,31 +884,36 @@ const DiscoverVideo = () => {
           }
         }
 
-        // TTS fallback for sentence + word (routed to native dialect voice).
-        const dialectHint = (video as any)?.dialect ?? null;
-        if (!sentenceAudioUrl && word.sentenceText) {
+        // TTS fallback for sentence + word: the dialect voice for Arabic, the
+        // default (English) voice for English.
+        const voice = studied === "en" ? null : video?.dialect ?? null;
+        const sentence = studied === "en" ? word.sentenceEnglish : word.sentenceText;
+        const spokenWord = studied === "en" ? word.english : word.arabic;
+        if (!sentenceAudioUrl && sentence) {
           sentenceAudioUrl =
-            (await synthesizeAndUploadTTS(word.sentenceText, user.id, dialectHint, "sentence")) ?? undefined;
+            (await synthesizeAndUploadTTS(sentence, user.id, voice, "sentence")) ?? undefined;
         }
-        if (!wordAudioUrl && word.arabic) {
+        if (!wordAudioUrl && spokenWord) {
           wordAudioUrl =
-            (await synthesizeAndUploadTTS(word.arabic, user.id, dialectHint, "word")) ?? undefined;
+            (await synthesizeAndUploadTTS(spokenWord, user.id, voice, "word")) ?? undefined;
         }
 
         await addUserVocabulary.mutateAsync({
           word_arabic: word.arabic,
           word_english: word.english,
+          // sentence_text holds the Arabic, sentence_english the English, on
+          // both kinds of video.
           sentence_text: word.sentenceText,
           sentence_english: word.sentenceEnglish,
           sentence_audio_url: sentenceAudioUrl,
           word_audio_url: wordAudioUrl,
           source: "discover",
         });
-        setSavedWords((prev) => new Set(prev).add(word.arabic));
+        setSavedWords((prev) => new Set(prev).add(savedKey));
         toast.success("حُفظت في كلماتي");
       } catch (err: any) {
         if (err?.code === "23505") {
-          setSavedWords((prev) => new Set(prev).add(word.arabic));
+          setSavedWords((prev) => new Set(prev).add(savedKey));
           toast.info("موجودة في كلماتي");
         } else {
           toast.error("تعذّر حفظ الكلمة");
@@ -883,6 +922,8 @@ const DiscoverVideo = () => {
     },
     [isAuthenticated, user, video, addUserVocabulary],
   );
+  const handleSaveToMyWords = useCallback((word: VocabItem) => saveWord(word, "ar"), [saveWord]);
+  const handleSaveEnglishWord = useCallback((word: VocabItem) => saveWord(word, "en"), [saveWord]);
 
   const allLines = useMemo(
     () => ((video?.transcript_lines as any[]) ?? []) as TranscriptLine[],
@@ -922,6 +963,7 @@ const DiscoverVideo = () => {
       setManualLineIndex(clampedIndex);
 
       // Track the target line's start/end time for phrase-mode pause
+      stoppedAtEndRef.current = false;
       phraseStartMsRef.current = targetLine.startMs ?? null;
       phraseEndMsRef.current = targetLine.endMs ?? null;
 
@@ -1094,7 +1136,10 @@ const DiscoverVideo = () => {
               title: video.title,
               summary: `Watching a ${video.dialect} dialect video${video.cefr_level ? ` (${video.cefr_level})` : ""} with tap-to-translate subtitles.`,
               content: displayLine
-                ? `Current subtitle: ${displayLine.arabic}${displayLine.translation ? ` — ${displayLine.translation}` : ""}`
+                ? (() => {
+                    const view = lineView(displayLine);
+                    return `Current subtitle: ${view.spoken}${view.support ? ` — ${view.support}` : ""}`;
+                  })()
                 : undefined,
             }
           : null,
@@ -1117,22 +1162,20 @@ const DiscoverVideo = () => {
     }
   }, [activeLine, lines, playbackMode]);
 
-  // When switching to phrase mode, pause the video/audio and lock to current phrase
+  // Turning "pause after each line" on: aim it at the line playing now. It does
+  // not stop the clip here — it stops at that line's end, as its name says.
   useEffect(() => {
     if (playbackMode !== "line") return;
-    if (isYouTube) {
-      playerRef.current?.pauseVideo?.();
-    } else if (isTikTok) {
-      tiktokAudioRef.current?.pause();
-    }
+    stoppedAtEndRef.current = false;
     const currentLine = lines[lineControlIndex];
     if (currentLine) {
       phraseStartMsRef.current = currentLine.startMs ?? null;
       phraseEndMsRef.current = currentLine.endMs ?? null;
     }
-  }, [playbackMode, isYouTube, isTikTok]); // intentionally exclude lines/lineControlIndex — only fire on mode switch
+  }, [playbackMode]); // intentionally exclude lines/lineControlIndex — only fire on mode switch
 
-  // Phrase-end auto-pause for both YouTube and TikTok (hidden audio)
+  // "Pause after each line" for both YouTube and TikTok (hidden audio). The
+  // decision is `lineStopStep`; this applies it.
   useEffect(() => {
     if (playbackMode !== "line") return;
     const isPlaying = isYouTube ? isYouTubePlaying : (isTikTok && isTiktokAudioPlaying);
@@ -1140,24 +1183,40 @@ const DiscoverVideo = () => {
 
     const startMs = phraseStartMsRef.current;
     const endMs = phraseEndMsRef.current;
-    if (endMs == null) return;
 
     if (isSeekingRef.current) {
-      if (startMs != null && currentTimeMs >= startMs && currentTimeMs < endMs) {
+      if (startMs != null && endMs != null && currentTimeMs >= startMs && currentTimeMs < endMs) {
         isSeekingRef.current = false;
       }
       return;
     }
 
-    if (currentTimeMs >= endMs) {
+    const step = lineStopStep({
+      nowMs: currentTimeMs,
+      startMs,
+      endMs,
+      stoppedAtEnd: stoppedAtEndRef.current,
+      lines,
+    });
+    if (step.kind === "pause") {
+      stoppedAtEndRef.current = true;
       if (isYouTube) {
         playerRef.current?.pauseVideo?.();
         setIsYouTubePlaying(false);
       } else if (isTikTok) {
         tiktokAudioRef.current?.pause();
       }
+    } else if (step.kind === "follow") {
+      stoppedAtEndRef.current = false;
+      const next = lines[step.index];
+      phraseStartMsRef.current = next?.startMs ?? null;
+      phraseEndMsRef.current = next?.endMs ?? null;
+      if (next) {
+        setLineControlIndex(step.index);
+        setManualLineIndex(step.index);
+      }
     }
-  }, [currentTimeMs, isYouTube, isTikTok, isYouTubePlaying, isTiktokAudioPlaying, playbackMode]);
+  }, [currentTimeMs, isYouTube, isTikTok, isYouTubePlaying, isTiktokAudioPlaying, playbackMode, lines]);
 
   // Auto-scroll to active line
   useEffect(() => {
@@ -1512,33 +1571,55 @@ const DiscoverVideo = () => {
 
   if (!video) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4 px-6 text-center">
         <p className="text-muted-foreground">ما لقينا الفيديو</p>
+        <Button variant="outline" onClick={goBack}>رجوع</Button>
       </div>
     );
   }
 
+  const spokenLang = lines.some((l) => l.english?.trim()) ? "en" : "ar";
+  const hasLiteral = lines.some((l) => l.literal?.trim());
+  const level = videoLevel(video);
+  const durationMs = (video.duration_seconds ?? 0) * 1000;
+  const imitating = !!displayLine && shadowLineId === displayLine.id;
+
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      {/* Video section - sticky for YouTube, static for TikTok (vertical videos need more space) */}
+    <div className="flex min-h-[100dvh] flex-col bg-background">
+      {/* Header and video. Sticky for YouTube so the transcript scrolls under a
+          picture that stays put; static for TikTok, whose upright frame would
+          otherwise leave no room to read. */}
       <div className={cn(isYouTube ? "sticky top-0 z-30" : "relative z-30", "bg-background")}>
-        {/* Back nav */}
-        <div className="px-4 py-2 flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate("/discover")}
-            className="gap-1.5 text-muted-foreground"
+        <header className="flex items-center gap-2 px-3 py-2.5">
+          <button
+            type="button"
+            onClick={goBack}
+            aria-label="رجوع"
+            className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-foreground hover:bg-muted"
           >
-            <IconBack className="h-4 w-4" />
-            Back
-          </Button>
-          <div className="flex-1" />
-          <div className="flex gap-1.5">
-            <Badge variant="outline" className="text-xs">{video.dialect}</Badge>
-            <Badge variant="outline" className="text-xs">{video.difficulty}</Badge>
+            <IconBack className="h-6 w-6" />
+          </button>
+          <div className="min-w-0 flex-1">
+            <h1
+              className={cn(
+                "line-clamp-2 text-right text-base font-bold leading-[22px] text-foreground",
+                !hasArabic(video.title) && "font-english",
+              )}
+            >
+              {video.title}
+            </h1>
+            <p className="truncate text-[13px] leading-5 text-muted-foreground">
+              {[video.title_arabic, dialectName(video.dialect)].filter(Boolean).join(" · ")}
+              {level && (
+                <>
+                  {" · "}
+                  <bdi>{level}</bdi>
+                </>
+              )}
+            </p>
           </div>
-        </div>
+          <LikeButton videoId={video.id} isAuthenticated={isAuthenticated} />
+        </header>
 
         {/* Video embed */}
         <div className="bg-black relative">
@@ -1600,449 +1681,303 @@ const DiscoverVideo = () => {
             </div>
           )}
 
-        </div>
-      </div>
-
-      {/* Title bar */}
-      <div className="px-4 py-3 border-b border-border bg-card">
-        <div className="flex items-start gap-3">
-          <div className="flex-1 min-w-0">
-            <h1
-              className="text-base font-bold text-foreground"
-            >
-              {video.title}
-            </h1>
-            {video.title_arabic && (
-              <p
-                className="text-sm text-foreground/70 mt-0.5"
-                dir="rtl"
-              >
-                {video.title_arabic}
-              </p>
-            )}
-          </div>
-          <LikeButton videoId={video.id} isAuthenticated={isAuthenticated} />
-        </div>
-      </div>
-
-      {/* TikTok-only: hidden audio sync. When source MP4 is available we drive
-          the highlight from a real <audio> element. Otherwise fall back to a manual timer. */}
-      {isTikTok && tiktokAudioUrl && (
-        <>
-          <audio
-            ref={tiktokAudioRef}
-            src={tiktokAudioUrl}
-            preload="auto"
-            crossOrigin="anonymous"
-            className="hidden"
-            onLoadedMetadata={() => {
-              setTiktokAudioReady(true);
-              if (tiktokAudioRef.current) {
-                tiktokAudioRef.current.playbackRate = playbackSpeed;
-              }
-              sendTikTokCommand("mute");
-            }}
-            onTimeUpdate={(e) => setCurrentTimeMs((e.currentTarget.currentTime || 0) * 1000)}
-            onPlay={() => { setIsTiktokAudioPlaying(true); ensureTikTokVideoPlaying(true); }}
-            onPause={() => { setIsTiktokAudioPlaying(false); ensureTikTokVideoPlaying(false); }}
-            onSeeked={(e) => { sendTikTokCommand("mute"); sendTikTokCommand("seekTo", e.currentTarget.currentTime); }}
-            onEnded={() => { setIsTiktokAudioPlaying(false); sendTikTokCommand("pause"); }}
-          />
-          {lines.length > 0 && (
-            <div className="px-4 py-2 border-b border-border/50 bg-card/50 flex items-center justify-center gap-2">
-              <Button
-                variant={isTiktokAudioPlaying ? "secondary" : "default"}
-                size="sm"
-                className="gap-2"
-                onClick={() => {
-                  const audio = tiktokAudioRef.current;
-                  if (!audio) return;
-                  // Drive the video directly from the click too (rides the real
-                  // user gesture, in addition to the audio onPlay/onPause path).
-                  if (isTiktokAudioPlaying) {
-                    audio.pause();
-                    ensureTikTokVideoPlaying(false);
-                  } else {
-                    audio.play().catch(() => toast.error("تعذّر تشغيل الصوت"));
-                    ensureTikTokVideoPlaying(true);
+          {/* TikTok-only: hidden audio sync. When source MP4 is available we drive
+              the highlight from a real <audio> element. Otherwise fall back to a manual timer. */}
+          {isTikTok && tiktokAudioUrl && (
+            <>
+              <audio
+                ref={tiktokAudioRef}
+                src={tiktokAudioUrl}
+                preload="auto"
+                crossOrigin="anonymous"
+                className="hidden"
+                onLoadedMetadata={() => {
+                  setTiktokAudioReady(true);
+                  if (tiktokAudioRef.current) {
+                    tiktokAudioRef.current.playbackRate = playbackSpeed;
                   }
+                  sendTikTokCommand("mute");
                 }}
-                disabled={!tiktokAudioReady}
-              >
-                {isTiktokAudioPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-                {isTiktokAudioPlaying ? "إيقاف مؤقت" : "تشغيل"}
-              </Button>
-              <span className="text-xs text-muted-foreground tabular-nums">
-                {Math.floor(currentTimeMs / 1000)}s
-              </span>
-            </div>
-          )}
-        </>
-      )}
-
-      {/* Legacy TikTok fallback (no uploaded source audio) */}
-      {isTikTok && !tiktokAudioUrl && lines.length > 0 && (
-        <div className="px-4 py-2 border-b border-border/50 bg-card/50 flex flex-col items-center gap-1">
-          {isAuthenticated && (
-            <p className="text-[11px] text-muted-foreground/80 text-center px-2">
-              Source audio missing — auto-sync unavailable. Re-upload the audio in Admin → Edit Video to enable it.
-            </p>
-          )}
-          <div className="flex items-center justify-center gap-2">
-            <Button
-              variant={timerPlaying ? "secondary" : "default"}
-              size="sm"
-              className="gap-2"
-              onClick={() => {
-                setTimerPlaying((p) => !p);
-                // Start timer from the current manual line position so the user
-                // can press play without first scrubbing to a line.
-                if (!timerPlaying && timerMs === 0 && lines[manualLineIndex]?.startMs !== undefined) {
-                  setTimerMs(lines[manualLineIndex].startMs!);
-                }
-              }}
-            >
-              {timerPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-              {timerPlaying ? "أوقف المزامنة" : "ابدأ مزامنة الترجمة"}
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => { setTimerPlaying(false); setTimerMs(0); setManualLineIndex(0); setLineControlIndex(0); }}
-            >
-              صفّر
-            </Button>
-            <span className="text-xs text-muted-foreground tabular-nums">
-              {Math.floor(timerMs / 1000)}s
-            </span>
-          </div>
-        </div>
-      )}
-
-      {/* Active subtitle display with navigation arrows */}
-      {(
-        <div className="px-4 py-4 border-b border-border bg-card/50 min-h-[80px]">
-          <div className="flex items-center gap-2">
-            {/* Previous line arrow */}
-            <button
-              onClick={() => playLineByIndex(lineControlIndex - 1)}
-              disabled={lineControlIndex <= 0 || lines.length === 0}
-              className={cn(
-                "shrink-0 w-10 h-10 rounded-full flex items-center justify-center",
-                "bg-muted/60 transition-all duration-200",
-                "hover:bg-muted active:scale-95",
-                "disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-muted/60"
-              )}
-              aria-label="السطر السابق"
-            >
-              <ChevronLeft className="h-5 w-5 text-foreground" />
-            </button>
-
-            {/* Active line content */}
-            <div className="flex-1 min-w-0">
-              {displayLine ? (
-                <div className="text-center space-y-1.5">
-                  <p
-                    className="text-lg font-medium text-foreground leading-[2]"
-                    dir="rtl"
+                onTimeUpdate={(e) => setCurrentTimeMs((e.currentTarget.currentTime || 0) * 1000)}
+                onPlay={() => { setIsTiktokAudioPlaying(true); ensureTikTokVideoPlaying(true); }}
+                onPause={() => { setIsTiktokAudioPlaying(false); ensureTikTokVideoPlaying(false); }}
+                onSeeked={(e) => { sendTikTokCommand("mute"); sendTikTokCommand("seekTo", e.currentTarget.currentTime); }}
+                onEnded={() => { setIsTiktokAudioPlaying(false); sendTikTokCommand("pause"); }}
+              />
+              {lines.length > 0 && (
+                <div dir="ltr" className="flex items-center gap-3 px-3 pb-2 pt-1 text-white">
+                  <button
+                    type="button"
+                    aria-label={isTiktokAudioPlaying ? "إيقاف مؤقت" : "تشغيل"}
+                    className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-white/20 transition-colors hover:bg-white/30 disabled:opacity-40"
+                    onClick={() => {
+                      const audio = tiktokAudioRef.current;
+                      if (!audio) return;
+                      // Drive the video directly from the click too (rides the real
+                      // user gesture, in addition to the audio onPlay/onPause path).
+                      if (isTiktokAudioPlaying) {
+                        audio.pause();
+                        ensureTikTokVideoPlaying(false);
+                      } else {
+                        audio.play().catch(() => toast.error("تعذّر تشغيل الصوت"));
+                        ensureTikTokVideoPlaying(true);
+                      }
+                    }}
+                    disabled={!tiktokAudioReady}
                   >
-                    {displayLine.tokens && displayLine.tokens.length > 0
-                      ? displayLine.tokens.map((token, i) => (
-                          <span key={token.id} className="inline">
-                            <ClickableWord
-                              token={token}
-                              parentLine={displayLine}
-                              onSave={isAuthenticated ? handleSaveToMyWords : undefined}
-                              isSaved={savedWords?.has(token.surface)}
-                            />
-                            {i < displayLine.tokens.length - 1 && !/^[،؟.!:؛]+$/.test(token.surface) && " "}
-                          </span>
-                        ))
-                      : displayLine.arabic}
-                  </p>
-                  {showFusha && (
-                    fushaFor(displayLine) ? (
-                      <FushaLine
-                        dialect={displayLine.arabic}
-                        fusha={fushaFor(displayLine)}
-                        variant="inline"
-                      />
-                    ) : fushaStatus === "loading" ? (
-                      <p className="text-[10px] uppercase tracking-wide text-muted-foreground/60 text-center">
-                        جارٍ التحويل إلى الفصحى…
-                      </p>
-                    ) : null
-                  )}
-                  {showTranslations && displayLine.translation && (
+                    {isTiktokAudioPlaying ? <Pause className="h-[18px] w-[18px] fill-current" /> : <Play className="h-[18px] w-[18px] fill-current" />}
+                  </button>
+                  <span className="font-english text-xs tabular-nums">{formatClock(currentTimeMs)}</span>
+                  {durationMs > 0 && (
                     <>
-                      <p
-                        className="text-sm text-muted-foreground leading-relaxed"
-                      >
-                        {displayLine.translation}
-                      </p>
+                      <span className="h-1 flex-1 overflow-hidden rounded-full bg-white/30" aria-hidden>
+                        <span
+                          className="block h-full rounded-full bg-accent"
+                          style={{ width: `${Math.min(100, (currentTimeMs / durationMs) * 100)}%` }}
+                        />
+                      </span>
+                      <span className="font-english text-xs tabular-nums">{formatClock(durationMs)}</span>
                     </>
                   )}
-                  {showLiteral && displayLine.literal && (
-                    <p
-                      className="text-xs italic text-muted-foreground/80 leading-relaxed"
-                    >
-                      <span className="not-italic uppercase tracking-wide text-[9px] me-1.5 text-muted-foreground/60">
-                        حرفي
-                      </span>
-                      {displayLine.literal}
-                    </p>
-                  )}
-                  {displayLine.arabic && (
-                    <div className="flex flex-wrap justify-center gap-2 mt-2">
-                      <AskAISentence
-                        arabic={displayLine.arabic}
-                        english={displayLine.translation}
-                        variant="chip"
-                        className="h-8 px-3 bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary"
-                      />
-                      {displayLineShadowClip && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleToggleShadow(displayLine.id)}
-                          className={cn(
-                            "h-8 px-3 gap-1.5 rounded-full text-xs font-medium",
-                            shadowLineId === displayLine.id
-                              ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                              : "bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary",
-                          )}
-                        >
-                          <Mic className="h-3.5 w-3.5" />
-                          {shadowLineId === displayLine.id ? "إغلاق" : "تدرّب بالمحاكاة"}
-                        </Button>
-                      )}
-                    </div>
-                  )}
-                  {shadowLineId === displayLine.id && displayLineShadowClip && (
-                    <div className="mx-auto max-w-xl text-left" onClick={(e) => e.stopPropagation()}>
-                      <InlineLineShadow
-                        clip={displayLineShadowClip}
-                        audioUrl={shadowAudioUrl ?? null}
-                        startMs={displayLine.startMs}
-                        endMs={displayLine.endMs}
-                        externalYouTubeController={mainYouTubeShadowController}
-                        onClose={() => handleToggleShadow(displayLine.id)}
-                      />
-                    </div>
-                  )}
-                  <p className="text-xs text-muted-foreground/60">{lineControlIndex + 1} / {lines.length}</p>
                 </div>
-              ) : (
-                <p className="text-center text-sm text-muted-foreground italic">
-                  {lines.length > 0 ? (isYouTube ? "شغّل الفيديو لترى الترجمة" : "المس تشغيل على الفيديو للبدء") : "لا يتوفر نص للفيديو"}
+              )}
+            </>
+          )}
+
+          {/* Legacy TikTok fallback (no uploaded source audio) */}
+          {isTikTok && !tiktokAudioUrl && lines.length > 0 && (
+            <div className="flex flex-col items-center gap-1 px-3 pb-2 pt-1 text-white">
+              {isAuthenticated && (
+                <p className="px-2 text-center text-[11px] text-white/70">
+                  Source audio missing — auto-sync unavailable. Re-upload the audio in Admin → Edit Video to enable it.
                 </p>
               )}
-            </div>
-
-            {/* Next line arrow */}
-            <button
-              onClick={() => playLineByIndex(lineControlIndex + 1)}
-              disabled={lineControlIndex >= lines.length - 1 || lines.length === 0}
-              className={cn(
-                "shrink-0 w-10 h-10 rounded-full flex items-center justify-center",
-                "bg-muted/60 transition-all duration-200",
-                "hover:bg-muted active:scale-95",
-                "disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-muted/60"
-              )}
-              aria-label="السطر التالي"
-            >
-              <ChevronRight className="h-5 w-5 text-foreground" />
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Controls bar */}
-      <div className="px-4 py-2 flex items-center justify-between border-b border-border/50 bg-card/50">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="gap-1.5 text-muted-foreground text-xs"
-          onClick={() => setShowFullTranscript(!showFullTranscript)}
-        >
-          <List className="h-3.5 w-3.5" />
-          {showFullTranscript ? "أخفِ" : "أظهر"} النص ({lines.length})
-        </Button>
-        <div className="flex items-center gap-1.5">
-          {/* Speed control */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-7 gap-1 px-2 text-xs text-muted-foreground">
-                <Gauge className="h-3.5 w-3.5" />
-                {playbackSpeed}x
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="min-w-[100px]">
-              {[0.5, 0.75, 1, 1.25, 1.5].map((speed) => (
-                <DropdownMenuItem
-                  key={speed}
-                  onClick={() => setPlaybackSpeed(speed)}
-                  className={cn("text-sm", playbackSpeed === speed && "font-bold text-primary")}
+              <div className="flex items-center justify-center gap-2">
+                <Button
+                  variant={timerPlaying ? "secondary" : "default"}
+                  size="sm"
+                  className="gap-2"
+                  onClick={() => {
+                    setTimerPlaying((p) => !p);
+                    // Start timer from the current manual line position so the user
+                    // can press play without first scrubbing to a line.
+                    if (!timerPlaying && timerMs === 0 && lines[manualLineIndex]?.startMs !== undefined) {
+                      setTimerMs(lines[manualLineIndex].startMs!);
+                    }
+                  }}
                 >
-                  {speed}x {speed === 1 && "(Normal)"}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-          {/* Playback mode toggle */}
-          <Button
-            variant={playbackMode === "line" ? "secondary" : "ghost"}
-            size="sm"
-            className="h-7 gap-1 px-2 text-xs text-muted-foreground"
-            onClick={() => setPlaybackMode((prev) => (prev === "continuous" ? "line" : "continuous"))}
-          >
-            {playbackMode === "continuous" ? <Play className="h-3.5 w-3.5" /> : <Pause className="h-3.5 w-3.5" />}
-            {playbackMode === "continuous" ? "متواصل" : "جملة بجملة"}
-          </Button>
-          {showTranslations ? (
-            <Eye className="h-3.5 w-3.5 text-muted-foreground" />
-          ) : (
-            <EyeOff className="h-3.5 w-3.5 text-muted-foreground" />
+                  {timerPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                  {timerPlaying ? "أوقف المزامنة" : "ابدأ مزامنة الترجمة"}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-white hover:bg-white/15 hover:text-white"
+                  onClick={() => { setTimerPlaying(false); setTimerMs(0); setManualLineIndex(0); setLineControlIndex(0); }}
+                >
+                  صفّر
+                </Button>
+                <span className="font-english text-xs tabular-nums">{formatClock(timerMs)}</span>
+              </div>
+            </div>
           )}
-          {/* On an English video the spoken line is English, so what these
-              reveal is the Arabic support: the dialect gloss, the word-for-word
-              literal in English word order, and the Fusha rendering. */}
-          <span className="text-xs text-muted-foreground">المعنى</span>
-          <Switch
-            checked={showTranslations}
-            onCheckedChange={setShowTranslations}
-          />
-          <span className="text-xs text-muted-foreground ms-2">حرفي</span>
-          <Switch
-            checked={showLiteral}
-            onCheckedChange={setShowLiteral}
-          />
-          <span className="text-xs text-muted-foreground ms-2">فصحى</span>
-          <Switch
-            checked={showFusha}
-            onCheckedChange={setShowFusha}
-            aria-label="أظهر سطر الفصحى"
-          />
         </div>
       </div>
 
-      {playbackMode === "line" && lines.length > 0 && (
-        <div className="border-b border-border/50 bg-card/40 px-4 py-2">
-          <div className="flex items-center justify-center gap-2">
-            <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => playLineByIndex(lineControlIndex - 1)} disabled={lineControlIndex <= 0}>
-              <SkipBack className="h-4 w-4" />
-            </Button>
-            <Button variant="default" size="sm" className="gap-2" onClick={() => playLineByIndex(lineControlIndex)}>
-              <Play className="h-4 w-4" />
-              Phrase {lineControlIndex + 1}/{lines.length}
-            </Button>
-            <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => playLineByIndex(lineControlIndex + 1)} disabled={lineControlIndex >= lines.length - 1}>
-              <SkipForward className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      )}
-
-      {/* Full transcript (toggleable) */}
-      {showFullTranscript && (
-        <div
-          ref={transcriptContainerRef}
-          className="flex-1 overflow-y-auto px-2 py-3 space-y-1"
-        >
-          {lines.map((line) => (
-            <TranscriptRow
-              key={line.id}
-              line={line}
-              isActive={activeLineId === line.id}
-              showTranslation={showTranslations}
-              showLiteral={showLiteral}
-              fusha={showFusha ? fushaFor(line) : undefined}
-              onSave={isAuthenticated ? handleSaveToMyWords : undefined}
-              savedWords={savedWords}
-              lineRef={(el) => {
-                if (el) lineRefs.current.set(line.id, el);
-                else lineRefs.current.delete(line.id);
-              }}
-              onSeek={handleSeek}
-              video={video}
-              shadowAudioUrl={shadowAudioUrl}
-              isShadowing={shadowLineId === line.id}
-              onToggleShadow={handleToggleShadow}
-              externalYouTubeController={mainYouTubeShadowController}
-            />
-          ))}
-        </div>
-      )}
-
-      {/* Vocabulary, grammar & cultural context footer */}
-      <div className="border-t border-border bg-card px-4 py-4 space-y-4">
-        {onScreenLines.length > 0 && (
-          <details className="group" open={!!video.is_meme}>
-            <summary className="flex items-center gap-2 cursor-pointer text-sm font-semibold text-foreground">
-              <ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180 text-muted-foreground" />
-              On-Screen Text ({onScreenLines.length})
-            </summary>
-            <div className="mt-3 space-y-2">
-              {onScreenLines.map((line) => (
-                <div key={line.id} className="p-2 rounded-lg bg-muted/50">
-                  <p dir="rtl" className="text-base font-medium text-foreground">
-                    {line.arabic}
-                  </p>
-                  {line.translation && showTranslations && (
-                    <p className="mt-1 text-xs text-muted-foreground">{line.translation}</p>
+      {/* Clearance for the toolbar, which is fixed to the bottom. */}
+      <main className="flex-1 pb-[calc(5.5rem+env(safe-area-inset-bottom))]">
+        <section aria-labelledby="watch-transcript" className="px-3 pt-2">
+          <div className="flex items-center justify-between gap-2 px-2">
+            <h2 id="watch-transcript" className="text-base font-semibold leading-6">
+              النص
+            </h2>
+            <div className="flex items-center gap-1">
+              <label className="flex min-h-11 cursor-pointer items-center gap-2 text-sm text-muted-foreground">
+                <Switch checked={showTranslations} onCheckedChange={setShowTranslations} />
+                {supportLabel(video.dialect, spokenLang)}
+              </label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button
+                    type="button"
+                    aria-label="خيارات النص"
+                    className="grid h-11 w-11 place-items-center rounded-full text-muted-foreground hover:bg-muted"
+                  >
+                    <SlidersHorizontal className="h-5 w-5" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent align="end" className="w-64 space-y-1 p-2">
+                  {hasLiteral && (
+                    <label className="flex min-h-11 cursor-pointer items-center justify-between gap-3 rounded-xl px-2 text-sm">
+                      <span>
+                        <span className="block font-medium">حرفي</span>
+                        <span className="block text-xs text-muted-foreground">كلمة بكلمة، بترتيب الجملة</span>
+                      </span>
+                      <Switch checked={showLiteral} onCheckedChange={setShowLiteral} />
+                    </label>
                   )}
-                </div>
-              ))}
+                  <label className="flex min-h-11 cursor-pointer items-center justify-between gap-3 rounded-xl px-2 text-sm">
+                    <span>
+                      <span className="block font-medium">فصحى</span>
+                      <span className="block text-xs text-muted-foreground">نفس الجملة بالعربي الفصيح</span>
+                    </span>
+                    <Switch checked={showFusha} onCheckedChange={setShowFusha} aria-label="أظهر سطر الفصحى" />
+                  </label>
+                </PopoverContent>
+              </Popover>
             </div>
-          </details>
-        )}
+          </div>
 
-        {vocabulary.length > 0 && (
-          <details className="group">
-            <summary className="flex items-center gap-2 cursor-pointer text-sm font-semibold text-foreground">
-              <ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180 text-muted-foreground" />
-              Key Vocabulary ({vocabulary.length})
-            </summary>
-            <div className="mt-3 grid grid-cols-2 gap-2">
-              {vocabulary.map((v, i) => (
-                <div
-                  key={i}
-                  className="flex items-center justify-between gap-2 p-2 rounded-lg bg-muted/50 text-sm"
-                >
-                  <span dir="rtl" className="font-medium text-foreground">
-                    {v.arabic}
-                  </span>
-                  <span className="text-muted-foreground text-xs truncate">{v.english}</span>
-                </div>
-              ))}
-            </div>
-          </details>
-        )}
+          {showFusha && fushaStatus === "loading" && (
+            <p className="px-2 text-xs text-muted-foreground">جارٍ التحويل إلى الفصحى…</p>
+          )}
 
-        <GrammarNotesSection
-          videoId={video.id}
-          points={(video.grammar_points as any[]) ?? []}
-          videoDifficulty={video.difficulty}
-        />
+          {lines.length === 0 ? (
+            <p className="px-2 py-8 text-center text-sm text-muted-foreground">لا يتوفر نص للفيديو</p>
+          ) : (
+            <ol ref={transcriptContainerRef} className="flex flex-col gap-1 pb-3">
+              {lines.map((line, index) => {
+                const isCurrent = displayLine?.id === line.id;
+                const view = lineView(line);
+                return (
+                  <TranscriptRow
+                    key={line.id}
+                    line={line}
+                    isCurrent={isCurrent}
+                    showSupport={showTranslations}
+                    showLiteral={showLiteral}
+                    fusha={showFusha ? fushaFor(line) : undefined}
+                    onSaveArabicWord={isAuthenticated ? handleSaveToMyWords : undefined}
+                    onSaveEnglishWord={isAuthenticated ? handleSaveEnglishWord : undefined}
+                    savedWords={savedWords}
+                    lineRef={(el) => {
+                      if (el) lineRefs.current.set(line.id, el);
+                      else lineRefs.current.delete(line.id);
+                    }}
+                    onPlay={() => playLineByIndex(index)}
+                  >
+                    {isCurrent && view.spoken && (
+                      <div className="mt-1 flex flex-wrap gap-2">
+                        <AskAISentence
+                          arabic={line.arabic}
+                          english={view.spokenLang === "en" ? view.spoken : line.translation}
+                          variant="chip"
+                          className="h-8 bg-card px-3 text-primary hover:bg-card hover:text-primary"
+                        />
+                      </div>
+                    )}
+                    {isCurrent && imitating && displayLineShadowClip && (
+                      <div className="mt-2">
+                        <InlineLineShadow
+                          clip={displayLineShadowClip}
+                          audioUrl={shadowAudioUrl ?? null}
+                          startMs={line.startMs}
+                          endMs={line.endMs}
+                          externalYouTubeController={mainYouTubeShadowController}
+                          onClose={() => handleToggleShadow(line.id)}
+                        />
+                      </div>
+                    )}
+                  </TranscriptRow>
+                );
+              })}
+            </ol>
+          )}
+        </section>
 
+        {/* What the clip teaches, under the transcript rather than competing
+            with it. Collapsed except the grammar notes, which are levelled to
+            the learner. */}
+        <section aria-label="عن المقطع" className="mx-3 mt-2 space-y-4 rounded-3xl border border-border bg-card px-4 py-4">
+          {onScreenLines.length > 0 && (
+            <details className="group" open={!!video.is_meme}>
+              <summary className="flex min-h-11 cursor-pointer items-center gap-2 text-sm font-semibold text-foreground">
+                <ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180 text-muted-foreground" />
+                نص على الشاشة ({onScreenLines.length})
+              </summary>
+              <div className="mt-2 space-y-2">
+                {onScreenLines.map((line) => {
+                  const view = lineView(line);
+                  return (
+                    <div key={line.id} className="rounded-2xl bg-muted/50 p-3">
+                      <p
+                        dir={view.spokenLang === "en" ? "ltr" : "rtl"}
+                        className={cn("text-base font-medium text-foreground", view.spokenLang === "en" && "font-english")}
+                      >
+                        {view.spoken}
+                      </p>
+                      {view.support && showTranslations && (
+                        <p
+                          dir={view.spokenLang === "en" ? "rtl" : "ltr"}
+                          className={cn("mt-1 text-sm text-muted-foreground", view.spokenLang === "ar" && "font-english")}
+                        >
+                          {view.support}
+                        </p>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </details>
+          )}
 
-        {video.cultural_context && (
-          <details className="group" open={!!video.is_meme}>
-            <summary className="flex items-center gap-2 cursor-pointer text-sm font-semibold text-foreground">
-              <ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180 text-muted-foreground" />
-              {video.is_meme ? "تحليل الميم" : "السياق الثقافي"}
-            </summary>
-            <p className="mt-2 text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
-              {video.cultural_context}
-            </p>
-          </details>
-        )}
+          {vocabulary.length > 0 && (
+            <details className="group">
+              <summary className="flex min-h-11 cursor-pointer items-center gap-2 text-sm font-semibold text-foreground">
+                <ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180 text-muted-foreground" />
+                كلمات مهمة ({vocabulary.length})
+              </summary>
+              <div className="mt-2 grid grid-cols-2 gap-2">
+                {vocabulary.map((v, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center justify-between gap-2 rounded-2xl bg-muted/50 p-2.5 text-sm"
+                  >
+                    <span dir="auto" className="font-medium text-foreground">
+                      {v.arabic}
+                    </span>
+                    <span dir="auto" className="truncate text-xs text-muted-foreground">{v.english}</span>
+                  </div>
+                ))}
+              </div>
+            </details>
+          )}
 
-        {/* Video Rating */}
-        <VideoRating videoId={video.id} userId={user?.id} />
-      </div>
+          <GrammarNotesSection
+            videoId={video.id}
+            points={(video.grammar_points as any[]) ?? []}
+            videoDifficulty={video.difficulty}
+          />
+
+          {video.cultural_context && (
+            <details className="group" open={!!video.is_meme}>
+              <summary className="flex min-h-11 cursor-pointer items-center gap-2 text-sm font-semibold text-foreground">
+                <ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180 text-muted-foreground" />
+                {video.is_meme ? "تحليل الميم" : "السياق الثقافي"}
+              </summary>
+              <p className="mt-2 text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                {video.cultural_context}
+              </p>
+            </details>
+          )}
+
+          {/* Video Rating */}
+          <VideoRating videoId={video.id} userId={user?.id} />
+        </section>
+      </main>
+
+      <WatchToolbar
+        speed={playbackSpeed}
+        onSpeed={() => setPlaybackSpeed((s) => nextSpeed(s))}
+        pauseAfterLine={playbackMode === "line"}
+        onPauseAfterLine={() => setPlaybackMode((m) => (m === "line" ? "continuous" : "line"))}
+        onRepeat={() => playLineByIndex(lineControlIndex)}
+        canRepeat={lines.length > 0}
+        imitating={imitating}
+        onImitate={() => displayLine && handleToggleShadow(displayLine.id)}
+        canImitate={!!displayLineShadowClip}
+      />
     </div>
-
   );
 };
 
