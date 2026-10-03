@@ -35,3 +35,7 @@
 # The illustration set (public/art). Unhashed, so version by renaming the file.
 /art/*
   Cache-Control: public, max-age=31536000, immutable
+
+# Self-hosted web fonts. Versioned by folder (v1, v2…), never edited in place.
+/fonts/*
+  Cache-Control: public, max-age=31536000, immutable

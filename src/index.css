@@ -2,8 +2,11 @@
    Interface: Funnel Sans, with IBM Plex Sans Arabic for the Arabic glyphs it
    lacks (the stack falls through per character, so mixed lines just work).
    Headlines: Libre Baskerville over Noto Naskh Arabic, a book serif in both
-   scripts. Funnel Display is only the wordmark. */
-@import url('https://fonts.googleapis.com/css2?family=Funnel+Display:wght@600..800&family=Funnel+Sans:wght@300..800&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Noto+Naskh+Arabic:wght@400..700&display=swap');
+   scripts. Funnel Display is only the wordmark.
+   Self-hosted (src/fonts.css): same-origin files with preloads in index.html,
+   rather than a Google Fonts @import that could only start once this
+   stylesheet had loaded. */
+@import './fonts.css';
 
 @tailwind base;
 @tailwind components;
