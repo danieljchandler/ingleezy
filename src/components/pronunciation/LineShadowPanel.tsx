@@ -108,7 +108,7 @@ export function LineShadowPanel({ clip, nativeClipWav, externalYouTubeController
           and clips reusing the page's main video (no frame of their own) stay hidden */}
       <div
         className={cn(
-          "w-full overflow-hidden rounded-lg border border-border bg-card",
+          "w-full overflow-hidden rounded-2xl bg-card shadow-soft",
           clip.source === "youtube" && !externalYouTubeController ? "aspect-video max-w-xs mx-auto" : "h-0 invisible",
         )}
       >
@@ -124,13 +124,13 @@ export function LineShadowPanel({ clip, nativeClipWav, externalYouTubeController
 
       {/* Speed + listen */}
       <div className="flex items-center justify-between gap-3">
-        <div className="inline-flex rounded-lg border border-border bg-card p-0.5">
+        <div className="inline-flex rounded-full bg-muted p-1">
           {([1, 0.75, 0.5] as const).map((r) => (
             <button
               key={r}
               onClick={() => setRate(r)}
               className={cn(
-                "px-2 py-0.5 text-xs font-medium rounded-md transition-colors",
+                "px-2.5 py-1 text-xs font-medium rounded-full transition-colors",
                 rate === r ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground",
               )}
             >

@@ -178,7 +178,7 @@ const WriteTab = () => {
           ) : (
             <ul className="space-y-2">
               {review.corrections.map((c, i) => (
-                <li key={i} className="rounded-lg border border-border/60 p-3 text-sm">
+                <li key={i} className="rounded-2xl bg-muted p-3 text-sm">
                   <div className="font-english">
                     <span className="text-destructive line-through decoration-destructive/60">{c.original}</span>
                     <span className="mx-2 text-muted-foreground">←</span>

@@ -78,7 +78,7 @@ const WordMatchingGame = ({ words, onComplete }: { words: WordPair[]; onComplete
       <div className="grid grid-cols-2 gap-3">
         {/* English column — the anchor */}
         <div className="space-y-2">
-          <p className="text-xs font-semibold text-muted-foreground uppercase text-center mb-1">إنجليزي</p>
+          <p className="text-xs font-semibold text-muted-foreground text-center mb-1">إنجليزي</p>
           {gameWords.map((w) => (
             <button
               key={w.id + "-en"}
@@ -101,7 +101,7 @@ const WordMatchingGame = ({ words, onComplete }: { words: WordPair[]; onComplete
 
         {/* Arabic column — the meanings to match against */}
         <div className="space-y-2">
-          <p className="text-xs font-semibold text-muted-foreground uppercase text-center mb-1">المعنى</p>
+          <p className="text-xs font-semibold text-muted-foreground text-center mb-1">المعنى</p>
           {shuffledArabic.map((w) => (
             <button
               key={w.id + "-ar"}

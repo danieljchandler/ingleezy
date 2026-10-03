@@ -476,11 +476,11 @@ const Settings = () => {
             </div>
             <button
               onClick={() => navigate('/liked-videos')}
-              className="w-full flex items-center justify-between p-3 rounded-xl bg-card border border-border hover:border-primary/30 transition-all"
+              className="w-full flex items-center justify-between p-3 rounded-2xl bg-card shadow-soft hover:bg-muted transition-colors"
             >
               <div className="flex items-center gap-3">
                 <Heart className="h-5 w-5 text-primary fill-primary/30" />
-                <div className="text-left">
+                <div className="text-start">
                   <p className="font-medium text-foreground text-sm">فيديوهات أعجبتني</p>
                   <p className="text-xs text-muted-foreground">الفيديوهات التي حفظتها</p>
                 </div>

@@ -291,7 +291,7 @@ const MyPhrasesReview = () => {
         <div className="flex items-center justify-between mb-6">
           <PageCorner />
           {sessionCount > 0 && (
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-card border border-border">
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-card shadow-soft">
               <Trophy className="h-4 w-4 text-primary" />
               <span className="text-sm font-medium">{sessionCount}</span>
             </div>
@@ -420,7 +420,7 @@ const MyPhrasesReview = () => {
                 {current.jingle_audio_url && current.jingle_lyrics && (
                   <div className="mt-2">
                     {showLyrics ? (
-                      <div className="rounded-xl bg-muted/40 border border-border p-3 text-left animate-in fade-in duration-200">
+                      <div className="rounded-2xl bg-muted p-3 text-left animate-in fade-in duration-200">
                         <div className="flex items-center justify-between mb-1.5">
                           <span className="text-[10px] font-semibold text-muted-foreground">
                             كلمات الأنشودة

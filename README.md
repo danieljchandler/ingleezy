@@ -96,12 +96,14 @@ npm run dev
 ```
 
 Copy `.env.example` to `.env` and fill in `VITE_SUPABASE_URL` and
-`VITE_SUPABASE_PUBLISHABLE_KEY`. **No Supabase project is linked yet**, so
-without those two values the app builds and serves but throws on first import
-of the Supabase client, by name. That is deliberate: the fork inherited
-Hakiya's project ref as a hardcoded fallback, which meant an Ingleezy dev
-server with no `.env` read and wrote Hakiya's production database while looking
-perfectly healthy. No backend is the honest state until Ingleezy has its own.
+`VITE_SUPABASE_PUBLISHABLE_KEY` with Ingleezy's own Supabase project's values
+(it exists since 2026-10-02; `docs/backend-bootstrap.md` is the setup
+checklist). Nothing in the repo points at a project, so without those two
+values the app builds and serves but throws on first import of the Supabase
+client, by name. That is deliberate: the fork inherited Hakiya's project ref as
+a hardcoded fallback, which meant an Ingleezy dev server with no `.env` read
+and wrote Hakiya's production database while looking perfectly healthy. No
+backend is the honest state for a checkout with no `.env`.
 
 `VITE_PUBLIC_SITE_URL` is the other one worth setting before a real deploy: it
 is the public origin (`https://ingleezy.app`, whatever the domain turns out to

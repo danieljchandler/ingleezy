@@ -194,7 +194,7 @@ const DailyStoryPage = () => {
 
             {story.new_words?.length > 0 && (
               <div className="border-t border-border pt-3">
-                <p className="text-xs font-semibold uppercase text-muted-foreground mb-2">كلمات جديدة</p>
+                <p className="text-xs font-semibold text-muted-foreground mb-2">كلمات جديدة</p>
                 <div className="flex flex-wrap gap-2">
                   {story.new_words.map((w, i) => (
                     <Badge key={i} variant="outline" className="text-base font-english">{w}</Badge>

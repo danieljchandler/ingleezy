@@ -23,8 +23,8 @@ const LikedVideoCard = ({
   <button
     onClick={onClick}
     className={cn(
-      "w-full rounded-2xl overflow-hidden border border-border bg-card text-left",
-      "transition-all duration-200 hover:border-primary/40 hover:shadow-md active:scale-[0.99]",
+      "w-full rounded-3xl overflow-hidden bg-card shadow-card text-left",
+      "transition-all duration-200 hover:shadow-elegant active:scale-[0.99]",
       "flex gap-0"
     )}
   >

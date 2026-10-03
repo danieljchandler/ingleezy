@@ -157,7 +157,7 @@ const SetPhrasesPractice = ({ reviewMode = false }: Props) => {
         <Card className="p-5 space-y-4 bg-gradient-to-br from-success/5 to-periwinkle/5 border-success/20">
           {current.question_type === "reply" ? (
             <div>
-              <p className="text-xs uppercase text-muted-foreground mb-2">ردّ على هذا:</p>
+              <p className="text-xs text-muted-foreground mb-2">ردّ على هذا:</p>
               <div className="flex items-center justify-between gap-2">
                 <p className="text-2xl font-semibold leading-relaxed font-english">{current.prompt.english}</p>
                 {current.prompt.audio_url && (
@@ -171,7 +171,7 @@ const SetPhrasesPractice = ({ reviewMode = false }: Props) => {
             <div>
               {/* The situation arrives in the learner's dialect so the setup is
                   fully understood; the production is entirely in English. */}
-              <p className="text-xs uppercase text-muted-foreground mb-2">الموقف:</p>
+              <p className="text-xs text-muted-foreground mb-2">الموقف:</p>
               <p className="text-base leading-relaxed font-arabic" dir="rtl">{current.prompt.arabic}</p>
               <p className="text-xs text-muted-foreground mt-2">وش تقول بالإنجليزي؟</p>
             </div>
@@ -206,7 +206,7 @@ const SetPhrasesPractice = ({ reviewMode = false }: Props) => {
                   <button
                     key={i}
                     onClick={() => pickChoice(c)}
-                    className="w-full p-3 rounded-lg border border-border bg-card text-left hover:border-primary/40 active:scale-[0.99] transition"
+                    className="w-full p-3 rounded-2xl bg-card shadow-soft text-left hover:bg-muted active:scale-[0.99] transition"
                   >
                     <p className="text-lg font-english">{c.english}</p>
                   </button>
