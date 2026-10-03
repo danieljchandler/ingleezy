@@ -128,6 +128,12 @@
     --wash-teal: 186 51% 82%;
     --wash-sage: 142 30% 88%;
     --wash-aqua: 187 44% 76%;
+    /* How strongly each wash shows. Full in light mode; dark mode turns them
+       down, since a dim gold on a dark ground reads as brown, not light. */
+    --wash-gold-a: 1;
+    --wash-teal-a: 1;
+    --wash-sage-a: 1;
+    --wash-aqua-a: 1;
 
     --sidebar-background: 45 32% 96%;
     --sidebar-foreground: 190 28% 10%;
@@ -197,10 +203,16 @@
     --success-ink: 150 44% 64%;
     --clay-ink: 5 70% 74%;
 
-    --wash-gold: 42 60% 30%;
-    --wash-teal: 186 45% 22%;
-    --wash-sage: 150 25% 18%;
-    --wash-aqua: 187 40% 24%;
+    /* Bright hues at low strength: the glow stays gold and teal instead of
+       sinking to olive and brown on the dark ground. */
+    --wash-gold: 42 85% 58%;
+    --wash-teal: 186 55% 45%;
+    --wash-sage: 150 35% 42%;
+    --wash-aqua: 187 50% 50%;
+    --wash-gold-a: 0.16;
+    --wash-teal-a: 0.32;
+    --wash-sage-a: 0.18;
+    --wash-aqua-a: 0.26;
 
     --sidebar-background: 190 30% 10%;
     --sidebar-foreground: 40 16% 94%;
@@ -490,32 +502,32 @@
      other. AppShell lays it under every page. */
   .bg-wash-page {
     background:
-      radial-gradient(70% 260px at 92% 0%, hsl(var(--wash-gold) / 0.9) 0%, hsl(var(--wash-gold) / 0) 70%),
-      radial-gradient(60% 240px at 6% 0%, hsl(var(--wash-teal) / 0.9) 0%, hsl(var(--wash-teal) / 0) 70%);
+      radial-gradient(70% 260px at 92% 0%, hsl(var(--wash-gold) / calc(0.9 * var(--wash-gold-a))) 0%, hsl(var(--wash-gold) / 0) 70%),
+      radial-gradient(60% 240px at 6% 0%, hsl(var(--wash-teal) / calc(0.9 * var(--wash-teal-a))) 0%, hsl(var(--wash-teal) / 0) 70%);
   }
 
   /* The full four-glow ground: landing, onboarding, celebration. */
   .bg-wash-hero {
     background:
-      radial-gradient(60% 40% at 88% 6%, hsl(var(--wash-gold)) 0%, hsl(var(--wash-gold) / 0) 70%),
-      radial-gradient(65% 42% at 8% 16%, hsl(var(--wash-teal)) 0%, hsl(var(--wash-teal) / 0) 70%),
-      radial-gradient(70% 45% at 60% 52%, hsl(var(--wash-sage)) 0%, hsl(var(--wash-sage) / 0) 70%),
-      radial-gradient(75% 40% at 18% 96%, hsl(var(--wash-aqua)) 0%, hsl(var(--wash-aqua) / 0) 70%),
+      radial-gradient(60% 40% at 88% 6%, hsl(var(--wash-gold) / var(--wash-gold-a)) 0%, hsl(var(--wash-gold) / 0) 70%),
+      radial-gradient(65% 42% at 8% 16%, hsl(var(--wash-teal) / var(--wash-teal-a)) 0%, hsl(var(--wash-teal) / 0) 70%),
+      radial-gradient(70% 45% at 60% 52%, hsl(var(--wash-sage) / var(--wash-sage-a)) 0%, hsl(var(--wash-sage) / 0) 70%),
+      radial-gradient(75% 40% at 18% 96%, hsl(var(--wash-aqua) / var(--wash-aqua-a)) 0%, hsl(var(--wash-aqua) / 0) 70%),
       hsl(var(--background));
   }
 
   /* An art panel inside a card (a clip's poster, a featured shelf). */
   .bg-wash-panel {
     background:
-      radial-gradient(60% 80% at 15% 20%, hsl(var(--wash-gold)) 0%, hsl(var(--wash-gold) / 0) 70%),
-      radial-gradient(60% 80% at 90% 30%, hsl(var(--wash-teal)) 0%, hsl(var(--wash-teal) / 0) 70%),
-      radial-gradient(80% 80% at 60% 100%, hsl(var(--wash-aqua)) 0%, hsl(var(--wash-aqua) / 0) 70%),
+      radial-gradient(60% 80% at 15% 20%, hsl(var(--wash-gold) / var(--wash-gold-a)) 0%, hsl(var(--wash-gold) / 0) 70%),
+      radial-gradient(60% 80% at 90% 30%, hsl(var(--wash-teal) / var(--wash-teal-a)) 0%, hsl(var(--wash-teal) / 0) 70%),
+      radial-gradient(80% 80% at 60% 100%, hsl(var(--wash-aqua) / var(--wash-aqua-a)) 0%, hsl(var(--wash-aqua) / 0) 70%),
       hsl(var(--muted));
   }
   .bg-wash-panel-alt {
     background:
-      radial-gradient(80% 90% at 20% 10%, hsl(var(--wash-aqua)) 0%, hsl(var(--wash-aqua) / 0) 70%),
-      radial-gradient(80% 90% at 90% 100%, hsl(var(--wash-gold)) 0%, hsl(var(--wash-gold) / 0) 70%),
+      radial-gradient(80% 90% at 20% 10%, hsl(var(--wash-aqua) / var(--wash-aqua-a)) 0%, hsl(var(--wash-aqua) / 0) 70%),
+      radial-gradient(80% 90% at 90% 100%, hsl(var(--wash-gold) / var(--wash-gold-a)) 0%, hsl(var(--wash-gold) / 0) 70%),
       hsl(var(--muted));
   }
 

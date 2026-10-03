@@ -38,7 +38,7 @@ function apply(pref: ThemePreference) {
   document.documentElement.classList.toggle("dark", dark);
   // Keep the browser chrome (address bar, status bar) on-brand per mode.
   const meta = document.querySelector('meta[name="theme-color"]:not([media])');
-  if (meta) meta.setAttribute("content", dark ? "#121E21" : "#FAFBFD");
+  if (meta) meta.setAttribute("content", dark ? "#0E181B" : "#FAF9F5");
 }
 
 export function setThemePreference(pref: ThemePreference) {
