@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<!--
+  The social share card (1200x630), rendered to public/og-image.jpg by
+  scripts/render-og-image.mjs. Same pieces as the landing page: the wordmark,
+  the speech bubbles, the promise in the serif, over the gold-and-teal wash.
+  Fonts and art load from public/, so the card matches the app exactly.
+-->
+<link rel="stylesheet" href="/fonts.css">
+<style>
+  html, body { margin: 0; }
+  body {
+    width: 1200px; height: 630px; overflow: hidden; position: relative;
+    font-family: 'Funnel Sans', 'IBM Plex Sans Arabic', sans-serif; color: #121E21;
+    background:
+      radial-gradient(55% 60% at 92% 4%, #F6D47E 0%, rgba(246,212,126,0) 70%),
+      radial-gradient(55% 65% at 4% 10%, #BCE4E8 0%, rgba(188,228,232,0) 70%),
+      radial-gradient(60% 60% at 52% 60%, #D5EADD 0%, rgba(213,234,221,0) 70%),
+      radial-gradient(60% 55% at 12% 100%, #A6D9DF 0%, rgba(166,217,223,0) 70%),
+      #FAF9F5;
+  }
+  .art { position: absolute; left: 70px; top: 85px; width: 460px; height: 460px; object-fit: contain; }
+  .copy { position: absolute; right: 80px; top: 92px; width: 600px; text-align: right; }
+  .wordmark { direction: ltr; text-align: right; font-family: 'Funnel Display', sans-serif; font-weight: 800; font-size: 76px; line-height: 1; letter-spacing: -0.035em; white-space: nowrap; }
+  .wordmark .i { position: relative; display: inline-block; letter-spacing: 0; margin-right: 0.035em; }
+  .wordmark .dot { position: absolute; left: 50%; top: 0.05em; width: 0.17em; height: 0.17em; margin-left: -0.085em; border-radius: 50%;
+    background: radial-gradient(circle at 32% 30%, #FBE39B 0%, #E9AD20 52%, #B8820F 100%); }
+  h1 { margin: 40px 0 0; font-family: 'Noto Naskh Arabic', serif; font-weight: 400; font-size: 64px; line-height: 1.45; }
+  .en { margin: 10px 0 0; direction: ltr; text-align: right; font-family: 'Libre Baskerville', serif; font-style: italic; font-size: 28px; color: #696259; }
+  .tag { display: inline-block; margin-top: 34px; padding: 10px 22px; border-radius: 999px; background: #fff; font-size: 26px; font-weight: 600;
+    box-shadow: 0 1px 2px rgba(18,30,33,.05), 0 16px 40px -22px rgba(19,60,66,.25); }
+</style>
+</head>
+<body>
+  <img class="art" src="/art/bubbles.webp" alt="">
+  <div class="copy">
+    <div class="wordmark"><span class="i">ı<span class="dot"></span></span>ngleezy</div>
+    <h1>إنجليزي محكي حقيقي،<br>كلمة كلمة.</h1>
+    <p class="en">Real spoken English, word by word.</p>
+    <span class="tag">شرح بالخليجي · المصري · اليمني</span>
+  </div>
+</body>
+</html>
