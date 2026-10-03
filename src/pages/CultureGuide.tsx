@@ -280,7 +280,7 @@ const CultureGuide = () => {
               <button
                 key={i}
                 onClick={() => handleSend(s)}
-                className="w-full text-left p-3 rounded-xl bg-card border border-border text-sm text-foreground hover:border-primary/40 transition-colors"
+                className="w-full text-start p-3 rounded-2xl bg-card shadow-soft text-sm text-foreground hover:bg-muted transition-colors"
                 dir="auto"
               >
                 {s}
@@ -304,10 +304,10 @@ const CultureGuide = () => {
             )}
             <div
               className={cn(
-                "max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap",
+                "max-w-[85%] rounded-[22px] px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap",
                 msg.role === "user"
                   ? "bg-primary text-primary-foreground rounded-br-md"
-                  : "bg-card border border-border text-foreground rounded-bl-md"
+                  : "bg-card shadow-soft text-foreground rounded-bl-md"
               )}
               dir="auto"
             >
@@ -326,7 +326,7 @@ const CultureGuide = () => {
             <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
               <Bot className="h-4 w-4 text-primary" />
             </div>
-            <div className="bg-card border border-border rounded-2xl rounded-bl-md px-4 py-3">
+            <div className="bg-card shadow-soft rounded-[22px] rounded-bl-md px-4 py-3">
               <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
             </div>
           </div>

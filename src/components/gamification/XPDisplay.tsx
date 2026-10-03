@@ -30,7 +30,7 @@ export function XPDisplay({ compact = false, className }: XPDisplayProps) {
   }
 
   return (
-    <div className={cn("bg-card rounded-xl p-4 border border-border", className)}>
+    <div className={cn("bg-card rounded-3xl p-4 shadow-card", className)}>
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center">

@@ -69,7 +69,7 @@ export function AskAiContextCard({ seed, payload, pageKind, onClearSeed }: AskAi
       <div className="rounded-xl border border-primary/25 bg-primary/[0.04] px-2.5 py-1.5">
         <div className="flex items-center gap-1.5">
           <Icon className="h-3.5 w-3.5 shrink-0 text-primary" />
-          <span className="shrink-0 text-[10px] font-medium uppercase tracking-wide text-primary/80">
+          <span className="shrink-0 text-[11px] font-medium text-primary/80">
             {label}
           </span>
           {/* Expanded, the body already shows this in full — repeating a

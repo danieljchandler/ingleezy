@@ -69,7 +69,7 @@ const SetPhrases = () => {
                 <button
                   key={o.id}
                   onClick={() => navigate(`/set-phrases/practice?occasion=${o.id}`)}
-                  className="p-4 rounded-xl bg-card border border-border text-left hover:border-success/40 active:scale-[0.98] transition"
+                  className="p-4 rounded-3xl bg-card shadow-card text-left hover:bg-muted active:scale-[0.98] transition"
                 >
                   <p className="font-semibold text-sm">{o.name}</p>
                   {o.name_arabic && (

@@ -319,7 +319,7 @@ const MemeAnalyzer = () => {
       {file && !result && (
         <div className="space-y-4">
           {/* Media preview */}
-          <div className="relative rounded-xl overflow-hidden border border-border bg-card">
+          <div className="relative rounded-3xl overflow-hidden bg-card shadow-card">
             {isVideo ? (
               <video
                 src={mediaPreviewUrl!}
@@ -371,7 +371,7 @@ const MemeAnalyzer = () => {
       {result && (
         <div className="space-y-6">
           {/* Media display */}
-          <div className="relative rounded-xl overflow-hidden border border-border bg-card">
+          <div className="relative rounded-3xl overflow-hidden bg-card shadow-card">
             {isVideo ? (
               <video
                 src={mediaPreviewUrl!}
@@ -475,7 +475,7 @@ const MemeAnalyzer = () => {
                   {vocabulary.map((word, idx) => (
                     <div
                       key={idx}
-                      className="flex items-center justify-between p-3 rounded-lg bg-muted/50 border border-border/50"
+                      className="flex items-center justify-between p-3 rounded-2xl bg-muted"
                     >
                       <div className="flex items-center gap-3">
                         {/* English leads — it is the word being learned. */}

@@ -47,7 +47,7 @@ export const QuizResults = ({ topic, quizState, onRestart, onHome }: QuizResults
     <AppShell compact>
       {/* Header */}
       <div className="text-center mb-8">
-        <div className="inline-block px-4 py-2 rounded-lg bg-card border border-border">
+        <div className="inline-block px-4 py-2 rounded-full bg-card shadow-soft">
           <span className="text-sm font-semibold text-foreground font-arabic">
             {topic.name_arabic}
           </span>

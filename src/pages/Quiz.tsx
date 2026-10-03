@@ -145,7 +145,7 @@ const Quiz = () => {
     <AppShell compact>
       <div className="flex items-center justify-between mb-6">
         <PageCorner />
-        <div className="px-4 py-2 rounded-lg bg-card border border-border">
+        <div className="px-4 py-2 rounded-full bg-card shadow-soft">
           <span className="text-sm font-semibold text-foreground font-arabic">
             {topic.name_arabic}
           </span>

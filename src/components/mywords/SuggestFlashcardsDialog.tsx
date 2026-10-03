@@ -151,7 +151,7 @@ export const SuggestFlashcardsDialog = ({ open, onOpenChange }: Props) => {
             {suggestions.map((c, i) => (
               <label
                 key={i}
-                className="flex items-start gap-3 p-3 rounded-lg border border-border hover:bg-muted/50 cursor-pointer"
+                className="flex items-start gap-3 p-3 rounded-2xl bg-muted/60 hover:bg-muted cursor-pointer"
               >
                 <Checkbox
                   checked={selected.has(i)}

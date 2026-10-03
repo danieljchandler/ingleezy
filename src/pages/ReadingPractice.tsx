@@ -575,7 +575,7 @@ const ReadingPractice = () => {
             {/* Passage mode */}
             <button
               onClick={() => setMode("passage")}
-              className="w-full p-5 rounded-2xl text-left bg-card border border-border hover:border-primary/40 transition-all group"
+              className="w-full p-5 rounded-3xl text-start bg-card shadow-card hover:shadow-elegant transition-all group"
             >
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
@@ -594,7 +594,7 @@ const ReadingPractice = () => {
             {/* Q&A mode */}
             <button
               onClick={() => setMode("qa")}
-              className="w-full p-5 rounded-2xl text-left bg-card border border-border hover:border-primary/40 transition-all group"
+              className="w-full p-5 rounded-3xl text-start bg-card shadow-card hover:shadow-elegant transition-all group"
             >
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 rounded-xl bg-accent/30 flex items-center justify-center shrink-0">
@@ -630,7 +630,7 @@ const ReadingPractice = () => {
               <select
                 value={qaDifficulty}
                 onChange={(e) => setQaDifficulty(e.target.value as Difficulty)}
-                className="text-xs rounded-lg border border-border bg-card px-2 py-1.5 text-foreground"
+                className="text-xs rounded-full border border-input bg-card px-3 py-1.5 text-foreground"
               >
                 <option value="beginner">مبتدئ</option>
                 <option value="intermediate">متوسط</option>
@@ -680,13 +680,13 @@ const ReadingPractice = () => {
             {qaMessages.map((msg, msgIdx) => (
               <div key={msgIdx} className={cn("flex", msg.role === "user" ? "justify-end" : "justify-start")}>
                 {msg.role === "user" ? (
-                  <div className="max-w-[85%] rounded-2xl rounded-br-md bg-primary text-primary-foreground px-4 py-2.5">
+                  <div className="max-w-[85%] rounded-[22px] rounded-br-md bg-primary text-primary-foreground px-4 py-2.5">
                     <p className="text-sm">{msg.content}</p>
                   </div>
                 ) : (
                   <div className="max-w-[95%] space-y-3">
                     {/* Arabic response lines */}
-                    <div className="bg-card border border-border rounded-2xl rounded-bl-md p-3 space-y-2">
+                    <div className="bg-card shadow-soft rounded-[22px] rounded-bl-md p-3 space-y-2">
                       <p className="text-xs text-muted-foreground mb-1">اضغط الكلمة تشوف معناها • أيقونة العين للعربي</p>
                       {msg.lines?.map((line, lineIdx) => {
                         const lineKey = `${msgIdx}-${lineIdx}`;
@@ -737,7 +737,7 @@ const ReadingPractice = () => {
 
             {qaLoading && (
               <div className="flex justify-start">
-                <div className="bg-card border border-border rounded-2xl rounded-bl-md px-4 py-3">
+                <div className="bg-card shadow-soft rounded-[22px] rounded-bl-md px-4 py-3">
                   <Loader2 className="h-5 w-5 animate-spin text-primary" />
                 </div>
               </div>
@@ -756,7 +756,7 @@ const ReadingPractice = () => {
                 value={qaInput}
                 onChange={(e) => setQaInput(e.target.value)}
                 placeholder="اسأل أي شي…"
-                className="flex-1 rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="flex-1 rounded-full border border-input bg-card px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 disabled={qaLoading}
               />
               <Button type="submit" size="icon" disabled={qaLoading || !qaInput.trim()} className="shrink-0 rounded-xl">
@@ -795,7 +795,7 @@ const ReadingPractice = () => {
               value={customTopic}
               onChange={(e) => setCustomTopic(e.target.value)}
               placeholder="مثلاً: تطلب قهوة في كافيه، تزور الدكتور، تتسوّق…"
-              className="flex w-full rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring resize-none min-h-[72px]"
+              className="flex w-full rounded-2xl border border-input bg-card px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring resize-none min-h-[72px]"
               maxLength={200}
             />
             {customTopic.length > 0 && (
@@ -810,9 +810,9 @@ const ReadingPractice = () => {
                 onClick={() => loadPassage(level)}
                 disabled={loading}
                 className={cn(
-                  "w-full p-4 rounded-xl text-left bg-card border border-border",
+                  "w-full p-4 rounded-2xl text-start bg-card shadow-soft",
                   "flex items-center justify-between transition-all duration-200",
-                  "hover:border-primary/40 active:scale-[0.99] disabled:opacity-50"
+                  "hover:bg-muted active:scale-[0.99] disabled:opacity-50"
                 )}
               >
                 <div className="flex items-center gap-3">

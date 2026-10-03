@@ -96,7 +96,7 @@ export const SentenceReader = ({
         return (
           <div
             key={i}
-            className="rounded-xl border border-border/40 bg-card/40 p-3"
+            className="rounded-2xl bg-card p-3 shadow-soft"
           >
             <p className={cn("font-english leading-relaxed", englishClassName)}>
               <TappableEnglishText

@@ -122,13 +122,13 @@ export function ShadowPlayer({ clip, threshold, autoAdvance, showEnglish, onResu
 
       {/* Speed + listen controls */}
       <div className="flex items-center justify-between gap-3">
-        <div className="inline-flex rounded-lg border border-border bg-card p-0.5">
+        <div className="inline-flex rounded-full bg-muted p-1">
           {([1, 0.75, 0.5] as const).map((r) => (
             <button
               key={r}
               onClick={() => setRate(r)}
               className={cn(
-                "px-2.5 py-1 text-xs font-medium rounded-md transition-colors",
+                "px-2.5 py-1 text-xs font-medium rounded-full transition-colors",
                 rate === r ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
               )}
             >

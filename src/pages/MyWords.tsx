@@ -743,7 +743,7 @@ const MyWords = () => {
 
       {/* Word list */}
       {filteredWords && filteredWords.length > 0 && (
-        <div className="rounded-xl bg-card border border-border overflow-hidden">
+        <div className="rounded-3xl bg-card shadow-card overflow-hidden">
           {filteredWords.map((word, index) => {
             const hasContext = !!word.sentence_text;
             const isExpanded = expandedContext.has(word.id);

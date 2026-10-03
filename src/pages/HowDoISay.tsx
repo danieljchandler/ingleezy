@@ -314,7 +314,7 @@ const HowDoISay = () => {
 
           {/* Detected mode + context */}
           {result.detectedContext && (
-            <div className="flex items-center gap-2.5 p-3 rounded-lg bg-muted/40 border border-border/50">
+            <div className="flex items-center gap-2.5 p-3 rounded-2xl bg-muted">
               <Badge variant="outline" className="shrink-0 capitalize text-xs">
                 {result.inputMode === "translation"
                   ? "ترجمة"
@@ -445,7 +445,7 @@ const HowDoISay = () => {
                   {result.vocabulary.map((word, idx) => (
                     <div
                       key={idx}
-                      className="flex items-center justify-between p-3 rounded-lg bg-muted/50 border border-border/50"
+                      className="flex items-center justify-between p-3 rounded-2xl bg-muted"
                     >
                       <div className="flex items-center gap-3 min-w-0">
                         <span className="font-english text-lg font-semibold text-foreground shrink-0">

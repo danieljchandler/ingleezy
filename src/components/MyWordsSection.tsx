@@ -81,7 +81,7 @@ export const MyWordsSection = () => {
       </div>
 
       {/* Word list */}
-      <div className="rounded-xl bg-card border border-border overflow-hidden">
+      <div className="rounded-3xl bg-card shadow-card overflow-hidden">
         {recentWords.map((word, index) => (
           <div
             key={word.id}

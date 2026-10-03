@@ -220,7 +220,7 @@ const SouqNews = () => {
                 </button>
 
                 {expanded && (
-                  <div className="bg-card/60 rounded-xl p-3 mb-3 border border-border/50">
+                  <div className="bg-muted rounded-2xl p-3 mb-3">
                     <p
                       dir="rtl"
                       className="font-semibold text-sm text-foreground mb-1 font-arabic"

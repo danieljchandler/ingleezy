@@ -260,7 +260,7 @@ const LearnFromX = () => {
             {isAnalyzing && extractedText && (
               <div className="mt-3 space-y-2">
                 <LoadingPanel task="analyze" variant="inline" size="sm" />
-                <div className="p-3 rounded-lg bg-muted/50 border border-border">
+                <div className="p-3 rounded-2xl bg-muted">
                   {/* The post itself — English, so it reads left to right. */}
                   <p className="font-english text-sm text-foreground leading-relaxed">
                     {extractedText}

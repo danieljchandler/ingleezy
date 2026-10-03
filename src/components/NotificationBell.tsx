@@ -90,7 +90,7 @@ export function NotificationBell() {
                       <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{n.body}</p>
                     </div>
                     {n.priority === "high" && (
-                      <span className="text-[10px] font-bold text-destructive uppercase shrink-0">عاجل</span>
+                      <span className="text-[10px] font-bold text-destructive shrink-0">عاجل</span>
                     )}
                   </div>
                 </button>

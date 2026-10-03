@@ -38,7 +38,7 @@ export const FushaLine = ({
     return (
       <p
         className={cn(
-          "text-[10px] uppercase tracking-wide text-muted-foreground/60",
+          "text-[10px] uppercase text-muted-foreground/60",
           centred && "text-center",
           className,
         )}
@@ -55,7 +55,7 @@ export const FushaLine = ({
     <div className={cn("space-y-0.5", className)}>
       <p
         className={cn(
-          "text-[10px] uppercase tracking-wide text-muted-foreground/60",
+          "text-[10px] uppercase text-muted-foreground/60",
           centred ? "text-center" : "text-right",
         )}
       >

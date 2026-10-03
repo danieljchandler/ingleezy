@@ -75,9 +75,9 @@ function VideoCard({ video, onClick, feed, comprehension }: CardProps) {
       onClick={onClick}
       aria-label={`فيديو: ${video.title} — ${video.dialect}, ${video.difficulty}`}
       className={cn(
-        "rounded-xl overflow-hidden border border-border bg-card",
+        "rounded-3xl overflow-hidden bg-card shadow-card",
         "text-left transition-all duration-200",
-        "hover:shadow-md hover:border-primary/20 active:scale-[0.98]",
+        "hover:shadow-elegant active:scale-[0.98]",
       )}
     >
       <div className="relative aspect-video bg-muted">

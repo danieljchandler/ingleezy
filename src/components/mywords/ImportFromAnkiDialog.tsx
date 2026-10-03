@@ -389,7 +389,7 @@ export function ImportFromAnkiDialog({ open, onOpenChange }: Props) {
             </div>
 
             {priorCount !== null && priorCount > 0 && (
-              <div className="flex items-center justify-between gap-3 rounded-lg border border-border bg-muted/30 p-3">
+              <div className="flex items-center justify-between gap-3 rounded-2xl bg-muted p-3">
                 <div className="text-xs">
                   <p className="font-medium">
                     {priorCount.toLocaleString()} card{priorCount === 1 ? "" : "s"} from a previous Anki import

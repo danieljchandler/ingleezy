@@ -222,7 +222,7 @@ export function SentencePracticeSheet({ open, onOpenChange, targetEnglish, targe
                   )}
 
                   {feedback.natural_rewrite && (
-                    <div className="rounded-lg bg-muted/40 border border-border p-3">
+                    <div className="rounded-2xl bg-muted p-3">
                       <p className="text-[11px] font-semibold text-muted-foreground mb-1">
                         أطبع منها
                       </p>
@@ -267,7 +267,7 @@ export function SentencePracticeSheet({ open, onOpenChange, targetEnglish, targe
                         {feedback.alternatives.map((alt, i) => (
                           <div
                             key={i}
-                            className="rounded-lg border border-border bg-background/50 p-2.5"
+                            className="rounded-2xl bg-muted p-2.5"
                           >
                             <p className="font-english text-base leading-relaxed">{alt.english}</p>
                             {alt.arabic && (

@@ -33,7 +33,7 @@ export function WeeklyGoalCard({ className }: WeeklyGoalCardProps) {
   const xpComplete = goal.target_xp > 0 && goal.earned_xp >= goal.target_xp;
 
   return (
-    <div className={cn("bg-card rounded-xl p-4 border border-border", className)}>
+    <div className={cn("bg-card rounded-3xl p-4 shadow-card", className)}>
       <div className="flex items-center gap-2 mb-4">
         <Target className="h-5 w-5 text-primary" />
         <h3 className="font-semibold text-foreground">أهداف الأسبوع</h3>
