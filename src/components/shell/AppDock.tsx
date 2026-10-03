@@ -104,38 +104,31 @@ export function AppDock({ className }: { className?: string }) {
   const { pathname } = useLocation();
   if (!shouldShowDock(pathname)) return null;
 
+  // A floating white bar, inset from the screen edges, with the current tab
+  // as a firoza pill: Dafi's tab bar. It floats because the page's washes and
+  // cards run under it, and a bar welded to the edge would cut them off.
   return (
     <nav
       aria-label="التنقل الرئيسي"
-      className={cn(
-        "fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card",
-        className,
-      )}
-      style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+      className={cn("fixed inset-x-3 z-40 mx-auto max-w-md sm:inset-x-4", className)}
+      style={{ bottom: "calc(env(safe-area-inset-bottom) + 12px)" }}
     >
-      <ul className="mx-auto grid max-w-2xl grid-cols-4 px-2 pb-1 pt-1.5">
+      <ul className="grid h-[68px] grid-cols-4 gap-1 rounded-[28px] bg-card p-2 shadow-elegant ring-1 ring-border/60">
         {SLOTS.map(({ to, label, icon: Icon, owns, tourId }) => {
           const active = slotOwns(owns, pathname);
           return (
-            <li key={to} data-tour={tourId}>
+            <li key={to} data-tour={tourId} className="min-w-0">
               <Link
                 to={to}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "flex min-h-[3.5rem] flex-col items-center justify-center gap-1 text-[13px] leading-[18px] transition-colors",
+                  "flex h-full flex-col items-center justify-center gap-0.5 rounded-[20px] text-[12px] leading-4 transition-colors",
                   active
-                    ? "font-semibold text-primary"
-                    : "font-medium text-muted-foreground hover:text-foreground",
+                    ? "bg-primary font-semibold text-primary-foreground"
+                    : "font-medium text-muted-foreground hover:bg-muted hover:text-foreground",
                 )}
               >
-                <span
-                  className={cn(
-                    "grid h-8 w-14 place-items-center rounded-full transition-colors",
-                    active && "bg-primary/10 dark:bg-primary/20",
-                  )}
-                >
-                  <Icon className="h-[22px] w-[22px]" strokeWidth={2} />
-                </span>
+                <Icon className="h-5 w-5" strokeWidth={2} aria-hidden />
                 <span>{label}</span>
               </Link>
             </li>

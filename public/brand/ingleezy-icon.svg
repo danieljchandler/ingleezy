@@ -1,45 +1,23 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Ingleezy">
   <!--
-    The Ingleezy mark.
+    The Ingleezy app icon: the wordmark's first letter on a Firoza tile.
 
-    Two speech bubbles that overlap, tails pointing opposite ways: one down and
-    to the left for English, one down and to the right for Arabic. The app in
-    one shape. Where the two overlap the colour deepens, which is the point of
-    the whole product: the two languages are not side by side, they are on top
-    of each other.
+    The wordmark is "ıngleezy" with the i's dot lifted off and set in gold, so
+    the icon is that one letter: a white bar and a gold dot. Gold is the
+    brand's highlighter and the dot is the only coloured thing in the mark.
 
-    The tails are what make it a conversation rather than a stack of cards, so
-    they are drawn long and wide enough to survive being rasterised to 16px by
-    scripts/render-brand-icons.mjs. Check any edit at that size before shipping
-    it; a tail that reads at 512 can vanish at 16.
+    Flat fills only. This file is the favicon, and a gradient at 16px is mud;
+    the in-app wordmark carries the lit sphere instead. Check any edit at 16px
+    (scripts/render-brand-icons.mjs renders the PNG sizes).
 
-    What this replaces: a white circle holding an exclamation mark, which read
-    as an error badge at every size, and whose one meaningful detail (a hamza
-    standing in for the dot) was invisible below about 64px.
-
-    Three flat fills and no gradients. This file is the favicon, and a gradient
-    at 16px is just mud. The colours are Gold (#E5A917), Firoza (#135F68) and the overlap
-    (#09474E), matching the accent, primary and olive tokens in
-    src/index.css.css.
+    Colours: Firoza #13636C, Gold #E9AD20, white, matching the primary and
+    accent tokens in src/index.css.
 
     Keep comment text free of doubled hyphens, which XML forbids inside a
     comment: browsers parse this file as XML when it is loaded through an img
     tag, and one stray pair makes the whole logo fail to render.
   -->
-  <defs>
-    <clipPath id="ingleezy-english">
-      <path d="M112 56 H248 A56 56 0 0 1 304 112 V208 A56 56 0 0 1 248 264 H112 A56 56 0 0 1 56 208 V112 A56 56 0 0 1 112 56 Z M104 250 L54 336 L150 250 Z"/>
-    </clipPath>
-  </defs>
-
-  <!-- English bubble, tail down and to the left. -->
-  <path fill="#E5A917" d="M112 56 H248 A56 56 0 0 1 304 112 V208 A56 56 0 0 1 248 264 H112 A56 56 0 0 1 56 208 V112 A56 56 0 0 1 112 56 Z M104 250 L54 336 L150 250 Z"/>
-
-  <!-- Arabic bubble, tail down and to the right. -->
-  <path fill="#135F68" d="M264 192 H400 A56 56 0 0 1 456 248 V344 A56 56 0 0 1 400 400 H264 A56 56 0 0 1 208 344 V248 A56 56 0 0 1 264 192 Z M362 386 L412 472 L316 386 Z"/>
-
-  <!-- Where they overlap. -->
-  <g clip-path="url(#ingleezy-english)">
-    <path fill="#09474E" d="M264 192 H400 A56 56 0 0 1 456 248 V344 A56 56 0 0 1 400 400 H264 A56 56 0 0 1 208 344 V248 A56 56 0 0 1 264 192 Z"/>
-  </g>
+  <rect width="512" height="512" rx="120" fill="#13636C"/>
+  <circle cx="256" cy="150" r="48" fill="#E9AD20"/>
+  <rect x="219" y="224" width="74" height="188" rx="8" fill="#FFFFFF"/>
 </svg>

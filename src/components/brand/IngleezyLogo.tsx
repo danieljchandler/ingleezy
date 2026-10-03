@@ -1,49 +1,63 @@
 import { cn } from "@/lib/utils";
 
 /**
- * The primary lockup: mark + Ingleezy wordmark + تعلّم tagline.
+ * The wordmark: "ıngleezy", lowercase, in Funnel Display at its heaviest,
+ * with the i's dot lifted off and set as a gold sphere.
  *
- * The wordmark is live text in the display face (Readex Pro), not an image —
- * it scales, themes, and stays selectable. The mark rides in from the shared
- * SVG asset so the favicon and the in-app logo can never drift apart.
+ * It is live text, not an image, so it scales, themes and stays crisp. The
+ * glyphs are a dotless ı plus a drawn dot rather than a plain i, because the
+ * dot is the one coloured thing in the mark: gold is the brand's highlighter,
+ * and the dot is the brand highlighting itself. The sphere's soft light echoes
+ * the grainy 3D art used across the app.
  *
- * Readex Pro is drawn for Arabic and Latin as a pair, so the wordmark and the
- * tagline are in one voice. It replaced Baloo Bhaijaan 2, whose bouncy Arabic
- * read young for an adult audience. Wordmark colour stays locked to the
- * foreground: never recoloured.
+ * The visible letters are hidden from assistive tech (a screen reader would
+ * otherwise spell out the dotless ı); the lockup is announced as "Ingleezy".
+ * Tracking is −3.5%, but zero after the ı, or it touches the n and reads "m".
  */
 export function IngleezyLogo({
   className,
   iconOnly = false,
 }: {
   className?: string;
-  /** Mark without wordmark — headers and tight spots. */
+  /** The app-icon tile instead of the wordmark — headers and tight spots. */
   iconOnly?: boolean;
 }) {
-  return (
-    <span dir="ltr" className={cn("inline-flex items-center gap-2.5 select-none", className)}>
+  if (iconOnly) {
+    return (
       <img
         src="/brand/ingleezy-icon.svg"
-        alt=""
-        aria-hidden
-        className="h-[1.55em] w-auto shrink-0"
+        alt="Ingleezy"
+        className={cn("h-[1.6em] w-auto select-none", className)}
         draggable={false}
       />
-      {!iconOnly && (
-        <span className="flex flex-col leading-none" dir="ltr">
-          <span className="font-display text-[1.28em] font-bold leading-none text-foreground">
-            Ingleezy
-          </span>
-          {/* Sits on the wordmark's baseline rather than under a rule: the old
-              bordered block made the lockup read as two stacked logos. */}
-          <span
-            className="mt-[0.22em] text-end font-display text-[0.6em] font-semibold not-italic leading-none text-primary"
-            dir="rtl"
-          >
-            تعلّم
-          </span>
+    );
+  }
+
+  return (
+    <span
+      role="img"
+      aria-label="Ingleezy"
+      dir="ltr"
+      className={cn("inline-block select-none whitespace-nowrap font-wordmark text-foreground", className)}
+    >
+      <span aria-hidden>
+        <span className="relative inline-block" style={{ letterSpacing: 0, marginRight: "0.035em" }}>
+          ı
+          <WordmarkDot />
         </span>
-      )}
+        ngleezy
+      </span>
     </span>
+  );
+}
+
+/** The gold dot over the ı. Exported so the app icon tile can share it. */
+export function WordmarkDot({ className }: { className?: string }) {
+  return (
+    <span
+      aria-hidden
+      className={cn("absolute left-1/2 top-[0.05em] h-[0.17em] w-[0.17em] -ml-[0.085em] rounded-full", className)}
+      style={{ background: "radial-gradient(circle at 32% 30%, #FBE39B 0%, #E9AD20 52%, #B8820F 100%)" }}
+    />
   );
 }

@@ -335,7 +335,7 @@ const MyPhrasesReview = () => {
 
       {/* Card */}
       <div className="py-4">
-        <div className="max-w-sm mx-auto">
+        <div className="mx-auto w-full max-w-sm">
           <div className="rounded-3xl bg-card border border-primary/15 p-7 text-center space-y-5 shadow-elegant">
             <p className="text-[10px] uppercase tracking-[0.18em] font-semibold text-muted-foreground">
               قلها بالإنجليزية

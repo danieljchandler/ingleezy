@@ -40,8 +40,8 @@ export const DailySoundGoalRing = ({ goal = 3, className }: DailySoundGoalRingPr
   return (
     <div
       className={cn(
-        "flex items-center gap-2.5 px-3 py-2 rounded-xl border-2 bg-card",
-        complete ? "border-accent/60" : "border-border",
+        "flex items-center gap-3 rounded-3xl border-2 bg-card px-3 py-2.5 text-foreground shadow-soft",
+        complete ? "border-accent/60" : "border-transparent",
         className,
       )}
       title={`${masteredToday} من ${goal} أصوات اليوم`}

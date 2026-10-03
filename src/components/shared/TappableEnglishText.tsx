@@ -102,22 +102,23 @@ export function TappableEnglishText({
                 {segment}
               </button>
             </PopoverTrigger>
-            <PopoverContent className="w-56 p-3 space-y-2" side="top">
-              <p className="font-english font-semibold">{word}</p>
+            <PopoverContent className="w-60 space-y-2 rounded-3xl p-4" side="top">
+              <p>
+                <span dir="ltr" className="rounded-lg bg-accent px-1.5 font-heading text-2xl leading-9 text-accent-foreground">{word}</span>
+              </p>
               {state?.loading ? (
                 <div className="flex items-center gap-2 text-muted-foreground text-sm">
                   <Loader2 className="h-3.5 w-3.5 animate-spin" /> نترجم…
                 </div>
               ) : state?.translation ? (
-                <p dir="rtl" className="font-arabic text-base">{state.translation}</p>
+                <p dir="rtl" className="font-naskh text-xl leading-8">{state.translation}</p>
               ) : (
                 <p className="text-xs text-muted-foreground">ما فيه ترجمة.</p>
               )}
               {onSaveWord && (
                 <Button
-                  size="sm"
                   variant={isSaved ? "secondary" : "default"}
-                  className="w-full gap-1.5"
+                  className="h-11 w-full gap-1.5"
                   disabled={isSaved || state?.loading}
                   onClick={() => {
                     onSaveWord({

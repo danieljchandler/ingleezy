@@ -15,7 +15,7 @@ const OUT = [
   ["public/favicon.png", 256, null],
   ["public/brand/icon-192.png", 192, null],
   ["public/brand/icon-512.png", 512, null],
-  ["public/brand/icon-maskable-512.png", 512, "#135F68"],
+  ["public/brand/icon-maskable-512.png", 512, "#13636C"],
 ];
 
 const browser = await chromium.launch(

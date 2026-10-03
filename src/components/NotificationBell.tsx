@@ -32,17 +32,17 @@ export function NotificationBell() {
       <button
         onClick={() => setOpen(!open)}
         className={cn(
-          "relative p-2 rounded-lg transition-colors",
-          "text-muted-foreground hover:text-foreground hover:bg-muted/50",
-          open && "bg-muted/50 text-foreground"
+          "relative grid h-11 w-11 place-items-center rounded-full bg-card shadow-soft transition-colors",
+          "text-foreground hover:bg-muted",
+          open && "bg-muted"
         )}
         title="Notifications"
         aria-label="الإشعارات"
       >
-        <Bell className="h-4 w-4" />
+        <Bell className="h-5 w-5" />
         {count > 0 && (
           <span className={cn(
-            "absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] rounded-full text-[10px] font-bold flex items-center justify-center px-1",
+            "absolute -top-0.5 -end-0.5 min-w-[18px] h-[18px] rounded-full text-[10px] font-bold flex items-center justify-center px-1",
             highPriority > 0
               ? "bg-destructive text-destructive-foreground animate-pulse"
               : "bg-primary text-primary-foreground"
@@ -54,8 +54,8 @@ export function NotificationBell() {
 
       {open && (
         <div className={cn(
-          "absolute right-0 top-full mt-2 w-80 max-h-96 overflow-y-auto",
-          "bg-card border border-border rounded-xl shadow-xl z-50",
+          "absolute end-0 top-full mt-2 w-80 max-h-96 overflow-y-auto",
+          "bg-card rounded-3xl shadow-elegant ring-1 ring-border/60 z-50",
           "animate-in fade-in slide-in-from-top-2 duration-200"
         )}>
           <div className="p-3 border-b border-border">

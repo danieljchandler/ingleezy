@@ -300,7 +300,7 @@ test.describe("the streak", () => {
     db.seed("review_streaks", [aReviewStreak({ current_streak: 4, last_review_date: key })]);
     await page.goto("/");
 
-    await expect(page.getByText("سلسلة 4 أيام")).toBeVisible();
+    await expect(page.getByRole("region", { name: "سلسلة 4 أيام" })).toBeVisible();
     await expect(page.getByRole("list", { name: "آخر سبعة أيام" }).getByLabel("تم")).toHaveCount(4);
   });
 

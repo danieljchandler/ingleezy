@@ -35,7 +35,7 @@ export function PageHeader({ title, subtitle, icon, action, className }: PageHea
     <header className={cn("mb-6 pt-1", className)}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <h1 className="inline-flex items-center gap-2 font-heading text-title font-bold tracking-tight text-foreground md:text-headline">
+          <h1 className="inline-flex items-center gap-2 font-heading text-[28px] font-normal leading-[42px] text-foreground md:text-headline">
             {icon}
             {title}
           </h1>

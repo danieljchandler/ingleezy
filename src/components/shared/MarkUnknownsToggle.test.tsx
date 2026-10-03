@@ -55,8 +55,11 @@ describe("MarkUnknownsToggle — turning marking on", () => {
   });
 
   it("looks like a secondary action while off", () => {
-    const { container } = render(<MarkUnknownsToggle />);
-    expect(container.querySelector(".border-input")).toBeInTheDocument();
+    render(<MarkUnknownsToggle />);
+    // Outlined, not filled: the filled slab is reserved for the mode once on.
+    const button = screen.getByRole("button");
+    expect(button).toHaveClass("bg-transparent");
+    expect(button).not.toHaveClass("bg-primary");
   });
 });
 

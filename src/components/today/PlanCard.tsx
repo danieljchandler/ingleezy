@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import { ChevronNext } from "@/components/shared/DirectionalIcon";
 
 /**
- * Today's plan: three steps and one button.
+ * Today's plan: three steps and one button, on a white card.
  *
  * Borrowed from the calm-home pattern (Headspace's Today, Elevate's daily
  * workout): one card, a short list, and a single button that launches the next
@@ -44,32 +44,27 @@ export function PlanCard({ tasks, videoTitle, className }: PlanCardProps) {
   return (
     <section
       aria-labelledby="today-plan"
-      className={cn(
-        "rounded-[28px] bg-primary p-5 text-primary-foreground shadow-elegant",
-        className,
-      )}
+      className={cn("rounded-[28px] bg-card px-4 pb-4 pt-[18px] shadow-card", className)}
     >
-      <div className="flex items-baseline justify-between gap-3">
-        <h2 id="today-plan" className="text-[22px] leading-8 text-primary-foreground">
+      <div className="flex items-center justify-between gap-3">
+        {/* The heading is the tag: "today's plan" names the card, the serif
+            line under it says where you are in it. */}
+        <h2
+          id="today-plan"
+          className="rounded-full bg-tint-gold px-2.5 py-0.5 font-sans text-xs font-semibold leading-[18px] text-accent-ink"
+        >
           {AR.today.planTitle}
         </h2>
-        <p className="text-sm leading-[22px] text-primary-foreground/85">
+        <p className="text-[13px] leading-5 text-muted-foreground">
           {AR.today.minutes(plan.minutes)} · {AR.today.planProgress(plan.done, plan.steps.length)}
         </p>
       </div>
-
-      {/* One segment per step, filled from the start edge as steps finish. */}
-      <div aria-hidden className="mt-3.5 flex gap-1.5">
-        {plan.steps.map((step) => (
-          <span
-            key={step.id}
-            className={cn("h-1.5 flex-1 rounded-full", step.done ? "bg-accent" : "bg-white/25")}
-          />
-        ))}
-      </div>
+      <p className="mx-1 mt-2.5 font-heading text-[22px] leading-[34px]">
+        {AR.today.planHeadline(plan.done, plan.steps.length)}
+      </p>
       <p className="sr-only">{AR.home.tasksDone(plan.done, plan.steps.length)}</p>
 
-      <ol className="mt-3 space-y-1">
+      <ol className="mt-2 space-y-1">
         {plan.steps.map((step) => (
           <li key={step.id}>
             <Step
@@ -83,9 +78,9 @@ export function PlanCard({ tasks, videoTitle, className }: PlanCardProps) {
       </ol>
 
       {plan.complete && (
-        <div className="mt-3 rounded-2xl bg-white/10 px-4 py-3">
-          <p className="font-semibold">{AR.today.planDoneTitle}</p>
-          <p className="text-sm text-primary-foreground/85">{AR.today.planDoneBody}</p>
+        <div className="mt-3 rounded-2xl bg-tint-sage px-4 py-3">
+          <p className="font-semibold text-success-ink">{AR.today.planDoneTitle}</p>
+          <p className="text-sm text-muted-foreground">{AR.today.planDoneBody}</p>
         </div>
       )}
 
@@ -94,8 +89,8 @@ export function PlanCard({ tasks, videoTitle, className }: PlanCardProps) {
           type="button"
           onClick={() => open(plan.next!)}
           className={cn(
-            "mt-4 flex h-14 w-full items-center justify-center gap-2.5 rounded-full bg-card px-5",
-            "text-lg font-semibold text-primary transition-transform active:scale-[0.98]",
+            "mt-3 flex h-[54px] w-full items-center justify-center gap-2 rounded-2xl bg-primary px-5",
+            "text-base font-semibold text-primary-foreground transition-transform active:scale-[0.98]",
           )}
         >
           <span className="truncate">
@@ -106,12 +101,12 @@ export function PlanCard({ tasks, videoTitle, className }: PlanCardProps) {
       )}
 
       {plan.extras.length > 0 && (
-        <div className="mt-3">
+        <div className="mt-2">
           <button
             type="button"
             aria-expanded={showExtras}
             onClick={() => setShowExtras((open) => !open)}
-            className="flex min-h-[44px] w-full items-center justify-center gap-1.5 text-sm font-medium text-primary-foreground/85"
+            className="flex min-h-[44px] w-full items-center justify-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
           >
             {AR.today.extrasTitle} ({plan.extras.length})
             <ChevronDown
@@ -153,22 +148,22 @@ function Step({
       onClick={onOpen}
       aria-label={AR.queue.taskAria(task.done, task.title, task.estMinutes)}
       className={cn(
-        "flex w-full items-center gap-3 rounded-2xl px-2 py-2.5 text-start transition-colors",
-        isNext ? "bg-card text-card-foreground" : "hover:bg-white/10",
+        "flex w-full items-center gap-3 rounded-[18px] p-2 text-start transition-colors",
+        isNext ? "bg-gradient-next" : "hover:bg-muted",
       )}
     >
       <span
         className={cn(
-          "grid h-10 w-10 shrink-0 place-items-center rounded-full",
+          "grid h-11 w-11 shrink-0 place-items-center rounded-[14px]",
           task.done
-            ? "bg-accent text-secondary"
+            ? "bg-tint-sage text-success-ink"
             : isNext
-              ? "bg-primary text-primary-foreground"
-              : "border-[1.5px] border-white/55",
+              ? "bg-card text-foreground"
+              : "bg-tint-firoza text-primary dark:text-foreground",
         )}
       >
         {task.done ? (
-          <Check className="h-5 w-5" strokeWidth={2.5} aria-hidden />
+          <Check className="h-5 w-5" strokeWidth={2.4} aria-hidden />
         ) : (
           <Icon className="h-5 w-5" aria-hidden />
         )}
@@ -176,9 +171,8 @@ function Step({
       <span className="min-w-0 flex-1">
         <span
           className={cn(
-            "block truncate text-base leading-6",
-            isNext ? "font-semibold" : "font-medium",
-            task.done && "text-primary-foreground/85",
+            "block truncate text-[15px] font-semibold leading-[22px]",
+            task.done && "text-muted-foreground",
           )}
         >
           {task.title}
@@ -186,32 +180,23 @@ function Step({
         {subtitleEn ? (
           <span
             dir="ltr"
-            className={cn(
-              "font-english block truncate text-right text-[13px] leading-5",
-              isNext ? "text-muted-foreground" : "text-primary-foreground/85",
-            )}
+            className="font-english block truncate text-right text-[13px] leading-5 text-muted-foreground"
           >
             {subtitleEn}
           </span>
         ) : (
-          <span
-            className={cn(
-              "block truncate text-[13px] leading-5",
-              isNext ? "text-muted-foreground" : "text-primary-foreground/85",
-            )}
-          >
+          <span className="block truncate text-[13px] leading-5 text-muted-foreground">
             {task.subtitle ? `${task.subtitle} · ` : ""}
             {AR.today.minutes(task.estMinutes)}
           </span>
         )}
       </span>
-      {isNext && (
-        <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
-          {AR.today.next}
-        </span>
+      {task.done && (
+        <span className="shrink-0 text-xs font-semibold text-success-ink">{AR.today.dayDone}</span>
       )}
+      {isNext && <ChevronNext className="h-5 w-5 shrink-0" aria-hidden />}
       {task.countBadge && !task.done && !isNext && (
-        <span className="shrink-0 rounded-full bg-white/15 px-2 py-0.5 text-xs font-semibold tabular-nums">
+        <span className="shrink-0 rounded-full bg-tint-firoza px-2 py-0.5 text-xs font-semibold tabular-nums text-primary dark:text-foreground">
           {task.countBadge}
         </span>
       )}
