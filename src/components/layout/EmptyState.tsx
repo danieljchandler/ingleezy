@@ -49,11 +49,11 @@ export function EmptyState({
       )}
     >
       {Icon && (
-        <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-muted">
-          <Icon className="h-7 w-7 text-muted-foreground" aria-hidden />
+        <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-[18px] bg-tint-firoza">
+          <Icon className="h-7 w-7 text-primary dark:text-foreground" aria-hidden />
         </div>
       )}
-      <h2 className="font-heading text-subtitle font-bold text-foreground">{title}</h2>
+      <h2 className="font-heading text-title font-normal text-foreground">{title}</h2>
       {body && (
         <p className="mt-1.5 max-w-xs text-body-sm leading-relaxed text-muted-foreground">
           {body}

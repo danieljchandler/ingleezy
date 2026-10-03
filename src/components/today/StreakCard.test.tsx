@@ -37,7 +37,9 @@ describe("the streak card", () => {
   it("counts the run and ticks the days it covers", async () => {
     render([aReviewStreak({ current_streak: 3, last_review_date: localDateKey() })]);
 
-    await waitFor(() => expect(screen.getByText("سلسلة 3 أيام")).toBeInTheDocument());
+    // The tile shows the bare number; the sentence is its accessible name.
+    await waitFor(() => expect(screen.getByRole("region", { name: "سلسلة 3 أيام" })).toBeInTheDocument());
+    expect(screen.getByText("3")).toBeInTheDocument();
     expect(screen.getAllByLabelText("تم")).toHaveLength(3);
   });
 

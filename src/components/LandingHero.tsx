@@ -1,6 +1,7 @@
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { Globe2 } from "lucide-react";
 import { IngleezyLogo } from "@/components/brand/IngleezyLogo";
-import { Headphones, Brain, PlayCircle, Globe2 } from "lucide-react";
+import { Art, type ArtName } from "@/components/brand/Art";
 import { Button } from "@/components/ui/button";
 import { IconNext } from "@/components/shared/DirectionalIcon";
 
@@ -13,54 +14,66 @@ import { IconNext } from "@/components/shared/DirectionalIcon";
  * trying to speak. So the promise is spoken English rather than exam English,
  * and it is made in the visitor's own language.
  *
- * The picture is the product rather than a scene. The campfire clip that sat
- * here (men round a fire in the dunes, a camel behind them) was heritage
- * ornament carried over from Hakiya; it told an Arabic speaker the app was
- * "for them" by looking Arab, which is the one thing the brand has decided
- * not to do. What appeals instead is the thing they came for: a real English
- * line, the word they would get stuck on lit in gold, and its meaning in
- * their own dialect underneath.
+ * The first screen is the onboarding design: the wordmark, the two speech
+ * bubbles, the promise in the book serif over a soft gold-and-teal wash, and
+ * one gradient button. Nothing on it looks "Arab" on purpose (the campfire
+ * clip that once sat here told the visitor the app was for them by looking
+ * like their heritage); what appeals is the product, shown further down: a
+ * real English line, the word they would stop on lit in gold, and its meaning
+ * in their own dialect.
  */
 export function LandingHero() {
   const navigate = useNavigate();
 
   return (
-    <section className="py-6">
-      <div className="mb-6 flex justify-center">
-        <IngleezyLogo className="text-3xl sm:text-4xl" />
-      </div>
+    <div className="pb-6">
+      <section className="-mx-4 -mt-4 overflow-hidden rounded-b-[32px] bg-wash-hero sm:mx-0 sm:mt-0 sm:rounded-[32px]">
+        <div className="mx-auto flex max-w-md flex-col items-center px-6 pb-8 pt-7 text-center">
+          <IngleezyLogo className="text-[30px]" />
 
-      <div className="mx-auto mb-6 max-w-xl text-center">
-        {/*
-          The line breaks are deliberate: left to wrap on its own the headline
-          strands the last word alone at 375px. The dialect names step down a
-          size — they qualify the promise above rather than share its weight.
-        */}
-        <h1 className="mb-3 text-balance text-t-headline text-foreground sm:text-t-display">
-          إنجليزي محكي حقيقي،
-          <br />
-          <span className="text-primary">كلمة كلمة.</span>
-          <span className="mt-1 block text-t-subtitle text-muted-foreground sm:text-t-title">
-            نشرح لك بلهجتك: خليجي · مصري · يمني.
+          <Art name="bubbles" eager className="mt-4 h-[260px] w-[260px] sm:h-[290px] sm:w-[290px]" />
+
+          <span className="mt-1 rounded-full bg-card px-3 py-1 text-[13px] font-semibold leading-5 shadow-soft">
+            مقاطع حقيقية · شرح بلهجتك
           </span>
-        </h1>
-      </div>
+
+          {/* The line break is deliberate: left to wrap on its own the
+              headline strands the last word alone at 375px. */}
+          <h1 className="mt-4 text-balance text-[34px] leading-[52px] sm:text-[38px] sm:leading-[58px]">
+            إنجليزي محكي حقيقي،
+            <br />
+            كلمة كلمة.
+          </h1>
+          <p lang="en" dir="ltr" className="mt-1.5 font-heading text-[15px] italic leading-[22px] text-muted-foreground">
+            Real spoken English, word by word.
+          </p>
+
+          <button
+            type="button"
+            onClick={() => navigate("/auth")}
+            className="mt-8 flex h-[62px] w-full items-center justify-between rounded-full bg-gradient-cta pe-2 ps-6 text-lg font-semibold shadow-elegant transition-transform active:scale-[0.98]"
+          >
+            انضم للتجربة — مجاناً
+            <span className="grid h-[46px] w-[46px] place-items-center rounded-full bg-card text-foreground">
+              <IconNext className="h-[22px] w-[22px]" />
+            </span>
+          </button>
+          <Button asChild variant="outline" className="mt-2.5 h-[54px] w-full text-base">
+            <Link to="/auth">عندي حساب</Link>
+          </Button>
+          <p className="mt-3.5 text-[13px] leading-5 text-muted-foreground">الشرح بالخليجي · المصري · اليمني</p>
+        </div>
+      </section>
 
       <DemoCard />
 
-      {/* flex-1 only in a row: in the stacked column it sets a zero basis,
-          which overrides the height and collapses the buttons to their text. */}
-      <div className="mx-auto mb-4 mt-6 flex max-w-md flex-col gap-3 sm:flex-row">
-        <Button size="lg" className="h-14 text-base sm:flex-1" onClick={() => navigate("/auth")}>
-          انضم للتجربة — مجاناً
-          <IconNext className="h-4 w-4" />
-        </Button>
-        <Button variant="outline" size="lg" className="h-14 text-base sm:flex-1" onClick={() => navigate("/placement")}>
+      <div className="mx-auto mt-4 max-w-md text-center">
+        <Button variant="secondary" size="lg" className="w-full" onClick={() => navigate("/placement")}>
           جرّب اختبار المستوى
         </Button>
       </div>
 
-      <p className="mx-auto mb-10 max-w-md text-center text-[15px] leading-7 text-muted-foreground">
+      <p className="mx-auto mb-8 mt-6 max-w-md text-center text-[15px] leading-7 text-muted-foreground">
         كل شي هنا إنجليزي، وكل شرح له بلهجتك إنت. دروس، صوت ناطقين أصليين،
         وبطاقات مراجعة متباعدة مبنية من كلام الناس الحقيقي — مو من كتاب.
       </p>
@@ -68,17 +81,17 @@ export function LandingHero() {
       {/* Value props — who says it, how it sticks, what you hear next */}
       <div className="mx-auto mb-6 grid max-w-3xl grid-cols-1 gap-3 sm:grid-cols-3">
         <ValueCard
-          icon={<Headphones className="h-5 w-5" />}
+          art="headphones"
           title="بأصوات ناطقين أصليين"
           body="كل كلمة وجملة مسجّلة بصوت ناطقين بالإنجليزي — فاللي تتعلمه هو نفسه اللي بتسمعه برّا."
         />
         <ValueCard
-          icon={<Brain className="h-5 w-5" />}
+          art="book"
           title="كل كلمة تثبت معك"
           body="الكلمات ترجع لك بالضبط قبل ما تنساها، بنظام مراجعة متباعدة (FSRS)."
         />
         <ValueCard
-          icon={<PlayCircle className="h-5 w-5" />}
+          art="coffee"
           title="محتوى تتفرّج عليه أصلاً"
           body="تيك توك، مقاطع أخبار، قصص ومحادثات — دوس على أي كلمة تتعلمها وتحفظها."
         />
@@ -88,55 +101,46 @@ export function LandingHero() {
         <Globe2 className="h-3.5 w-3.5 shrink-0" />
         <span>درست إنجليزي بالمدرسة؟ نوصّلك من إنجليزي الكتاب إلى الإنجليزي المحكي.</span>
       </p>
-    </section>
+    </div>
   );
 }
 
 /**
  * One line from a clip, as the app shows it: the English, the word a learner
- * would stop on highlighted, and the meaning in Gulf Arabic. Static — it is a
- * picture of the product, so nothing on it is a control.
+ * would stop on highlighted in gold, and the meaning in Gulf Arabic. Static —
+ * it is a picture of the product, so nothing on it is a control.
  */
 function DemoCard() {
   return (
     <figure
       aria-label="مثال من المقاطع"
-      className="relative mx-auto max-w-md overflow-hidden rounded-[28px] bg-primary p-6 text-primary-foreground shadow-card"
+      className="relative mx-auto mt-6 max-w-md rounded-[28px] bg-card p-5 shadow-card"
     >
-      <span aria-hidden className="absolute -bottom-16 -start-12 h-40 w-40 rounded-full bg-black/10" />
-      <div className="relative">
-        <p className="mb-3 text-[13px] font-medium text-primary-foreground/80">من مقطع حقيقي · خليجي</p>
-        <p lang="en" className="font-english text-[26px] font-bold leading-9">
-          I&apos;m not gonna lie, that was{" "}
-          <mark className="rounded-lg bg-accent px-1.5 text-accent-foreground">rough</mark>.
-        </p>
-        <p className="mt-2 text-base leading-7 text-primary-foreground/85">ما راح أكذب عليك، كانت صعبة.</p>
-        <figcaption className="mt-4 inline-flex items-center gap-2 rounded-full bg-card px-3.5 py-1.5 text-sm text-foreground">
-          <bdi className="font-english font-bold">rough</bdi>
-          <span className="text-muted-foreground">=</span>
-          <span className="font-semibold">صعبة، متعبة</span>
-        </figcaption>
-      </div>
+      <span className="inline-block rounded-full bg-tint-firoza px-2.5 py-0.5 text-xs font-semibold leading-[18px] text-primary dark:text-foreground">
+        من مقطع حقيقي · خليجي
+      </span>
+      <p lang="en" className="font-english mt-3 text-[22px] font-semibold leading-9">
+        I&apos;m not gonna lie, that was{" "}
+        <mark className="rounded-md bg-accent px-1.5 text-accent-foreground">rough</mark>.
+      </p>
+      <p className="mt-1 text-[15px] leading-7 text-muted-foreground">ما راح أكذب عليك، كانت صعبة.</p>
+      <figcaption className="mt-4 inline-flex items-center gap-2 rounded-2xl bg-muted px-3.5 py-2 text-sm text-foreground">
+        <bdi className="font-heading text-base">rough</bdi>
+        <span className="text-muted-foreground">=</span>
+        <span className="font-naskh text-base">صعبة، متعبة</span>
+      </figcaption>
     </figure>
   );
 }
 
-function ValueCard({
-  icon,
-  title,
-  body,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  body: string;
-}) {
+function ValueCard({ art, title, body }: { art: ArtName; title: string; body: string }) {
   return (
-    <div className="rounded-3xl bg-card p-4 shadow-card">
-      <div className="mb-2.5 grid h-10 w-10 place-items-center rounded-full bg-primary/10 text-primary">
-        {icon}
+    <div className="flex items-start gap-3 rounded-3xl bg-card p-4 shadow-card sm:flex-col">
+      <Art name={art} className="h-14 w-14 shrink-0" />
+      <div>
+        <h3 className="mb-1 text-[15px] font-semibold text-foreground">{title}</h3>
+        <p className="text-sm leading-6 text-muted-foreground">{body}</p>
       </div>
-      <h3 className="mb-1 text-[15px] font-semibold text-foreground">{title}</h3>
-      <p className="text-sm leading-6 text-muted-foreground">{body}</p>
     </div>
   );
 }

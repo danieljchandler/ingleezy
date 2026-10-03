@@ -342,7 +342,7 @@ const Review = () => {
               <Button
                 size="lg"
                 onClick={() => setShowAnswer(true)}
-                className="h-14 w-full gap-2 rounded-full text-base font-bold"
+                className="h-14 w-full gap-2 text-base"
               >
                 <Eye className="h-5 w-5" />
                 {isProduction ? "أظهر الإنجليزية" : "أظهر المعنى"}
@@ -351,7 +351,7 @@ const Review = () => {
           )
         }
       >
-        <div className="max-w-sm mx-auto">
+        <div className="mx-auto w-full max-w-sm">
           {isAudio ? (
             <ReviewAudioCard
               wordArabic={currentWord.word_arabic}
@@ -362,10 +362,10 @@ const Review = () => {
               onAudioGenerated={persistCurriculumAudio}
             />
           ) : (
-          <section aria-label="بطاقة الكلمة" className="rounded-[28px] bg-card px-6 pb-6 pt-5 text-center shadow-card">
+          <section aria-label="بطاقة الكلمة" className="rounded-[32px] bg-card px-6 pb-6 pt-5 text-center shadow-elegant">
             {/* Direction label — without it, a production card looks like a
                 recognition card the learner has simply failed to read. */}
-            <div className="mb-5 inline-flex items-center justify-center gap-1.5 rounded-full bg-muted px-3 py-1 text-[13px] font-medium text-muted-foreground">
+            <div className="mb-5 inline-flex items-center justify-center gap-1.5 rounded-full bg-tint-firoza px-3 py-1 text-xs font-semibold leading-[18px] text-primary dark:text-foreground">
               {isProduction ? (
                 <>
                   <PenLine className="h-3.5 w-3.5" />
@@ -411,11 +411,11 @@ const Review = () => {
             {isProduction ? (
               /* Prompt in Arabic; the English is what the learner has to
                  produce, so it stays hidden until they've committed. */
-              <p className="mb-5 max-w-full break-words text-[32px] font-bold leading-[48px] text-foreground">
+              <p className="mb-5 max-w-full break-words font-naskh text-[34px] leading-[52px] text-foreground">
                 {currentWord.word_arabic}
               </p>
             ) : (
-              <p className="mb-5 max-w-full break-words font-english text-[44px] font-bold leading-[52px] text-foreground">
+              <p dir="ltr" className="mb-5 max-w-full break-words font-heading text-[50px] leading-[62px] text-foreground">
                 {currentWord.word_english}
               </p>
             )}
@@ -446,13 +446,13 @@ const Review = () => {
 
             {/* Reveal the other side */}
             {showAnswer && (
-              <div className="animate-in fade-in border-t border-dashed border-border pt-4 duration-200">
+              <div className="animate-in fade-in border-t-[1.5px] border-dashed border-border pt-4 duration-200">
                 {isProduction ? (
-                  <p className="break-words font-english text-[32px] font-bold leading-10 text-foreground">
+                  <p dir="ltr" className="break-words font-heading text-[36px] leading-[48px] text-foreground">
                     {currentWord.word_english}
                   </p>
                 ) : (
-                  <p className="text-[26px] font-bold leading-10 text-foreground">
+                  <p className="font-naskh text-[30px] leading-[46px] text-foreground">
                     {currentWord.word_arabic}
                   </p>
                 )}

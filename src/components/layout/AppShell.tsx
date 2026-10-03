@@ -41,9 +41,12 @@ export function AppShell({ children, className, compact = false }: AppShellProps
         paddingBottom: "env(safe-area-inset-bottom)",
       }}
     >
-      {/* No page watermark. The all-page Sadu pattern that sat here was
-          heritage ornament doing no job, behind every line of text; the brand
-          now gets its appeal from copy and type rather than motifs. */}
+      {/* The page wash: a gold glow from one top corner, turquoise from the
+          other, fading out before the content gets busy. Lighting, not
+          ornament (the Sadu watermark that once sat here was heritage
+          decoration doing no job), so nothing that must be read depends on
+          it. */}
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-[320px] bg-wash-page" />
       <div className={cn(
         "relative mx-auto w-full max-w-2xl animate-fade-up",
         compact ? "px-4 py-5 sm:px-5 sm:py-6" : "px-4 pt-4 pb-8 sm:px-6 md:pt-6 md:pb-12",
@@ -55,7 +58,7 @@ export function AppShell({ children, className, compact = false }: AppShellProps
         // 47px and cleared it by one pixel, so nothing showed until the bar
         // was replaced.
         // pb-36 rather than pb-24 on a phone: the Ask AI button sits above
-        // the dock (bottom-20), and the last card has to be able to scroll
+        // the dock (bottom-24), and the last card has to be able to scroll
         // clear of both.
         showNav && "pb-36 md:pb-24",
         // Let the page scroll clear of the bottom sheet, or its lower half is

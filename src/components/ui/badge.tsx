@@ -3,14 +3,19 @@ import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
 
+// Tags, after Dafi: a quiet tint with its own dark text, never a solid fill.
+// Each pairing passes AA. Gold marks what is today's or earned; sage what is
+// done; clay what needs another go; sand what is merely new.
 const badgeVariants = cva(
-  "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+  "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold leading-[18px] transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
   {
     variants: {
       variant: {
-        default: "border-transparent bg-primary text-primary-foreground hover:bg-primary/80",
-        secondary: "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        destructive: "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
+        default: "border-transparent bg-tint-firoza text-primary dark:text-foreground",
+        secondary: "border-transparent bg-tint-sand text-muted-foreground",
+        destructive: "border-transparent bg-tint-clay text-clay-ink",
+        gold: "border-transparent bg-tint-gold text-accent-ink",
+        success: "border-transparent bg-tint-sage text-success-ink",
         outline: "text-foreground",
       },
     },

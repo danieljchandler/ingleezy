@@ -34,10 +34,10 @@ export const RatingButtons = ({
   // Four pills under the thumb. "Good" is the filled one: it is the answer
   // to most cards, and the one a learner should not have to look for.
   const buttons: { rating: Rating; label: string; color: string }[] = [
-    { rating: "again", label: "من جديد", color: "bg-destructive/10 text-destructive hover:bg-destructive/15" },
-    { rating: "hard", label: "صعب", color: "bg-accent/15 text-accent-ink hover:bg-accent/25" },
+    { rating: "again", label: "من جديد", color: "bg-tint-clay text-clay-ink hover:bg-tint-clay/70" },
+    { rating: "hard", label: "صعب", color: "bg-tint-gold text-accent-ink hover:bg-tint-gold/70" },
     { rating: "good", label: "جيد", color: "bg-primary text-primary-foreground hover:bg-primary/90" },
-    { rating: "easy", label: "سهل", color: "bg-success/10 text-success hover:bg-success/15" },
+    { rating: "easy", label: "سهل", color: "bg-tint-sage text-success-ink hover:bg-tint-sage/70" },
   ];
 
   return (

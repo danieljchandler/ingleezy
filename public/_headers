@@ -31,3 +31,7 @@
 
 /assets/campfire-hero-poster.webp
   Cache-Control: public, max-age=31536000, immutable
+
+# The illustration set (public/art). Unhashed, so version by renaming the file.
+/art/*
+  Cache-Control: public, max-age=31536000, immutable

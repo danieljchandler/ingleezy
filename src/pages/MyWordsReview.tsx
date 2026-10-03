@@ -736,7 +736,7 @@ const MyWordsReview = () => {
 
       {/* Card */}
       <div className="py-4">
-        <div className="max-w-sm mx-auto">
+        <div className="mx-auto w-full max-w-sm">
           {useCloze ? (
             <div>
               <ReviewClozeCard

@@ -19,19 +19,20 @@ export default {
     },
     extend: {
       fontFamily: {
-        // Two families, split by script and job. Readex Pro is one modern
-        // family drawn for Arabic AND Latin as a pair (built on Lexend's
-        // readability research), so headings, chrome and Arabic paragraphs share
-        // one voice. Atkinson Hyperlegible Next is for English CONTENT, the
-        // studied language: it is drawn so I, l and 1 cannot be confused, and it
-        // looks deliberately separate from the chrome around it.
-        sans: ["Readex Pro", "system-ui", "sans-serif"],
-        heading: ["Readex Pro", "system-ui", "sans-serif"],
-        arabic: ["Readex Pro", "system-ui", "sans-serif"],
-        english: ["Atkinson Hyperlegible Next", "Readex Pro", "system-ui", "sans-serif"],
-        display: ["Readex Pro", "system-ui", "sans-serif"],
+        // Two jobs per script. The interface is Funnel Sans, falling through
+        // to IBM Plex Sans Arabic for every Arabic glyph. Headlines are the
+        // book serif: Libre Baskerville over Noto Naskh Arabic. Funnel Display
+        // is the wordmark only.
+        sans: ["Funnel Sans", "IBM Plex Sans Arabic", "system-ui", "sans-serif"],
+        heading: ["Libre Baskerville", "Noto Naskh Arabic", "Georgia", "serif"],
+        serif: ["Libre Baskerville", "Noto Naskh Arabic", "Georgia", "serif"],
+        naskh: ["Noto Naskh Arabic", "Libre Baskerville", "Georgia", "serif"],
+        arabic: ["Funnel Sans", "IBM Plex Sans Arabic", "system-ui", "sans-serif"],
+        english: ["Funnel Sans", "IBM Plex Sans Arabic", "system-ui", "sans-serif"],
+        display: ["Libre Baskerville", "Noto Naskh Arabic", "Georgia", "serif"],
+        wordmark: ["Funnel Display", "Funnel Sans", "system-ui", "sans-serif"],
         // Legacy alias (transcript surfaces) — folded into the chrome family.
-        cairo: ["Readex Pro", "system-ui", "sans-serif"],
+        cairo: ["Funnel Sans", "IBM Plex Sans Arabic", "system-ui", "sans-serif"],
       },
       fontSize: {
         // Locked typographic scale — 1.25 ratio. No letter-spacing anywhere in
@@ -68,6 +69,20 @@ export default {
         success: {
           DEFAULT: "hsl(var(--success))",
           foreground: "hsl(var(--success-foreground))",
+          // Sage TEXT on the sage tint.
+          ink: "hsl(var(--success-ink))",
+        },
+        clay: {
+          // Clay TEXT on the clay tint; the fill is `destructive`.
+          ink: "hsl(var(--clay-ink))",
+        },
+        // Quiet fills behind tags, icons and states.
+        tint: {
+          firoza: "hsl(var(--tint-firoza))",
+          gold: "hsl(var(--tint-gold))",
+          sage: "hsl(var(--tint-sage))",
+          clay: "hsl(var(--tint-clay))",
+          sand: "hsl(var(--tint-sand))",
         },
         muted: {
           DEFAULT: "hsl(var(--muted))",

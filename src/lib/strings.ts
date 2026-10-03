@@ -108,6 +108,23 @@ export const AR = {
     talkAll: "كل أدوات الكلام",
     talkAsk: "كيف أقول…؟",
     talkCall: "مكالمة مع المعلّم",
+    talkCallBody: "تكلّم 5 دقايق عن يومك، والتصحيح بلهجتك.",
+    /** The unit under the streak number. The number is set apart, so the
+     *  dual and the 3–10 plural are the only forms that change. */
+    streakUnit: (n: number) =>
+      n === 2 ? "يومين متواصلين" : n >= 3 && n <= 10 ? "أيام متواصلة" : "يوم متواصل",
+    /** The unit under the word-count number. */
+    wordsUnit: (n: number) =>
+      n === 2 ? "كلمتين في بطاقاتك" : n >= 3 && n <= 10 ? "كلمات في بطاقاتك" : "كلمة في بطاقاتك",
+    wordsLabel: "كلماتك",
+    /** The plan card's line: where the learner is in today's steps. */
+    planHeadline: (done: number, total: number) => {
+      const steps = (n: number) =>
+        arCount(n, { one: "خطوة وحدة", two: "خطوتين", few: "خطوات", many: "خطوة" });
+      if (done >= total) return "يومك كامل، أحسنت";
+      if (done === 0) return `يومك في ${steps(total)}`;
+      return `كمّل، باقي ${steps(total - done)}`;
+    },
   },
 
   queue: {

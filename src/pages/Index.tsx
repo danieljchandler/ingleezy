@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { GraduationCap, MessageCircleQuestion, Phone } from "lucide-react";
+import { GraduationCap, MessageCircleQuestion } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useTodayQueue } from "@/hooks/useTodayQueue";
@@ -14,8 +14,10 @@ import { Button } from "@/components/design-system";
 import { AppShell } from "@/components/layout/AppShell";
 import { ProfileEmblem } from "@/components/shell/ProfileEmblem";
 import { NotificationBell } from "@/components/NotificationBell";
-import { ChevronOpen } from "@/components/shared/DirectionalIcon";
+import { ChevronNext, ChevronOpen } from "@/components/shared/DirectionalIcon";
 import { StreakCard } from "@/components/today/StreakCard";
+import { WordsCard } from "@/components/today/WordsCard";
+import { Art } from "@/components/brand/Art";
 import { PlanCard } from "@/components/today/PlanCard";
 import { PhraseOfTheDay } from "@/components/PhraseOfTheDay";
 import { ContinueCard } from "@/components/ContinueCard";
@@ -115,9 +117,9 @@ const Index = () => {
     "placement-banner": !placementLevel ? (
       <Link
         to="/placement"
-        className="flex items-center gap-3.5 rounded-3xl border border-border bg-card p-4 transition-colors hover:bg-muted"
+        className="flex items-center gap-3.5 rounded-3xl bg-card p-4 text-foreground no-underline shadow-card transition-colors hover:bg-muted"
       >
-        <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
+        <span className="grid h-11 w-11 shrink-0 place-items-center rounded-[14px] bg-tint-firoza text-primary dark:text-foreground">
           <GraduationCap className="h-5 w-5" />
         </span>
         <span className="min-w-0 flex-1">
@@ -129,8 +131,12 @@ const Index = () => {
     ) : null,
 
     "daily-queue": (
-      <div className="space-y-4">
-        <StreakCard />
+      <div className="space-y-3.5">
+        {/* The two numbers first: how long the run is, how many words. */}
+        <div className="grid grid-cols-2 gap-3">
+          <StreakCard />
+          <WordsCard />
+        </div>
         <PlanCard tasks={tasks} videoTitle={todaysVideo?.title} />
       </div>
     ),
@@ -141,9 +147,9 @@ const Index = () => {
   return (
     <AppShell>
       <header className="mb-5 flex items-center gap-3">
-        <ProfileEmblem />
+        <ProfileEmblem name={firstName} />
         <div className="min-w-0 flex-1">
-          <p className="text-sm leading-[22px] text-muted-foreground">{DATE_FORMAT.format(new Date())}</p>
+          <p className="text-[13px] leading-5 text-muted-foreground">{DATE_FORMAT.format(new Date())}</p>
           <h1 className="truncate text-[26px] leading-[38px]">
             {firstName ? `${greeting}، ${firstName}` : greeting}
           </h1>
@@ -163,36 +169,38 @@ const Index = () => {
         )}
       </header>
 
-      <div className="space-y-4">
+      <div className="space-y-3.5">
         {homeLayout.order.map((id) => {
           if (!isSectionVisible(id, homeLayout)) return null;
           const node = sections[id];
           return node ? <div key={id}>{node}</div> : null;
         })}
 
-        {/* The tutor, one tap away. Two doors rather than a list: the Talk tab
-            has the rest. */}
+        {/* The tutor, one tap away: the call as a card with the microphone,
+            and "how do I say…" beside it. The Talk tab has the rest. */}
         <section aria-labelledby="today-talk" className="pt-1">
-          <div className="mb-2.5 flex items-center justify-between">
-            <h2 id="today-talk" className="text-[17px] leading-[26px]">{AR.today.talkTitle}</h2>
-            <Link to="/talk" className="text-sm font-medium no-underline">{AR.today.talkAll}</Link>
+          <div className="mb-2.5 flex items-center justify-between px-1">
+            <h2 id="today-talk" className="font-sans text-[17px] font-semibold leading-[26px]">{AR.today.talkTitle}</h2>
+            <Link to="/talk" className="text-sm font-semibold text-primary no-underline">{AR.today.talkAll}</Link>
           </div>
-          <div className="flex flex-wrap gap-2">
-            <Link
-              to="/how-do-i-say"
-              className="flex min-h-[44px] items-center gap-2 rounded-full border border-border bg-card px-4 text-sm text-foreground"
-            >
-              <MessageCircleQuestion className="h-4 w-4 text-primary" />
-              {AR.today.talkAsk}
-            </Link>
-            <Link
-              to="/conversation"
-              className="flex min-h-[44px] items-center gap-2 rounded-full border border-border bg-card px-4 text-sm text-foreground"
-            >
-              <Phone className="h-4 w-4 text-primary" />
-              {AR.today.talkCall}
-            </Link>
-          </div>
+          <Link
+            to="/conversation"
+            className="flex items-center gap-3 rounded-3xl bg-card py-2.5 pe-4 ps-3 text-foreground no-underline shadow-card transition-transform active:scale-[0.99]"
+          >
+            <Art name="mic" eager className="h-[60px] w-[60px] shrink-0 rounded-[18px] bg-muted" />
+            <span className="min-w-0 flex-1">
+              <span className="block text-[15px] font-semibold leading-[22px]">{AR.today.talkCall}</span>
+              <span className="block text-[13px] leading-5 text-muted-foreground">{AR.today.talkCallBody}</span>
+            </span>
+            <ChevronNext className="h-5 w-5 shrink-0" aria-hidden />
+          </Link>
+          <Link
+            to="/how-do-i-say"
+            className="mt-2.5 inline-flex min-h-[44px] items-center gap-2 rounded-full bg-card px-4 text-sm font-medium text-foreground no-underline shadow-soft"
+          >
+            <MessageCircleQuestion className="h-4 w-4 text-primary" />
+            {AR.today.talkAsk}
+          </Link>
         </section>
 
         <ContinueCard />

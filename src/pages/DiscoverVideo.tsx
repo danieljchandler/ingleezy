@@ -284,8 +284,10 @@ const TranscriptRow = ({
         onPlay();
       }}
       className={cn(
-        "flex cursor-pointer flex-col gap-1 rounded-[18px] px-3 py-2.5 transition-colors",
-        isCurrent ? "bg-primary/10" : "hover:bg-muted/60",
+        "flex cursor-pointer flex-col gap-1 rounded-[20px] px-3.5 py-3 transition-colors",
+        // The line being spoken lifts off the page as a white card, as the
+        // design has it; the rest sit flat on the ground.
+        isCurrent ? "bg-card shadow-card" : "hover:bg-muted/60",
       )}
     >
       <div className="flex items-start gap-2">
@@ -1589,7 +1591,7 @@ const DiscoverVideo = () => {
       {/* Header and video. Sticky for YouTube so the transcript scrolls under a
           picture that stays put; static for TikTok, whose upright frame would
           otherwise leave no room to read. */}
-      <div className={cn(isYouTube ? "sticky top-0 z-30" : "relative z-30", "bg-background")}>
+      <div className={cn(isYouTube ? "sticky top-0 z-30" : "relative z-30", "bg-background pb-2")}>
         <header className="flex items-center gap-2 px-3 py-2.5">
           <button
             type="button"
@@ -1601,10 +1603,8 @@ const DiscoverVideo = () => {
           </button>
           <div className="min-w-0 flex-1">
             <h1
-              className={cn(
-                "line-clamp-2 text-right text-base font-bold leading-[22px] text-foreground",
-                !hasArabic(video.title) && "font-english",
-              )}
+              dir={hasArabic(video.title) ? undefined : "ltr"}
+              className="line-clamp-2 text-right font-heading text-[17px] font-normal leading-6 text-foreground [unicode-bidi:isolate]"
             >
               {video.title}
             </h1>
@@ -1621,8 +1621,10 @@ const DiscoverVideo = () => {
           <LikeButton videoId={video.id} isAuthenticated={isAuthenticated} />
         </header>
 
-        {/* Video embed */}
-        <div className="bg-black relative">
+        {/* Video embed: a rounded dark panel inset from the edges, after the
+            design's lesson screen. The dark is the ink-teal, not pure black,
+            so the panel belongs to the page around it. */}
+        <div className="relative mx-3 overflow-hidden rounded-[26px] bg-[#102326] shadow-elegant sm:mx-4">
           {video.platform === "youtube" ? (
             <div className={cn("aspect-video mx-auto", horizontalVideoMaxHeightClass)}>
               <div ref={iframeRef} className="w-full h-full" />
@@ -1888,7 +1890,7 @@ const DiscoverVideo = () => {
         {/* What the clip teaches, under the transcript rather than competing
             with it. Collapsed except the grammar notes, which are levelled to
             the learner. */}
-        <section aria-label="عن المقطع" className="mx-3 mt-2 space-y-4 rounded-3xl border border-border bg-card px-4 py-4">
+        <section aria-label="عن المقطع" className="mx-3 mt-2 space-y-4 rounded-[28px] bg-card px-4 py-4 shadow-card">
           {onScreenLines.length > 0 && (
             <details className="group" open={!!video.is_meme}>
               <summary className="flex min-h-11 cursor-pointer items-center gap-2 text-sm font-semibold text-foreground">

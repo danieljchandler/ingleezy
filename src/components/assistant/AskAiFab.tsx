@@ -7,7 +7,8 @@ import { cn } from "@/lib/utils";
 
 /**
  * Floating "Ask AI" button, mounted in AppShell next to the feedback FAB.
- * Stacks above it (the feedback widget owns bottom-20 / md:bottom-6).
+ * Stacks above it (the feedback widget owns bottom-24 / md:bottom-6), clear
+ * of the floating dock.
  *
  * On a session screen it sits higher. Those routes hide the dock — the app
  * already treats them as immersive — and SessionFrame puts a full-width
@@ -58,7 +59,7 @@ export function AskAiFab({ className }: { className?: string }) {
         "fixed right-3 z-40 flex items-center justify-center gap-1.5 rounded-full",
         "bg-primary text-primary-foreground shadow-lg transition-transform hover:scale-105",
         "md:right-6",
-        ownsItsBottom ? "bottom-36 md:bottom-24" : "bottom-20 md:bottom-6",
+        ownsItsBottom ? "bottom-36 md:bottom-24" : "bottom-24 md:bottom-6",
         // A 44px circle on a phone, the labelled pill from md up. The pill was
         // 150px of button floating over whatever card sat under it — a plan
         // step, a pronunciation result — on every page at phone width.

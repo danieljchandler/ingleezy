@@ -1,10 +1,8 @@
 import { Link } from "react-router-dom";
-import {
-  Headphones, BookOpen, Mic, PenLine, Play,
-  Upload, Gamepad2, BookOpenText, Route as RouteIcon, Lock,
-} from "lucide-react";
+import { Upload, Gamepad2, BookOpenText, Route as RouteIcon, Lock, Play } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { ProfileEmblem } from "@/components/shell/ProfileEmblem";
+import { Art, type ArtName } from "@/components/brand/Art";
 import { SKILLS, SHELVES, LEARNING_PATH } from "@/lib/surfaces";
 import { cn } from "@/lib/utils";
 
@@ -17,91 +15,100 @@ import { cn } from "@/lib/utils";
  * changed colour every time you moved between tabs. The blocks stay; the page
  * is on the same light ground as every other tab.
  *
- * The clips feed used to be the front door. It now sits here, as the first
- * thing on the shelf, because "what should I do today" is the Today tab's
- * question and "what can I watch" is this one's.
+ * Three shapes for three kinds of thing, so the eye never compares unlike
+ * things: the shelves (stories, games, upload) are a row of chips, the clips
+ * feed is one big card with its art, and the four skills are art cards two by
+ * two. The clips feed used to be the front door; it sits here now because
+ * "what should I do today" is the Today tab's question and "what can I
+ * watch" is this one's.
  */
 
-const ICONS = {
-  Headphones, BookOpen, Mic, PenLine, Upload, Gamepad2, BookOpenText, Route: RouteIcon,
-} as const;
+const SHELF_ICONS = { BookOpenText, Gamepad2, Upload } as const;
 
-/** Two tones of the brand, alternating diagonally — no rainbow. */
-const TILE_BG = ["bg-primary", "bg-secondary", "bg-secondary", "bg-primary"];
+/** Each skill's object from the illustration set. */
+const SKILL_ART: Record<string, ArtName> = {
+  listen: "headphones",
+  read: "book",
+  speak: "mic",
+  write: "bubbles",
+};
+
+/** Alternate the two panel washes so neighbouring cards do not match. */
+const SKILL_WASH = ["bg-wash-panel", "bg-wash-panel-alt", "bg-wash-panel-alt", "bg-wash-panel"];
 
 const Library = () => (
   <AppShell>
-    <header className="mb-5 flex items-center gap-3">
-      <ProfileEmblem />
-      <h1 className="text-[26px] leading-[38px]">المكتبة</h1>
+    <header className="mb-4 flex items-start gap-3">
+      <ProfileEmblem className="mt-1" />
+      <div className="min-w-0 flex-1">
+        <h1 className="text-[30px] leading-[44px]">المكتبة</h1>
+        <p className="text-sm leading-[22px] text-muted-foreground">مقاطع وقصص على مستواك، من كلام الناس الحقيقي.</p>
+      </div>
     </header>
 
-    {/* The feed, as a shelf rather than as the front door. */}
+    {/* The shelves: kinds of content and tools, as chips. */}
+    <div className="-mx-4 mb-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none]">
+      {SHELVES.map((v) => {
+        const Icon = SHELF_ICONS[v.icon as keyof typeof SHELF_ICONS];
+        return (
+          <Link
+            key={v.id}
+            to={v.to}
+            className="flex h-[52px] shrink-0 items-center gap-2 rounded-full bg-card pe-4 ps-1.5 text-sm font-semibold text-foreground no-underline shadow-soft transition-transform active:scale-[0.98]"
+          >
+            <span className="grid h-10 w-10 place-items-center rounded-full bg-tint-firoza text-primary dark:text-foreground">
+              <Icon className="h-[18px] w-[18px]" aria-hidden />
+            </span>
+            {v.label}
+          </Link>
+        );
+      })}
+    </div>
+
+    {/* The feed, as the first and biggest shelf rather than the front door. */}
     <Link
       to="/feed"
-      className={cn(
-        "relative mb-3 flex items-center gap-4 overflow-hidden rounded-3xl bg-secondary p-5 text-white",
-        "transition-transform active:scale-[0.99]",
-      )}
+      className="mb-5 block overflow-hidden rounded-[28px] bg-card text-foreground no-underline shadow-card transition-transform active:scale-[0.99]"
     >
-      <span aria-hidden className="absolute -end-10 -top-12 h-36 w-36 rounded-full bg-primary" />
-      <span className="relative flex-1">
-        <span className="block text-xl font-bold leading-8">مقاطع لك</span>
-        <span className="block text-sm leading-6 text-white/80">
-          إنجليزي حقيقي، مقطع ورا مقطع
+      <span className="relative flex h-[156px] items-center justify-center bg-wash-panel">
+        <Art name="headphones" eager className="h-[150px] w-[150px]" />
+        <span
+          aria-hidden
+          className="absolute bottom-3.5 start-3.5 grid h-11 w-11 place-items-center rounded-full bg-card text-foreground shadow-soft"
+        >
+          <Play className="h-[18px] w-[18px] fill-current" />
         </span>
       </span>
-      <span className="relative grid h-12 w-12 shrink-0 place-items-center rounded-full bg-accent text-secondary">
-        <Play className="h-5 w-5 fill-current" />
+      <span className="block px-4 pb-3.5 pt-3">
+        <span className="block font-heading text-[20px] leading-[30px]">مقاطع لك</span>
+        <span className="block text-[13px] leading-5 text-muted-foreground">إنجليزي حقيقي، مقطع ورا مقطع</span>
       </span>
     </Link>
 
     {/* The four skills. Each one is a full page, never a sheet: speaking
         needs a microphone and writing needs a keyboard, and both deserve the
         whole screen. */}
+    <h2 className="mb-2.5 px-1 font-sans text-[18px] font-semibold leading-[26px]">المهارات</h2>
     <div className="grid grid-cols-2 gap-3">
-      {SKILLS.map((s, i) => {
-        const Icon = ICONS[s.icon as keyof typeof ICONS];
-        return (
-          <Link
-            key={s.id}
-            to={s.to}
-            className={cn(
-              "flex h-28 flex-col justify-between rounded-3xl p-4 text-white",
-              "transition-transform active:scale-[0.98]",
-              TILE_BG[i],
-            )}
-          >
-            <Icon className={cn("h-6 w-6", i % 3 === 0 ? "text-white/90" : "text-accent")} />
-            <span className="flex items-baseline justify-between gap-2">
-              <span className="text-[22px] font-bold leading-8">{s.label}</span>
-              {/* English, untracked: letter-spacing on this label is what used
-                  to render "Listen" as "Liste n". */}
-              <span dir="ltr" className="font-english text-sm font-semibold text-white/80">
-                {s.latin}
-              </span>
+      {SKILLS.map((s, i) => (
+        <Link
+          key={s.id}
+          to={s.to}
+          className="overflow-hidden rounded-3xl bg-card text-foreground no-underline shadow-card transition-transform active:scale-[0.98]"
+        >
+          <span className={cn("flex h-24 items-center justify-center", SKILL_WASH[i])}>
+            <Art name={SKILL_ART[s.id] ?? "bubbles"} className="h-[88px] w-[88px]" />
+          </span>
+          <span className="flex items-baseline justify-between gap-2 px-3.5 pb-3 pt-2.5">
+            <span className="text-[17px] font-semibold leading-6">{s.label}</span>
+            {/* English, untracked: letter-spacing on this label is what used
+                to render "Listen" as "Liste n". */}
+            <span dir="ltr" className="font-heading text-[13px] italic text-muted-foreground">
+              {s.latin}
             </span>
-          </Link>
-        );
-      })}
-    </div>
-
-    {/* The rest of the shelf. Deliberately a different, smaller shape — these
-        are kinds of content and tools, not peers of a skill. */}
-    <div className="mt-3 grid grid-cols-3 gap-3">
-      {SHELVES.map((v) => {
-        const Icon = ICONS[v.icon as keyof typeof ICONS];
-        return (
-          <Link
-            key={v.id}
-            to={v.to}
-            className="flex flex-col items-center gap-1.5 rounded-2xl border border-border bg-card py-4 transition-colors hover:bg-muted"
-          >
-            <Icon className="h-5 w-5 text-primary" />
-            <span className="text-sm font-medium">{v.label}</span>
-          </Link>
-        );
-      })}
+          </span>
+        </Link>
+      ))}
     </div>
 
     {/* Announced, not hidden. A path is sequential and the rest of the
@@ -109,14 +116,16 @@ const Library = () => (
         the shape of the app is honest, disabled until it is genuinely ready. */}
     <div
       aria-disabled="true"
-      className="mt-3 flex items-center gap-3 rounded-2xl border border-dashed border-border px-4 py-3.5"
+      className="mt-3 flex items-center gap-3 rounded-3xl border-[1.5px] border-dashed border-border px-4 py-3.5"
     >
-      <RouteIcon className="h-5 w-5 text-muted-foreground" />
+      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-[14px] bg-muted text-muted-foreground">
+        <RouteIcon className="h-5 w-5" />
+      </span>
       <span className="flex-1">
-        <span className="block text-sm font-medium">{LEARNING_PATH.label}</span>
+        <span className="block text-sm font-semibold">{LEARNING_PATH.label}</span>
         <span className="block text-xs text-muted-foreground">دروس مرتّبة من البداية للنهاية</span>
       </span>
-      <span className="flex items-center gap-1 rounded-full bg-muted px-2.5 py-1 text-xs font-semibold text-muted-foreground">
+      <span className="flex items-center gap-1 rounded-full bg-tint-sand px-2.5 py-1 text-xs font-semibold text-muted-foreground">
         <Lock className="h-3 w-3" />
         قريباً
       </span>
