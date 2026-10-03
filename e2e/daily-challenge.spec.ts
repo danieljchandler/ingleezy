@@ -32,7 +32,7 @@ function isoDate(daysAgo: number): string {
 }
 
 const startButton = (page: Page) => page.getByRole("button", { name: "ابدأ تحدي اليوم" });
-const options = (page: Page) => page.locator("button.rounded-xl.border-2");
+const options = (page: Page) => page.getByRole("group", { name: "الخيارات" }).getByRole("button");
 
 const aGeneratedChallenge = (over: Record<string, unknown> = {}) => ({
   challenge: {
@@ -40,7 +40,7 @@ const aGeneratedChallenge = (over: Record<string, unknown> = {}) => ({
     title: "Freshly generated",
     titleArabic: "مولّد",
     questions: [
-      { prompt: "What is 'door'?", options: ["باب", "كتاب"], answer: "باب" },
+      { prompt: "كيف تقول «باب» بالإنجليزي؟", options: ["door", "book"], answer: "door" },
     ],
   },
   streakMultiplier: 1.0,
@@ -179,9 +179,9 @@ test.describe("the landing screen", () => {
     await page.goto("/daily-challenge");
     await startButton(page).click();
 
-    await page.getByRole("button", { name: "باب" }).click();
+    await page.getByRole("button", { name: "door" }).click();
     await page.getByRole("button", { name: "التالي" }).click();
-    await page.getByRole("button", { name: "كتاب" }).click();
+    await page.getByRole("button", { name: "book" }).click();
     await page.getByRole("button", { name: "شوف النتيجة" }).click();
 
     // Two correct at the base 15 XP, with no multiplier applied.
@@ -309,14 +309,14 @@ test.describe("answering", () => {
     await page.goto("/daily-challenge");
     await startButton(page).click();
 
-    await expect(page.getByText("What is 'door'?")).toBeVisible();
+    await expect(page.getByText("كيف تقول «باب» بالإنجليزي؟")).toBeVisible();
     await expect(options(page)).toHaveCount(3);
   });
 
   test("confirms a right answer", async ({ page }) => {
     await page.goto("/daily-challenge");
     await startButton(page).click();
-    await page.getByRole("button", { name: "باب" }).click();
+    await page.getByRole("button", { name: "door" }).click();
 
     await expect(page.getByText("صح!")).toBeVisible();
     await expect(page.getByText("النتيجة: 1")).toBeVisible();
@@ -325,44 +325,44 @@ test.describe("answering", () => {
   test("shows the right answer after a wrong one", async ({ page }) => {
     await page.goto("/daily-challenge");
     await startButton(page).click();
-    await page.getByRole("button", { name: "كرسي" }).click();
+    await page.getByRole("button", { name: "chair" }).click();
 
     // Being told what it should have been is the only teaching this screen
     // does — a bare "wrong" leaves nothing learned.
-    await expect(page.getByText("الجواب: باب")).toBeVisible();
+    await expect(page.getByText("الجواب: door")).toBeVisible();
     await expect(page.getByText("النتيجة: 0")).toBeVisible();
   });
 
   test("takes no second answer once one is given", async ({ page }) => {
     await page.goto("/daily-challenge");
     await startButton(page).click();
-    await page.getByRole("button", { name: "كرسي" }).click();
-    await expect(page.getByText("الجواب: باب")).toBeVisible();
+    await page.getByRole("button", { name: "chair" }).click();
+    await expect(page.getByText("الجواب: door")).toBeVisible();
 
-    await expect(page.getByRole("button", { name: "باب" })).toBeDisabled();
+    await expect(page.getByRole("button", { name: "door" })).toBeDisabled();
     await expect(page.getByText("النتيجة: 0")).toBeVisible();
   });
 
   test("moves on and finishes on the last question", async ({ page }) => {
     await page.goto("/daily-challenge");
     await startButton(page).click();
-    await page.getByRole("button", { name: "باب" }).click();
+    await page.getByRole("button", { name: "door" }).click();
     await page.getByRole("button", { name: "التالي" }).click();
 
-    await expect(page.getByText("What is 'book'?")).toBeVisible();
-    await page.getByRole("button", { name: "كتاب" }).click();
+    await expect(page.getByText("كيف تقول «كتاب» بالإنجليزي؟")).toBeVisible();
+    await page.getByRole("button", { name: "book" }).click();
     // The last question offers results rather than another Next.
     await expect(page.getByRole("button", { name: "شوف النتيجة" })).toBeVisible();
   });
 
-  test("hides the English until it is asked for", async ({ page, db }) => {
+  test("hides the meaning until it is asked for", async ({ page, db }) => {
     seedPool(db, {
       questions: [
         {
-          sentence: "شلونك اليوم",
-          sentenceEnglish: "How are you today",
-          options: ["بخير", "مع السلامة"],
-          answer: "بخير",
+          sentence: "How are you ___?",
+          sentenceEnglish: "شلونك اليوم؟",
+          options: ["today", "yesterday"],
+          answer: "today",
         },
       ],
     });
@@ -370,28 +370,115 @@ test.describe("answering", () => {
     await page.goto("/daily-challenge");
     await startButton(page).click();
 
-    await expect(page.getByText("شلونك اليوم")).toBeVisible();
-    await expect(page.getByText("How are you today")).toHaveCount(0);
-    await page.getByRole("switch").click();
-    await expect(page.getByText("How are you today")).toBeVisible();
+    // The English is the task, so it is read before the dialect explains it.
+    await expect(page.getByText(/How are you/)).toBeVisible();
+    await expect(page.getByText("شلونك اليوم؟")).toHaveCount(0);
+    await page.getByRole("switch", { name: "أظهر المعنى" }).click();
+    await expect(page.getByText("شلونك اليوم؟")).toBeVisible();
   });
 
-  test("shows a hint on a scrambled question", async ({ page, db }) => {
+  test("fills the gap with the answer once it is given", async ({ page, db }) => {
     seedPool(db, {
-      questions: [
-        {
-          scrambled: "ك ت ا ب",
-          hint: "You read it",
-          options: ["كتاب", "باب"],
-          answer: "كتاب",
-        },
-      ],
+      questions: [{ sentence: "She is good ___ math.", options: ["at", "in"], answer: "at" }],
+    });
+
+    await page.goto("/daily-challenge");
+    await startButton(page).click();
+    await page.getByRole("button", { name: "in", exact: true }).click();
+
+    // The sentence is shown whole and right, not just the word in a banner.
+    await expect(page.getByText("She is good at math.")).toBeVisible();
+  });
+
+  test("shows the hint in the learner's dialect", async ({ page, db }) => {
+    seedPool(db, {
+      questions: [{ scrambled: "market the went to I", hint: "رحت السوق", answer: "I went to the market" }],
     });
 
     await page.goto("/daily-challenge");
     await startButton(page).click();
 
-    await expect(page.getByText("Hint: You read it")).toBeVisible();
+    await expect(page.getByText("تلميح: رحت السوق")).toBeVisible();
+  });
+});
+
+test.describe("answering without options", () => {
+  // The pool's word-order and fill-in rows carry no options. Until 2026-10-03
+  // the page could only answer by picking one, so those rows showed a question
+  // with nothing to press.
+  test.beforeEach(async ({ signInAs, db }) => {
+    await signInAs("free");
+    db.seed("daily_challenge_completions", []);
+  });
+
+  const sentence = (page: Page) => page.getByRole("group", { name: "جملتك" });
+  const wordBank = (page: Page) => page.getByRole("group", { name: "الكلمات" });
+
+  async function startWordOrder(page: Page, db: MemoryDb) {
+    seedPool(db, {
+      questions: [{ scrambled: "market the went to I", hint: "رحت السوق", answer: "I went to the market." }],
+    });
+    await page.goto("/daily-challenge");
+    await startButton(page).click();
+  }
+
+  test("rebuilds a scrambled sentence word by word", async ({ page, db }) => {
+    await startWordOrder(page, db);
+
+    for (const word of ["I", "went", "to", "the", "market"]) {
+      await wordBank(page).getByRole("button", { name: word, exact: true }).click();
+    }
+    await page.getByRole("button", { name: "تحقق" }).click();
+
+    // Spacing and the closing full stop are not what is being tested.
+    await expect(page.getByText("صح!")).toBeVisible();
+    await expect(page.getByText("النتيجة: 1")).toBeVisible();
+  });
+
+  test("checks only once every word is placed", async ({ page, db }) => {
+    await startWordOrder(page, db);
+
+    await wordBank(page).getByRole("button", { name: "I", exact: true }).click();
+
+    await expect(page.getByRole("button", { name: "تحقق" })).toBeDisabled();
+  });
+
+  test("gives a placed word back when it is tapped", async ({ page, db }) => {
+    await startWordOrder(page, db);
+
+    await wordBank(page).getByRole("button", { name: "market" }).click();
+    await expect(wordBank(page).getByRole("button", { name: "market" })).toHaveCount(0);
+    await sentence(page).getByRole("button", { name: "market" }).click();
+
+    await expect(sentence(page).getByRole("button")).toHaveCount(0);
+    await expect(wordBank(page).getByRole("button", { name: "market" })).toBeVisible();
+  });
+
+  test("marks a wrong order and shows the sentence", async ({ page, db }) => {
+    await startWordOrder(page, db);
+
+    for (const word of ["I", "went", "the", "to", "market"]) {
+      await wordBank(page).getByRole("button", { name: word, exact: true }).click();
+    }
+    await page.getByRole("button", { name: "تحقق" }).click();
+
+    await expect(page.getByText("الجواب: I went to the market.")).toBeVisible();
+    await expect(page.getByText("النتيجة: 0")).toBeVisible();
+  });
+
+  test("takes a typed answer when there is nothing to pick", async ({ page, db }) => {
+    seedPool(db, {
+      questions: [{ sentence: "I ___ from Kuwait.", sentenceEnglish: "أنا من الكويت.", answer: "am" }],
+    });
+    await page.goto("/daily-challenge");
+    await startButton(page).click();
+
+    // Capitals and stray spaces are forgiven; the word is what counts.
+    await page.getByRole("textbox", { name: "جوابك بالإنجليزي" }).fill(" Am ");
+    await page.getByRole("button", { name: "تحقق" }).click();
+
+    await expect(page.getByText("صح!")).toBeVisible();
+    await expect(page.getByText("I am from Kuwait.")).toBeVisible();
   });
 });
 
@@ -405,9 +492,9 @@ test.describe("finishing", () => {
   async function playThrough(page: Page, correct: boolean) {
     await page.goto("/daily-challenge");
     await startButton(page).click();
-    await page.getByRole("button", { name: correct ? "باب" : "كرسي" }).click();
+    await page.getByRole("button", { name: correct ? "door" : "chair" }).click();
     await page.getByRole("button", { name: "التالي" }).click();
-    await page.getByRole("button", { name: correct ? "كتاب" : "باب" }).click();
+    await page.getByRole("button", { name: correct ? "book" : "door" }).click();
     await page.getByRole("button", { name: "شوف النتيجة" }).click();
   }
 

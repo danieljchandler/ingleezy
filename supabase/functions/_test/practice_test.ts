@@ -395,22 +395,47 @@ Deno.test("listening-quiz turns an anonymous caller away", async () => {
 
 // ── daily-challenge ─────────────────────────────────────────────────────────
 
+/** What the model returns for a translate day: the dialect asks, English answers. */
 const aChallenge = {
-  type: "translate",
-  title: "Daily Translation",
-  titleArabic: "ترجمة اليوم",
-  questions: [{ prompt: "hello", answer: "هلا", options: ["هلا", "مع السلامة", "شكرا"] }],
+  questions: [
+    { prompt: "كيف تقول «هلا» بالإنجليزي؟", answer: "Hello", options: ["Hello", "Hallo", "Hello you"] },
+  ],
 };
+
+/** The system and user prompts as sent, decoded so Arabic reads as Arabic. */
+function sentPrompt(calls: string[], bodies: (string | undefined)[]): string {
+  const i = calls.findIndex((u) => u.includes("ai.gateway"));
+  const messages = (JSON.parse(bodies[i] ?? "{}").messages ?? []) as { content: unknown }[];
+  return messages.map((m) => (typeof m.content === "string" ? m.content : JSON.stringify(m.content))).join("\n");
+}
 
 Deno.test("daily-challenge returns a challenge", async () => {
   const { status, body } = await call(
     "daily-challenge",
-    { dialect: "Gulf" },
-    caller({ "ai.gateway.lovable.dev": speaking(aChallenge) }),
+    { dialect: "Gulf", challengeType: "translate" },
+    caller({ "ai.gateway.lovable.dev": emitting(aChallenge) }),
   );
 
   assertEquals(status, 200);
-  assert(body.challenge ?? body.type ?? body.questions);
+  const challenge = body.challenge as { type: string; title: string; questions: { answer: string }[] };
+  assertEquals(challenge.type, "translate");
+  assertEquals(challenge.title, "Say it in English");
+  assertEquals(challenge.questions[0].answer, "Hello");
+});
+
+Deno.test("daily-challenge practises English, with the dialect as the scaffold", async () => {
+  const { calls, bodies } = await call(
+    "daily-challenge",
+    { dialect: "Gulf", challengeType: "translate" },
+    caller({ "ai.gateway.lovable.dev": emitting(aChallenge) }),
+  );
+
+  const sent = sentPrompt(calls, bodies);
+  // Until 2026-10-03 this prompt began "You are a Gulf Arabic language
+  // challenge generator": Hakiya's exercise, served to people learning English.
+  assertStringIncludes(sent, "learning English");
+  assertStringIncludes(sent, "The English is what is being practised");
+  assert(!sent.includes("language challenge generator"));
 });
 
 Deno.test("daily-challenge sources its words from the learner's deck", async () => {
@@ -421,7 +446,7 @@ Deno.test("daily-challenge sources its words from the learner's deck", async () 
     // pin this test fails every Friday.
     { dialect: "Gulf", challengeType: "translate", userVocab: [{ word_arabic: "كتاب", word_english: "book" }] },
     caller({
-      "ai.gateway.lovable.dev": speaking(aChallenge),
+      "ai.gateway.lovable.dev": emitting(aChallenge),
       "/rest/v1/user_vocabulary": () =>
         json([
           {
@@ -435,52 +460,116 @@ Deno.test("daily-challenge sources its words from the learner's deck", async () 
     }),
   );
 
-  const i = calls.findIndex((u) => u.includes("ai.gateway"));
   // The client used to send `userVocab` as the whole curriculum shuffled, so
   // the "daily challenge" routinely quizzed words the learner had never
-  // studied. The learner's own deck wins over whatever the client supplies.
-  assertStringIncludes(bodies[i] ?? "", "بيت");
+  // studied. The learner's own deck wins over whatever the client supplies,
+  // and the English leads: it is the word being learned.
+  const sent = sentPrompt(calls, bodies);
+  assertStringIncludes(sent, "house (بيت)");
+  assert(!sent.includes("book (كتاب)"));
 });
 
 Deno.test("daily-challenge falls back to the client's words when the deck is empty", async () => {
   const { bodies, calls } = await call(
     "daily-challenge",
     { dialect: "Gulf", challengeType: "translate", userVocab: [{ word_arabic: "كتاب", word_english: "book" }] },
-    caller({ "ai.gateway.lovable.dev": speaking(aChallenge) }),
+    caller({ "ai.gateway.lovable.dev": emitting(aChallenge) }),
   );
 
-  const i = calls.findIndex((u) => u.includes("ai.gateway"));
   // A learner on their first day has no deck; a challenge built from nothing
   // is not a challenge.
-  assertStringIncludes(bodies[i] ?? "", "كتاب");
+  assertStringIncludes(sentPrompt(calls, bodies), "book (كتاب)");
 });
 
 Deno.test("daily-challenge uses the dialect's own examples when there is nothing else", async () => {
   const { status, bodies, calls } = await call(
     "daily-challenge",
-    { dialect: "Yemeni" },
-    caller({ "ai.gateway.lovable.dev": speaking(aChallenge) }),
+    { dialect: "Yemeni", challengeType: "translate" },
+    caller({ "ai.gateway.lovable.dev": emitting(aChallenge) }),
   );
 
   assertEquals(status, 200);
-  const i = calls.findIndex((u) => u.includes("ai.gateway"));
   // Third fallback in the chain. Without it the prompt interpolates an empty
-  // string and the model invents words from any dialect it likes.
-  assert((bodies[i] ?? "").length > 0);
+  // string and the model invents words from any dialect it likes. The shared
+  // examples are written dialect-first; the prompt turns them English-first.
+  assertStringIncludes(sentPrompt(calls, bodies), "good (زين)");
 });
 
-Deno.test("daily-challenge asks about the right culture per dialect", async () => {
+Deno.test("daily-challenge sets culture day in English-speaking life, glossed in the dialect", async () => {
   const { bodies, calls } = await call(
     "daily-challenge",
-    { dialect: "Yemeni", difficulty: "beginner" },
-    caller({ "ai.gateway.lovable.dev": speaking({ ...aChallenge, type: "culture" }) }),
+    { dialect: "Yemeni", challengeType: "culture" },
+    caller({ "ai.gateway.lovable.dev": emitting(aChallenge) }),
   );
 
-  const i = calls.findIndex((u) => u.includes("ai.gateway"));
-  const sent = bodies[i] ?? "";
-  // Only reaches the prompt on the culture day, but the whole prompt map is
-  // built every time — so this is checkable regardless of what day it is.
-  assert(sent.includes("Yemeni") || sent.includes("يمني"));
+  const sent = sentPrompt(calls, bodies);
+  // Hakiya's culture day quizzed Yemeni traditions. For someone learning
+  // English the culture worth a question is English-speaking manners, asked
+  // in their own dialect.
+  assertStringIncludes(sent, "English-speaking life");
+  assertStringIncludes(sent, "Yemeni");
+  assert(!sent.includes("قات"));
+});
+
+Deno.test("daily-challenge shuffles an unscramble from the answer's own words", async () => {
+  const { status, body } = await call(
+    "daily-challenge",
+    { dialect: "Gulf", challengeType: "unscramble" },
+    caller({
+      "ai.gateway.lovable.dev": emitting({
+        // The model's own scramble is ignored: a model that drops or adds a
+        // word makes a puzzle nobody can solve.
+        questions: [{ answer: "I went to the market.", scrambled: "market went I", hint: "رحت السوق" }],
+      }),
+    }),
+  );
+
+  assertEquals(status, 200);
+  const [q] = (body.challenge as { questions: { scrambled: string; answer: string; options?: string[] }[] }).questions;
+  assertEquals(q.answer, "I went to the market.");
+  assertEquals(q.scrambled.split(" ").sort(), ["I", "went", "to", "the", "market"].sort());
+  assert(q.scrambled !== "I went to the market");
+  // Tapped back into order, not picked from a list.
+  assertEquals(q.options, undefined);
+});
+
+Deno.test("daily-challenge keeps only questions a learner can answer", async () => {
+  const { status, body } = await call(
+    "daily-challenge",
+    { dialect: "Gulf", challengeType: "fill_blank" },
+    caller({
+      "ai.gateway.lovable.dev": emitting({
+        questions: [
+          // The answer missing from its own options: put back, not dropped.
+          { sentence: "She is good ___ math.", sentenceEnglish: "هي شاطرة بالرياضيات", answer: "at", options: ["in", "on"] },
+          // A gap sentence with no gap.
+          { sentence: "She is good at math.", answer: "at", options: ["at", "in"] },
+          // No answer at all.
+          { sentence: "I ___ from Kuwait.", options: ["am", "is"] },
+        ],
+      }),
+    }),
+  );
+
+  assertEquals(status, 200);
+  const questions = (body.challenge as { questions: { sentence: string; options: string[] }[] }).questions;
+  assertEquals(questions.length, 1);
+  assertEquals(questions[0].sentence, "She is good ___ math.");
+  assertEquals([...questions[0].options].sort(), ["at", "in", "on"]);
+});
+
+Deno.test("daily-challenge says so rather than inventing a quiz when nothing is usable", async () => {
+  const { status, body } = await call(
+    "daily-challenge",
+    { dialect: "Gulf", challengeType: "translate" },
+    caller({ "ai.gateway.lovable.dev": emitting({ questions: [{ prompt: "كيف تقول «هلا»؟" }] }) }),
+  );
+
+  // A stand-in "hello / thank you" quiz once filled this gap, and a learner
+  // could keep a streak alive on it. The page shows an error and a retry.
+  assertEquals(status, 502);
+  assert(body.error);
+  assertEquals(body.challenge, undefined);
 });
 
 Deno.test("daily-challenge survives an unreadable learner profile", async () => {
@@ -491,7 +580,7 @@ Deno.test("daily-challenge survives an unreadable learner profile", async () => 
     // pin this test fails every Friday.
     { dialect: "Gulf", challengeType: "translate", userVocab: [{ word_arabic: "كتاب", word_english: "book" }] },
     caller({
-      "ai.gateway.lovable.dev": speaking(aChallenge),
+      "ai.gateway.lovable.dev": emitting(aChallenge),
       "/rest/v1/user_vocabulary": () => json({ message: "denied" }, 403),
       "/rest/v1/word_reviews": () => json({ message: "denied" }, 403),
     }),
@@ -506,7 +595,7 @@ Deno.test("daily-challenge says so when its key is missing", async () => {
   const { status } = await call(
     "daily-challenge",
     { dialect: "Gulf" },
-    caller({ "ai.gateway.lovable.dev": speaking(aChallenge) }),
+    caller({ "ai.gateway.lovable.dev": emitting(aChallenge) }),
     { env: { LOVABLE_API_KEY: undefined } },
   );
 
@@ -517,7 +606,7 @@ Deno.test("daily-challenge turns an anonymous caller away", async () => {
   const { status } = await call(
     "daily-challenge",
     { dialect: "Gulf" },
-    caller({ "ai.gateway.lovable.dev": speaking(aChallenge) }),
+    caller({ "ai.gateway.lovable.dev": emitting(aChallenge) }),
     { jwt: null },
   );
 

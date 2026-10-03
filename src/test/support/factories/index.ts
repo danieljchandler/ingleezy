@@ -805,8 +805,9 @@ export const aDailyChallenge = (over: Row = {}): Row => ({
   difficulty: "beginner",
   status: "published",
   questions: [
-    { prompt: "What is 'door'?", options: ["باب", "كتاب", "كرسي"], answer: "باب" },
-    { prompt: "What is 'book'?", options: ["باب", "كتاب", "كرسي"], answer: "كتاب" },
+    // English is what is practised: the dialect asks, the learner answers in English.
+    { prompt: "كيف تقول «باب» بالإنجليزي؟", options: ["door", "book", "chair"], answer: "door" },
+    { prompt: "كيف تقول «كتاب» بالإنجليزي؟", options: ["door", "book", "chair"], answer: "book" },
   ],
   session_id: null,
   created_by: TEST_USER_ID,
