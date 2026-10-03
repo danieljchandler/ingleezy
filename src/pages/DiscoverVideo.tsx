@@ -1790,7 +1790,7 @@ const DiscoverVideo = () => {
       <main className="flex-1 pb-[calc(5.5rem+env(safe-area-inset-bottom))]">
         <section aria-labelledby="watch-transcript" className="px-3 pt-2">
           <div className="flex items-center justify-between gap-2 px-2">
-            <h2 id="watch-transcript" className="text-base font-semibold leading-6">
+            <h2 id="watch-transcript" className="font-sans text-[17px] font-semibold leading-6">
               النص
             </h2>
             <div className="flex items-center gap-1">
@@ -1933,12 +1933,12 @@ const DiscoverVideo = () => {
                 {vocabulary.map((v, i) => (
                   <div
                     key={i}
-                    className="flex items-center justify-between gap-2 rounded-2xl bg-muted/50 p-2.5 text-sm"
+                    className="flex items-center justify-between gap-2 rounded-2xl bg-tint-firoza/60 px-3 py-2.5"
                   >
-                    <span dir="auto" className="font-medium text-foreground">
+                    <span dir="auto" className="font-naskh text-base text-foreground">
                       {v.arabic}
                     </span>
-                    <span dir="auto" className="truncate text-xs text-muted-foreground">{v.english}</span>
+                    <span dir="auto" className="truncate font-heading text-sm text-muted-foreground">{v.english}</span>
                   </div>
                 ))}
               </div>
