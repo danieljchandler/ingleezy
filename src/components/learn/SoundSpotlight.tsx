@@ -102,7 +102,7 @@ export const SoundSpotlight = ({ entries }: Props) => {
   if (usable.length === 0) return null;
 
   return (
-    <div className="rounded-xl border border-border bg-card overflow-hidden mb-4">
+    <div className="rounded-3xl bg-card shadow-card overflow-hidden mb-4">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}

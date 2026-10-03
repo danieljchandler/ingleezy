@@ -131,7 +131,7 @@ const FriendCard = ({
   const isPending = followUser.isPending || unfollowUser.isPending;
 
   return (
-    <div className="bg-card border border-border rounded-xl p-4">
+    <div className="bg-card rounded-3xl shadow-soft p-4">
       <div className="flex items-center gap-3">
         <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center shrink-0 overflow-hidden">
           {friend.avatar_url ? (

@@ -208,7 +208,7 @@ export function LineShadowPanel({ clip, nativeClipWav, externalYouTubeController
                 result.overall >= 90
                   ? "border-success"
                   : result.overall >= 75
-                    ? "border-blue-500"
+                    ? "border-periwinkle"
                     : result.overall >= 60
                       ? "border-accent"
                       : "border-destructive",

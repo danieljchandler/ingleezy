@@ -91,11 +91,9 @@ export const ContinueCard = () => {
   return (
     <div
       className={cn(
-        "w-full mb-4 rounded-2xl",
-        "bg-gradient-to-r from-primary/10 via-card to-primary/5",
-        "border-2 border-primary/25",
+        "w-full rounded-3xl bg-card shadow-card",
         "flex items-stretch overflow-hidden",
-        "transition-all hover:border-primary/50 hover:shadow-md"
+        "transition-colors hover:bg-muted/60"
       )}
     >
       <button
@@ -103,12 +101,12 @@ export const ContinueCard = () => {
         aria-label={`كمّل ${label}: ${resolved.title}`}
         className="flex-1 min-w-0 flex items-center gap-3 p-4 text-left active:scale-[0.99] transition-transform"
       >
-        <div className="h-11 w-11 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
+        <div className="h-11 w-11 rounded-[14px] bg-tint-firoza flex items-center justify-center shrink-0">
           <Icon className="h-5 w-5 text-primary" />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-0.5">
-            <span className="text-[10px] uppercase tracking-wider font-semibold text-primary">
+            <span className="text-[11px] font-semibold text-primary dark:text-periwinkle">
               كمّل {label}
             </span>
             <span className="text-[10px] text-muted-foreground">

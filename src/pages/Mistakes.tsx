@@ -94,7 +94,7 @@ function MistakeCard({ group, onDismiss, dismissing }: MistakeCardProps) {
   }, [ttsUrl]);
 
   return (
-    <div className="rounded-xl border border-border bg-card p-4">
+    <div className="rounded-3xl bg-card shadow-card p-4">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="font-english text-2xl font-bold text-foreground break-words">

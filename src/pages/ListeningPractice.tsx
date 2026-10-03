@@ -22,7 +22,6 @@ import type { Database } from "@/integrations/supabase/types";
 
 type ListeningExercise = Database['public']['Tables']['listening_exercises']['Row'];
 import {
-  Headphones,
   Play,
   Volume2,
   Check,
@@ -35,6 +34,7 @@ import {
   Languages
 } from "lucide-react";
 import { ChevronOpen } from "@/components/shared/DirectionalIcon";
+import { Art } from "@/components/brand/Art";
 
 type Mode = "dictation" | "comprehension" | "speed";
 
@@ -286,10 +286,8 @@ const ListeningPractice = () => {
         <PageCorner />
         <div className="py-8 space-y-6">
           <div className="text-center space-y-2">
-            <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
-              <Headphones className="h-8 w-8 text-primary" />
-            </div>
-            <h1 className="text-2xl font-bold text-foreground inline-flex items-center gap-2 justify-center">تدريب الاستماع <InfoHint {...PAGE_HINTS["listening-practice"]} size="md" /></h1>
+            <Art name="headphones" eager className="mx-auto mb-1 h-32 w-32" />
+            <h1 className="text-[28px] font-normal leading-[42px] text-foreground inline-flex items-center gap-2 justify-center">تدريب الاستماع <InfoHint {...PAGE_HINTS["listening-practice"]} size="md" /></h1>
             <p className="text-muted-foreground">درّب أذنك بتمارين صوتية بالإنجليزية</p>
           </div>
 
@@ -299,19 +297,16 @@ const ListeningPractice = () => {
               onClick={() => startSession("dictation")}
               disabled={loading}
               className={cn(
-                "w-full p-4 rounded-xl text-left",
-                "bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border border-blue-500/20",
-                "flex items-center gap-4",
-                "transition-all duration-200",
-                "hover:border-blue-500/40 active:scale-[0.99]",
+                "flex w-full items-center gap-4 rounded-3xl bg-card p-3 pe-4 text-start shadow-soft",
+                "transition-transform duration-200 hover:bg-muted active:scale-[0.99]",
                 "disabled:opacity-50"
               )}
             >
-              <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center shrink-0">
-                <PenLine className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-[14px] bg-tint-firoza text-primary dark:text-foreground">
+                <PenLine className="h-6 w-6" />
               </div>
               <div className="flex-1">
-                <p className="font-bold text-foreground">الإملاء</p>
+                <p className="text-[15px] font-semibold text-foreground">الإملاء</p>
                 <p className="text-sm text-muted-foreground">استمع واكتب ما تسمعه</p>
               </div>
               <ChevronOpen className="h-5 w-5 text-muted-foreground" />
@@ -322,19 +317,16 @@ const ListeningPractice = () => {
               onClick={() => startSession("comprehension")}
               disabled={loading}
               className={cn(
-                "w-full p-4 rounded-xl text-left",
-                "bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/20",
-                "flex items-center gap-4",
-                "transition-all duration-200",
-                "hover:border-purple-500/40 active:scale-[0.99]",
+                "flex w-full items-center gap-4 rounded-3xl bg-card p-3 pe-4 text-start shadow-soft",
+                "transition-transform duration-200 hover:bg-muted active:scale-[0.99]",
                 "disabled:opacity-50"
               )}
             >
-              <div className="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center shrink-0">
-                <BookOpen className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-[14px] bg-tint-sage text-success-ink">
+                <BookOpen className="h-6 w-6" />
               </div>
               <div className="flex-1">
-                <p className="font-bold text-foreground">الفهم</p>
+                <p className="text-[15px] font-semibold text-foreground">الفهم</p>
                 <p className="text-sm text-muted-foreground">أجب عن أسئلة حول ما تسمعه</p>
               </div>
               <ChevronOpen className="h-5 w-5 text-muted-foreground" />
@@ -345,19 +337,16 @@ const ListeningPractice = () => {
               onClick={() => startSession("speed")}
               disabled={loading}
               className={cn(
-                "w-full p-4 rounded-xl text-left",
-                "bg-gradient-to-r from-accent/10 to-accent/10 border border-accent/20",
-                "flex items-center gap-4",
-                "transition-all duration-200",
-                "hover:border-accent/40 active:scale-[0.99]",
+                "flex w-full items-center gap-4 rounded-3xl bg-card p-3 pe-4 text-start shadow-soft",
+                "transition-transform duration-200 hover:bg-muted active:scale-[0.99]",
                 "disabled:opacity-50"
               )}
             >
-              <div className="w-12 h-12 rounded-xl bg-accent/20 flex items-center justify-center shrink-0">
-                <Zap className="h-6 w-6 text-accent" />
+              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-[14px] bg-tint-gold text-accent-ink">
+                <Zap className="h-6 w-6" />
               </div>
               <div className="flex-1">
-                <p className="font-bold text-foreground">تمرين السرعة</p>
+                <p className="text-[15px] font-semibold text-foreground">تمرين السرعة</p>
                 <p className="text-sm text-muted-foreground">استماع سريع بسرعات متغيرة</p>
               </div>
               <ChevronOpen className="h-5 w-5 text-muted-foreground" />
@@ -464,7 +453,7 @@ const ListeningPractice = () => {
       )}
 
       {/* Main question area */}
-      <div className="bg-card border border-border rounded-2xl p-6 space-y-6">
+      <div className="bg-card rounded-3xl shadow-card p-6 space-y-6">
         {/* Play button */}
         <div className="flex justify-center">
           <button

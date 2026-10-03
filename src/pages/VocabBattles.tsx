@@ -11,10 +11,11 @@ import { InfoHint } from '@/components/InfoHint';
 import { PAGE_HINTS } from '@/lib/pageHints';
 import { formatDistanceToNow } from 'date-fns';
 import { ChevronOpen } from '@/components/shared/DirectionalIcon';
+import { Art } from "@/components/brand/Art";
 
 const statusColors: Record<string, string> = {
   pending: 'bg-accent/10 text-accent-ink border-accent/20',
-  in_progress: 'bg-blue-500/10 text-blue-700 border-blue-500/20',
+  in_progress: 'bg-tint-firoza text-primary border-primary/20',
   completed: 'bg-success/10 text-success border-success/20',
 };
 
@@ -100,10 +101,8 @@ const VocabBattles = () => {
       <div className="max-w-lg mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mb-4">
-            <Swords className="h-8 w-8 text-primary" />
-          </div>
-          <h1 className="text-2xl font-bold font-heading mb-1 inline-flex items-center gap-2 justify-center">معارك المفردات <InfoHint {...PAGE_HINTS["vocab-battles"]} size="md" /></h1>
+          <Art name="bubbles" eager className="mx-auto mb-1 h-32 w-32" />
+          <h1 className="text-[28px] font-normal leading-[42px] font-heading mb-1 inline-flex items-center gap-2 justify-center">معارك المفردات <InfoHint {...PAGE_HINTS["vocab-battles"]} size="md" /></h1>
           <p className="text-muted-foreground">تحدَّ أصدقاءك في مواجهات مفردات</p>
         </div>
 

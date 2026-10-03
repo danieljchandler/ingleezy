@@ -30,7 +30,7 @@ export const LessonPlanSection = ({ title, icon: Icon, rows, defaultOpen = false
   if (items.length === 0) return null;
 
   return (
-    <div className="rounded-xl border border-border bg-card overflow-hidden">
+    <div className="rounded-3xl bg-card shadow-card overflow-hidden">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}

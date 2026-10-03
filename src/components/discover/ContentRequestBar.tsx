@@ -71,7 +71,7 @@ export const ContentRequestBar = () => {
   }
 
   return (
-    <div className="rounded-xl border border-border bg-card p-4 space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
+    <div className="rounded-3xl bg-card shadow-card p-4 space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
       <div className="flex items-center gap-2">
         <Sparkles className="h-4 w-4 text-primary shrink-0" />
         <p className="text-sm font-medium text-foreground">ماذا تريد أن تشاهد؟</p>

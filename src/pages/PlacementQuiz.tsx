@@ -249,11 +249,11 @@ export default function PlacementQuiz() {
               </p>
             </div>
             <div className="grid grid-cols-2 gap-3 w-full max-w-xs">
-              <div className="bg-card border border-border rounded-xl p-3 text-center">
+              <div className="bg-card rounded-3xl shadow-soft p-3 text-center">
                 <p className="text-2xl font-bold text-primary">20</p>
                 <p className="text-xs text-muted-foreground">أسئلة</p>
               </div>
-              <div className="bg-card border border-border rounded-xl p-3 text-center">
+              <div className="bg-card rounded-3xl shadow-soft p-3 text-center">
                 <p className="text-2xl font-bold text-primary">~5 دقائق</p>
                 <p className="text-xs text-muted-foreground">المدة</p>
               </div>
@@ -305,7 +305,7 @@ export default function PlacementQuiz() {
                 </div>
 
                 {/* Question */}
-                <div className="bg-card border border-border rounded-2xl p-5 mb-6">
+                <div className="bg-card rounded-3xl shadow-card p-5 mb-6">
                   <p className="text-xl font-semibold text-foreground leading-relaxed font-english">
                     {currentQuestion.question_english}
                   </p>
@@ -387,14 +387,14 @@ export default function PlacementQuiz() {
 
             {/* Score breakdown */}
             <div className="w-full max-w-sm space-y-3">
-              <div className="bg-card border border-border rounded-xl p-4">
+              <div className="bg-card rounded-3xl shadow-soft p-4">
                 <p className="text-sm text-muted-foreground mb-1">درجة الثقة</p>
                 <Progress value={results.confidence} className="h-2 mb-1" />
                 <p className="text-xs text-muted-foreground text-right">{results.confidence}%</p>
               </div>
 
               {results.strengths.length > 0 && (
-                <div className="bg-card border border-border rounded-xl p-4 text-left">
+                <div className="bg-card rounded-3xl shadow-soft p-4 text-left">
                   <p className="text-sm font-semibold text-foreground mb-2">💪 Strengths</p>
                   <div className="flex flex-wrap gap-2">
                     {results.strengths.map((s) => (
@@ -410,7 +410,7 @@ export default function PlacementQuiz() {
               )}
 
               {results.weaknesses.length > 0 && (
-                <div className="bg-card border border-border rounded-xl p-4 text-left">
+                <div className="bg-card rounded-3xl shadow-soft p-4 text-left">
                   <p className="text-sm font-semibold text-foreground mb-2">📈 Areas to improve</p>
                   <div className="flex flex-wrap gap-2">
                     {results.weaknesses.map((w) => (

@@ -7,7 +7,7 @@ import { useDialect } from "@/contexts/DialectContext";
 import { Button } from "@/components/ui/button";
 import { BookOpen, Trash2, Loader2, Shuffle, Sparkles, Quote, MessageCircleQuestion, Upload, CheckSquare, X, Languages } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { arCount } from "@/lib/strings";
+import { AR, arCount } from "@/lib/strings";
 import { toast } from "sonner";
 import { AppShell } from "@/components/layout/AppShell";
 import { EmptyState } from "@/components/layout/EmptyState";
@@ -37,7 +37,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { ChevronBack, ChevronOpen } from "@/components/shared/DirectionalIcon";
+import { ChevronOpen } from "@/components/shared/DirectionalIcon";
+import { ProfileEmblem } from "@/components/shell/ProfileEmblem";
+import { Art } from "@/components/brand/Art";
 
 const MyWords = () => {
   const navigate = useNavigate();
@@ -293,75 +295,75 @@ const MyWords = () => {
 
   return (
     <AppShell>
-      {/* Header */}
-      <div className="flex items-center gap-3 mb-6">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => navigate("/")}
-          className="text-muted-foreground"
-        >
-          <ChevronBack className="h-5 w-5" />
-        </Button>
-        <div className="flex items-center gap-2">
-          <BookOpen className="h-6 w-6 text-primary" />
-          <h1 className="text-2xl font-bold text-foreground">كلماتي</h1>
-          <InfoHint {...PAGE_HINTS["my-words"]} />
+      {/* Header: the tab's corner emblem, the serif title and the count, with
+          the dialect mix as one pill. A tab has no back button. */}
+      <header className="mb-4 flex items-start gap-3">
+        <ProfileEmblem className="mt-1" />
+        <div className="min-w-0 flex-1">
+          <h1 className="inline-flex items-center gap-2 text-[30px] leading-[44px]">
+            كلماتي
+            <InfoHint {...PAGE_HINTS["my-words"]} />
+          </h1>
+          <p className="text-sm leading-[22px] text-muted-foreground">
+            {AR.today.savedWords(words?.length || 0)}
+          </p>
         </div>
-        <span className="text-sm text-muted-foreground">
-          ({words?.length || 0})
-        </span>
-        <Button
-          variant={mixAll ? "default" : "outline"}
-          size="sm"
-          className="ms-auto gap-1.5"
-          onClick={() => setMixAll(!mixAll)}
-        >
-          <Shuffle className="h-4 w-4" />
-          {mixAll ? "All Dialects" : activeDialect}
-        </Button>
-        <InfoHint
-          title="اخلط كل اللهجات"
-          body="Toggle this to review words from every dialect at once. Leave it off to stay focused on your current dialect only."
-        />
-      </div>
+        <div className="mt-2 flex shrink-0 items-center gap-1">
+          <Button
+            variant={mixAll ? "default" : "outline"}
+            size="sm"
+            className="gap-1.5 rounded-full"
+            onClick={() => setMixAll(!mixAll)}
+          >
+            <Shuffle className="h-4 w-4" />
+            {mixAll ? "All Dialects" : activeDialect}
+          </Button>
+          <InfoHint
+            title="اخلط كل اللهجات"
+            body="Toggle this to review words from every dialect at once. Leave it off to stay focused on your current dialect only."
+          />
+        </div>
+      </header>
 
-      {/* AI suggest button */}
-      <div className="grid grid-cols-3 gap-2 mb-3">
-        <Button
-          onClick={() => setSuggestOpen(true)}
-          variant="outline"
-          className="w-full gap-2"
-        >
-          <Wand2 className="h-4 w-4" />اقتراحات الذكاء الاصطناعي</Button>
-        <Button
-          onClick={() => navigate("/translate")}
-          variant="outline"
-          className="w-full gap-2"
-        >
-          <Languages className="h-4 w-4" />أضف من نص</Button>
-        <Button
-          onClick={() => setAnkiOpen(true)}
-          variant="outline"
-          className="w-full gap-2"
-        >
-          <Upload className="h-4 w-4" />استيراد من Anki</Button>
-      </div>
+      {/* What is due, as the first card: the book, the number, one button. */}
+      <section aria-label="المراجعة" className="relative mb-4 overflow-hidden rounded-[28px] bg-card p-4 shadow-card">
+        <Art name="book" eager className="absolute end-2 top-2 h-20 w-20" />
+        <p className="font-display text-[44px] leading-[52px] tabular-nums">{stats?.dueCount ?? 0}</p>
+        <p className="text-[13px] leading-5 text-muted-foreground">{AR.today.dueUnit(stats?.dueCount ?? 0)}</p>
+        {stats && stats.dueCount > 0 && (
+          <Button
+            onClick={() => navigate("/review/my-words")}
+            className="mt-3 h-[54px] w-full gap-2 text-base"
+          >
+            راجع {stats.dueCount} كلمة مستحقة
+            <ChevronOpen className="h-4 w-4" />
+          </Button>
+        )}
+      </section>
 
-      {/* Review button */}
-      {stats && stats.dueCount > 0 && (
-        <Button
-          onClick={() => navigate("/review/my-words")}
-          className="w-full mb-6 gap-2"
-          size="lg"
-        >
-          راجع {stats.dueCount} كلمة مستحقة
-          <ChevronOpen className="h-4 w-4" />
-        </Button>
-      )}
+      {/* Ways to add words, as a row of chips. */}
+      <div className="-mx-4 mb-5 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none]">
+        {[
+          { label: "اقتراحات الذكاء الاصطناعي", icon: Wand2, onClick: () => setSuggestOpen(true) },
+          { label: "أضف من نص", icon: Languages, onClick: () => navigate("/translate") },
+          { label: "استيراد من Anki", icon: Upload, onClick: () => setAnkiOpen(true) },
+        ].map(({ label, icon: Icon, onClick }) => (
+          <button
+            key={label}
+            type="button"
+            onClick={onClick}
+            className="flex h-12 shrink-0 items-center gap-2 rounded-full bg-card pe-4 ps-1.5 text-sm font-semibold text-foreground shadow-soft transition-transform active:scale-[0.98]"
+          >
+            <span className="grid h-9 w-9 place-items-center rounded-full bg-tint-firoza text-primary dark:text-foreground">
+              <Icon className="h-4 w-4" aria-hidden />
+            </span>
+            {label}
+          </button>
+        ))}
+      </div>
 
       {/* My Phrases section */}
-      <div className="mb-8 rounded-xl border border-border bg-card overflow-hidden">
+      <div className="mb-8 rounded-3xl bg-card shadow-card overflow-hidden">
         <div className="flex items-center justify-between p-4 border-b border-border bg-muted/30">
           <div className="flex items-center gap-2">
             <MessageCircleQuestion className="h-5 w-5 text-primary" />

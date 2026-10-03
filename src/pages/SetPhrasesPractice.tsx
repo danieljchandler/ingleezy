@@ -154,7 +154,7 @@ const SetPhrasesPractice = ({ reviewMode = false }: Props) => {
           </div>
         </div>
 
-        <Card className="p-5 space-y-4 bg-gradient-to-br from-success/5 to-teal-500/5 border-success/20">
+        <Card className="p-5 space-y-4 bg-gradient-to-br from-success/5 to-periwinkle/5 border-success/20">
           {current.question_type === "reply" ? (
             <div>
               <p className="text-xs uppercase text-muted-foreground mb-2">ردّ على هذا:</p>

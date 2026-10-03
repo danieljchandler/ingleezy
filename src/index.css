@@ -577,11 +577,11 @@
     50% { transform: translateX(-18px); }
   }
 
-  /* Camel caravan bob */
-  .animate-camel-bob {
-    animation: camel-bob 1.4s ease-in-out infinite;
+  /* Trail marker bob — the gold dot over the learner's current stop */
+  .animate-marker-bob {
+    animation: marker-bob 1.4s ease-in-out infinite;
   }
-  @keyframes camel-bob {
+  @keyframes marker-bob {
     0%, 100% { transform: translateY(0) rotate(-2deg); }
     50% { transform: translateY(-3px) rotate(2deg); }
   }
@@ -665,7 +665,7 @@
   .animate-shine-sweep,
   .animate-drift-slow,
   .animate-drift-slower,
-  .animate-camel-bob,
+  .animate-marker-bob,
   .animate-xp-float,
   .animate-banner-shine,
   .animate-shake,

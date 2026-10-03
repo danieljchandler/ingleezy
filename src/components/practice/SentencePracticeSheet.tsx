@@ -139,7 +139,7 @@ export function SentencePracticeSheet({ open, onOpenChange, targetEnglish, targe
 
         <div className="mt-6 space-y-6">
           {/* Recorder */}
-          <div className="rounded-2xl border border-border bg-card p-6 text-center">
+          <div className="rounded-3xl bg-card shadow-card p-6 text-center">
             {permissionDenied ? (
               <p className="text-sm text-destructive">
                 المايك مرفوض. فعّله من إعدادات المتصفح.

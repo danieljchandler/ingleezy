@@ -54,8 +54,8 @@ type Tab = "weekly" | "all-time";
 const RankBadge = ({ rank }: { rank: number }) => {
   if (rank === 1) {
     return (
-      <div className="w-8 h-8 rounded-full bg-yellow-500/20 flex items-center justify-center">
-        <Crown className="h-4 w-4 text-yellow-500" />
+      <div className="w-8 h-8 rounded-full bg-tint-gold flex items-center justify-center">
+        <Crown className="h-4 w-4 text-accent-ink" />
       </div>
     );
   }
@@ -68,8 +68,8 @@ const RankBadge = ({ rank }: { rank: number }) => {
   }
   if (rank === 3) {
     return (
-      <div className="w-8 h-8 rounded-full bg-amber-600/20 flex items-center justify-center">
-        <Medal className="h-4 w-4 text-amber-600" />
+      <div className="w-8 h-8 rounded-full bg-tint-clay flex items-center justify-center">
+        <Medal className="h-4 w-4 text-clay-ink" />
       </div>
     );
   }

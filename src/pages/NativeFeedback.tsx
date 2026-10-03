@@ -116,7 +116,7 @@ const NativeFeedback = () => {
         within 48 hours. One credit per submission; a request we can't answer is refunded.
       </p>
 
-      <div className="mb-6 flex items-center justify-between rounded-xl border border-border bg-card p-4">
+      <div className="mb-6 flex items-center justify-between rounded-3xl bg-card shadow-card p-4">
         <div>
           <p className="text-sm font-medium">الأرصدة</p>
           <p className="text-2xl font-bold">{status?.balance ?? "—"}</p>
@@ -163,7 +163,7 @@ const NativeFeedback = () => {
       </h2>
       <div className="space-y-3">
         {(status?.requests ?? []).map((request) => (
-          <div key={request.id} className="rounded-xl border border-border bg-card p-4">
+          <div key={request.id} className="rounded-3xl bg-card shadow-card p-4">
             <div className="mb-2 flex items-center gap-2">
               {request.status === "answered" ? (
                 <Badge className="gap-1 bg-success text-white"><CheckCircle2 className="h-3 w-3" />مُجاب</Badge>

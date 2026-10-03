@@ -307,7 +307,7 @@ const FillBlankGame = ({ words, onComplete }: { words: WordPair[]; onComplete: (
       </div>
 
       {/* Question Card */}
-      <div className="bg-card border border-border rounded-2xl p-8 text-center space-y-4">
+      <div className="bg-card rounded-3xl shadow-card p-8 text-center space-y-4">
         <p className="text-sm text-muted-foreground">كيف تقولها بالإنجليزية؟</p>
         <p
           className="text-4xl font-bold text-foreground"
@@ -402,7 +402,7 @@ const ResultsScreen = ({
           {pct >= 80 ? "عمل ممتاز! 🎉" : pct >= 50 ? "جهد طيب! واصل التدريب 💪" : "واصل — ستصل! 🌟"}
         </p>
       </div>
-      <div className="bg-card border border-border rounded-2xl p-6 max-w-xs mx-auto">
+      <div className="bg-card rounded-3xl shadow-card p-6 max-w-xs mx-auto">
         <p className="text-4xl font-bold text-primary">{pct}%</p>
         <p className="text-sm text-muted-foreground">{score} / {total} صحيحة</p>
       </div>
@@ -539,7 +539,7 @@ const VocabGames = () => {
             </div>
 
             {words.length < 6 ? (
-              <div className="bg-card border border-border rounded-2xl p-8 text-center space-y-3">
+              <div className="bg-card rounded-3xl shadow-card p-8 text-center space-y-3">
                 <Gamepad2 className="h-12 w-12 text-muted-foreground/30 mx-auto" />
                 <p className="text-muted-foreground">تحتاج 6 كلمات على الأقل للعب</p>
                 <p className="text-sm text-muted-foreground/70">

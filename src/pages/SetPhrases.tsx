@@ -21,7 +21,7 @@ const SetPhrases = () => {
       <PageCorner />
       <h1 className="text-2xl font-bold mt-4 mb-4 inline-flex items-center gap-2">عبارات جاهزة <InfoHint {...PAGE_HINTS["set-phrases"]} size="md" /></h1>
       <div className="space-y-4">
-        <Card className="p-4 bg-gradient-to-br from-success/10 to-teal-500/10 border-success/30">
+        <Card className="p-4 bg-gradient-to-br from-success/10 to-periwinkle/10 border-success/30">
           <div className="flex items-start gap-3">
             <div className="w-10 h-10 rounded-lg bg-success/20 flex items-center justify-center shrink-0">
               <MessageCircle className="h-5 w-5 text-success" />

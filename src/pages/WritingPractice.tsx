@@ -112,11 +112,11 @@ const WriteTab = () => {
   return (
     <div className="space-y-4">
       {promptLoading ? (
-        <div className="flex items-center gap-2 rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground">
+        <div className="flex items-center gap-2 rounded-3xl bg-card shadow-card p-4 text-sm text-muted-foreground">
           <Loader2 className="h-4 w-4 animate-spin" /> نجيب لك شي ترد عليه…
         </div>
       ) : prompt ? (
-        <div className="rounded-xl border border-border bg-card p-4">
+        <div className="rounded-3xl bg-card shadow-card p-4">
           <p className="text-xs text-muted-foreground">{prompt.scenario_arabic}</p>
           <div className="mt-2 max-w-[85%] rounded-2xl rounded-tl-sm bg-primary/10 px-4 py-3">
             <p className="font-english text-lg leading-relaxed">{prompt.message_english}</p>
@@ -133,7 +133,7 @@ const WriteTab = () => {
           </button>
         </div>
       ) : (
-        <div className="rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground">
+        <div className="rounded-3xl bg-card shadow-card p-4 text-sm text-muted-foreground">
           ما قدرنا نجيب رسالة. اكتب أي شي بالإنجليزي تحت وبنصحّحه لك برضه.
         </div>
       )}
@@ -163,7 +163,7 @@ const WriteTab = () => {
       </div>
 
       {review && (
-        <div className="space-y-3 rounded-xl border border-border bg-card p-4">
+        <div className="space-y-3 rounded-3xl bg-card shadow-card p-4">
           <p className="text-sm font-medium">{review.verdict_arabic}</p>
 
           <div className="rounded-lg bg-success/10 px-4 py-3">
@@ -342,7 +342,7 @@ const SpellingTab = () => {
       </div>
 
       {done ? (
-        <div className="rounded-xl border border-border bg-card p-6 text-center">
+        <div className="rounded-3xl bg-card shadow-card p-6 text-center">
           <CheckCircle2 className="mx-auto h-8 w-8 text-success" />
           <p className="mt-2 text-lg font-semibold">دقة {score.accuracy}%</p>
           <p className="text-sm text-muted-foreground">

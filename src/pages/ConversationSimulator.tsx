@@ -434,7 +434,7 @@ export default function ConversationSimulator() {
             <button
               type="button"
               onClick={() => setLiveMode(true)}
-              className="mt-3 flex w-full items-center gap-3.5 rounded-3xl border border-border bg-card px-4 py-4 text-start transition-colors hover:bg-muted"
+              className="mt-3 flex w-full items-center gap-3.5 rounded-3xl bg-card shadow-soft px-4 py-4 text-start transition-colors hover:bg-muted"
             >
               <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
                 <Phone className="h-5 w-5" aria-hidden />

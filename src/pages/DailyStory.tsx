@@ -103,7 +103,7 @@ const DailyStoryPage = () => {
         </p>
 
         {(isLoading || generate.isPending) && !story && (
-          <div className="rounded-xl border border-border bg-card p-8 text-center space-y-3">
+          <div className="rounded-3xl bg-card shadow-card p-8 text-center space-y-3">
             {/* Only the generation is a long AI wait; the plain fetch keeps a spinner. */}
             {generate.isPending ? (
               <LoadingPanel task="story" variant="inline" />
@@ -160,7 +160,7 @@ const DailyStoryPage = () => {
                 each sentence, shown when the global reveal preference is on. */}
             <div className="space-y-3">
               {lines.map((line, i) => (
-                <div key={i} className="rounded-xl border border-border bg-card p-4 space-y-2">
+                <div key={i} className="rounded-3xl bg-card shadow-card p-4 space-y-2">
                   <p className="font-english text-lg leading-relaxed">
                     <TappableEnglishText
                       text={line.english}
