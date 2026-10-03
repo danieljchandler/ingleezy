@@ -133,7 +133,7 @@ function MistakeCard({ group, onDismiss, dismissing }: MistakeCardProps) {
       {/* What actually came out. Omitted for sources with no utterance (quiz). */}
       {group.attempts.length > 0 && (
         <p className="mt-2 text-sm text-muted-foreground">
-          <span className="text-xs uppercase tracking-wide me-2">قلت</span>
+          <span className="text-xs me-2">قلت</span>
           <span className="font-english">{group.attempts.join(", ")}</span>
         </p>
       )}

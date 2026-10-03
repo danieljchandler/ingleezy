@@ -107,7 +107,7 @@ const EnglishSound = () => {
       </div>
 
       <header className="text-center mb-5">
-        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        <p className="text-xs font-semibold text-muted-foreground">
           الخطوة {stepIdx + 1} من {SOUND_STEPS.length}
         </p>
         <h2 className="text-lg font-bold text-foreground mt-0.5">

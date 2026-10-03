@@ -189,7 +189,7 @@ const Curriculum = () => {
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="font-semibold text-foreground">{lesson.name}</span>
                           {state.isNextUp && (
-                            <span className="text-[10px] font-bold uppercase tracking-wider text-primary bg-primary/10 px-1.5 py-0.5 rounded">
+                            <span className="text-[10px] font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded">
                               التالي
                             </span>
                           )}

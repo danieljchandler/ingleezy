@@ -328,7 +328,7 @@ const BattlePlay = () => {
         {question && (
           <div className="animate-in fade-in slide-in-from-right-4 duration-300">
             <div className="bg-card border-2 border-border rounded-2xl p-8 text-center mb-6">
-              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">
+              <p className="text-xs font-medium text-muted-foreground mb-3">
                 كيف تقولها بالإنجليزية؟
               </p>
               <p className="text-4xl font-bold">

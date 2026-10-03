@@ -355,8 +355,9 @@ const PronunciationPractice = () => {
               {/* The English to say, big; its meaning behind the switch. */}
               <section aria-label="قل هذا" className="rounded-[28px] bg-card px-6 py-8 text-center shadow-card">
                 <p
+                  dir="ltr"
                   className={cn(
-                    "break-words font-english font-bold",
+                    "break-words font-heading",
                     mode === "sentence" ? "text-[28px] leading-10" : "text-[44px] leading-[52px]",
                   )}
                 >

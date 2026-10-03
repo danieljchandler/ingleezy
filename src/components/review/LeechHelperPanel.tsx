@@ -131,7 +131,7 @@ export function LeechHelperPanel({
       <div className="flex items-start gap-2 mb-3">
         <AlertTriangle className="h-4 w-4 text-[hsl(var(--primary))] mt-0.5 shrink-0" />
         <div className="flex-1">
-          <p className="text-xs font-semibold uppercase tracking-wide text-[hsl(var(--primary))]">
+          <p className="text-xs font-semibold text-[hsl(var(--primary))]">
             متعثر مع هذه البطاقة؟
           </p>
           <p className="text-xs text-muted-foreground mt-0.5">
@@ -151,9 +151,9 @@ export function LeechHelperPanel({
 
       {/* Mnemonic */}
       {mnemonic ? (
-        <div className="mb-3 rounded-lg bg-card border border-border p-3">
+        <div className="mb-3 rounded-2xl bg-card p-3 shadow-soft">
           <div className="flex items-center justify-between gap-2 mb-1.5">
-            <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground inline-flex items-center gap-1">
+            <span className="text-[10px] font-semibold text-muted-foreground inline-flex items-center gap-1">
               <Brain className="h-3 w-3" /> وسيلة تذكّر
             </span>
             <Button

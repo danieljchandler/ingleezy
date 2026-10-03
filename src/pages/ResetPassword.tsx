@@ -83,12 +83,12 @@ const ResetPassword = () => {
       </div>
       <div className="max-w-sm mx-auto">
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold font-heading mb-2">عيّن كلمة مرور جديدة</h1>
+          <h1 className="text-[28px] font-normal leading-[42px] mb-2">عيّن كلمة مرور جديدة</h1>
           <p className="text-muted-foreground text-sm">
             اختر كلمة مرور جديدة لحسابك في إنجليزي.
           </p>
         </div>
-        <div className="bg-card rounded-xl p-6 border border-border">
+        <div className="bg-card rounded-3xl p-6 shadow-soft">
           {!isReady && !error && (
             <div className="flex justify-center py-8">
               <Loader2 className="h-6 w-6 animate-spin text-primary" />
@@ -116,7 +116,6 @@ const ResetPassword = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="h-11 rounded-lg"
                   disabled={isSubmitting}
                   autoFocus
                 />
@@ -133,7 +132,6 @@ const ResetPassword = () => {
                   value={confirm}
                   onChange={(e) => setConfirm(e.target.value)}
                   placeholder="••••••••"
-                  className="h-11 rounded-lg"
                   disabled={isSubmitting}
                 />
               </div>

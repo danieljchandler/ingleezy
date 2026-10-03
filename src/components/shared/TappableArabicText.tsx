@@ -410,7 +410,7 @@ export const TappableArabicText = ({
                       if (!match?.msa_form) return null;
                       return (
                         <div className="pt-1 border-t border-border bg-primary/5 -mx-3 px-3 py-2">
-                          <p className="text-[10px] font-medium uppercase tracking-wide text-primary">
+                          <p className="text-[10px] font-medium text-primary">
                             MSA · الفصحى
                           </p>
                           <p className="font-arabic text-sm text-foreground" dir="rtl">
@@ -498,7 +498,7 @@ export const TappableArabicText = ({
                               <p className="text-muted-foreground">{s.english}</p>
                               {s.literal && (
                                 <p className="italic text-muted-foreground/70">
-                                  <span className="not-italic uppercase tracking-wide text-[9px] me-1 text-muted-foreground/50">
+                                  <span className="not-italic text-[9px] me-1 text-muted-foreground/50">
                                     حرفي
                                   </span>
                                   {s.literal}
@@ -554,7 +554,7 @@ export const TappableArabicText = ({
                 )}
                 {phraseData && !phraseData.enriching && phraseData.enrichment?.literal && (
                   <p className="text-xs italic text-muted-foreground/80 mt-0.5">
-                    <span className="not-italic uppercase tracking-wide text-[9px] me-1 text-muted-foreground/60">
+                    <span className="not-italic text-[9px] me-1 text-muted-foreground/60">
                       حرفي
                     </span>
                     {phraseData.enrichment.literal}

@@ -499,7 +499,10 @@ test.describe("the standalone quiz", () => {
     // options drifting out of step with the word being asked about.
     for (let index = 1; index <= 5; index++) {
       await expect(page.getByText(`${index} / 5`)).toBeVisible();
-      const prompt = await page.locator("p.font-arabic").filter({ hasText: /^كلمة\d$/ }).innerText();
+      const prompt = await page
+        .getByRole("group", { name: "الكلمة" })
+        .getByText(/^كلمة\d$/)
+        .innerText();
       const answer = `word ${prompt.replace("كلمة", "")}`;
       await page.getByRole("radio", { name: answer, exact: true }).click();
     }

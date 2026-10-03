@@ -226,31 +226,27 @@ test.describe("review preferences", () => {
   test("the leech toggle persists across a reload", async ({ page }) => {
     await page.goto("/settings");
 
-    // Row-scoped, not section-scoped: the Review Preferences section now also
-    // carries the recording-contribution switch.
-    const leechRow = () =>
-      page.locator("div.rounded-xl").filter({ hasText: /البطاقات الصعبة/ });
-    const toggle = leechRow().getByRole("switch");
-    await expect(toggle).toBeChecked();
-    await toggle.click();
+    // By the switch's own name, not by the row's styling: the Review
+    // Preferences section also carries the recording-contribution switch.
+    const toggle = () => page.getByRole("switch", { name: /البطاقات الصعبة/ });
+    await expect(toggle()).toBeChecked();
+    await toggle().click();
 
     await page.reload();
-    await expect(leechRow().getByRole("switch")).not.toBeChecked();
+    await expect(toggle()).not.toBeChecked();
   });
 
   test("the word-families toggle persists across a reload", async ({ page }) => {
     await page.goto("/settings");
 
-    const rootRow = () =>
-      page.locator("div.rounded-xl").filter({ hasText: /كلمات من نفس العائلة/ });
-    const toggle = rootRow().getByRole("switch");
+    const toggle = () => page.getByRole("switch", { name: /كلمات من نفس العائلة/ });
     // On by default: the footnote only appears when a family actually exists,
     // so it is quiet until it has something to say.
-    await expect(toggle).toBeChecked();
-    await toggle.click();
+    await expect(toggle()).toBeChecked();
+    await toggle().click();
 
     await page.reload();
-    await expect(rootRow().getByRole("switch")).not.toBeChecked();
+    await expect(toggle()).not.toBeChecked();
   });
 });
 

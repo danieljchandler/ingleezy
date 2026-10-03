@@ -90,7 +90,7 @@ export function LineShadowPanel({ clip, nativeClipWav, externalYouTubeController
     <div className="mt-3 rounded-xl border-2 border-primary/30 bg-primary/[0.03] p-4 space-y-3">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <span className="text-xs font-semibold text-primary uppercase tracking-wide">ردّد هذا السطر</span>
+        <span className="text-xs font-semibold text-primary">ردّد هذا السطر</span>
         <button onClick={onClose} className="text-muted-foreground hover:text-foreground" aria-label="إغلاق">
           <X className="h-4 w-4" />
         </button>

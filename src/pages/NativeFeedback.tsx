@@ -158,7 +158,7 @@ const NativeFeedback = () => {
         )}
       </div>
 
-      <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+      <h2 className="mb-3 text-sm font-semibold text-muted-foreground">
         طلباتك
       </h2>
       <div className="space-y-3">

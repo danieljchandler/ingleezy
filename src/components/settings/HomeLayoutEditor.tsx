@@ -15,7 +15,7 @@ export const HomeLayoutEditor = () => {
   return (
     <section className="space-y-3">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+        <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
           <LayoutDashboard className="h-4 w-4" />
           تخطيط الرئيسية
         </div>

@@ -175,7 +175,7 @@ const Auth = () => {
         {/* Logo and Title */}
         <div className="text-center mb-10">
           <IngleezyLogo className="mx-auto mb-5 text-3xl" />
-          <h1 className="text-2xl font-bold text-foreground mb-2 font-heading">
+          <h1 className="text-[28px] font-normal leading-[42px] text-foreground mb-2">
             {isLogin ? "أهلاً بعودتك" : "انضم إلى إنجليزي"}
           </h1>
           <p className="text-muted-foreground">
@@ -186,7 +186,7 @@ const Auth = () => {
         </div>
 
         {/* Form Card */}
-        <div className="bg-card rounded-xl p-6 border border-border">
+        <div className="bg-card rounded-3xl p-6 shadow-soft">
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Email */}
             <div className="space-y-2">
@@ -202,7 +202,6 @@ const Auth = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="your@email.com"
-                className="h-11 rounded-lg"
                 disabled={isSubmitting}
               />
               {errors.email && (
@@ -223,7 +222,6 @@ const Auth = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="h-11 rounded-lg"
                 disabled={isSubmitting}
               />
               {errors.password && (
@@ -281,7 +279,7 @@ const Auth = () => {
                   value={inviteCode}
                   onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
                   placeholder="مثلاً: INGLEEZY-XXXX"
-                  className="h-11 rounded-lg font-mono tracking-wider"
+                  className="font-mono tracking-wider"
                   autoComplete="off"
                   autoCapitalize="characters"
                   autoCorrect="off"
@@ -300,7 +298,7 @@ const Auth = () => {
             {/* Submit Button */}
             <Button
               type="submit"
-              className="w-full h-11"
+              className="w-full"
               disabled={isSubmitting}
             >
               {isSubmitting ? (
@@ -324,7 +322,7 @@ const Auth = () => {
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t border-border" />
             </div>
-            <div className="relative flex justify-center text-xs uppercase">
+            <div className="relative flex justify-center text-xs">
               <span className="bg-card px-2 text-muted-foreground">أو تابع باستخدام</span>
             </div>
           </div>
@@ -333,7 +331,7 @@ const Auth = () => {
           <Button
             type="button"
             variant="outline"
-            className="w-full h-11"
+            className="w-full"
             disabled={isSubmitting}
             onClick={async () => {
               setIsSubmitting(true);

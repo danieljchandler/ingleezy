@@ -16,7 +16,7 @@ export function AchievementsGrid() {
   const totalCount = achievements.length;
 
   return (
-    <div className="bg-card rounded-xl p-4 border border-border">
+    <div className="bg-card rounded-3xl p-4 shadow-soft">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Trophy className="h-5 w-5 text-accent" />

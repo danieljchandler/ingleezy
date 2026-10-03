@@ -28,7 +28,7 @@ export const MyWordsSection = () => {
 
   if (isLoading) {
     return (
-      <div className="mb-8 p-5 rounded-xl bg-card border border-border">
+      <div className="mb-8 p-5 rounded-3xl bg-card shadow-soft">
         <div className="flex items-center justify-center py-4">
           <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
         </div>

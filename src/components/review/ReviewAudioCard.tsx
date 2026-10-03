@@ -81,8 +81,8 @@ export const ReviewAudioCard = ({
   }, [playableUrl, autoPlayKey, play]);
 
   return (
-    <div className="rounded-2xl bg-card border border-border p-8 text-center">
-      <div className="flex items-center justify-center gap-1.5 text-xs font-medium text-muted-foreground uppercase tracking-wider mb-6">
+    <div className="rounded-3xl bg-card p-8 text-center shadow-soft">
+      <div className="flex items-center justify-center gap-1.5 text-xs font-medium text-muted-foreground mb-6">
         <Headphones className="h-3.5 w-3.5" />
         استمع
       </div>

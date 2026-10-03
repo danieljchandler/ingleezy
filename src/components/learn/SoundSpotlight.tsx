@@ -109,7 +109,7 @@ export const SoundSpotlight = ({ entries }: Props) => {
         aria-expanded={open}
         className="w-full flex items-center justify-between gap-2 px-4 py-3 text-left"
       >
-        <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+        <span className="text-xs font-bold text-muted-foreground">
           أصوات هذا الدرس
         </span>
         <ChevronDown

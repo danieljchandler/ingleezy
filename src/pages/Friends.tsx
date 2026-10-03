@@ -607,7 +607,7 @@ const Friends = () => {
         {/* Pending Challenges */}
         {pendingChallenges.length > 0 && (
           <div className="space-y-2">
-            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">تحديات واردة</h2>
+            <h2 className="text-sm font-semibold text-muted-foreground">تحديات واردة</h2>
             {pendingChallenges.map((challenge) => (
               <ChallengeCard
                 key={challenge.id}
@@ -622,7 +622,7 @@ const Friends = () => {
         {/* Active Challenges */}
         {activeChallenges.length > 0 && (
           <div className="space-y-2">
-            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">تحديات جارية</h2>
+            <h2 className="text-sm font-semibold text-muted-foreground">تحديات جارية</h2>
             {activeChallenges.map((challenge) => (
               <ChallengeCard
                 key={challenge.id}
@@ -648,7 +648,7 @@ const Friends = () => {
         {/* Search Results */}
         {searchTerm.length >= 2 && (
           <div className="space-y-2">
-            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">نتائج البحث</h2>
+            <h2 className="text-sm font-semibold text-muted-foreground">نتائج البحث</h2>
             {searchLoading ? (
               <div className="flex items-center justify-center py-8">
                 <Loader2 className="h-6 w-6 animate-spin text-primary" />

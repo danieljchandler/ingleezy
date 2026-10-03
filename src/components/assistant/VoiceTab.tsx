@@ -104,7 +104,7 @@ export function VoiceTab() {
                 t.partial && "opacity-70",
               )}
             >
-              <div className="mb-0.5 text-[10px] uppercase tracking-wide text-muted-foreground">
+              <div className="mb-0.5 text-[10px] text-muted-foreground">
                 {t.role === "user" ? "أنت" : "المدرّب"}
               </div>
               {t.role === "assistant" ? (

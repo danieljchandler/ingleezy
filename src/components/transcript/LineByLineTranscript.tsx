@@ -192,7 +192,7 @@ const InlineToken = ({
                   <p className="text-sm text-muted-foreground">{compoundGloss}</p>
                   {compoundLiteral && (
                     <p className="text-xs italic text-muted-foreground/80">
-                      <span className="not-italic uppercase tracking-wide text-[9px] me-1 text-muted-foreground/60">
+                      <span className="not-italic text-[9px] me-1 text-muted-foreground/60">
                         حرفي
                       </span>
                       {compoundLiteral}
@@ -559,7 +559,7 @@ interface TranscriptLineCardProps {
        {isOverlay && (
          <div className="flex items-center gap-1.5 mb-2">
            <MonitorPlay className="h-3.5 w-3.5 text-accent" />
-           <span className="text-xs font-medium text-accent uppercase tracking-wide">
+           <span className="text-xs font-medium text-accent">
              على الشاشة
            </span>
          </div>

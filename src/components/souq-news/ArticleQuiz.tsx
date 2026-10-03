@@ -113,7 +113,7 @@ export const ArticleQuiz = ({ article }: ArticleQuizProps) => {
   // Finished
   if (finished) {
     return (
-      <div className="mt-3 rounded-xl bg-card border border-border p-4 space-y-3">
+      <div className="mt-3 rounded-3xl bg-card p-4 space-y-3 shadow-soft">
         <div className="text-center">
           <p className="text-lg font-bold text-foreground">
             {score}/{questions.length}
@@ -137,7 +137,7 @@ export const ArticleQuiz = ({ article }: ArticleQuizProps) => {
   const q = questions[currentQ];
 
   return (
-    <div className="mt-3 rounded-xl bg-card border border-border p-4 space-y-3">
+    <div className="mt-3 rounded-3xl bg-card p-4 space-y-3 shadow-soft">
       <div className="flex items-center justify-between">
         <p className="text-xs text-muted-foreground">
           Question {currentQ + 1}/{questions.length}

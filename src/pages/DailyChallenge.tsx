@@ -56,7 +56,7 @@ const DailyChallenge = () => {
   const { user, isAuthenticated } = useAuth();
   const { activeDialect } = useDialect();
   const { difficulty: userDifficulty } = useUserLevel();
-  const { data: allWords } = useAllWords();
+  const { data: allWords, refetch: refetchAllWords } = useAllWords();
   const addXP = useAddXP();
 
   // Restore persisted session
@@ -198,7 +198,11 @@ const DailyChallenge = () => {
       // Fallback to live AI generation. The challenge words come from the
       // server-side learner profile (real SRS state, weak words first); this
       // list is only a cold-start fallback for a learner with no deck yet.
-      const wordsToUse = allWords?.slice(0, 20) || [];
+      // Start can be tapped before the words query has answered. Wait for it
+      // rather than sending an empty hint, which would quietly build the
+      // challenge from nothing of the learner's own.
+      const words = allWords ?? (await refetchAllWords()).data ?? [];
+      const wordsToUse = words.slice(0, 20);
       const { data, error } = await supabase.functions.invoke("daily-challenge", {
         body: {
           userVocab: wordsToUse.map((w) => ({

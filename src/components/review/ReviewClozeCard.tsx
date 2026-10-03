@@ -120,7 +120,7 @@ export const ReviewClozeCard = ({
   return (
     <div className="rounded-3xl bg-card border border-primary/15 p-7 text-center shadow-elegant">
       <div className="flex items-center justify-center gap-2 mb-6">
-        <span className="text-[10px] uppercase tracking-[0.18em] font-semibold text-muted-foreground">
+        <span className="rounded-full bg-tint-firoza px-3 py-1 text-xs font-semibold leading-[18px] text-primary dark:text-foreground">
           أكمل الكلمة الناقصة
         </span>
       </div>
@@ -157,7 +157,7 @@ export const ReviewClozeCard = ({
         >
           {ttsLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : <Play className="h-6 w-6 ms-0.5" />}
         </button>
-        <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
+        <span className="text-[10px] text-muted-foreground font-medium">
           {selected == null ? "الكلمة محجوبة" : "الجملة كاملة"}
         </span>
       </div>

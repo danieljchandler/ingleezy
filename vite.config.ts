@@ -76,9 +76,10 @@ const vapidPublicKey = fromEnv("VITE_VAPID_PUBLIC_KEY", "VAPID_PUBLIC_KEY") ?? "
 /**
  * The public origin this deployment answers on, e.g. `https://ingleezy.app`.
  *
- * Only robots.txt and sitemap.xml use it, and both degrade honestly without it
- * (see scripts/seo.mjs). It is read here rather than injected into the bundle
- * because nothing in the app needs to know its own hostname.
+ * robots.txt, sitemap.xml and the share image's URL use it, and all three
+ * degrade honestly without it (see scripts/seo.mjs). It is read here rather
+ * than injected into the bundle because nothing in the app needs to know its
+ * own hostname.
  */
 const publicSiteUrl = fromEnv("VITE_PUBLIC_SITE_URL", "PUBLIC_SITE_URL");
 
@@ -94,6 +95,13 @@ function seoFiles(): Plugin {
   return {
     name: "ingleezy-seo-files",
     apply: "build",
+    // Link-preview crawlers want an absolute og:image. With no origin the
+    // relative path stays: still right for anyone who resolves it.
+    transformIndexHtml(html) {
+      if (!publicSiteUrl) return html;
+      const origin = publicSiteUrl.replace(/\/$/, "");
+      return html.replace(/content="\/og-image\.jpg"/g, `content="${origin}/og-image.jpg"`);
+    },
     generateBundle() {
       this.emitFile({
         type: "asset",

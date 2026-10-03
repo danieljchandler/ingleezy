@@ -37,14 +37,14 @@ export const TranslationPair = ({
       >
         {hasLiteral && (
           <div>
-            <p className="text-[10px] uppercase tracking-wide text-muted-foreground mb-0.5">
+            <p className="text-[10px] text-muted-foreground mb-0.5">
               حرفي
             </p>
             <p className="text-sm text-foreground/80 italic">{literal}</p>
           </div>
         )}
         <div>
-          <p className="text-[10px] uppercase tracking-wide text-muted-foreground mb-0.5">
+          <p className="text-[10px] text-muted-foreground mb-0.5">
             طبيعي
           </p>
           <p className="text-sm font-medium">{natural}</p>
@@ -58,7 +58,7 @@ export const TranslationPair = ({
       <p className="text-sm text-muted-foreground leading-relaxed">{natural}</p>
       {hasLiteral && (
         <p className="text-xs italic text-muted-foreground/80 leading-relaxed">
-          <span className="not-italic uppercase tracking-wide text-[9px] me-1.5 text-muted-foreground/60">
+          <span className="not-italic text-[9px] me-1.5 text-muted-foreground/60">
             حرفي
           </span>
           {literal}
