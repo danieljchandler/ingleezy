@@ -100,7 +100,7 @@ const Curriculum = () => {
       )}
 
       {!hasLessons && (
-        <div className="rounded-2xl border border-border bg-card p-8 text-center">
+        <div className="rounded-3xl bg-card shadow-card p-8 text-center">
           <p className="text-foreground font-medium mb-1">ما فيه دروس بعد لـ{activeDialect}</p>
           <p className="text-sm text-muted-foreground">
             جرّب لهجة ثانية من مبدّل اللهجات في الرئيسية.

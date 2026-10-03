@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LiveVoicePanel } from "@/components/conversation/LiveVoicePanel";
+import { Art } from "@/components/brand/Art";
 
 interface ChatMsg {
   role: "user" | "assistant";
@@ -358,7 +359,7 @@ export default function ConversationSimulator() {
     >
       {/* A session screen, like Watch: its own header, no dock. The way out is
           the back arrow, to the Talk tab this page is opened from. */}
-      <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur">
+      <header className="sticky top-0 z-30 bg-background/90 backdrop-blur">
         <div className="mx-auto flex max-w-2xl items-center gap-2 px-3 py-2">
           <Link
             to="/talk"
@@ -368,7 +369,7 @@ export default function ConversationSimulator() {
             <IconBack className="h-6 w-6" />
           </Link>
           <div className="min-w-0 flex-1 text-center">
-            <h1 className="inline-flex items-center gap-1.5 text-[17px] font-semibold leading-[26px]">
+            <h1 className="inline-flex items-center gap-1.5 text-[19px] leading-[28px]">
               {liveMode ? "مكالمة مع المعلّم" : topic}
               <InfoHint {...PAGE_HINTS["conversation"]} />
             </h1>
@@ -405,12 +406,12 @@ export default function ConversationSimulator() {
                 dead start; the tutor opens the conversation instead. */}
             <section
               aria-labelledby="chat-topics"
-              className="rounded-[28px] border border-border bg-card p-5 shadow-card"
+              className="rounded-[28px] bg-card p-5 shadow-card"
             >
-              <p className="flex items-center gap-1.5 text-[13px] font-semibold text-primary">
-                <Sparkles className="h-4 w-4" aria-hidden /> المعلّم يبدأ، وأنت ترد
+              <p className="inline-flex items-center gap-1.5 rounded-full bg-tint-gold px-2.5 py-0.5 text-xs font-semibold leading-[18px] text-accent-ink">
+                <Sparkles className="h-3.5 w-3.5" aria-hidden /> المعلّم يبدأ، وأنت ترد
               </p>
-              <h2 id="chat-topics" className="mt-1 text-[22px] leading-8">
+              <h2 id="chat-topics" className="mt-2 text-[22px] leading-8">
                 اختر موضوعاً للبدء
               </h2>
               <p className="mt-1 text-[15px] leading-6 text-muted-foreground">
@@ -421,7 +422,8 @@ export default function ConversationSimulator() {
                 {TOPIC_SEEDS.map((t) => (
                   <Button
                     key={t.key}
-                    variant="outline"
+                    variant="secondary"
+                    className="rounded-full"
                     onClick={() => startConversation(t)}
                     disabled={sending}
                   >
@@ -434,11 +436,9 @@ export default function ConversationSimulator() {
             <button
               type="button"
               onClick={() => setLiveMode(true)}
-              className="mt-3 flex w-full items-center gap-3.5 rounded-3xl border border-border bg-card px-4 py-4 text-start transition-colors hover:bg-muted"
+              className="mt-3 flex w-full items-center gap-3.5 rounded-3xl bg-card shadow-soft px-4 py-4 text-start transition-colors hover:bg-muted"
             >
-              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
-                <Phone className="h-5 w-5" aria-hidden />
-              </span>
+              <Art name="mic" className="h-14 w-14 shrink-0" />
               <span className="min-w-0 flex-1">
                 <span className="block text-base font-semibold leading-6">مكالمة صوتية مع المعلّم</span>
                 <span className="block text-sm leading-6 text-muted-foreground">تكلّم وهو يسمعك، بدون ما تضغط أي زر.</span>
@@ -473,7 +473,7 @@ export default function ConversationSimulator() {
                 <Fragment key={i}>
                   {m.correction && !correctedAbove && <CorrectionCard text={m.correction} />}
                   <div className="flex max-w-[90%] flex-col items-start gap-1 self-start">
-                    <div className="rounded-[22px] rounded-ss-md border border-border bg-card px-4 py-3">
+                    <div className="rounded-[22px] rounded-ss-md bg-card px-4 py-3 shadow-soft">
                       {m.content ? (
                         <p lang="en" className="font-english text-base leading-7">
                           <TappableEnglishText text={m.content} source="free-chat" />
@@ -531,7 +531,7 @@ export default function ConversationSimulator() {
           and the mic turns into send as soon as there is text to send. */}
       {!liveMode && hasThread && (
         <footer
-          className="sticky bottom-0 z-30 border-t border-border bg-card px-3 pt-2"
+          className="sticky bottom-0 z-30 rounded-t-[28px] bg-card px-3 pt-3 shadow-elegant"
           style={{ paddingBottom: "calc(0.75rem + env(safe-area-inset-bottom))" }}
         >
           <div className="mx-auto max-w-2xl">
@@ -549,8 +549,8 @@ export default function ConversationSimulator() {
                   aria-pressed={slow}
                   onClick={() => setSlow((v) => !v)}
                   className={cn(
-                    "flex h-9 items-center gap-1 rounded-full border px-3 text-[13px] font-semibold transition-colors",
-                    slow ? "border-primary bg-primary/10 text-primary" : "border-border text-foreground hover:bg-muted",
+                    "flex h-9 items-center gap-1 rounded-full px-3 text-[13px] font-semibold transition-colors",
+                    slow ? "bg-primary text-primary-foreground" : "bg-muted text-foreground hover:bg-tint-firoza",
                   )}
                 >
                   أبطأ
@@ -559,7 +559,7 @@ export default function ConversationSimulator() {
                   type="button"
                   onClick={() => setLiveMode(true)}
                   disabled={sending}
-                  className="flex h-9 items-center gap-1.5 rounded-full border border-border px-3 text-[13px] font-semibold text-foreground transition-colors hover:bg-muted disabled:opacity-40"
+                  className="flex h-9 items-center gap-1.5 rounded-full bg-muted px-3 text-[13px] font-semibold text-foreground transition-colors hover:bg-tint-firoza disabled:opacity-40"
                 >
                   <Phone className="h-4 w-4" aria-hidden />
                   مكالمة صوتية
@@ -626,15 +626,15 @@ function CorrectionCard({ text }: { text: string }) {
   return (
     <section
       aria-label="تصحيح"
-      className="w-full max-w-[85%] self-end rounded-[22px] border border-border bg-card px-4 pb-4 pt-3 shadow-card"
+      className="w-full max-w-[85%] self-end rounded-[22px] bg-card px-4 pb-4 pt-3 shadow-card"
     >
-      <p className="mb-1 flex items-center gap-1.5 text-[13px] font-semibold leading-5 text-primary">
-        <Lightbulb className="h-4 w-4" aria-hidden /> تصحيح
+      <p className="mb-1.5 inline-flex items-center gap-1.5 rounded-full bg-tint-gold px-2.5 py-0.5 text-xs font-semibold leading-[18px] text-accent-ink">
+        <Lightbulb className="h-3.5 w-3.5" aria-hidden /> تصحيح
       </p>
       <p dir="auto" className="text-[15px] leading-7 text-foreground">
         {splitLatinRuns(text).map((run, i) =>
           run.latin ? (
-            <bdi key={i} className="rounded-md bg-accent/25 px-1 font-english font-semibold">
+            <bdi key={i} className="rounded-md bg-tint-gold px-1 font-english font-semibold">
               {run.text}
             </bdi>
           ) : (

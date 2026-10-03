@@ -10,6 +10,9 @@ import { cn } from "@/lib/utils";
  * line mode, and a "practise by imitating" chip repeated on every line. Here
  * each is one thumb-reach button, labelled in words, and the two that are
  * modes say whether they are on (`aria-pressed`).
+ *
+ * It floats like the dock it replaces on this screen: a white bar inset from
+ * the edges, with a mode that is on shown as a firoza pill.
  */
 
 interface Props {
@@ -41,23 +44,23 @@ export function WatchToolbar({
   return (
     <nav
       aria-label="أدوات المقطع"
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card"
-      style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+      className="fixed inset-x-3 z-40 mx-auto max-w-md sm:inset-x-4"
+      style={{ bottom: "calc(env(safe-area-inset-bottom) + 12px)" }}
     >
-      <div className="mx-auto grid max-w-2xl grid-cols-4 px-2 pb-1 pt-1.5">
+      <div className="grid h-[68px] grid-cols-4 gap-1 rounded-[28px] bg-card p-2 shadow-elegant ring-1 ring-border/60">
         <ToolButton label="كرّر السطر" onClick={onRepeat} disabled={!canRepeat}>
-          <Repeat className="h-[22px] w-[22px]" aria-hidden />
+          <Repeat className="h-5 w-5" aria-hidden />
         </ToolButton>
         <ToolButton label="السرعة" onClick={onSpeed} ariaLabel={`السرعة ${speed}×`}>
-          <span dir="ltr" className="font-english text-[15px] font-bold leading-[22px]">
+          <span dir="ltr" className="font-english text-[15px] font-bold leading-5">
             {speed}×
           </span>
         </ToolButton>
         <ToolButton label="وقفة بعد السطر" onClick={onPauseAfterLine} pressed={pauseAfterLine}>
-          <Pause className="h-[22px] w-[22px]" aria-hidden />
+          <Pause className="h-5 w-5" aria-hidden />
         </ToolButton>
         <ToolButton label="قلّدها" onClick={onImitate} pressed={imitating} disabled={!canImitate}>
-          <Mic className="h-[22px] w-[22px]" aria-hidden />
+          <Mic className="h-5 w-5" aria-hidden />
         </ToolButton>
       </div>
     </nav>
@@ -87,9 +90,9 @@ function ToolButton({
       aria-pressed={pressed}
       aria-label={ariaLabel}
       className={cn(
-        "flex min-h-14 flex-col items-center justify-center gap-1 rounded-2xl text-[13px] leading-[18px] transition-colors",
+        "flex h-full flex-col items-center justify-center gap-0.5 rounded-[20px] text-[12px] leading-4 transition-colors",
         "disabled:opacity-40",
-        pressed ? "font-semibold text-primary" : "text-foreground hover:bg-muted",
+        pressed ? "bg-primary font-semibold text-primary-foreground" : "font-medium text-foreground hover:bg-muted",
       )}
     >
       {children}

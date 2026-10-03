@@ -18,6 +18,8 @@ import {
 import { getTopicCategories } from '@/data/listenTopics';
 import { LEARNING_REASONS, reasonLabel } from '@/data/learningReasons';
 import { ChevronBack, ChevronOpen } from '@/components/shared/DirectionalIcon';
+import { IngleezyLogo } from '@/components/brand/IngleezyLogo';
+import { Art } from '@/components/brand/Art';
 const lahjaIcon = "/brand/ingleezy-icon.svg";
 
 type Step = 'welcome' | 'dialect' | 'level' | 'purpose' | 'goal';
@@ -172,12 +174,13 @@ const Onboarding = () => {
         {/* ─── WELCOME ─────────────────────────── */}
         {step === 'welcome' && (
           <div className="text-center space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-            <img src="/brand/ingleezy-icon.svg" alt="Ingleezy" className="h-20 w-20 mx-auto" />
+            <IngleezyLogo className="text-[30px]" />
+            <Art name="bubbles" eager className="mx-auto -mt-2 h-52 w-52" />
             <div>
-              <h1 className="text-3xl font-bold font-heading text-foreground mb-3">
+              <h1 className="text-[34px] font-normal leading-[52px] text-foreground mb-1">
                 أهلاً وسهلاً!
               </h1>
-              <h2 className="text-xl font-semibold text-foreground mb-2">
+              <h2 className="font-sans text-lg font-semibold text-foreground mb-2">
                 مرحباً بك في إنجليزي
               </h2>
               <p className="text-muted-foreground leading-relaxed">
@@ -186,20 +189,20 @@ const Onboarding = () => {
               </p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-4">
-              <div className="bg-card border border-border rounded-xl p-3 text-center">
+              <div className="bg-card rounded-3xl shadow-soft p-3 text-center">
                 <Globe2 className="h-6 w-6 text-primary mx-auto mb-1" />
                 <p className="text-xs text-muted-foreground">شرح بلهجتك</p>
               </div>
-              <div className="bg-card border border-border rounded-xl p-3 text-center">
+              <div className="bg-card rounded-3xl shadow-soft p-3 text-center">
                 <GraduationCap className="h-6 w-6 text-primary mx-auto mb-1" />
                 <p className="text-xs text-muted-foreground">6 مراحل تعلم</p>
               </div>
-              <div className="bg-card border border-border rounded-xl p-3 text-center">
+              <div className="bg-card rounded-3xl shadow-soft p-3 text-center">
                 <Sparkles className="h-6 w-6 text-primary mx-auto mb-1" />
                 <p className="text-xs text-muted-foreground">مدعوم بالذكاء الاصطناعي</p>
               </div>
             </div>
-            <Button onClick={next} className="w-full h-12 text-base">
+            <Button onClick={next} className="w-full h-[54px] text-base">
               لنبدأ <ChevronOpen className="h-5 w-5 ms-1" />
             </Button>
           </div>

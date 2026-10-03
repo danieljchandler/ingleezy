@@ -117,6 +117,16 @@ export const AR = {
     wordsUnit: (n: number) =>
       n === 2 ? "كلمتين في بطاقاتك" : n >= 3 && n <= 10 ? "كلمات في بطاقاتك" : "كلمة في بطاقاتك",
     wordsLabel: "كلماتك",
+    /** My Words' header line: how many words are saved. */
+    savedWords: (n: number) =>
+      n === 0
+        ? "ما فيه كلمات محفوظة بعد"
+        : arCount(n, { one: "كلمة وحدة محفوظة", two: "كلمتين محفوظتين", few: "كلمات محفوظة", many: "كلمة محفوظة" }),
+    /** The unit under My Words' due number. */
+    dueUnit: (n: number) =>
+      n === 0
+        ? "ما فيه كلمات مستحقة الحين"
+        : n === 2 ? "كلمتين مستحقتين للمراجعة" : n >= 3 && n <= 10 ? "كلمات مستحقة للمراجعة" : "كلمة مستحقة للمراجعة",
     /** The plan card's line: where the learner is in today's steps. */
     planHeadline: (done: number, total: number) => {
       const steps = (n: number) =>

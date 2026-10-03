@@ -46,6 +46,7 @@ import {
 } from "lucide-react";
 import { IconBack } from "@/components/shared/DirectionalIcon";
 import { ChevronOpen } from "@/components/shared/DirectionalIcon";
+import { Art } from "@/components/brand/Art";
 
 type Difficulty = "beginner" | "intermediate" | "advanced";
 type Mode = "select" | "passage" | "qa";
@@ -564,10 +565,8 @@ const ReadingPractice = () => {
         <PageCorner />
         <div className="py-8 space-y-6">
           <div className="text-center space-y-2">
-            <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
-              <BookOpen className="h-8 w-8 text-primary" />
-            </div>
-            <h1 className="text-2xl font-bold text-foreground inline-flex items-center gap-2 justify-center">تمرين القراءة <InfoHint {...PAGE_HINTS["reading-practice"]} size="md" /></h1>
+            <Art name="book" eager className="mx-auto mb-1 h-32 w-32" />
+            <h1 className="text-[28px] font-normal leading-[42px] text-foreground inline-flex items-center gap-2 justify-center">تمرين القراءة <InfoHint {...PAGE_HINTS["reading-practice"]} size="md" /></h1>
             <p className="text-muted-foreground">اقرأ إنجليزي وتعلّم منه</p>
           </div>
 
@@ -783,10 +782,8 @@ const ReadingPractice = () => {
           </div>
 
           <div className="text-center space-y-2">
-            <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
-              <BookOpen className="h-8 w-8 text-primary" />
-            </div>
-            <h1 className="text-2xl font-bold text-foreground">اقرأ نصاً</h1>
+            <Art name="book" eager className="mx-auto mb-1 h-32 w-32" />
+            <h1 className="text-[28px] font-normal leading-[42px] text-foreground">اقرأ نصاً</h1>
             <p className="text-muted-foreground">اقرأ نصوصاً إنجليزية واختبر فهمك</p>
           </div>
           <div className="space-y-2">
@@ -913,7 +910,7 @@ const ReadingPractice = () => {
             {showEnglish && <p dir="rtl" className="font-arabic text-sm text-muted-foreground animate-in fade-in duration-200">{passage.titleArabic}</p>}
           </div>
 
-          <div className="bg-card border border-border rounded-2xl p-4 space-y-3">
+          <div className="bg-card rounded-3xl shadow-card p-4 space-y-3">
             <p className="text-xs text-muted-foreground text-center mb-2">
               Tap any word for translation • Tap the eye icon for sentence meaning
             </p>
@@ -968,7 +965,7 @@ const ReadingPractice = () => {
             <Progress value={((currentQuestion + 1) / passage.questions.length) * 100} className="h-2" />
           </div>
 
-          <div className="bg-card border border-border rounded-2xl p-5 space-y-4">
+          <div className="bg-card rounded-3xl shadow-card p-5 space-y-4">
             <div className="text-center">
               <p className="font-english text-lg text-foreground">{passage.questions[currentQuestion].question}</p>
               {showEnglish && <p dir="rtl" className="font-arabic text-sm text-muted-foreground mt-1 animate-in fade-in duration-200">{passage.questions[currentQuestion].questionArabic}</p>}

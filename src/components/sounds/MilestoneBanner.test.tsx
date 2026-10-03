@@ -87,12 +87,12 @@ describe("MilestoneBanner — when it appears", () => {
 describe("MilestoneBanner — what it says", () => {
   it("keeps the learner going at the intermediate milestones", () => {
     render(<MilestoneBanner masteredCount={21} />);
-    expect(screen.getByText("استمر — القافلة تواصل مسيرها.")).toBeInTheDocument();
+    expect(screen.getByText("استمر — الرحلة مكمّلة.")).toBeInTheDocument();
   });
 
   it("marks the whole journey differently", () => {
     render(<MilestoneBanner masteredCount={28} />);
-    expect(screen.getByText("أنهيت رحلة القافلة كاملة 🐪")).toBeInTheDocument();
+    expect(screen.getByText("أنهيت رحلة الأصوات كاملة")).toBeInTheDocument();
   });
 
   it("animates the shine by default", () => {

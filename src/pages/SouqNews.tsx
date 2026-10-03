@@ -44,13 +44,13 @@ interface SouqArticle {
 }
 
 const DIALECT_COLORS: Record<string, string> = {
-  Gulf: "from-teal-500/10 to-cyan-500/10 border-teal-500/20",
+  Gulf: "from-primary/10 to-periwinkle/10 border-primary/20",
   Egyptian: "from-accent/10 to-accent/10 border-accent/20",
   Yemeni: "from-destructive/10 to-destructive/10 border-destructive/20",
 };
 
 const DIALECT_ACCENT: Record<string, string> = {
-  Gulf: "text-teal-600 dark:text-teal-400",
+  Gulf: "text-primary",
   Egyptian: "text-accent",
   Yemeni: "text-destructive",
 };

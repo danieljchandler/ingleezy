@@ -126,34 +126,27 @@ const Profile = () => {
           </div>
         )}
 
-        {/* ── Passport cover ── */}
-        <div className="relative overflow-hidden rounded-2xl border-2 border-desert-red bg-card-cream shadow-card">
-          {/* Sadu watermark */}
-          <div
-            className="absolute inset-0 opacity-[0.06] pointer-events-none"
-            style={{
-              backgroundImage: "url(/assets/sadu-watermark.svg)",
-              backgroundSize: "260px",
-              backgroundRepeat: "repeat",
-            }}
-          />
-          {/* Corner stamp */}
-          <div className="absolute top-3 right-3 rotate-6 rounded-md border-2 border-desert-red/80 px-2 py-1 text-[10px] tracking-[0.18em] uppercase font-heading text-desert-red/80">
-            Ingleezy · جواز
-          </div>
+        {/* ── Passport cover ── a white card over a gold-and-teal wash. The Sadu
+            watermark that sat behind it was heritage ornament the brand has
+            dropped. */}
+        <div className="relative overflow-hidden rounded-[28px] bg-card shadow-card">
+          <div aria-hidden className="absolute inset-x-0 top-0 h-28 bg-wash-panel" />
+          <span className="absolute top-3 end-3 rounded-full bg-tint-gold px-2.5 py-0.5 text-xs font-semibold text-accent-ink">
+            جوازك
+          </span>
 
           <div className="relative p-5 flex flex-col items-center text-center">
             <div className="relative">
-              <Avatar className="h-24 w-24 ring-4 ring-desert-red/15 border-2 border-desert-red/40">
+              <Avatar className="h-24 w-24 ring-4 ring-card">
                 <AvatarImage src={profile?.avatar_url ?? undefined} />
                 <AvatarFallback className="text-2xl font-heading bg-muted">{initial}</AvatarFallback>
               </Avatar>
-              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 rounded-full bg-desert-red px-2.5 py-0.5 text-[11px] font-heading font-bold text-primary-foreground shadow-button">
+              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 rounded-full bg-primary px-2.5 py-0.5 text-[11px] font-semibold text-primary-foreground shadow-button">
                 LV {level}
               </div>
             </div>
 
-            <h1 className="mt-5 text-title font-heading font-bold text-foreground">
+            <h1 className="mt-5 text-[28px] font-normal leading-10 text-foreground">
               {loading ? <Skeleton className="h-7 w-40 mx-auto" /> : (profile?.display_name ?? "مسافر")}
             </h1>
             <p className="text-overline mt-1">عضو منذ {memberSince}</p>
@@ -166,7 +159,7 @@ const Profile = () => {
               </div>
               <div className="h-2 rounded-full bg-muted overflow-hidden">
                 <div
-                  className="h-full bg-gradient-to-r from-desert-red to-primary transition-all"
+                  className="h-full rounded-full bg-accent transition-all"
                   style={{ width: `${progress.percent}%` }}
                 />
               </div>
@@ -204,7 +197,7 @@ const Profile = () => {
               <Skeleton className="h-32 rounded-2xl" />
             </div>
           ) : dialectStudy.length === 0 ? (
-            <div className="rounded-2xl border-2 border-dashed border-desert-red/40 bg-card-cream/60 p-8 text-center">
+            <div className="rounded-3xl border-[1.5px] border-dashed border-border bg-card/60 p-8 text-center">
               <p className="text-body-strong font-heading">لا طوابع بعد</p>
               <p className="text-caption mt-1">احفظ كلمة لتكسب أول طابع.</p>
             </div>
@@ -267,7 +260,7 @@ const Profile = () => {
             )}
           </div>
           {(achievements?.length ?? 0) === 0 ? (
-            <div className="rounded-2xl border-2 border-dashed border-desert-red/40 bg-card-cream/60 p-6 text-center">
+            <div className="rounded-3xl border-[1.5px] border-dashed border-border bg-card/60 p-6 text-center">
               <Sparkles className="h-5 w-5 mx-auto text-muted-foreground" />
               <p className="text-caption mt-2">اكسب أول وسام بإكمال تحدي اليوم.</p>
             </div>
@@ -277,7 +270,7 @@ const Profile = () => {
                 <div
                   key={ua.id}
                   className={cn(
-                    "rounded-2xl border-2 border-desert-red/30 bg-card-cream p-3 text-center shadow-soft",
+                    "rounded-3xl bg-card p-3 text-center shadow-soft",
                   )}
                 >
                   <div className="text-2xl">{ua.achievement?.icon ?? "🏅"}</div>
@@ -297,8 +290,8 @@ const Profile = () => {
 const StatCard = ({
   icon, label, value, sub,
 }: { icon: React.ReactNode; label: string; value: number | string; sub: string }) => (
-  <div className="rounded-2xl border-2 border-desert-red/30 bg-card-cream px-3 py-3 text-center shadow-soft">
-    <div className="flex items-center justify-center gap-1 text-desert-red/80">
+  <div className="rounded-3xl bg-card px-3 py-3 text-center shadow-soft">
+    <div className="flex items-center justify-center gap-1 text-primary dark:text-periwinkle">
       {icon}
       <span className="text-overline">{label}</span>
     </div>

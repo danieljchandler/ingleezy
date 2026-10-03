@@ -30,6 +30,7 @@ import {
   Languages
 } from "lucide-react";
 import { ChevronOpen } from "@/components/shared/DirectionalIcon";
+import { Art } from "@/components/brand/Art";
 
 interface ChallengeQuestion {
   prompt?: string;
@@ -278,10 +279,8 @@ const DailyChallenge = () => {
         <PageCorner />
         <div className="py-8 space-y-6">
           <div className="text-center space-y-2">
-            <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
-              <Flame className="h-8 w-8 text-primary" />
-            </div>
-            <h1 className="text-2xl font-bold text-foreground inline-flex items-center gap-2 justify-center">تحدي اليوم <InfoHint {...PAGE_HINTS["daily-challenge"]} size="md" /></h1>
+            <Art name="flame" eager className="mx-auto mb-1 h-32 w-32" />
+            <h1 className="text-[28px] font-normal leading-[42px] text-foreground inline-flex items-center gap-2 justify-center">تحدي اليوم <InfoHint {...PAGE_HINTS["daily-challenge"]} size="md" /></h1>
             <p className="text-muted-foreground">خلّص تحدي اليوم عشان تحافظ على سلسلتك!</p>
           </div>
 
@@ -302,7 +301,7 @@ const DailyChallenge = () => {
           )}
 
           {alreadyCompleted ? (
-            <div className="bg-card border border-border rounded-2xl p-6 text-center space-y-3">
+            <div className="bg-card rounded-3xl shadow-card p-6 text-center space-y-3">
               <Check className="h-12 w-12 text-primary mx-auto" />
               <p className="font-bold text-foreground">خلّصت التحدي!</p>
               <p className="text-sm text-muted-foreground">
@@ -393,7 +392,7 @@ const DailyChallenge = () => {
 
       <Progress value={progress} className="h-2 mb-6" />
 
-      <div className="bg-card border border-border rounded-2xl p-6 space-y-6">
+      <div className="bg-card rounded-3xl shadow-card p-6 space-y-6">
         {/* Question prompt (non-match types) */}
         {challenge.type !== 'match' && currentQuestion && (
         <div className="text-center">

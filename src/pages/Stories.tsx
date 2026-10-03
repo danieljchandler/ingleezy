@@ -9,6 +9,7 @@ import { InfoHint } from '@/components/InfoHint';
 import { PAGE_HINTS } from '@/lib/pageHints';
 import { ChevronOpen } from '@/components/shared/DirectionalIcon';
 import { EmptyState } from "@/components/layout/EmptyState";
+import { Art } from "@/components/brand/Art";
 
 const DIFFICULTY_COLORS: Record<string, string> = {
   Beginner: 'bg-success/10 text-success border-success/20',
@@ -26,10 +27,8 @@ const Stories = () => {
 
       <div className="max-w-lg mx-auto">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mb-4">
-            <BookOpen className="h-8 w-8 text-primary" />
-          </div>
-          <h1 className="text-2xl font-bold font-heading mb-1 inline-flex items-center gap-2 justify-center">قصص تفاعلية <InfoHint {...PAGE_HINTS["stories"]} size="md" /></h1>
+          <Art name="book" eager className="mx-auto mb-1 h-32 w-32" />
+          <h1 className="text-[28px] font-normal leading-[42px] font-heading mb-1 inline-flex items-center gap-2 justify-center">قصص تفاعلية <InfoHint {...PAGE_HINTS["stories"]} size="md" /></h1>
           <p className="text-muted-foreground">اختر مغامرتك وتعلّم الإنجليزي داخل القصة</p>
         </div>
 

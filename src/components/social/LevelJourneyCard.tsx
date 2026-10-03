@@ -58,7 +58,7 @@ export function LevelJourneyCard() {
   if (rows === null) return null; // no card until we know; nothing to skeleton
 
   return (
-    <div className="rounded-xl border border-border bg-card p-4">
+    <div className="rounded-3xl bg-card shadow-card p-4">
       <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <GraduationCap className="h-4 w-4 text-primary" />

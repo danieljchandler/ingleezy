@@ -167,19 +167,19 @@ export const PhraseOfTheDay = () => {
   return (
     <div
       className={cn(
-        "w-full mb-6 p-5 rounded-3xl",
-        "bg-card border border-border shadow-card relative overflow-hidden",
+        "w-full p-5 rounded-[28px]",
+        "bg-card shadow-card relative overflow-hidden",
       )}
     >
       
 
       <div className="flex items-center justify-between mb-3 relative z-10">
         <div className="flex items-center gap-2">
-          <div className="w-9 h-9 rounded-xl bg-accent/20 flex items-center justify-center">
-            <Sparkles className="h-4 w-4 text-accent-foreground" />
+          <div className="w-10 h-10 rounded-[14px] bg-tint-gold flex items-center justify-center">
+            <Sparkles className="h-4 w-4 text-accent-ink" />
           </div>
           <div>
-            <p className="font-bold text-foreground text-sm">عبارة اليوم</p>
+            <p className="font-semibold text-foreground text-[15px]">عبارة اليوم</p>
             <p className="text-xs text-muted-foreground">English · glossed in {activeDialect}</p>
           </div>
         </div>
@@ -203,14 +203,14 @@ export const PhraseOfTheDay = () => {
       ) : phrase ? (
         <div className="space-y-3 relative z-10">
           {showEnglish ? (
-            <p className="text-2xl font-semibold text-foreground leading-relaxed font-english">
+            <p dir="ltr" className="text-start font-heading text-2xl text-foreground leading-relaxed [unicode-bidi:isolate]">
               {phrase.phrase_english}
             </p>
           ) : (
             <button
               onClick={() => setShowEnglish(true)}
               aria-label="اكشف العبارة بالإنجليزي"
-              className="w-full py-3.5 rounded-2xl bg-muted text-sm font-semibold text-foreground hover:bg-accent/20 transition flex items-center justify-center gap-2"
+              className="w-full py-3.5 rounded-2xl bg-gradient-next text-sm font-semibold text-foreground transition-transform active:scale-[0.99] flex items-center justify-center gap-2"
             >
               <Eye className="h-4 w-4" />
               اضغط تشوف الإنجليزي

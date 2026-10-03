@@ -1,11 +1,13 @@
 import { useCallback, useMemo, useState } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { Loader2, Plus, Check } from "lucide-react";
+import { Loader2, Plus, Check, Volume2 } from "lucide-react";
 import { useDialect } from "@/contexts/DialectContext";
 import { supabase } from "@/integrations/supabase/client";
 import type { VocabItem } from "@/types/transcript";
 import { cn } from "@/lib/utils";
+import { englishSpeechUrl } from "@/lib/englishSpeech";
+import { DIALECT_LABELS } from "@/config";
 
 /**
  * English text where every word is tappable — the mirror of
@@ -16,6 +18,10 @@ import { cn } from "@/lib/utils";
  * Deliberately simpler than the Arabic side (no compound spans, no token
  * glosses from the pipeline): English words are fetched on demand through
  * translate-phrase, which is dialect-aware and already capped server-side.
+ *
+ * The popover is the design's word sheet in small: the word lit in gold with
+ * a button to hear it said, a tag naming the dialect of the gloss, the
+ * meaning in Naskh, and one button to keep it.
  */
 
 interface Props {
@@ -50,6 +56,16 @@ export function TappableEnglishText({
   const [savedLocal, setSavedLocal] = useState<Set<string>>(new Set());
 
   const words = useMemo(() => text.split(/(\s+)/), [text]);
+
+  // A model English voice for the word. Quiet on failure: the word and its
+  // meaning are still on screen, and a missing sound is not worth a toast.
+  const say = useCallback(async (word: string) => {
+    try {
+      await new Audio(await englishSpeechUrl(word)).play();
+    } catch {
+      /* no audio this time */
+    }
+  }, []);
 
   const lookup = useCallback(
     async (word: string) => {
@@ -103,9 +119,20 @@ export function TappableEnglishText({
               </button>
             </PopoverTrigger>
             <PopoverContent className="w-60 space-y-2 rounded-3xl p-4" side="top">
-              <p>
+              <div className="flex items-center justify-between gap-2">
                 <span dir="ltr" className="rounded-lg bg-accent px-1.5 font-heading text-2xl leading-9 text-accent-foreground">{word}</span>
-              </p>
+                <button
+                  type="button"
+                  onClick={() => void say(word)}
+                  aria-label="اسمع الكلمة"
+                  className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-muted text-foreground transition-colors hover:bg-tint-firoza"
+                >
+                  <Volume2 className="h-[18px] w-[18px]" aria-hidden />
+                </button>
+              </div>
+              <span className="inline-block rounded-full bg-tint-sage px-2.5 py-0.5 text-xs font-semibold leading-[18px] text-success-ink">
+                بال{DIALECT_LABELS[activeDialect]}
+              </span>
               {state?.loading ? (
                 <div className="flex items-center gap-2 text-muted-foreground text-sm">
                   <Loader2 className="h-3.5 w-3.5 animate-spin" /> نترجم…

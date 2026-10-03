@@ -227,8 +227,7 @@ test.describe("dismissing a mistake", () => {
 
     await page.goto("/mistakes");
     await page
-      .locator("div.rounded-xl")
-      .filter({ hasText: "مرحبا" })
+      .getByRole("region", { name: "مرحبا" })
       .getByRole("button", { name: "أتقنتها الآن" })
       .click();
 

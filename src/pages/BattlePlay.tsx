@@ -238,7 +238,7 @@ const BattlePlay = () => {
         <div className="max-w-md mx-auto text-center animate-in fade-in zoom-in-95 duration-500">
           <div className={cn(
             'inline-flex items-center justify-center w-24 h-24 rounded-full mb-6',
-            isWinner ? 'bg-accent/10' : isDraw ? 'bg-blue-500/10' : 'bg-muted'
+            isWinner ? 'bg-accent/10' : isDraw ? 'bg-tint-firoza' : 'bg-muted'
           )}>
             {isWinner ? (
               <Trophy className="h-12 w-12 text-accent" />

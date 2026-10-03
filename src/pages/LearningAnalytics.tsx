@@ -158,7 +158,7 @@ const LearningAnalytics = () => {
         </div>
 
         {/* Skill Radar Chart */}
-        <div className="bg-card border border-border rounded-2xl p-4 space-y-3">
+        <div className="bg-card rounded-3xl shadow-card p-4 space-y-3">
           <h2 className="font-semibold text-foreground flex items-center gap-2">
             <Target className="h-4 w-4 text-primary" />تفصيل المهارات</h2>
           <div className="h-52">
@@ -188,7 +188,7 @@ const LearningAnalytics = () => {
         </div>
 
         {/* Word Mastery Breakdown */}
-        <div className="bg-card border border-border rounded-2xl p-4 space-y-3">
+        <div className="bg-card rounded-3xl shadow-card p-4 space-y-3">
           <div className="flex items-center justify-between">
             <h2 className="font-semibold text-foreground flex items-center gap-2">
               <Brain className="h-4 w-4 text-primary" />إتقان الكلمات</h2>
@@ -217,7 +217,7 @@ const LearningAnalytics = () => {
         </div>
 
         {/* SRS Review Forecast */}
-        <div className="bg-card border border-border rounded-2xl p-4 space-y-3">
+        <div className="bg-card rounded-3xl shadow-card p-4 space-y-3">
           <h2 className="font-semibold text-foreground flex items-center gap-2">
             📅 Review Forecast (7 days)
           </h2>
@@ -230,7 +230,7 @@ const LearningAnalytics = () => {
         </div>
 
         {/* SRS Card Health */}
-        <div className="bg-card border border-border rounded-2xl p-4 space-y-3">
+        <div className="bg-card rounded-3xl shadow-card p-4 space-y-3">
           <h2 className="font-semibold text-foreground flex items-center gap-2">
             🧠 Card Health
           </h2>
@@ -262,7 +262,7 @@ const LearningAnalytics = () => {
 
         {/* Vocab Growth Over Time */}
         {analytics.vocabGrowth.length > 1 && (
-          <div className="bg-card border border-border rounded-2xl p-4 space-y-3">
+          <div className="bg-card rounded-3xl shadow-card p-4 space-y-3">
             <h2 className="font-semibold text-foreground flex items-center gap-2">
               <TrendingUp className="h-4 w-4 text-primary" />نمو المفردات</h2>
             <div className="h-40">
@@ -304,7 +304,7 @@ const LearningAnalytics = () => {
         )}
 
         {/* Daily Activity */}
-        <div className="bg-card border border-border rounded-2xl p-4 space-y-3">
+        <div className="bg-card rounded-3xl shadow-card p-4 space-y-3">
           <h2 className="font-semibold text-foreground flex items-center gap-2">
             <BarChart3 className="h-4 w-4 text-primary" /> Daily Activity (14 days)
           </h2>
@@ -344,7 +344,7 @@ const LearningAnalytics = () => {
 
         {/* Weekly Accuracy Trend */}
         {analytics.weeklyAccuracy.some((w) => w.accuracy > 0) && (
-          <div className="bg-card border border-border rounded-2xl p-4 space-y-3">
+          <div className="bg-card rounded-3xl shadow-card p-4 space-y-3">
             <h2 className="font-semibold text-foreground flex items-center gap-2">
               <Target className="h-4 w-4 text-primary" /> Accuracy Trend (4 weeks)
             </h2>
@@ -369,7 +369,7 @@ const LearningAnalytics = () => {
 
         {/* Top Mistakes */}
         {analytics.topMistakes.length > 0 && (
-          <div className="bg-card border border-border rounded-2xl p-4 space-y-3">
+          <div className="bg-card rounded-3xl shadow-card p-4 space-y-3">
             <h2 className="font-semibold text-foreground flex items-center gap-2">
               <AlertTriangle className="h-4 w-4 text-destructive" />كلمات تحتاج تركيزاً</h2>
             <div className="space-y-2">

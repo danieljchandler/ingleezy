@@ -4,9 +4,8 @@ import { useSoundProgress, useCheckpointProgress } from "@/hooks/useSoundProgres
 import { AppShell } from "@/components/layout/AppShell";
 import { PageCorner } from "@/components/shell/PageCorner";
 import { InfoHint } from "@/components/InfoHint";
-import { DesertBackdrop } from "@/components/sounds/DesertBackdrop";
-import { StopOrnament } from "@/components/sounds/StopOrnament";
-import { CaravanMarker } from "@/components/sounds/CaravanMarker";
+import { TrailOrnament } from "@/components/sounds/TrailOrnament";
+import { TrailMarker } from "@/components/sounds/TrailMarker";
 import { StopMasteryRing } from "@/components/sounds/StopMasteryRing";
 import { MilestoneBanner } from "@/components/sounds/MilestoneBanner";
 import { tapFeedback } from "@/lib/tapFeedback";
@@ -20,9 +19,11 @@ import { cn } from "@/lib/utils";
  * (the wrong direction once the app itself flipped). See
  * src/data/englishSounds.ts for the curriculum and its research basis.
  *
- * The trail chrome (desert backdrop, caravan marker, checkpoint oases) is
- * unchanged from Hakiya — it was never Arabic-specific, just a "journey"
- * motif — so only the content and the copy needed to flip.
+ * The trail chrome is the app's own: a dashed firoza path, the illustration
+ * set beside the stops, the wordmark's gold dot as "you are here", and
+ * gold-tint checkpoint cards. It replaced a desert scene carried over from
+ * Hakiya (dunes, palms, a camel, "oasis" checkpoints), heritage scenery the
+ * brand has dropped: it appeals through the product, not through motifs.
  */
 const EnglishSounds = () => {
   const navigate = useNavigate();
@@ -37,7 +38,6 @@ const EnglishSounds = () => {
 
   return (
     <AppShell>
-      <DesertBackdrop />
       <div className="flex items-center justify-between mb-4">
         <PageCorner />
         <div className="flex items-center gap-3">
@@ -58,11 +58,11 @@ const EnglishSounds = () => {
       <MilestoneBanner masteredCount={masteredCount} />
 
       <header className="mb-6 text-center">
-        <h1 className="text-2xl font-bold text-foreground flex items-center justify-center gap-2">
-          رحلة أصوات الإنجليزية 🐪
+        <h1 className="text-[28px] font-normal leading-[42px] text-foreground flex items-center justify-center gap-2">
+          رحلة أصوات الإنجليزية
           <InfoHint
             title="رحلة أصوات الإنجليزية"
-            body="قافلة من 28 محطة عبر أصوات الإنجليزية — وأغلبها الأصوات التي لا توجد في العربية أو تُلبس بصوت عربي قريب. كل محطة درس مصغّر: اسمع الصوت، افهم كيف يُشكَّل، شاهد كيف يُكتب، ثم تدرّبان عليه بلعبتين. أتقن محطة لتفتح التي تليها."
+            body="رحلة من 28 محطة عبر أصوات الإنجليزية — وأغلبها الأصوات التي لا توجد في العربية أو تُلبس بصوت عربي قريب. كل محطة درس مصغّر: اسمع الصوت، افهم كيف يُشكَّل، شاهد كيف يُكتب، ثم تدرّبان عليه بلعبتين. أتقن محطة لتفتح التي تليها."
           />
         </h1>
         <p className="font-english text-3xl text-primary mt-2" dir="ltr">
@@ -74,12 +74,12 @@ const EnglishSounds = () => {
       </header>
 
       <div className="relative">
-        {/* Vertical trail line - dashed caravan path */}
+        {/* Vertical trail line - dashed path */}
         <div
           className="absolute left-1/2 top-6 bottom-6 -translate-x-1/2 w-px"
           style={{
             backgroundImage:
-              "repeating-linear-gradient(to bottom, #135F68 0 6px, transparent 6px 12px)",
+              "repeating-linear-gradient(to bottom, hsl(var(--primary)) 0 6px, transparent 6px 12px)",
             opacity: 0.35,
           }}
         />
@@ -113,11 +113,11 @@ const EnglishSounds = () => {
                   {/* Side label card */}
                   <div
                     className={cn(
-                      "flex-1 px-3 py-2 rounded-xl border backdrop-blur-sm transition-colors",
+                      "flex-1 px-3.5 py-2.5 rounded-2xl transition-colors",
                       isLeft ? "text-right" : "text-left",
                       unlocked
-                        ? "bg-[#F7F8FC]/75 border-primary/25"
-                        : "bg-muted/40 border-muted-foreground/15",
+                        ? "bg-card shadow-soft"
+                        : "bg-muted/60",
                     )}
                   >
                     <p className="text-[10px] font-semibold uppercase tracking-wider text-primary/70 dark:text-periwinkle/70">
@@ -139,10 +139,10 @@ const EnglishSounds = () => {
                     className={cn(
                       "relative h-16 w-16 rounded-full border-2 flex items-center justify-center shrink-0 transition-all",
                       mastered &&
-                        "bg-gradient-to-br from-[#F1E3C6] to-[#E2C892] border-accent shadow-[0_4px_14px_-4px_rgba(207,164,78,0.6)] animate-master-bounce",
+                        "bg-tint-gold border-accent shadow-soft animate-master-bounce",
                       !mastered &&
                         unlocked &&
-                        "bg-gradient-to-br from-[#F2F4FB] to-[#DCE2F5] border-primary shadow-[0_4px_12px_-4px_rgba(27,37,52,0.35)] hover:shadow-[0_6px_18px_-4px_rgba(27,37,52,0.5)] active:scale-95 animate-unlock-bounce",
+                        "bg-card border-primary shadow-card hover:shadow-elegant active:scale-95 animate-unlock-bounce",
                       !unlocked && "bg-muted border-muted-foreground/25 opacity-60",
                     )}
                   >
@@ -156,7 +156,7 @@ const EnglishSounds = () => {
                     {unlocked && (
                       <div
                         className="absolute inset-1 rounded-full border border-dashed pointer-events-none"
-                        style={{ borderColor: mastered ? "#E5A917" : "#135F68", opacity: 0.35 }}
+                        style={{ borderColor: mastered ? "hsl(var(--accent))" : "hsl(var(--primary))", opacity: 0.35 }}
                       />
                     )}
                     {/* Shine sweep for mastered stops */}
@@ -174,7 +174,7 @@ const EnglishSounds = () => {
                       <span
                         className={cn(
                           "font-english text-2xl relative",
-                          mastered ? "text-[#8F5A24] dark:text-accent" : "text-primary dark:text-periwinkle",
+                          mastered ? "text-accent-ink" : "text-primary dark:text-periwinkle",
                         )}
                         style={{ lineHeight: 1 }}
                         dir="ltr"
@@ -183,29 +183,25 @@ const EnglishSounds = () => {
                       </span>
                     )}
                     {mastered && (
-                      <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-[#4A7A40] text-white flex items-center justify-center shadow">
+                      <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-success text-success-foreground flex items-center justify-center shadow">
                         <Check className="h-3 w-3" />
                       </span>
                     )}
-                    {/* Caravan: marks the learner's current spot */}
+                    {/* The gold dot: marks the learner's current spot */}
                     {sound.order_index === currentStopIndex && (
-                      <div className="absolute -top-7 left-1/2 -translate-x-1/2 pointer-events-none drop-shadow">
-                        <CaravanMarker size={32} />
+                      <div className="absolute -top-6 left-1/2 -translate-x-1/2 pointer-events-none">
+                        <TrailMarker size={18} />
                       </div>
                     )}
                   </div>
 
                   {/* Ornament instead of empty spacer */}
                   <div className="flex-1 flex justify-center">
-                    <StopOrnament
-                      index={sound.order_index}
-                      side={isLeft ? "right" : "left"}
-                      active={unlocked}
-                    />
+                    <TrailOrnament index={sound.order_index} active={unlocked} />
                   </div>
                 </button>
 
-                {/* Checkpoint marker - oasis card */}
+                {/* Checkpoint card */}
                 {isCheckpointAfter && checkpointIdx >= 0 && (
                   <button
                     onClick={(e) => {
@@ -216,45 +212,24 @@ const EnglishSounds = () => {
                     }}
                     disabled={!mastered}
                     className={cn(
-                      "mt-3 w-full p-4 rounded-2xl border-2 flex items-center justify-center gap-3 transition-all relative overflow-hidden",
+                      "mt-3 w-full p-4 rounded-3xl flex items-center justify-center gap-3 transition-all relative overflow-hidden",
                       mastered
                         ? checkpoints[checkpointIdx]
-                          ? "border-accent bg-gradient-to-r from-[#F4E3B8]/80 via-[#F9F0D4]/80 to-[#F4E3B8]/80"
-                          : "border-accent bg-gradient-to-r from-[#F9F0D4]/70 to-[#F4E3B8]/70 hover:from-[#F4E3B8] hover:to-[#EED9A0] animate-pulse"
-                        : "border-muted bg-muted/30 opacity-60",
+                          ? "bg-tint-gold shadow-soft"
+                          : "bg-tint-gold ring-2 ring-accent shadow-soft hover:shadow-card animate-pulse"
+                        : "bg-muted/50 opacity-60",
                     )}
                   >
-                    {/* Faint palm silhouettes left/right */}
-                    {mastered && (
-                      <>
-                        <svg className="absolute left-2 bottom-1 opacity-40" width="22" height="32" viewBox="0 0 40 64">
-                          <path d="M20,60 Q18,40 22,18" stroke="#5C3A1E" strokeWidth="2" fill="none" />
-                          <g transform="translate(22,18)">
-                            {[0, 60, 120, 180, 240, 300].map((a) => (
-                              <path key={a} d="M0,0 Q9,-3 16,2" stroke="#4A7A40" strokeWidth="1.8" fill="none" transform={`rotate(${a})`} />
-                            ))}
-                          </g>
-                        </svg>
-                        <svg className="absolute right-2 bottom-1 opacity-40 -scale-x-100" width="22" height="32" viewBox="0 0 40 64">
-                          <path d="M20,60 Q18,40 22,18" stroke="#5C3A1E" strokeWidth="2" fill="none" />
-                          <g transform="translate(22,18)">
-                            {[0, 60, 120, 180, 240, 300].map((a) => (
-                              <path key={a} d="M0,0 Q9,-3 16,2" stroke="#4A7A40" strokeWidth="1.8" fill="none" transform={`rotate(${a})`} />
-                            ))}
-                          </g>
-                        </svg>
-                      </>
-                    )}
                     {checkpoints[checkpointIdx] ? (
-                      <Trophy className="h-5 w-5 text-[#A57B1F] relative" />
+                      <Trophy className="h-5 w-5 text-accent-ink relative" />
                     ) : (
-                      <Flag className="h-5 w-5 text-[#A57B1F] relative" />
+                      <Flag className="h-5 w-5 text-accent-ink relative" />
                     )}
                     <span className="font-bold text-primary dark:text-periwinkle relative">
-                      نقطة تفتيش الواحة {checkpointIdx + 1}
+                      نقطة تفتيش {checkpointIdx + 1}
                     </span>
                     {checkpoints[checkpointIdx] && (
-                      <span className="text-xs font-semibold text-[#A57B1F] me-1 relative">
+                      <span className="text-xs font-semibold text-accent-ink me-1 relative">
                         {checkpoints[checkpointIdx].score}%
                       </span>
                     )}

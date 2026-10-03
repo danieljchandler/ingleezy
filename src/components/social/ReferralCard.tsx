@@ -112,7 +112,7 @@ export function ReferralCard() {
   }
 
   return (
-    <div className="rounded-xl border border-border bg-card p-4 space-y-3">
+    <div className="rounded-3xl bg-card shadow-card p-4 space-y-3">
       <div className="flex items-center gap-2">
         <Gift className="h-4 w-4 text-primary" />
         <p className="text-sm font-semibold">

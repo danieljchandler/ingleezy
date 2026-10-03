@@ -346,7 +346,7 @@ const GrammarDrills = () => {
           </div>
 
           {/* Question */}
-          <div className="bg-card border border-border rounded-2xl p-5 space-y-2">
+          <div className="bg-card rounded-3xl shadow-card p-5 space-y-2">
             <p className="font-english text-xl font-bold text-foreground leading-relaxed">
               {q.question}
             </p>

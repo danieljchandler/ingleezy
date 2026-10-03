@@ -15,8 +15,8 @@ interface SRSStageBarProps {
 
 const STAGE_META: Array<{ key: keyof SRSStageBarProps["stages"]; label: string; color: string }> = [
   { key: "new", label: "New", color: "bg-muted-foreground/30" },
-  { key: "learning", label: "Learning", color: "bg-blue-500" },
-  { key: "familiar", label: "Familiar", color: "bg-cyan-500" },
+  { key: "learning", label: "Learning", color: "bg-primary/45" },
+  { key: "familiar", label: "Familiar", color: "bg-periwinkle" },
   { key: "practiced", label: "Practiced", color: "bg-success" },
   { key: "strong", label: "Strong", color: "bg-success" },
   { key: "mastered", label: "Mastered", color: "bg-accent" },
