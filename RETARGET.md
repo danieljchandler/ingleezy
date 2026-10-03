@@ -612,6 +612,22 @@ open boxes in this document all mean the same thing.
       RTL glosses with word-save wired through translate-phrase; "auto"
       dialect now means the learner's own. saved_text_translations
       stores the flipped sentence shape in the same jsonb.
+      **Daily challenge DONE (2026-10-03), found after the retarget was
+      marked complete.** `daily-challenge` still opened "You are a Gulf
+      Arabic language challenge generator": English learners were asked to
+      unscramble Arabic letters, fill dialect gaps and translate English
+      into their own dialect, and culture day quizzed Yemeni traditions. It
+      is an english-target Brain call now, writing the shape
+      `curriculum-chat` already uses for the published pool (dialect
+      prompt → English answer; English gap sentence with the dialect
+      meaning in `sentenceEnglish`; spelling and culture asked in the
+      dialect, answered in English; speed the other way round). The
+      unscramble is shuffled server-side from the answer's own words, and
+      an unusable generation is a 502, not the old hello/thank-you
+      stand-in. The page could only answer by picking an option, so the
+      pool's word-order and fill-in rows (no options) showed a question
+      with nothing to press; it now takes tapped word order and typed
+      answers, and sets every string by its script.
       (sentence coach DONE — the model for the rest)
 - [x] TTS: English voices for targets; Arabic TTS kept for scaffold audio.
       `planEnglishProvider()` (ElevenLabs premade English voices, Azure

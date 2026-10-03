@@ -18,6 +18,8 @@ import { toast } from "sonner";
 import { markTaskCompletedToday } from "@/lib/todayCompletion";
 import { cn } from "@/lib/utils";
 import { Switch } from "@/components/ui/switch";
+import { Input } from "@/components/ui/input";
+import { hasArabic } from "@/lib/watch";
 import {
   Flame,
   Check,
@@ -32,16 +34,69 @@ import {
 import { ChevronOpen } from "@/components/shared/DirectionalIcon";
 import { Art } from "@/components/brand/Art";
 
+/**
+ * One question, in the shape both sources share: the `daily-challenge`
+ * generator and the published pool `curriculum-chat` writes. English is what
+ * is practised and the learner's dialect is the scaffold, but keys are
+ * Arabic-era where the pool fixed them: `sentenceEnglish` holds the DIALECT
+ * meaning of an English `sentence`. Nothing here assumes a direction — a
+ * string is set as English or as Arabic by what script it is in — so pool rows
+ * written either way still read correctly.
+ */
 interface ChallengeQuestion {
   prompt?: string;
-  answer: string;
+  answer?: string;
   options?: string[];
   sentence?: string;
   sentenceEnglish?: string;
+  /** The answer's words, shuffled. With no options, tapped back into order. */
   scrambled?: string;
   hint?: string;
   arabic?: string;
   english?: string;
+}
+
+/**
+ * How typed and tapped answers are compared: case, curly apostrophes, spacing
+ * and closing punctuation are not what a daily challenge is testing.
+ */
+function normalizeAnswer(text: string): string {
+  return text
+    .normalize("NFKC")
+    .toLowerCase()
+    .replace(/[\u2018\u2019]/g, "'")
+    .replace(/[.!?\u060C,]+$/, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/** A string set in its own script: English as English, Arabic in Naskh. */
+function Phrase({ text, english, arabic }: { text: string; english: string; arabic: string }) {
+  return hasArabic(text) ? (
+    <span dir="rtl" className={cn("font-naskh", arabic)}>{text}</span>
+  ) : (
+    <span lang="en" dir="ltr" className={cn("font-english", english)}>{text}</span>
+  );
+}
+
+/** An English gap sentence, the gap drawn as a line until it is answered. */
+function GapSentence({ sentence, fill }: { sentence: string; fill?: string }) {
+  const parts = sentence.split(/_{2,}/);
+  return (
+    <p lang="en" dir="ltr" className="font-english text-[22px] font-semibold leading-9 text-foreground">
+      {parts.map((part, i) => (
+        <span key={i}>
+          {part}
+          {i < parts.length - 1 &&
+            (fill ? (
+              <mark className="rounded-md bg-accent px-1.5 text-accent-foreground">{fill}</mark>
+            ) : (
+              <span aria-label="فراغ" className="mx-1 inline-block w-14 border-b-2 border-foreground/40 align-baseline" />
+            ))}
+        </span>
+      ))}
+    </p>
+  );
 }
 
 interface Challenge {
@@ -87,6 +142,11 @@ const DailyChallenge = () => {
   const [matchedPairs, setMatchedPairs] = useState<Set<number>>(new Set());
   const [matchSelected, setMatchSelected] = useState<{ side: 'arabic' | 'english'; index: number } | null>(null);
   const [shuffledEnglish, setShuffledEnglish] = useState<{ text: string; origIndex: number }[]>([]);
+  // A question with no options is answered by tapping the words into order
+  // (unscramble) or by typing; the pool's fill-blank and unscramble rows carry
+  // no options, and until these existed they could not be answered at all.
+  const [placed, setPlaced] = useState<number[]>([]);
+  const [typed, setTyped] = useState("");
 
   // Persist session state
   useEffect(() => {
@@ -191,6 +251,8 @@ const DailyChallenge = () => {
         setScore(0);
         setSelectedAnswer(null);
         setShowResult(false);
+        setPlaced([]);
+        setTyped("");
         setSessionComplete(false);
         return;
       }
@@ -224,6 +286,8 @@ const DailyChallenge = () => {
       setScore(0);
       setSelectedAnswer(null);
       setShowResult(false);
+      setPlaced([]);
+      setTyped("");
       setSessionComplete(false);
     } catch (e) {
       console.error("Failed to load challenge:", e);
@@ -233,11 +297,14 @@ const DailyChallenge = () => {
     }
   };
 
-  const handleAnswer = (answer: string) => {
-    if (showResult || !currentQuestion) return;
+  /** `exact` for a picked option; typed and tapped answers are normalized. */
+  const handleAnswer = (answer: string, exact = true) => {
+    if (showResult || !currentQuestion?.answer) return;
 
     setSelectedAnswer(answer);
-    const correct = answer === currentQuestion.answer;
+    const correct = exact
+      ? answer === currentQuestion.answer
+      : normalizeAnswer(answer) === normalizeAnswer(currentQuestion.answer);
     setIsCorrect(correct);
     setShowResult(true);
 
@@ -251,6 +318,8 @@ const DailyChallenge = () => {
       setCurrentIndex((prev) => prev + 1);
       setSelectedAnswer(null);
       setShowResult(false);
+      setPlaced([]);
+      setTyped("");
     } else {
       // Complete
       setSessionComplete(true);
@@ -290,7 +359,7 @@ const DailyChallenge = () => {
 
           {/* Streak display */}
           {isAuthenticated && (
-            <div className="bg-gradient-to-r from-accent/10 to-accent/10 border border-accent/20 rounded-2xl p-4 text-center">
+            <div className="rounded-3xl bg-card p-4 text-center shadow-card">
               <div className="flex items-center justify-center gap-2 mb-1">
                 <Flame className="h-6 w-6 text-accent" />
                 <span className="text-3xl font-bold text-foreground">{streakData || 0}</span>
@@ -377,54 +446,116 @@ const DailyChallenge = () => {
   }
 
   // Question view
+  const tiles = currentQuestion?.scrambled?.split(/\s+/).filter(Boolean) ?? [];
+  const hasOptions = !!currentQuestion?.options?.length;
+  const isWordBank = !hasOptions && tiles.length > 0;
+  const isTyped = !hasOptions && !isWordBank;
+
+  /** A pair matched: score it, and finish the challenge on the last one. */
+  const matchPair = (index: number) => {
+    const newMatched = new Set(matchedPairs);
+    newMatched.add(index);
+    setMatchedPairs(newMatched);
+    setScore((prev) => prev + 1);
+    setMatchSelected(null);
+    if (newMatched.size !== challenge.questions.length) return;
+
+    setSessionComplete(true);
+    markTaskCompletedToday("daily-challenge");
+    const totalXP = Math.round(newMatched.size * baseXP * streakMultiplier);
+    if (isAuthenticated && user) {
+      addXP.mutate({ amount: totalXP, reason: "daily_challenge" });
+      const today = new Date().toISOString().split("T")[0];
+      supabase.from("daily_challenge_completions" as any).insert({
+        user_id: user.id, challenge_date: today, challenge_type: "match",
+        xp_earned: totalXP, score: newMatched.size, max_score: challenge.questions.length,
+      });
+    }
+  };
+
+  const missedPair = () => {
+    setMatchSelected(null);
+    toast.error("مو مطابقة، جرّب مرة ثانية");
+  };
+
+  const matchTile = (state: "matched" | "selected" | "idle") =>
+    cn(
+      "w-full min-h-12 rounded-2xl px-3 py-2.5 text-center transition-all",
+      state === "matched" && "bg-tint-sage text-success-ink opacity-70",
+      state === "selected" && "bg-tint-firoza ring-2 ring-primary",
+      state === "idle" && "bg-card shadow-soft hover:bg-muted",
+    );
+
   return (
     <AppShell>
-      <div className="flex items-center justify-between mb-4">
+      <div className="mb-4 flex items-center justify-between gap-2">
         <Button variant="ghost" size="sm" onClick={() => navigate("/")}>
-          <X className="h-4 w-4 me-1" /> Exit
+          <X className="h-4 w-4 me-1" /> خروج
         </Button>
-        <div className="text-center">
-          <p className="text-xs text-muted-foreground">{challenge.title}</p>
-          <p className="text-xs font-arabic text-muted-foreground">{challenge.titleArabic}</p>
+        <div className="min-w-0 text-center">
+          <p className="text-sm font-semibold text-foreground">{challenge.titleArabic}</p>
+          <p lang="en" dir="ltr" className="font-english text-xs text-muted-foreground">{challenge.title}</p>
         </div>
-        <div className="flex items-center gap-1.5">
-          <Languages className="h-3.5 w-3.5 text-muted-foreground" />
-          <span className="text-xs text-muted-foreground">EN</span>
-          <Switch checked={showEnglish} onCheckedChange={setShowEnglish} className="h-5 w-9 data-[state=checked]:bg-primary data-[state=unchecked]:bg-input [&>span]:h-4 [&>span]:w-4 [&>span]:data-[state=checked]:translate-x-4" />
-        </div>
+        {/* Only where there is a meaning to reveal. Hidden by default so the
+            English is read before the dialect explains it. */}
+        {currentQuestion?.sentenceEnglish ? (
+          <div className="flex items-center gap-1.5">
+            <Languages className="h-3.5 w-3.5 text-muted-foreground" aria-hidden />
+            <Switch
+              checked={showEnglish}
+              onCheckedChange={setShowEnglish}
+              aria-label="أظهر المعنى"
+              className="h-5 w-9 data-[state=checked]:bg-primary data-[state=unchecked]:bg-input [&>span]:h-4 [&>span]:w-4 [&>span]:data-[state=checked]:translate-x-4"
+            />
+          </div>
+        ) : (
+          <span className="w-16" aria-hidden />
+        )}
       </div>
 
       <Progress value={progress} className="h-2 mb-6" />
 
       <div className="bg-card rounded-3xl shadow-card p-6 space-y-6">
-        {/* Question prompt (non-match types) */}
+        {/* The question (every type but match) */}
         {challenge.type !== 'match' && currentQuestion && (
-        <div className="text-center">
-          {currentQuestion.prompt && (
-            <p className="text-xl font-semibold text-foreground">{currentQuestion.prompt}</p>
-          )}
-          {currentQuestion.sentence && (
-            <div>
-              <p className="text-xl font-arabic text-foreground" dir="rtl">{currentQuestion.sentence}</p>
-              {showEnglish && currentQuestion.sentenceEnglish && (
-                <p className="text-sm text-muted-foreground mt-1 animate-in fade-in duration-200">{currentQuestion.sentenceEnglish}</p>
-              )}
-            </div>
-          )}
-          {currentQuestion.scrambled && (
-            <div>
-              <p className="text-2xl font-arabic text-foreground tracking-widest" dir="rtl">
-                {currentQuestion.scrambled}
+          <div className="space-y-2 text-center">
+            {currentQuestion.prompt && (
+              <p className="text-foreground">
+                <Phrase
+                  text={currentQuestion.prompt}
+                  english="font-heading text-[26px] leading-10"
+                  arabic="text-xl leading-9"
+                />
               </p>
-              {currentQuestion.hint && (
-                <p className="text-sm text-muted-foreground mt-2">Hint: {currentQuestion.hint}</p>
-              )}
-            </div>
-          )}
-        </div>
+            )}
+            {currentQuestion.sentence &&
+              (hasArabic(currentQuestion.sentence) ? (
+                <p dir="rtl" className="font-naskh text-xl leading-9 text-foreground">{currentQuestion.sentence}</p>
+              ) : (
+                <GapSentence
+                  sentence={currentQuestion.sentence}
+                  fill={showResult ? currentQuestion.answer : undefined}
+                />
+              ))}
+            {showEnglish && currentQuestion.sentenceEnglish && (
+              <p className="text-[15px] text-muted-foreground animate-in fade-in duration-200">
+                <Phrase text={currentQuestion.sentenceEnglish} english="" arabic="" />
+              </p>
+            )}
+            {currentQuestion.scrambled && hasOptions && (
+              <p className="text-foreground">
+                <Phrase text={currentQuestion.scrambled} english="text-xl" arabic="text-2xl" />
+              </p>
+            )}
+            {currentQuestion.hint && (
+              <p className="text-sm text-muted-foreground">
+                تلميح: <bdi>{currentQuestion.hint}</bdi>
+              </p>
+            )}
+          </div>
         )}
 
-        {/* Match type */}
+        {/* Match: English on one side, the dialect on the other */}
         {challenge.type === 'match' && (
           <div className="space-y-3">
             <p className="text-center text-sm text-muted-foreground mb-2">اضغط كلمة إنجليزية، بعدين اضغط معناها</p>
@@ -440,41 +571,15 @@ const DailyChallenge = () => {
                       onClick={() => {
                         if (isMatched) return;
                         if (matchSelected?.side === 'english') {
-                          const engItem = shuffledEnglish[matchSelected.index];
-                          if (engItem.origIndex === i) {
-                            const newMatched = new Set(matchedPairs);
-                            newMatched.add(i);
-                            setMatchedPairs(newMatched);
-                            setScore(prev => prev + 1);
-                            setMatchSelected(null);
-                            if (newMatched.size === challenge.questions.length) {
-                              setSessionComplete(true);
-                              markTaskCompletedToday("daily-challenge");
-                              const totalXP = Math.round(newMatched.size * baseXP * streakMultiplier);
-                              if (isAuthenticated && user) {
-                                addXP.mutate({ amount: totalXP, reason: "daily_challenge" });
-                                const today = new Date().toISOString().split("T")[0];
-                                supabase.from("daily_challenge_completions" as any).insert({
-                                  user_id: user.id, challenge_date: today, challenge_type: "match",
-                                  xp_earned: totalXP, score: newMatched.size, max_score: challenge.questions.length,
-                                });
-                              }
-                            }
-                          } else {
-                            setMatchSelected(null);
-                            toast.error("مو مطابقة، جرّب مرة ثانية");
-                          }
+                          if (shuffledEnglish[matchSelected.index].origIndex === i) matchPair(i);
+                          else missedPair();
                         } else {
                           setMatchSelected({ side: 'arabic', index: i });
                         }
                       }}
-                      className={cn(
-                        "w-full p-3 rounded-xl border-2 text-center font-arabic text-lg transition-all",
-                        isMatched ? "border-success bg-success/10 opacity-60" :
-                        isSelected ? "border-primary bg-primary/10" : "border-border hover:border-primary/50"
-                      )}
+                      className={matchTile(isMatched ? "matched" : isSelected ? "selected" : "idle")}
                     >
-                      {q.arabic}
+                      <Phrase text={q.arabic ?? ""} english="text-[15px] font-semibold" arabic="text-lg" />
                     </button>
                   );
                 })}
@@ -490,40 +595,15 @@ const DailyChallenge = () => {
                       onClick={() => {
                         if (isMatched) return;
                         if (matchSelected?.side === 'arabic') {
-                          if (item.origIndex === matchSelected.index) {
-                            const newMatched = new Set(matchedPairs);
-                            newMatched.add(item.origIndex);
-                            setMatchedPairs(newMatched);
-                            setScore(prev => prev + 1);
-                            setMatchSelected(null);
-                            if (newMatched.size === challenge.questions.length) {
-                              setSessionComplete(true);
-                              markTaskCompletedToday("daily-challenge");
-                              const totalXP = Math.round(newMatched.size * baseXP * streakMultiplier);
-                              if (isAuthenticated && user) {
-                                addXP.mutate({ amount: totalXP, reason: "daily_challenge" });
-                                const today = new Date().toISOString().split("T")[0];
-                                supabase.from("daily_challenge_completions" as any).insert({
-                                  user_id: user.id, challenge_date: today, challenge_type: "match",
-                                  xp_earned: totalXP, score: newMatched.size, max_score: challenge.questions.length,
-                                });
-                              }
-                            }
-                          } else {
-                            setMatchSelected(null);
-                            toast.error("مو مطابقة، جرّب مرة ثانية");
-                          }
+                          if (item.origIndex === matchSelected.index) matchPair(item.origIndex);
+                          else missedPair();
                         } else {
                           setMatchSelected({ side: 'english', index: i });
                         }
                       }}
-                      className={cn(
-                        "w-full p-3 rounded-xl border-2 text-center text-sm transition-all",
-                        isMatched ? "border-success bg-success/10 opacity-60" :
-                        isSelected ? "border-primary bg-primary/10" : "border-border hover:border-primary/50"
-                      )}
+                      className={matchTile(isMatched ? "matched" : isSelected ? "selected" : "idle")}
                     >
-                      {item.text}
+                      <Phrase text={item.text} english="text-[15px] font-semibold" arabic="text-lg" />
                     </button>
                   );
                 })}
@@ -532,9 +612,9 @@ const DailyChallenge = () => {
           </div>
         )}
 
-        {/* Options (non-match types) */}
-        {challenge.type !== 'match' && currentQuestion?.options && (
-          <div className="space-y-2">
+        {/* Options */}
+        {challenge.type !== 'match' && hasOptions && currentQuestion?.options && (
+          <div role="group" aria-label="الخيارات" className="space-y-2">
             {currentQuestion.options.map((option, i) => {
               const isSelected = selectedAnswer === option;
               const isAnswer = option === currentQuestion.answer;
@@ -545,38 +625,116 @@ const DailyChallenge = () => {
                   onClick={() => handleAnswer(option)}
                   disabled={showResult}
                   className={cn(
-                    "w-full p-4 rounded-xl text-center transition-all border-2",
+                    "w-full min-h-14 rounded-2xl px-4 py-3 text-center transition-all",
                     showResult
                       ? isAnswer
-                        ? "border-success bg-success/10"
+                        ? "bg-tint-sage ring-2 ring-success text-success-ink"
                         : isSelected
-                        ? "border-destructive bg-destructive/10"
-                        : "border-border bg-muted/50"
-                      : "border-border hover:border-primary/50 bg-card"
+                        ? "bg-tint-clay ring-2 ring-destructive text-clay-ink"
+                        : "bg-muted text-muted-foreground"
+                      : "bg-card text-foreground shadow-soft hover:bg-muted"
                   )}
                 >
-                  <p className="font-medium text-foreground font-arabic text-lg">{option}</p>
+                  <Phrase text={option} english="text-[17px] font-semibold" arabic="text-lg" />
                 </button>
               );
             })}
           </div>
         )}
 
-        {/* Result + Next (non-match types) */}
+        {/* Word order: tap the words into the sentence, tap one to take it back */}
+        {challenge.type !== 'match' && isWordBank && (
+          <div className="space-y-4">
+            <div
+              role="group"
+              aria-label="جملتك"
+              dir="ltr"
+              className={cn(
+                "flex min-h-[60px] flex-wrap items-center gap-2 rounded-2xl p-3",
+                showResult ? (isCorrect ? "bg-tint-sage" : "bg-tint-clay") : "bg-muted",
+              )}
+            >
+              {placed.map((tileIndex, position) => (
+                <button
+                  key={`${tileIndex}-${position}`}
+                  disabled={showResult}
+                  onClick={() => setPlaced((prev) => prev.filter((_, p) => p !== position))}
+                  className="rounded-xl bg-card px-3 py-2 font-english text-[15px] font-semibold shadow-soft"
+                  lang="en"
+                >
+                  {tiles[tileIndex]}
+                </button>
+              ))}
+            </div>
+            <div role="group" aria-label="الكلمات" dir="ltr" className="flex flex-wrap justify-center gap-2">
+              {tiles.map((tile, i) => (
+                <button
+                  key={i}
+                  disabled={showResult || placed.includes(i)}
+                  onClick={() => setPlaced((prev) => [...prev, i])}
+                  className={cn(
+                    "rounded-xl bg-card px-3 py-2 font-english text-[15px] font-semibold shadow-soft hover:bg-muted",
+                    placed.includes(i) && "invisible",
+                  )}
+                  lang="en"
+                >
+                  {tile}
+                </button>
+              ))}
+            </div>
+            {!showResult && (
+              <Button
+                className="w-full"
+                disabled={placed.length !== tiles.length}
+                onClick={() => handleAnswer(placed.map((i) => tiles[i]).join(" "), false)}
+              >
+                تحقق
+              </Button>
+            )}
+          </div>
+        )}
+
+        {/* Typed: a question with nothing to pick from */}
+        {challenge.type !== 'match' && isTyped && currentQuestion && (
+          <form
+            className="space-y-3"
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (typed.trim()) handleAnswer(typed, false);
+            }}
+          >
+            <Input
+              value={typed}
+              onChange={(e) => setTyped(e.target.value)}
+              disabled={showResult}
+              aria-label="جوابك بالإنجليزي"
+              placeholder="اكتب الجواب بالإنجليزي"
+              lang="en"
+              dir="ltr"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
+              className="text-center font-english text-lg placeholder:font-sans"
+            />
+            {!showResult && (
+              <Button type="submit" className="w-full" disabled={!typed.trim()}>
+                تحقق
+              </Button>
+            )}
+          </form>
+        )}
+
+        {/* Result + Next */}
         {challenge.type !== 'match' && showResult && currentQuestion && (
           <div className="space-y-3">
             <div className={cn(
-              "p-3 rounded-xl text-center",
-              isCorrect ? "bg-success/10" : "bg-destructive/10"
+              "rounded-2xl p-3 text-center",
+              isCorrect ? "bg-tint-sage text-success-ink" : "bg-tint-clay text-clay-ink"
             )}>
-              <div className="flex items-center justify-center gap-2">
-                {isCorrect ? (
-                  <Check className="h-5 w-5 text-success" />
-                ) : (
-                  <X className="h-5 w-5 text-destructive" />
-                )}
-                <span className={isCorrect ? "text-success font-medium" : "text-destructive font-medium"}>
-                  {isCorrect ? "صح!" : `الجواب: ${currentQuestion.answer}`}
+              <div className="flex items-center justify-center gap-2 font-medium">
+                {isCorrect ? <Check className="h-5 w-5" /> : <X className="h-5 w-5" />}
+                <span>
+                  {isCorrect ? "صح!" : <>الجواب: <bdi>{currentQuestion.answer}</bdi></>}
                 </span>
               </div>
             </div>
