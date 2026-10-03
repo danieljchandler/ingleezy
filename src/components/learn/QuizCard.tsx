@@ -123,8 +123,9 @@ export const QuizCard = ({ word, otherWords, onAnswer, topicLabel }: QuizCardPro
         <p className="text-sm text-muted-foreground">وش معناها بالإنجليزي؟</p>
       </div>
 
-      {/* Arabic word + audio button */}
-      <div className="flex flex-col items-center justify-center gap-2 mb-8 p-6 rounded-3xl bg-card shadow-soft">
+      {/* Arabic word + audio button. Named, so the word being asked about can
+          be found by what it is rather than by how it is styled. */}
+      <div role="group" aria-label="الكلمة" className="flex flex-col items-center justify-center gap-2 mb-8 p-6 rounded-3xl bg-card shadow-soft">
         <div className="flex items-center justify-center gap-4">
           <p className="font-naskh text-[44px] leading-[64px]" dir="rtl">
             {word.word_arabic}

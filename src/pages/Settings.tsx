@@ -508,7 +508,7 @@ const Settings = () => {
                   أيقونات (i) صغيرة في أنحاء التطبيق تشرح كل ميزة. أطفئها متى ألفت المكان.
                 </p>
               </div>
-              <Switch checked={hintsEnabled} onCheckedChange={setHintsEnabled} />
+              <Switch checked={hintsEnabled} onCheckedChange={setHintsEnabled} aria-label="أظهر تلميحات الميزات" />
             </div>
           </section>
 
@@ -561,7 +561,7 @@ const Settings = () => {
                   بعد عدة أخطاء، تظهر وسيلة تذكّر وأنشودة من الذكاء الاصطناعي لتساعدك على الحفظ.
                 </p>
               </div>
-              <Switch checked={leechEnabled} onCheckedChange={setLeechEnabled} />
+              <Switch checked={leechEnabled} onCheckedChange={setLeechEnabled} aria-label="علّم البطاقات الصعبة كبطاقات متعثرة" />
             </div>
             <div className="flex items-center justify-between p-3 rounded-2xl bg-card shadow-soft">
               <div className="min-w-0 pe-3">
@@ -571,7 +571,7 @@ const Settings = () => {
                   الكلمة — <span className="font-english">act, action, active, actor</span>.
                 </p>
               </div>
-              <Switch checked={rootFamiliesEnabled} onCheckedChange={setRootFamiliesEnabled} />
+              <Switch checked={rootFamiliesEnabled} onCheckedChange={setRootFamiliesEnabled} aria-label="أظهر كلمات من نفس العائلة" />
             </div>
             <div className="p-3 rounded-2xl bg-card shadow-soft">
               <p className="font-medium text-foreground text-sm">كثافة المراجعة</p>
@@ -608,7 +608,7 @@ const Settings = () => {
                   إيقافه متى شئت — راجع الشروط للتفاصيل.
                 </p>
               </div>
-              <Switch checked={contributeAudio} onCheckedChange={setContributeAudio} />
+              <Switch checked={contributeAudio} onCheckedChange={setContributeAudio} aria-label="ساهم بتسجيلات تدريبي" />
             </div>
             <Button
               variant="outline"
@@ -661,7 +661,7 @@ const Settings = () => {
                 <p className="font-medium text-foreground text-sm">أظهرني في لوحة الصدارة</p>
                 <p className="text-xs text-muted-foreground">يمكن للآخرين رؤية اسمك ونقاطك</p>
               </div>
-              <Switch checked={showOnLeaderboard} onCheckedChange={setShowOnLeaderboard} />
+              <Switch checked={showOnLeaderboard} onCheckedChange={setShowOnLeaderboard} aria-label="أظهرني في لوحة الصدارة" />
             </div>
           </section>
 
