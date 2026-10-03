@@ -149,7 +149,7 @@ export const RequestSituationCard = () => {
           {phrases.map((p, i) => (
             <div
               key={i}
-              className="p-3 rounded-lg bg-card border border-border"
+              className="p-3 rounded-2xl bg-card shadow-soft"
             >
               <p className="text-lg font-semibold font-english">
                 {p.phrase_english}
@@ -162,7 +162,7 @@ export const RequestSituationCard = () => {
               </p>
               {p.literal && (
                 <p className="text-xs text-muted-foreground/80 mt-0.5 font-arabic" dir="rtl">
-                  <span className="uppercase tracking-wide text-[9px] ms-1 text-muted-foreground/60">
+                  <span className="text-[9px] ms-1 text-muted-foreground/60">
                     حرفي
                   </span>
                   {p.literal}

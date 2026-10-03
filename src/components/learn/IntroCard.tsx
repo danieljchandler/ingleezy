@@ -60,7 +60,7 @@ export const IntroCard = ({ word, onContinue, topicLabel }: IntroCardProps) => {
       </div>
 
       {/* Arabic Word Display - hidden until revealed */}
-      <div className="mb-3 py-4 px-5 rounded-xl bg-card border border-border">
+      <div className="mb-3 py-4 px-5 rounded-2xl bg-card shadow-soft">
         {showArabic ? (
           <div className="animate-in fade-in duration-200">
             <p
@@ -99,8 +99,8 @@ export const IntroCard = ({ word, onContinue, topicLabel }: IntroCardProps) => {
       </div>
 
       {/* English Translation */}
-      <div className="mb-6 py-3 px-5 rounded-xl bg-card border border-border">
-        <p className="text-xs text-muted-foreground/70 mb-1 tracking-wide">
+      <div className="mb-6 py-3 px-5 rounded-2xl bg-card shadow-soft">
+        <p className="text-xs text-muted-foreground/70 mb-1">
           بالإنجليزي
         </p>
         <p className="text-sm text-muted-foreground font-english">

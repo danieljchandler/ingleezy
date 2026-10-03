@@ -751,14 +751,14 @@ const MyWordsReview = () => {
                 distractors={distractorPool}
               />
               {clozeFromTranscript && transcriptCloze && (
-                <p className="mt-2 text-center text-[11px] uppercase tracking-wide text-muted-foreground">
+                <p className="mt-2 text-center text-[11px] text-muted-foreground">
                   {transcriptCloze.origin === "upload" ? "من تفريغك الصوتي" : "من فيديو شاهدته"} ·{" "}
                   <span className="font-english" dir="ltr">{transcriptCloze.sourceTitle}</span>
                 </p>
               )}
             </div>
           ) : (
-          <div className="rounded-2xl bg-card border border-border p-8 text-center">
+          <div className="rounded-3xl bg-card p-8 text-center shadow-soft">
             {/* Image if available */}
             {currentWord.image_url && (
               <div className="mb-4 rounded-lg overflow-hidden bg-muted aspect-[4/3] flex items-center justify-center">
@@ -787,18 +787,18 @@ const MyWordsReview = () => {
               <>
                 {!showAnswer ? (
                   <>
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground mb-2">
+                    <p className="text-xs text-muted-foreground mb-2">
                       قلها بالإنجليزية
                     </p>
                     <p
-                      className="text-2xl font-semibold text-foreground mb-6"
+                      className="font-naskh text-[30px] leading-[46px] text-foreground mb-6"
                     >
                       {currentWord.word_arabic}
                     </p>
                   </>
                 ) : (
                   <>
-                    <p className="font-english text-4xl font-bold text-foreground mb-1 animate-in fade-in duration-200">
+                    <p dir="ltr" className="font-heading text-[42px] leading-[54px] text-foreground mb-1 animate-in fade-in duration-200">
                       {currentWord.word_english}
                     </p>
                     {/* transliteration carries phonetic_ar — the English word
@@ -811,7 +811,7 @@ const MyWordsReview = () => {
               </>
             ) : (
               <>
-                <p className="font-english text-4xl font-bold text-foreground mb-1">
+                <p dir="ltr" className="font-heading text-[42px] leading-[54px] text-foreground mb-1">
                   {currentWord.word_english}
                 </p>
                 {currentWord.transliteration && (
@@ -889,13 +889,13 @@ const MyWordsReview = () => {
                 {showLyrics ? (
                   <div className="rounded-lg bg-muted/40 border border-border p-3 text-left animate-in fade-in duration-200 max-w-md mx-auto">
                     <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                      <span className="text-[10px] font-semibold text-muted-foreground">
                         كلمات الأنشودة
                       </span>
                       <button
                         type="button"
                         onClick={() => setShowLyrics(false)}
-                        className="text-[10px] uppercase tracking-wide text-muted-foreground hover:text-foreground"
+                        className="text-[10px] text-muted-foreground hover:text-foreground"
                       >
                         إخفاء
                       </button>
@@ -996,7 +996,7 @@ const MyWordsReview = () => {
                   </Button>
                 ) : (
                   <div className="text-left bg-muted/40 border-l-2 border-primary/40 rounded-r p-3 animate-in fade-in duration-200">
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground mb-1">
+                    <p className="text-xs text-muted-foreground mb-1">
                       السياق الأصلي
                     </p>
                     <p

@@ -336,19 +336,19 @@ const MyPhrasesReview = () => {
       {/* Card */}
       <div className="py-4">
         <div className="mx-auto w-full max-w-sm">
-          <div className="rounded-3xl bg-card border border-primary/15 p-7 text-center space-y-5 shadow-elegant">
-            <p className="text-[10px] uppercase tracking-[0.18em] font-semibold text-muted-foreground">
+          <div className="rounded-[32px] bg-card p-7 text-center space-y-5 shadow-elegant">
+            <p className="inline-block rounded-full bg-tint-firoza px-3 py-1 text-xs font-semibold leading-[18px] text-primary dark:text-foreground">
               قلها بالإنجليزية
             </p>
             <p
-              className="text-2xl font-semibold text-foreground leading-relaxed"
+              className="font-naskh text-[30px] leading-[46px] text-foreground"
             >
               {current.phrase_arabic}
             </p>
 
             {showAnswer ? (
               <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 space-y-4 pt-2">
-                <p className="font-english text-4xl font-bold text-primary leading-snug">
+                <p dir="ltr" className="font-heading text-[34px] leading-[46px] text-foreground">
                   {current.phrase_english}
                 </p>
                 {/* transliteration carries phonetic_ar — the English phrase in
@@ -422,13 +422,13 @@ const MyPhrasesReview = () => {
                     {showLyrics ? (
                       <div className="rounded-xl bg-muted/40 border border-border p-3 text-left animate-in fade-in duration-200">
                         <div className="flex items-center justify-between mb-1.5">
-                          <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                          <span className="text-[10px] font-semibold text-muted-foreground">
                             كلمات الأنشودة
                           </span>
                           <button
                             type="button"
                             onClick={() => setShowLyrics(false)}
-                            className="text-[10px] uppercase tracking-wide text-muted-foreground hover:text-foreground"
+                            className="text-[10px] text-muted-foreground hover:text-foreground"
                           >
                             إخفاء
                           </button>

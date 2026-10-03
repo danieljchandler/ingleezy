@@ -144,7 +144,7 @@ const SoundsCheckpoint = () => {
       </div>
 
       <header className="text-center mb-6">
-        <p className="text-xs font-semibold uppercase tracking-wider text-accent">
+        <p className="text-xs font-semibold text-accent">
           نقطة تفتيش القافلة {idx + 1}
         </p>
         <h1 className="text-xl font-bold text-foreground flex items-center justify-center gap-2 mt-1">

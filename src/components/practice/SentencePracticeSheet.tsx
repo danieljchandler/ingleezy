@@ -189,7 +189,7 @@ export function SentencePracticeSheet({ open, onOpenChange, targetEnglish, targe
                 <>
                   {feedback.transcript && (
                     <div>
-                      <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground mb-1">
+                      <p className="text-[11px] font-semibold text-muted-foreground mb-1">
                         اللي قلته
                       </p>
                       <p className="font-english text-lg leading-relaxed">{feedback.transcript}</p>
@@ -223,7 +223,7 @@ export function SentencePracticeSheet({ open, onOpenChange, targetEnglish, targe
 
                   {feedback.natural_rewrite && (
                     <div className="rounded-lg bg-muted/40 border border-border p-3">
-                      <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground mb-1">
+                      <p className="text-[11px] font-semibold text-muted-foreground mb-1">
                         أطبع منها
                       </p>
                       <p className="font-english text-lg leading-relaxed">
@@ -239,7 +239,7 @@ export function SentencePracticeSheet({ open, onOpenChange, targetEnglish, targe
 
                   {feedback.interference_notes && feedback.interference_notes.length > 0 && (
                     <div className="rounded-lg border border-accent/40 bg-accent/5 p-3">
-                      <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground mb-1.5 flex items-center gap-1">
+                      <p className="text-[11px] font-semibold text-muted-foreground mb-1.5 flex items-center gap-1">
                         <Lightbulb className="h-3.5 w-3.5 text-accent" />
                         من العربي للإنجليزي
                       </p>
@@ -260,7 +260,7 @@ export function SentencePracticeSheet({ open, onOpenChange, targetEnglish, targe
 
                   {feedback.alternatives && feedback.alternatives.length > 0 && (
                     <div>
-                      <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground mb-1.5">
+                      <p className="text-[11px] font-semibold text-muted-foreground mb-1.5">
                         طرق ثانية تقولها فيها
                       </p>
                       <div className="space-y-2">

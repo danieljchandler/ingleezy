@@ -116,12 +116,12 @@ export const QuizQuestion = ({
             )}
           </div>
         ) : (
-          <div className="w-44 h-32 rounded-xl mx-auto mb-4 flex items-center justify-center bg-muted border border-border">
+          <div className="w-44 h-32 rounded-2xl mx-auto mb-4 flex items-center justify-center bg-muted">
             <Volume2 className="w-8 h-8 text-muted-foreground/40" />
           </div>
         )}
         
-        <p className="text-4xl font-bold mb-2 font-arabic leading-relaxed" dir="rtl">
+        <p className="font-naskh text-[38px] leading-[56px] mb-2" dir="rtl">
           {currentWord.word_arabic}
         </p>
         {/* Held back until the question is answered. The root of a word is a
@@ -139,16 +139,19 @@ export const QuizQuestion = ({
             const isSelected = selectedAnswer === option;
             const isCorrectAnswer = option === currentWord.word_english;
             
-            let buttonStyle = "bg-card border border-border hover:border-primary";
+            // Tint plus its own ink: the old fills put white text on a pale
+            // green, which a learner could barely read at the one moment it
+            // mattered.
+            let buttonStyle = "bg-card shadow-soft hover:bg-muted";
             
             if (showResult) {
               if (isCorrectAnswer) {
-                buttonStyle = "bg-success/20 border-2 border-success text-success-foreground";
+                buttonStyle = "bg-tint-sage ring-2 ring-success text-success-ink";
               } else if (isSelected && !isCorrectAnswer) {
-                buttonStyle = "bg-destructive/20 border-2 border-destructive text-destructive-foreground";
+                buttonStyle = "bg-tint-clay ring-2 ring-destructive text-clay-ink";
               }
             } else if (isSelected) {
-              buttonStyle = "bg-primary/20 border-2 border-primary";
+              buttonStyle = "bg-tint-firoza ring-2 ring-primary";
             }
 
             return (
@@ -157,7 +160,7 @@ export const QuizQuestion = ({
                 onClick={() => handleMultipleChoiceSelect(option)}
                 disabled={showResult}
                 className={cn(
-                  "p-3 rounded-xl font-sans text-sm transition-all duration-200",
+                  "min-h-14 p-3 rounded-2xl font-english text-[15px] font-semibold transition-all duration-200",
                   "flex items-center justify-center gap-2",
                   buttonStyle,
                   !showResult && "hover:scale-[1.02] active:scale-[0.98]"
@@ -208,14 +211,14 @@ export const QuizQuestion = ({
             <Button
               type="submit"
               disabled={!typedAnswer.trim()}
-              className="w-full py-5 text-lg font-semibold rounded-xl bg-primary text-primary-foreground shadow-button"
+              className="h-[54px] w-full text-base font-semibold rounded-2xl bg-primary text-primary-foreground"
             >
               تحقّق
             </Button>
           )}
           
           {showResult && !isCorrect && (
-            <div className="text-center p-3 bg-card rounded-xl border border-border">
+            <div className="text-center p-3 bg-card rounded-2xl shadow-soft">
               <p className="text-muted-foreground text-sm mb-1">الجواب الصحيح:</p>
               <p className="text-xl font-bold text-success">
                 {currentWord.word_english}

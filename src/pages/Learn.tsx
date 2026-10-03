@@ -310,7 +310,7 @@ const Learn = () => {
             {isGreatScore ? "أحسنت — تقدّمك حلو" : "واصل التمرين وبتتحسّن"}
           </p>
 
-          <div className="p-6 rounded-xl mb-8 bg-card border border-border">
+          <div className="p-6 rounded-3xl mb-8 bg-card shadow-soft">
             <span className="text-4xl font-bold text-foreground">{percentage}%</span>
             <p className="text-muted-foreground mt-2">
               {sessionResults.correct} / {sessionResults.total} correct

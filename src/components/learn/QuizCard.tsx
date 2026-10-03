@@ -112,7 +112,7 @@ export const QuizCard = ({ word, otherWords, onAnswer, topicLabel }: QuizCardPro
       {/* Topic Label */}
       {topicLabel && (
         <div className="mb-3 flex justify-center">
-          <span className="px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">
+          <span className="px-3 py-1 rounded-full text-xs font-semibold bg-tint-firoza text-primary dark:text-foreground">
             {topicLabel}
           </span>
         </div>
@@ -124,9 +124,9 @@ export const QuizCard = ({ word, otherWords, onAnswer, topicLabel }: QuizCardPro
       </div>
 
       {/* Arabic word + audio button */}
-      <div className="flex flex-col items-center justify-center gap-2 mb-8 p-6 rounded-2xl bg-card border border-border">
+      <div className="flex flex-col items-center justify-center gap-2 mb-8 p-6 rounded-3xl bg-card shadow-soft">
         <div className="flex items-center justify-center gap-4">
-          <p className="text-5xl font-bold font-arabic leading-relaxed" dir="rtl">
+          <p className="font-naskh text-[44px] leading-[64px]" dir="rtl">
             {word.word_arabic}
           </p>
           <button
@@ -162,13 +162,13 @@ export const QuizCard = ({ word, otherWords, onAnswer, topicLabel }: QuizCardPro
           const isSelected = selectedAnswer === option;
           const isCorrectAnswer = option === word.word_english;
 
-          let buttonStyle = "bg-card border border-border hover:border-primary/30";
+          let buttonStyle = "bg-card shadow-soft hover:bg-muted";
 
           if (showResult) {
             if (isCorrectAnswer) {
-              buttonStyle = "bg-success/10 border border-success";
+              buttonStyle = "bg-tint-sage ring-2 ring-success";
             } else if (isSelected && !isCorrectAnswer) {
-              buttonStyle = "bg-destructive/10 border border-destructive";
+              buttonStyle = "bg-tint-clay ring-2 ring-destructive";
             }
           }
 
@@ -181,7 +181,7 @@ export const QuizCard = ({ word, otherWords, onAnswer, topicLabel }: QuizCardPro
               aria-checked={isSelected ?? false}
               aria-label={option}
               className={cn(
-                "p-3 rounded-lg text-sm transition-all duration-200",
+                "min-h-14 p-3 rounded-2xl font-english text-[15px] font-semibold transition-all duration-200",
                 "flex items-center justify-center gap-2",
                 buttonStyle
               )}
@@ -201,11 +201,11 @@ export const QuizCard = ({ word, otherWords, onAnswer, topicLabel }: QuizCardPro
       {/* Result feedback */}
       {showResult && (
         <div className={cn(
-          "mt-4 p-3 rounded-lg text-center text-sm font-medium",
+          "mt-4 p-3 rounded-2xl text-center text-sm font-semibold",
           "animate-in fade-in zoom-in-95 duration-300",
           isCorrect
-            ? "bg-success/10 text-success"
-            : "bg-destructive/10 text-destructive"
+            ? "bg-tint-sage text-success-ink"
+            : "bg-tint-clay text-clay-ink"
         )}>
           {isCorrect
             ? "Correct! أحسنت"
@@ -217,7 +217,7 @@ export const QuizCard = ({ word, otherWords, onAnswer, topicLabel }: QuizCardPro
       {showResult && !isCorrect && (
         <button
           onClick={handleContinue}
-          className="mt-3 w-full py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity animate-in fade-in duration-300"
+          className="mt-3 h-[54px] w-full rounded-2xl bg-primary text-primary-foreground text-base font-semibold hover:opacity-90 transition-opacity animate-in fade-in duration-300"
         >
           كمّل
         </button>

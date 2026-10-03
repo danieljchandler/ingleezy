@@ -23,7 +23,7 @@ export function DisplayPrefsEditor() {
 
   return (
     <section className="space-y-3">
-      <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+      <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
         <Eye className="h-4 w-4" />
         تفضيلات العرض
       </div>
@@ -35,7 +35,7 @@ export function DisplayPrefsEditor() {
         {ROWS.map((row) => (
           <div
             key={row.key}
-            className="flex items-center justify-between p-3 rounded-xl bg-card border border-border"
+            className="flex items-center justify-between p-3 rounded-2xl bg-card shadow-soft"
           >
             <div className="min-w-0 pe-3">
               <p className="font-medium text-foreground text-sm">{row.label}</p>

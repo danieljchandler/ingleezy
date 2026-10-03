@@ -179,7 +179,7 @@ export const PronunciationButton = ({
 
       {/* Results */}
       {result && band && (
-        <div className="w-full max-w-xs rounded-xl bg-card border border-border p-4 text-center animate-in fade-in duration-300">
+        <div className="w-full max-w-xs rounded-3xl bg-card p-4 text-center animate-in fade-in duration-300 shadow-soft">
           <div className="mb-2">
             <span className={`text-3xl font-bold ${band.color}`}>
               {displayScore}

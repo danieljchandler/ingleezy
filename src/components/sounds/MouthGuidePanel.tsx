@@ -23,7 +23,7 @@ export const MouthGuidePanel = ({ sound }: MouthGuidePanelProps) => {
   return (
     <div className="space-y-4">
       <div className="p-5 rounded-2xl border-2 border-border bg-card space-y-3">
-        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        <p className="text-xs font-semibold text-muted-foreground">
           كيف تشكّل الصوت
         </p>
         <p className="text-base text-foreground leading-relaxed">{sound.mouth_ar}</p>
@@ -31,7 +31,7 @@ export const MouthGuidePanel = ({ sound }: MouthGuidePanelProps) => {
 
       {sound.voiced !== undefined && (
         <div className="p-5 rounded-2xl border-2 border-primary/30 bg-primary/5 space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-wider text-primary">
+          <p className="text-xs font-semibold text-primary">
             جرّب: ضع يدك على حلقك
           </p>
           <p className="text-base text-foreground leading-relaxed">
@@ -44,7 +44,7 @@ export const MouthGuidePanel = ({ sound }: MouthGuidePanelProps) => {
       )}
 
       <div className="p-5 rounded-2xl border-2 border-accent/30 bg-accent/5 space-y-2">
-        <p className="text-xs font-semibold uppercase tracking-wider text-accent">
+        <p className="text-xs font-semibold text-accent">
           فخ شائع لمتحدثي العربية
         </p>
         <p className="text-base text-foreground leading-relaxed">{sound.interference_ar}</p>

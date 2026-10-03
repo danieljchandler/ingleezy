@@ -33,7 +33,7 @@ export function HubSection({ title, subtitle, tiles }: HubSectionProps) {
       <div className="px-1 mb-3 flex items-baseline gap-3">
         <span className="h-px flex-1 bg-primary/15" aria-hidden />
         <h2
-          className="text-[10px] font-bold text-primary/65 uppercase tracking-[0.18em]"
+          className="font-sans text-[13px] font-semibold text-primary/80 dark:text-periwinkle"
         >
           {title}
         </h2>

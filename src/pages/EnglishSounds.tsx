@@ -120,7 +120,7 @@ const EnglishSounds = () => {
                         : "bg-muted/60",
                     )}
                   >
-                    <p className="text-[10px] font-semibold uppercase tracking-wider text-primary/70 dark:text-periwinkle/70">
+                    <p className="text-[10px] font-semibold text-primary/70 dark:text-periwinkle/70">
                       محطة {sound.order_index + 1}
                     </p>
                     <p className="font-english text-sm font-medium text-foreground" dir="ltr">

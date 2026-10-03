@@ -335,7 +335,7 @@ const HowDoISay = () => {
 
           {/* Translations */}
           <div>
-            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
+            <h2 className="text-sm font-semibold text-muted-foreground mb-3">
               {result.inputMode === "scenario"
                 ? "ماذا تقول في هذا الموقف"
                 : result.inputMode === "conversation"

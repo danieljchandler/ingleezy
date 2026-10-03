@@ -282,7 +282,7 @@ const Settings = () => {
         <div className="space-y-8">
           {/* Profile Section */}
           <section className="space-y-3">
-            <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+            <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
               <User className="h-4 w-4" />
               الملف الشخصي
             </div>
@@ -340,7 +340,7 @@ const Settings = () => {
 
           {/* Dialect Section */}
           <section className="space-y-3">
-            <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+            <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
               <Globe2 className="h-4 w-4" />
               لهجتك
             </div>
@@ -366,7 +366,7 @@ const Settings = () => {
 
           {/* Level Section */}
           <section className="space-y-3">
-            <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+            <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
               <Target className="h-4 w-4" />
               مستواك في الإنجليزية
             </div>
@@ -393,7 +393,7 @@ const Settings = () => {
 
           {/* Goal Section */}
           <section className="space-y-3">
-            <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+            <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
               <Target className="h-4 w-4" />
               الهدف الأسبوعي
             </div>
@@ -419,7 +419,7 @@ const Settings = () => {
 
           {/* What you want English for — feeds generated content */}
           <section className="space-y-3">
-            <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+            <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
               <Compass className="h-4 w-4" />
               لماذا تتعلم الإنجليزية؟
             </div>
@@ -470,7 +470,7 @@ const Settings = () => {
 
           {/* Library */}
           <section className="space-y-3">
-            <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+            <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
               <Heart className="h-4 w-4" />
               مكتبتي
             </div>
@@ -497,11 +497,11 @@ const Settings = () => {
 
           {/* Feature Hints */}
           <section className="space-y-3">
-            <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+            <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
               <Info className="h-4 w-4" />
               تلميحات الميزات
             </div>
-            <div className="flex items-center justify-between p-3 rounded-xl bg-card border border-border">
+            <div className="flex items-center justify-between p-3 rounded-2xl bg-card shadow-soft">
               <div className="min-w-0 pe-3">
                 <p className="font-medium text-foreground text-sm">أظهر تلميحات الميزات</p>
                 <p className="text-xs text-muted-foreground">
@@ -514,10 +514,10 @@ const Settings = () => {
 
           {/* Appearance */}
           <section className="space-y-3">
-            <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+            <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
               المظهر
             </div>
-            <div className="p-3 rounded-xl bg-card border border-border">
+            <div className="p-3 rounded-2xl bg-card shadow-soft">
               <p className="font-medium text-foreground text-sm">الوضع الليلي</p>
               <p className="text-xs text-muted-foreground mb-2">
                 «النظام» يتبع إعداد جهازك تلقائياً.
@@ -535,7 +535,7 @@ const Settings = () => {
                     aria-checked={themePref === value}
                     onClick={() => chooseTheme(value)}
                     className={cn(
-                      'flex-1 rounded-lg border px-3 py-2 text-sm font-medium transition-colors',
+                      'flex-1 rounded-full border px-3 py-2 text-sm font-medium transition-colors',
                       themePref === value
                         ? 'border-primary bg-primary text-primary-foreground'
                         : 'border-border bg-card text-muted-foreground hover:border-primary/40',
@@ -550,11 +550,11 @@ const Settings = () => {
 
           {/* Review Preferences */}
           <section className="space-y-3">
-            <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+            <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
               <AlertTriangle className="h-4 w-4" />
               تفضيلات المراجعة
             </div>
-            <div className="flex items-center justify-between p-3 rounded-xl bg-card border border-border">
+            <div className="flex items-center justify-between p-3 rounded-2xl bg-card shadow-soft">
               <div className="min-w-0 pe-3">
                 <p className="font-medium text-foreground text-sm">علّم البطاقات الصعبة كبطاقات متعثرة</p>
                 <p className="text-xs text-muted-foreground">
@@ -563,7 +563,7 @@ const Settings = () => {
               </div>
               <Switch checked={leechEnabled} onCheckedChange={setLeechEnabled} />
             </div>
-            <div className="flex items-center justify-between p-3 rounded-xl bg-card border border-border">
+            <div className="flex items-center justify-between p-3 rounded-2xl bg-card shadow-soft">
               <div className="min-w-0 pe-3">
                 <p className="font-medium text-foreground text-sm">أظهر كلمات من نفس العائلة</p>
                 <p className="text-xs text-muted-foreground">
@@ -573,7 +573,7 @@ const Settings = () => {
               </div>
               <Switch checked={rootFamiliesEnabled} onCheckedChange={setRootFamiliesEnabled} />
             </div>
-            <div className="p-3 rounded-xl bg-card border border-border">
+            <div className="p-3 rounded-2xl bg-card shadow-soft">
               <p className="font-medium text-foreground text-sm">كثافة المراجعة</p>
               <p className="text-xs text-muted-foreground mb-2">
                 إلى أي درجة تريد أن تتذكر البطاقات وقت المراجعة. الأخف يعني مراجعات أقل
@@ -599,7 +599,7 @@ const Settings = () => {
                 ))}
               </div>
             </div>
-            <div className="flex items-center justify-between p-3 rounded-xl bg-card border border-border">
+            <div className="flex items-center justify-between p-3 rounded-2xl bg-card shadow-soft">
               <div className="min-w-0 pe-3">
                 <p className="font-medium text-foreground text-sm">ساهم بتسجيلات تدريبي</p>
                 <p className="text-xs text-muted-foreground">
@@ -625,11 +625,11 @@ const Settings = () => {
               deployment has no VAPID key — a dead toggle is worse than none. */}
           {push.isSupported && (
             <section className="space-y-3">
-              <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+              <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
                 <Bell className="h-4 w-4" />
                 التذكيرات
               </div>
-              <div className="flex items-center justify-between gap-3 p-3 rounded-xl bg-card border border-border">
+              <div className="flex items-center justify-between gap-3 p-3 rounded-2xl bg-card shadow-soft">
                 <div className="min-w-0">
                   <p className="font-medium text-foreground text-sm">تذكيرات المراجعة</p>
                   <p className="text-xs text-muted-foreground">
@@ -652,11 +652,11 @@ const Settings = () => {
 
           {/* Privacy Section */}
           <section className="space-y-3">
-            <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+            <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
               <Eye className="h-4 w-4" />
               الخصوصية
             </div>
-            <div className="flex items-center justify-between p-3 rounded-xl bg-card border border-border">
+            <div className="flex items-center justify-between p-3 rounded-2xl bg-card shadow-soft">
               <div>
                 <p className="font-medium text-foreground text-sm">أظهرني في لوحة الصدارة</p>
                 <p className="text-xs text-muted-foreground">يمكن للآخرين رؤية اسمك ونقاطك</p>
@@ -667,11 +667,11 @@ const Settings = () => {
 
           {/* Subscription */}
           <section className="space-y-3">
-            <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+            <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
               <Heart className="h-4 w-4" />
               الاشتراك
             </div>
-            <div className="p-3 rounded-xl bg-card border border-border space-y-2">
+            <div className="p-3 rounded-2xl bg-card space-y-2 shadow-soft">
               <p className="text-sm font-medium text-foreground">
                 {subscribed ? `الباقة الفعّالة: ${tier === 'allin' ? 'الشاملة' : 'القياسية'}` : 'الباقة المجانية'}
               </p>

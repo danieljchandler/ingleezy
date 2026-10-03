@@ -291,9 +291,9 @@ describe("answering", () => {
     choose("house");
 
     // Being told you were wrong without being shown the answer teaches nothing.
-    expect(screen.getByRole("radio", { name: "market" }).className).toContain("border-success");
+    expect(screen.getByRole("radio", { name: "market" }).className).toContain("ring-success");
     expect(screen.getByRole("radio", { name: "house" }).className).toContain(
-      "border-destructive",
+      "ring-destructive",
     );
   });
 
