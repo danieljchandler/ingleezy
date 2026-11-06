@@ -17,6 +17,7 @@ it was describing.
 | [`handoff-findings.md`](handoff-findings.md) | The 47 behaviour findings the test suite turned up, all fixed, plus the standing constraints on the test environment. A record, and the constraints are live. |
 | [`curriculum-builder-plan.md`](curriculum-builder-plan.md) | Design for the admin curriculum builder. Built; the plan is the rationale. |
 | [`lesson-import-plan.md`](lesson-import-plan.md) | Design for the lesson xlsx importer. Built; same. |
+| [`content-sourcing-plan-2026-11.md`](content-sourcing-plan-2026-11.md) | How to find real spoken English for the clip library and get it in through Maktaba: the selection brief, where to look, the runbook, cadence and targets. Proposal; §1 names two code findings and §8 the open decisions. |
 
 ## Inherited from Hakiya
 
