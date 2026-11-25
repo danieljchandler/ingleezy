@@ -17,6 +17,12 @@
 // The gemini gateway serves google/* only; anything else it cannot serve
 // (openai/*) falls through to OpenRouter.
 //
+// With no OPENROUTER_API_KEY, a model only OpenRouter carries (Claude, Qwen,
+// Saba, openai/* on the gemini gateway) is swapped for AI_FALLBACK_MODEL
+// (default google/gemini-2.5-flash) on whichever gateway is configured, so a
+// project running on a free Gemini key alone still gets an answer from every
+// lineup rather than a 500. The swap is logged once per model.
+//
 // Every function here reads the environment when it is called, not when the
 // module loads, so tests can change the env between calls.
 
@@ -81,11 +87,23 @@ export function wireModel(model: string, route: AiRoute): string {
   return route === 'gemini' ? model.replace(/^google\//, '') : model;
 }
 
+const DEFAULT_FALLBACK_MODEL = 'google/gemini-2.5-flash';
+const warnedSubstitutions = new Set<string>();
+
+/** The model that stands in for an OpenRouter-only model when OpenRouter has no key. */
+export function fallbackModel(): string {
+  return Deno.env.get('AI_FALLBACK_MODEL')?.trim() || DEFAULT_FALLBACK_MODEL;
+}
+
 export interface ChatTarget {
   route: AiRoute;
   url: string;
   /** The model id to put in the request body. */
   model: string;
+  /** The model the caller asked for, before any fallback swap. */
+  requestedModel: string;
+  /** True when an OpenRouter-only model was swapped for the fallback model. */
+  substituted: boolean;
   /** Undefined when the route's key is not configured; see `missingKey`. */
   apiKey: string | undefined;
   /** The env var to set when `apiKey` is undefined, else null. */
@@ -95,12 +113,28 @@ export interface ChatTarget {
 
 /** Everything needed to POST an OpenAI-shaped chat completion for `model`. */
 export function chatTarget(model: string): ChatTarget {
-  const route = routeForModel(model);
-  const apiKey = envKey(route);
+  let route = routeForModel(model);
+  let apiKey = envKey(route);
+  let effective = model;
+  if (!apiKey && route === 'openrouter') {
+    const gateway = defaultGateway();
+    const gatewayKey = gateway === 'openrouter' ? undefined : envKey(gateway);
+    if (gatewayKey) {
+      effective = fallbackModel();
+      route = routeForModel(effective) === 'openrouter' ? gateway : routeForModel(effective);
+      apiKey = envKey(route);
+      if (!warnedSubstitutions.has(model)) {
+        warnedSubstitutions.add(model);
+        console.warn(`[aiGateway] OPENROUTER_API_KEY not set: ${model} answered by ${effective} via ${route}`);
+      }
+    }
+  }
   return {
     route,
     url: CHAT_URL[route],
-    model: wireModel(model, route),
+    model: wireModel(effective, route),
+    requestedModel: model,
+    substituted: effective !== model,
     apiKey,
     missingKey: apiKey ? null : missingKeyName(route),
     headers: { Authorization: `Bearer ${apiKey ?? ''}`, 'Content-Type': 'application/json' },

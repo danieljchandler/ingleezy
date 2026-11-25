@@ -361,8 +361,9 @@ Deno.test("analyze-meme refuses a request with neither image nor transcript", as
 });
 
 Deno.test("analyze-meme says so when a key is missing", async () => {
-  // No gateway for the vision half, or no OpenRouter for the Qwen half.
-  const cases = [["LOVABLE_API_KEY", NO_AI_GATEWAY], ["OPENROUTER_API_KEY", { OPENROUTER_API_KEY: undefined }]] as const;
+  // Only "no gateway at all" stops it. The function never calls OpenRouter
+  // itself, so a missing OPENROUTER_API_KEY alone is not a reason to refuse.
+  const cases = [["LOVABLE_API_KEY", NO_AI_GATEWAY]] as const;
   for (const [key, env] of cases) {
     const { status, body, calls } = await call(
       { imageBase64: IMAGE },

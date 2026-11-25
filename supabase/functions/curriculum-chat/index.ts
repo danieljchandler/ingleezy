@@ -371,7 +371,9 @@ async function callLLM(
   messages: Array<{ role: string; content: string }>,
   maxTokens = 4096,
 ): Promise<string> {
-  if (config.endpoint === GATEWAY) {
+  // Gateway models and OpenRouter models both resolve per call, so a missing
+  // OPENROUTER_API_KEY falls back to Gemini instead of failing (aiGateway.ts).
+  if (config.endpoint === GATEWAY || config.endpoint === OPENROUTER_ENDPOINT) {
     const target = chatTarget(config.model);
     config = { endpoint: target.url, model: target.model, keyEnv: ROUTE_KEY[target.route] };
   }

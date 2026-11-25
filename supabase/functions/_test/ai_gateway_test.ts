@@ -1,6 +1,6 @@
 import { assert, assertEquals, assertStringIncludes, assertThrows } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import { fixtureJwt, jsonRequest, loadFunction, loadSharedModule, NO_AI_GATEWAY, stubUpstreams } from "./harness.ts";
-import { chatCompletion, json, type UpstreamHandler } from "./upstreams.ts";
+import { chatCompletion, json, sseCompletion, type UpstreamHandler } from "./upstreams.ts";
 
 /**
  * Where an LLM call goes when the project is not on Lovable Cloud.
@@ -69,10 +69,31 @@ Deno.test("with only a Gemini key, Gemini goes to Google without the vendor pref
     assertEquals(target.model, "gemini-2.5-flash");
     assertEquals(target.headers.Authorization, "Bearer fixture-gemini");
 
-    // Google cannot serve an OpenAI model or Claude; those still need OpenRouter
-    // and say so by name.
-    assertEquals(gw.chatTarget("openai/gpt-5-mini").missingKey, "OPENROUTER_API_KEY");
-    assertEquals(gw.chatTarget("anthropic/claude-sonnet-4.5").missingKey, "OPENROUTER_API_KEY");
+    // Google cannot serve an OpenAI model or Claude. With no OpenRouter key they
+    // are answered by the fallback Gemini model instead of failing.
+    for (const model of ["openai/gpt-5-mini", "anthropic/claude-sonnet-4.5", "qwen/qwen3-235b-a22b"]) {
+      const swapped = gw.chatTarget(model);
+      assertEquals(swapped.route, "gemini");
+      assertEquals(swapped.model, "gemini-2.5-flash");
+      assertEquals(swapped.requestedModel, model);
+      assertEquals(swapped.substituted, true);
+      assertEquals(swapped.missingKey, null);
+    }
+  });
+});
+
+Deno.test("AI_FALLBACK_MODEL picks the stand-in for OpenRouter-only models", async () => {
+  await withGateway({ ...ONLY_GEMINI, AI_FALLBACK_MODEL: "google/gemini-2.5-flash-lite" }, (gw) => {
+    assertEquals(gw.chatTarget("anthropic/claude-sonnet-4.5").model, "gemini-2.5-flash-lite");
+  });
+});
+
+Deno.test("with an OpenRouter key, Claude is never swapped", async () => {
+  await withGateway(ONLY_OPENROUTER, (gw) => {
+    const target = gw.chatTarget("anthropic/claude-sonnet-4.5");
+    assertEquals(target.route, "openrouter");
+    assertEquals(target.model, "anthropic/claude-sonnet-4.5");
+    assertEquals(target.substituted, false);
   });
 });
 
@@ -214,6 +235,52 @@ Deno.test("the Brain answers with only a Gemini key, through Google", async () =
   assertEquals(JSON.parse(call.body ?? "{}").model, "gemini-2.5-flash");
   // OpenRouter-only extras stay off Google's endpoint, which rejects unknown fields.
   assert(!("usage" in JSON.parse(call.body ?? "{}")));
+});
+
+Deno.test("the Brain answers a Claude task on a Gemini key alone", async () => {
+  const up = stubUpstreams({ env: ONLY_GEMINI, upstreams: { ...backend, [GOOGLE]: () => chatCompletion("hello") } });
+  try {
+    const brain = await loadSharedModule<Brain>("aiBrain");
+    const result = await brain.askBrain({
+      purpose: "ai-gateway-test",
+      dialect: "Gulf",
+      target: "english",
+      userPrompt: "Say hello.",
+      strategy: "solo",
+      models: ["anthropic/claude-sonnet-4.5"],
+      skipRepair: true,
+      validateDialect: false,
+      enforceDialect: false,
+    });
+    assertEquals(result.raw, "hello");
+    assertEquals(up.callsTo(OPENROUTER).length, 0);
+    assertEquals(JSON.parse(up.callsTo(GOOGLE)[0].body ?? "{}").model, "gemini-2.5-flash");
+  } finally {
+    up.restore();
+  }
+});
+
+Deno.test("Ask AI streams on a Gemini key alone", async () => {
+  const up = stubUpstreams({
+    env: ONLY_GEMINI,
+    upstreams: { ...backend, [GOOGLE]: () => sseCompletion("hi") },
+  });
+  try {
+    const brain = await loadSharedModule<Brain>("aiBrain");
+    const response = await brain.streamBrain({
+      purpose: "ai-gateway-test",
+      dialect: "Gulf",
+      target: "english",
+      model: "anthropic/claude-sonnet-4.5",
+      messages: [{ role: "user", content: "hi" }],
+    });
+    await response.text();
+    assertEquals(response.status, 200);
+    assertEquals(up.callsTo(OPENROUTER).length, 0);
+    assertEquals(up.callsTo(GOOGLE).length, 1);
+  } finally {
+    up.restore();
+  }
 });
 
 // ── A function end to end ───────────────────────────────────────────────────
