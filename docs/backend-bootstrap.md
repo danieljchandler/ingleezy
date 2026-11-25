@@ -103,14 +103,17 @@ supabase db push
 Link rather than editing `project_id` in `supabase/config.toml` — that line is
 a local name now, and it used to be Hakiya's ref.
 
-164 migrations. They **do** replay cleanly from nothing: CI's `contract` job
-rebuilds the whole schema against a stock Postgres 16 on every PR and asserts
+168 migrations. They **do** replay cleanly from nothing: CI's `contract` job
+rebuilds the whole schema against a stock Postgres 16 on every PR, one
+transaction per file exactly as `db push` applies them, and asserts
 that every table and every column the app queries exists afterwards. That was
 not true until recently — the history had accumulated fourteen failures behind
 a skipped check, and a rebuilt database silently lacked the `learner-audio`
 bucket, `lessons.dialect_module`, `user_vocabulary.stage` and a policy hiding
 draft lessons from non-admins. `RETARGET.md`'s Known risks section has the full
-account. The relevant part here is that the replay is proven, so a failure
+account. Until 2026-11-25 the replay ran without per-file transactions, which
+hid two migrations that added an `app_role` value and used it in the same file;
+both now have their `ADD VALUE` split into a file of its own. The relevant part here is that the replay is proven, so a failure
 during `db push` is news.
 
 To rehearse it locally first:
