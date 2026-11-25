@@ -37,6 +37,12 @@ otherwise the first of Lovable, OpenRouter, Gemini whose key is configured. So:
 - **To send Gemini to Google directly** (cheaper, Google's own rate limits), set
   `GEMINI_API_KEY` and `AI_GATEWAY=gemini`. Claude still needs
   `OPENROUTER_API_KEY`; without it every lineup falls back to its Gemini drafter.
+- **For free, set only `GEMINI_API_KEY`** (a Google AI Studio key). Gemini
+  goes to Google directly, and with no `OPENROUTER_API_KEY` every Claude, Qwen
+  or Saba call is answered by `AI_FALLBACK_MODEL` (default
+  `google/gemini-2.5-flash`) instead of failing. Every feature works, at
+  Gemini's quality and the free tier's rate limits. Image generation and Lyria
+  jingles may still need billing enabled on the Google project.
 - **On Lovable Cloud**, `LOVABLE_API_KEY` is injected and routing is exactly
   what it was before this file existed.
 
@@ -167,7 +173,7 @@ told apart from the ones that can wait.
 
 | Secret | Without it |
 | --- | --- |
-| `OPENROUTER_API_KEY` (or `GEMINI_API_KEY` + `AI_GATEWAY=gemini`) | every generation call 500s — see §0 |
+| `OPENROUTER_API_KEY` or `GEMINI_API_KEY` (either alone is enough) | every generation call 500s — see §0 |
 | `ALLOWED_ORIGINS` | the deployed app's own requests are rejected; must contain `VITE_PUBLIC_SITE_URL` |
 
 **Needed for the differentiating features**
