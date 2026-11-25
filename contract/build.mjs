@@ -9,8 +9,11 @@
  *
  * Applies contract/prelude.sql first, which supplies the auth and storage
  * objects the migrations reference but do not create (see that file). Each
- * migration runs in its own transaction, so one failure does not abort the
- * rest — the point is to report every problem in one pass.
+ * migration runs in its own transaction (`psql -1`), as `supabase db push`
+ * runs them, so one failure does not abort the rest — the point is to report
+ * every problem in one pass. Without -1, psql autocommits statement by
+ * statement, which hid migrations that add an enum value and use it in the
+ * same file: they replayed here and failed on a real project.
  *
  * DESTRUCTIVE: drops and recreates the public, auth and storage schemas before
  * it starts. Point DATABASE_URL at a throwaway database and nothing else. The
@@ -41,7 +44,7 @@ if (!DATABASE_URL) {
 /** Run a .sql file, returning its error output if it failed. */
 function apply(file) {
   try {
-    execFileSync("psql", [DATABASE_URL, "-v", "ON_ERROR_STOP=1", "-q", "-f", file], {
+    execFileSync("psql", [DATABASE_URL, "-v", "ON_ERROR_STOP=1", "-1", "-q", "-f", file], {
       stdio: ["ignore", "ignore", "pipe"],
     });
     return null;

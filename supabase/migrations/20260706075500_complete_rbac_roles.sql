@@ -1,4 +1,4 @@
-ALTER TYPE public.app_role ADD VALUE IF NOT EXISTS 'content_reviewer';
+-- The 'content_reviewer' enum value is added by 20260706075459_app_role_content_reviewer_value.sql, which must commit first.
 
 CREATE OR REPLACE FUNCTION public.is_content_reviewer()
 RETURNS boolean

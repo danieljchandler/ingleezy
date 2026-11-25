@@ -1,5 +1,5 @@
 -- Add 'bible_reader' to the app_role enum so admins can grant Bible reading access
-ALTER TYPE public.app_role ADD VALUE IF NOT EXISTS 'bible_reader';
+-- The 'bible_reader' enum value is added by 20260412235959_app_role_bible_reader_value.sql, which must commit first.
 
 -- Helper function: is the current user a bible_reader?
 CREATE OR REPLACE FUNCTION public.is_bible_reader()
