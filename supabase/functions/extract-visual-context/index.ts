@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getCorsHeaders } from "../_shared/cors.ts";
+import { chatTarget } from '../_shared/aiGateway.ts';
 
 
 interface VideoFrame {
@@ -127,8 +128,8 @@ serve(async (req) => {
       );
     }
 
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    if (!LOVABLE_API_KEY) {
+    const ai = chatTarget('google/gemini-2.5-flash');
+    if (!ai.apiKey) {
       return new Response(
         JSON.stringify({ error: 'AI service not configured' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -166,15 +167,12 @@ serve(async (req) => {
 
     let rawResponse: string;
     try {
-      const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+      const response = await fetch(ai.url, {
         method: 'POST',
         signal: controller.signal,
-        headers: {
-          'Authorization': `Bearer ${LOVABLE_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
+        headers: ai.headers,
         body: JSON.stringify({
-          model: 'google/gemini-2.5-flash',
+          model: ai.model,
           messages: [
             { role: 'system', content: VISUAL_CONTEXT_PROMPT },
             { role: 'user', content: userContent },

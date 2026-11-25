@@ -7,6 +7,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getCorsHeaders } from "../_shared/cors.ts";
 import { MODEL_IDS } from "../_shared/modelRegistry.ts";
+import { chatTarget } from "../_shared/aiGateway.ts";
 
 
 type Cefr = "A1" | "A2" | "B1" | "B2" | "C1" | "C2";
@@ -112,9 +113,9 @@ serve(async (req) => {
     ).join("\n");
 
     const dialect = video.dialect || "Gulf";
-    const lovableKey = Deno.env.get("LOVABLE_API_KEY");
-    if (!lovableKey) {
-      return new Response(JSON.stringify({ error: "Missing LOVABLE_API_KEY" }), {
+    const ai = chatTarget(MODEL_IDS.GEMINI_FAST);
+    if (ai.missingKey) {
+      return new Response(JSON.stringify({ error: `Missing ${ai.missingKey}` }), {
         status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -139,11 +140,11 @@ ${transcriptSnippet}
 Return ONLY JSON of the form:
 {"points":[{"title":"...","explanation":"...","examples":["...","..."],"cefr_level":"${target_level}"}]}`;
 
-    const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const aiResp = await fetch(ai.url, {
       method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${lovableKey}` },
+      headers: ai.headers,
       body: JSON.stringify({
-        model: MODEL_IDS.GEMINI_FAST,
+        model: ai.model,
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },

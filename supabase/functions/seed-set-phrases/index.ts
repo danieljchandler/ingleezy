@@ -13,6 +13,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getCorsHeaders } from "../_shared/cors.ts";
 import { MODEL_IDS } from "../_shared/modelRegistry.ts";
+import { chatTarget } from "../_shared/aiGateway.ts";
 
 
 // Guards the SCAFFOLD: every Arabic gloss must be the learner's own dialect.
@@ -23,7 +24,7 @@ const DIALECT_RULES: Record<string, string> = {
 };
 
 async function generatePhrases(dialect: string, occasionName: string): Promise<any[]> {
-  const apiKey = Deno.env.get("LOVABLE_API_KEY")!;
+  const ai = chatTarget(MODEL_IDS.GEMINI_FAST);
   const sys = `You curate ENGLISH situational-phrase libraries for Arabic-speaking English learners.
 ${DIALECT_RULES[dialect] ?? DIALECT_RULES.Gulf}
 Rules:
@@ -36,11 +37,11 @@ Rules:
 - For BOTH the phrase and its reply, also provide a "literal" word-for-word ARABIC gloss (phrase_literal, reply_literal) that preserves the ENGLISH word order. It may sound stiff — it shows learners how the English is built.
 - cultural_note: a short usage note in the learner's dialect Arabic, only when register or culture matters.`;
 
-  const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+  const resp = await fetch(ai.url, {
     method: "POST",
-    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+    headers: ai.headers,
     body: JSON.stringify({
-      model: MODEL_IDS.GEMINI_FAST,
+      model: ai.model,
       messages: [
         { role: "system", content: sys },
         { role: "user", content: `Occasion: ${occasionName}\nDialect: ${dialect}\nGenerate 10 phrases.` },

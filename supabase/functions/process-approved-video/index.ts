@@ -18,6 +18,7 @@ import {
   joinAdtsFrames,
   planAsrPayloads,
 } from "../_shared/audioChunk.ts";
+import { chatTarget } from "../_shared/aiGateway.ts";
 
 
 const ASR_TIMEOUT_MS = 5 * 60 * 1000;
@@ -1370,19 +1371,19 @@ async function runPipeline(
       let titleArabic = video.title_arabic;
       if (!titleArabic && result.titleArabic) titleArabic = result.titleArabic;
 
-      // Auto-generate a concise title via Lovable AI if still missing/placeholder
+      // Auto-generate a concise title if still missing/placeholder
       if (!title || title === "Untitled Video" || !titleArabic) {
         try {
           const sampleLines = sanitizedLines.slice(0, 6).map((l) =>
             `${l.arabic ?? ""}${l.translation ? " — " + l.translation : ""}`
           ).join("\n");
-          const lovableKey = Deno.env.get("LOVABLE_API_KEY");
-          if (lovableKey && sampleLines.trim()) {
-            const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+          const titleAi = chatTarget("google/gemini-2.5-flash-lite");
+          if (titleAi.apiKey && sampleLines.trim()) {
+            const aiResp = await fetch(titleAi.url, {
               method: "POST",
-              headers: { "Content-Type": "application/json", Authorization: `Bearer ${lovableKey}` },
+              headers: titleAi.headers,
               body: JSON.stringify({
-                model: "google/gemini-2.5-flash-lite",
+                model: titleAi.model,
                 messages: [
                   { role: "system", content: 'Return ONLY JSON: {"title": string (English, ≤8 words, no quotes), "titleArabic": string (Arabic, ≤8 words)}. Title should describe the video content based on the transcript snippet.' },
                   { role: "user", content: sampleLines },

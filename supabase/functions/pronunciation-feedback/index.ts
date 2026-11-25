@@ -3,6 +3,7 @@ import { getCorsHeaders } from "../_shared/cors.ts";
 import { logEdgeError } from "../_shared/logError.ts";
 import { enforceDailyCap } from "../_shared/usageCap.ts";
 import { MODEL_IDS } from "../_shared/modelRegistry.ts";
+import { chatTarget, missingAiKeyError } from "../_shared/aiGateway.ts";
 
 /**
  * The learner's L1, from either an Azure locale code or the canonical dialect
@@ -30,9 +31,9 @@ serve(async (req) => {
     const payload = await req.json();
     const { mode } = payload;
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
+    const ai = chatTarget(MODEL_IDS.GEMINI_FAST);
+    if (ai.missingKey) {
+      throw new Error(missingAiKeyError(MODEL_IDS.GEMINI_FAST)!);
     }
 
     // ── Shadow mode: coach on the gap between what the learner said and the
@@ -130,14 +131,11 @@ Watch specifically for the sounds that trip Arabic speakers — /p/ said as /b/,
 Give exactly 2-3 short, actionable tips (one sentence each) to improve their pronunciation. Be encouraging but specific. Reference the actual English words/sounds. Do not repeat the scores.`;
     }
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const response = await fetch(ai.url, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
+      headers: ai.headers,
       body: JSON.stringify({
-        model: MODEL_IDS.GEMINI_FAST,
+        model: ai.model,
         messages: [
           { role: "system", content: "You are a concise pronunciation coach. Return ONLY a JSON array of tip strings, no markdown, no explanation." },
           { role: "user", content: prompt },

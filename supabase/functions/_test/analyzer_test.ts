@@ -1,5 +1,5 @@
 import { assert, assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
-import { jsonRequest, loadFunction } from "./harness.ts";
+import { jsonRequest, loadFunction, NO_AI_GATEWAY } from "./harness.ts";
 import { chatCompletion, json, type UpstreamHandler } from "./upstreams.ts";
 
 /**
@@ -93,7 +93,7 @@ Deno.test("accepts on-screen text alone when analysing a meme", async () => {
 
 Deno.test("reports a missing model key rather than pretending to analyse", async () => {
   const fn = await loadFunction("analyze-gulf-arabic", {
-    env: { OPENROUTER_API_KEY: undefined },
+    env: NO_AI_GATEWAY,
     upstreams: allowed(),
   });
   try {
@@ -172,7 +172,7 @@ Deno.test("reports a phrase translation that came back empty as null", async () 
 
 Deno.test("needs a model key for the phrase shortcut too", async () => {
   const fn = await loadFunction("analyze-gulf-arabic", {
-    env: { OPENROUTER_API_KEY: undefined },
+    env: NO_AI_GATEWAY,
     upstreams: allowed(),
   });
   try {

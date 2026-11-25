@@ -1,5 +1,5 @@
 import { assert, assertEquals, assertStringIncludes } from "https://deno.land/std@0.224.0/assert/mod.ts";
-import { jsonRequest, loadFunction } from "./harness.ts";
+import { jsonRequest, loadFunction, NO_AI_GATEWAY } from "./harness.ts";
 import { chatCompletion, json, type UpstreamHandler } from "./upstreams.ts";
 
 /**
@@ -375,7 +375,7 @@ Deno.test("pronunciation-feedback flattens any other gateway failure to 500", as
 Deno.test("pronunciation-feedback says so when its key is missing", async () => {
   const fn = await loadFunction("pronunciation-feedback", {
     upstreams: caller({ "ai.gateway.lovable.dev": tips("A tip.") }),
-    env: { LOVABLE_API_KEY: undefined },
+    env: NO_AI_GATEWAY,
   });
   try {
     const response = await fn.handler(

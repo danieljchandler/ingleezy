@@ -16,11 +16,11 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { getCorsHeaders } from "../_shared/cors.ts";
+import { chatTarget } from "../_shared/aiGateway.ts";
 
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
 
 // ============================================================
 // 1. Pan-dialect A1/A2 baseline (Gulf + Egyptian + Yemeni + MSA).
@@ -376,14 +376,12 @@ ${transcript.slice(0, 6000)}
 Respond ONLY with valid JSON:
 {"cefr_level":"A1|A2|B1|B2|C1|C2","rationale":"1-2 sentences referencing concrete evidence from the transcript and metrics"}`;
 
-  const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+  const ai = chatTarget("google/gemini-2.5-flash");
+  const res = await fetch(ai.url, {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${LOVABLE_API_KEY}`,
-      "Content-Type": "application/json",
-    },
+    headers: ai.headers,
     body: JSON.stringify({
-      model: "google/gemini-2.5-flash",
+      model: ai.model,
       messages: [{ role: "user", content: prompt }],
       response_format: { type: "json_object" },
     }),

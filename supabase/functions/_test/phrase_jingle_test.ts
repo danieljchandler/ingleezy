@@ -1,5 +1,5 @@
 import { assert, assertEquals, assertStringIncludes } from "https://deno.land/std@0.224.0/assert/mod.ts";
-import { fixtureJwt, jsonRequest, loadFunction, optionsRequest } from "./harness.ts";
+import { fixtureJwt, jsonRequest, loadFunction, NO_AI_GATEWAY, optionsRequest } from "./harness.ts";
 import { json, type UpstreamHandler } from "./upstreams.ts";
 
 /**
@@ -143,8 +143,8 @@ Deno.test("generate-phrase-jingle needs both halves of the phrase", async () => 
 Deno.test("generate-phrase-jingle refuses to start with a key missing", async () => {
   // Two models, two keys. Failing up front costs nothing; failing after the
   // lyrics are written wastes the first call.
-  for (const key of ["LOVABLE_API_KEY", "GEMINI_API_KEY"]) {
-    const result = await call(PHRASE, backend(), { env: { [key]: undefined } });
+  for (const env of [NO_AI_GATEWAY, { GEMINI_API_KEY: undefined }]) {
+    const result = await call(PHRASE, backend(), { env });
     assertEquals(result.status, 500);
     assertEquals(result.body.error, "AI keys not configured");
     assertEquals(result.calls.length, 0);

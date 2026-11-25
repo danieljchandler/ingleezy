@@ -1,5 +1,5 @@
 import { assert, assertEquals, assertStringIncludes } from "https://deno.land/std@0.224.0/assert/mod.ts";
-import { jsonRequest, loadFunction, optionsRequest } from "./harness.ts";
+import { jsonRequest, loadFunction, NO_AI_GATEWAY, optionsRequest } from "./harness.ts";
 import { chatCompletion, json, type UpstreamHandler } from "./upstreams.ts";
 
 /**
@@ -367,7 +367,7 @@ Deno.test("classify-tutor-segments reports a missing gateway key", async () => {
     "classify-tutor-segments",
     { segments },
     caller(),
-    { env: { LOVABLE_API_KEY: undefined } },
+    { env: NO_AI_GATEWAY },
   );
 
   assertEquals(result.status, 500);

@@ -3,6 +3,7 @@ import { getDialectLabel, getDialectVocabRules } from "../_shared/dialectHelpers
 import { enforceDailyCap } from "../_shared/usageCap.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
 import { MODEL_IDS } from "../_shared/modelRegistry.ts";
+import { chatTarget, missingAiKeyError } from "../_shared/aiGateway.ts";
 
 
 serve(async (req) => {
@@ -31,12 +32,12 @@ serve(async (req) => {
       );
     }
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    const ai = chatTarget(MODEL_IDS.GEMINI_FAST);
     const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
 
-    if (!LOVABLE_API_KEY) {
+    if (!ai.apiKey) {
       return new Response(
-        JSON.stringify({ error: "LOVABLE_API_KEY not configured" }),
+        JSON.stringify({ error: missingAiKeyError(MODEL_IDS.GEMINI_FAST) }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -47,7 +48,7 @@ serve(async (req) => {
       );
     }
 
-    // Step 1: Generate a dialect-specific music prompt using Lovable AI
+    // Step 1: Generate a dialect-specific music prompt
     const dialectLabel = getDialectLabel(dialect);
     const dialectRules = getDialectVocabRules(dialect);
     const dialectStyle = dialect === "Egyptian"
@@ -57,15 +58,12 @@ serve(async (req) => {
       : "Khaliji/Gulf Arabic pop style with Gulf dialect vocals";
 
     const promptGenResponse = await fetch(
-      "https://ai.gateway.lovable.dev/v1/chat/completions",
+      ai.url,
       {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
-          "Content-Type": "application/json",
-        },
+        headers: ai.headers,
         body: JSON.stringify({
-          model: MODEL_IDS.GEMINI_FAST,
+          model: ai.model,
           messages: [
             {
               role: "system",

@@ -30,6 +30,7 @@ import {
   buildFushaSystemPrompt,
 } from "../_shared/fushaBridge.ts";
 import { MODEL_IDS } from "../_shared/modelRegistry.ts";
+import { chatTarget, missingAiKey } from '../_shared/aiGateway.ts';
 
 // Helper to generate unique IDs
 function generateId(): string {
@@ -764,7 +765,10 @@ type CallAIArgs = {
   isRetry?: boolean;
   maxTokens?: number;
   model?: string; // defaults to 'qwen/qwen3-235b-a22b'
-  gateway?: 'openrouter' | 'lovable'; // defaults to 'openrouter'
+  // Historical label only. Every call is routed by aiGateway.ts from the model
+  // id: OpenRouter-only models go to OpenRouter, or to the fallback Gemini
+  // model when OPENROUTER_API_KEY is unset; Gemini goes to the configured gateway.
+  gateway?: 'openrouter' | 'lovable';
 };
 
 async function callAI({
@@ -776,11 +780,11 @@ async function callAI({
   model = 'qwen/qwen3-235b-a22b',
   gateway = 'openrouter',
 }: CallAIArgs): Promise<{ content: string | null; error?: string; status?: number }> {
-    const isLovable = gateway === 'lovable';
-    const gatewayUrl = isLovable
-      ? 'https://ai.gateway.lovable.dev/v1/chat/completions'
-      : 'https://openrouter.ai/api/v1/chat/completions';
-    const gatewayKey = isLovable ? (Deno.env.get('LOVABLE_API_KEY') ?? '') : apiKey;
+    void gateway;
+    const target = chatTarget(model);
+    const gatewayUrl = target.url;
+    const gatewayKey = target.apiKey ?? apiKey;
+    const wireModelId = target.model;
 
     const controller = new AbortController();
     // Tightened from 55s → 40s so the full multi-stage pipeline (Call 1 + parallel
@@ -800,7 +804,7 @@ async function callAI({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model,
+          model: wireModelId,
           messages: [
             { role: 'system', content: systemPrompt },
             { role: 'user', content: userContent },
@@ -1653,8 +1657,8 @@ serve(async (req) => {
     // When called with { phrase } (no transcript), translate a short Arabic
     // word or phrase and return { translation } immediately.
     if (body.phrase && typeof body.phrase === 'string') {
-      const OPENROUTER_API_KEY = Deno.env.get('OPENROUTER_API_KEY');
-      if (!OPENROUTER_API_KEY) {
+      const OPENROUTER_API_KEY = Deno.env.get('OPENROUTER_API_KEY') ?? '';
+      if (missingAiKey('qwen/qwen3-235b-a22b')) {
         return new Response(JSON.stringify({ error: 'AI service not configured' }), {
           status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
@@ -1685,9 +1689,11 @@ serve(async (req) => {
       );
     }
 
-    const OPENROUTER_API_KEY = Deno.env.get('OPENROUTER_API_KEY');
-    if (!OPENROUTER_API_KEY) {
-      console.error('OPENROUTER_API_KEY is not configured');
+    // Qwen and Claude fall back to Gemini when OpenRouter has no key
+    // (aiGateway.ts), so only "no AI key at all" stops the analysis.
+    const OPENROUTER_API_KEY = Deno.env.get('OPENROUTER_API_KEY') ?? '';
+    if (missingAiKey('qwen/qwen3-235b-a22b')) {
+      console.error('No AI gateway key is configured');
       return new Response(
         JSON.stringify({ error: 'AI service not configured' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

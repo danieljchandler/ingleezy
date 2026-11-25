@@ -59,6 +59,17 @@ export const FIXTURE_ENV: Record<string, string> = {
   ALLOWED_ORIGINS: "https://ingleezy.app,https://lahja-arabic.lovable.app",
 };
 
+/**
+ * Env overrides that leave no AI gateway configured at all. Unsetting only
+ * LOVABLE_API_KEY is not enough any more: aiGateway.ts falls back to
+ * OpenRouter or Gemini when their keys are set, as they are in FIXTURE_ENV.
+ */
+export const NO_AI_GATEWAY: Record<string, undefined> = {
+  LOVABLE_API_KEY: undefined,
+  OPENROUTER_API_KEY: undefined,
+  GEMINI_API_KEY: undefined,
+};
+
 /** A recorded outbound call, so a test can assert what was sent upstream. */
 export interface UpstreamCall {
   url: string;

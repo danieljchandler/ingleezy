@@ -10,9 +10,8 @@ import {
   getDialectLabel,
   type Dialect,
 } from './dialectHelpers.ts';
+import { chatTarget } from './aiGateway.ts';
 
-const GATEWAY_URL = 'https://ai.gateway.lovable.dev/v1/chat/completions';
-const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
 const VALIDATOR_MODEL = 'google/gemini-2.5-pro';
 // Arabic-native second opinion. Mistral Saba is a 24B Arabic-focused model on
 // the OpenRouter key the app already uses — roughly an order of magnitude
@@ -40,6 +39,7 @@ export interface ValidatorResult {
 }
 
 export interface ValidateOptions {
+  /** Overrides LOVABLE_API_KEY when the model routes to the Lovable gateway; ignored elsewhere. */
   apiKey?: string;
   passThreshold?: number; // default 4
   maxChars?: number;      // truncate text for cost control; default 4000
@@ -51,7 +51,7 @@ export interface ValidateOptions {
    * Ignored when `signal` is supplied.
    */
   timeoutMs?: number;
-  /** Override the judging model. Defaults to Gemini 2.5 Pro via the Lovable gateway. */
+  /** Override the judging model. Defaults to Gemini 2.5 Pro via the configured gateway (aiGateway.ts). */
   model?: string;
 }
 
@@ -62,13 +62,16 @@ export async function validateDialect(
 ): Promise<ValidatorResult> {
   const start = Date.now();
   const model = opts.model ?? VALIDATOR_MODEL;
-  // OpenRouter-only models (Saba) need their own key + endpoint; everything
-  // else goes through the Lovable gateway. Mirrors routeForModel in aiBrain.
-  const viaOpenRouter = /^(mistralai|anthropic|qwen|meta-llama|deepseek|x-ai)\//.test(model);
-  const apiKey = viaOpenRouter
-    ? Deno.env.get('OPENROUTER_API_KEY')
-    : (opts.apiKey ?? Deno.env.get('LOVABLE_API_KEY'));
-  if (!apiKey || !text || !text.trim()) {
+  // Same routing as the Brain: OpenRouter-only models (Saba) go there, Gemini
+  // goes to whichever gateway is configured. See aiGateway.ts.
+  const target = chatTarget(model);
+  // A caller's explicit key stands in for the Lovable secret only; it is
+  // never sent to OpenRouter or Google.
+  if (opts.apiKey && target.route === 'lovable') {
+    target.apiKey = opts.apiKey;
+    target.headers = { ...target.headers, Authorization: `Bearer ${opts.apiKey}` };
+  }
+  if (!target.apiKey || !text || !text.trim()) {
     return { score: 0, verdict: 'unknown', leaks: [], latencyMs: 0, ok: false, model };
   }
 
@@ -118,15 +121,12 @@ Be harsh. When in doubt between 4 and 3, choose 3.`;
   };
 
   try {
-    const res = await fetch(viaOpenRouter ? OPENROUTER_URL : GATEWAY_URL, {
+    const res = await fetch(target.url, {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
+      headers: target.headers,
       signal: opts.signal ?? (opts.timeoutMs ? AbortSignal.timeout(opts.timeoutMs) : undefined),
       body: JSON.stringify({
-        model,
+        model: target.model,
         temperature: 0.2,
         max_tokens: 600,
         messages: [
