@@ -206,7 +206,11 @@ jobs:
   # its own in-memory database, so there is no shared state to serialize on.
   e2e:
     name: End-to-end (${{ matrix.shard }}/4)
-    runs-on: ubuntu-latest
+    # Pinned: ubuntu-latest moved to 26.04, which Playwright 1.56 cannot install
+    # Chromium's system dependencies for ("does not support chromium on
+    # ubuntu26.04-x64"). Unpin when Playwright is upgraded to a release that
+    # supports it.
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     strategy:
       # One shard failing should not hide which of the others also failed.
