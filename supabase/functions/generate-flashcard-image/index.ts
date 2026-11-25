@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { enforceDailyCap } from "../_shared/usageCap.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
+import { chatTarget, generateImage, ImageGenError, LOVABLE_IMAGES_URL, missingAiKeyError } from "../_shared/aiGateway.ts";
 
 
 serve(async (req) => {
@@ -47,8 +48,9 @@ serve(async (req) => {
       });
     }
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+    const IMAGE_MODEL = "google/gemini-2.5-flash-image";
+    const ai = chatTarget(IMAGE_MODEL);
+    if (ai.missingKey) throw new Error(missingAiKeyError(IMAGE_MODEL)!);
 
     let prompt = `A single realistic, professional photograph of: ${word_english}.
 STYLE GUIDE — follow exactly for every image:
@@ -69,16 +71,29 @@ STYLE GUIDE — follow exactly for every image:
 
     console.log(`Generating image for: ${word_english}`);
 
-    // Try Gemini first (chat-completions image shape), then fall back to gpt-image-2
+    // Try Gemini first (chat-completions image shape, or Google's native API
+    // when routed there), then fall back to gpt-image-2 on the Lovable gateway
     let imageBase64: string | null = null;
 
     async function tryGemini(): Promise<string | null> {
+      if (ai.route === "gemini") {
+        for (let attempt = 0; attempt < 2; attempt++) {
+          try {
+            return await generateImage(IMAGE_MODEL, prompt);
+          } catch (e) {
+            if (e instanceof ImageGenError && e.status === 429) throw new Error("RATE_LIMIT");
+            console.warn(`Gemini attempt ${attempt + 1}: ${e instanceof Error ? e.message : String(e)}`);
+            await new Promise(r => setTimeout(r, 1500));
+          }
+        }
+        return null;
+      }
       for (let attempt = 0; attempt < 2; attempt++) {
-        const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        const response = await fetch(ai.url, {
           method: "POST",
-          headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+          headers: ai.headers,
           body: JSON.stringify({
-            model: "google/gemini-2.5-flash-image",
+            model: ai.model,
             messages: [{ role: "user", content: prompt }],
             modalities: ["image", "text"],
           }),
@@ -99,10 +114,13 @@ STYLE GUIDE — follow exactly for every image:
     }
 
     async function tryGptImage(): Promise<string | null> {
+      // gpt-image-2 is only wired up on the Lovable gateway's images endpoint.
+      const gpt = chatTarget("openai/gpt-image-2");
+      if (gpt.route !== "lovable" || !gpt.apiKey) return null;
       try {
-        const response = await fetch("https://ai.gateway.lovable.dev/v1/images/generations", {
+        const response = await fetch(LOVABLE_IMAGES_URL, {
           method: "POST",
-          headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+          headers: gpt.headers,
           body: JSON.stringify({
             model: "openai/gpt-image-2",
             prompt,

@@ -1,5 +1,5 @@
 import { assert, assertEquals, assertStringIncludes } from "https://deno.land/std@0.224.0/assert/mod.ts";
-import { jsonRequest, loadFunction, optionsRequest } from "./harness.ts";
+import { jsonRequest, loadFunction, NO_AI_GATEWAY, optionsRequest } from "./harness.ts";
 import { json, type UpstreamHandler } from "./upstreams.ts";
 
 /**
@@ -282,7 +282,7 @@ Deno.test("generate-story-video-full will not render before the preview is appro
 
 Deno.test("generate-story-video-full refuses to start with no image key configured", async () => {
   const result = await call({ story_id: STORY }, backend(), {
-    env: { LOVABLE_API_KEY: undefined },
+    env: NO_AI_GATEWAY,
   });
 
   assertEquals(result.status, 500);

@@ -6,6 +6,7 @@
 // deduplication compares, and comparing the wrong half means the learner is
 // offered words they already own whenever two English words share a gloss.
 import { getCorsHeaders } from "../_shared/cors.ts";
+import { chatTarget, missingAiKeyError } from "../_shared/aiGateway.ts";
 
 
 // The dialect the GLOSS is written in. The words themselves are English; this
@@ -30,8 +31,8 @@ Deno.serve(async (req) => {
       });
     }
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
+    const ai = chatTarget("google/gemini-2.5-flash");
+    if (ai.missingKey) throw new Error(missingAiKeyError("google/gemini-2.5-flash")!);
 
     const dialectGuide = DIALECT_GUIDE[dialect] ?? DIALECT_GUIDE.Gulf;
     const existingList = (existingWords as string[]).slice(0, 500);
@@ -54,14 +55,11 @@ ${existingList.length ? existingList.join(", ") : "(none)"}
 
 Generate ${count} new flashcards.`;
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const response = await fetch(ai.url, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
+      headers: ai.headers,
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: ai.model,
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },

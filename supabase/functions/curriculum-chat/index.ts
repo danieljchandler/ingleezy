@@ -7,9 +7,12 @@ import { detectMsaLeaks } from "../_shared/msaLeakDetector.ts";
 import type { Dialect } from "../_shared/dialectHelpers.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
 import { MODEL_IDS } from "../_shared/modelRegistry.ts";
+import { chatTarget, ROUTE_KEY } from "../_shared/aiGateway.ts";
 
 
-const LOVABLE_GATEWAY = "https://ai.gateway.lovable.dev/v1/chat/completions";
+// Marks a model served by whichever gateway aiGateway.ts picks (Lovable,
+// OpenRouter or Google), resolved per call rather than pinned here.
+const GATEWAY = "gateway";
 const OPENROUTER_ENDPOINT = "https://openrouter.ai/api/v1/chat/completions";
 const FANAR_ENDPOINT = "https://api.fanar.qa/v1/chat/completions";
 
@@ -27,14 +30,14 @@ interface ModelConfig {
 // selector offers but this map lacks fails with "Unknown model".
 const openRouter = (model: string): ModelConfig =>
   ({ endpoint: OPENROUTER_ENDPOINT, model, keyEnv: "OPENROUTER_API_KEY" });
-const lovable = (model: string): ModelConfig =>
-  ({ endpoint: LOVABLE_GATEWAY, model, keyEnv: "LOVABLE_API_KEY" });
+const gateway = (model: string): ModelConfig =>
+  ({ endpoint: GATEWAY, model, keyEnv: "LOVABLE_API_KEY" /* replaced per call */ });
 
 const MODEL_REGISTRY: Record<string, ModelConfig> = {
-  [MODEL_IDS.GEMINI_FAST]: lovable(MODEL_IDS.GEMINI_FAST),
-  [MODEL_IDS.GEMINI_FLASH]: lovable(MODEL_IDS.GEMINI_FLASH),
-  [MODEL_IDS.GEMINI_PRO]: lovable(MODEL_IDS.GEMINI_PRO),
-  "google/gemini-2.5-flash": lovable("google/gemini-2.5-flash"),
+  [MODEL_IDS.GEMINI_FAST]: gateway(MODEL_IDS.GEMINI_FAST),
+  [MODEL_IDS.GEMINI_FLASH]: gateway(MODEL_IDS.GEMINI_FLASH),
+  [MODEL_IDS.GEMINI_PRO]: gateway(MODEL_IDS.GEMINI_PRO),
+  "google/gemini-2.5-flash": gateway("google/gemini-2.5-flash"),
   // Selector sends the hyphenated id; OpenRouter resolves the dotted one —
   // the hyphen form 404s on that route.
   "anthropic/claude-sonnet-4-5": openRouter(MODEL_IDS.CLAUDE),
@@ -368,6 +371,10 @@ async function callLLM(
   messages: Array<{ role: string; content: string }>,
   maxTokens = 4096,
 ): Promise<string> {
+  if (config.endpoint === GATEWAY) {
+    const target = chatTarget(config.model);
+    config = { endpoint: target.url, model: target.model, keyEnv: ROUTE_KEY[target.route] };
+  }
   const apiKey = Deno.env.get(config.keyEnv)?.trim();
   if (!apiKey) {
     throw new Error(`API key ${config.keyEnv} not configured`);
@@ -548,8 +555,8 @@ serve(async (req) => {
     // Chat and suggest_* modes keep the single-model path to preserve UX.
     const useBrain =
       resolvedMode?.startsWith("generate_") &&
-      // Brain only works for Lovable-gateway-compatible models. Skip native/Fanar/OpenRouter-only.
-      config.endpoint === LOVABLE_GATEWAY;
+      // Brain only takes the gateway models (Gemini). Skip Fanar and OpenRouter-only.
+      config.endpoint === GATEWAY;
 
     let responseContent: string;
     if (useBrain) {
@@ -618,17 +625,14 @@ serve(async (req) => {
           `curriculum-chat MSA leaks detected (non-brain path): dialect=${dialect} leaks=${leakResult.leaks.join(",")} severity=${leakResult.severity}`,
         );
         try {
-          const repairKey = Deno.env.get("LOVABLE_API_KEY")?.trim();
-          if (repairKey) {
+          const repair = chatTarget("google/gemini-2.5-flash");
+          if (repair.apiKey) {
             const repairSys = `You are a ${dialect} Arabic editor working on English-teaching material. The Arabic in the text below leaked MSA tokens: ${leakResult.leaks.join(", ")}. Rewrite ONLY the Arabic strings into authentic ${dialect} dialect. Leave every English string exactly as it is — do NOT translate English into Arabic, and do NOT translate Arabic into English. Preserve any \`\`\`json code blocks and all field names and structure EXACTLY. Return ONLY the corrected text — no commentary.`;
-            const repairResp = await fetch(LOVABLE_GATEWAY, {
+            const repairResp = await fetch(repair.url, {
               method: "POST",
-              headers: {
-                Authorization: `Bearer ${repairKey}`,
-                "Content-Type": "application/json",
-              },
+              headers: repair.headers,
               body: JSON.stringify({
-                model: "google/gemini-2.5-flash",
+                model: repair.model,
                 messages: [
                   { role: "system", content: repairSys },
                   { role: "user", content: responseContent },

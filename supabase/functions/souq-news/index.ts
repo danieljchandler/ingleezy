@@ -7,6 +7,7 @@ import { getDialectLabel, type Dialect } from "../_shared/dialectHelpers.ts";
 import { emitMetric } from "../_shared/featureMetrics.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
 import { MODEL_IDS } from "../_shared/modelRegistry.ts";
+import { chatTarget } from "../_shared/aiGateway.ts";
 
 const FEATURE = "souq-news";
 
@@ -38,9 +39,9 @@ Deno.serve(async (req) => {
       );
     }
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      emitMetric({ feature: FEATURE, event: "config_missing", dialect, status: "error", meta: { missing: "LOVABLE_API_KEY" } });
+    const ai = chatTarget(MODEL_IDS.GEMINI_FAST);
+    if (ai.missingKey) {
+      emitMetric({ feature: FEATURE, event: "config_missing", dialect, status: "error", meta: { missing: ai.missingKey } });
       return new Response(
         JSON.stringify({ error: "AI gateway not configured" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -166,14 +167,11 @@ Return ONLY the JSON object, no markdown fencing. CRITICAL: use ONLY ASCII punct
 
         const aiStart = Date.now();
         try {
-          const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+          const aiRes = await fetch(ai.url, {
             method: "POST",
-            headers: {
-              Authorization: `Bearer ${LOVABLE_API_KEY}`,
-              "Content-Type": "application/json",
-            },
+            headers: ai.headers,
             body: JSON.stringify({
-              model: MODEL_IDS.GEMINI_FAST,
+              model: ai.model,
               response_format: { type: "json_object" },
               messages: [
                 { role: "system", content: systemPrompt },

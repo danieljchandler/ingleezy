@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getCorsHeaders } from "../_shared/cors.ts";
 import { MODEL_IDS } from "../_shared/modelRegistry.ts";
+import { chatTarget, missingAiKeyError } from "../_shared/aiGateway.ts";
 
 
 interface TimestampedSegment {
@@ -71,8 +72,8 @@ serve(async (req) => {
     const dialectLabel = dialect === 'Egyptian' ? 'Egyptian Arabic (مصري)' : dialect === 'Yemeni' ? 'Yemeni Arabic (يمني)' : 'Gulf Arabic (Khaliji)';
     console.log('classify-tutor-segments dialect module:', dialect);
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+    const ai = chatTarget(MODEL_IDS.GEMINI_FAST);
+    if (ai.missingKey) throw new Error(missingAiKeyError(MODEL_IDS.GEMINI_FAST)!);
 
     // Build segment list
     const segmentList = segments.map((s, i) => 
@@ -148,12 +149,12 @@ Return the results using the extract_candidates tool.`;
 
     const userMessage = `Here are the transcript segments:\n\n${segmentList}${wordList}`;
 
-    // Use Gemini via Lovable AI gateway
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    // Gemini via whichever gateway is configured (aiGateway.ts)
+    const response = await fetch(ai.url, {
       method: "POST",
-      headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+      headers: ai.headers,
       body: JSON.stringify({
-        model: MODEL_IDS.GEMINI_FAST,
+        model: ai.model,
         messages: [{ role: "system", content: systemPrompt }, { role: "user", content: userMessage }],
         tools: requestTools,
         tool_choice: { type: "function", function: { name: "extract_candidates" } },

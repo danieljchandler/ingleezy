@@ -7,7 +7,7 @@ type: feature
 ## The rule
 - Do NOT hardcode model IDs in edge function code. Import from `MODEL_LINEUPS` in `supabase/functions/_shared/modelRegistry.ts`.
 - If a model breaks, fix the root cause (credits, routing, prompt). Do NOT silently swap models in individual functions — that creates inconsistency across dialects and hides the underlying issue.
-- Claude routes via OpenRouter (`OPENROUTER_API_KEY`). Gemini routes via Lovable Gateway (`LOVABLE_API_KEY`). aiBrain's `routeForModel()` handles this automatically.
+- Claude routes via OpenRouter (`OPENROUTER_API_KEY`). Gemini routes via the gateway `AI_GATEWAY` names (lovable, openrouter or gemini), else the first configured of `LOVABLE_API_KEY`, `OPENROUTER_API_KEY`, `GEMINI_API_KEY`. `routeForModel()` in `_shared/aiGateway.ts` handles this automatically.
 
 ## Lineups
 - **TRANSLATION**: ensemble of `anthropic/claude-sonnet-4.5` + `google/gemini-3.5-flash`. Used by `translate-phrase`, `falcon-translate`, `analyze-gulf-arabic` (+ qwen3-max as third verifier), and aiBrain purposes `translation` / `phrase_of_the_day` / `sample_sentences` / `vocab_definition`.

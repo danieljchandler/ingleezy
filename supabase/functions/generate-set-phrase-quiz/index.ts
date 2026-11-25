@@ -16,6 +16,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getCorsHeaders } from "../_shared/cors.ts";
 import { MODEL_IDS } from "../_shared/modelRegistry.ts";
+import { chatTarget } from "../_shared/aiGateway.ts";
 
 
 // The rules guard the SCAFFOLD language now: the scenario the learner reads
@@ -52,8 +53,8 @@ async function generateScenarioAndDistractors(
   phraseArabic: string | null,
   occasion: string | null,
 ): Promise<{ scenario_arabic: string; distractors: { english: string; arabic: string }[] } | null> {
-  const apiKey = Deno.env.get("LOVABLE_API_KEY");
-  if (!apiKey) return null;
+  const ai = chatTarget(MODEL_IDS.GEMINI_FAST);
+  if (!ai.apiKey) return null;
 
   const sys = `You design situational ENGLISH-phrase quizzes for Arabic-speaking English learners.
 ${DIALECT_RULES[dialect] ?? DIALECT_RULES.Gulf}
@@ -68,11 +69,11 @@ Occasion: ${occasion ?? "general"}
 Generate the scenario + 3 distractor phrases.`;
 
   try {
-    const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const resp = await fetch(ai.url, {
       method: "POST",
-      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      headers: ai.headers,
       body: JSON.stringify({
-        model: MODEL_IDS.GEMINI_FAST,
+        model: ai.model,
         messages: [
           { role: "system", content: sys },
           { role: "user", content: user },

@@ -4,6 +4,7 @@ import { getCorsHeaders } from "../_shared/cors.ts";
 import { MODEL_IDS } from "../_shared/modelRegistry.ts";
 import { resolveUserId } from "../_shared/usageCap.ts";
 import { normalizeDialect } from "../_shared/transcriptDiffCore.ts";
+import { chatTarget, missingAiKeyError } from "../_shared/aiGateway.ts";
 
 // Service-role client for the placement_history trajectory, cached per
 // isolate like every other function's.
@@ -85,8 +86,8 @@ serve(async (req) => {
 
   try {
     const { action, current_difficulty, question_number, history, dialect } = await req.json();
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
+    const ai = chatTarget(MODEL_IDS.GEMINI_FAST);
+    if (ai.missingKey) throw new Error(missingAiKeyError(MODEL_IDS.GEMINI_FAST)!);
 
     // The learner's assessment trajectory (C4) — server-written rows only,
     // so the chart can't be self-reported.
@@ -196,14 +197,11 @@ Return a JSON object with this exact structure:
   "suggested_difficulty": "${difficulty}"
 }`;
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const response = await fetch(ai.url, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
+      headers: ai.headers,
       body: JSON.stringify({
-        model: MODEL_IDS.GEMINI_FAST,
+        model: ai.model,
         messages: [
           { role: "system", content: "You are a precise English language assessment tool for Arabic-speaking learners. Always respond with valid JSON only, no markdown fences." },
           { role: "user", content: prompt },

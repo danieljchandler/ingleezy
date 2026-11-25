@@ -12,11 +12,11 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { estimateSeconds, planEnglishProvider, synthesizeLine } from "../_shared/listenTts.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
 import { MODEL_IDS } from "../_shared/modelRegistry.ts";
+import { chatTarget, dataUrlToBytes, generateImage, missingAiKeyError } from "../_shared/aiGateway.ts";
 
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
 
 const IMAGE_MODEL = "google/gemini-3.1-flash-image";
 const BUCKET = "listen-audio";
@@ -99,15 +99,12 @@ Hard rules:
 STORY (authoritative — every scene must match this):
 ${fullEnglish}`;
 
-  const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+  const ai = chatTarget(MODEL_IDS.GEMINI_FAST);
+  const resp = await fetch(ai.url, {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${LOVABLE_API_KEY}`,
-      "Lovable-API-Key": LOVABLE_API_KEY,
-      "Content-Type": "application/json",
-    },
+    headers: ai.route === "lovable" ? { ...ai.headers, "Lovable-API-Key": ai.apiKey ?? "" } : ai.headers,
     body: JSON.stringify({
-      model: MODEL_IDS.GEMINI_FAST,
+      model: ai.model,
       messages: [
         { role: "system", content: system },
         { role: "user", content: user },
@@ -153,27 +150,7 @@ function buildScenePrompt(plan: Plan, sceneIdx: number): string {
 }
 
 async function generateSceneImage(prompt: string): Promise<Uint8Array> {
-  const resp = await fetch("https://ai.gateway.lovable.dev/v1/images/generations", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${LOVABLE_API_KEY}`,
-      "Lovable-API-Key": LOVABLE_API_KEY,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: IMAGE_MODEL,
-      messages: [{ role: "user", content: prompt }],
-      modalities: ["image", "text"],
-    }),
-  });
-  if (!resp.ok) throw new Error(`image gen failed: ${resp.status} ${await resp.text()}`);
-  const json = await resp.json();
-  const b64: string | undefined = json?.data?.[0]?.b64_json;
-  if (!b64) throw new Error(`no image in response: ${JSON.stringify(json).slice(0, 300)}`);
-  const bin = atob(b64);
-  const bytes = new Uint8Array(bin.length);
-  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-  return bytes;
+  return dataUrlToBytes(await generateImage(IMAGE_MODEL, prompt));
 }
 
 async function synthesizeSceneNarration(
@@ -276,7 +253,8 @@ Deno.serve(async (req) => {
   const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   try {
-    if (!LOVABLE_API_KEY) throw new Error("Missing LOVABLE_API_KEY");
+    const missingKey = missingAiKeyError(IMAGE_MODEL) ?? missingAiKeyError(MODEL_IDS.GEMINI_FAST);
+    if (missingKey) throw new Error(missingKey);
 
     const authHeader = req.headers.get("Authorization") ?? "";
     const token = authHeader.replace("Bearer ", "");

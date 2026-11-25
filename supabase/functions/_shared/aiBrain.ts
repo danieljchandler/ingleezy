@@ -23,6 +23,7 @@ import { decideCriticOutcome } from './criticDecision.ts';
 import { emitMetric } from './featureMetrics.ts';
 import { extractUsage } from './llmUsageCore.ts';
 import { logLlmUsage } from './llmUsageLogger.ts';
+import { chatTarget, type AiRoute } from './aiGateway.ts';
 import { logRepairPair } from './trainingExampleLogger.ts';
 import {
   DEFAULT_FAST,
@@ -189,15 +190,9 @@ export interface BrainResult<T = unknown> {
   passes: Array<{ pass: string; model: string; ms: number }>;
 }
 
-const GATEWAY_URL = 'https://ai.gateway.lovable.dev/v1/chat/completions';
-const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
-
-// Models that aren't on the Lovable AI Gateway catalog and must go through
-// OpenRouter (uses OPENROUTER_API_KEY). Everything else goes through Lovable.
-function routeForModel(model: string): 'openrouter' | 'lovable' {
-  if (/^(anthropic|qwen|meta-llama|mistralai|deepseek|x-ai)\//.test(model)) return 'openrouter';
-  return 'lovable';
-}
+// Where each model's call goes (Lovable, OpenRouter or Google directly) is
+// decided per call by aiGateway.ts, so the Brain needs no Lovable key unless
+// the project is on Lovable Cloud. A missing key fails the call that needs it.
 
 class BrainHttpError extends Error {
   constructor(public status: number, message: string) {
@@ -208,9 +203,6 @@ class BrainHttpError extends Error {
 // ----------------- Public entry point -----------------
 
 export async function askBrain<T = unknown>(task: BrainTask): Promise<BrainResult<T>> {
-  const apiKey = Deno.env.get('LOVABLE_API_KEY');
-  if (!apiKey) throw new BrainHttpError(500, 'LOVABLE_API_KEY not configured');
-
   if (task.target === 'english') await primeEnglishPrompt(task.dialect);
   else await primeDialectPrompt(task.dialect);
 
@@ -224,16 +216,16 @@ export async function askBrain<T = unknown>(task: BrainTask): Promise<BrainResul
   let result: BrainResult<T>;
   switch (strategy) {
     case 'solo':
-      result = await runSolo<T>(task, apiKey, deadline);
+      result = await runSolo<T>(task, deadline);
       break;
     case 'ensemble':
-      result = await runEnsemble<T>(task, apiKey, deadline);
+      result = await runEnsemble<T>(task, deadline);
       break;
     case 'draft_critic':
-      result = await runDraftCritic<T>(task, apiKey, deadline);
+      result = await runDraftCritic<T>(task, deadline);
       break;
     case 'council':
-      result = await runCouncil<T>(task, apiKey, deadline);
+      result = await runCouncil<T>(task, deadline);
       break;
   }
 
@@ -254,7 +246,7 @@ export async function askBrain<T = unknown>(task: BrainTask): Promise<BrainResul
     } else {
       try {
         const beforeText = extractScanText(task, result.output, result.raw);
-        const repaired = await runRepair<T>(task, result, apiKey, deadline);
+        const repaired = await runRepair<T>(task, result, deadline);
         const afterText = extractScanText(task, repaired.output, repaired.raw);
         // A repair that actually shifted the leaks is a correction pair worth
         // keeping (bronze — automated, not human): what the model said vs what
@@ -285,7 +277,7 @@ export async function askBrain<T = unknown>(task: BrainTask): Promise<BrainResul
   if (task.validateDialect && task.target !== 'english' && !result.validator) {
     try {
       const scanText = extractScanText(task, result.output, result.raw);
-      const v = await validateDialectCrossChecked(scanText, task.dialect, { apiKey });
+      const v = await validateDialectCrossChecked(scanText, task.dialect);
       result.validator = v;
       if (v.ok && (v.verdict === 'rewrite' || v.leaks.length > 0)) {
         logValidatorResult({
@@ -420,7 +412,7 @@ function supportsPromptCache(model: string): boolean {
  */
 function systemMessage(
   opts: Pick<CallOptions, 'system' | 'systemParts' | 'model'>,
-  route: 'openrouter' | 'lovable',
+  route: AiRoute,
 ): { role: 'system'; content: unknown } {
   const parts = opts.systemParts;
   if (route === 'openrouter' && supportsPromptCache(opts.model) && parts?.stable) {
@@ -442,7 +434,6 @@ interface CallOptions {
   tool?: BrainTask['tool'];
   maxTokens?: number;
   temperature?: number;
-  apiKey: string;
   /** Hard ceiling for this one call. Defaults to DEFAULT_CALL_TIMEOUT_MS. */
   timeoutMs?: number;
   /** The task's purpose, so cost telemetry can name the feature it served. */
@@ -465,9 +456,10 @@ function isTimeout(err: unknown): boolean {
 
 async function callModel(opts: CallOptions): Promise<{ raw: string; parsed: unknown }> {
   const isGpt5 = /^openai\/gpt-5/.test(opts.model);
-  const route = routeForModel(opts.model);
+  const target = chatTarget(opts.model);
+  const route = target.route;
   const body: Record<string, unknown> = {
-    model: opts.model,
+    model: target.model,
     messages: [
       systemMessage(opts, route),
       { role: 'user', content: opts.user },
@@ -493,32 +485,22 @@ async function callModel(opts: CallOptions): Promise<{ raw: string; parsed: unkn
     body.tool_choice = { type: 'function', function: { name: opts.tool.name } };
   }
 
-  let url: string;
-  let authKey: string | undefined;
+  if (!target.apiKey) {
+    throw new BrainHttpError(500, `${target.missingKey} not configured (required for ${opts.model})`);
+  }
   if (route === 'openrouter') {
-    url = OPENROUTER_URL;
-    authKey = Deno.env.get('OPENROUTER_API_KEY');
-    if (!authKey) {
-      throw new BrainHttpError(500, `OPENROUTER_API_KEY not configured (required for ${opts.model})`);
-    }
     // Ask OpenRouter to report spend per call; it lands in `usage.cost` (USD)
     // alongside the token counts. Cost telemetry stores what the provider
     // says rather than computing from a price table that would drift.
     body.usage = { include: true };
-  } else {
-    url = GATEWAY_URL;
-    authKey = opts.apiKey;
   }
 
   const timeoutMs = opts.timeoutMs ?? DEFAULT_CALL_TIMEOUT_MS;
   let res: Response;
   try {
-    res = await fetch(url, {
+    res = await fetch(target.url, {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${authKey}`,
-        'Content-Type': 'application/json',
-      },
+      headers: target.headers,
       body: JSON.stringify(body),
       signal: AbortSignal.timeout(timeoutMs),
     });
@@ -658,7 +640,7 @@ async function callModelWithFallback(
 }
 
 
-async function runSolo<T>(task: BrainTask, apiKey: string, deadline: Deadline): Promise<BrainResult<T>> {
+async function runSolo<T>(task: BrainTask, deadline: Deadline): Promise<BrainResult<T>> {
   const model = task.models?.[0] ?? DEFAULT_FAST;
   const passes: PassLog = [];
   const { raw, parsed, model: usedModel } = await timePass(passes, 'solo', model, () => callModelWithFallback({
@@ -669,7 +651,6 @@ async function runSolo<T>(task: BrainTask, apiKey: string, deadline: Deadline): 
     tool: task.tool,
     maxTokens: task.maxTokens,
     temperature: task.temperature,
-    apiKey,
     purpose: task.purpose,
   }, deadline));
   const text = extractScanText(task, parsed, raw);
@@ -687,7 +668,7 @@ async function runSolo<T>(task: BrainTask, apiKey: string, deadline: Deadline): 
 }
 
 
-async function runEnsemble<T>(task: BrainTask, apiKey: string, deadline: Deadline): Promise<BrainResult<T>> {
+async function runEnsemble<T>(task: BrainTask, deadline: Deadline): Promise<BrainResult<T>> {
   const models = (task.models ?? DEFAULT_DRAFTERS).slice(0, 3);
   const sys = buildSystem(task);
   const passes: PassLog = [];
@@ -702,7 +683,6 @@ async function runEnsemble<T>(task: BrainTask, apiKey: string, deadline: Deadlin
         tool: task.tool,
         maxTokens: task.maxTokens,
         temperature: task.temperature,
-        apiKey,
         purpose: task.purpose,
         timeoutMs: callBudget(deadline),
       }),
@@ -752,7 +732,7 @@ async function runEnsemble<T>(task: BrainTask, apiKey: string, deadline: Deadlin
   };
 }
 
-async function runDraftCritic<T>(task: BrainTask, apiKey: string, deadline: Deadline): Promise<BrainResult<T>> {
+async function runDraftCritic<T>(task: BrainTask, deadline: Deadline): Promise<BrainResult<T>> {
   // CONTENT lineup: Gemini drafts, Claude critiques. Source of truth =
   // MODEL_LINEUPS.CONTENT in modelRegistry.ts.
   const [drafter, critic] = task.models && task.models.length >= 2
@@ -769,7 +749,6 @@ async function runDraftCritic<T>(task: BrainTask, apiKey: string, deadline: Dead
     tool: task.tool,
     maxTokens: task.maxTokens,
     temperature: task.temperature,
-    apiKey,
     purpose: task.purpose,
   }, deadline));
 
@@ -825,7 +804,6 @@ async function runDraftCritic<T>(task: BrainTask, apiKey: string, deadline: Dead
     const vStart = Date.now();
     try {
       validator = await validateDialectCrossChecked(draftText, task.dialect, {
-        apiKey,
         // timeoutMs, not a shared signal: the cross-check runs two calls at once
         // and one AbortSignal between them let a slow leg abort the other.
         timeoutMs: Math.max(
@@ -876,7 +854,6 @@ async function runDraftCritic<T>(task: BrainTask, apiKey: string, deadline: Dead
       tool: task.tool,
       maxTokens: task.maxTokens,
       temperature: 0.3,
-      apiKey,
       purpose: task.purpose,
     }, deadline));
   } catch (err) {
@@ -954,7 +931,7 @@ function safeGate(
   }
 }
 
-async function runCouncil<T>(task: BrainTask, apiKey: string, deadline: Deadline): Promise<BrainResult<T>> {
+async function runCouncil<T>(task: BrainTask, deadline: Deadline): Promise<BrainResult<T>> {
   const drafters = (task.models ?? DEFAULT_DRAFTERS).slice(0, 3);
   const judge = DEFAULT_JUDGE;
   const sys = buildSystem(task);
@@ -971,7 +948,6 @@ async function runCouncil<T>(task: BrainTask, apiKey: string, deadline: Deadline
         tool: task.tool,
         maxTokens: task.maxTokens,
         temperature: task.temperature ?? 0.7,
-        apiKey,
         purpose: task.purpose,
         timeoutMs: callBudget(deadline),
       }),
@@ -1007,7 +983,6 @@ async function runCouncil<T>(task: BrainTask, apiKey: string, deadline: Deadline
       tool: task.tool,
       maxTokens: task.maxTokens,
       temperature: 0.3,
-      apiKey,
       purpose: task.purpose,
       timeoutMs: callBudget(deadline),
     });
@@ -1032,7 +1007,7 @@ async function runCouncil<T>(task: BrainTask, apiKey: string, deadline: Deadline
   };
 }
 
-async function runRepair<T>(task: BrainTask, prior: BrainResult<T>, apiKey: string, deadline: Deadline): Promise<BrainResult<T>> {
+async function runRepair<T>(task: BrainTask, prior: BrainResult<T>, deadline: Deadline): Promise<BrainResult<T>> {
   const sys = `${buildSystem(task)}\n\nThe previous output leaked MSA. Rewrite it in authentic ${getDialectLabel(task.dialect)} ONLY. The following MSA words MUST be replaced with dialectal equivalents: ${prior.msaLeaks.leaks.join(', ')}. Return ONLY the corrected output in the same format (no commentary).`;
   const user = `Original request:\n${stringifyUserPrompt(task.userPrompt)}\n\nFlawed output to correct:\n${prior.raw}`;
   const repairStart = Date.now();
@@ -1043,7 +1018,6 @@ async function runRepair<T>(task: BrainTask, prior: BrainResult<T>, apiKey: stri
     tool: task.tool,
     maxTokens: task.maxTokens,
     temperature: 0.2,
-    apiKey,
     purpose: task.purpose,
     timeoutMs: callBudget(deadline),
   });
@@ -1123,15 +1097,10 @@ export async function streamBrain(task: StreamBrainTask): Promise<Response> {
   const model = task.model ?? DEFAULT_DRAFTERS[1] ?? MODEL_IDS.GEMINI_FLASH;
   const isGpt5 = /^openai\/gpt-5/.test(model);
 
-  const route = routeForModel(model);
-  const apiKey = Deno.env.get(route === 'openrouter' ? 'OPENROUTER_API_KEY' : 'LOVABLE_API_KEY');
-  if (!apiKey) {
-    throw new BrainHttpError(
-      500,
-      route === 'openrouter'
-        ? `OPENROUTER_API_KEY not configured (required for ${model})`
-        : 'LOVABLE_API_KEY not configured',
-    );
+  const target = chatTarget(model);
+  const route = target.route;
+  if (!target.apiKey) {
+    throw new BrainHttpError(500, `${target.missingKey} not configured (required for ${model})`);
   }
 
   const streamTask = {
@@ -1148,7 +1117,7 @@ export async function streamBrain(task: StreamBrainTask): Promise<Response> {
   const userMessages = task.messages.filter((m) => m.role !== 'system');
 
   const body: Record<string, unknown> = {
-    model,
+    model: target.model,
     stream: true,
     messages: [
       // Ask AI chat streams through here on an Anthropic model many times per
@@ -1167,12 +1136,9 @@ export async function streamBrain(task: StreamBrainTask): Promise<Response> {
   // route — the Lovable gateway is not documented to accept the field.
   if (route === 'openrouter') body.usage = { include: true };
 
-  const upstream = await fetch(route === 'openrouter' ? OPENROUTER_URL : GATEWAY_URL, {
+  const upstream = await fetch(target.url, {
     method: 'POST',
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
+    headers: target.headers,
     body: JSON.stringify(body),
     signal: task.signal,
   });
@@ -1236,14 +1202,14 @@ export async function streamBrain(task: StreamBrainTask): Promise<Response> {
             // Fire-and-forget a repair call so callers with onComplete can get
             // the corrected text (e.g., conversation-practice buffers the stream).
             if (task.onComplete) {
-              const apiKey = Deno.env.get('LOVABLE_API_KEY');
-              if (apiKey && leaks.severity !== 'none') {
+              const repair = chatTarget(DEFAULT_FAST);
+              if (repair.apiKey && leaks.severity !== 'none') {
                 const repairSys = `${buildSystem({ purpose: task.purpose, dialect: task.dialect, userPrompt: '', systemPromptExtra: task.systemPromptExtra } as BrainTask)}\n\nThe previous output leaked MSA. Rewrite it in authentic ${getDialectLabel(task.dialect)} ONLY. The following MSA words MUST be replaced with dialectal equivalents: ${leaks.leaks.join(', ')}. Return ONLY the corrected text (no commentary).`;
-                fetch(GATEWAY_URL, {
+                fetch(repair.url, {
                   method: 'POST',
-                  headers: { 'Authorization': 'Bearer ' + apiKey, 'Content-Type': 'application/json' },
+                  headers: repair.headers,
                   body: JSON.stringify({
-                    model: DEFAULT_FAST,
+                    model: repair.model,
                     max_tokens: 600,
                     temperature: 0.2,
                     messages: [

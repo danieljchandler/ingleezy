@@ -207,7 +207,7 @@ Deno.test("a missing API key degrades to unknown rather than to pass", async () 
     assertEquals(result.ok, false);
     assertEquals(result.verdict, "unknown");
     assertEquals(up.calls.length, 0);
-  }, { env: { LOVABLE_API_KEY: undefined } });
+  }, { env: { LOVABLE_API_KEY: undefined, OPENROUTER_API_KEY: undefined, GEMINI_API_KEY: undefined } });
 });
 
 Deno.test("a gateway error degrades to unknown", async () => {

@@ -10,7 +10,8 @@ This is the checklist for giving it one. It assumes nothing exists yet.
 Two things are worth knowing before you start, because both are easier to
 decide than to discover halfway through:
 
-1. **The Brain is gated on a key you may not have** (§0). Settle it first.
+1. **Which gateway serves Gemini** (§0). On a standalone project that is one
+   secret, `OPENROUTER_API_KEY`; settle it first.
 2. **Nobody can sign up until you insert an invite code by hand** (§7).
    Signup requires one, invite codes are created by admins, and there is no
    admin until someone has signed up.
@@ -19,34 +20,33 @@ decide than to discover halfway through:
 
 ## 0. Decide the AI routing before you create anything
 
-`supabase/functions/_shared/aiBrain.ts` opens `askBrain` with:
+Every model call is routed by `supabase/functions/_shared/aiGateway.ts`:
 
-```ts
-const apiKey = Deno.env.get('LOVABLE_API_KEY');
-if (!apiKey) throw new BrainHttpError(500, 'LOVABLE_API_KEY not configured');
-```
+| Models | Go to | Key |
+| --- | --- | --- |
+| `anthropic/*`, `qwen/*`, `mistralai/*`, `meta-llama/*`, `deepseek/*`, `x-ai/*` | OpenRouter, always | `OPENROUTER_API_KEY` |
+| `google/*` (half of both named lineups) | the gateway below | that gateway's key |
+| `openai/*` | the gateway below, or OpenRouter when that gateway is `gemini` | |
 
-That runs *before* it looks at which model the task wants, so every generation
-call fails without the key — including tasks that would only ever have used
-Claude through OpenRouter. And `routeForModel` (same file) sends everything
-not matching `anthropic|qwen|meta-llama|mistralai|deepseek|x-ai` to the Lovable
-gateway, which is all of `google/*` — half of both named lineups in
-`modelRegistry.ts`. Twenty-seven edge functions read the key.
+The gateway is `AI_GATEWAY` when set (`openrouter`, `gemini` or `lovable`),
+otherwise the first of Lovable, OpenRouter, Gemini whose key is configured. So:
 
-`LOVABLE_API_KEY` is issued by Lovable Cloud and injected into the functions of
-a project it backs. So:
+- **On a standalone Supabase project, set `OPENROUTER_API_KEY` and you are
+  done.** OpenRouter already carries the Claude traffic, and with no
+  `LOVABLE_API_KEY` it picks up Gemini too. One key, one bill.
+- **To send Gemini to Google directly** (cheaper, Google's own rate limits), set
+  `GEMINI_API_KEY` and `AI_GATEWAY=gemini`. Claude still needs
+  `OPENROUTER_API_KEY`; without it every lineup falls back to its Gemini drafter.
+- **On Lovable Cloud**, `LOVABLE_API_KEY` is injected and routing is exactly
+  what it was before this file existed.
 
-- **If the new Supabase project is backed by Lovable Cloud**, the key is
-  supplied and nothing here needs changing.
-- **If it is a standalone Supabase project**, the Brain is dark on day one
-  until two things change: the unconditional guard above (a task routed
-  entirely through OpenRouter has no business requiring it), and
-  `routeForModel`, which needs a destination for Google models — either
-  OpenRouter, which already carries the Anthropic traffic, or Google directly
-  via `GEMINI_API_KEY`, which `.env.example` already lists.
+Image generation (story scenes, flashcard pictures) follows the same rule: the
+Lovable images endpoint, OpenRouter's image-output chat completions, or Google's
+native `generateContent` respectively. The `gpt-image-2` flashcard fallback only
+exists on Lovable and is skipped elsewhere.
 
-Neither is a large change. Doing it after the project exists means discovering
-it as a 500 from whichever generator someone tries first.
+A missing key fails the call that needs it, with the key's name in the error;
+with no gateway key at all the error lists all three.
 
 ---
 
@@ -167,14 +167,14 @@ told apart from the ones that can wait.
 
 | Secret | Without it |
 | --- | --- |
-| `LOVABLE_API_KEY` | every generation call 500s — see §0 |
+| `OPENROUTER_API_KEY` (or `GEMINI_API_KEY` + `AI_GATEWAY=gemini`) | every generation call 500s — see §0 |
 | `ALLOWED_ORIGINS` | the deployed app's own requests are rejected; must contain `VITE_PUBLIC_SITE_URL` |
 
 **Needed for the differentiating features**
 
 | Secret | Without it |
 | --- | --- |
-| `OPENROUTER_API_KEY` | the Claude/Qwen/Saba leg of every lineup; ensembles fall back to one drafter |
+| `OPENROUTER_API_KEY` | if Gemini goes direct: the Claude/Qwen/Saba leg of every lineup; ensembles fall back to one drafter |
 | `GEMINI_API_KEY` | direct Gemini, and the dialect validator's escalation path |
 | `ELEVENLABS_API_KEY` | English TTS and the Scribe ASR leg |
 | `AZURE_SPEECH_KEY` + `AZURE_SPEECH_REGION` | pronunciation assessment and Azure TTS |
@@ -269,8 +269,8 @@ is wrong.
    `20260918120000_record_review_day_and_weekly_goal.sql` — so it is worth
    confirming rather than assuming.
 5. **Ask the AI anything.** The Ask AI panel is reachable from every learner
-   screen. A 500 saying `LOVABLE_API_KEY not configured` means §0 was not
-   settled.
+   screen. A 500 naming `OPENROUTER_API_KEY`, `GEMINI_API_KEY` or
+   `LOVABLE_API_KEY` means §0 was not settled.
 
 ## 9. Afterwards
 

@@ -3,6 +3,7 @@ import { getDialectLabel } from "../_shared/dialectHelpers.ts";
 import { getEnglishIdentity, getInterferenceGuidance } from "../_shared/englishHelpers.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
 import { MODEL_IDS } from "../_shared/modelRegistry.ts";
+import { chatTarget, missingAiKeyError } from "../_shared/aiGateway.ts";
 
 
 serve(async (req) => {
@@ -21,8 +22,8 @@ serve(async (req) => {
       });
     }
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
+    const ai = chatTarget(MODEL_IDS.GEMINI_FAST);
+    if (ai.missingKey) throw new Error(missingAiKeyError(MODEL_IDS.GEMINI_FAST)!);
 
     const dialectLabel = getDialectLabel(dialect);
     const englishIdentity = getEnglishIdentity();
@@ -75,14 +76,11 @@ Return JSON in this exact format:
     // Add the current question
     messages.push({ role: "user", content: question });
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const response = await fetch(ai.url, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
+      headers: ai.headers,
       body: JSON.stringify({
-        model: MODEL_IDS.GEMINI_FAST,
+        model: ai.model,
         messages,
         temperature: 0.8,
       }),

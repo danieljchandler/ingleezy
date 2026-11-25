@@ -2,8 +2,8 @@
 // for videos transcribed before literal glosses were added to the pipeline.
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { getCorsHeaders } from "../_shared/cors.ts";
+import { chatTarget, missingAiKeyError } from "../_shared/aiGateway.ts";
 
-const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
@@ -25,14 +25,13 @@ Length MUST equal number of lines.
 Lines:
 ${numbered}`;
 
-  const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+  const ai = chatTarget("google/gemini-2.5-flash");
+  if (!ai.apiKey) throw new Error(missingAiKeyError("google/gemini-2.5-flash")!);
+  const resp = await fetch(ai.url, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Lovable-API-Key": LOVABLE_API_KEY,
-    },
+    headers: ai.route === "lovable" ? { ...ai.headers, "Lovable-API-Key": ai.apiKey } : ai.headers,
     body: JSON.stringify({
-      model: "google/gemini-2.5-flash",
+      model: ai.model,
       messages: [{ role: "user", content: prompt }],
       response_format: { type: "json_object" },
     }),

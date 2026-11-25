@@ -11,7 +11,8 @@
 //   - CONTENT:    Claude Sonnet 4.5 + Gemini 3.5 Flash, draft_critic.
 //
 // Claude routes via OpenRouter (OPENROUTER_API_KEY); Gemini routes via the
-// Lovable AI Gateway (LOVABLE_API_KEY). See routeForModel() in aiBrain.ts.
+// gateway AI_GATEWAY names: Lovable, OpenRouter or Google directly. See
+// routeForModel() in aiGateway.ts.
 //
 // Live voice (realtime-session-token) and ASR/TTS/image models are NOT
 // governed by this registry — they have their own provider-specific configs.
@@ -22,7 +23,7 @@
 export const MODEL_IDS = {
   CLAUDE: 'anthropic/claude-sonnet-4.5',          // one tier below Opus (cheaper)
   CLAUDE_CHAT: 'anthropic/claude-sonnet-5',        // newest Sonnet — Ask AI text chat
-  GEMINI_FLASH: 'google/gemini-3.5-flash',         // via Lovable Gateway
+  GEMINI_FLASH: 'google/gemini-3.5-flash',         // via the configured gateway
   GEMINI_PRO: 'google/gemini-2.5-pro',             // heavy reasoning fallback
   GEMINI_FAST: 'google/gemini-3-flash-preview',    // cheapest utility default
   QWEN: 'qwen/qwen3-max',                          // third-leg verifier

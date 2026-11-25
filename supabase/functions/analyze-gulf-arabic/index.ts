@@ -30,6 +30,7 @@ import {
   buildFushaSystemPrompt,
 } from "../_shared/fushaBridge.ts";
 import { MODEL_IDS } from "../_shared/modelRegistry.ts";
+import { chatTarget, OPENROUTER_CHAT_URL } from '../_shared/aiGateway.ts';
 
 // Helper to generate unique IDs
 function generateId(): string {
@@ -764,6 +765,9 @@ type CallAIArgs = {
   isRetry?: boolean;
   maxTokens?: number;
   model?: string; // defaults to 'qwen/qwen3-235b-a22b'
+  // 'lovable' historically meant the Lovable gateway; it now means "whichever
+  // gateway serves this model" (aiGateway.ts), which is Lovable only when the
+  // project is on Lovable Cloud. 'openrouter' always uses OpenRouter + apiKey.
   gateway?: 'openrouter' | 'lovable'; // defaults to 'openrouter'
 };
 
@@ -776,11 +780,10 @@ async function callAI({
   model = 'qwen/qwen3-235b-a22b',
   gateway = 'openrouter',
 }: CallAIArgs): Promise<{ content: string | null; error?: string; status?: number }> {
-    const isLovable = gateway === 'lovable';
-    const gatewayUrl = isLovable
-      ? 'https://ai.gateway.lovable.dev/v1/chat/completions'
-      : 'https://openrouter.ai/api/v1/chat/completions';
-    const gatewayKey = isLovable ? (Deno.env.get('LOVABLE_API_KEY') ?? '') : apiKey;
+    const target = gateway === 'lovable' ? chatTarget(model) : null;
+    const gatewayUrl = target ? target.url : OPENROUTER_CHAT_URL;
+    const gatewayKey = target ? (target.apiKey ?? '') : apiKey;
+    const wireModelId = target ? target.model : model;
 
     const controller = new AbortController();
     // Tightened from 55s → 40s so the full multi-stage pipeline (Call 1 + parallel
@@ -800,7 +803,7 @@ async function callAI({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model,
+          model: wireModelId,
           messages: [
             { role: 'system', content: systemPrompt },
             { role: 'user', content: userContent },

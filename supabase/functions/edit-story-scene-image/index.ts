@@ -8,11 +8,11 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { getCorsHeaders } from "../_shared/cors.ts";
+import { dataUrlToBytes, generateImage, missingAiKeyError } from "../_shared/aiGateway.ts";
 
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
 const IMAGE_MODEL = "google/gemini-3.1-flash-image";
 const BUCKET = "listen-audio";
 
@@ -27,29 +27,9 @@ type Segment = {
   index?: number;
 };
 
-async function generateImage(prompt: string): Promise<Uint8Array> {
-  const resp = await fetch("https://ai.gateway.lovable.dev/v1/images/generations", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${LOVABLE_API_KEY}`,
-      "Lovable-API-Key": LOVABLE_API_KEY,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: IMAGE_MODEL,
-      messages: [{ role: "user", content: prompt }],
-      modalities: ["image", "text"],
-    }),
-    signal: AbortSignal.timeout(90_000),
-  });
-  if (!resp.ok) throw new Error(`image gen failed: ${resp.status} ${await resp.text()}`);
-  const json = await resp.json();
-  const b64: string | undefined = json?.data?.[0]?.b64_json;
-  if (!b64) throw new Error("no image in response");
-  const bin = atob(b64);
-  const bytes = new Uint8Array(bin.length);
-  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-  return bytes;
+async function generateSceneImage(prompt: string): Promise<Uint8Array> {
+  const dataUrl = await generateImage(IMAGE_MODEL, prompt, { signal: AbortSignal.timeout(90_000) });
+  return dataUrlToBytes(dataUrl);
 }
 
 function decodeDataUrl(dataUrl: string): { bytes: Uint8Array; contentType: string; ext: string } {
@@ -67,7 +47,8 @@ Deno.serve(async (req) => {
   const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   try {
-    if (!LOVABLE_API_KEY) throw new Error("Missing LOVABLE_API_KEY");
+    const missingKey = missingAiKeyError(IMAGE_MODEL);
+    if (missingKey) throw new Error(missingKey);
 
     const admin = createClient(SUPABASE_URL, SERVICE_ROLE);
     const token = (req.headers.get("Authorization") ?? "").replace("Bearer ", "");
@@ -118,7 +99,7 @@ Deno.serve(async (req) => {
     } else {
       usedPrompt = (prompt && prompt.trim()) || segments[scene_index].prompt || "";
       if (!usedPrompt) throw new Error("no prompt available to regenerate");
-      bytes = await generateImage(usedPrompt);
+      bytes = await generateSceneImage(usedPrompt);
     }
 
     const path = `authentic-stories/${story_id}/scene-${scene_index}-edit-${Date.now()}.${ext}`;

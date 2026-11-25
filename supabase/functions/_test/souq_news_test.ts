@@ -1,5 +1,5 @@
 import { assert, assertEquals, assertStringIncludes } from "https://deno.land/std@0.224.0/assert/mod.ts";
-import { jsonRequest, loadFunction } from "./harness.ts";
+import { jsonRequest, loadFunction, NO_AI_GATEWAY } from "./harness.ts";
 import { chatCompletion, json, type UpstreamHandler } from "./upstreams.ts";
 
 /**
@@ -397,9 +397,9 @@ Deno.test("souq-news passes a failed search's status through", async () => {
 
 Deno.test("souq-news names each missing key", async () => {
   for (
-    const [key, message] of [
-      ["FIRECRAWL_API_KEY", "Firecrawl not configured"],
-      ["LOVABLE_API_KEY", "AI gateway not configured"],
+    const [env, message] of [
+      [{ FIRECRAWL_API_KEY: undefined }, "Firecrawl not configured"],
+      [NO_AI_GATEWAY, "AI gateway not configured"],
     ] as const
   ) {
     const { status, body, calls } = await call(
@@ -409,7 +409,7 @@ Deno.test("souq-news names each missing key", async () => {
         "api.firecrawl.dev": firecrawl(["A"]),
         "ai.gateway.lovable.dev": retelling(aRetelling()),
       }),
-      { [key]: undefined },
+      env,
     );
 
     // Both are checked before anything is fetched, and they are named

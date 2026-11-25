@@ -1159,10 +1159,10 @@ All nine are done. What is left is not a retarget step:
 
     **It is a checklist now, not a paragraph:
     [`docs/backend-bootstrap.md`](docs/backend-bootstrap.md).** Writing it out
-    turned up two things this entry did not know. The Brain is gated on
+    turned up two things this entry did not know. The Brain was gated on
     `LOVABLE_API_KEY` unconditionally, so a project not backed by Lovable
-    Cloud has no AI at all until `routeForModel` gains another destination —
-    see Known risks. And nobody can sign up until an invite code is inserted
+    Cloud had no AI at all (since fixed: `_shared/aiGateway.ts`, see Known
+    risks). And nobody can sign up until an invite code is inserted
     by hand: signup requires one, invite codes are created by admins, and no
     admin exists until someone has signed up. Both are cheap to handle in
     advance and expensive to meet halfway through.
@@ -1250,21 +1250,19 @@ same bar as Hakiya's CI.
   one. [`docs/backend-bootstrap.md`](docs/backend-bootstrap.md) is the
   checklist for supplying it.
 
-- **The Brain is gated on a key Lovable Cloud issues.** `askBrain` opens with
-  `if (!apiKey) throw new BrainHttpError(500, 'LOVABLE_API_KEY not configured')`
-  — before it looks at which model the task wants, so a task routed entirely
-  through OpenRouter fails for want of a key it would never have used. And
-  `routeForModel` sends everything outside
-  `anthropic|qwen|meta-llama|mistralai|deepseek|x-ai` to the Lovable gateway,
-  which is all of `google/*` — half of both named lineups in
-  `modelRegistry.ts`. Twenty-seven edge functions read the key.
-
-  This has never bitten because there is no backend to run the functions
-  against. It bites on the day there is one, and it decides the shape of step
-  10: either Ingleezy's project is backed by Lovable Cloud and the key is
-  injected, or the guard and the routing both need another destination before
-  a single generator works. Cheap to settle first, expensive to discover as a
-  500 from whichever generator someone tries.
+- **The Brain was gated on a key Lovable Cloud issues.** Fixed. `askBrain`
+  opened with `if (!apiKey) throw new BrainHttpError(500, 'LOVABLE_API_KEY not configured')`
+  before it looked at which model the task wanted, and `routeForModel` sent all
+  of `google/*` to the Lovable gateway, so a project not on Lovable Cloud had no
+  AI at all. Routing now lives in `_shared/aiGateway.ts` and is decided per
+  call: OpenRouter-only vendors go to OpenRouter, and Google/OpenAI models go
+  to the gateway `AI_GATEWAY` names, or the first of Lovable, OpenRouter,
+  Gemini whose key is set. A Lovable-backed project routes exactly as before;
+  a standalone one needs only `OPENROUTER_API_KEY`. The twenty-seven functions
+  that called the gateway directly go through the same module, image
+  generation included. `_test/ai_gateway_test.ts` pins the routing, and the
+  missing-key tests now unset every gateway key (`NO_AI_GATEWAY`), since
+  unsetting Lovable's alone falls back rather than failing.
 
 - **The public surface pointed at Hakiya's domain for eight months.** Fixed,
   and worth keeping as a shape: `robots.txt` and `sitemap.xml` were static

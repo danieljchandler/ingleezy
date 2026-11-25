@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
 import { MODEL_IDS } from "../_shared/modelRegistry.ts";
 import { enforceDailyCap } from "../_shared/usageCap.ts";
+import { chatTarget } from "../_shared/aiGateway.ts";
 
 
 serve(async (req) => {
@@ -12,9 +13,9 @@ serve(async (req) => {
 
   // Two models, two keys — a missing one fails here, before the cap's own
   // round-trips, so a config error costs nothing.
-  const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+  const ai = chatTarget(MODEL_IDS.GEMINI_FAST);
   const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
-  if (!LOVABLE_API_KEY || !GEMINI_API_KEY) {
+  if (!ai.apiKey || !GEMINI_API_KEY) {
     return new Response(
       JSON.stringify({ error: "AI keys not configured" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
@@ -44,15 +45,12 @@ serve(async (req) => {
     const jingleStyle = "upbeat English pop style with clear, friendly English vocals";
 
     const promptGen = await fetch(
-      "https://ai.gateway.lovable.dev/v1/chat/completions",
+      ai.url,
       {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
-          "Content-Type": "application/json",
-        },
+        headers: ai.headers,
         body: JSON.stringify({
-          model: MODEL_IDS.GEMINI_FAST,
+          model: ai.model,
           messages: [
             {
               role: "system",

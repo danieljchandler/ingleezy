@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
 import { MODEL_IDS } from "../_shared/modelRegistry.ts";
+import { chatTarget, missingAiKeyError } from "../_shared/aiGateway.ts";
 
 
 serve(async (req) => {
@@ -20,10 +21,10 @@ serve(async (req) => {
       );
     }
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
+    const ai = chatTarget(MODEL_IDS.GEMINI_FAST);
+    if (ai.missingKey) {
       return new Response(
-        JSON.stringify({ error: "LOVABLE_API_KEY not configured" }),
+        JSON.stringify({ error: missingAiKeyError(MODEL_IDS.GEMINI_FAST) }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
@@ -45,14 +46,11 @@ Dialect: ${dialect}
 
 Write the mnemonic.`;
 
-    const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const resp = await fetch(ai.url, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
+      headers: ai.headers,
       body: JSON.stringify({
-        model: MODEL_IDS.GEMINI_FAST,
+        model: ai.model,
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },

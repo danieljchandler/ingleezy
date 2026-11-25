@@ -1,5 +1,5 @@
 import { assert, assertEquals, assertStringIncludes } from "https://deno.land/std@0.224.0/assert/mod.ts";
-import { jsonRequest, loadFunction } from "./harness.ts";
+import { jsonRequest, loadFunction, NO_AI_GATEWAY } from "./harness.ts";
 import { chatCompletion, json, type UpstreamHandler } from "./upstreams.ts";
 
 /**
@@ -361,11 +361,13 @@ Deno.test("analyze-meme refuses a request with neither image nor transcript", as
 });
 
 Deno.test("analyze-meme says so when a key is missing", async () => {
-  for (const key of ["LOVABLE_API_KEY", "OPENROUTER_API_KEY"]) {
+  // No gateway for the vision half, or no OpenRouter for the Qwen half.
+  const cases = [["LOVABLE_API_KEY", NO_AI_GATEWAY], ["OPENROUTER_API_KEY", { OPENROUTER_API_KEY: undefined }]] as const;
+  for (const [key, env] of cases) {
     const { status, body, calls } = await call(
       { imageBase64: IMAGE },
       caller({ "ai.gateway.lovable.dev": vision(anAnalysis()) }),
-      { env: { [key]: undefined } },
+      { env },
     );
 
     // Both are checked up front. The vision half and the audio half use

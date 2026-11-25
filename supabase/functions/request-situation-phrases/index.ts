@@ -13,6 +13,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getCorsHeaders } from "../_shared/cors.ts";
 import { MODEL_IDS } from "../_shared/modelRegistry.ts";
+import { chatTarget } from "../_shared/aiGateway.ts";
 
 
 // Guards the SCAFFOLD: every Arabic gloss must be the learner's own dialect.
@@ -49,8 +50,8 @@ serve(async (req) => {
       });
     }
 
-    const apiKey = Deno.env.get("LOVABLE_API_KEY");
-    if (!apiKey) {
+    const ai = chatTarget(MODEL_IDS.GEMINI_FAST);
+    if (!ai.apiKey) {
       return new Response(JSON.stringify({ error: "config_missing" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -69,11 +70,11 @@ Rules:
 - notes: a short usage note in the learner's dialect Arabic ONLY if register/context matters; otherwise leave empty.
 - NEVER invent unnatural phrases.`;
 
-    const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const resp = await fetch(ai.url, {
       method: "POST",
-      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      headers: ai.headers,
       body: JSON.stringify({
-        model: MODEL_IDS.GEMINI_FAST,
+        model: ai.model,
         messages: [
           { role: "system", content: sys },
           { role: "user", content: `Dialect: ${dialect}\nSituation: ${situation.trim()}\nGenerate ${n} phrases.` },

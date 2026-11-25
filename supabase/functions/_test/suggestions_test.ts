@@ -1,5 +1,5 @@
 import { assert, assertEquals, assertStringIncludes } from "https://deno.land/std@0.224.0/assert/mod.ts";
-import { jsonRequest, loadFunction } from "./harness.ts";
+import { jsonRequest, loadFunction, NO_AI_GATEWAY } from "./harness.ts";
 import { chatCompletion, json, type UpstreamHandler } from "./upstreams.ts";
 
 /**
@@ -452,7 +452,7 @@ Deno.test("request-situation-phrases names a missing key as a config problem", a
     "request-situation-phrases",
     { situation: "at a café" },
     caller({ "ai.gateway.lovable.dev": emitting({ phrases: [aPhrase()] }) }),
-    { env: { LOVABLE_API_KEY: undefined } },
+    { env: NO_AI_GATEWAY },
   );
 
   // A machine-readable code rather than prose, because the page distinguishes

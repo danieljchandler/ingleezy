@@ -1,4 +1,5 @@
 import { getCorsHeaders } from "../_shared/cors.ts";
+import { chatTarget, missingAiKey, missingAiKeyError, NO_AI_KEY_MESSAGE } from "../_shared/aiGateway.ts";
 // AI Re-segment Transcript
 // Takes existing word-level segments and asks an LLM to restructure them into
 // thought-by-thought lines, starting a new line on speaker changes. Word
@@ -190,7 +191,6 @@ function flattenWords(segments: Segment[]) {
 
 async function callGateway(
   flat: ReturnType<typeof flattenWords>,
-  apiKey: string,
   dialect: string | undefined,
   signal: AbortSignal,
 ): Promise<AILine[]> {
@@ -206,14 +206,13 @@ async function callGateway(
   };
 
   const tryModel = async (model: string) => {
-    const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const ai = chatTarget(model);
+    if (!ai.apiKey) throw new Error(missingAiKeyError(model) ?? "AI key not configured");
+    const resp = await fetch(ai.url, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
+      headers: ai.headers,
       body: JSON.stringify({
-        model,
+        model: ai.model,
         messages: [
           { role: "system", content: buildSystemPrompt(dialect) },
           {
@@ -342,10 +341,10 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const apiKey = Deno.env.get("LOVABLE_API_KEY");
-    if (!apiKey) {
+    const missingKey = missingAiKey();
+    if (missingKey) {
       return new Response(
-        JSON.stringify({ error: "LOVABLE_API_KEY is not configured" }),
+        JSON.stringify({ error: missingKey === NO_AI_KEY_MESSAGE ? missingKey : `${missingKey} is not configured` }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
@@ -380,7 +379,7 @@ Deno.serve(async (req) => {
 
     try {
       if (flat.length <= CHUNK_SIZE) {
-        const lines = await callGateway(flat, apiKey, dialect, controller.signal);
+        const lines = await callGateway(flat, dialect, controller.signal);
         allLines.push(...lines);
       } else {
         const offsets: number[] = [];
@@ -390,7 +389,7 @@ Deno.serve(async (req) => {
           offsets.map(async (offset) => {
             const slice = flat.slice(offset, offset + CHUNK_SIZE);
             const reindexed = slice.map((w, i) => ({ ...w, idx: i }));
-            const lines = await callGateway(reindexed, apiKey, dialect, controller.signal);
+            const lines = await callGateway(reindexed, dialect, controller.signal);
             return lines.map((line) => ({
               ...line,
               wordIndices: (line.wordIndices ?? []).map((i) => i + offset),
